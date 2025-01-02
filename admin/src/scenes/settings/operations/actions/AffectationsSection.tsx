@@ -1,17 +1,18 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
 
+import { CohortDto } from "snu-lib";
+
 import AffectationSimulationMetropole from "./AffectationSimulationMetropole/AffectationSimulationMetropole";
 
 interface AffectationsSectionProps {
-  sessionId: string;
-  sessionNom: string;
+  session: CohortDto;
 }
 
-export default function AffectationsSection({ sessionId, sessionNom }: AffectationsSectionProps) {
+export default function AffectationsSection({ session }: AffectationsSectionProps) {
   return (
     <Collapsable title="Affectations">
-      <AffectationSimulationMetropole sessionId={sessionId} sessionNom={sessionNom} />
+      <AffectationSimulationMetropole session={session} />
     </Collapsable>
   );
 }

@@ -12,7 +12,6 @@ export type LigneDeBusModel = {
     centreId: string;
     sejourId?: string;
     pointDeRassemblementIds: string[];
-    equipe: any;
     dureeTrajet: any;
     heureArriveeCentre: any;
     heureDepartCentre: any;

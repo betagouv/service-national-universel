@@ -3,4 +3,7 @@ export enum HistoryType {
     REFERENT = "referent",
     CLASSE = "classe",
     SESSION = "session",
+    SEJOUR = "sejour",
+    LIGNEDEBUS = "lignedebus",
+    PLANDETRANSPORT = "plandetransport",
 }

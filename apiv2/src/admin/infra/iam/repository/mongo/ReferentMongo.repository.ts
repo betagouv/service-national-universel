@@ -6,16 +6,18 @@ import {
     ReferentPasswordModel,
 } from "@admin/core/iam/Referent.model";
 import { Inject, Injectable } from "@nestjs/common";
+import { FilterQuery, ClientSession, Model } from "mongoose";
+import { ClsService } from "nestjs-cls";
+import { v4 as uuidv4 } from "uuid";
+
+import { ReferentType } from "snu-lib";
+
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { FilterQuery, Model } from "mongoose";
-import { ClsService } from "nestjs-cls";
 import { Role, SousRole } from "@shared/core/Role";
-import { v4 as uuidv4 } from "uuid";
 import { ContactGateway } from "../../Contact.gateway";
 import { REFERENT_MONGOOSE_ENTITY, ReferentDocument } from "../../provider/ReferentMongo.provider";
 import { ReferentMapper } from "./Referent.mapper";
-import { ReferentType } from "snu-lib";
 import { OperationType } from "@notification/infra/email/Contact";
 import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "../../../sejours/cle/classe/provider/ClasseMongo.provider";
 
@@ -26,6 +28,7 @@ export class ReferentRepository implements ReferentGateway {
         @Inject(ContactGateway) private contactGateway: ContactGateway,
         @Inject(ClockGateway) private clockGateway: ClockGateway,
         @Inject(CLASSE_MONGOOSE_ENTITY) private classeMongooseEntity: Model<ClasseDocument>,
+
         private readonly cls: ClsService,
     ) {}
 

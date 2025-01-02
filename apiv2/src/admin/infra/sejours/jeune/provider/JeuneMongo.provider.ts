@@ -6,7 +6,7 @@ import { YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchema
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type JeuneDocument = HydratedDocument<YoungType>;
-export const JeuneName = "youngs";
+export const JeuneName = "young";
 export const JEUNE_MONGOOSE_ENTITY = "JEUNE_MONGOOSE_ENTITY";
 
 const JeuneSchemaRef = new mongoose.Schema({
@@ -35,8 +35,7 @@ JeuneSchemaRef.pre("save", function (next, params) {
     next();
 });
 
-JeuneSchemaRef.plugin(patchHistory, {
-    mongoose,
+export const JEUNE_PATCHHISTORY_OPTIONS = {
     name: `${JeuneName}Patches`,
     trackOriginalValue: true,
     includes: {
@@ -44,7 +43,9 @@ JeuneSchemaRef.plugin(patchHistory, {
         user: { type: Object, required: false, from: "_user" },
     },
     excludes: ["/updatedAt"],
-});
+};
+
+JeuneSchemaRef.plugin(patchHistory, { mongoose, ...JEUNE_PATCHHISTORY_OPTIONS });
 
 export const jeuneMongoProviders = [
     {

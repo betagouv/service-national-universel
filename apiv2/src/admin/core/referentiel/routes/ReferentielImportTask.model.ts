@@ -17,7 +17,6 @@ export interface ReferentielImportTaskParameters {
 }
 
 export type ReferentielImportTaskResult = {
-    rapportUrl: string;
     rapportKey: string;
 };
 

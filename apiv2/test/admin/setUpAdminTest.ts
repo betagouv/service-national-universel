@@ -42,6 +42,10 @@ import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { historyProvider } from "@admin/infra/history/historyProvider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -69,6 +73,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
         providers: [
             ClasseService,
+            AffectationService,
             SimulationAffectationHTSService,
             ReferentielRoutesService,
             ...cleGatewayProviders,
@@ -79,11 +84,13 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...etablissementMongoProviders,
             ...jeuneMongoProviders,
             ...centreMongoProviders,
+            ...planDeTransportMongoProviders,
             ...ligneDeBusMongoProviders,
             ...pointDeRassemblementMongoProviders,
             ...sejourMongoProviders,
             ...sessionMongoProviders,
             ...taskMongoProviders,
+            ...historyProvider,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
@@ -102,6 +109,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .useValue(mockQueue)
         .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
         .useValue(mockQueue)
+        .overrideProvider(DATABASE_CONNECTION)
+        .useFactory({ factory: testDatabaseProviders(setupOptions.newContainer).useFactory })
         .compile();
 
     const app = adminTestModule.createNestApplication({ logger: false });

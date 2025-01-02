@@ -15,6 +15,7 @@ import { QueueName } from "@shared/infra/Queue";
                     url: config.getOrThrow("broker.url"),
                 },
                 prefix: config.getOrThrow("broker.queuePrefix"),
+                lockDuration: 1000 * 60 * 5, // 5 minutes
             }),
         }),
         BullModule.registerQueue({

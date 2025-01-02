@@ -46,6 +46,10 @@ export class TaskRepository implements TaskGateway {
         await this.taskMongooseEntity.deleteOne({ _id: id });
     }
 
+    async deleteMany(ids: string[]): Promise<void> {
+        await this.taskMongooseEntity.deleteMany({ _id: { $in: ids } });
+    }
+
     async update(id: string, task: TaskModel): Promise<TaskModel> {
         const updatedTask = await this.taskMongooseEntity.findByIdAndUpdate(id, TaskMapper.toEntity(task), {
             new: true,

@@ -5,7 +5,7 @@ import patchHistory from "mongoose-patch-history";
 import { LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
-export const LigneDeBusName = "lignebuses";
+export const LigneDeBusName = "lignebus";
 export const LIGNEDEBUS_MONGOOSE_ENTITY = "LIGNEDEBUS_MONGOOSE_ENTITY";
 
 const LigneDeBusSchemaRef = new mongoose.Schema({
@@ -24,8 +24,7 @@ LigneDeBusSchemaRef.pre("save", function (next, params) {
     next();
 });
 
-LigneDeBusSchemaRef.plugin(patchHistory, {
-    mongoose,
+export const LIGNEDEBUS_PATCHHISTORY_OPTIONS = {
     name: `${LigneDeBusName}Patches`,
     trackOriginalValue: true,
     includes: {
@@ -33,6 +32,11 @@ LigneDeBusSchemaRef.plugin(patchHistory, {
         user: { type: Object, required: false, from: "_user" },
     },
     excludes: ["/updatedAt"],
+};
+
+LigneDeBusSchemaRef.plugin(patchHistory, {
+    mongoose,
+    ...LIGNEDEBUS_PATCHHISTORY_OPTIONS,
 });
 
 export const ligneDeBusMongoProviders = [
