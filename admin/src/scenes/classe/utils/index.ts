@@ -386,6 +386,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Nom de l'établissement",
       "Nom du référent de classe",
       "Prénom du référent de classe",
+      "Téléphone du référent de classe",
       "Email du référent de classe",
       "Nombre de places total",
       "Dossiers ouverts",
