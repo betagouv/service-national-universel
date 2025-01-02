@@ -106,9 +106,3 @@ export function getCorrectionRequest(requests, field) {
     return req.field === field;
   });
 }
-
-export function getYoungStatusForBascule(youngStatus: string) {
-  if (youngStatus === YOUNG_STATUS.NOT_AUTORISED || youngStatus === YOUNG_STATUS.IN_PROGRESS || youngStatus === YOUNG_STATUS.REINSCRIPTION) {
-    return YOUNG_STATUS.IN_PROGRESS;
-  } else return YOUNG_STATUS.WAITING_VALIDATION;
-}

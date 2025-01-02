@@ -3,7 +3,7 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle, HiOutlineExclamation } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, getYoungStatusForBascule } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, getYoungStatusForBasculeToCLE } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 import { statusClassForBadge } from "../../../classe/utils";
@@ -442,7 +442,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Nouveau statut de l'élève :</div>
-                  <Badge title={translateInscriptionStatus(getYoungStatusForBascule(youngStatus))} status={getYoungStatusForBascule(youngStatus)} />
+                  <Badge title={translateInscriptionStatus(getYoungStatusForBasculeToCLE(youngStatus))} status={getYoungStatusForBasculeToCLE(youngStatus)} />
                 </div>
               </div>
             </div>

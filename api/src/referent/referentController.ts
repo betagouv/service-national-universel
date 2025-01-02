@@ -108,7 +108,7 @@ import {
   isAdmin,
   isReferentReg,
   isReferentDep,
-  getYoungStatusForBascule,
+  getYoungStatusForBasculeToCLE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -854,13 +854,21 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const { cohort, cohortChangeReason } = payload;
 
     let youngStatus = young.status;
-    youngStatus = getYoungStatusForBascule(young.status);
+    let inscriptionStep = young.inscriptionStep2023;
+    let reinscriptionStep = young.reinscriptionStep2023;
+
+    if (payload.source === YOUNG_SOURCE.CLE) {
+      youngStatus = getYoungStatusForBasculeToCLE(youngStatus);
+    }
+    if (young.source === YOUNG_SOURCE.CLE && payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeCLEtoHTS(youngStatus);
+    }
+    if (young.source === YOUNG_SOURCE.VOLONTAIRE && payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      youngStatus = getYoungStatusForBasculeHTStoHTS(youngStatus);
+    }
     if (cohort === "à venir ") {
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
-
-    let inscriptionStep = young.inscriptionStep2023;
-    let reinscriptionStep = young.reinscriptionStep2023;
 
     let sessions: CohortDocumentWithPlaces[] = [];
     if (req.user.role === ROLES.ADMIN) {
@@ -870,7 +878,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     } else {
       sessions = await getFilteredSessionsForCLE();
     }
-    
+
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;
@@ -1051,6 +1059,22 @@ const getYoungStatusForAVenir = (young: YoungType) => {
       return YOUNG_STATUS.WAITING_VALIDATION;
     default:
       return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
+
+const getYoungStatusForBasculeCLEtoHTS = (status: string) => {
+  if (status === YOUNG_STATUS.NOT_AUTORISED) {
+    return YOUNG_STATUS.IN_PROGRESS;
+  } else {
+    return YOUNG_STATUS.WAITING_VALIDATION;
+  }
+};
+
+const getYoungStatusForBasculeHTStoHTS = (status: string) => {
+  if (status === YOUNG_STATUS.WITHDRAWN || YOUNG_STATUS.ABANDONED || YOUNG_STATUS.VALIDATED) {
+    return YOUNG_STATUS.WAITING_VALIDATION;
+  } else {
+    return status;
   }
 };
 
