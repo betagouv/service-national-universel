@@ -65,8 +65,9 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     if (req.params.action === "export") {
       let response = await allRecords("classe", hitsRequestBody.query, esClient, exportFields);
+      response = await populateWithEtablissementInfo(response);
+
       if (req.query?.type === "export-des-classes") {
-        response = await populateWithEtablissementInfo(response);
         response = await populateWithAllReferentsInfo(response);
         response = await populateWithYoungsInfo(response);
       }
@@ -84,6 +85,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
           }
         }
 
+        response = await populateWithReferentClasseInfo(response);
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithYoungsInfo(response);
