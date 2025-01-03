@@ -133,14 +133,6 @@ export default function SectionIdentite({
 
     result = validateEmpty(youngFiltered, "lastName", errors) && result;
     result = validateEmpty(youngFiltered, "firstName", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCity", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCityZip", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCountry", errors) && result;
-
-    result = validateEmpty(youngFiltered, "address", errors) && result;
-    result = validateEmpty(youngFiltered, "zip", errors) && result;
-    result = validateEmpty(youngFiltered, "city", errors) && result;
-    result = validateEmpty(youngFiltered, "country", errors) && result;
 
     setErrors(errors);
     return result;
