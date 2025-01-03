@@ -14,7 +14,7 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel, ApplicationDocument } from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel, ApplicationDocument, ReferentDocument } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -54,13 +54,13 @@ import {
   youngCanWithdraw,
   translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
-  ReferentType,
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   CohortDto,
   MissionType,
   ContractType,
   CohortType,
+  SUB_ROLES,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../services/application";
@@ -74,6 +74,7 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { ReferentType } from "../../../../packages/lib/.rollup.cache/Users/charlelie/projects/service-national-universel/packages/lib/dist/mongoSchema/referent";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -944,8 +945,25 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
-    // If they are CLE, we notify the class referent.
+    // We notify the ref dep and the young
     try {
+      const referents: ReferentDocument[] = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+      const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.manager_phase2, SUB_ROLES.secretariat];
+      let selectedReferent: ReferentDocument | null = null;
+      for (const subRole of SUB_ROLES_PRIORITY) {
+        selectedReferent = referents.find((ref) => ref.subRole === subRole) || null;
+        if (selectedReferent) break;
+      }
+      if (!selectedReferent && referents.length > 0) {
+        selectedReferent = referents[0];
+      }
+      if (selectedReferent) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${selectedReferent.firstName} ${selectedReferent.lastName}`, email: selectedReferent.email }],
+          params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+        });
+      }
+      // If they are CLE, we notify the class referent.
       if (cohort?.type === YOUNG_SOURCE.CLE) {
         const classe = await ClasseModel.findById(young.classeId);
         const referent = await ReferentModel.findById(classe?.referentClasseIds[0]);
@@ -956,6 +974,19 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
           });
         }
       }
+
+      // If young affected, we notify the head center
+      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.sessionPhase1Id != null) {
+        const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+        const headCenter = await ReferentModel.findById(session?.headCenterId);
+        if (headCenter) {
+          await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+            emailTo: [{ name: `${headCenter.firstName} ${headCenter.lastName}`, email: headCenter.email }],
+            params: { youngFirstName: young.firstName, youngLastName: young.lastName, raisondesistement: withdrawnReason },
+          });
+        }
+      }
+
       await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { raisondesistement: withdrawnReason },
