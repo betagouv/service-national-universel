@@ -51,12 +51,12 @@ export default function ModalAffectationsForCLE({ isOpen, onClose, young, setYou
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(code));
       }
+      toastr.success("Succès !", "Le jeune a bien été affecté");
       setYoung(youngResponse);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de l'affectation du jeune", translate(e.message));
     } finally {
-      toastr.success("Succès !", "Le jeune a bien été affecté");
       setIsLoading(false);
       onClose();
     }
