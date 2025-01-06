@@ -91,7 +91,7 @@ jobs:
           NOTION_DATABASE_ID: ${{ secrets.NOTION_DATABASE_ID }}
           NOTION_SECRET_KEY: ${{ secrets.NOTION_SECRET_KEY }}
         run: |
-          .github/scripts/generate_changelog.sh "${{ github.event.before }}...${{ github.event.after }}" > CHANGELOG.md
+          devops/scripts/generate_changelog.sh "${{ github.event.before }}...${{ github.event.after }}" > CHANGELOG.md
           cat CHANGELOG.md
           {
             echo 'changelog<<EOF'
