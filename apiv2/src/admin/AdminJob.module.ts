@@ -19,16 +19,40 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
+import { historyProvider } from "./infra/history/historyProvider";
 
 @Module({
-    imports: [ClsModule.forRoot({}), ConfigModule, TaskModule, DatabaseModule],
+    imports: [
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
+        ConfigModule,
+        TaskModule,
+        DatabaseModule,
+    ],
     providers: [
         Logger,
         AdminTaskConsumer,
         AdminTaskRepository,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
@@ -36,10 +60,14 @@ import { useCaseProvider as referentielUseCaseProvider } from "./infra/referenti
         ...taskMongoProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
+        ...historyProvider,
         { provide: FileGateway, useClass: FileProvider },
+        { provide: TaskGateway, useClass: AdminTaskRepository },
         // add use case here
+        AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        ValiderAffectationHTS,
         ...referentielUseCaseProvider,
     ],
 })

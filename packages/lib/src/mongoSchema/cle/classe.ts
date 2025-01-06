@@ -1,9 +1,8 @@
 import { Schema, InferSchemaType } from "mongoose";
-import { ClasseDto } from "../../dto";
 import { STATUS_CLASSE_LIST, STATUS_PHASE1_CLASSE_LIST, CLE_FILIERE_LIST, CLE_GRADE_LIST, CLE_COLORATION_LIST, TYPE_CLASSE_LIST } from "../../constants/constants";
 import { ReferentCreatedBy } from "../../constants/referentConstants";
 
-import { InterfaceExtended, EtablissementType, CohesionCenterType, PointDeRassemblementType, ReferentType, CohortType } from "../../mongoSchema";
+import { InterfaceExtended, EtablissementType, CohesionCenterType, PointDeRassemblementType, ReferentType, CohortType, SessionPhase1Type, LigneBusType } from "../../mongoSchema";
 
 const classeMetadataSchema = {
   createdBy: {
@@ -258,7 +257,8 @@ export type ClasseType = InterfaceExtended<InferSchemaType<typeof schema>> & {
   etablissement?: EtablissementType;
   referents?: ReferentType[];
   cohesionCenter?: CohesionCenterType;
-  session?: ClasseDto["session"]; // TODO: utiliser SessionPhase1Type
+  session?: SessionPhase1Type;
   pointDeRassemblement?: PointDeRassemblementType;
   cohortDetails?: Pick<CohortType, "_id" | "dateStart" | "dateEnd">;
+  ligne?: LigneBusType;
 };

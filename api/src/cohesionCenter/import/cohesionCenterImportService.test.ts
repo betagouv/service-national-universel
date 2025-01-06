@@ -1,5 +1,5 @@
 import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
-import { processCentersByMatriculeFound, processCenterWithId, processCenterWithoutId, updateCenter } from "./cohesionCenterImportService";
+import { processCentersByMatriculeFound, processCenterWithoutId, updateCenter } from "./cohesionCenterImportService";
 
 jest.mock("../../models");
 jest.mock("../../logger");
@@ -23,26 +23,6 @@ afterEach(() => {
 });
 
 describe("cohesionCenterImportService", () => {
-  describe("processCenterWithId", () => {
-    it("should update the center if it exists", async () => {
-      const center = { _id: "123", name: "Test Center", matricule: "12345" };
-      const existingCenter = { _id: "123", name: "Old Center", matricule: "12345", save: jest.fn(), set: jest.fn() };
-      const findByIdSpy = jest.spyOn(CohesionCenterModel, "findById").mockResolvedValue(existingCenter);
-      const result = await processCenterWithId(center);
-      expect(result.action).toBe("updated");
-      expect(existingCenter.save).toHaveBeenCalled();
-      expect(findByIdSpy).toHaveBeenCalledWith("123");
-    });
-
-    it("should return an error if the center does not exist", async () => {
-      const center = { _id: "123", name: "Test Center", matricule: "12345" };
-      const findByIdSpy = jest.spyOn(CohesionCenterModel, "findById").mockResolvedValue(null);
-      const result = await processCenterWithId(center);
-      expect(result.action).toBe("error");
-      expect(findByIdSpy).toHaveBeenCalledWith("123");
-    });
-  });
-
   describe("processCenterWithoutId", () => {
     it("should update the center if one is found by matricule", async () => {
       const center = { name: "Test Center", matricule: "12345" };
@@ -51,7 +31,7 @@ describe("cohesionCenterImportService", () => {
       const result = await processCenterWithoutId(center);
       expect(result.action).toBe("updated");
       expect(foundCenter.save).toHaveBeenCalled();
-      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345" });
+      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345", deletedAt: { $exists: false } });
     });
 
     it("should return an error if multiple centers are found by matricule", async () => {
@@ -63,7 +43,7 @@ describe("cohesionCenterImportService", () => {
       const findSpy = jest.spyOn(CohesionCenterModel, "find").mockResolvedValue(foundCenters);
       const result = await processCenterWithoutId(center);
       expect(result.action).toBe("nothing");
-      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345" });
+      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345", deletedAt: { $exists: false } });
     });
 
     it("should create a new center if none are found by matricule", async () => {
@@ -75,7 +55,7 @@ describe("cohesionCenterImportService", () => {
       const result = await processCenterWithoutId(center);
       expect(result.action).toBe("created");
       expect(createdCenter.save).toHaveBeenCalled();
-      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345" });
+      expect(findSpy).toHaveBeenCalledWith({ matricule: "12345", deletedAt: { $exists: false } });
       expect(createSpy).toHaveBeenCalledWith(center);
     });
   });
@@ -100,7 +80,7 @@ describe("cohesionCenterImportService", () => {
       ] as unknown as CohesionCenterDocument[];
       const result = await processCentersByMatriculeFound(center, foundCenters);
       expect(result.action).toBe("nothing");
-      expect(result.comment).toBe("No Id provided in CSV, several centers found by matricule");
+      expect(result.comment).toBe("Several centers found by matricule");
     });
   });
 });

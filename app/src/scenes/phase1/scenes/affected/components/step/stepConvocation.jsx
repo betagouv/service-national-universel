@@ -12,10 +12,11 @@ import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
+import useAuth from "@/services/useAuth";
 
 export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
   const index = 3;
-  const young = useSelector((state) => state.Auth.young);
+  const { young, isCLE } = useAuth();
   const isEnabled = isStepDone(STEPS.AGREEMENT, young);
   const isDone = isStepDone(STEPS.CONVOCATION, young);
   const dispatch = useDispatch();
@@ -76,7 +77,11 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
       <div className="flex items-center flex-col md:flex-row gap-3 justify-between text-sm">
         <div>
           <p className="font-semibold">Téléchargez votre convocation</p>
-          <p className="mt-1 text-gray-500">Votre convocation sera à présenter à l'arrivée munie d'une pièce d'identité valide.</p>
+          {isCLE ? (
+            <p className="mt-1 text-gray-500">Consultez votre convocation avant votre départ.</p>
+          ) : (
+            <p className="mt-1 text-gray-500">Votre convocation sera à présenter à l'arrivée munie d'une pièce d'identité valide.</p>
+          )}
         </div>
         <div className="w-full md:w-auto mt-1 md:mt-0 flex flex-col md:flex-row-reverse gap-2">
           <button

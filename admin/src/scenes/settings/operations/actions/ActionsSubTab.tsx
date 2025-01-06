@@ -1,19 +1,21 @@
 import React from "react";
+
+import { CohortDto } from "snu-lib";
+
 import InscriptionsSection from "./InscriptionsSection";
 import AffectationsSection from "./AffectationsSection";
 import ApreSejourSection from "./ApreSejourSection";
 
 interface ActionsSubTabProps {
-  sessionId: string;
-  sessionNom: string;
+  session: CohortDto;
 }
 
-export default function ActionsSubTab({ sessionId, sessionNom }: ActionsSubTabProps) {
+export default function ActionsSubTab({ session }: ActionsSubTabProps) {
   return (
     <div className="flex flex-col gap-8">
-      <InscriptionsSection sessionId={sessionId} />
-      <AffectationsSection sessionId={sessionId} sessionNom={sessionNom} />
-      <ApreSejourSection sessionId={sessionId} />
+      <InscriptionsSection sessionId={session._id!} />
+      <AffectationsSection session={session} />
+      <ApreSejourSection sessionId={session._id!} />
     </div>
   );
 }

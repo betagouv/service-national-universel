@@ -32,6 +32,7 @@ export * from "./translation";
 export * from "./transport-info";
 export * from "./utils/cohortUtils";
 export * from "./utils/date";
+export * from "./utils/location";
 export * from "./utils/file";
 export * from "./utils/parseEnv";
 export * from "./utils/request";

@@ -14,32 +14,16 @@ import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import plausibleEvent from "../../../services/plausible";
 import { translate } from "../../../utils";
+import useSejours from "../../changeSejour/lib/useSejours";
+import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
 
 export default function ModalSejour({ isOpen, onCancel }) {
   const young = useSelector((state) => state.Auth.young);
   const [loading, setLoading] = React.useState(false);
-  const [cohorts, setCohorts] = React.useState([]);
+  const { data: cohorts, isLoading, errors } = useSejours();
   const [error, setError] = React.useState({});
   const dispatch = useDispatch();
   const { grade } = young;
-
-  React.useEffect(() => {
-    (async () => {
-      try {
-        const res = await api.post(`/cohort-session/eligibility/2023/${young._id}`);
-        if (res.data.msg) return setError({ text: res.data.msg });
-        const cohorts = res.data;
-        if (cohorts.length === 0) {
-          setError({ text: "Il n'y a malheureusement plus de place dans votre département." });
-        }
-        setCohorts(cohorts);
-      } catch (e) {
-        capture(e);
-        setCohorts([]);
-      }
-      setLoading(false);
-    })();
-  }, []);
 
   const onSubmit = async (cohort) => {
     setLoading(true);
@@ -60,6 +44,14 @@ export default function ModalSejour({ isOpen, onCancel }) {
       setLoading(false);
     }
   };
+
+  if (isLoading) {
+    return <Loader />;
+  }
+
+  if (errors) {
+    return <ErrorNotice message="Une erreur s'est produite lors du chargement des séjours" />;
+  }
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="lg">

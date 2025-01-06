@@ -12,7 +12,7 @@ export interface ImportPointDeRassemblementRoute extends BasicRoute {
 
 export interface PointDeRassemblementCSV {
   "Matricule du point de rassemblement": string;
-  "Point de Rassemblement : Désignation du Point de Rassemblement": string;
+  "Point de Rassemblement : Désignation": string;
   Adresse: string;
   "Code postal": string;
   Commune: string;
@@ -20,15 +20,30 @@ export interface PointDeRassemblementCSV {
   "Région académique": string;
   Académie: string;
   Département: string;
+  "ID temporaire PDR": string;
+  UAI: string;
   "Numéro d'ordre": string;
   "Date  début validité de l'enregistrement": string;
-  "ID temporaire PDR": string;
+  "Point de Rassemblement : Date de création": string;
+  "Point de Rassemblement : Date de dernière modification": string;
 }
 
 export type PointDeRassemblementImportMapped = Pick<
   PointDeRassemblementType,
-  "name" | "address" | "city" | "zip" | "department" | "region" | "academie" | "particularitesAcces" | "matricule"
+  | "name"
+  | "address"
+  | "city"
+  | "zip"
+  | "department"
+  | "region"
+  | "academie"
+  | "particularitesAcces"
+  | "matricule"
+  | "uai"
+  | "numeroOrdre"
+  | "dateCreation"
+  | "dateDebutValidite"
+  | "dateDerniereModification"
 > & {
-  _id?: string;
   complementAddress: string;
 };
