@@ -4,7 +4,7 @@ import { BiLoaderAlt } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { PHONE_ZONES } from "snu-lib";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { validateEmail, validatePhoneNumber } from "@/utils/form-validation.utils";
 import { updateYoung } from "@/services/young.service";
@@ -19,7 +19,8 @@ import ButtonLight from "@/components/ui/buttons/ButtonLight";
 import ChangeAddressModal from "./components/ChangeAddressModal";
 import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
+import useAuth from "@/services/useAuth";
 
 const getInitialFormValues = (young) => ({
   lastName: young.lastName || "",
@@ -35,8 +36,8 @@ const getInitialFormValues = (young) => ({
 });
 
 const AccountGeneralPage = () => {
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+  const { young } = useAuth();
+  const { cohort } = useCohort();
   const cantUpdatePSC1 = cohort.isAssignmentAnnouncementsOpenForYoung;
   const dispatch = useDispatch();
 

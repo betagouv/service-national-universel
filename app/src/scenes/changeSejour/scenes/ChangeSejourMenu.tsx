@@ -4,7 +4,6 @@ import useAuth from "@/services/useAuth";
 import { HiArrowRight } from "react-icons/hi";
 import { CohortGroupType, CohortType, getCohortPeriod, getCohortYear } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
-import { getCohort } from "@/utils/cohorts";
 import Loader from "@/components/Loader";
 import { knowledgebaseURL } from "@/config";
 import NoSejourSection from "../components/NoSejourSection";
@@ -15,6 +14,7 @@ import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfir
 import usePermissions from "@/hooks/usePermissions";
 import { useLocation } from "react-router-dom";
 import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
+import useCohort from "@/services/useCohort";
 
 export default function ChangeSejour() {
   const groups = useCohortGroups();
@@ -47,8 +47,7 @@ export default function ChangeSejour() {
 }
 
 function Sejours({ cohorts }: { cohorts: CohortType[] }) {
-  const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
+  const { cohort } = useCohort();
   return (
     <section id="changement-de-sejour" className="text-center">
       <h2 className="text-base font-bold md:text-2xl">S'inscrire à un autre séjour en {getCohortYear(cohort)}</h2>

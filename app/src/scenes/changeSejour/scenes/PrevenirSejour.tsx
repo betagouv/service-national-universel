@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import ReasonForm from "../components/ReasonForm";
 import { useHistory } from "react-router-dom";
-import useAuth from "@/services/useAuth";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import { getCohortPeriod } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { HiOutlineXCircle } from "react-icons/hi2";
 import { HiOutlineCheckCircle } from "react-icons/hi2";
@@ -26,9 +25,9 @@ export default function PrevenirSejour() {
 }
 
 function Modal({ open, setOpen, reason, message }) {
-  const { young } = useAuth();
+  const { cohort } = useCohort();
   const history = useHistory();
-  const date = capitalizeFirstLetter(getCohortPeriod(getCohort(young.cohort)));
+  const date = capitalizeFirstLetter(getCohortPeriod(cohort));
   const { mutate, isPending: loading } = useChangeSejour();
 
   const handleChangeCohort = async () => {
