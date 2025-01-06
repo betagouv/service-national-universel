@@ -1063,7 +1063,7 @@ const getYoungStatusForAVenir = (young: YoungType) => {
 };
 
 const getYoungStatusForBasculeCLEtoHTS = (status: string) => {
-  if (status === YOUNG_STATUS.NOT_AUTORISED) {
+  if (status === YOUNG_STATUS.NOT_AUTORISED || status === YOUNG_STATUS.IN_PROGRESS) {
     return YOUNG_STATUS.IN_PROGRESS;
   } else {
     return YOUNG_STATUS.WAITING_VALIDATION;
