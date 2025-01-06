@@ -32,7 +32,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       city: Joi.string().trim().required(),
       startDate: Joi.string().trim().required(),
       endDate: Joi.string().trim().required(),
-      missionDuration: Joi.number().required(),
+      missionDuration: Joi.number().allow(null),
       contactFullName: Joi.string().trim().required(),
       contactEmail: Joi.string().trim().required(),
       files: Joi.array().items(Joi.string().required()).required().min(1),
@@ -42,6 +42,8 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
+
+    value.missionDuration = value.missionDuration === null ? 84 : value.missionDuration;
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
@@ -132,7 +134,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       startDate: Joi.string().trim(),
       endDate: Joi.string().trim(),
       contactFullName: Joi.string().trim(),
-      missionDuration: Joi.number(),
+      missionDuration: Joi.number().allow(null),
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
@@ -145,6 +147,9 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
+
+    // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
+    value.missionDuration = value.missionDuration === null ? 84 : value.missionDuration;
 
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });

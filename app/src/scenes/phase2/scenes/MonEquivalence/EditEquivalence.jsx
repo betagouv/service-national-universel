@@ -100,7 +100,7 @@ export default function EditEquivalence() {
       ...prevData,
       type,
       sousType: "",
-      missionDuration: type !== "Autre" ? 84 : prevData?.missionDuration,
+      missionDuration: type === "Autre" ? prevData?.missionDuration : null,
     }));
     setOpenType(false);
   };
