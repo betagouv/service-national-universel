@@ -110,6 +110,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...cleUseCaseProviders,
             ...referentielGatewayProviders,
             ...regionAcademiqueMongoProviders,
+            ...serviceProvider,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
