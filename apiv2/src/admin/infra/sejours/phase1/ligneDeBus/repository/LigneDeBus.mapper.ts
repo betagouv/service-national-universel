@@ -29,6 +29,7 @@ export class LigneDeBusMapper {
             dateDepart: ligneDeBusDocument.departuredDate,
             dateRetour: ligneDeBusDocument.returnDate,
             ligneFusionneIds: ligneDeBusDocument.mergedBusIds,
+            ligneMirroirId: ligneDeBusDocument.mirrorBusId,
         };
     }
 
@@ -54,6 +55,7 @@ export class LigneDeBusMapper {
             departuredDate: ligneDeBusModel.dateDepart,
             returnDate: ligneDeBusModel.dateRetour,
             mergedBusIds: ligneDeBusModel.ligneFusionneIds,
+            mirrorBusId: ligneDeBusModel.ligneMirroirId,
         };
     }
 }

@@ -69,6 +69,7 @@ describe("POST /plan-de-transport/import/:cohort", () => {
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/plan-de-transport/import/Avril 2023 - A")
       .attach("file", xlsxFile, { filename: "test.xslx" });
+    expect(response.body.errors).toBeUndefined();
     expect(response.status).toBe(200);
   });
 });
