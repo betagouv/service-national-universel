@@ -15,13 +15,13 @@ export type SejourModel = {
     centreCodePostal?: string;
     sessionName?: string;
     sessionId?: string;
-    equipe: {
-        firstName?: string;
-        lastName?: string;
-        role?: string;
-        email?: string;
-        phone?: string;
-    }[];
+    // equipe: {
+    //     firstName?: string;
+    //     lastName?: string;
+    //     role?: string;
+    //     email?: string;
+    //     phone?: string;
+    // }[];
     sejourSnuId?: string;
     dateStart?: string;
     dateEnd?: string;
@@ -29,8 +29,8 @@ export type SejourModel = {
     // mandatory
     listeAttente: string[];
     status: string;
-    projetPedagogiqueFiles: SejourFile[];
-    emploiDuTempsFiles: SejourFile[];
+    // projetPedagogiqueFiles: SejourFile[];
+    // emploiDuTempsFiles: SejourFile[];
     hasTimeSchedule: string;
     hasPedagoProject: string;
 };

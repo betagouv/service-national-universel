@@ -1,17 +1,42 @@
-import { Body, Controller, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 
-import { AffectationRoutes, TaskName, TaskStatus } from "snu-lib";
+import {
+    AffectationRoutes,
+    TaskName,
+    TaskStatus,
+    SimulationAffectationHTSTaskParameters,
+    ValiderAffectationHTSTaskParameters,
+} from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { PostSimulationsPayloadDto } from "./Affectation.validation";
+import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Affectation.validation";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 
 @Controller("affectation")
 export class AffectationController {
-    constructor(@Inject(TaskGateway) private readonly taskGateway: TaskGateway) {}
+    constructor(
+        private readonly affectationService: AffectationService,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+    ) {}
+
+    @UseGuards(AdminGuard)
+    @Get("/:sessionId")
+    async getStatus(@Param("sessionId") sessionId: string): Promise<AffectationRoutes["GetAffectation"]["response"]> {
+        const traitement = await this.affectationService.getStatusValidation(sessionId);
+        return {
+            simulation: await this.affectationService.getStatusSimulation(sessionId),
+            traitement: {
+                ...traitement,
+                lastCompletedAt: traitement.lastCompletedAt?.toISOString(),
+            },
+        };
+    }
 
     @UseGuards(AdminGuard)
     @Post("/:sessionId/simulations")
@@ -20,6 +45,13 @@ export class AffectationController {
         @Param("sessionId") sessionId: string,
         @Body() payload: PostSimulationsPayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        const importTask: ReferentielImportTaskModel = await this.taskGateway.findById(payload.sdrImportId);
+        if (!importTask.metadata?.parameters?.fileKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à l'import des routes introuvable",
+            );
+        }
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION,
             status: TaskStatus.PENDING,
@@ -28,7 +60,8 @@ export class AffectationController {
                     sessionId,
                     departements: payload.departements,
                     niveauScolaires: payload.niveauScolaires,
-                    changementDepartements: payload.changementDepartements,
+                    sdrImportId: payload.sdrImportId,
+                    sdrFileName: importTask.metadata.parameters.fileName,
                     etranger: payload.etranger,
                     affecterPDR: payload.affecterPDR,
                     auteur: {
@@ -38,7 +71,48 @@ export class AffectationController {
                         role: request.user.role,
                         sousRole: request.user.sousRole,
                     },
-                },
+                } as SimulationAffectationHTSTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider")
+    async validerSimulation(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+        @Body() payload: PostSimulationValiderPayloadDto,
+    ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        const simulationTask = await this.taskGateway.findById(taskId);
+
+        // On verifie qu'une simulation n'a pas déjà été affecté en amont
+        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(sessionId);
+
+        if (
+            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
+            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
+        ) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+        }
+
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    simulationTaskId: taskId,
+                    affecterPDR: payload.affecterPDR,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as ValiderAffectationHTSTaskParameters,
             },
         });
         return TaskMapper.toDto(task);

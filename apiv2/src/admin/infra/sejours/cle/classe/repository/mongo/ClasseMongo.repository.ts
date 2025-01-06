@@ -11,6 +11,7 @@ import { ClasseMapper } from "../Classe.mapper";
 export class ClasseRepository implements ClasseGateway {
     constructor(
         @Inject(CLASSE_MONGOOSE_ENTITY) private classeMongooseEntity: Model<ClasseDocument>,
+
         private readonly cls: ClsService,
     ) {}
 
