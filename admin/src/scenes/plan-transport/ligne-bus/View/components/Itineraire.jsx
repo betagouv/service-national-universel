@@ -136,7 +136,7 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
   return (
     <div className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
-        <div className="text-xl leading-6 text-[#242526]">Itinéraire</div>
+        <div className="text-lg leading-7 text-gray-900 font-bold">Itinéraire</div>
         <div className="flex items-center gap-3">
           <div className="flex flex-col">
             <div className="text-xs font-light leading-5 text-gray-500">Aller</div>

@@ -4,7 +4,7 @@ import { useSelector } from "react-redux";
 import { BsChevronDown, BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 
-import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, LigneBusType, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
@@ -35,7 +35,7 @@ interface FormErrors {
 
 type FormValue = Partial<
   PointDeRassemblementType &
-    LigneBusType & {
+    LigneBusDto & {
       transportType?: string;
       meetingHour?: string;
       busArrivalHour?: string;
@@ -46,8 +46,8 @@ type FormValue = Partial<
 >;
 
 interface PointDeRassemblementProps {
-  bus: LigneBusType;
-  onBusChange: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  bus: LigneBusDto;
+  onBusChange: React.Dispatch<React.SetStateAction<LigneBusDto>>;
   index: number;
   pdr: FormValue;
   volume?: { youngsCount: number; meetingPointId: string }[];
@@ -197,7 +197,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     <div className="w-full rounded-xl bg-white p-8">
       <div className="relative flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
+          <div className="text-lg leading-7 text-gray-900 font-bold">Point de rassemblement</div>
           <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
         </div>
         {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
