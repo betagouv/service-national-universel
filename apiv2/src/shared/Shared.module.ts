@@ -7,10 +7,11 @@ import { ClockProvider } from "./infra/Clock.provider";
 import { FileProvider } from "./infra/File.provider";
 import { FileController } from "./infra/File.controller";
 import { FileGateway } from "./core/File.gateway";
+import { DatabaseModule } from "@infra/Database.module";
 
 @Global()
 @Module({
-    imports: [ConfigModule],
+    imports: [DatabaseModule, ConfigModule],
     providers: [
         AllExceptionsFilter,
         Logger,

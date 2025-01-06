@@ -1,18 +1,18 @@
-import { Tooltip } from "@snu/ds/admin";
 import React from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 
 import { SimulationAffectationHTSTaskDto } from "snu-lib";
+import { Tooltip } from "@snu/ds/admin";
 
 const formatPourcentage = (value: number) => {
   return `${(value * 100).toFixed(1)}%`;
 };
 
-interface SimulationsHtsResultsProps {
+interface SimulationHtsResultCellProps {
   simulation: unknown;
 }
 
-export default function SimulationsHtsResults({ simulation }: SimulationsHtsResultsProps) {
+export default function SimulationHtsResultCell({ simulation }: SimulationHtsResultCellProps) {
   const simulationHts = simulation as SimulationAffectationHTSTaskDto;
 
   return (

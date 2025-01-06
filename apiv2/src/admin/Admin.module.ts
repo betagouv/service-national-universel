@@ -45,12 +45,30 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
 import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
 import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { HistoryController } from "./infra/history/api/History.controller";
+import { historyProvider } from "./infra/history/historyProvider";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 @Module({
     imports: [
-        ClsModule.forRoot({}),
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
         ConfigModule,
         DatabaseModule,
         JwtAuthModule,
@@ -65,10 +83,12 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
         ImportReferentielController,
         AuthController,
         AdminTaskController,
+        HistoryController,
         ReferentController,
     ],
     providers: [
         ClasseService,
+        AffectationService,
         SimulationAffectationHTSService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -77,12 +97,14 @@ import { ReferentController } from "./infra/iam/api/Referent.controller";
         ...etablissementMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
         ...sessionMongoProviders,
         ...guardProviders,
         ...taskMongoProviders,
+        ...historyProvider,
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },

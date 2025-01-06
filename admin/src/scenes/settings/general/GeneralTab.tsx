@@ -731,48 +731,48 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   }}
                 />
               </div>
-              {cohort.type !== COHORT_TYPE.CLE && (
-                <>
-                  <div className="flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="flex flex-1 text-xs  font-medium text-gray-900">
-                        Affectation manuelle des volontaires et modification de leur affectation et de leur point de rassemblement
-                      </p>
-                      <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
-                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires et/ou à modifier leur centre d’affectation ou point de
-                          rassemblement.
-                        </p>
-                      </ReactTooltip>
-                    </div>
-                    <ToggleDate
-                      label="Modérateurs"
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      // @ts-ignore
-                      value={cohort.manualAffectionOpenForAdmin}
-                      onChange={() =>
-                        onCohortChange({
-                          ...cohort,
-                          manualAffectionOpenForAdmin: !cohort.manualAffectionOpenForAdmin,
-                        })
-                      }
-                      range={{
-                        from: cohort?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
-                        to: cohort?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
-                      }}
-                      onChangeRange={(range) => {
-                        onCohortChange({
-                          ...cohort,
-                          uselessInformation: {
-                            ...cohort.uselessInformation,
-                            manualAffectionOpenForAdminFrom: range?.from,
-                            manualAffectionOpenForAdminTo: range?.to,
-                          },
-                        });
-                      }}
-                    />
+              <>
+                <div className="flex items-center gap-2">
+                  <p className="flex flex-1 text-xs  font-medium text-gray-900">
+                    Affectation manuelle des volontaires {cohort.type !== COHORT_TYPE.CLE && "et modification de leur affectation et de leur point de rassemblement"}
+                  </p>
+                  <MdInfoOutline data-tip data-for="affectation_manuelle" className="h-5 w-5 cursor-pointer text-gray-400" />
+                  <ReactTooltip id="affectation_manuelle" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                    <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                      Ouverture ou fermeture pour les utilisateurs du droit à affecter manuellement des volontaires
+                      {cohort.type !== COHORT_TYPE.CLE && "et/ou à modifier leur centre d’affectation ou point de rassemblement."}
+                    </p>
+                  </ReactTooltip>
+                </div>
+                <ToggleDate
+                  label="Modérateurs"
+                  disabled={isLoading}
+                  readOnly={readOnly}
+                  // @ts-ignore
+                  value={cohort.manualAffectionOpenForAdmin}
+                  onChange={() =>
+                    onCohortChange({
+                      ...cohort,
+                      manualAffectionOpenForAdmin: !cohort.manualAffectionOpenForAdmin,
+                    })
+                  }
+                  range={{
+                    from: cohort?.uselessInformation?.manualAffectionOpenForAdminFrom || undefined,
+                    to: cohort?.uselessInformation?.manualAffectionOpenForAdminTo || undefined,
+                  }}
+                  onChangeRange={(range) => {
+                    onCohortChange({
+                      ...cohort,
+                      uselessInformation: {
+                        ...cohort.uselessInformation,
+                        manualAffectionOpenForAdminFrom: range?.from,
+                        manualAffectionOpenForAdminTo: range?.to,
+                      },
+                    });
+                  }}
+                />
+                {cohort.type !== COHORT_TYPE.CLE && (
+                  <>
                     <ToggleDate
                       label="Référents régionaux"
                       disabled={isLoading}
@@ -827,36 +827,36 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                         });
                       }}
                     />
-                  </div>
-                  <div className="mt-4 flex flex-col gap-3">
-                    <div className="flex items-center gap-2">
-                      <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
-                      <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
-                      <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
-                        <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
-                          <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
-                          <li>
-                            Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
-                            choix du point de rassemblement.
-                          </li>
-                          <li>Cela prend effet à 23h59 heure de Paris.</li>
-                        </ul>
-                      </ReactTooltip>
+                    <div className="mt-4 flex flex-col gap-3">
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs  font-medium text-gray-900">Confirmation du point de rassemblement par les volontaires</p>
+                        <MdInfoOutline data-tip data-for="confirmation_PDR" className="h-5 w-5 cursor-pointer text-gray-400" />
+                        <ReactTooltip id="confirmation_PDR" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                          <ul className=" w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
+                            <li>Fin de la possibilité de confirmer le point de rassemblement pour le volontaire sur son compte.</li>
+                            <li>
+                              Fin de la possibilité pour un utilisateur de choisir l’option “Je laisse [Prénom du volontaire] choisir son point de rassemblement” dans la modale de
+                              choix du point de rassemblement.
+                            </li>
+                            <li>Cela prend effet à 23h59 heure de Paris.</li>
+                          </ul>
+                        </ReactTooltip>
+                      </div>
+                      <DatePickerInput
+                        mode="single"
+                        label="Fin"
+                        placeholder={"Date"}
+                        disabled={isLoading}
+                        readOnly={readOnly}
+                        // @ts-ignore
+                        value={cohort.pdrChoiceLimitDate}
+                        onChange={(value) => onCohortChange({ ...cohort, pdrChoiceLimitDate: value })}
+                        error={error.pdrChoiceLimitDate}
+                      />
                     </div>
-                    <DatePickerInput
-                      mode="single"
-                      label="Fin"
-                      placeholder={"Date"}
-                      disabled={isLoading}
-                      readOnly={readOnly}
-                      // @ts-ignore
-                      value={dayjs(cohort.pdrChoiceLimitDate).local().toDate()}
-                      onChange={(value) => onCohortChange({ ...cohort, pdrChoiceLimitDate: value })}
-                      error={error.pdrChoiceLimitDate}
-                    />
-                  </div>
-                </>
-              )}
+                  </>
+                )}
+              </>
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-[90%] w-[1px] border-r-[1px] border-gray-200"></div>
