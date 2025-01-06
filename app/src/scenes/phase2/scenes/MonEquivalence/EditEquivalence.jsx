@@ -95,6 +95,16 @@ export default function EditEquivalence() {
       })();
   }, [young, id]);
 
+  const handleSelectType = (type) => {
+    setData((prevData) => ({
+      ...prevData,
+      type,
+      sousType: "",
+      missionDuration: type !== "Autre" ? 84 : prevData?.missionDuration,
+    }));
+    setOpenType(false);
+  };
+
   const handleSubmit = async () => {
     setErrorMail(false);
     setErrorDuration(false);
@@ -266,13 +276,7 @@ export default function EditEquivalence() {
               {/* display options */}
               <div className={`${openType ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                 {ENGAGEMENT_TYPES.map((option) => (
-                  <div
-                    key={option}
-                    onClick={() => {
-                      setData({ ...data, type: option, sousType: "" });
-                      setOpenType(false);
-                    }}
-                    className={`${option === data?.type && "bg-gray font-bold"}`}>
+                  <div key={option} onClick={() => handleSelectType(option)} className={`${option === data?.type && "bg-gray font-bold"}`}>
                     <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
                       <div>{option}</div>
                       {option === data?.type ? <BsCheck2 /> : null}
@@ -438,30 +442,32 @@ export default function EditEquivalence() {
               />
             </div>
           </div>
-          <div className="mt-4">
-            <div className="text-xs font-medium leading-4">Combien de temps ?</div>
-            <div className="mt-3 flex flex-row  items-stretch gap-2 align-middle">
-              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                <input
-                  className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
-                  placeholder="Exemple: 10"
-                  type="number"
-                  min="1"
-                  step="1"
-                  value={duration}
-                  onChange={handleInputChange}
-                />
+          {data?.type === "Autre" && (
+            <div className="mt-4">
+              <div className="text-xs font-medium leading-4">Combien de temps ?</div>
+              <div className="mt-3 flex flex-row  items-stretch gap-2 align-middle">
+                <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                  <input
+                    className="::placeholder:text-gray-500 w-full text-sm font-normal leading-5"
+                    placeholder="Exemple: 10"
+                    type="number"
+                    min="1"
+                    step="1"
+                    value={duration}
+                    onChange={handleInputChange}
+                  />
+                </div>
+                <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
+                  <select className="text-gray-500 w-full text-sm font-normal leading-5" value={unit} onChange={handleSelectChange}>
+                    <option value="heures">Heures</option>
+                    <option value="jours">Jours</option>
+                  </select>
+                </div>
               </div>
-              <div className="w-full rounded-lg border-[1px] border-gray-300 px-3 py-2">
-                <select className="text-gray-500 w-full text-sm font-normal leading-5" value={unit} onChange={handleSelectChange}>
-                  <option value="heures">Heures</option>
-                  <option value="jours">Jours</option>
-                </select>
-              </div>
+              <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
+              {errorDuration ? <div className="text-xs font-normal leading-4 text-red-500">Veuillez rentrer un nombre supérieur à 0</div> : null}
             </div>
-            <p className="text-gray-500 w-full text-xs font-normal leading-5 mt-1">Arrondir à l'entier supérieur.</p>
-            {errorDuration ? <div className="text-xs font-normal leading-4 text-red-500">Veuillez rentrer un nombre supérieur à 0</div> : null}
-          </div>
+          )}
         </div>
         <div className="mt-4 rounded-lg bg-white p-4 border">
           <div className="text-lg font-bold leading-7">Personne contact au sein de la structure d’accueil</div>
