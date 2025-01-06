@@ -8,8 +8,11 @@ import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway"
 import { CentreRepository } from "../centre/repository/mongo/CentreMongo.repository";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { SessionRepository } from "../session/repository/mongo/SessionMongo.repository";
+import { PlanDeTransportGateway } from "@admin/core/sejours/phase1/PlanDeTransport/PlanDeTransport.gateway";
+import { PlanDeTransportRepository } from "../planDeTransport/repository/mongo/PlanDeTransportMongo.repository";
 
 export const gatewayProviders = [
+    { provide: PlanDeTransportGateway, useClass: PlanDeTransportRepository },
     { provide: LigneDeBusGateway, useClass: LigneDeBusRepository },
     { provide: PointDeRassemblementGateway, useClass: PointDeRassemblementRepository },
     { provide: SejourGateway, useClass: SejourRepository },

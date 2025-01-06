@@ -51,7 +51,7 @@ schema.virtual("pointDeRassemblement", {
 });
 
 schema.virtual("ligne", {
-  ref: "lignebuses",
+  ref: "lignebus",
   localField: "ligneId",
   foreignField: "_id",
   justOne: true,

@@ -1,31 +1,27 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { HiOutlinePaperClip, HiPlay } from "react-icons/hi";
+import { HiPlay } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
-import { formatDateFR, getZonedDate, Phase1Routes, TaskName, translate, translateSimulationName, translateTaskStatus } from "snu-lib";
-import { Badge, DataTable, TBadgeStatus, Tooltip } from "@snu/ds/admin";
+import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { DataTable } from "@snu/ds/admin";
 
-import { downloadSecuredFile } from "@/services/file.service";
 import { Phase1Service } from "@/services/phase1Service";
-import SimulationsHtsResults from "./simulationHts/SimulationHtsResult";
-import ActionCell from "./ActionCell";
-import SimulationHtsResultStartButton from "./simulationHts/SimulationHtsResultStartButton";
+
+import ActionCell from "../components/ActionCell";
+import StatusCell from "../components/StatusCell";
+import RapportCell from "../components/RapportCell";
+import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
+import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 
 interface SimulationsSubTabProps {
-  sessionId: string;
+  session: CohortDto;
 }
 
-const MAPPING_STATUS_COLOR: { [key: string]: TBadgeStatus } = {
-  PENDING: "none",
-  IN_PROGRESS: "IN_PROGRESS",
-  COMPLETED: "VALIDATED",
-  FAILED: "REFUSED",
-};
-
-export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps) {
+export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
   const { search } = useLocation();
   const currentAction = new URLSearchParams(search).get("action") || "";
+  const currentId = new URLSearchParams(search).get("id") || "";
 
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [filters, setFilters] = useState({
@@ -36,33 +32,35 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
   });
 
   const {
-    isPending,
+    isFetching: isLoading,
     error,
     data: simulations,
   } = useQuery<Phase1Routes["GetSimulationsRoute"]["response"]>({
     queryKey: ["phase-simulations", filters.action, sort],
-    queryFn: async () => Phase1Service.getSimulations(sessionId, { name: filters.action, sort }),
+    queryFn: async () => Phase1Service.getSimulations(session._id!, { name: filters.action, sort }),
   });
 
   const simulationRows = useMemo(() => {
     return (
-      simulations?.map((simu) => ({
-        id: simu.id,
-        data: {
-          ...simu,
-          statut: translateTaskStatus(simu.status),
-          action: translateSimulationName(simu.name),
-          date: formatDateFR(getZonedDate(simu.createdAt)),
-          author: `${simu.metadata?.parameters?.auteur?.prenom || ""} ${simu.metadata?.parameters?.auteur?.nom || ""}`,
-        },
-      })) || []
+      simulations
+        ?.filter((simu) => !currentId || simu.id === currentId)
+        ?.map((simu) => ({
+          id: simu.id,
+          data: {
+            ...simu,
+            statut: translateTaskStatus(simu.status),
+            action: translateSimulationName(simu.name),
+            date: formatDateFR(getZonedDate(simu.createdAt)),
+            author: `${simu.metadata?.parameters?.auteur?.prenom || ""} ${simu.metadata?.parameters?.auteur?.nom || ""}`,
+          },
+        })) || []
     );
-  }, [simulations]);
+  }, [simulations, currentId]);
 
   return (
     <div className="flex flex-col gap-8">
       <DataTable<{ id: string; data: Phase1Routes["GetSimulationsRoute"]["response"][0] }>
-        isLoading={isPending}
+        isLoading={isLoading}
         isError={!!error}
         rows={simulationRows}
         isSortable
@@ -80,34 +78,24 @@ export default function SimulationsSubTab({ sessionId }: SimulationsSubTabProps)
               { key: "date", label: "Date" },
               { key: "author", label: "Auteur" },
             ],
-            renderCell: (simulation) => <ActionCell simulation={simulation} />,
+            renderCell: (simulation) => <ActionCell simulation={simulation} session={session} />,
           },
           {
-            key: "fieldKey",
+            key: "metadata",
             title: "Resultats",
-            renderCell: (simulation) => <SimulationsHtsResults simulation={simulation} />,
+            // TODO: switch en fonction de Task.name
+            renderCell: (simulation) => <SimulationHtsResultCell simulation={simulation} />,
           },
           {
             key: "statut",
             title: "Statut",
             filtrable: true,
-            renderCell: (simulation) => (
-              <Tooltip id={simulation.id} title={`${translate(simulation.error?.code)} ${simulation.error?.description || ""}`} disabled={!simulation.error?.code}>
-                <Badge title={translateTaskStatus(simulation.status)} status={MAPPING_STATUS_COLOR[simulation.status]} />
-              </Tooltip>
-            ),
+            renderCell: StatusCell,
           },
           {
-            key: "rapportUrl",
+            key: "rapportKey",
             title: "Simulat.",
-            renderCell: (simulation) =>
-              simulation.metadata?.results?.rapportUrl && (
-                <>
-                  <button onClick={() => downloadSecuredFile(simulation.metadata?.results?.rapportKey)} className="border-[1px] border-blue-600 rounded-full p-2.5">
-                    <HiOutlinePaperClip size={24} />
-                  </button>
-                </>
-              ),
+            renderCell: RapportCell,
           },
           {
             key: "lancer",

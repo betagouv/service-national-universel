@@ -6,7 +6,8 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 
-const PHASE1_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION];
+const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION];
+const PHASE1_TRAITEMENTS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER];
 
 @Controller("phase1")
 export class Phase1Controller {
@@ -18,7 +19,7 @@ export class Phase1Controller {
         @Param("sessionId")
         sessionId: string,
         @Query("name")
-        name?: TaskName.AFFECTATION_HTS_SIMULATION,
+        name?: TaskName,
         @Query("status")
         status?: TaskStatus,
         @Query("sort")
@@ -30,7 +31,37 @@ export class Phase1Controller {
         if (status) {
             filter.status = status;
         }
-        const simulations = await this.taskGateway.findByNames(name ? [name] : PHASE1_TASK_NAMES, filter, sort);
+        const simulations = await this.taskGateway.findByNames(
+            name ? [name] : PHASE1_SIMULATIONS_TASK_NAMES,
+            filter,
+            sort,
+        );
+        return simulations.map(TaskMapper.toDto);
+    }
+
+    @UseGuards(AdminGuard)
+    @Get("/:sessionId/traitements")
+    async getTraitements(
+        @Param("sessionId")
+        sessionId: string,
+        @Query("name")
+        name?: TaskName,
+        @Query("status")
+        status?: TaskStatus,
+        @Query("sort")
+        sort?: "ASC" | "DESC",
+    ): Promise<Phase1Routes["GetSimulationsRoute"]["response"]> {
+        const filter: any = {
+            "metadata.parameters.sessionId": sessionId,
+        };
+        if (status) {
+            filter.status = status;
+        }
+        const simulations = await this.taskGateway.findByNames(
+            name ? [name] : PHASE1_TRAITEMENTS_TASK_NAMES,
+            filter,
+            sort,
+        );
         return simulations.map(TaskMapper.toDto);
     }
 }

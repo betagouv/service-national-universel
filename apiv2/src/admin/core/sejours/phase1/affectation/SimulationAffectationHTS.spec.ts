@@ -6,6 +6,7 @@ import { department2region, departmentList, GRADES, RegionsHorsMetropole } from 
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 import { FileGateway } from "@shared/core/File.gateway";
+import { TaskGateway } from "@task/core/Task.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
@@ -23,6 +24,8 @@ import * as mockLignesBus from "./__tests__/lignebuses.json";
 import * as mockPdr from "./__tests__/pdr.json";
 import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
+import { AffectationService } from "./Affectation.service";
+import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 
 const cohortName = "Avril 2024 - C";
 
@@ -34,10 +37,31 @@ describe("SimulationAffectationHTS", () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
+                AffectationService,
                 SimulationAffectationHTS,
                 SimulationAffectationHTSService,
                 Logger,
-                { provide: FileGateway, useValue: { generateExcel: jest.fn(), uploadFile: jest.fn() } },
+                {
+                    provide: FileGateway,
+                    useValue: {
+                        generateExcel: jest.fn(),
+                        uploadFile: jest.fn(),
+                        downloadFile: jest.fn().mockResolvedValue({ Body: null }),
+                        parseXLS: jest.fn().mockResolvedValue([]),
+                    },
+                },
+                {
+                    provide: TaskGateway,
+                    useValue: {
+                        findById: jest.fn().mockResolvedValue({
+                            metadata: {
+                                parameters: {
+                                    fileKey: "mockedFileKey",
+                                },
+                            },
+                        }),
+                    },
+                },
                 {
                     provide: SessionGateway,
                     useValue: {
@@ -54,12 +78,15 @@ describe("SimulationAffectationHTS", () => {
                     provide: LigneDeBusGateway,
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockLignesBus),
+                        findBySessionNom: jest.fn().mockResolvedValue(mockLignesBus),
                     },
                 },
                 {
                     provide: PointDeRassemblementGateway,
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockPdr),
+                        findByMatricules: jest.fn(),
+                        findByIds: jest.fn().mockResolvedValue(mockPdr),
                     },
                 },
                 {
@@ -74,6 +101,13 @@ describe("SimulationAffectationHTS", () => {
                         findBySessionId: jest.fn().mockResolvedValue(mockCentres),
                     },
                 },
+                {
+                    provide: PlanDeTransportGateway,
+                    useValue: {
+                        findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
+                        update: jest.fn(),
+                    },
+                },
             ],
         }).compile();
 
@@ -86,7 +120,7 @@ describe("SimulationAffectationHTS", () => {
                 sessionId: cohortName,
                 departements: departmentList,
                 niveauScolaires: Object.values(GRADES),
-                changementDepartements: [],
+                sdrImportId: "sdrImportId",
             }),
         ).rejects.toThrow(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
     });
@@ -98,7 +132,8 @@ describe("SimulationAffectationHTS", () => {
                 (departement) => !RegionsHorsMetropole.includes(department2region[departement]),
             ),
             niveauScolaires: Object.values(GRADES),
-            changementDepartements: [],
+            sdrImportId: "sdrImportId",
+            etranger: true,
         });
 
         // fixed data
@@ -108,10 +143,10 @@ describe("SimulationAffectationHTS", () => {
         expect(result.rapportData.centreList.length).toEqual(15);
 
         // affectation result
-        expect(result.rapportData.jeuneIntraDepartementList.length).toEqual(0);
+        expect(result.rapportData.jeuneIntraDepartementList.length).toEqual(1);
         expect(result.rapportData.jeuneAttenteAffectationList.length).toBeGreaterThan(3);
         expect(result.rapportData.jeunesDejaAffectedList.length).toEqual(14);
-        expect(result.rapportData.jeunesNouvellementAffectedList.length).toBeGreaterThan(75);
+        expect(result.rapportData.jeunesNouvellementAffectedList.length).toBeGreaterThan(74);
         expect(result.rapportData.jeuneAttenteAffectationList[0]["Ligne Theorique"]).toBeDefined();
     });
 });

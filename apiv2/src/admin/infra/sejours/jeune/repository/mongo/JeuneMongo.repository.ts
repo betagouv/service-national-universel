@@ -4,13 +4,18 @@ import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { JeuneGateway } from "../../../../../core/sejours/jeune/Jeune.gateway";
 import { JeuneModel } from "../../../../../core/sejours/jeune/Jeune.model";
-import { JEUNE_MONGOOSE_ENTITY, JeuneDocument } from "../../provider/JeuneMongo.provider";
+import { JEUNE_MONGOOSE_ENTITY, JEUNE_PATCHHISTORY_OPTIONS, JeuneDocument } from "../../provider/JeuneMongo.provider";
 import { JeuneMapper } from "../Jeune.mapper";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { HistoryType } from "@admin/core/history/History";
+import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
+import { HistoryGateway } from "@admin/core/history/History.gateway";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
     constructor(
         @Inject(JEUNE_MONGOOSE_ENTITY) private jeuneMongooseEntity: Model<JeuneDocument>,
+        @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
 
@@ -62,8 +67,61 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModel(retrievedJeune);
     }
 
+    async bulkUpdate(jeunesUpdated: JeuneModel[]): Promise<number> {
+        const jeunesOriginal = await this.findByIds(jeunesUpdated.map((jeune) => jeune.id));
+        if (jeunesOriginal.length !== jeunesUpdated.length) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        const jeunesEntity = jeunesUpdated.map((updated) => ({
+            original: JeuneMapper.toEntity(jeunesOriginal.find(({ id }) => updated.id === id)!),
+            updated: JeuneMapper.toEntity(updated),
+        }));
+
+        const user = this.cls.get("user");
+
+        const updateJeunes = await this.jeuneMongooseEntity.bulkWrite(
+            jeunesEntity.map((jeune) => ({
+                updateOne: {
+                    filter: { _id: jeune.updated._id },
+                    update: { $set: jeune.updated },
+                    upsert: false,
+                },
+            })),
+        );
+
+        await this.historyGateway.bulkCreate(
+            HistoryType.JEUNE,
+            HistoryMapper.toUpdateHistories(jeunesEntity, JEUNE_PATCHHISTORY_OPTIONS, user),
+        );
+
+        return updateJeunes.modifiedCount;
+    }
+
     async findAll(): Promise<JeuneModel[]> {
         const jeunes = await this.jeuneMongooseEntity.find();
         return JeuneMapper.toModels(jeunes);
+    }
+
+    async findByIds(ids: string[]): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({ _id: { $in: ids } });
+        return JeuneMapper.toModels(jeunes);
+    }
+
+    async countAffectedByLigneDeBus(ligneDeBusId): Promise<number> {
+        return this.jeuneMongooseEntity.countDocuments({
+            $and: [
+                {
+                    status: YOUNG_STATUS.VALIDATED,
+                    ligneId: ligneDeBusId,
+                },
+                {
+                    $or: [
+                        { statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] } },
+                        { statusPhase1Tmp: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] } },
+                    ],
+                },
+            ],
+        });
     }
 }

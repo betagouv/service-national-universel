@@ -2,7 +2,7 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { formatDepartement, GRADES, Phase1Routes, ReferentielRoutes, ReferentielTaskType, region2department, RegionsMetropole, TaskName, translate } from "snu-lib";
+import { CohortDto, formatDepartement, GRADES, Phase1Routes, ReferentielRoutes, ReferentielTaskType, region2department, RegionsMetropole, TaskName, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -12,24 +12,25 @@ import { capture } from "@/sentry";
 import { ReferentielService } from "@/services/ReferentielService";
 
 interface AffectationSimulationMetropoleProps {
-  sessionId: string;
+  session: CohortDto;
   onClose: () => void;
 }
 
-export default function AffectationSimulationMetropoleModal({ sessionId, onClose }: AffectationSimulationMetropoleProps) {
+export default function AffectationSimulationMetropoleModal({ session, onClose }: AffectationSimulationMetropoleProps) {
   const queryClient = useQueryClient();
+
   const [state, setState] = useSetState<{
     niveauScolaires: string[];
     departements: Record<string, string[]>;
     etranger: boolean;
     affecterPDR: boolean;
   }>({
-    niveauScolaires: Object.values(GRADES),
+    niveauScolaires: session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
     departements: RegionsMetropole.reduce((acc, region) => {
-      acc[region] = region2department[region];
+      acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
       return acc;
     }, {}),
-    etranger: false,
+    etranger: true,
     affecterPDR: false,
   });
 
@@ -38,20 +39,24 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
     queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, type: ReferentielTaskType.IMPORT_ROUTES, limit: 1, order: "DESC" }),
   });
 
+  const sdrImport = routesImports?.[0];
+  const isReady = state.niveauScolaires.length > 0 && Object.values(state.departements).some((departements) => departements.length > 0) && !!sdrImport;
+
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await AffectationService.postAffectationMetropole(sessionId, {
+      return await AffectationService.postAffectationMetropole(session._id!, {
         departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         niveauScolaires: state.niveauScolaires as any,
-        changementDepartements: [],
+        sdrImportId: sdrImport!.id,
         etranger: state.etranger,
         affecterPDR: state.affecterPDR,
       });
     },
     onSuccess: (task) => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      const oldTasks = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(["affectation-simulations-pending"]) || [];
-      queryClient.setQueryData(["affectation-simulations-pending"], [...oldTasks, task]);
+      const queryKey = ["affectation", session._id];
+      const oldStatus = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(queryKey) || [];
+      queryClient.setQueryData(queryKey, { ...oldStatus, simulation: { status: task.status } });
       onClose();
     },
     onError: (error: any) => {
@@ -75,7 +80,7 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
             </div>
             <h1 className="font-bold text-xl m-0">Affectation HTS (Hors DOM TOM)</h1>
             <p className="text-lg">
-              La simulation se basera sur le schéma de répartition suivant : <b>{isLoadingImports ? "..." : routesImports?.[0]?.metadata?.parameters?.fileName || "--"}</b>
+              La simulation se basera sur le schéma de répartition suivant : <b>{isLoadingImports ? "..." : sdrImport?.metadata?.parameters?.fileName || "--"}</b>
             </p>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
@@ -102,12 +107,8 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
                     isOpen={false}
                   />
                 ))}
-                <SectionSwitcher title="Etranger" disabled value={state.etranger} onChange={(etranger) => setState({ etranger })} />
+                <SectionSwitcher title="Etranger" value={state.etranger} onChange={(etranger) => setState({ etranger })} className="py-2.5" />
               </div>
-            </div>
-            <div className="flex flex-col w-full gap-2.5">
-              <h2 className="text-lg leading-7 font-bold m-0">Points de rassemblement</h2>
-              <SectionSwitcher title="Affecter les PDR" disabled value={state.affecterPDR} onChange={(affecterPDR) => setState({ affecterPDR })} />
             </div>
           </div>
         </div>
@@ -115,7 +116,7 @@ export default function AffectationSimulationMetropoleModal({ sessionId, onClose
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onClose} />
-          <Button disabled={isPending} onClick={() => mutate()} title="Lancer une simulation" className="flex-1" />
+          <Button disabled={!isReady || isPending} onClick={() => mutate()} title="Lancer une simulation" className="flex-1" />
         </div>
       }
     />
