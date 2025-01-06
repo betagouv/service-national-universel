@@ -948,7 +948,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     // We notify the ref dep and the young
     try {
       const referents: ReferentDocument[] = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
-      const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.manager_phase2, SUB_ROLES.secretariat];
+      const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.secretariat, SUB_ROLES.manager_phase2];
       let selectedReferent: ReferentDocument | null = null;
       for (const subRole of SUB_ROLES_PRIORITY) {
         selectedReferent = referents.find((ref) => ref.subRole === subRole) || null;
