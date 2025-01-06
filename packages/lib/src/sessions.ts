@@ -127,7 +127,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
 }
 
 const isCohortTooOld = (cohort: CohortType) => {
-  return cohort.status === COHORT_STATUS.ARCHIVED;
+  return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
 function hasAccessToReinscription(young: YoungType) {
