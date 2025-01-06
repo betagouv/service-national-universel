@@ -383,6 +383,8 @@ const translate = (value) => {
       return "Le fichier est vide on un onglet est manquant";
     case "IMPORT_MISSING_COLUMN":
       return "Impossible d'importer ce fichier car une colonne est manquante";
+    case "ERR_NETWORK":
+      return "Impossible de se connecter au serveur, vérifier votre connexion internet avant d'actualiser";
     default:
       return value;
   }
@@ -1185,7 +1187,8 @@ export const translateTaskStatus = (status: TaskType["status"]) => {
 export const translateSimulationName = (name: string) => {
   switch (name) {
     case "AFFECTATION_HTS_SIMULATION":
-      return "Affectation HTS (Hors DOM TOM)";
+    case "AFFECTATION_HTS_SIMULATION_VALIDER":
+      return "Affectation HTS (Metropole, hors Corse)";
     default:
       return name;
   }

@@ -30,6 +30,8 @@ describe("Architecture test", () => {
                     MatchingPattern.NESTJS_COMMON,
                     MatchingPattern.NESTJS_TESTING,
                     MatchingPattern.NESTJS_CONFIG,
+                    MatchingPattern.NESTJS_CLS,
+                    MatchingPattern.NESTJS_TRANSACTIONAL,
                 )
                 .because("Core should not depend on any other dependencies")
                 .check(srcProject.allClasses());
@@ -103,6 +105,8 @@ describe("Architecture test", () => {
                     MatchingPattern.NESTJS_COMMON,
                     MatchingPattern.NESTJS_TESTING,
                     MatchingPattern.NESTJS_CONFIG,
+                    MatchingPattern.NESTJS_CLS,
+                    MatchingPattern.NESTJS_TRANSACTIONAL,
                 )
                 .because("Core should not depend on any other dependencies")
                 .check(srcProject.allClasses());

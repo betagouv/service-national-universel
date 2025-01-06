@@ -26,6 +26,7 @@ import { adminURL } from "../../../config";
 import ExternalLink from "../../../assets/icons/ExternalLink";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
+import { HiExternalLink } from "react-icons/hi";
 
 export default function DetailsView({ mission, setMission, getMission }) {
   const [values, setValues] = useState(mission);
@@ -270,7 +271,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
         {editing && mission?.isJvaMission === "true" ? (
           <div className="mb-2.5 rounded-lg bg-violet-100 p-4 text-center text-base text-indigo-800">
             Les informations grisées sont à modifier par le responsable de la structure depuis son espace{" "}
-            <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/">
+            <a target="_blank" rel="noreferrer" href="https://www.jeveuxaider.gouv.fr/" className="underline">
               jeveuxaider.gouv.fr
             </a>
           </div>
@@ -350,6 +351,19 @@ export default function DetailsView({ mission, setMission, getMission }) {
             </div>
             <div className="flex flex-wrap gap-14">
               <div className="flex min-w-[350px] flex-1 flex-col gap-4">
+                {mission.isJvaMission === "true" && (
+                  <p className="text-xs">
+                    Cette mission provient de <strong>JeVeuxAider.gouv.fr.</strong>{" "}
+                    <a
+                      href={`https://www.jeveuxaider.gouv.fr/missions-benevolat/${mission.jvaMissionId}`}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="text-blue-600 underline underline-offset-2 hover:text-blue-800 hover:underline">
+                      Voir la mission sur JVA
+                      <HiExternalLink className="inline-block ml-1" />
+                    </a>
+                  </p>
+                )}
                 <div>
                   <div className="mb-2 text-xs font-medium">
                     Donnez un nom à votre mission. Privilégiez une phrase précisant l&apos;action du volontaire. Ex : « Je fais les courses de produits pour mes voisins les plus

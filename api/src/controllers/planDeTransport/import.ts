@@ -129,7 +129,7 @@ router.post(
 
       const { centerCount, classeCount, pdrCount, maxPdrOnLine } = computeImportSummary(lines);
 
-      const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, lines });
+      const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, cohortId: cohort._id, lines });
 
       res.status(200).send({
         ok: true,
@@ -206,6 +206,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: cohesionCenter[0]._id });
         const busLineData = {
           cohort: importData.cohort,
+          cohortId: importData.cohortId,
           busId: line["NUMERO DE LIGNE"],
           departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
           returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),

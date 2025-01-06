@@ -144,9 +144,20 @@ function normalizeDepartmentName(deptName) {
   }
 }
 
-const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
+const getDepartmentNumber = (deptName: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(deptName));
 
 export const formatDepartement = (department: string) => `${department} (${getDepartmentNumber(department)})`;
+
+export const getDepartmentByNumber = (numDepartement: string) => {
+  let numero = numDepartement;
+  if (numDepartement.length === 3 && numDepartement.startsWith("0")) {
+    numero = numDepartement.substring(1);
+  }
+  if (numero.length < 2 || numero.length > 3) {
+    throw Error("Invalid department number " + numDepartement);
+  }
+  return departmentLookUp[numero];
+};
 
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;

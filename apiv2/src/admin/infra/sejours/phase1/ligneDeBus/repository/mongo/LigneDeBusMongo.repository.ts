@@ -3,37 +3,45 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
-import { LIGNEDEBUS_MONGOOSE_ENTITY, LigneDeBusDocument } from "../../provider/LigneDeBusMongo.provider";
+import {
+    LIGNEDEBUS_MONGOOSE_ENTITY,
+    LIGNEDEBUS_PATCHHISTORY_OPTIONS,
+    LigneDeBusDocument,
+} from "../../provider/LigneDeBusMongo.provider";
 import { LigneDeBusModel } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
 import { LigneDeBusMapper } from "../LigneDeBus.mapper";
+import { HistoryGateway } from "@admin/core/history/History.gateway";
+import { HistoryType } from "@admin/core/history/History";
+import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 
 @Injectable()
 export class LigneDeBusRepository implements LigneDeBusGateway {
     constructor(
-        @Inject(LIGNEDEBUS_MONGOOSE_ENTITY) private pointDeRassemblementMongooseEntity: Model<LigneDeBusDocument>,
+        @Inject(LIGNEDEBUS_MONGOOSE_ENTITY) private ligneDeBusMongooseEntity: Model<LigneDeBusDocument>,
+        @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
 
-    async create(pointDeRassemblement: LigneDeBusModel): Promise<LigneDeBusModel> {
-        const pointDeRassemblementEntity = LigneDeBusMapper.toEntity(pointDeRassemblement);
-        const createdLigneDeBus = await this.pointDeRassemblementMongooseEntity.create(pointDeRassemblementEntity);
+    async create(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel> {
+        const ligneDeBusEntity = LigneDeBusMapper.toEntity(ligneDeBus);
+        const createdLigneDeBus = await this.ligneDeBusMongooseEntity.create(ligneDeBusEntity);
         return LigneDeBusMapper.toModel(createdLigneDeBus);
     }
 
     async findById(id: string): Promise<LigneDeBusModel> {
-        const pointDeRassemblement = await this.pointDeRassemblementMongooseEntity.findById(id);
-        if (!pointDeRassemblement) {
+        const ligneDeBus = await this.ligneDeBusMongooseEntity.findById(id);
+        if (!ligneDeBus) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
-        return LigneDeBusMapper.toModel(pointDeRassemblement);
+        return LigneDeBusMapper.toModel(ligneDeBus);
     }
-    async update(pointDeRassemblement: LigneDeBusModel): Promise<LigneDeBusModel> {
-        const pointDeRassemblementEntity = LigneDeBusMapper.toEntity(pointDeRassemblement);
-        const retrievedLigneDeBus = await this.pointDeRassemblementMongooseEntity.findById(pointDeRassemblement.id);
+    async update(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel> {
+        const ligneDeBusEntity = LigneDeBusMapper.toEntity(ligneDeBus);
+        const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
         if (!retrievedLigneDeBus) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
-        retrievedLigneDeBus.set(pointDeRassemblementEntity);
+        retrievedLigneDeBus.set(ligneDeBusEntity);
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
@@ -41,13 +49,54 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         return LigneDeBusMapper.toModel(retrievedLigneDeBus);
     }
 
+    async findByIds(ids: string[]): Promise<LigneDeBusModel[]> {
+        const ligneDeBus = await this.ligneDeBusMongooseEntity.find({ _id: { $in: ids } });
+        return LigneDeBusMapper.toModels(ligneDeBus);
+    }
+
     async findAll(): Promise<LigneDeBusModel[]> {
-        const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find();
-        return LigneDeBusMapper.toModels(pointDeRassemblements);
+        const lignesDeBus = await this.ligneDeBusMongooseEntity.find();
+        return LigneDeBusMapper.toModels(lignesDeBus);
     }
 
     async findBySessionId(sessionId: string): Promise<LigneDeBusModel[]> {
-        const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find({ cohortId: sessionId });
-        return LigneDeBusMapper.toModels(pointDeRassemblements);
+        const lignesDeBus = await this.ligneDeBusMongooseEntity.find({ cohortId: sessionId });
+        return LigneDeBusMapper.toModels(lignesDeBus);
+    }
+
+    async findBySessionNom(sessionNom: string): Promise<LigneDeBusModel[]> {
+        const lignesDeBus = await this.ligneDeBusMongooseEntity.find({ cohort: sessionNom });
+        return LigneDeBusMapper.toModels(lignesDeBus);
+    }
+
+    async bulkUpdate(lignesUpdated: LigneDeBusModel[]): Promise<number> {
+        const lignesOriginal = await this.findByIds(lignesUpdated.map((ligne) => ligne.id));
+        if (lignesOriginal.length !== lignesUpdated.length) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+
+        const lignesEntity = lignesUpdated.map((updated) => ({
+            original: LigneDeBusMapper.toEntity(lignesOriginal.find(({ id }) => updated.id === id)!),
+            updated: LigneDeBusMapper.toEntity(updated),
+        }));
+
+        const user = this.cls.get("user");
+
+        const updateLignes = await this.ligneDeBusMongooseEntity.bulkWrite(
+            lignesEntity.map((ligne) => ({
+                updateOne: {
+                    filter: { _id: ligne.updated._id },
+                    update: { $set: ligne.updated },
+                    upsert: false,
+                },
+            })),
+        );
+
+        await this.historyGateway.bulkCreate(
+            HistoryType.LIGNEDEBUS,
+            HistoryMapper.toUpdateHistories(lignesEntity, LIGNEDEBUS_PATCHHISTORY_OPTIONS, user),
+        );
+
+        return updateLignes.modifiedCount;
     }
 }
