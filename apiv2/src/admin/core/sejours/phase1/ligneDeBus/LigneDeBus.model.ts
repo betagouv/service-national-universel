@@ -20,4 +20,5 @@ export type LigneDeBusModel = {
     dateDepart: any;
     dateRetour: any;
     ligneFusionneIds: any;
+    ligneMirroirId: any;
 };

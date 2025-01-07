@@ -7,7 +7,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
+import { getLinePdrCount, getLinePdrIds, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -66,6 +66,7 @@ export const validatePdtFile = async (
     "PAUSE DÉJEUNER RETOUR": [],
     "TEMPS DE ROUTE": [],
     "LIGNES FUSIONNÉES": [],
+    "LIGNE MIROIR": [],
   };
 
   if (isCle) {
@@ -246,20 +247,40 @@ export const validatePdtFile = async (
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
     if (line["LIGNES FUSIONNÉES"]) {
-      const mergedLines = line["LIGNES FUSIONNÉES"].split(",");
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mergedLines = line["LIGNES FUSIONNÉES"].replaceAll(" ", "").split(",");
       if (mergedLines.length > 5) {
         errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      for (const mergedLine of mergedLines) {
+      for (const mergedLine of mergedLines.filter((b) => b !== currentBusId)) {
         let found = false;
-        for (const [i, line] of lines.entries()) {
-          if (line["NUMERO DE LIGNE"] === mergedLine.trim()) {
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mergedLine) {
             found = true;
             break;
           }
         }
         if (!found) {
           errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
+        }
+      }
+    }
+    if (line["LIGNE MIROIR"]) {
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mirrorLine = line["LIGNE MIROIR"].replaceAll(" ", "");
+
+      if (mirrorLine === currentBusId) {
+        errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_MIRROR_LINE_ID, extra: mirrorLine });
+      } else {
+        let found = false;
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mirrorLine) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MIRROR_LINE_ID, extra: mirrorLine });
         }
       }
     }
@@ -385,7 +406,7 @@ export const validatePdtFile = async (
 export const computeImportSummary = (lines: PdtLine[]) => {
   const countPdr = getLinePdrCount(lines[0]);
   let maxPdrOnLine = 0;
-  for (const line of lines.entries()) {
+  for (const [i, line] of lines.entries()) {
     const currentLinePDRCount = getLinePdrIds(line).length;
     if (currentLinePDRCount > maxPdrOnLine) {
       maxPdrOnLine = currentLinePDRCount;
@@ -424,19 +445,4 @@ export const computeImportSummary = (lines: PdtLine[]) => {
     pdrCount,
     maxPdrOnLine,
   };
-};
-
-const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
-};
-
-const getLinePdrIds = (line) => {
-  const countPdr = getLinePdrCount(line);
-  const pdrIds: string[] = [];
-  for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-      pdrIds.push(line[`ID PDR ${pdrNumber}`]);
-    }
-  }
-  return pdrIds;
 };

@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { canEditLigneBusTeam, CohortType, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, LigneBusType, translate } from "snu-lib";
+import { canEditLigneBusTeam, CohortType, isBusEditionOpen, isTeamLeaderOrSupervisorEditable, LigneBusDto, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bin from "@/assets/Bin";
@@ -16,8 +16,8 @@ import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 
 interface BusTeamProps {
-  bus: LigneBusType;
-  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  bus: LigneBusDto;
+  setBus: React.Dispatch<React.SetStateAction<LigneBusDto>>;
   title: string;
   role: string;
   addOpen?: boolean;
@@ -152,7 +152,7 @@ export default function BusTeam({ bus, setBus, title, role, addOpen, setAddOpen,
   return (
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
-        <div className="text-xl leading-6 text-[#242526]">{title}</div>
+        <div className="text-lg leading-7 text-gray-900 font-bold">{title}</div>
         {canEditLigneBusTeam(user) || isBusEditionOpen(user, cohort) || isTeamLeaderOrSupervisorEditable(user, cohort) ? (
           <>
             {!editInfo ? (

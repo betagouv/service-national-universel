@@ -229,6 +229,12 @@ export const LigneBusSchema = {
       description: "Liste des lignes de bus fusionnées",
     },
   },
+  mirrorBusId: {
+    type: String,
+    documentation: {
+      description: "Numero de ligne du bus miroir",
+    },
+  },
 
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
