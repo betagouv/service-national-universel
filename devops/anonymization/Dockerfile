@@ -13,4 +13,4 @@ ARG TARGET_DATABASE_URI
 ENV SOURCE_DATABASE_URI=${SOURCE_DATABASE_URI}
 ENV TARGET_DATABASE_URI=${TARGET_DATABASE_URI}
 
-CMD ["devops/anonymization/docker_start.sh"]
+CMD ["bash", "devops/anonymization/docker_start.sh"]
