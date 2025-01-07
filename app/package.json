@@ -32,7 +32,7 @@
     "vite": "^5.4.11"
   },
   "dependencies": {
-    "@codegouvfr/react-dsfr": "^1.16.6",
+    "@codegouvfr/react-dsfr": "^1.9.2",
     "@headlessui/react": "^2.1.1",
     "@sentry/react": "^8.25.0",
     "@sentry/vite-plugin": "^2.22.1",
