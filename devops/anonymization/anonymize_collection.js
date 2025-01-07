@@ -1,7 +1,7 @@
 const readline = require("node:readline");
 const { EJSON } = require("bson");
 
-MODULE_PATH = `${__dirname}/../../anonymization`;
+MODULE_PATH = `${__dirname}/../../api/src/anonymization`;
 
 ANONYMIZABLE_COLLECTIONS = {
   applications: `${MODULE_PATH}/application`,
