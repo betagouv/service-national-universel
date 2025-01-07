@@ -1,11 +1,24 @@
+import fs from "fs";
 import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
-import { processCentersByMatriculeFound, processCenterWithoutId, updateCenter } from "./cohesionCenterImportService";
+import { XLSXToCSVBuffer, readCSVBuffer } from "../../services/fileService";
+import { uploadFile } from "../../utils";
+import { checkColumnHeaders, processCenterWithoutId, processCentersByMatriculeFound, updateCenter, uploadAndConvertFile, xlsxMimetype } from "./cohesionCenterImportService";
 
 jest.mock("../../models");
 jest.mock("../../logger");
 jest.mock("../../services/fileService");
-jest.mock("../../utils");
+jest.mock("../../utils", () => ({
+  ...jest.requireActual("../../utils"),
+  uploadFile: jest.fn(),
+}));
 jest.mock("./cohesionCenterImportMapper");
+jest.mock("fs", () => ({
+  readFileSync: jest.fn(),
+}));
+jest.mock("../../services/fileService", () => ({
+  XLSXToCSVBuffer: jest.fn(),
+  readCSVBuffer: jest.fn(),
+}));
 
 jest.mock("../../models", () => {
   return {
@@ -82,5 +95,69 @@ describe("cohesionCenterImportService", () => {
       expect(result.action).toBe("nothing");
       expect(result.comment).toBe("Several centers found by matricule");
     });
+  });
+  describe("checkColumnHeaders", () => {
+    it("should not throw error when all headers are present", () => {
+      const fileHeaders = [
+        "Matricule du Centre",
+        "Désignation du centre",
+        "Adresse",
+        "Complément adresse",
+        "Code postal",
+        "Commune",
+        "Commentaire interne sur l'enregistrement",
+        "Capacité d'accueil Maximale",
+        "Acceuil PMR",
+        "Avis conforme",
+        "Date avis commission hygiène & sécurité",
+        "Région académique",
+        "Académie",
+        "Département",
+        "Typologie du centre",
+        "Domaine d'activité",
+        "Organisme de rattachement",
+        "Date début validité de l'enregistrement",
+        "Date fin de validité de l'enregistrement",
+        "ID temporaire",
+      ];
+
+      expect(() => checkColumnHeaders(fileHeaders)).not.toThrow();
+    });
+
+    it("should throw error when headers are missing", () => {
+      const fileHeaders = ["Matricule du Centre", "Désignation du centre"];
+
+      expect(() => checkColumnHeaders(fileHeaders)).toThrow("Un fichier d'import de centre doit contenir les colonnes suivantes:");
+    });
+  });
+});
+
+describe("uploadAndConvertFile", () => {
+  const timestamp = "2024-01-01";
+  const filePath = "test.xlsx";
+
+  beforeEach(() => {
+    (fs.readFileSync as jest.Mock).mockReturnValue(Buffer.from("test data"));
+    (XLSXToCSVBuffer as jest.Mock).mockReturnValue(Buffer.from("csv data"));
+    (readCSVBuffer as jest.Mock).mockResolvedValue([{ data: "test" }]);
+  });
+
+  it("should read the file and upload it to the bucket", async () => {
+    await uploadAndConvertFile(filePath, timestamp);
+
+    expect(fs.readFileSync).toHaveBeenCalledWith(filePath);
+    expect(uploadFile).toHaveBeenCalledWith("file/si-snu/centres/export-2024-01-01/export-si-snu-centres-2024-01-01.xlsx", {
+      data: Buffer.from("test data"),
+      encoding: "",
+      mimetype: xlsxMimetype,
+    });
+  });
+
+  it("should convert xlsx to csv and return parsed data", async () => {
+    const result = await uploadAndConvertFile(filePath, timestamp);
+
+    expect(XLSXToCSVBuffer).toHaveBeenCalledWith(filePath);
+    expect(readCSVBuffer).toHaveBeenCalledWith(Buffer.from("csv data"));
+    expect(result).toEqual([{ data: "test" }]);
   });
 });
