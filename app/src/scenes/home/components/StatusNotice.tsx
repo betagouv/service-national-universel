@@ -14,6 +14,7 @@ const notices = {
   [YOUNG_STATUS.WAITING_VALIDATION]: <WaitingValidation />,
   [YOUNG_STATUS.WAITING_CORRECTION]: <WaitingCorrection />,
   [YOUNG_STATUS.WAITING_LIST]: <WaitingList />,
+  [YOUNG_STATUS.REFUSED]: <Refused />,
 };
 
 export default function StatusNotice({ status }: { status: string }) {
@@ -73,6 +74,15 @@ function WaitingList() {
     <Notice>
       <p className="font-bold">Votre inscription au SNU est bien validée.</p>
       <p>Nous vous recontacterons dès qu’une place se libère dans les prochains jours</p>
+    </Notice>
+  );
+}
+
+function Refused() {
+  return (
+    <Notice>
+      <p className="font-bold">Votre inscription n&apos;a pas pu être retenue.</p>
+      <p>Suite au traitement de votre dossier d&apos;inscription, votre référent n&apos;a pas pu retenir votre inscription.</p>
     </Notice>
   );
 }
