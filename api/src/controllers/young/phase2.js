@@ -12,6 +12,7 @@ const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 const { decrypt } = require("../../cryptoUtils");
 const { getMimeFromBuffer } = require("../../utils/file");
+const { PHASE2_TOTAL_HOURS } = require("snu-lib");
 const mime = require("mime-types");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
@@ -55,8 +56,13 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const youngId = value.id;
     delete value.id;
-    const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
-    // Si c'est un jeune, on met à jour le statut d'équivalence
+    const data = await MissionEquivalenceModel.create({
+      ...value,
+      youngId,
+      status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED",
+      // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
+      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+    }); // Si c'est un jeune, on met à jour le statut d'équivalence
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
@@ -148,9 +154,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
 
-    // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
-    value.missionDuration = value.missionDuration === null ? 84 : value.missionDuration;
-
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
@@ -162,7 +165,11 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     delete value.id;
     delete value.idEquivalence;
-    equivalence.set(value);
+    equivalence.set({
+      ...value,
+      // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
+      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+    });
     const data = await equivalence.save({ fromUser: req.user });
 
     if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {

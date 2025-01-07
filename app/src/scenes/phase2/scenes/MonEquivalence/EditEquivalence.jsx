@@ -276,12 +276,15 @@ export default function EditEquivalence() {
               {/* display options */}
               <div className={`${openType ? "block" : "hidden"}  absolute left-0 top-[30px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
                 {ENGAGEMENT_TYPES.map((option) => (
-                  <div key={option} onClick={() => handleSelectType(option)} className={`${option === data?.type && "bg-gray font-bold"}`}>
-                    <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                      <div>{option}</div>
-                      {option === data?.type ? <BsCheck2 /> : null}
-                    </div>
-                  </div>
+                  <button
+                    key={option}
+                    onClick={() => handleSelectType(option)}
+                    className={`group flex w-full items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50 ${
+                      option === data?.type ? "bg-gray font-bold" : ""
+                    }`}>
+                    <div>{option}</div>
+                    {option === data?.type ? <BsCheck2 /> : null}
+                  </button>
                 ))}
               </div>
             </div>
