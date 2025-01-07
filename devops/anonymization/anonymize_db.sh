@@ -118,15 +118,15 @@ admin_users=$(uuidgen)
 mongoexport --quiet --query='{"email":{"$regex":"@beta.gouv.fr|@example.org|@selego.co|@snu.gouv.fr"},"role":"admin"}' --collection=referents $dst_db_uri > $admin_users
 
 
-echo "Drop collections"
+# echo "Drop collections"
 
-cat $drop_collections_filename \
-| while read collection
-do
-    echo "Dropping $collection"
-    echo "" \
-    | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
-done
+# cat $drop_collections_filename \
+# | while read collection
+# do
+#     echo "Dropping $collection"
+#     echo "" \
+#     | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
+# done
 
 
 echo "Import collections"
@@ -142,14 +142,17 @@ do
     | gunzip \
     | bsondump > $json_file
 
-    node "$(dirname $0)/anonymize_collection.js" "$collection" < $json_file \
-    | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
+    node "$(dirname $0)/anonymize_collection.js" "$collection" < $json_file > tmptest.txt
+    rm tmptest.txt
+
+    # node "$(dirname $0)/anonymize_collection.js" "$collection" < $json_file \
+    # | mongoimport --quiet --drop --collection="$collection" $dst_db_uri
 
     rm $json_file
 done
 
-echo "Reimport admin referents"
-mongoimport --quiet --collection=referents $dst_db_uri < $admin_users
+# echo "Reimport admin referents"
+# mongoimport --quiet --collection=referents $dst_db_uri < $admin_users
 
 
 rm $admin_users
