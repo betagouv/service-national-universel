@@ -1,5 +1,5 @@
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("../utils/anonymise");
-const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("./utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("./utils/anonymise-model-fields");
 const { v4: uuid } = require("uuid");
 
 function anonymize(itemToAnonymize) {
