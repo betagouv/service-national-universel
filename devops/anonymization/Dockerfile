@@ -9,7 +9,8 @@ COPY api/src/anonymization api/src/anonymization
 
 WORKDIR /app/devops/anonymization
 
-RUN npm ci
+ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+RUN npm --global install
 
 ARG SOURCE_DATABASE_URI
 ARG TARGET_DATABASE_URI
