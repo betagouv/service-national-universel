@@ -12,7 +12,7 @@ import {
 } from "@nestjs/common";
 import { FileInterceptor } from "@nestjs/platform-express";
 
-import { MIME_TYPES, ReferentielTaskType, ReferentielRoutes, TaskName, TaskType, TaskStatus } from "snu-lib";
+import { MIME_TYPES, ReferentielTaskType, ReferentielRoutes, TaskName, TaskStatus } from "snu-lib";
 
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CustomRequest } from "@shared/infra/CustomRequest";

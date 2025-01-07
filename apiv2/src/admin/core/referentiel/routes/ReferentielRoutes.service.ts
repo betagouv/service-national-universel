@@ -17,7 +17,6 @@ const REQUIRED_COLUMN_NAMES = [
     "Session : Date de fin de la session",
     "Route",
     "Code point de rassemblement initial",
-    "Point de rassemblement initial",
 ];
 
 @Injectable()

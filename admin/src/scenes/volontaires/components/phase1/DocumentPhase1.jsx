@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
+import { Container } from "@snu/ds/admin";
 import FileIcon from "../../../../assets/FileIcon";
 import api from "../../../../services/api";
 import { SENDINBLUE_TEMPLATES, translate } from "../../../../utils";
@@ -88,35 +89,36 @@ export default function DocumentPhase1(props) {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue pendant la mise à jour des statuts : ", e.message);
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <>
-      <article className="flex items-start justify-between gap-6">
-        <div className="flex basis-1/4 flex-col items-center justify-center">
-          <section className="m-2 flex h-[300px] w-full flex-col items-center justify-start rounded-lg bg-gray-50 p-4">
-            <div className=" mx-2 mb-3 w-full">
-              <Select
-                name="cohesionStayMedical"
-                type="select"
-                setSelected={({ value }) => {
-                  needModal(value, "cohesionStayMedical");
-                }}
-                selected={statusCohesionStayMedical}
-                options={medicalFileOptions}
-              />
-            </div>
-            <FileIcon icon="sanitaire" filled={young.cohesionStayMedicalFileDownload === "true"} />
-            <p className="mt-2 text-base font-bold">Fiche sanitaire</p>
-          </section>
+    <Container title="Documents">
+      <div className="flex bg-gray-50 gap-2 px-6 py-4 items-center w-1/2">
+        <div className="flex items-center w-1/2">
+          <FileIcon icon="sanitaire" filled={young.cohesionStayMedicalFileDownload === "true"} />
+          <p className="mt-2 text-base font-bold">Fiche sanitaire</p>
+        </div>
+        <div className="flex flex-col gap-2 w-1/2">
+          <Select
+            name="cohesionStayMedical"
+            type="select"
+            setSelected={({ value }) => {
+              needModal(value, "cohesionStayMedical");
+            }}
+            selected={statusCohesionStayMedical}
+            options={medicalFileOptions}
+          />
+
           {statusCohesionStayMedical === "TO_DOWNLOAD" && (
             <ButtonPrimary disabled={loading} onClick={() => handleEmailClick("cohesionStayMedical")}>
               Relancer le volontaire
             </ButtonPrimary>
           )}
         </div>
-      </article>
-    </>
+      </div>
+    </Container>
   );
 }

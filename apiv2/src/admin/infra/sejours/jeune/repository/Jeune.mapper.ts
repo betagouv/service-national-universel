@@ -11,136 +11,137 @@ export class JeuneMapper {
     static toModel(jeuneDocument: JeuneDocument): JeuneModel {
         return {
             id: jeuneDocument._id.toString(),
-            statusPhase1: jeuneDocument.statusPhase1,
+            statut: jeuneDocument.status,
+            statutPhase1: jeuneDocument.statusPhase1,
+            email: jeuneDocument.email,
+            dateNaissance: jeuneDocument.birthdateAt,
+            telephone: jeuneDocument.phone,
             centreId: jeuneDocument.cohesionCenterId,
-            handicapMemeDepartment: jeuneDocument.handicapInSameDepartment,
+            handicapMemeDepartement: jeuneDocument.handicapInSameDepartment,
             genre: jeuneDocument.gender,
             qpv: jeuneDocument.qpv,
             psh: jeuneDocument.handicap,
             departement: jeuneDocument.department,
             region: jeuneDocument.region,
+            localisation: jeuneDocument.location,
+            departementScolarite: jeuneDocument.schoolDepartment,
+            regionScolarite: jeuneDocument.schoolRegion,
+            paysScolarite: jeuneDocument.schoolCountry,
             pointDeRassemblementId: jeuneDocument.meetingPointId,
             ligneDeBusId: jeuneDocument.ligneId,
+            sejourId: jeuneDocument.sessionPhase1Id,
+            hasPDR: jeuneDocument.hasMeetingInformation,
             sessionId: jeuneDocument.cohortId,
             sessionNom: jeuneDocument.cohort,
             prenom: jeuneDocument.firstName,
             nom: jeuneDocument.lastName,
-            // mandatory
-            cniFiles: jeuneDocument.cniFiles,
-            highSkilledActivityProofFiles: jeuneDocument.highSkilledActivityProofFiles,
-            parentConsentmentFiles: jeuneDocument.parentConsentmentFiles,
-            autoTestPCRFiles: jeuneDocument.autoTestPCRFiles,
-            imageRightFiles: jeuneDocument.imageRightFiles,
-            dataProcessingConsentmentFiles: jeuneDocument.dataProcessingConsentmentFiles,
-            rulesFiles: jeuneDocument.rulesFiles,
-            militaryPreparationFilesIdentity: jeuneDocument.militaryPreparationFilesIdentity,
-            militaryPreparationFilesCensus: jeuneDocument.militaryPreparationFilesCensus,
-            militaryPreparationFilesAuthorization: jeuneDocument.militaryPreparationFilesAuthorization,
-            militaryPreparationFilesCertificate: jeuneDocument.militaryPreparationFilesCertificate,
-            domains: jeuneDocument.domains,
-            periodRanking: jeuneDocument.periodRanking,
-            mobilityTransport: jeuneDocument.mobilityTransport,
-            notes: jeuneDocument.notes,
-            statusPhase2Contract: jeuneDocument.statusPhase2Contract,
-            historic: jeuneDocument.historic,
-            phase2ApplicationStatus: jeuneDocument.phase2ApplicationStatus,
-            phase2ApplicationFilesType: jeuneDocument.phase2ApplicationFilesType,
-            missionsInMail: jeuneDocument.missionsInMail,
-            status: jeuneDocument.status,
-            email: jeuneDocument.email,
-            loginAttempts: jeuneDocument.loginAttempts,
-            token2FA: jeuneDocument.token2FA,
-            attempts2FA: jeuneDocument.attempts2FA,
-            lastLoginAt: jeuneDocument.lastLoginAt,
-            forgotPasswordResetToken: jeuneDocument.forgotPasswordResetToken,
-            acceptCGU: jeuneDocument.acceptCGU,
-            invitationToken: jeuneDocument.invitationToken,
-            phase: jeuneDocument.phase,
-            statusPhase2: jeuneDocument.statusPhase2,
-            statusPhase3: jeuneDocument.statusPhase3,
-            lastStatusAt: jeuneDocument.lastStatusAt,
-            hasStartedReinscription: jeuneDocument.hasStartedReinscription,
-            cohesion2020Step: jeuneDocument.cohesion2020Step,
-            tokenEmailValidation: jeuneDocument.tokenEmailValidation,
-            attemptsEmailValidation: jeuneDocument.attemptsEmailValidation,
-            cohesionStayMedicalFileDownload: jeuneDocument.cohesionStayMedicalFileDownload,
-            convocationFileDownload: jeuneDocument.convocationFileDownload,
-            source: jeuneDocument.source,
-            phase3Token: jeuneDocument.phase3Token,
-            parent1FromFranceConnect: jeuneDocument.parent1FromFranceConnect,
-            parent2FromFranceConnect: jeuneDocument.parent2FromFranceConnect,
-            imageRightFilesStatus: jeuneDocument.imageRightFilesStatus,
-            autoTestPCRFilesStatus: jeuneDocument.autoTestPCRFilesStatus,
+            deplacementPhase1Autonomous: jeuneDocument.deplacementPhase1Autonomous,
+            transportInfoGivenByLocal: jeuneDocument.transportInfoGivenByLocal,
+            // Parent 1 Information
+            parent1Prenom: jeuneDocument.parent1FirstName,
+            parent1Nom: jeuneDocument.parent1LastName,
+            parent1Email: jeuneDocument.parent1Email,
+            parent1Telephone: jeuneDocument.parent1Phone,
+            // Parent 2 Information
+            parent2Prenom: jeuneDocument.parent2FirstName,
+            parent2Nom: jeuneDocument.parent2LastName,
+            parent2Email: jeuneDocument.parent2Email,
+            parent2Telephone: jeuneDocument.parent2Phone,
             youngPhase1Agreement: jeuneDocument.youngPhase1Agreement,
-            hasNotes: jeuneDocument.hasNotes,
         };
     }
 
-    static toEntity(jeuneModel: JeuneModel): Omit<YoungType, "metadata" | "createdAt" | "updatedAt"> {
+    static toEntity(
+        jeuneModel: JeuneModel,
+    ): Omit<
+        YoungType,
+        | "metadata"
+        | "createdAt"
+        | "updatedAt"
+        | "cniFiles"
+        | "highSkilledActivityProofFiles"
+        | "parentConsentmentFiles"
+        | "autoTestPCRFiles"
+        | "imageRightFiles"
+        | "dataProcessingConsentmentFiles"
+        | "rulesFiles"
+        | "militaryPreparationFilesIdentity"
+        | "militaryPreparationFilesCensus"
+        | "militaryPreparationFilesAuthorization"
+        | "militaryPreparationFilesCertificate"
+        | "domains"
+        | "periodRanking"
+        | "mobilityTransport"
+        | "notes"
+        | "statusPhase2Contract"
+        | "historic"
+        | "phase2ApplicationStatus"
+        | "phase2ApplicationFilesType"
+        | "missionsInMail"
+        | "loginAttempts"
+        | "token2FA"
+        | "attempts2FA"
+        | "lastLoginAt"
+        | "forgotPasswordResetToken"
+        | "acceptCGU"
+        | "invitationToken"
+        | "phase"
+        | "statusPhase2"
+        | "statusPhase3"
+        | "lastStatusAt"
+        | "hasStartedReinscription"
+        | "cohesion2020Step"
+        | "tokenEmailValidation"
+        | "attemptsEmailValidation"
+        | "cohesionStayMedicalFileDownload"
+        | "convocationFileDownload"
+        | "source"
+        | "phase3Token"
+        | "parent1FromFranceConnect"
+        | "parent2FromFranceConnect"
+        | "imageRightFilesStatus"
+        | "autoTestPCRFilesStatus"
+        | "hasNotes"
+    > {
         return {
             _id: jeuneModel.id,
-            statusPhase1: jeuneModel.statusPhase1,
+            status: jeuneModel.statut,
+            statusPhase1: jeuneModel.statutPhase1,
+            email: jeuneModel.email,
+            birthdateAt: jeuneModel.dateNaissance,
+            phone: jeuneModel.telephone,
             cohesionCenterId: jeuneModel.centreId,
-            handicapInSameDepartment: jeuneModel.handicapMemeDepartment,
+            handicapInSameDepartment: jeuneModel.handicapMemeDepartement,
             gender: jeuneModel.genre,
             qpv: jeuneModel.qpv,
             handicap: jeuneModel.psh,
             department: jeuneModel.departement,
             region: jeuneModel.region,
+            location: jeuneModel.localisation,
+            schoolDepartment: jeuneModel.departementScolarite,
+            schoolRegion: jeuneModel.regionScolarite,
+            schoolCountry: jeuneModel.paysScolarite,
             meetingPointId: jeuneModel.pointDeRassemblementId,
             ligneId: jeuneModel.ligneDeBusId,
+            sessionPhase1Id: jeuneModel.sejourId,
+            hasMeetingInformation: jeuneModel.hasPDR,
             cohortId: jeuneModel.sessionId,
             cohort: jeuneModel.sessionNom,
             firstName: jeuneModel.prenom,
             lastName: jeuneModel.nom,
-            // mandatory
-            cniFiles: jeuneModel.cniFiles,
-            highSkilledActivityProofFiles: jeuneModel.highSkilledActivityProofFiles,
-            parentConsentmentFiles: jeuneModel.parentConsentmentFiles,
-            autoTestPCRFiles: jeuneModel.autoTestPCRFiles,
-            imageRightFiles: jeuneModel.imageRightFiles,
-            dataProcessingConsentmentFiles: jeuneModel.dataProcessingConsentmentFiles,
-            rulesFiles: jeuneModel.rulesFiles,
-            militaryPreparationFilesIdentity: jeuneModel.militaryPreparationFilesIdentity,
-            militaryPreparationFilesCensus: jeuneModel.militaryPreparationFilesCensus,
-            militaryPreparationFilesAuthorization: jeuneModel.militaryPreparationFilesAuthorization,
-            militaryPreparationFilesCertificate: jeuneModel.militaryPreparationFilesCertificate,
-            domains: jeuneModel.domains,
-            periodRanking: jeuneModel.periodRanking,
-            mobilityTransport: jeuneModel.mobilityTransport,
-            notes: jeuneModel.notes,
-            statusPhase2Contract: jeuneModel.statusPhase2Contract,
-            historic: jeuneModel.historic,
-            phase2ApplicationStatus: jeuneModel.phase2ApplicationStatus,
-            phase2ApplicationFilesType: jeuneModel.phase2ApplicationFilesType,
-            missionsInMail: jeuneModel.missionsInMail,
-            status: jeuneModel.status,
-            email: jeuneModel.email,
-            loginAttempts: jeuneModel.loginAttempts,
-            token2FA: jeuneModel.token2FA,
-            attempts2FA: jeuneModel.attempts2FA,
-            lastLoginAt: jeuneModel.lastLoginAt,
-            forgotPasswordResetToken: jeuneModel.forgotPasswordResetToken,
-            acceptCGU: jeuneModel.acceptCGU,
-            invitationToken: jeuneModel.invitationToken,
-            phase: jeuneModel.phase,
-            statusPhase2: jeuneModel.statusPhase2,
-            statusPhase3: jeuneModel.statusPhase3,
-            lastStatusAt: jeuneModel.lastStatusAt,
-            hasStartedReinscription: jeuneModel.hasStartedReinscription,
-            cohesion2020Step: jeuneModel.cohesion2020Step,
-            tokenEmailValidation: jeuneModel.tokenEmailValidation,
-            attemptsEmailValidation: jeuneModel.attemptsEmailValidation,
-            cohesionStayMedicalFileDownload: jeuneModel.cohesionStayMedicalFileDownload,
-            convocationFileDownload: jeuneModel.convocationFileDownload,
-            source: jeuneModel.source,
-            phase3Token: jeuneModel.phase3Token,
-            parent1FromFranceConnect: jeuneModel.parent1FromFranceConnect,
-            parent2FromFranceConnect: jeuneModel.parent2FromFranceConnect,
-            imageRightFilesStatus: jeuneModel.imageRightFilesStatus,
-            autoTestPCRFilesStatus: jeuneModel.autoTestPCRFilesStatus,
+            deplacementPhase1Autonomous: jeuneModel.deplacementPhase1Autonomous,
+            transportInfoGivenByLocal: jeuneModel.transportInfoGivenByLocal,
+            // Parent 1 Information
+            parent1FirstName: jeuneModel.parent1Prenom,
+            parent1LastName: jeuneModel.parent1Nom,
+            parent1Email: jeuneModel.parent1Email,
+            parent1Phone: jeuneModel.parent1Telephone,
+            // Parent 2 Information
+            parent2FirstName: jeuneModel.parent2Prenom,
+            parent2LastName: jeuneModel.parent2Nom,
+            parent2Email: jeuneModel.parent2Email,
+            parent2Phone: jeuneModel.parent2Telephone,
             youngPhase1Agreement: jeuneModel.youngPhase1Agreement,
-            hasNotes: jeuneModel.hasNotes,
         };
     }
 }

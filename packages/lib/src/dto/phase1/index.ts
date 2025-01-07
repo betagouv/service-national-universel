@@ -1,3 +1,3 @@
 export * from "./affectation";
 
-export type { SimulationPhase1TaskHTSTaskDto } from "./SimulationPhase1TaskHTSTaskDto";
+export type { Phase1HTSTaskDto } from "./Phase1HTSTaskDto";

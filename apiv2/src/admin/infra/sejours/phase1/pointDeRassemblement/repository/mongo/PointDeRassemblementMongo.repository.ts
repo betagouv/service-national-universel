@@ -28,6 +28,15 @@ export class PointDeRassemblementRepository implements PointDeRassemblementGatew
         }
         return PointDeRassemblementMapper.toModel(pointDeRassemblement);
     }
+
+    async findByMatricule(matricule: string): Promise<PointDeRassemblementModel> {
+        const pointDeRassemblement = await this.pointDeRassemblementMongooseEntity.findOne({ matricule });
+        if (!pointDeRassemblement) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return PointDeRassemblementMapper.toModel(pointDeRassemblement);
+    }
+
     async update(pointDeRassemblement: PointDeRassemblementModel): Promise<PointDeRassemblementModel> {
         const pointDeRassemblementEntity = PointDeRassemblementMapper.toEntity(pointDeRassemblement);
         const retrievedPointDeRassemblement = await this.pointDeRassemblementMongooseEntity.findById(
@@ -46,6 +55,17 @@ export class PointDeRassemblementRepository implements PointDeRassemblementGatew
 
     async findAll(): Promise<PointDeRassemblementModel[]> {
         const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find();
+        return PointDeRassemblementMapper.toModels(pointDeRassemblements);
+    }
+
+    async findByIds(ids: string[]): Promise<PointDeRassemblementModel[]> {
+        const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find({ _id: { $in: ids } });
+        return PointDeRassemblementMapper.toModels(pointDeRassemblements);
+    }
+    async findByMatricules(matricules: string[]): Promise<PointDeRassemblementModel[]> {
+        const pointDeRassemblements = await this.pointDeRassemblementMongooseEntity.find({
+            matricule: { $in: matricules },
+        });
         return PointDeRassemblementMapper.toModels(pointDeRassemblements);
     }
 

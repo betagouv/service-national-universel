@@ -13,17 +13,15 @@ import {
     SimulationAffectationHTSService,
 } from "./SimulationAffectationHTS.service";
 
-import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
-import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
-import { SejourGateway } from "../sejour/Sejour.gateway";
 import { SejourModel } from "../sejour/Sejour.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { CentreGateway } from "../centre/Centre.gateway";
-import { JeuneModel } from "../../jeune/Jeune.model";
-import { SessionGateway } from "../session/Session.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
+import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
+import { AffectationService } from "./Affectation.service";
 
-const NB_MAX_ITERATION = 50;
+// TODO: déplacer dans un paramétrage dynamique
+const NB_MAX_ITERATION = 150;
 
 export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
@@ -41,14 +39,12 @@ export type SimulationAffectationHTSResult = {
 
 export class SimulationAffectationHTS implements UseCase<SimulationAffectationHTSResult> {
     constructor(
+        @Inject(AffectationService)
+        private readonly affectationService: AffectationService,
         @Inject(SimulationAffectationHTSService)
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
-        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
-        @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         private readonly logger: Logger,
     ) {}
@@ -56,63 +52,58 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         sessionId,
         departements,
         niveauScolaires,
-        changementDepartements,
-    }: {
-        sessionId: string;
-        departements: string[];
-        niveauScolaires: Array<keyof typeof GRADES>;
-        changementDepartements: { origine: string; destination: string }[];
-    }): Promise<SimulationAffectationHTSResult> {
+        sdrImportId,
+        etranger,
+    }: SimulationAffectationHTSTaskParameters): Promise<SimulationAffectationHTSResult> {
         if (departements.some((departement) => RegionsHorsMetropole.includes(department2region[departement]))) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_DEPARTEMENT_HORS_METROPOLE);
         }
 
-        const session = await this.sessionGateway.findById(sessionId);
-        if (!session) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
-        }
+        const { ligneDeBusList, sejoursList, pdrList } = await this.affectationService.loadAffectationData(sessionId);
 
-        // Chargement des données associés à la session
-        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionId(sessionId);
-        if (ligneDeBusList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "lignes de bus");
-        }
-        const sejoursList = await this.sejoursGateway.findBySessionId(sessionId);
-        if (sejoursList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "sejours");
-        }
-        const pdrList = await this.pointDeRassemblementGateway.findBySessionId(sessionId);
-        if (pdrList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "PDRs");
-        }
         const centreList = await this.centresGateway.findBySessionId(sessionId);
         if (centreList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "centres");
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun centres !");
         }
-        const allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
+        let allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
             sessionId,
             YOUNG_STATUS.VALIDATED,
             niveauScolaires,
             departements,
         );
-        if (allJeunes.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "jeunes");
+        if (!etranger) {
+            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite === "FRANCE");
         }
+        if (allJeunes.length === 0) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
+        }
+
+        const changementDepartements = await this.simulationAffectationHTSService.getChangementsDepartements(
+            sdrImportId,
+            centreList,
+            pdrList,
+            ligneDeBusList,
+        );
 
         // on sépare les jeunes intra dep des autres
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
             (acc, jeune) => {
                 if (
-                    ["oui", "true"].includes(jeune.handicapMemeDepartment!) &&
-                    jeune.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
+                    ["oui", "true"].includes(jeune.handicapMemeDepartement!) &&
+                    jeune.statutPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION
                 ) {
-                    acc.jeuneIntraDepartementList.push(jeune);
+                    acc.jeuneIntraDepartementList.push(jeune as JeuneAffectationModel);
                 } else {
-                    acc.jeunesList.push(jeune);
+                    const jeuneAaffecter = jeune as JeuneAffectationModel;
+                    acc.jeunesList.push(jeuneAaffecter);
                 }
                 return acc;
             },
-            { jeunesList: [] as JeuneModel[], jeuneIntraDepartementList: [] as JeuneModel[] },
+            { jeunesList: [] as JeuneAffectationModel[], jeuneIntraDepartementList: [] as JeuneAffectationModel[] },
+        );
+
+        this.logger.log(
+            `Jeunes a affectés : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
         );
 
         // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
@@ -120,7 +111,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
 
         // on recupere les jeunes que l on va devoir affecter
         const jeuneAttenteAffectationList = jeunesList.filter(
-            ({ statusPhase1 }) => statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            ({ statutPhase1 }) => statutPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
         );
 
         // on sépare pour chaque departement : les jeunes / pdr / lignes de bus / centre
@@ -161,6 +152,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                     jeunesList,
                     sejoursList,
                     ligneDeBusList,
+                    pdrList,
                 );
 
             const tauxRepartitionCentres = this.simulationAffectationHTSService.calculTauxRepartitionParCentre(
@@ -206,7 +198,16 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 results.analytics.tauxRepartitionCentreList = tauxRepartitionCentres;
                 results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
                 results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
+            } else {
+                this.logger.debug(`Worth simulation cost ${coutSimulation}`);
             }
+        }
+
+        if (results.analytics.selectedCost === 1e3) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                `Aucune simulation valide sur les ${NB_MAX_ITERATION} itérations`,
+            );
         }
 
         // Calcul des données pour le rapport excel
@@ -218,6 +219,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             pdrList,
             jeunesList,
             jeuneIntraDepartementList,
+            changementDepartements,
             results.analytics,
         );
 

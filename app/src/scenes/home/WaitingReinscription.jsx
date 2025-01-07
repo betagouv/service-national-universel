@@ -6,7 +6,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
-export default function WaitingReinscription({ reinscriptionOpen }) {
+export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
   const history = useHistory();
 
@@ -38,17 +38,13 @@ export default function WaitingReinscription({ reinscriptionOpen }) {
               </div>
               <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
               {textSecond && <div className="left-7 mt-3 text-[#738297] pr-16">{textSecond}</div>}
-              {reinscriptionOpen && (
-                <>
-                  <div className="flex w-fit flex-col items-stretch">
-                    <button
-                      className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-                      onClick={onClickEligibilte}>
-                      Vérifier mon éligibilité
-                    </button>
-                  </div>
-                </>
-              )}
+              <div className="flex w-fit flex-col items-stretch">
+                <button
+                  className="mt-4 rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
+                  onClick={onClickEligibilte}>
+                  Vérifier mon éligibilité
+                </button>
+              </div>
             </div>
             <img className="w-1/2 object-fill" src={Img3} />
           </div>
@@ -63,15 +59,11 @@ export default function WaitingReinscription({ reinscriptionOpen }) {
             </div>
             <div className="left-7 mt-4 text-black text-xl leading-7 font-bold">{textPrecision}</div>
             {textSecond && <div className="left-7 mt-3 text-[#738297]">{textSecond}</div>}
-            {reinscriptionOpen && (
-              <>
-                <button
-                  className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
-                  onClick={onClickEligibilte}>
-                  Vérifier mon éligibilité
-                </button>
-              </>
-            )}
+            <button
+              className="mt-3 w-full rounded-[10px] border-[1px] border-blue-600  bg-blue-600 py-2.5 px-3 text-sm leading-5 text-white transition duration-150 ease-in-out hover:bg-white hover:!text-blue-600"
+              onClick={onClickEligibilte}>
+              Vérifier mon éligibilité
+            </button>
           </div>
           <img src={Img2} />
         </div>
