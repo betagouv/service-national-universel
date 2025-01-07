@@ -227,6 +227,32 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
   }
 });
 
+router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: error.details });
+    }
+
+    const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    if (!equivalence) {
+      return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND, message: "Equivalence not found" });
+    }
+
+    if (req.user.role === "young" && equivalence.userId.toString() !== req.user._id.toString()) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Unauthorized to delete this equivalence" });
+    }
+
+    await equivalence.deleteOne();
+
+    return res.status(200).send({ ok: true, message: "Equivalence deleted successfully" });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "An error occurred while deleting equivalence" });
+  }
+});
+
 router.put("/militaryPreparation/status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({

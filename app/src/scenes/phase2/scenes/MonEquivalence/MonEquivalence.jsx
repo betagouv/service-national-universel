@@ -1,7 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
-import React from "react";
+import React, { useState } from "react";
+import { useHistory } from "react-router-dom";
 import { Link, useParams } from "react-router-dom";
-import { fetchEquivalence, fetchEquivalenceFile } from "../../engagement.repository";
+import { fetchEquivalence, fetchEquivalenceFile, deleteEquivalence } from "../../engagement.repository";
 import Loader from "@/components/Loader";
 import useAuth from "@/services/useAuth";
 import { HiChat, HiDownload, HiPaperClip, HiPencil } from "react-icons/hi";
@@ -10,12 +11,16 @@ import CopyButton from "@/components/buttons/CopyButton";
 import { EQUIVALENCE_STATUS } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import Container from "@/components/layout/Container";
+import { HiTrash } from "react-icons/hi";
+import ModalConfirm from "@/components/modals/ModalConfirm";
 
 export default function Equivalence() {
   const { young } = useAuth();
   const { id } = useParams();
   const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", id], queryFn: () => fetchEquivalence(young._id, id) });
-
+  const [isModalOpen, setModalOpen] = useState(false);
+  const [selectedId, setSelectedId] = useState(null);
+  const history = useHistory();
   async function handleClick(fileName) {
     try {
       await fetchEquivalenceFile(young._id, fileName);
@@ -24,22 +29,56 @@ export default function Equivalence() {
     }
   }
 
+  const handleDeleteClick = (equivalenceId) => {
+    setSelectedId(equivalenceId);
+    setModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    try {
+      await deleteEquivalence(young._id, selectedId);
+      toastr.success("L'équivalence a bien été supprimée");
+      setModalOpen(false);
+      history.push("/phase2/");
+    } catch (e) {
+      toastr.error("Une erreur s'est produite lors de la suppression de l'équivalence");
+    }
+  };
+
+  const handleCancel = () => {
+    setModalOpen(false);
+  };
+
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur lors du chargement de l'équivalence</div>;
 
   const action = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(data.status) ? (
-    <Link to={`${data._id}/edit`} className="w-full hover:bg-gray-50">
-      <div className="w-full border px-2 py-1.5 bg-white rounded-lg text-sm text-gray-500 text-center">
-        <HiPencil className="inline-block text-lg mr-1 text-gray-400 align-text-bottom" />
+    <>
+      <Link to={`${data._id}/edit`} className="flex items-center justify-center w-full h-10 border px-3 bg-white rounded-lg text-sm text-gray-500 hover:bg-gray-50">
+        <HiPencil className="text-lg mr-1 text-gray-400" />
         Modifier
-      </div>
-    </Link>
+      </Link>
+      <button
+        onClick={() => handleDeleteClick(data._id)}
+        className="ml-2 flex items-center justify-center w-14 h-10 md:px-3 border bg-white rounded-lg text-sm text-gray-500 hover:bg-gray-50">
+        <HiTrash className="text-lg text-gray-400" />
+      </button>
+    </>
   ) : null;
 
   const title = data.type === "Autre" ? data.desc : data.type;
 
   return (
     <Container title={title} subtitle="Engagement ajouté" action={action} backlink="/phase2/mes-engagements">
+      <ModalConfirm
+        isOpen={isModalOpen}
+        title="Confirmer la suppression"
+        message="Êtes-vous sûr de vouloir supprimer cette équivalence ? Cette action est irréversible."
+        onConfirm={handleConfirmDelete}
+        onCancel={handleCancel}
+        confirmText="Supprimer"
+        cancelText="Annuler"
+      />
       <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto pb-[6rem]">
         <h2 className="text-2xl md:text-3xl font-bold m-0">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
