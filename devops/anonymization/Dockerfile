@@ -4,16 +4,11 @@ WORKDIR /app
 
 RUN apk --no-cache add bash mongodb-tools jq curl util-linux
 
-# USER node
-
 COPY devops/anonymization devops/anonymization
 COPY api/src/anonymization api/src/anonymization
 
 WORKDIR /app/devops/anonymization
 
-# ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-# ENV NODE_PATH=/home/node/.npm-global/lib/node_modules
-# RUN < npm_globals.txt xargs npm install --global
 RUN npm ci
 
 ARG SOURCE_DATABASE_URI
