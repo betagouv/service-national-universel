@@ -194,11 +194,38 @@
     },
     {
       "label": "Run local containers",
-      "command": "docker-compose -f ./docker-compose.yml up -d",
+      "command": "docker compose up -d",
       "type": "shell",
       "problemMatcher": [],
       "options": {
         "cwd": "./devops/local"
+      }
+    },
+    {
+      "label": "Remove local containers",
+      "command": "docker compose down",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./devops/local"
+      }
+    },
+    {
+      "label": "Pull staging db",
+      "command": "source .env && export $(cut -d= -f1 .env) && ./pull_staging.sh",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./devops/local"
+      }
+    },
+    {
+      "label": "Get branch endpoints",
+      "command": "source .env && export $(cut -d= -f1 .env) && npm run endpoints",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
       }
     }
   ]
