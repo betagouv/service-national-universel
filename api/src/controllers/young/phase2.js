@@ -44,8 +44,6 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    value.missionDuration = value.missionDuration === null ? 84 : value.missionDuration;
-
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
@@ -162,17 +160,26 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+
+    let missionDuration;
+    if (value?.type === "Autre" || equivalence.type === "Autre") {
+      // Priorité à la durée de mission dans `value` si elle existe, sinon utiliser celle de `equivalence`
+      missionDuration = value?.missionDuration || equivalence.missionDuration;
+    } else {
+      // Si le type n'est pas "Autre", utiliser la valeur par défaut
+      missionDuration = PHASE2_TOTAL_HOURS;
+    }
+    console.log("missionduration", missionDuration);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     delete value.id;
     delete value.idEquivalence;
     equivalence.set({
       ...value,
-      // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
-      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+      missionDuration: missionDuration,
     });
     const data = await equivalence.save({ fromUser: req.user });
 
-    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
+    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED", "WAITING_VERIFICATION"].includes(value.status)) {
       await updateYoungPhase2StatusAndHours(young, req.user);
     }
 
