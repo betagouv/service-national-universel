@@ -18,6 +18,7 @@ RUN npm --global install
 
 RUN ls .
 RUN ls /home/node/.npm-global/lib/node_modules
+RUN npm ls -g
 
 # ARG SOURCE_DATABASE_URI
 # ARG TARGET_DATABASE_URI
