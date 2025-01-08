@@ -14,10 +14,8 @@ WORKDIR /app/devops/anonymization
 
 ENV PATH=/home/node/.npm-global/bin:$PATH
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
-RUN npm --global install
+RUN < npm_globals.txt xargs npm install --global
 
-RUN ls .
-RUN ls /home/node/.npm-global/lib/node_modules
 RUN npm ls -g
 
 # ARG SOURCE_DATABASE_URI
