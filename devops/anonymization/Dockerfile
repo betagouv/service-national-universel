@@ -2,6 +2,7 @@ FROM node:20.17-alpine AS base
 
 WORKDIR /app
 
+RUN apk --no-cache add bash
 # RUN apk --no-cache add bash mongodb-tools jq curl util-linux
 
 USER node
