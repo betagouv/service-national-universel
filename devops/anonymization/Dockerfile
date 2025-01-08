@@ -12,8 +12,9 @@ COPY api/src/anonymization api/src/anonymization
 
 WORKDIR /app/devops/anonymization
 
-ENV PATH=/home/node/.npm-global/bin:$PATH
+#ENV PATH=/home/node/.npm-global/bin:$PATH
 ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
+ENV NODE_PATH=/home/node/.npm-global/lib/node_modules
 RUN < npm_globals.txt xargs npm install --global
 
 RUN npm ls -g
