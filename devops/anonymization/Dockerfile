@@ -17,7 +17,7 @@ ENV NPM_CONFIG_PREFIX=/home/node/.npm-global
 RUN npm --global install
 
 RUN ls .
-RUN ls /home/node/.npm-global
+RUN ls /home/node/.npm-global/lib
 
 # ARG SOURCE_DATABASE_URI
 # ARG TARGET_DATABASE_URI
