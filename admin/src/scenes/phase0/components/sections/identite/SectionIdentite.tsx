@@ -137,7 +137,7 @@ export default function SectionIdentite({
     result = validateEmpty(youngFiltered, "lastName", errors) && result;
     result = validateEmpty(youngFiltered, "firstName", errors) && result;
 
-    if (user.role !== ROLES.ADMIN) {
+    if (!(user.role === ROLES.ADMIN && young.status === YOUNG_STATUS.IN_PROGRESS)) {
       result = validateEmpty(youngFiltered, "birthCity", errors) && result;
       result = validateEmpty(youngFiltered, "birthCityZip", errors) && result;
       result = validateEmpty(youngFiltered, "birthCountry", errors) && result;
