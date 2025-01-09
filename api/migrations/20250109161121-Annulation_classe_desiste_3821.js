@@ -9,7 +9,7 @@ module.exports = {
     const classe = await ClasseModel.findById(classeId);
     logger.info(`Found ${classe.name}...`);
     classe.set({ status: STATUS_CLASSE.CLOSED });
-    await classe.save({ fromUser: { firstName: "annulation des classes désistées 3804" } });
+    await classe.save({ fromUser: { firstName: "annulation des classes désistées 3821" } });
 
     const youngs = await YoungModel.find({ classeId: classe._id });
     logger.info(`Found ${youngs.length} youngs in class ${classe.name}...`);
@@ -25,7 +25,7 @@ module.exports = {
     const classe = await ClasseModel.findById(classeId);
     logger.info(`Found ${classe.length} classes...`);
     classe.set({ status: STATUS_CLASSE.WITHDRAWN });
-    await classe.save({ fromUser: { firstName: "annulation des classes désistées 3804" } });
+    await classe.save({ fromUser: { firstName: "annulation des classes désistées 3821" } });
 
     const youngs = await YoungModel.find({ classeId: classe._id });
     logger.info(`Found ${youngs.length} youngs in class ${classe.name}...`);
