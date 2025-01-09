@@ -1,0 +1,7 @@
+{
+  "name": "anonymization",
+  "version": "1.0.0",
+  "dependencies": {
+    "bson": "^4.7.2"
+  }
+}

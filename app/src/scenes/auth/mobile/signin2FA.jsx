@@ -16,16 +16,9 @@ const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN = DURATION_BEFORE_EXPIRATION_
 
 export default function Signin() {
   const params = queryString.parse(location.search);
-  const { redirect, disconnected, email } = params;
+  const { redirect, email } = params;
   const [loading, setLoading] = React.useState(false);
-  const [error, setError] = React.useState(
-    disconnected
-      ? {
-          text: "Votre session a expiré",
-          subText: "Merci de vous reconnecter.",
-        }
-      : {},
-  );
+  const [error, setError] = React.useState({});
   const history = useHistory();
   const [token2FA, setToken2FA] = React.useState("");
   const [rememberMe, setRememberMe] = React.useState(false);

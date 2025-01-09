@@ -12,11 +12,14 @@ export default function EngagementPrograms() {
     <>
       <h2 className="my-4 text-xl font-bold">Découvrez d’autres formes d’engagement</h2>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
-        {programs.slice(0, 4).map((program) => (
-          <div className="w-72 flex-none md:w-full" key={program._id}>
-            <EngagementCard program={program} />
-          </div>
-        ))}
+        {programs
+          .sort((a, b) => a.order - b.order)
+          .slice(0, 4)
+          .map((program) => (
+            <div className="w-72 flex-none md:w-full" key={program._id}>
+              <EngagementCard program={program} />
+            </div>
+          ))}
       </div>
       <div className="mt-6 flex justify-center">
         <Link
