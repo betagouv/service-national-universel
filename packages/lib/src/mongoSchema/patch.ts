@@ -1,27 +1,36 @@
 import mongoose, { InferSchemaType } from "mongoose";
 
-const userSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  email: { type: String, required: true },
+export const PatchUserSchema = {
+  email: { type: String },
   firstName: { type: String, required: true },
-  lastName: { type: String, required: true },
-});
+  lastName: { type: String },
+};
 
-const operationSchema = new mongoose.Schema({
+export const PatchOperationSchema = {
   op: { type: String, required: true },
   path: { type: String, required: true },
-  value: { type: String, required: true },
+  value: { type: String },
   originalValue: { type: String },
-});
+};
 
-export const PatchSchema = new mongoose.Schema({
-  _id: mongoose.Schema.Types.ObjectId,
-  ops: { type: [operationSchema], required: true },
-  ref: { type: mongoose.Schema.Types.ObjectId, required: true },
+export const PatchSchema = {
+  ops: { type: [PatchOperationSchema], required: true },
+  ref: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   modelName: { type: String, required: true },
-  user: { type: userSchema },
-  date: { type: Date, required: true },
-  __v: { type: Number, default: 0 },
+  user: { type: PatchUserSchema },
+  date: { type: Date, required: true, default: Date.now },
+};
+
+const schema = new mongoose.Schema({
+  ...PatchSchema,
+  user: {
+    ...PatchSchema.user,
+    type: new mongoose.Schema(PatchUserSchema),
+  },
+  ops: {
+    ...PatchSchema.ops,
+    type: [new mongoose.Schema(PatchOperationSchema)],
+  },
 });
 
-export type PatchType = InferSchemaType<typeof PatchSchema>;
+export type PatchType = InferSchemaType<typeof schema>;

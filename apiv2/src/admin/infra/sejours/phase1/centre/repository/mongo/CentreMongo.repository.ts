@@ -11,6 +11,7 @@ import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway"
 export class CentreRepository implements CentreGateway {
     constructor(
         @Inject(CENTRE_MONGOOSE_ENTITY) private centreMongooseEntity: Model<CentreDocument>,
+
         private readonly cls: ClsService,
     ) {}
 
