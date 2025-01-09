@@ -67,7 +67,7 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
 
     const contentData = csvBufferResponse.toString("base64");
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.CLE.IMPORT_DES_CLASSES, {
+    await sendTemplate(SENDINBLUE_TEMPLATES.IMPORT_AUTO, {
       emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email! }],
       attachment: [{ content: contentData, name: responseFileName }],
     });
