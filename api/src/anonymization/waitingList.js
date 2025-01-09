@@ -1,5 +1,5 @@
-const { generateRandomEmail, generateBirthdate } = require("../utils/anonymise");
-const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
+const { generateRandomEmail, generateBirthdate } = require("./utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("./utils/anonymise-model-fields");
 
 function anonymize(itemToAnonymize) {
   const whitelist = ["_id.$oid", "zip", "mail", "birthdateAt", "createdAt", "updatedAt", "__v"];

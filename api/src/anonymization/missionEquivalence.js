@@ -1,5 +1,5 @@
-const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("../utils/anonymise");
-const { anonymizeNonDeclaredFields } = require("../utils/anonymise-model-fields");
+const { generateRandomName, generateRandomEmail, generateAddress, starify } = require("./utils/anonymise");
+const { anonymizeNonDeclaredFields } = require("./utils/anonymise-model-fields");
 
 function anonymize(itemToAnonymize) {
   const whitelist = [
