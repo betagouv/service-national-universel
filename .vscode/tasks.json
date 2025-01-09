@@ -212,7 +212,7 @@
     },
     {
       "label": "Pull staging db",
-      "command": "source .env && export $(cut -d= -f1 .env) && ./pull_staging.sh",
+      "command": "source ../../.env && export $(cut -d= -f1 ../../.env) && ./pull_staging.sh",
       "type": "shell",
       "problemMatcher": [],
       "options": {
