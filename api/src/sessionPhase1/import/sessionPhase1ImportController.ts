@@ -39,14 +39,16 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
     const data = fs.readFileSync(filePath);
-    const fileHeaders = getHeadersFromXLSX(filePath);
-    checkColumnHeaders(fileHeaders);
 
     uploadFile(`file/si-snu/centres-des-sessions/export-${timestamp}/export-si-snu-sessions-${timestamp}.xlsx`, {
       data: data,
       encoding: "",
       mimetype: xlsxMimetype,
     });
+
+    // Check headers
+    const fileHeaders = getHeadersFromXLSX(filePath);
+    checkColumnHeaders(fileHeaders);
 
     const csvBuffer = XLSXToCSVBuffer(filePath);
     const parsedContent: SessionCohesionCenterCSV[] = await readCSVBuffer(csvBuffer);
