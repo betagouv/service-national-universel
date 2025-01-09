@@ -12,7 +12,7 @@ import { accessControlMiddleware } from "../../middlewares/accessControlMiddlewa
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { capture } from "../../sentry";
 import { importSessionsPhase1 } from "./sessionPhase1ImportService";
-import { sessionPhase1ImportValidator } from "./sessionPhase1ImportValidator";
+import { checkColumnHeaders } from "./sessionPhase1ImportValidator";
 import { SessionCohesionCenterCSV } from "./sessionPhase1Import";
 
 const router = express.Router();
@@ -40,9 +40,7 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
 
     const data = fs.readFileSync(filePath);
     const fileHeaders = getHeadersFromXLSX(filePath);
-    if (!sessionPhase1ImportValidator(fileHeaders)) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
+    checkColumnHeaders(fileHeaders);
 
     uploadFile(`file/si-snu/centres-des-sessions/export-${timestamp}/export-si-snu-sessions-${timestamp}.xlsx`, {
       data: data,

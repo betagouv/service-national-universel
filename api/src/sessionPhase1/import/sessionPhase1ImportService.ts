@@ -13,6 +13,7 @@ export interface SessionCohesionCenterImportReport {
   placesTotal?: number;
   action: string;
   comment: string;
+  warning?: string;
 }
 
 export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCenterCSV[]) => {
@@ -90,10 +91,12 @@ const createSession = async (
   foundCenter: CohesionCenterDocument,
   foundCohort: CohortDocument,
 ): Promise<SessionCohesionCenterImportReport> => {
+  let warning = "";
   if (sessionCenter.sessionPlaces > sessionCenter.cohesionCenterPlacesTotal) {
     logger.warn(
       `Session with wrong place number (${sessionCenter.sessionPlaces} > ${sessionCenter.cohesionCenterPlacesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`,
     );
+    warning = "session places > center places";
   }
 
   const foundSession = await SessionPhase1Model.findOne({ cohesionCenterId: foundCenter._id, cohortId: foundCohort.id });
@@ -111,6 +114,7 @@ const createSession = async (
       placesTotal: sessionCenter.sessionPlaces,
       action: "update nombre de places",
       comment: "session already exists",
+      warning,
     };
   }
 
@@ -141,6 +145,7 @@ const createSession = async (
     placesTotal: sessionCenter.sessionPlaces,
     action: "created",
     comment: "session created",
+    warning,
   };
 };
 const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCohort: CohortDocument) => {
