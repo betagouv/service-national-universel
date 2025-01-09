@@ -132,6 +132,6 @@ export const COHESION_CENTER_HEADERS = [
 export const checkColumnHeaders = (fileHeaders: string[]) => {
   const missingHeaders = COHESION_CENTER_HEADERS.filter((header) => !fileHeaders.includes(header));
   if (missingHeaders.length > 0) {
-    throw new Error(`Un fichier d'import de centre doit contenir les colonnes suivantes: ${missingHeaders.join(", ")}`);
+    throw new Error(missingHeaders.join(", "));
   }
 };

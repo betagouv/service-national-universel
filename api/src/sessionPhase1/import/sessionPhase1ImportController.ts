@@ -40,9 +40,7 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
 
     const data = fs.readFileSync(filePath);
     const fileHeaders = getHeadersFromXLSX(filePath);
-    if (!sessionPhase1ImportValidator(fileHeaders)) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
+    sessionPhase1ImportValidator(fileHeaders);
 
     uploadFile(`file/si-snu/centres-des-sessions/export-${timestamp}/export-si-snu-sessions-${timestamp}.xlsx`, {
       data: data,

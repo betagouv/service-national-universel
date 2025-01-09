@@ -127,7 +127,7 @@ describe("cohesionCenterImportService", () => {
     it("should throw error when headers are missing", () => {
       const fileHeaders = ["Matricule du Centre", "Désignation du centre"];
 
-      expect(() => checkColumnHeaders(fileHeaders)).toThrow("Un fichier d'import de centre doit contenir les colonnes suivantes:");
+      expect(() => checkColumnHeaders(fileHeaders)).toThrow("Adresse");
     });
   });
 });
