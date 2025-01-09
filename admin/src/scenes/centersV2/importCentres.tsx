@@ -10,7 +10,7 @@ import api from "@/services/api";
 import { Button, Container } from "@snu/ds/admin";
 
 import { toastr } from "react-redux-toastr";
-import { FILE_SIZE_LIMIT } from "./import";
+const FILE_SIZE_LIMIT = 5 * 1024 * 1024;
 
 export default function ImportCentres() {
   const [isUploading, setIsUploading] = useState(false);
