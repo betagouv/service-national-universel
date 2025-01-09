@@ -45,11 +45,18 @@ const SearchableSelect = ({
   );
 
   return (
-    <div className="text-[#161616]" style={{ fontFamily: "Marianne" }}>
+    <div
+      className="text-[#161616]"
+      style={{ fontFamily: "Marianne" }}
+      onTouchStart={(e) => e.stopPropagation()}
+      onTouchEnd={(e) => e.stopPropagation()}
+      onTouchMove={(e) => e.stopPropagation()}>
       <label className={`w-full my-2 ${correction || error ? "text-[#CE0500]" : "text-[#161616]}"}`}>
         {label}
         <Select
           styles={customStyles}
+          menuPortalTarget={document.body}
+          menuPosition="fixed"
           value={options.find((option) => option.value === value)}
           onChange={(option) => onChange(option.value)}
           options={isDebounced ? filteredOptions : options}
@@ -128,7 +135,18 @@ const customStyles = {
     return { ...provided, margin: 0, padding: 0 };
   },
   menu: (provided) => {
-    return { ...provided, margin: 0, padding: 0 };
+    return {
+      ...provided,
+      position: "absolute",
+      zIndex: 1000,
+      margin: 0,
+      padding: 0,
+      touchAction: "none",
+      isolation: "isolate",
+    };
+  },
+  menuPortal: (provided) => {
+    return { ...provided, zIndex: 1000 };
   },
   indicatorSeparator: () => {
     return { display: "none" };
