@@ -123,6 +123,7 @@ export const createPdr = async (pdr: PointDeRassemblementImportMapped): Promise<
 };
 
 const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?: PointDeRassemblementDocument) => {
+  // TODO: remove cohorts CLE 05/06 (legacy 2024)
   const cohorts = await CohortModel.find({ name: { $regex: "CLE 0[56]" } });
   if (cohorts.length !== 4) {
     throw Error("importPointDeRassemblement() - Cohortes CLE 05 et CLE 06 non trouvées");

@@ -392,7 +392,7 @@ export default function View(props) {
           </div>
         </div>
         {/* SEJOUR */}
-        {pdr?.cohorts?.length > 0 ? (
+        {/* {pdr?.cohorts?.length > 0 ? (
           <div className="flex flex-col gap-4">
             <div className="flex items-center justify-between">
               <Title>Par séjour</Title>
@@ -486,7 +486,7 @@ export default function View(props) {
               </div>
             </div>
           </div>
-        ) : null}
+        ) : null} */}
       </div>
       <ModalCreation
         isOpen={modalCreation.isOpen}
