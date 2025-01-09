@@ -1,8 +1,8 @@
 import React from "react";
 
 import { Header, Page } from "@snu/ds/admin";
-import ImportCentres from "./ImportCentres";
-import ImportCentresSessions from "./ImportCentresSession";
+import ImportCentres from "./ZImportCentres";
+import ImportCentresSessions from "./ZImportCentresSession";
 
 export default function Import() {
   return (
