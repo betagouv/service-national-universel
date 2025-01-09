@@ -84,8 +84,9 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
   };
 }
 
-async function createReferentIfNotExists(resp, structureId: string): Promise<ReferentDocument | null> {
-  if (await ReferentModel.exists({ email: resp.email })) return null;
+async function createReferentIfNotExists(resp, structureId: string): Promise<ReferentDocument> {
+  const currentReferent = await ReferentModel.findOne({ email: resp.email });
+  if (currentReferent) return currentReferent;
   const ref = new ReferentModel(formatResponsable(resp, structureId));
   return await ref.save({ fromUser });
 }
@@ -168,7 +169,7 @@ async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument
   let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
   if (!structure) {
     const newStructure = await createStructure(mission);
-    if (!newStructure) throw new Error("No structure created");
+    if (!newStructure) throw new Error("No structure created", { cause: `Structure could not be created for mission ${mission.clientId}` });
     structure = newStructure;
   }
 
@@ -179,7 +180,7 @@ async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument
 
   //Get referent mission
   let referent = await ReferentModel.findOne({ structureId: structure.id });
-  if (!referent) throw new Error("No referent found");
+  if (!referent) throw new Error("No referent found", { cause: `No referent found for structure ${structure.id}` });
 
   //Create or update mission
   const formattedMission = formatMission(mission, structure, referent);
