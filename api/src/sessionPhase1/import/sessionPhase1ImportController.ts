@@ -12,7 +12,7 @@ import { accessControlMiddleware } from "../../middlewares/accessControlMiddlewa
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { capture } from "../../sentry";
 import { importSessionsPhase1 } from "./sessionPhase1ImportService";
-import { sessionPhase1ImportValidator } from "./sessionPhase1ImportValidator";
+import { checkColumnHeaders } from "./sessionPhase1ImportValidator";
 import { SessionCohesionCenterCSV } from "./sessionPhase1Import";
 
 const router = express.Router();
@@ -39,14 +39,16 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
     const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
 
     const data = fs.readFileSync(filePath);
-    const fileHeaders = getHeadersFromXLSX(filePath);
-    sessionPhase1ImportValidator(fileHeaders);
 
     uploadFile(`file/si-snu/centres-des-sessions/export-${timestamp}/export-si-snu-sessions-${timestamp}.xlsx`, {
       data: data,
       encoding: "",
       mimetype: xlsxMimetype,
     });
+
+    // Check headers
+    const fileHeaders = getHeadersFromXLSX(filePath);
+    checkColumnHeaders(fileHeaders);
 
     const csvBuffer = XLSXToCSVBuffer(filePath);
     const parsedContent: SessionCohesionCenterCSV[] = await readCSVBuffer(csvBuffer);
@@ -65,7 +67,7 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
 
     const contentData = csvBufferResponse.toString("base64");
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.CLE.IMPORT_DES_CLASSES, {
+    await sendTemplate(SENDINBLUE_TEMPLATES.IMPORT_AUTO, {
       emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email! }],
       attachment: [{ content: contentData, name: responseFileName }],
     });
