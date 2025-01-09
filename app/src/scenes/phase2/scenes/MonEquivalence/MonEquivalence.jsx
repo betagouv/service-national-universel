@@ -103,7 +103,7 @@ export default function Equivalence() {
             Du {new Date(data.startDate).toLocaleDateString("fr-FR")} au {new Date(data.endDate).toLocaleDateString("fr-FR")}
           </p>
 
-          {data.missionDuration ? (
+          {data.missionDuration && data.type === "Autre" ? (
             <>
               <p className="text-gray-500 mt-3">Durée</p>
               <p>{data.missionDuration} h</p>
