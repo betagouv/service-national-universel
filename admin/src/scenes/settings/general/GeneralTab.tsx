@@ -401,6 +401,14 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                     error={error.instructionEndDate}
                   />
                 </div>
+                {cohort.type !== COHORT_TYPE.CLE && (
+                  <SimpleToggle
+                    label="Bascule manuelle de LC vers LP pour les référents regionaux après fermeture de l'instruction"
+                    disabled={isLoading || readOnly}
+                    value={!cohort.youngHTSBasculeLPDisabled}
+                    onChange={() => onCohortChange({ ...cohort, youngHTSBasculeLPDisabled: !cohort.youngHTSBasculeLPDisabled })}
+                  />
+                )}
               </div>
               {cohort.type !== COHORT_TYPE.CLE && (
                 <div className="flex flex-col gap-3">
