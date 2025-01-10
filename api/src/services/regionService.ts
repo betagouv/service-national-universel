@@ -44,3 +44,47 @@ export const mapRegionToTrigramme = (region: string | undefined): string | undef
       return undefined;
   }
 };
+
+export const mapTrigrammeToRegion = (region: string | undefined): string | undefined => {
+  switch (region) {
+    case "ARA":
+      return "Auvergne-Rhône-Alpes";
+    case "BFC":
+      return "Bourgogne-Franche-Comté";
+    case "BRE":
+      return "Bretagne";
+    case "CVL":
+      return "Centre-Val de Loire";
+    case "COR":
+      return "Corse";
+    case "GES":
+      return "Grand Est";
+    case "GUA":
+      return "Guadeloupe";
+    case "GUY":
+      return "Guyane";
+    case "HDF":
+      return "Hauts-de-France";
+    case "IDF":
+      return "Île-de-France";
+    case "REU":
+      return "La Réunion";
+    case "MAR":
+      return "Martinique";
+    case "MAY":
+      return "Mayotte";
+    case "NOR":
+      return "Normandie";
+    case "NAQ":
+      return "Nouvelle-Aquitaine";
+    case "OCC":
+      return "Occitanie";
+    case "PDL":
+      return "Pays de la Loire";
+    case "PAC":
+      return "Provence-Alpes-Côte d'Azur";
+    default:
+      logger.warn(`mapRegionToTrigramme() - No matching region for : ${region}`);
+      return undefined;
+  }
+};
