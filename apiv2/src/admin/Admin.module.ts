@@ -56,6 +56,7 @@ import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
+import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
 
 @Module({
     imports: [
@@ -118,6 +119,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
         ...jeuneGatewayProviders,
         ...referentielUseCaseProvider,
         ...serviceProvider,
+        ...referentielServiceProvider,
     ],
 })
 export class AdminModule {
