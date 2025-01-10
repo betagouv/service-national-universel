@@ -29,6 +29,14 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 import { historyProvider } from "./infra/history/historyProvider";
+import { ReferentielTaskService } from "./infra/task/ReferentielTask.service";
+import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
+import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
+import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
+import { ImporterRoutes } from "./core/referentiel/routes/useCase/ImporterRoutes";
+import { ImporterClasses } from "./core/referentiel/classe/useCase/ImporterClasses";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+import { ClockProvider } from "@shared/infra/Clock.provider";
 
 @Module({
     imports: [
@@ -61,14 +69,20 @@ import { historyProvider } from "./infra/history/historyProvider";
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         ...historyProvider,
+        ...classeMongoProviders,
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
+        { provide: ClasseGateway, useClass: ClasseRepository },
+        { provide: ClockGateway, useClass: ClockProvider },
         // add use case here
         AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
         ValiderAffectationHTS,
-        ...referentielUseCaseProvider,
+        // ...referentielUseCaseProvider,
+        ImporterRoutes,
+        ImporterClasses,
+        ReferentielTaskService,
     ],
 })
 export class AdminJobModule {

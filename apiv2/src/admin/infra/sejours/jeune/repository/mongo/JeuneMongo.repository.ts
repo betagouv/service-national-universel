@@ -18,6 +18,10 @@ export class JeuneRepository implements JeuneGateway {
         @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
+    async findByClasseId(classeId: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({ classeId });
+        return JeuneMapper.toModels(jeunes);
+    }
 
     async create(jeune: JeuneModel): Promise<JeuneModel> {
         const jeuneEntity = JeuneMapper.toEntity(jeune);
