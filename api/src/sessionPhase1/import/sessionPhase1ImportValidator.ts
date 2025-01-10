@@ -1,6 +1,15 @@
-import Joi from "joi";
-import { SessionCenterImportRoute } from "./sessionPhase1Import";
+export const SESSIONS_CENTER_HEADERS = [
+  "Session formule",
+  "Désignation du centre",
+  "Capacité d'accueil Maximale",
+  "Effectif d'individuels",
+  "Effectif d'élèves (CLE)",
+  "Code du centre pour la session",
+];
 
-export const sessionCohesionCenterImportBodySchema = Joi.object<SessionCenterImportRoute>({
-  sessionCenterFilePath: Joi.string().required(),
-});
+export const checkColumnHeaders = (fileHeaders: string[]) => {
+  const missingHeaders = SESSIONS_CENTER_HEADERS.filter((header) => !fileHeaders.includes(header));
+  if (missingHeaders.length > 0) {
+    throw new Error(missingHeaders.join(", "));
+  }
+};

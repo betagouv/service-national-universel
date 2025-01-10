@@ -10,9 +10,6 @@ export const mapSessionCohesionCentersForSept2024 = (sessionsCcohesionCenters: S
       sessionPlaces: getSessionPlaces(sessionCohesionCenter),
       sejourSnuId: sessionCohesionCenter["Code du centre pour la session"],
     };
-    if (sessionCohesionCenter["ID temporaire"]) {
-      return { _id: sessionCohesionCenter["ID temporaire"].toLowerCase(), ...sessionCohesionCenterWithoutId };
-    }
     return sessionCohesionCenterWithoutId;
   });
 };
