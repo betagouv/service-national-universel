@@ -22,8 +22,8 @@ export default function DocumentsPhase1({ young }) {
   // TODO: find a better way to implement feature flags
   if (young.status === YOUNG_STATUS.VALIDATED) {
     return (
-      <section>
-        <h3 className="text-base font-semibold">Document à préparer</h3>
+      <section id="documents">
+        <h3 className="text-lg font-semibold">Document à préparer</h3>
         <p className="text-sm mt-2">Complétez votre fiche sanitaire et préparez vos documents annexes.</p>
         <div className="bg-gray-50 rounded-lg p-3 w-full md:w-64 mt-4 flex flex-col gap-3 items-center">
           <FileIcon filled={true} icon="sanitaire" />
