@@ -1,15 +1,4 @@
-import { BasicRoute, ClasseType, CohesionCenterType, ReferentDto, RouteResponseBody } from "snu-lib";
-
-export interface CohesionCenterImportRoute extends BasicRoute {
-  cohesionCenterFilePath: string;
-}
-
-export interface ImportCohesionCenterRoute extends BasicRoute {
-  method: "POST";
-  path: "";
-  payload: CohesionCenterImportRoute;
-  response: RouteResponseBody<ClasseType>;
-}
+import { CohesionCenterType } from "snu-lib";
 
 export interface CohesionCenterCSV {
   "Matricule du Centre": string;

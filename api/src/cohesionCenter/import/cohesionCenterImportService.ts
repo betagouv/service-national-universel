@@ -1,10 +1,13 @@
+import fs from "fs";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel } from "../../models";
-import { readCSVBuffer } from "../../services/fileService";
-import { getFile } from "../../utils";
+import { XLSXToCSVBuffer, readCSVBuffer } from "../../services/fileService";
+import { uploadFile } from "../../utils";
 import { CohesionCenterCSV, CohesionCenterImportMapped } from "./cohesionCenterImport";
 import { mapCohesionCentersForSept2024 } from "./cohesionCenterImportMapper";
 
+export const xlsxMimetype = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet";
+export const buildPathOnBucket = (timestamp: string) => `file/si-snu/centres/export-${timestamp}`;
 export interface CohesionCenterImportReport {
   _id?: string;
   matricule: string | undefined;
@@ -13,10 +16,7 @@ export interface CohesionCenterImportReport {
   comment: string;
 }
 
-export const importCohesionCenter = async (centerFilePath: string) => {
-  const centerFile = await getFile(centerFilePath);
-  const centerToImport: CohesionCenterCSV[] = await readCSVBuffer<CohesionCenterCSV>(Buffer.from(centerFile.Body));
-
+export const importCohesionCenter = async (centerToImport: CohesionCenterCSV[]) => {
   const mappedCenters = mapCohesionCentersForSept2024(centerToImport);
   const filteredCenter = filterCenter(mappedCenters);
 
@@ -93,4 +93,45 @@ export const createCenter = async (center: CohesionCenterImportMapped): Promise<
     action: "created",
     comment: "Center created",
   };
+};
+
+export const uploadAndConvertFile = async (filePath: string, timestamp: string) => {
+  const data = fs.readFileSync(filePath);
+  uploadFile(`${buildPathOnBucket(timestamp)}/export-si-snu-centres-${timestamp}.xlsx`, {
+    data: data,
+    encoding: "",
+    mimetype: xlsxMimetype,
+  });
+  const csvBuffer = XLSXToCSVBuffer(filePath);
+  return readCSVBuffer<any>(csvBuffer);
+};
+
+export const COHESION_CENTER_HEADERS = [
+  "Matricule du Centre",
+  "Désignation du centre",
+  "Adresse",
+  "Complément adresse",
+  "Code postal",
+  "Commune",
+  "Commentaire interne sur l'enregistrement",
+  "Capacité d'accueil Maximale",
+  "Acceuil PMR",
+  "Avis conforme",
+  "Date avis commission hygiène & sécurité",
+  "Région académique",
+  "Académie",
+  "Département",
+  "Typologie du centre",
+  "Domaine d'activité",
+  "Organisme de rattachement",
+  "Date début validité de l'enregistrement",
+  "Date fin de validité de l'enregistrement",
+  "ID temporaire",
+];
+
+export const checkColumnHeaders = (fileHeaders: string[]) => {
+  const missingHeaders = COHESION_CENTER_HEADERS.filter((header) => !fileHeaders.includes(header));
+  if (missingHeaders.length > 0) {
+    throw new Error(`Un fichier d'import de centre doit contenir les colonnes suivantes: ${missingHeaders.join(", ")}`);
+  }
 };
