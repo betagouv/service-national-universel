@@ -4,6 +4,7 @@ import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortMode
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
 import { normalizeDepartmentName } from "snu-lib";
+import { mapTrigrammeToRegion } from "../../services/regionService";
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
   sessionFormule?: string;
@@ -29,7 +30,7 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
-    const zonedSnuId = getZonedSnuId(sessionCenter, foundCenter);
+    const zonedSnuId = getZonedSnuId(sessionCenter);
     const foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
     if (!foundCohort?._id) {
       processedSessionReport = await processCohortNotFound(sessionCenter, zonedSnuId);
@@ -40,8 +41,7 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
     // Somme des effectifs pour une même cohort
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
-      (sc) =>
-        sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc, foundCenter) === zonedSnuId,
+      (sc) => sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc) === zonedSnuId,
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
@@ -154,13 +154,14 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
   return foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
 };
 
-const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped, foundCenter: CohesionCenterDocument) => {
+const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped) => {
   if (sessionCenter.sessionFormule.includes("CLE")) {
     return sessionCenter.sessionFormule;
   }
-  // HTS
   let snuId = sessionCenter.sessionFormule;
-  const zone = region2zone[foundCenter.region!];
+  const codeRegion = sessionCenter.sejourSnuId.replaceAll(`_${sessionCenter.cohesionCenterMatricule}`, "").replaceAll(`${sessionCenter.sessionFormule}_`, "");
+  const region = mapTrigrammeToRegion(codeRegion);
+  const zone = region2zone[region!];
   if (zone?.length === 1) {
     snuId += `_${zone}`;
   }
