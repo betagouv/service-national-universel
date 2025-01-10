@@ -21,6 +21,7 @@ import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskGateway } from "@task/core/Task.gateway";
+import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
 
 const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
 
@@ -28,6 +29,7 @@ const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
 export class ImportReferentielController {
     constructor(
         private readonly routeService: ReferentielRoutesService,
+        private readonly referentielClasseService: ReferentielClasseService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
@@ -61,6 +63,14 @@ export class ImportReferentielController {
                     auteur,
                 });
                 return TaskMapper.toDto(importTask);
+            case ReferentielTaskType.IMPORT_CLASSES:
+                const importClasseTask = await this.referentielClasseService.import({
+                    fileName: file.originalname,
+                    buffer: file.buffer,
+                    mimetype: file.mimetype,
+                    auteur,
+                });
+                return TaskMapper.toDto(importClasseTask);
             default:
                 throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }

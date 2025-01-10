@@ -21,6 +21,13 @@ export class SejourRepository implements SejourGateway {
         @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
+    async findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null> {
+        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuId });
+        if (!sejour) {
+            return null;
+        }
+        return SejourMapper.toModel(sejour);
+    }
 
     async create(sejour: SejourModel): Promise<SejourModel> {
         const sejourEntity = SejourMapper.toEntity(sejour);

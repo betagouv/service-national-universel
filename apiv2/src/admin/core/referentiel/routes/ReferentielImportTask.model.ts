@@ -14,6 +14,7 @@ export interface ReferentielImportTaskParameters {
     fileKey: string;
     fileLineCount: number;
     auteur: ReferentielImportTaskAuthor;
+    folderPath: string;
 }
 
 export type ReferentielImportTaskResult = {
@@ -21,3 +22,4 @@ export type ReferentielImportTaskResult = {
 };
 
 export type ReferentielImportTaskModel = TaskModel<ReferentielImportTaskParameters, ReferentielImportTaskResult>;
+export type CreateReferentielImportTaskModel = Omit<ReferentielImportTaskModel, "id" | "createdAt" | "updatedAt">;
