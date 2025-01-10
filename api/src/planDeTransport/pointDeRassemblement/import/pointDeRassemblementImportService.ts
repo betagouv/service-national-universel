@@ -123,29 +123,12 @@ export const createPdr = async (pdr: PointDeRassemblementImportMapped): Promise<
 };
 
 const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?: PointDeRassemblementDocument) => {
-  const cohorts = await CohortModel.find({ name: { $regex: "CLE 0[56]" } });
-  if (cohorts.length !== 4) {
-    throw Error("importPointDeRassemblement() - Cohortes CLE 05 et CLE 06 non trouvées");
-  }
-  let cohortNames = foundPdr?.cohorts || [];
-  cohortNames = [...new Set([...cohortNames, ...cohorts.map(({ name }) => name)])];
+  const cohortNames = foundPdr?.cohorts || [];
 
   let cohortIds = foundPdr?.cohortIds || [];
-  cohortIds = [...new Set([...cohortIds, ...cohorts.map(({ _id }) => _id)])];
+  cohortIds = [...new Set([...cohortIds])];
 
-  let complementAddress = foundPdr?.complementAddress || [];
-  if (pdr.complementAddress) {
-    complementAddress = [
-      ...new Set([
-        ...complementAddress,
-        ...cohorts.map(({ name: cohort, _id: cohortId }) => ({
-          cohort,
-          cohortId,
-          complement: pdr.complementAddress,
-        })),
-      ]),
-    ];
-  }
+  const complementAddress = foundPdr?.complementAddress || [];
 
   const code = foundPdr?.code || pdr.matricule;
 

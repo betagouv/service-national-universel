@@ -104,7 +104,7 @@ const ListPoints = ({ user }) => {
   const [paramData, setParamData] = React.useState({ page: 0 });
   const [size, setSize] = useState(10);
   const filterArray: Filter[] = [
-    { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
+    // { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     { title: "Région", name: "region", missingLabel: "Non renseignée", defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [] },
     {
       title: "Département",
@@ -145,7 +145,7 @@ const ListPoints = ({ user }) => {
                   // @ts-ignore
                   Identifiant: item._id.toString(),
                   Code: item.code,
-                  Cohortes: item?.cohorts.map((e) => e).join(", "),
+                  // Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,
                   Ville: item.city,
@@ -182,7 +182,6 @@ const ListPoints = ({ user }) => {
             <hr />
             <div className="flex items-center py-3 px-4 text-xs uppercase text-gray-400">
               <div className="w-[40%]">Points de rassemblements</div>
-              <div className="w-[60%]">Cohortes</div>
             </div>
             {data?.map((hit) => {
               return <Hit key={hit._id} hit={hit} />;
@@ -197,7 +196,7 @@ const ListPoints = ({ user }) => {
 
 const Hit = ({ hit }) => {
   const history = useHistory();
-  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  // const cohorts = useSelector((state: CohortState) => state.Cohorts);
   return (
     <>
       <hr />
@@ -211,7 +210,7 @@ const Hit = ({ hit }) => {
             {hit.department}, {hit.region}
           </div>
         </div>
-        <div className="flex w-[60%] flex-wrap items-center gap-2">
+        {/* <div className="flex w-[60%] flex-wrap items-center gap-2">
           {hit.cohorts?.map((cohortName) => {
             const cohort = cohorts?.find((e) => e.name === cohortName);
             // @ts-ignore
@@ -227,7 +226,7 @@ const Hit = ({ hit }) => {
               </div>
             );
           })}
-        </div>
+        </div> */}
       </div>
     </>
   );
