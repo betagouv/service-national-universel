@@ -12,7 +12,7 @@ import { EQUIVALENCE_STATUS } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import Container from "@/components/layout/Container";
 import { HiTrash } from "react-icons/hi";
-import ModalConfirm from "@/components/modals/ModalConfirm";
+import ResponsiveModal from "@/components/modals/ResponsiveModal";
 
 export default function Equivalence() {
   const { young } = useAuth();
@@ -70,15 +70,13 @@ export default function Equivalence() {
 
   return (
     <Container title={title} subtitle="Engagement ajouté" action={action} backlink="/phase2/mes-engagements">
-      <ModalConfirm
+      <ResponsiveModal
         isOpen={isModalOpen}
-        title="Confirmer la suppression"
-        message="Êtes-vous sûr de vouloir supprimer cette équivalence ? Cette action est irréversible."
+        title="Voulez-vous supprimer cet engagement ?"
         onConfirm={handleConfirmDelete}
-        onCancel={handleCancel}
-        confirmText="Supprimer"
-        cancelText="Annuler"
-      />
+        setOpen={setModalOpen}
+        confirmText="Oui, supprimer"
+        cancelText="Annuler"></ResponsiveModal>
       <div className="mt-[2rem] md:mt-0 max-w-3xl mx-auto pb-[6rem]">
         <h2 className="text-2xl md:text-3xl font-bold m-0">Statut</h2>
         <div className="mt-4 px-4 py-3 border rounded-xl w-full">
