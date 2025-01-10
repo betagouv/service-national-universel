@@ -198,7 +198,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
           "HEURE DEPART DU PDR 1": "09:00",
           "TYPE DE TRANSPORT PDR 2": TRANSPORT_MODES.TRAIN,
           "HEURE DEPART DU PDR 2": "10:00",
-        }
+        },
       ],
     };
     const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
