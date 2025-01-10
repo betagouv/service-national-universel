@@ -252,6 +252,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           readonly={user.role === ROLES.HEAD_CENTER}
+          user={user}
         />
         <SectionParents
           young={young}
