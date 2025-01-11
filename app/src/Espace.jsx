@@ -1,6 +1,6 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { getCohort } from "./utils/cohorts";
+import useAuth from "./services/useAuth";
+import useCohort from "./services/useCohort";
 import API from "./services/api";
 import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
@@ -34,8 +34,8 @@ const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+  const { young } = useAuth();
+  const { cohort } = useCohort();
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -69,7 +69,7 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (shouldForceRedirectToEmailValidation(young)) {
+  if (shouldForceRedirectToEmailValidation(young, cohort)) {
     return <Redirect to="/preinscription/email-validation" />;
   }
 

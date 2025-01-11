@@ -4,10 +4,8 @@ import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
 import { YOUNG_SOURCE, YoungType } from "snu-lib";
-import { fetchCohort } from "@/utils/cohorts";
 import { displaySignupToast } from "@/utils";
 import { AuthState } from "@/redux/auth/reducer";
-import { setCohort } from "@/redux/cohort/actions";
 
 export const useAuth = () => {
   const dispatch = useDispatch();
@@ -26,11 +24,7 @@ export const useAuth = () => {
 
   const login = async (user?: YoungType) => {
     if (!user) return history.push("/auth");
-    dispatch(setYoung(user));
-    const cohort = await fetchCohort(user.cohortId);
-    if (cohort) {
-      dispatch(setCohort(cohort));
-    }
+    await dispatch(setYoung(user));
     displaySignupToast(user);
   };
 

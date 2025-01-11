@@ -1,6 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import { HiArrowRight } from "react-icons/hi";
 import { CohortGroupType, CohortType, getCohortPeriod, getCohortYear } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
@@ -14,7 +14,6 @@ import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfir
 import usePermissions from "@/hooks/usePermissions";
 import { useLocation } from "react-router-dom";
 import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
-import useCohort from "@/services/useCohort";
 
 export default function ChangeSejour() {
   const groups = useCohortGroups();

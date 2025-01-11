@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
 import { getCohortPeriod, getCohortYear } from "snu-lib";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import Error from "../../../components/error";
 import { knowledgebaseURL } from "../../../config";
 import { setYoung } from "../../../redux/auth/actions";
@@ -18,6 +18,7 @@ import Loader from "@/components/Loader";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
+  const { cohort } = useCohort();
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -61,13 +62,15 @@ export default function StepConsentements() {
 
   if (isLoading) return <Loader />;
 
-  const cohortYear = isCLE ? classe?.schoolYear : getCohortYear(getCohort(young.cohort));
+  const cohortYear = isCLE ? classe?.schoolYear : getCohortYear(cohort);
 
   return (
     <>
       <DSFRContainer
         title="Apporter mon consentement"
-        supportLink={`${knowledgebaseURL}${isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"}`}
+        supportLink={`${knowledgebaseURL}${
+          isCLE ? "/base-de-connaissance/cle-je-minscris-et-donne-mon-consentement" : "/base-de-connaissance/je-minscris-et-donne-mon-consentement"
+        }`}
         supportEvent="Phase0/aide inscription - consentement">
         {error?.text && <Error {...error} onClose={() => setError({})} />}
         <div className="mt-4 flex flex-col gap-4 pb-2">
@@ -101,7 +104,7 @@ export default function StepConsentements() {
                       <>M&apos;inscris au séjour de cohésion </>
                     ) : (
                       <>
-                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(getCohort(young.cohort))}</strong> sous réserve de places disponibles{" "}
+                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(young.cohort)}</strong> sous réserve de places disponibles{" "}
                       </>
                     )}
                     et m&apos;engage à en respecter le{" "}

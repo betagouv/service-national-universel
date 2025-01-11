@@ -39,9 +39,13 @@ export const canYoungResumePhase1 = (y: YoungType): boolean => {
 };
 
 export async function fetchCohort(cohortId: string): Promise<CohortType> {
-  const res = await fetch(`${apiURL}/cohort/${cohortId}/public`);
-  if (!res.ok) {
-    throw new Error("Unable to fetch cohort");
-  }
-  return res.json();
+  return fetch(`${apiURL}/cohort/${cohortId}/public`)
+    .then((res) => res.json())
+    .catch((error) => {
+      throw new Error(error);
+    })
+    .then((res) => {
+      if (!res.ok) throw new Error("Unable to fetch cohort");
+      return res.data;
+    });
 }

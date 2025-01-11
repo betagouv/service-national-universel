@@ -26,6 +26,7 @@ import useAuth from "./services/useAuth";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
+import store from "./redux/store";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -65,7 +66,8 @@ function App() {
 
       await login(user);
 
-      if (shouldForceRedirectToEmailValidation(user)) {
+      const { cohort } = store.getState().Cohort;
+      if (shouldForceRedirectToEmailValidation(user, cohort)) {
         history.push("/preinscription/email-validation");
       }
     } catch (e) {

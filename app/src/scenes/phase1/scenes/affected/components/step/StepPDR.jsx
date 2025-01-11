@@ -5,7 +5,7 @@ import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
 import { capture } from "../../../../../../sentry";
 import api from "../../../../../../services/api";
-import { getMeetingHour, getReturnHour, isCle } from "snu-lib";
+import { getMeetingHour, getReturnHour } from "snu-lib";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
@@ -14,7 +14,7 @@ import useCohort from "@/services/useCohort";
 
 export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
   const index = 1;
-  const { young } = useAuth();
+  const { young, isCLE } = useAuth();
   const { pdrChoiceExpired, pdrChoiceLimitDate } = useCohort();
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);
@@ -46,7 +46,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
     setOpen(!open);
   }
 
-  if (isCle(young)) {
+  if (isCLE) {
     return (
       <StepCard variant="done" index={index}>
         <p className="font-semibold text-sm">Confirmation du point de rendez-vous : vous n'avez rien à faire</p>
@@ -73,7 +73,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          {!pdrChoiceExpired(young.cohort) && (
+          {!pdrChoiceExpired && (
             <div>
               <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
                 Modifier
@@ -81,7 +81,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
             </div>
           )}
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
+        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
       </StepCard>
     );
   }
@@ -104,7 +104,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
               </div>
             </div>
           </div>
-          {!pdrChoiceExpired(young.cohort) && (
+          {!pdrChoiceExpired && (
             <div>
               <button onClick={handleOpen} className="w-full text-sm border hover:bg-gray-100 py-2 px-4 shadow-sm rounded">
                 Modifier
@@ -112,7 +112,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
             </div>
           )}
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
+        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
       </StepCard>
     );
   }
@@ -126,7 +126,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
     );
   }
 
-  if (pdrChoiceExpired(young.cohort)) {
+  if (pdrChoiceExpired) {
     return (
       <StepCard variant="disabled" index={index}>
         <p className="font-semibold text-gray-500">Date de choix dépassée</p>
@@ -141,7 +141,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
         <div>
           <p className="font-semibold leading-tight">Confirmez votre point de rassemblement</p>
           <p className="text-sm mt-2 text-gray-500">
-            À faire avant le <strong>{pdrChoiceLimitDate(young.cohort)}</strong>.
+            À faire avant le <strong>{pdrChoiceLimitDate}</strong>.
           </p>
         </div>
         <div>
@@ -150,7 +150,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
           </button>
         </div>
       </div>
-      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} pdrChoiceExpired={pdrChoiceExpired(young.cohort)} />
+      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
     </StepCard>
   );
 }

@@ -1,5 +1,4 @@
 import React from "react";
-import { useSelector } from "react-redux";
 import { Redirect, useParams } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 
@@ -20,7 +19,7 @@ import { YOUNG_STATUS, inscriptionCreationOpenForYoungs } from "snu-lib";
 import FutureCohort from "./FutureCohort";
 import InscriptionClosed from "./InscriptionClosed";
 import { knowledgebaseURL } from "../../config";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import useAuth from "@/services/useAuth";
 import Help from "./components/Help";
 import Stepper from "@/components/dsfr/ui/Stepper";
@@ -103,9 +102,8 @@ const StepCorrection = () => {
 };
 
 export default function Index() {
-  const young = useSelector((state) => state.Auth.young);
-  const { isCLE } = useAuth();
-  const cohort = getCohort(young.cohort);
+  const { young, isCLE } = useAuth();
+  const { cohort } = useCohort();
 
   if (!young) return <Redirect to="/preinscription" />;
   if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && young.cohort === "à venir") {
