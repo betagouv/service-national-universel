@@ -274,8 +274,16 @@ export function shouldForceRedirectToReinscription(young) {
   return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
 }
 
+export function shouldRedirectToReinscription(young) {
+  if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
+    return false;
+  }
+  return young.cohort === "à venir";
+}
+
 export function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
   if (window.location.pathname.includes("/changer-de-sejour")) return false;
+  if (young.cohort === "à venir") return false;
   return (
     [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
     (isInscriptionModificationOpen &&

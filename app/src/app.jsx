@@ -104,7 +104,7 @@ function App() {
               <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
               <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
               <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-              <SentryRoute path="/besoin-d-aide" component={Contact} />
+              <SentryRoute path="/besoin-d-aide" exact component={Contact} />
               {!young && <SentryRoute path="/auth" component={Auth} />}
               <SentryRoute path="/public-engagements" component={AllEngagements} />
               <SentryRoute path="/merci" component={Thanks} />

@@ -1,4 +1,4 @@
-import { SessionPhase1Type } from "snu-lib";
+import { region2zone, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
 import { readCSVBuffer } from "../../services/fileService";
@@ -9,6 +9,7 @@ import { normalizeDepartmentName } from "snu-lib";
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
   sessionFormule?: string;
+  sessionSnuId?: string;
   cohesionCenterId: string | undefined;
   cohesionCenterMatricule: string | undefined;
   action: string;
@@ -31,14 +32,29 @@ export const importCohesionCenter = async (sessionCenterFilePath: string) => {
       report.push(processedSessionReport);
       continue;
     }
-    const foundCohort = await CohortModel.findOne({ snuId: sessionCenter.sessionFormule });
+    const zonedSnuId = getZonedSnuId(sessionCenter, foundCenter);
+    const foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
     if (!foundCohort?._id) {
-      processedSessionReport = await processCohortNotFound(sessionCenter);
+      processedSessionReport = await processCohortNotFound(sessionCenter, zonedSnuId);
       report.push(processedSessionReport);
       continue;
     }
 
-    processedSessionReport = await createSession(sessionCenter, foundCenter, foundCohort);
+    // Somme des effectifs pour une même cohort
+    const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
+    const multiSessions = mappedSessionCenter.filter(
+      (sc) =>
+        sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc, foundCenter) === zonedSnuId,
+    );
+    if (multiSessions.length > 1) {
+      const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
+      logger.warn(
+        `Multiple sessions found (${multiSessions.length}) for ${zonedSnuId} (${sessionCenter.cohesionCenterMatricule}): ${sessionPlaces} > ${sessionCenter.sessionPlaces}.`,
+      );
+      sessionCenterUpdated.sessionPlaces = sessionPlaces;
+    }
+
+    processedSessionReport = await createSession(sessionCenterUpdated, foundCenter, foundCohort);
     if (processedSessionReport.action === "created") {
       await addCohortToCohesionCenter(foundCenter, foundCohort);
     }
@@ -60,11 +76,12 @@ const processCenterNotFound = (sessionCenter: SessionCohesionCenterImportMapped)
   };
 };
 
-const processCohortNotFound = (sessionCenter: SessionCohesionCenterImportMapped): SessionCohesionCenterImportReport => {
+const processCohortNotFound = (sessionCenter: SessionCohesionCenterImportMapped, zonedSnuId: string): SessionCohesionCenterImportReport => {
   logger.warn(`Cohort not found for name ${sessionCenter.sessionFormule}`);
   return {
     sessionId: undefined,
     sessionFormule: sessionCenter.sessionFormule,
+    sessionSnuId: zonedSnuId,
     cohesionCenterId: undefined,
     cohesionCenterMatricule: sessionCenter.cohesionCenterMatricule,
     action: "nothing",
@@ -77,12 +94,20 @@ const createSession = async (
   foundCenter: CohesionCenterDocument,
   foundCohort: CohortDocument,
 ): Promise<SessionCohesionCenterImportReport> => {
+  if (sessionCenter.sessionPlaces > sessionCenter.cohesionCenterPlacesTotal) {
+    logger.warn(
+      `Session with wrong place number (${sessionCenter.sessionPlaces} > ${sessionCenter.cohesionCenterPlacesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`,
+    );
+  }
+
   const foundSession = await SessionPhase1Model.findOne({ cohesionCenterId: foundCenter._id, cohortId: foundCohort.id });
   if (foundSession?._id) {
+    // TODO: mettre à jour le nombre de places disponibles si il a évolué
     logger.warn(`Session already exists for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
     return {
       sessionId: foundSession._id,
       sessionFormule: sessionCenter.sessionFormule,
+      sessionSnuId: foundSession.sejourSnuId,
       cohesionCenterId: foundCenter._id,
       cohesionCenterMatricule: sessionCenter.cohesionCenterMatricule,
       action: "nothing",
@@ -122,4 +147,17 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
   foundCenter.cohorts.push(foundCohort.name);
   foundCenter.cohortIds.push(foundCohort._id.toString());
   return foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
+};
+
+const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped, foundCenter: CohesionCenterDocument) => {
+  if (sessionCenter.sessionFormule.includes("CLE")) {
+    return sessionCenter.sessionFormule;
+  }
+  // HTS
+  let snuId = sessionCenter.sessionFormule;
+  const zone = region2zone[foundCenter.region!];
+  if (zone?.length === 1) {
+    snuId += `_${zone}`;
+  }
+  return snuId;
 };
