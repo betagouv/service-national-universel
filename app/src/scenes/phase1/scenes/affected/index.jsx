@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
-import { isCle, transportDatesToString, youngCanChangeSession, getDepartureDate, getReturnDate } from "snu-lib";
+import { isCle, youngCanChangeSession, getDepartureDate, getReturnDate, getCohortPeriod } from "snu-lib";
 import { getCohort } from "../../../../utils/cohorts";
 import api from "../../../../services/api";
 import { AlertBoxInformation } from "../../../../components/Content";
@@ -16,6 +16,9 @@ import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
 import { areAllStepsDone } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
+import HomeContainer from "@/components/layout/HomeContainer";
+import HomeHeader from "@/components/layout/HomeHeader";
+import hero from "../../../../assets/hero/home.png";
 
 export default function Affected() {
   const { young } = useAuth();
@@ -29,6 +32,8 @@ export default function Affected() {
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
   const data = { center, meetingPoint, session, departureDate, returnDate };
+
+  const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
 
   useEffect(() => {
     if (!young.sessionPhase1Id) return;
@@ -66,8 +71,12 @@ export default function Affected() {
   }
 
   return (
-    <div className="md:m-8">
-      <div className="relative mb-4 flex max-w-[80rem] flex-col justify-between overflow-hidden bg-gray-50 py-8 md:mx-auto md:rounded-xl md:bg-white md:shadow-nina">
+    <HomeContainer>
+      <HomeHeader title={title} img={hero}>
+        {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
+
+        <CenterInfo center={center} />
+
         {showInfoMessage && (
           <AlertBoxInformation
             title="Information"
@@ -75,40 +84,28 @@ export default function Affected() {
             onClose={() => setShowInfoMessage(false)}
           />
         )}
+      </HomeHeader>
 
-        <header className="items-between order-1 flex flex-col px-4 py-4 md:!px-8 lg:flex-row lg:justify-between lg:!px-16">
+      {areAllStepsDone(young) && (
+        <div className="mt-4 gap-6 grid grid-cols-1 md:grid-cols-3">
           <div>
-            <h1 className="text-2xl leading-[2.5rem] md:text-5xl md:leading-[3.5rem]">
-              Mon séjour de cohésion
-              <br />
-              <strong>{transportDatesToString(departureDate, returnDate)}</strong>
-            </h1>
-            {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
+            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
           </div>
-
-          <CenterInfo center={center} />
-        </header>
-
-        {areAllStepsDone(young) && (
-          <div className="order-3">
-            <div className="flex-none gap-6 grid grid-cols-1 md:grid-cols-3">
-              <div>
-                <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
-              </div>
-              <div className="col-span-2">
-                <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data} />
-              </div>
-            </div>
+          <div className="col-span-2">
+            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data} />
           </div>
-        )}
+        </div>
+      )}
 
+      <div className="mt-8 grid grid-cols-1 gap-12">
         <StepsAffected data={data} />
-        {!isCle(young) && <FaqAffected className={`${areAllStepsDone(young) ? "order-3" : "order-4"}`} />}
-      </div>
 
-      <div className="flex justify-end py-4 pr-8">
-        <JDMA id="3504" />
+        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCle(young) && <FaqAffected />}</div>
+
+        <div className="flex justify-end py-4 pr-8">
+          <JDMA id="3504" />
+        </div>
       </div>
-    </div>
+    </HomeContainer>
   );
 }
