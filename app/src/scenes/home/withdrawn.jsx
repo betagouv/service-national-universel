@@ -1,7 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import useAuth from "@/services/useAuth";
-import { HeroContainer, Hero, Content, Separator, VioletButton } from "../../components/Content";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../assets/hero/home.png";
