@@ -16,6 +16,6 @@ export default function Phase1() {
   if (!young || !permissionPhase1(young)) return <Redirect to="/" />;
   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) return <Done />;
   if (young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED && young.cohesion2020Step !== "DONE") return <Cancel />;
-  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && !cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) return <Affected />;
+  if (young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && cohortAssignmentAnnouncementsIsOpenForYoung(young.cohort)) return <Affected />;
   return <WaitingAffectation young={young} />;
 }

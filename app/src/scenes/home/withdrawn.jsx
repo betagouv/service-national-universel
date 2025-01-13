@@ -1,33 +1,30 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { HeroContainer, Hero, Content, Separator, VioletButton } from "../../components/Content";
+import HomeContainer from "@/components/layout/HomeContainer";
+import HomeHeader from "@/components/layout/HomeHeader";
+import hero from "../../assets/hero/home.png";
 import { isCle, translate } from "../../utils";
 import plausibleEvent from "../../services/plausible";
 
 export default function Withdrawn() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const title = `${young.firstName}, dommage que vous nous quittiez !`;
 
   return (
-    <HeroContainer>
-      <Hero>
-        <Content>
-          <h1>
-            <strong>{young.firstName},</strong> dommage que vous nous quittiez !
-          </h1>
-          <p>Votre désistement du SNU {isCle(young) && "dans le cadre des classes engagées "} a bien été pris en compte.</p>
-          <p>Si l&apos;engagement vous donne envie, vous trouverez ci-dessous des dispositifs qui pourront vous intéresser.</p>
-          <p>
-            Bonne continuation, <br />
-            Les équipes du Service National Universel
+    <HomeContainer>
+      <HomeHeader title={title} img={hero}>
+        <p className="mt-6 leading-relaxed text-gray-500">
+          Votre désistement du SNU {isCle(young) && "dans le cadre des classes engagées "} a bien été pris en compte. Si l&apos;engagement vous donne envie, vous trouverez
+          ci-dessous des dispositifs qui pourront vous intéresser.
+        </p>
+        <Link to="/les-programmes" onClick={() => plausibleEvent("CTA désisté - Autres possibilités d'engagement", { statut: translate(young.status) })}>
+          <p className="mt-6 text-center md:w-fit rounded-md bg-blue-600 py-2 px-3 text-sm text-white transition duration-150 ease-in-out hover:bg-blue-800">
+            Consulter les autres possibilités d&apos;engagement
           </p>
-          <Separator />
-          <Link to="/les-programmes" onClick={() => plausibleEvent("CTA désisté - Autres possibilités d'engagement", { statut: translate(young.status) })}>
-            <VioletButton>Consulter les autres possibilités d&apos;engagement</VioletButton>
-          </Link>
-        </Content>
-        <div className="thumb" />
-      </Hero>
-    </HeroContainer>
+        </Link>
+      </HomeHeader>
+    </HomeContainer>
   );
 }
