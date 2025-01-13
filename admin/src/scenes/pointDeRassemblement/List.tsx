@@ -113,6 +113,7 @@ const ListPoints = ({ user }) => {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
   ];
 
   return (
