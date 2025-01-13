@@ -29,7 +29,11 @@ export function createFormDataForFileUpload(arr: any[], properties) {
   for (const file of files) {
     // eslint-disable-next-line no-control-regex
     const name = encodeURIComponent(file.name.replace(/['/:*?"<>|\x00-\x1F\x80-\x9F]/g, "_").trim());
-    Object.defineProperty(file, "name", { value: name });
+    try {
+      Object.defineProperty(file, "name", { value: name, configurable: true });
+    } catch (e) {
+      console.log(e);
+    }
     // We add each file under a different key in order to not squash them
     formData.append(file.name, file, name);
   }
