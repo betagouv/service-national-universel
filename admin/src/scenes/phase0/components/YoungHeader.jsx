@@ -4,10 +4,10 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import {
   canManageMig,
+  canValidateYoungToLP,
   canViewEmailHistory,
   canViewNotes,
   isCle,
-  isReferentDep,
   ROLES,
   SENDINBLUE_TEMPLATES,
   translate,
@@ -46,7 +46,6 @@ import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
-import { isAfter } from "date-fns";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -70,10 +69,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            if (isReferentDep(user.role) && cohortYoung?.instructionEndDate && isAfter(new Date(), new Date(cohortYoung.instructionEndDate))) {
-              options = [YOUNG_STATUS.WITHDRAWN];
-            } else {
+            if (canValidateYoungToLP(user, cohortYoung)) {
               options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            } else {
+              options = [YOUNG_STATUS.WITHDRAWN];
             }
             break;
           case YOUNG_STATUS.WITHDRAWN:
