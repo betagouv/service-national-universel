@@ -8,7 +8,7 @@ export default function JDMDone({ cohort }) {
   const [isCensusDoneOpen, setIsCensusDoneOpen] = React.useState(false);
   const [isCensusNotDoneOpen, setIsCensusNotDoneOpen] = React.useState(false);
   return (
-    <div className="mt-8 mb-16 space-y-3 md:mt-0 md:mb-8 md:px-10">
+    <div className="space-y-3">
       <div className="flex justify-center">
         <Unlock />
       </div>

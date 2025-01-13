@@ -1,7 +1,7 @@
 import React from "react";
 import { getCohortPeriod } from "snu-lib";
 import { Link } from "react-router-dom";
-import hero from "../../assets/hero/waiting-affectation.png";
+import hero from "../../assets/hero/phase1.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
 import DiscoverStay from "../../assets/icons/DiscoverStay";
 import CheckYourSpamSection from "./components/CheckYourSpamSection";
