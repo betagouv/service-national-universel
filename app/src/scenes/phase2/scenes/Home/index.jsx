@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import EngagementSrc from "@/assets/engagement/engagement-home.png";
+import React from "react";
+import EngagementSrc from "@/assets/hero/phase2.png";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
 import plausibleEvent from "@/services/plausible";
