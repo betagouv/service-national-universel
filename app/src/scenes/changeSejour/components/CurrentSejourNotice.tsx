@@ -1,27 +1,25 @@
 import React from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
-import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
 import useCohort from "@/services/useCohort";
 
 const CurrentSejourNotice = () => {
   const { young } = useAuth();
-  const { cohort } = useCohort();
-  const cohortPeriod = getCohortPeriod(cohort);
-  const sejourIsDone = new Date() > new Date(cohort.dateEnd);
+  const { cohortDateString, isCohortDone } = useCohort();
 
   const text =
     young.status === YOUNG_STATUS.WITHDRAWN ? (
       <p>Vous vous êtes désisté(e) 🥲</p>
     ) : young.status === YOUNG_STATUS.ABANDONED ? (
       <p>Vous avez abandonné votre inscription 🥲</p>
-    ) : sejourIsDone ? (
+    ) : isCohortDone ? (
       <p>
-        Vous étiez positionné(e) sur le séjour <strong>{cohortPeriod}</strong>.
+        Vous étiez positionné(e) sur le séjour <strong>{cohortDateString}</strong>.
       </p>
     ) : (
       <p>
-        Vous êtes positionné(e) sur le séjour <strong>{cohortPeriod}</strong>.
+        Vous êtes positionné(e) sur le séjour <strong>{cohortDateString}</strong>.
       </p>
     );
 

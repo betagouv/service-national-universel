@@ -2,7 +2,7 @@ import React from "react";
 import { useDispatch } from "react-redux";
 import { useHistory } from "react-router-dom";
 import useAuth from "@/services/useAuth";
-import { getCohortPeriod, getCohortYear } from "snu-lib";
+import { getCohortYear } from "snu-lib";
 import useCohort from "@/services/useCohort";
 import Error from "../../../components/error";
 import { knowledgebaseURL } from "../../../config";
@@ -18,7 +18,7 @@ import Loader from "@/components/Loader";
 
 export default function StepConsentements() {
   const { young, isCLE } = useAuth();
-  const { cohort } = useCohort();
+  const { cohort, cohortDateString } = useCohort();
   const history = useHistory();
   const [disabled, setDisabled] = React.useState(true);
   const [loading, setLoading] = React.useState(false);
@@ -104,7 +104,7 @@ export default function StepConsentements() {
                       <>M&apos;inscris au séjour de cohésion </>
                     ) : (
                       <>
-                        M&apos;inscris au séjour de cohésion <strong>{getCohortPeriod(young.cohort)}</strong> sous réserve de places disponibles{" "}
+                        M&apos;inscris au séjour de cohésion <strong>{cohortDateString}</strong> sous réserve de places disponibles{" "}
                       </>
                     )}
                     et m&apos;engage à en respecter le{" "}

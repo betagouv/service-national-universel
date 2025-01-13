@@ -3,7 +3,6 @@ import { useHistory } from "react-router-dom";
 import ReasonForm from "../components/ReasonForm";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { getCohortPeriod } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
@@ -37,11 +36,11 @@ export default function NewChoiceSejour() {
 }
 
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
-  const { cohort: currentCohort } = useCohort();
+  const { cohortDateString } = useCohort();
   const queryParams = new URLSearchParams(window.location.search);
   const cohortId = queryParams.get("cohortid") || "";
   const cohortName = queryParams.get("cohortName") || "";
-  const oldCohortPeriod = capitalizeFirstLetter(getCohortPeriod(currentCohort));
+  const oldCohortPeriod = capitalizeFirstLetter(cohortDateString);
   const history = useHistory();
   const sejourMutation = useChangeSejour();
   const goalQuery = useInscriptionGoal(cohortName);

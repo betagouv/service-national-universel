@@ -9,11 +9,12 @@ import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalConte
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle, CohortType } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle, CohortType, YoungType } from "snu-lib";
 import useCohort from "@/services/useCohort";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
 import { setCohort } from "@/redux/cohort/actions";
+import useSejours from "@/scenes/changeSejour/lib/useSejours";
 
 const changeAddressSteps = {
   CONFIRM: "CONFIRM",
@@ -24,11 +25,21 @@ const changeAddressSteps = {
   NOT_ELIGIBLE: "NOT_ELIGIBLE",
 };
 
+const shouldChangeCohort = (young: YoungType, newAddress) => {
+  return (
+    !isCle(young) &&
+    newAddress.department !== young.department &&
+    young.cohort !== "à venir" &&
+    young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
+    (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
+  );
+};
+
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const { cohort: currentCohort, isCohortDone } = useCohort();
-  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>([]);
+  const { data: availableCohorts, refetch } = useSejours();
   const [selectedCohortId, setSelectedCohortId] = useState<string>();
-  const newCohort = availableCohorts.find((c) => c._id === selectedCohortId);
+  const newCohort = availableCohorts?.find((c) => c._id === selectedCohortId);
   const [newAddress, setNewAddress] = useState<any>();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
   const [isLoading, setLoading] = useState(false);
@@ -44,13 +55,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
 
   const onAddressEntered = async (newAddress) => {
     setNewAddress(newAddress);
-    if (
-      !isCle(young) &&
-      newAddress.department !== young.department &&
-      young.cohort !== "à venir" &&
-      young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
-      (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
-    ) {
+    if (shouldChangeCohort(young, newAddress)) {
       await getAvailableCohorts(newAddress);
     } else {
       updateAddress(newAddress);
@@ -149,7 +154,6 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
       const { title, message, data: updatedYoung } = await updateYoung("address", dataToUpdate);
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
-      dispatch(setCohort(newCohort));
       setStep(changeAddressSteps.CONFIRM);
       onClose();
     } catch (error) {
@@ -197,7 +201,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts.map((cohort) => ({ value: cohort._id, label: cohort.name === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(cohort)}` }))}
+              cohorts={availableCohorts?.map((cohort) => ({ value: cohort._id, label: cohort.name === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(cohort)}` }))}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />

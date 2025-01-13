@@ -1,6 +1,8 @@
 import Img2 from "../../../../assets/validatedPhase2.png";
 import React from "react";
 import { FiMail } from "react-icons/fi";
+import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import { toastr } from "react-redux-toastr";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import Download from "../../../../assets/icons/Download";
@@ -10,15 +12,13 @@ import { translate } from "../../../../utils";
 import downloadPDF from "../../../../utils/download-pdf";
 import InfoConvocation from "../../components/modals/InfoConvocation";
 import { capture } from "../../../../sentry";
-import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import { isCohortDone } from "../../../../utils/cohorts";
+import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import JDCDone from "./components/JDCDone";
 import JDCNotDone from "./components/JDCNotDone";
 import JDMDone from "./components/JDMDone";
 import JDMNotDone from "./components/JDMNotDone";
 import NextStep from "./components/NextStep";
-import useAuth from "@/services/useAuth";
-import useCohort from "@/services/useCohort";
 
 export default function Done() {
   const { young } = useAuth();

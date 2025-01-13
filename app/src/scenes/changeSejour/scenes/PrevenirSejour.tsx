@@ -3,7 +3,6 @@ import ReasonForm from "../components/ReasonForm";
 import { useHistory } from "react-router-dom";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
-import { getCohortPeriod } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
 import useCohort from "@/services/useCohort";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
@@ -25,9 +24,8 @@ export default function PrevenirSejour() {
 }
 
 function Modal({ open, setOpen, reason, message }) {
-  const { cohort } = useCohort();
+  const { cohortDateString } = useCohort();
   const history = useHistory();
-  const date = capitalizeFirstLetter(getCohortPeriod(cohort));
   const { mutate, isPending: loading } = useChangeSejour();
 
   const handleChangeCohort = async () => {
@@ -57,7 +55,7 @@ function Modal({ open, setOpen, reason, message }) {
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
             <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
             <p className="text-gray-500 text-sm">Ancien séjour</p>
-            <p className="text-gray-900 font-medium">{date}</p>
+            <p className="text-gray-900 font-medium">{capitalizeFirstLetter(cohortDateString)}</p>
           </div>
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
             <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />
