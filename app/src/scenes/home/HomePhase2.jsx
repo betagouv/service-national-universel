@@ -1,10 +1,10 @@
+import hero from "../../assets/hero/home.png";
 import React from "react";
 import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
 import plausibleEvent from "../../services/plausible";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import hero from "../../assets/hero/home.png";
 
 export default function HomePhase2() {
   const { young } = useAuth();
