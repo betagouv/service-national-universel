@@ -1,4 +1,3 @@
-import Img2 from "../../../../assets/validatedPhase2.png";
 import React from "react";
 import { FiMail } from "react-icons/fi";
 import { useSelector } from "react-redux";
@@ -13,7 +12,6 @@ import InfoConvocation from "../../components/modals/InfoConvocation";
 import { capture } from "../../../../sentry";
 import { isCohortDone } from "../../../../utils/cohorts";
 import hero from "../../../../assets/hero/phase1.png";
-import HeroPhase1Mobile from "./assets/herophase1mobile.png";
 import { isCohortNeedJdm } from "../../../../utils/cohorts";
 import JDCDone from "./components/JDCDone";
 import JDCNotDone from "./components/JDCNotDone";
