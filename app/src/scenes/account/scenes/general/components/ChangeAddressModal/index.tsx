@@ -9,7 +9,7 @@ import ChangedDepartmentInfoModalContent from "./ChangedDepartmentInfoModalConte
 import ChooseCohortModalContent from "./ChooseCohortModalContent";
 import { updateYoung } from "../../../../../../services/young.service";
 import { capture } from "../../../../../../sentry";
-import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, calculateAge, getCohortPeriod, isCle, CohortType, YoungType } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_STATUS, translate, getCohortPeriod, isCle, CohortType, YoungType } from "snu-lib";
 import useCohort from "@/services/useCohort";
 import api from "../../../../../../services/api";
 import { setYoung } from "../../../../../../redux/auth/actions";
@@ -36,7 +36,11 @@ const shouldChangeCohort = (young: YoungType, newAddress) => {
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const { cohort: currentCohort, isCohortDone } = useCohort();
   const [selectedCohortId, setSelectedCohortId] = useState<string>();
-  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>();
+  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>([]);
+  const cohortOptions =
+    availableCohorts?.length > 0
+      ? availableCohorts?.map((cohort) => ({ value: cohort._id, label: `Séjour ${getCohortPeriod(cohort)}` }))
+      : { value: "à venir", label: "Séjour à venir" };
   const newCohort = selectedCohortId ? availableCohorts?.find((c) => c._id === selectedCohortId) : currentCohort;
   const [newAddress, setNewAddress] = useState<any>();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
@@ -116,11 +120,6 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
         if (isCurrentCohortAvailable) return checkInscriptionGoal(young.cohort, address);
         cohorts = data.filter((cohort) => cohort.id !== young.cohortId);
       }
-      // if no available cohort, check eligibility and add "à venir" cohort
-      // @todo : this date should come from the db
-      if (cohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
-        cohorts.push({ name: "à venir" });
-      }
       // if any available cohort, show modal to choose one
       if (cohorts.length > 0) {
         setAvailableCohorts(cohorts);
@@ -199,7 +198,7 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
             <ChooseCohortModalContent
               onCancel={onCancel}
               onConfirm={chooseNewCohort}
-              cohorts={availableCohorts?.map((cohort) => ({ value: cohort._id, label: cohort.name === "à venir" ? "Séjour à venir" : `Séjour ${getCohortPeriod(cohort)}` }))}
+              cohorts={cohortOptions}
               currentCohortPeriod={getCohortPeriod(currentCohort)}
               isLoading={isLoading}
             />
