@@ -394,6 +394,13 @@ export const CohortSchema = {
       description: "Niveau des objectifs (départemental ou régional)",
     },
   },
+
+  youngHTSBasculeLPDisabled: {
+    type: Boolean,
+    documentation: {
+      description: "Fermeture de la validation sur Liste Principale",
+    },
+  },
 };
 
 const schema = new Schema(CohortSchema);

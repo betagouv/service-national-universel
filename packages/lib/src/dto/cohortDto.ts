@@ -67,6 +67,7 @@ export type CohortDto = {
   youngCheckinForDepartmentReferent?: boolean;
   daysToValidate?: number | null;
   objectifLevel?: "departemental" | "regional";
+  youngHTSBasculeLPDisabled?: boolean;
   uselessInformation?: Record<string, any> | null;
   validationDate?: Date | null;
   validationDateForTerminaleGrade?: Date | null;

@@ -56,7 +56,7 @@ export default function Home() {
     return <HomePhase2 />;
   }
 
-  if (isReinscriptionOpen && !shouldRedirectToReinscription(young)) {
+  if (hasAccessToReinscription && isReinscriptionOpen && !shouldRedirectToReinscription(young)) {
     return <WaitingReinscription />;
   }
   if (hasAccessToReinscription) {
