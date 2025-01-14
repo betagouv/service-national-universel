@@ -286,14 +286,17 @@ describe("SimulationAffectationHTSService", () => {
                     ["1", "2", "3", "4", "5"],
                     ["6", "7", "8", "9", "10", "11", "12", "13", "14", "15"],
                 ],
+                // ligne1 est dans les deux département (changement de departement)
                 ligneIdListParDepartement: [
                     ["ligne1", "ligne2"],
                     ["ligne3", "ligne1"],
                 ],
+                // centre1 est dans les deux département (changement de departement)
                 centreIdListParLigne: [
                     ["center1", "center2"],
                     ["center3", "center1"],
                 ],
+                // 5 places au total pour la ligne1 mais disponible dans 2 departements
                 placesDisponiblesParLigne: [
                     [5, 3],
                     [6, 5],
