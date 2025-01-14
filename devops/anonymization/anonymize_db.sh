@@ -49,6 +49,9 @@ set -e
 
 drop_collections_filename=$(uuidgen)
 cat > $drop_collections_filename <<EOF
+backup_sessionphase1_department
+backup_sessions_without_placeLeft
+buses
 emails
 alertemessages
 events
@@ -66,7 +69,12 @@ alerte_message_patches
 application_patches
 classe_patches
 cohesioncenter_patches
+cohesioncenters_patches
+cohort_group_patches
 cohort_patches
+cohorts_patches
+deleted_cohesion_centers_backup
+deleted_etablissements_backup
 contract_patches
 departmentservice_patches
 etablissement_patches
@@ -75,14 +83,17 @@ importplandetransport_patches
 inscriptiongoal_patches
 knowledgebase_patches
 lignebus_patches
+lignebuses_patches
 lignetopoint_patches
 meetingpoint_patches
+migrationchangeloglock
 mission_patches
 missionapi_patches
 missionequivalence_patches
 modificationbus_patches
 plandetransport_patches
 pointderassemblement_patches
+point_de_rassemblement_patches
 program_patches
 referent_patches
 schemaderepartition_patches
@@ -93,8 +104,10 @@ snutag_patches
 structure_patches
 tablederepartition_patches
 tag_patches
+tasks
 ticket_patches
 young_patches
+youngs_patches
 EOF
 
 
@@ -159,3 +172,7 @@ then
     echo "Remove $dump_dir"
     rm -Rf $dump_dir
 fi
+
+# Without the sleep, the last mongoimport succeeds without importing all youngs.
+# Maybe related to http connexions prematurely closed ?
+sleep 60
