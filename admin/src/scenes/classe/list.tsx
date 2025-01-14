@@ -128,7 +128,7 @@ export default function List() {
 
   if (!isClasses) return null;
   const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
-  const breadcrumb = [![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && { title: "Séjours" }, { title: "Classes" }];
+  const breadcrumb = [![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && { title: "Séjours" }, { title: "Classes" }].filter(Boolean);
 
   return (
     <Page>
