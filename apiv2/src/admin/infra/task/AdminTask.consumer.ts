@@ -1,11 +1,4 @@
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
-import { SimulationAffectationHTS } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS";
-import {
-    SimulationAffectationHTSTaskModel,
-    SimulationAffectationHTSTaskResult,
-} from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
-import { ValiderAffectationHTS } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTS";
-import { ValiderAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSTask.model";
 import { Processor, WorkerHost } from "@nestjs/bullmq";
 import { Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
@@ -13,14 +6,27 @@ import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
 import { TaskName, ValiderAffectationHTSTaskResult } from "snu-lib";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
+import { SimulationAffectationCLE } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE";
+import { SimulationAffectationHTS } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS";
+import {
+    SimulationAffectationHTSTaskModel,
+    SimulationAffectationHTSTaskResult,
+} from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
+import { ValiderAffectationHTS } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTS";
+import { ValiderAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSTask.model";
 import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
 import { ClsService } from "nestjs-cls";
+import {
+    SimulationAffectationCLETaskModel,
+    SimulationAffectationCLETaskResult,
+} from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLETask.model";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
     constructor(
         private readonly logger: Logger,
         private readonly adminTaskRepository: AdminTaskRepository,
+        private readonly simulationAffectationCle: SimulationAffectationCLE,
         private readonly simulationAffectationHts: SimulationAffectationHTS,
         private readonly validerAffectationHts: ValiderAffectationHTS,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
@@ -43,15 +49,15 @@ export class AdminTaskConsumer extends WorkerHost {
                 switch (job.name) {
                     case TaskName.AFFECTATION_HTS_SIMULATION:
                         const simulationHtsTask = task as SimulationAffectationHTSTaskModel; // pour l'onglet historique (patches)
-                        const simulation = await this.simulationAffectationHts.execute(
+                        const simulationhts = await this.simulationAffectationHts.execute(
                             simulationHtsTask.metadata!.parameters!,
                         );
                         results = {
-                            rapportKey: simulation.rapportFile.Key,
-                            selectedCost: simulation.analytics.selectedCost,
-                            jeunesNouvellementAffected: simulation.analytics.jeunesNouvellementAffected,
-                            jeuneAttenteAffectation: simulation.analytics.jeuneAttenteAffectation,
-                            jeunesDejaAffected: simulation.analytics.jeunesDejaAffected,
+                            rapportKey: simulationhts.rapportFile.Key,
+                            selectedCost: simulationhts.analytics.selectedCost,
+                            jeunesNouvellementAffected: simulationhts.analytics.jeunesNouvellementAffected,
+                            jeuneAttenteAffectation: simulationhts.analytics.jeuneAttenteAffectation,
+                            jeunesDejaAffected: simulationhts.analytics.jeunesDejaAffected,
                         } as SimulationAffectationHTSTaskResult;
                         break;
 
@@ -78,6 +84,19 @@ export class AdminTaskConsumer extends WorkerHost {
                             await this.adminTaskRepository.toFailed(job.data.id, "Aucun jeune n'a été affecté");
                             return ConsumerResponse.FAILURE;
                         }
+                        break;
+
+                    case TaskName.AFFECTATION_CLE_SIMULATION:
+                        const simulationCleTask = task as SimulationAffectationCLETaskModel; // pour l'onglet historique (patches)
+                        const simulationCle = await this.simulationAffectationCle.execute(
+                            simulationCleTask.metadata!.parameters!,
+                        );
+                        results = {
+                            rapportKey: simulationCle.rapportFile.Key,
+                            jeunesAffected: simulationCle.analytics.jeunesAffected,
+                            erreurs: simulationCle.analytics.erreurs,
+                            classes: simulationCle.analytics.classes,
+                        } as SimulationAffectationCLETaskResult;
                         break;
 
                     case TaskName.REFERENTIEL_IMPORT:
