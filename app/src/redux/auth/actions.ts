@@ -22,7 +22,6 @@ export function setYoung(young?: YoungType) {
     if (newCohortId && oldCohortId !== newCohortId) {
       const cohort = await fetchCohort(newCohortId);
       if (!cohort) return;
-      console.log(`Updating stored cohort. New cohort name: ${cohort.name}`);
       dispatch(setCohort(cohort));
     }
   };

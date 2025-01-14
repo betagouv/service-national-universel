@@ -16,10 +16,10 @@ window.addEventListener("vite:preloadError", (event) => {
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(
-  // <React.StrictMode>
-  <Provider store={store}>
-    <App />
-    <ReduxToastr timeOut={5000} transitionIn="fadeIn" transitionOut="fadeOut" />
-  </Provider>,
-  // </React.StrictMode>,
+  <React.StrictMode>
+    <Provider store={store}>
+      <App />
+      <ReduxToastr timeOut={5000} transitionIn="fadeIn" transitionOut="fadeOut" />
+    </Provider>
+  </React.StrictMode>,
 );

@@ -27,6 +27,7 @@ import useAuth from "./services/useAuth";
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
 import store from "./redux/store";
+import useCohort from "./services/useCohort";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -52,8 +53,8 @@ startReactDsfr({ defaultColorScheme: "light", Link });
 function App() {
   const [loading, setLoading] = useState(true);
   const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
-  const { login } = useAuth();
+  const { young, login } = useAuth();
+  const { cohort } = useCohort();
 
   async function fetchData() {
     try {
@@ -65,11 +66,6 @@ function App() {
       }
 
       await login(user);
-
-      const { cohort } = store.getState().Cohort;
-      if (shouldForceRedirectToEmailValidation(user, cohort)) {
-        history.push("/preinscription/email-validation");
-      }
     } catch (e) {
       console.log(e);
     } finally {
@@ -84,6 +80,8 @@ function App() {
   if (loading) return <PageLoader />;
 
   if (maintenance) return <Maintenance />;
+
+  if (shouldForceRedirectToEmailValidation(young, cohort)) return <Redirect to="/preinscription/email-validation" />;
 
   return (
     <Sentry.ErrorBoundary fallback={FallbackComponent}>

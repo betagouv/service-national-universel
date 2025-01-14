@@ -24,7 +24,6 @@ const changeAddressSteps = {
 };
 
 const shouldChangeCohort = (young: YoungType, newAddress) => {
-  return false;
   return (
     !isCle(young) &&
     newAddress.department !== young.department &&
@@ -36,9 +35,9 @@ const shouldChangeCohort = (young: YoungType, newAddress) => {
 
 const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   const { cohort: currentCohort, isCohortDone } = useCohort();
-  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>();
   const [selectedCohortId, setSelectedCohortId] = useState<string>();
-  const newCohort = availableCohorts?.find((c) => c._id === selectedCohortId);
+  const [availableCohorts, setAvailableCohorts] = useState<CohortType[]>();
+  const newCohort = selectedCohortId ? availableCohorts?.find((c) => c._id === selectedCohortId) : currentCohort;
   const [newAddress, setNewAddress] = useState<any>();
   const [step, setStep] = useState(changeAddressSteps.CONFIRM);
   const [isLoading, setLoading] = useState(false);
@@ -89,32 +88,14 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
     }
   };
 
-  function getIsSchooled(data) {
-    if (data.schooled) return String(data.schooled);
-    if (data.school?.department || data.school?.departmentName) return "true";
-    return "false";
-  }
-
   const fetchAvailableCohorts = async (address) => {
     try {
       setLoading(true);
-
-      const { data } = await api.post("/preinscription/eligibilite", {
-        schooled: getIsSchooled(young),
-        schoolDepartment: young.schoolDepartment,
-        department: address.department,
-        schoolRegion: young.schoolRegion,
-        schoolZip: young.schoolZip,
-        zip: address.zip,
-        isReInscription: !!young.isReInscription,
-        birthdateAt: young.birthdateAt,
+      const { data } = await api.post("/cohort-session/eligibility/2023", {
         grade: young.grade,
+        birthdateAt: young.birthdateAt,
+        ...address,
       });
-      // const { data } = await api.post("/cohort-session/eligibility/2023", {
-      //   grade: young.grade,
-      //   birthdateAt: young.birthdateAt,
-      //   ...address,
-      // });
       return data;
     } catch (error) {
       capture(error);
@@ -137,9 +118,9 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
       }
       // if no available cohort, check eligibility and add "à venir" cohort
       // @todo : this date should come from the db
-      // if (cohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
-      //   cohorts.push({ name: "à venir" });
-      // }
+      if (cohorts.length === 0 && calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18) {
+        cohorts.push({ name: "à venir" });
+      }
       // if any available cohort, show modal to choose one
       if (cohorts.length > 0) {
         setAvailableCohorts(cohorts);
@@ -164,11 +145,11 @@ const ChangeAddressModal = ({ onClose, isOpen, young }) => {
   };
 
   const updateAddress = async (address = newAddress, status = young.status) => {
-    // if (!newCohort) throw new Error("newCohort is required");
+    if (!newCohort) throw new Error("Aucune cohorte sélectionnée.");
     try {
       setLoading(true);
-      // const dataToUpdate = { ...address, status, cohortId: newCohort._id, cohortName: newCohort.name };
-      const { title, message, data: updatedYoung } = await updateYoung("address", address);
+      const dataToUpdate = { ...address, status, cohortId: newCohort._id, cohortName: newCohort.name };
+      const { title, message, data: updatedYoung } = await updateYoung("address", dataToUpdate);
       toastr.success(title, message);
       dispatch(setYoung(updatedYoung));
       setStep(changeAddressSteps.CONFIRM);
