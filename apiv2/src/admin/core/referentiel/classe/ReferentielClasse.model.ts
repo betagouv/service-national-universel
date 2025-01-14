@@ -24,5 +24,5 @@ export interface ClasseImportReport extends ClasseImportModel {
     sessionName?: string;
     result?: "success" | "error";
     error?: string;
-    updatedFields?: string[];
+    updated?: string;
 }

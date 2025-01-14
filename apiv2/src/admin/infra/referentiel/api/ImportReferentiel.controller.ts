@@ -52,6 +52,7 @@ export class ImportReferentielController {
             nom: request.user.nom,
             role: request.user.role,
             sousRole: request.user.sousRole,
+            email: request.user.email,
         };
 
         switch (name) {

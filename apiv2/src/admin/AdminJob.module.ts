@@ -37,6 +37,8 @@ import { ImporterRoutes } from "./core/referentiel/routes/useCase/ImporterRoutes
 import { ImporterClasses } from "./core/referentiel/classe/useCase/ImporterClasses";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { NotificationProducer } from "@notification/infra/Notification.producer";
 
 @Module({
     imports: [
@@ -74,6 +76,7 @@ import { ClockProvider } from "@shared/infra/Clock.provider";
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: ClasseGateway, useClass: ClasseRepository },
         { provide: ClockGateway, useClass: ClockProvider },
+        { provide: NotificationGateway, useClass: NotificationProducer },
         // add use case here
         AffectationService,
         SimulationAffectationHTSService,

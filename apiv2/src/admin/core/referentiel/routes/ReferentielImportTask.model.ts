@@ -6,6 +6,7 @@ export interface ReferentielImportTaskAuthor {
     nom?: string;
     role?: string;
     sousRole?: string;
+    email?: string;
 }
 
 export interface ReferentielImportTaskParameters {
