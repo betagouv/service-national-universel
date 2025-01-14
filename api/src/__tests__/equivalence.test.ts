@@ -1,5 +1,5 @@
 import fetch from "node-fetch";
-
+import { listFiles, deleteFilesByList } from "../utils";
 import request from "supertest";
 import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
@@ -12,6 +12,12 @@ import { createYoungHelper, notExistingYoungId } from "./helpers/young";
 import { createMissionEquivalenceHelpers, notExistingMissionEquivalenceId } from "./helpers/equivalence";
 import { createFixtureMissionEquivalence } from "./fixtures/equivalence";
 import { MissionEquivalenceModel, YoungModel } from "../models";
+
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  listFiles: jest.fn(),
+  deleteFilesByList: jest.fn(),
+}));
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
@@ -161,6 +167,9 @@ describe("Equivalence Routes", () => {
   });
 
   describe("DELETE /equivalence/:idEquivalence", () => {
+    beforeEach(() => {
+      jest.clearAllMocks(); // Réinitialise les mocks avant chaque test
+    });
     it("should return 200 delete an equivalence", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
@@ -179,36 +188,52 @@ describe("Equivalence Routes", () => {
         files: ["file1.pdf"],
       });
 
+      // Mock des fichiers S3
+      (listFiles as jest.Mock).mockResolvedValue([{ Key: "file1.pdf" }]);
+      (deleteFilesByList as jest.Mock).mockResolvedValue({ Deleted: [{ Key: "file1.pdf" }] });
+
       const res = await request(getAppHelper(young)).delete(`/young/${young._id}/phase2/equivalence/${equivalence._id}`);
 
       expect(res.status).toEqual(200);
+      expect(listFiles).toHaveBeenCalledWith(`app/young/${young._id}/equivalenceFiles/`);
+      expect(deleteFilesByList).toHaveBeenCalledWith([{ Key: "file1.pdf" }]);
+
+      const deletedEquivalence = await MissionEquivalenceModel.findById(equivalence._id);
+      expect(deletedEquivalence).toBeNull();
     });
 
-    it("should return 403 when status is  wrong", async () => {
+    it("should return 403 when status is wrong", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
       const equivalence = await createMissionEquivalenceHelpers({
         youngId: young._id.toString(),
+        type: "BAFA",
         structureName: "Test Structure",
+        address: "123 Street",
         zip: "12345",
         city: "City",
-        contactFullName: "John Doe",
         status: "WAITING_CORRECTION",
+        startDate: "2025-01-01",
+        endDate: "2025-01-02",
+        contactFullName: "John Doe",
+        contactEmail: "john@example.com",
         files: ["file1.pdf"],
       });
 
       const res = await request(getAppHelper(young)).delete(`/young/${young._id}/phase2/equivalence/${equivalence._id}`);
 
       expect(res.status).toEqual(403);
+      expect(listFiles).not.toHaveBeenCalled(); // Le mock ne devrait pas être appelé
+      expect(deleteFilesByList).not.toHaveBeenCalled();
     });
 
-    it("should return 404 if equivalence not found on delete", async () => {
+    it("should return 404 if equivalence not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-
-      // Essayer de supprimer une équivalence inexistante
       const res = await request(getAppHelper(young)).delete(`/young/${young._id}/phase2/equivalence/${notExistingMissionEquivalenceId}`);
 
       expect(res.status).toEqual(404);
+      expect(listFiles).not.toHaveBeenCalled();
+      expect(deleteFilesByList).not.toHaveBeenCalled();
     });
   });
 
