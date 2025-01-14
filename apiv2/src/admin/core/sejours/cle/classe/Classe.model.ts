@@ -25,7 +25,7 @@ export type ClasseModel = {
     niveau?: keyof typeof CLE_GRADE;
     niveaux: (keyof typeof CLE_GRADE)[] | string[];
     centreCohesionId?: string;
-    sessionPhase1Id?: string;
+    sejourId?: string;
     ligneId?: string;
     pointDeRassemblementId?: string;
     commentaires: string;

@@ -458,8 +458,8 @@ export class SimulationAffectationHTSService {
 
         const sejourNegatif = randomSejourList.find((sejour) => sejour.placesRestantes && sejour.placesRestantes < 0);
         if (sejourNegatif) {
-            throw new Error(
-                `Sejour negative placesLeft: ${sejourNegatif.id} (placesRestantes: ${sejourNegatif.placesRestantes})`,
+            this.logger.warn(
+                `Sejour negative placesLeft: ${sejourNegatif.id}, centre: ${sejourNegatif.centreId}, ${sejourNegatif.departement} (placesRestantes: ${sejourNegatif.placesRestantes})`,
             );
         }
         return { randomJeuneList, randomSejourList, randomLigneDeBusList };

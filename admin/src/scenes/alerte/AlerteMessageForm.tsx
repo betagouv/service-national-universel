@@ -81,7 +81,7 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
       if (!data.priority) errors.priority = "Ce champ est obligatoire";
       if (!data.to_role || data.to_role.length === 0) errors.to_role = "Ce champ est obligatoire";
       if (!data.title) errors.title = "Ce champ est obligatoire";
-      if (data.title && data.title.length > 100) errors.content = "Ce champs est limité à 100 caractères";
+      if (data.title && data.title.length > 100) errors.title = "Ce champs est limité à 100 caractères";
       if (!data.content) errors.content = "Ce champ est obligatoire";
       if (data.content && data.content.length > 500) errors.content = "Ce champs est limité à 500 caractères";
 
