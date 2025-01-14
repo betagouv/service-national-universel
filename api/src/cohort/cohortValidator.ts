@@ -82,6 +82,7 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     cleUpdateCentersForReferentDepartment: Joi.boolean().default(false),
     cleDisplayCohortsForAdminCLEDate: ToFromDateValidator,
     cleDisplayCohortsForReferentClasseDate: ToFromDateValidator,
+    youngHTSBasculeLPDisabled: Joi.boolean().default(false),
   }).validate(dto, { stripUnknown: true });
 };
 
