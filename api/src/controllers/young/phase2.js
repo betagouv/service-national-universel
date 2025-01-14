@@ -3,10 +3,11 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { config } = require("../../config");
-
+const { deleteFilesByList, listFiles, getFile } = require("../../utils/index");
+const { isYoung } = require("../../utils/index");
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
-const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours, getFile } = require("../../utils");
+const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
@@ -146,7 +147,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }
-
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -158,8 +158,8 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const cohort = await CohortModel.findById(young.cohortId);
 
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     let missionDuration;
     if (value?.type === "Autre" || equivalence.type === "Autre") {
@@ -169,8 +169,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       // Si le type n'est pas "Autre", utiliser la valeur par défaut
       missionDuration = PHASE2_TOTAL_HOURS;
     }
-    console.log("missionduration", missionDuration);
-    if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     delete value.id;
     delete value.idEquivalence;
     equivalence.set({
@@ -239,6 +238,7 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND });
     res.status(200).send({ ok: true, data: equivalence });
   } catch (error) {
     capture(error);
@@ -255,14 +255,24 @@ router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { se
     }
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+
     if (!equivalence) {
       return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND, message: "Equivalence not found" });
     }
 
-    if (req.user.role === "young" && equivalence.userId.toString() !== req.user._id.toString()) {
+    if (!isYoung(req.user) || equivalence.youngId.toString() !== req.user._id.toString() || equivalence.status !== "WAITING_VERIFICATION") {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Unauthorized to delete this equivalence" });
     }
-
+    const files = await listFiles(`app/young/${req.user._id}/equivalenceFiles/`);
+    const missionEquivalencesFiles = equivalence.files;
+    const equivalenceFilesArray = files
+      .filter((e) => missionEquivalencesFiles.includes(e.Key.split("/").pop()))
+      .map((e) => {
+        return { Key: e.Key };
+      });
+    if (equivalenceFilesArray.length !== 0) {
+      await deleteFilesByList(equivalenceFilesArray);
+    }
     await equivalence.deleteOne();
 
     return res.status(200).send({ ok: true, message: "Equivalence deleted successfully" });

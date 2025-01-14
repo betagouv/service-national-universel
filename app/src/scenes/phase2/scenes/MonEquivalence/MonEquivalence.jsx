@@ -19,7 +19,6 @@ export default function Equivalence() {
   const { id } = useParams();
   const { data, isError, isPending } = useQuery({ queryKey: ["equivalence", id], queryFn: () => fetchEquivalence(young._id, id) });
   const [isModalOpen, setModalOpen] = useState(false);
-  const [selectedId, setSelectedId] = useState(null);
   const history = useHistory();
   async function handleClick(fileName) {
     try {
@@ -29,14 +28,13 @@ export default function Equivalence() {
     }
   }
 
-  const handleDeleteClick = (equivalenceId) => {
-    setSelectedId(equivalenceId);
+  const handleDeleteClick = () => {
     setModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
     try {
-      await deleteEquivalence(young._id, selectedId);
+      await deleteEquivalence(young._id, data._id);
       toastr.success("L'équivalence a bien été supprimée");
       setModalOpen(false);
       history.push("/phase2/");
@@ -58,11 +56,13 @@ export default function Equivalence() {
         <HiPencil className="text-lg mr-1 text-gray-400" />
         Modifier
       </Link>
+      {/* {data.status === EQUIVALENCE_STATUS.WAITING_VERIFICATION && ( */}
       <button
         onClick={() => handleDeleteClick(data._id)}
         className="ml-2 flex items-center justify-center w-14 h-10 md:px-3 border bg-white rounded-lg text-sm text-gray-500 hover:bg-gray-50">
         <HiTrash className="text-lg text-gray-400" />
       </button>
+      {/* )} */}
     </>
   ) : null;
 
