@@ -26,7 +26,6 @@ import useAuth from "./services/useAuth";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
-import store from "./redux/store";
 import useCohort from "./services/useCohort";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
@@ -66,6 +65,7 @@ function App() {
       }
 
       await login(user);
+
     } catch (e) {
       console.log(e);
     } finally {
@@ -81,14 +81,13 @@ function App() {
 
   if (maintenance) return <Maintenance />;
 
-  if (shouldForceRedirectToEmailValidation(young, cohort)) return <Redirect to="/preinscription/email-validation" />;
-
   return (
     <Sentry.ErrorBoundary fallback={FallbackComponent}>
       <QueryClientProvider client={queryClient}>
         <Router history={history}>
           <AutoScroll />
           <Suspense fallback={<PageLoader />}>
+            {shouldForceRedirectToEmailValidation(young, cohort) && <Redirect to="/preinscription/email-validation" />}
             <Switch>
               <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
               <Redirect from={"/inscription2023"} to={"/inscription"} />

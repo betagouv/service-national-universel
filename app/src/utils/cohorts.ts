@@ -2,7 +2,7 @@ import { CohortType, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungType } from "snu-li
 import { apiURL } from "@/config";
 
 export function cohortAssignmentAnnouncementsIsOpenForYoung(cohort: CohortType): boolean {
-  return cohort.isAssignmentAnnouncementsOpenForYoung === true;
+  return cohort?.isAssignmentAnnouncementsOpenForYoung === true;
 }
 
 export function getMeetingPointChoiceLimitDateForCohort(cohort: CohortType): Date | null {
@@ -15,8 +15,8 @@ export function getMeetingPointChoiceLimitDateForCohort(cohort: CohortType): Dat
 
 // start of the cohort's last day
 export function isCohortDone(cohort: CohortType, extraDays = 0): boolean {
-  if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohort.name)) return true;
-  if (cohort && cohort.dateEnd) {
+  if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohort?.name)) return true;
+  if (cohort && cohort?.dateEnd) {
     const dateEnd = new Date(cohort.dateEnd);
     const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
     endDateDayStart.setDate(dateEnd.getUTCDate() + extraDays);
@@ -27,7 +27,7 @@ export function isCohortDone(cohort: CohortType, extraDays = 0): boolean {
 
 export function isCohortNeedJdm(cohort: CohortType): boolean {
   const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022", "2020"];
-  if (needTheJDMPresenceTrue.includes(cohort.name)) {
+  if (needTheJDMPresenceTrue.includes(cohort?.name)) {
     return true;
   } else {
     return false;
