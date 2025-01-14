@@ -62,6 +62,14 @@ export class ImporterClasses implements UseCase<string> {
                 );
             }
         }
+        console.timeEnd("ImporterClasses");
+        return this.processReport(parameters, report);
+    }
+
+    private async processReport(
+        parameters: ReferentielImportTaskParameters,
+        report: ClasseImportReport[],
+    ): Promise<string> {
         const fileBuffer = await this.fileGateway.generateExcel({ rapport: report });
         const timestamp = this.clockGateway.getNowSafeIsoDate();
         const reportName = `rapport-classes-importees-${timestamp}.xlsx`;
@@ -69,6 +77,8 @@ export class ImporterClasses implements UseCase<string> {
             data: fileBuffer,
             mimetype: MIME_TYPES.CSV,
         });
+
+        //TODO : supprimer quand on aura l'UI des imports
         if (parameters.auteur.email) {
             this.notificationGateway.sendEmail<EmailParams>(
                 {
@@ -84,16 +94,19 @@ export class ImporterClasses implements UseCase<string> {
             );
         }
 
-        console.timeEnd("ImporterClasses");
         return s3File.Key;
     }
 
     private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportReport> {
         const classe = await this.classeGateway.findById(classeImport.classeId);
-        if (!classe) throw new Error("Classe not found");
+        if (!classe) {
+            throw new Error("Classe non trouvée en base");
+        }
 
         const session = await this.sessionGateway.findBySnuId(classeImport.cohortCode);
-        if (!session) throw new Error("Session not found");
+        if (!session) {
+            throw new Error("Session non trouvée en base");
+        }
 
         const updatedFields: string[] = [];
 
@@ -102,6 +115,7 @@ export class ImporterClasses implements UseCase<string> {
             updatedFields.push("jeune.sessionId", "jeune.sessionNom");
         }
         updatedFields.push("sessionId", "sessionNom", "placesTotal");
+
         const newClasseData: ClasseModel = {
             ...classe,
             sessionId: session.id,
@@ -113,23 +127,30 @@ export class ImporterClasses implements UseCase<string> {
             updatedFields.push("statut");
         }
 
-        if (classeImport.sessionCode) {
-            const sejour = await this.sejourGateway.findBySejourSnuId(classeImport.sessionCode);
-            if (sejour) {
-                newClasseData.sejourId = sejour.id;
-                updatedFields.push(...(await this.addCenterAndPdrUpdates(newClasseData, classeImport)));
+        const sejour = await this.sejourGateway.findBySejourSnuId(classeImport.sessionCode);
+        if (!classeImport.sessionCode || !sejour) {
+            let errorMessage = '"Session : Code de la session_Désignation du centre" est manquant';
+            if (!sejour) {
+                errorMessage = "Sejour non trouvé en base";
             }
-        } else {
-            await this.classeGateway.update({ ...classe, ...newClasseData });
+            const updatedClasse = await this.classeGateway.update({ ...classe, ...newClasseData });
 
             return {
-                classeId: classe.id,
+                classeId: updatedClasse.id,
+                sessionId: session.id,
+                sessionName: session.nom,
+                classeStatus: updatedClasse.statut,
+                classeTotalSeats: updatedClasse.placesTotal,
                 sessionCode: classeImport.sessionCode,
                 cohortCode: classeImport.cohortCode,
                 updated: updatedFields.join(", "),
+                error: errorMessage,
                 result: "error",
             };
         }
+
+        newClasseData.sejourId = sejour.id;
+        updatedFields.push(...(await this.addCenterAndPdrUpdates(newClasseData, classeImport)));
 
         const updatedClasse = await this.classeGateway.update({ ...classe, ...newClasseData });
 
