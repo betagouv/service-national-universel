@@ -76,10 +76,14 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       cohort: Joi.string().allow(null),
     }).validate(req.body, { stripUnknown: true });
 
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (error) {
+      console.error("🚀 ~ router.put ~ error:", error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
 
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    console.log("🚀 ~ router.put ~ young.cohortId:", young.cohortId);
     const currentCohort = await CohortModel.findById(young.cohortId);
 
     // If the young is affected and the cohort is not ended address can't be updated.
@@ -87,47 +91,44 @@ router.put("/address", passport.authenticate("young", { session: false, failWith
       return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
     }
 
-    if (
-      // Cohort and status should be checked
-      value.department !== young.department &&
-      value.cohort !== "à venir" &&
-      young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
-      (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
-    ) {
-      // @todo eligibility is based on address, should be based on school address.
-      const availableSessions = await getFilteredSessionsForChangementSejour(
-        { grade: young.grade, birthdateAt: young.birthdateAt, ...value },
-        Number(req.headers["x-user-timezone"]) || null,
-      );
+    // if (
+    //   // Cohort and status should be checked
+    //   value.department !== young.department &&
+    //   value.cohort !== "à venir" &&
+    //   young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION &&
+    //   (young.status === YOUNG_STATUS.VALIDATED || young.status === YOUNG_STATUS.WAITING_LIST)
+    // ) {
+    //   // @todo eligibility is based on address, should be based on school address.
+    //   const availableSessions = await getFilteredSessionsForChangementSejour({ ...young.toObject(), ...value }, Number(req.headers["x-user-timezone"]) || null);
 
-      const cohort = value.cohort ? value.cohort : young.cohort;
-      const status = value.status ? value.status : young.status;
-      let isGoalReached = false;
+    //   const cohort = value.cohort ? value.cohort : young.cohort;
+    //   const status = value.status ? value.status : young.status;
+    //   let isGoalReached = false;
 
-      const cohortDocument = await CohortModel.findOne({ name: cohort });
-      if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    //   const cohortDocument = await CohortModel.findOne({ name: cohort });
+    //   if (!cohortDocument) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // Check cohort availability
-      const isEligible = availableSessions.find((s) => s.name === cohortDocument.name);
+    //   // Check cohort availability
+    //   const isEligible = availableSessions.find((s) => s.name === cohortDocument.name);
 
-      if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
-        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-      }
+    //   if (!isEligible && status !== YOUNG_STATUS.NOT_ELIGIBLE) {
+    //     return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+    //   }
 
-      // Check if cohort goal is reached
-      if (isEligible) {
-        const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
-        isGoalReached = completionObjectif.isAtteint;
-      }
+    //   // Check if cohort goal is reached
+    //   if (isEligible) {
+    //     const completionObjectif = await getCompletionObjectifs(value.department, cohortDocument);
+    //     isGoalReached = completionObjectif.isAtteint;
+    //   }
 
-      if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
-        return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-      }
+    //   if (isGoalReached && status === YOUNG_STATUS.VALIDATED) {
+    //     return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+    //   }
 
-      // Address should be updated without any other modification.
-    } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
-      return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
-    }
+    //   // Address should be updated without any other modification.
+    // } else if ((value.cohort && value.cohort !== young.cohort && value.cohort !== "à venir") || (value.status && value.status !== young.status)) {
+    //   return res.status(403).send({ ok: false, code: ERRORS.NOT_ALLOWED });
+    // }
 
     if (young.department && value.department !== young.department) {
       await notifDepartmentChange(value.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
