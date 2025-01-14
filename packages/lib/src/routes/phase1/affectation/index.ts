@@ -1,9 +1,11 @@
 import { GetAffectation } from "./getAffectation";
-import { PostSimulationsRoute } from "./postSimulationAffectationMetropole";
+import { PostSimulationsCLERoute } from "./postSimulationAffectationCLEMetropole";
+import { PostSimulationsHTSRoute } from "./postSimulationAffectationHTSMetropole";
 import { PostValiderAffectationRoute } from "./postValiderAffectationMetropole";
 
 export type AffectationRoutes = {
   GetAffectation: GetAffectation;
-  PostSimulationsRoute: PostSimulationsRoute;
+  PostSimulationsHTSRoute: PostSimulationsHTSRoute;
+  PostSimulationsCLERoute: PostSimulationsCLERoute;
   PostValiderAffectationRoute: PostValiderAffectationRoute;
 };

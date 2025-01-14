@@ -4,7 +4,15 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { departmentList, GRADES, region2department, RegionsMetropole, TaskName, TaskStatus } from "snu-lib";
+import {
+    departmentList,
+    GRADES,
+    region2department,
+    RegionsMetropole,
+    RegionsMetropoleAndCorse,
+    TaskName,
+    TaskStatus,
+} from "snu-lib";
 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -47,11 +55,11 @@ describe("AffectationController", () => {
         expect(affectationController).toBeDefined();
     });
 
-    describe("POST /affectation/:id/simulation", () => {
+    describe("POST /affectation/:id/simulation/hts", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`);
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/hts`);
 
             expect(response.status).toBe(400);
         });
@@ -59,7 +67,7 @@ describe("AffectationController", () => {
         it("should return 400 for invalid niveauScolaires", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulations`).send({
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/hts`).send({
                 niveauScolaires: [],
                 departements: departmentList,
                 sdrImportId: new mongoose.Types.ObjectId().toString(),
@@ -70,11 +78,11 @@ describe("AffectationController", () => {
             expect(response.status).toBe(400);
         });
 
-        it("should return 400 for invalid departement", async () => {
+        it("should return 400 for invalid departement (empty)", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulations`)
+                .post(`/affectation/${session.id}/simulation/hts`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: [],
@@ -86,11 +94,11 @@ describe("AffectationController", () => {
             expect(response.status).toBe(400);
         });
 
-        it("should return 400 for invalid departement", async () => {
+        it("should return 400 for invalid departement (inexistant)", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulations`)
+                .post(`/affectation/${session.id}/simulation/hts`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: ["nonInexistant"],
@@ -106,7 +114,7 @@ describe("AffectationController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulations`)
+                .post(`/affectation/${session.id}/simulation/hts`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: departmentList,
@@ -122,7 +130,7 @@ describe("AffectationController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulations`)
+                .post(`/affectation/${session.id}/simulation/hts`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: RegionsMetropole.flatMap((region) => region2department[region]),
@@ -147,7 +155,7 @@ describe("AffectationController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulations`)
+                .post(`/affectation/${session.id}/simulation/hts`)
                 .send({
                     niveauScolaires: Object.values(GRADES),
                     departements: RegionsMetropole.flatMap((region) => region2department[region]),
@@ -158,6 +166,67 @@ describe("AffectationController", () => {
 
             expect(response.status).toBe(201);
             expect(response.body.name).toBe(TaskName.AFFECTATION_HTS_SIMULATION);
+            expect(response.body.status).toBe(TaskStatus.PENDING);
+            expect(response.body.metadata.parameters.sessionId).toBe(session.id);
+        });
+    });
+
+    describe("POST /affectation/:id/simulation/cle", () => {
+        it("should return 400 for invalid params", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`);
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 for invalid departement (empty)", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
+                departements: [],
+                etranger: true,
+            });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 for invalid departement (inexistant)", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/cle`)
+                .send({
+                    departements: ["nonInexistant"],
+                    etranger: true,
+                });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 400 for departement hors metropole", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
+                departements: departmentList,
+                etranger: true,
+            });
+
+            expect(response.status).toBe(400);
+        });
+
+        it("should return 201 (valid with corse)", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/cle`)
+                .send({
+                    departements: RegionsMetropoleAndCorse.flatMap((region) => region2department[region]),
+                    etranger: true,
+                });
+
+            expect(response.status).toBe(201);
+            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
         });

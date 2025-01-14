@@ -69,6 +69,14 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         return LigneDeBusMapper.toModels(lignesDeBus);
     }
 
+    async findBySessionIdAndClasseId(sessionId: string, classeId: string): Promise<LigneDeBusModel> {
+        const ligneDeBus = await this.ligneDeBusMongooseEntity.findOne({ cohortId: sessionId, classeId });
+        if (!ligneDeBus) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return LigneDeBusMapper.toModel(ligneDeBus);
+    }
+
     async bulkUpdate(lignesUpdated: LigneDeBusModel[]): Promise<number> {
         const lignesOriginal = await this.findByIds(lignesUpdated.map((ligne) => ligne.id));
         if (lignesOriginal.length !== lignesUpdated.length) {

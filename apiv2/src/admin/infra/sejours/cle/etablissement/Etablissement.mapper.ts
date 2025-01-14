@@ -53,4 +53,8 @@ export class EtablissementMapper {
             schoolId: etablissementModel.schoolId,
         };
     }
+
+    static toModels(etablissementDocuments: EtablissementDocument[]): EtablissementModel[] {
+        return etablissementDocuments.map((etablissementDocument) => this.toModel(etablissementDocument));
+    }
 }

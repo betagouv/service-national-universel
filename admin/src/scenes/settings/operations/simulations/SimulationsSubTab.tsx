@@ -13,6 +13,7 @@ import StatusCell from "../components/StatusCell";
 import RapportCell from "../components/RapportCell";
 import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
+import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -83,8 +84,14 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
           {
             key: "metadata",
             title: "Resultats",
-            // TODO: switch en fonction de Task.name
-            renderCell: (simulation) => <SimulationHtsResultCell simulation={simulation} />,
+            renderCell: (simulation) => {
+              if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
+                return <SimulationHtsResultCell simulation={simulation} />;
+              } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
+                return <SimulationCleResultCell simulation={simulation} />;
+              }
+              return null;
+            },
           },
           {
             key: "statut",

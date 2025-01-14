@@ -170,7 +170,7 @@ describe("ValiderAffectationHTS", () => {
             parent2Nom: undefined,
             parent2Prenom: undefined,
             parent2Telephone: undefined,
-            "places restantes après l'inscription (centre)": 13,
+            "places restantes après l'inscription (centre)": 99,
             "places totale (centre)": 126,
             pointDeRassemblementId: "6398797d3bc18708cc3981f6",
             pointDeRassemblementMatricule: "",

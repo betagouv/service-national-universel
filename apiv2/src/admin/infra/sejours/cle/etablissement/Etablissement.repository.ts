@@ -25,4 +25,9 @@ export class EtablissementRepository implements EtablissementGateway {
         }
         return EtablissementMapper.toModel(etablissement);
     }
+
+    async findByIds(ids: string[]): Promise<EtablissementModel[]> {
+        const etablissements = await this.etablissementMongooseEntity.find({ _id: { $in: ids } });
+        return EtablissementMapper.toModels(etablissements);
+    }
 }
