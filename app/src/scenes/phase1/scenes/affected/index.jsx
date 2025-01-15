@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { isCle, youngCanChangeSession, getDepartureDate, getReturnDate, getCohortPeriod } from "snu-lib";
-import { getCohort } from "../../../../utils/cohorts";
+import useCohort from "@/services/useCohort";
 import api from "../../../../services/api";
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
@@ -28,7 +28,7 @@ export default function Affected() {
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const cohort = getCohort(young.cohort);
+  const { cohort } = useCohort();
   const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
   const returnDate = getReturnDate(young, session, cohort, meetingPoint);
   const data = { center, meetingPoint, session, departureDate, returnDate };

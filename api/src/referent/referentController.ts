@@ -563,7 +563,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (isReferentDep(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
+      if (!canValidateYoungToLP(req.user, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 

@@ -1,6 +1,7 @@
 import React from "react";
 import { FiMail } from "react-icons/fi";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import { toastr } from "react-redux-toastr";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import Download from "../../../../assets/icons/Download";
@@ -12,7 +13,6 @@ import InfoConvocation from "../../components/modals/InfoConvocation";
 import { capture } from "../../../../sentry";
 import { isCohortDone } from "../../../../utils/cohorts";
 import hero from "../../../../assets/hero/phase1.png";
-import { isCohortNeedJdm } from "../../../../utils/cohorts";
 import JDCDone from "./components/JDCDone";
 import JDCNotDone from "./components/JDCNotDone";
 import JDMDone from "./components/JDMDone";
@@ -22,7 +22,8 @@ import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 
 export default function Done() {
-  const young = useSelector((state) => state.Auth.young) || {};
+  const { young } = useAuth();
+  const { isCohortNeedJdm } = useCohort();
   const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);

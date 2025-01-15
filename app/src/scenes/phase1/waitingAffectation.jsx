@@ -1,5 +1,4 @@
 import React from "react";
-import { getCohortPeriod } from "snu-lib";
 import { Link } from "react-router-dom";
 import hero from "../../assets/hero/phase1.png";
 import CurvedArrowLeft from "../../assets/icons/CurvedArrowLeft";
@@ -13,16 +12,15 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import plausibleEvent from "@/services/plausible";
 import { HiArrowRight } from "react-icons/hi";
 import Notice from "@/components/ui/alerts/Notice";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
-  const cohort = getCohort(young.cohort);
-  const cohortDate = getCohortPeriod(cohort);
-  const title = `Mon séjour de cohésion ${cohortDate}`;
+  const { cohortDateString } = useCohort();
+  const title = `Mon séjour de cohésion ${cohortDateString}`;
   const text = isCLE
     ? "Votre affectation vous sera communiquée par votre établissement scolaire."
     : "Votre affectation vous sera communiquée dans les semaines qui précèdent le départ par mail. En attendant, commencez à préparer votre fiche sanitaire ci-dessous !";

@@ -2,9 +2,8 @@ import React from "react";
 import Unlock from "../../../../../assets/icons/Unlock";
 import CensusDone from "./CensusDone";
 import CensusNotDone from "./CensusNotDone";
-import { isCohortNeedJdm } from "../../../../../utils/cohorts";
 
-export default function JDMDone({ cohort }) {
+export default function JDMDone() {
   const [isCensusDoneOpen, setIsCensusDoneOpen] = React.useState(false);
   const [isCensusNotDoneOpen, setIsCensusNotDoneOpen] = React.useState(false);
   return (

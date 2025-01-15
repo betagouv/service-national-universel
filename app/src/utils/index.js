@@ -2,9 +2,10 @@ import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld, EQUIVALENCE_STATUS } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { getCohort, isCohortDone } from "./cohorts";
+import { isCohortDone } from "./cohorts";
 import { toastr } from "react-redux-toastr";
 import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
+import store from "@/redux/store";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -104,7 +105,7 @@ export function hasAccessToPhase2(young) {
   const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
   const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
-  const cohort = getCohort(young.cohort);
+  const { cohort } = store.getState().Cohort;
   if (isCohortTooOld(cohort) && !userIsDoingAMission && !hasEquivalence) {
     return false;
   }

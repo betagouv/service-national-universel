@@ -31,13 +31,13 @@ const RepresentantsLegauxContextProvider = ({ children, parentId }) => {
         setYoung(data);
 
         if (data.cohortId) {
-          const { ok, data: cohort } = await fetchCohort(data.cohortId);
-          if (ok) setCohort(cohort);
+          const cohort = await fetchCohort(data.cohortId);
+          if (cohort) setCohort(cohort);
         }
 
         if (data.classeId) {
           const classe = await fetchClass(data.classeId);
-          if (ok) setClasse(classe);
+          if (classe) setClasse(classe);
         }
       } catch (e) {
         if (e.code === "INVALID_BODY" || e.code === "OPERATION_UNAUTHORIZED") setError(true);
