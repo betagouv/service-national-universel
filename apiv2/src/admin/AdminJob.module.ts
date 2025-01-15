@@ -29,7 +29,7 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 import { historyProvider } from "./infra/history/historyProvider";
-import { ReferentielTaskService } from "./infra/task/ReferentielTask.service";
+import { AdminTaskImportReferentielSelectorService } from "./infra/task/AdminTaskImportReferentielSelector.service";
 import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
 import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
@@ -86,7 +86,7 @@ import { referentielServiceProvider } from "./infra/referentiel/initProvider/ser
         ValiderAffectationHTS,
         ...referentielUseCaseProvider,
         ...referentielServiceProvider,
-        ReferentielTaskService,
+        AdminTaskImportReferentielSelectorService,
     ],
 })
 export class AdminJobModule {

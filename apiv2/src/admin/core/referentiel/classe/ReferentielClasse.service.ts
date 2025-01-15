@@ -119,8 +119,9 @@ export class ReferentielClasseService {
         return createdTask;
     }
 
-    async processReport(parameters: ReferentielImportTaskParameters, report: ClasseRapport[]): Promise<string> {
-        const fileBuffer = await this.fileGateway.generateExcel({ rapport: report });
+    async processReport(parameters: ReferentielImportTaskParameters, ...reports: ClasseRapport[][]): Promise<string> {
+        const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
+        const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
         const timestamp = this.clockGateway.getNowSafeIsoDate();
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {

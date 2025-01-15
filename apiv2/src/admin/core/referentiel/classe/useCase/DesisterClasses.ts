@@ -11,23 +11,24 @@ import {
     ClasseDesisterModel,
     ClasseDesisterRapport,
     ClasseDesisterXslx,
-    DESISTER_CLASSES_ONGLET,
+    ClasseRapport,
+    DesiterClasseFileValidation,
 } from "../ReferentielClasse.model";
 import { ReferentielClasseService } from "../ReferentielClasse.service";
 Injectable();
-export class DesisterClasses implements UseCase<string> {
+export class DesisterClasses implements UseCase<ClasseRapport[]> {
     constructor(
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         private readonly referentielClasseService: ReferentielClasseService,
     ) {}
-    async execute(parameters: ReferentielImportTaskParameters): Promise<string> {
+    async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseRapport[]> {
         //
         const report: ClasseDesisterRapport[] = [];
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
         const classesFromXslx = await this.fileGateway.parseXLS<ClasseDesisterXslx>(fileContent.Body, {
-            sheetName: DESISTER_CLASSES_ONGLET,
+            sheetName: DesiterClasseFileValidation.sheetName,
         });
         const mappedClasses = ReferentielClasseMapper.mapDesisterClassesFromFile(classesFromXslx);
 
@@ -45,9 +46,18 @@ export class DesisterClasses implements UseCase<string> {
             }
         }
 
-        return this.referentielClasseService.processReport(parameters, report);
+        // return this.referentielClasseService.processReport(parameters, report, report);
+        return report;
     }
     async processClasse(classeToDesister: ClasseDesisterModel): Promise<ClasseDesisterRapport> {
+        if (!classeToDesister.classeId) {
+            return {
+                classeId: classeToDesister.classeId,
+                error: "No classe ID found",
+                result: "error",
+                jeunesDesistesIds: "",
+            };
+        }
         // Désister classe
         const classeDesistee = await this.classeGateway.updateStatut(
             classeToDesister.classeId,
@@ -67,6 +77,7 @@ export class DesisterClasses implements UseCase<string> {
         return {
             classeId: classeDesistee.id,
             result: "success",
+            error: "",
             jeunesDesistesIds: jeunesToDesisterList.map((jeune) => jeune.id)?.join(","),
         };
     }

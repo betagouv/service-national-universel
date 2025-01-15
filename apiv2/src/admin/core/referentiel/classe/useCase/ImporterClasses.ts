@@ -13,11 +13,17 @@ import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
-import { ClasseImportModel, ClasseImportRapport, ClasseImportXslx } from "../ReferentielClasse.model";
+import {
+    ClasseImportModel,
+    ClasseImportRapport,
+    ClasseImportXslx,
+    ClasseRapport,
+    ImportClasseFileValidation,
+} from "../ReferentielClasse.model";
 import { ReferentielClasseService } from "../ReferentielClasse.service";
 
 @Injectable()
-export class ImporterClasses implements UseCase<string> {
+export class ImporterClasses implements UseCase<ClasseRapport[]> {
     constructor(
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
@@ -30,11 +36,11 @@ export class ImporterClasses implements UseCase<string> {
         private readonly logger: Logger,
     ) {}
 
-    async execute(parameters: ReferentielImportTaskParameters): Promise<string> {
+    async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseRapport[]> {
         const report: ClasseImportRapport[] = [];
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
         const classesFromXslx = await this.fileGateway.parseXLS<ClasseImportXslx>(fileContent.Body, {
-            sheetIndex: 0,
+            sheetName: ImportClasseFileValidation.sheetName,
         });
         const mappedClasses = ReferentielClasseMapper.mapImporterClassesFromFile(classesFromXslx);
 
@@ -57,7 +63,8 @@ export class ImporterClasses implements UseCase<string> {
                 );
             }
         }
-        return this.referentielClasseService.processReport(parameters, report);
+        // return this.referentielClasseService.processReport(parameters, report);
+        return report;
     }
 
     private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {

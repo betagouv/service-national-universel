@@ -13,7 +13,7 @@ import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
 import { TaskName, ValiderAffectationHTSTaskResult } from "snu-lib";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
-import { ReferentielTaskService } from "./ReferentielTask.service";
+import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
 import { ClsService } from "nestjs-cls";
 
 @Processor(QueueName.ADMIN_TASK)
@@ -23,7 +23,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly simulationAffectationHts: SimulationAffectationHTS,
         private readonly validerAffectationHts: ValiderAffectationHTS,
-        private readonly referentielTaskService: ReferentielTaskService,
+        private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
         private readonly cls: ClsService,
     ) {
         super();
@@ -82,6 +82,10 @@ export class AdminTaskConsumer extends WorkerHost {
 
                     case TaskName.REFERENTIEL_IMPORT:
                         const importTask = task as ReferentielImportTaskModel;
+                        this.logger.log(
+                            `Processing import task "${importTask.metadata?.parameters?.type}"`,
+                            AdminTaskConsumer.name,
+                        );
                         results = await this.referentielTaskService.handleImporterReferentiel(importTask);
                         break;
                     default:

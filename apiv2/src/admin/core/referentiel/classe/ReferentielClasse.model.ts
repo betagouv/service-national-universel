@@ -29,21 +29,19 @@ export interface ClasseImportRapport extends ClasseImportModel, ClasseRapport {
 }
 
 export interface ClasseDesisterXslx {
-    "Identifiant de la classe engagée": string;
+    "Identifiant de la classe engagée"?: string;
 }
 
 export interface ClasseDesisterModel {
-    classeId: string;
+    classeId?: string;
 }
 
 export interface ClasseDesisterRapport extends ClasseRapport {
-    classeId: string;
+    classeId?: string;
     result: "success" | "error";
     jeunesDesistesIds: string;
     error?: string;
 }
-
-export const DESISTER_CLASSES_ONGLET = "CLASSES DESISTEES";
 
 export interface FileValidation {
     requiredColumns: string[];
@@ -58,7 +56,7 @@ export const ImportClasseFileValidation: FileValidation = {
         "Session : Code de la session",
         "Désignation du centre",
     ],
-    sheetName: "CLE 2025",
+    sheetName: "CLE2025",
 };
 
 export const DesiterClasseFileValidation: FileValidation = {

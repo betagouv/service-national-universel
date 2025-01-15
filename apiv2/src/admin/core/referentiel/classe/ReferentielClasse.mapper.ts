@@ -18,6 +18,8 @@ export class ReferentielClasseMapper {
     }
 
     static mapDesisterClassesFromFile(classes: ClasseDesisterXslx[]): ClasseDesisterModel[] {
-        return classes.map((classe) => ({ classeId: classe["Identifiant de la classe engagée"].toLocaleLowerCase() }));
+        return classes.map((classe) => {
+            return { classeId: classe["Identifiant de la classe engagée"]?.toLowerCase() };
+        });
     }
 }
