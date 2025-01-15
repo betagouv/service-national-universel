@@ -56,13 +56,13 @@ export default function Equivalence() {
         <HiPencil className="text-lg mr-1 text-gray-400" />
         Modifier
       </Link>
-      {/* {data.status === EQUIVALENCE_STATUS.WAITING_VERIFICATION && ( */}
-      <button
-        onClick={() => handleDeleteClick(data._id)}
-        className="ml-2 flex items-center justify-center w-14 h-10 md:px-3 border bg-white rounded-lg text-sm text-gray-500 hover:bg-gray-50">
-        <HiTrash className="text-lg text-gray-400" />
-      </button>
-      {/* )} */}
+      {data.status === EQUIVALENCE_STATUS.WAITING_VERIFICATION && (
+        <button
+          onClick={() => handleDeleteClick(data._id)}
+          className="ml-2 flex items-center justify-center w-14 h-10 md:px-3 border bg-white rounded-lg text-sm text-gray-500 hover:bg-gray-50">
+          <HiTrash className="text-lg text-gray-400" />
+        </button>
+      )}
     </>
   ) : null;
 
