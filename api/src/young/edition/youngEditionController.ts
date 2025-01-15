@@ -118,10 +118,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
       if (qpv === true) value.qpv = "true";
@@ -265,10 +261,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     young.set({
