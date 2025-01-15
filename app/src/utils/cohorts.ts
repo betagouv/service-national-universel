@@ -15,14 +15,11 @@ export function getMeetingPointChoiceLimitDateForCohort(cohort: CohortType): Dat
 
 // start of the cohort's last day
 export function isCohortDone(cohort: CohortType, extraDays = 0): boolean {
-  if (["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"].includes(cohort?.name)) return true;
-  if (cohort && cohort?.dateEnd) {
-    const dateEnd = new Date(cohort.dateEnd);
-    const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
-    endDateDayStart.setDate(dateEnd.getUTCDate() + extraDays);
-    return endDateDayStart.valueOf() < Date.now();
-  }
-  return false;
+  if (!cohort?.dateEnd) return false;
+  const dateEnd = new Date(cohort.dateEnd);
+  const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
+  endDateDayStart.setDate(dateEnd.getUTCDate() + extraDays);
+  return endDateDayStart.valueOf() < Date.now();
 }
 
 export function isCohortNeedJdm(cohort: CohortType): boolean {
