@@ -9,7 +9,7 @@ import api from "@/services/api";
 
 import InfoMessage from "../components/ui/InfoMessage";
 
-import Accueil_jpg from "../../../assets/accueil-cle/accueil.jpg";
+import Accueil_jpg from "@/assets/accueil-cle/accueil.jpg";
 
 export default function Accueil() {
   const { data: messages } = useQuery<AlerteMessageDto[]>({
