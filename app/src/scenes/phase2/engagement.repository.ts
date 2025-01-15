@@ -44,6 +44,16 @@ export async function fetchEquivalence(youngId, id) {
   return data;
 }
 
+export async function deleteEquivalence(youngId, id) {
+  const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence/${id}`, {
+    method: "DELETE",
+    credentials: "include",
+  });
+  const { ok, error, message } = await res.json();
+  if (!ok) throw new Error(error || message || "Erreur lors de la suppression de l'équivalence");
+  return { message: "Equivalence deleted successfully" };
+}
+
 export async function fetchEquivalenceFile(youngId, fileName) {
   const f = await API.get(`/young/${youngId}/phase2/equivalence-file/${fileName}`);
   FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
