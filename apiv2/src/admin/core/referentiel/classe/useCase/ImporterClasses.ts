@@ -4,20 +4,17 @@ import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway"
 import { PointDeRassemblementGateway } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.gateway";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { ClsService } from "nestjs-cls";
-import { MIME_TYPES, STATUS_CLASSE, STATUS_PHASE1_CLASSE, TaskStatus } from "snu-lib";
+import { STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
+import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
+import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
-import { ClasseImportModel, ClasseImportReport, ClasseImportXslx } from "../ReferentielClasse.model";
-import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
-import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
-import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
-import { NotificationGateway } from "@notification/core/Notification.gateway";
-import { EmailParams, EmailTemplate } from "@notification/core/Notification";
+import { ClasseImportModel, ClasseImportRapport, ClasseImportXslx } from "../ReferentielClasse.model";
+import { ReferentielClasseService } from "../ReferentielClasse.service";
 
 @Injectable()
 export class ImporterClasses implements UseCase<string> {
@@ -29,18 +26,17 @@ export class ImporterClasses implements UseCase<string> {
         @Inject(PointDeRassemblementGateway) private readonly pdrGateway: PointDeRassemblementGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
-        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
-        @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
+        private readonly referentielClasseService: ReferentielClasseService,
         private readonly logger: Logger,
     ) {}
 
     async execute(parameters: ReferentielImportTaskParameters): Promise<string> {
-        const report: ClasseImportReport[] = [];
+        const report: ClasseImportRapport[] = [];
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
         const classesFromXslx = await this.fileGateway.parseXLS<ClasseImportXslx>(fileContent.Body, {
             sheetIndex: 0,
         });
-        const mappedClasses = ReferentielClasseMapper.mapFromFile(classesFromXslx);
+        const mappedClasses = ReferentielClasseMapper.mapImporterClassesFromFile(classesFromXslx);
 
         for (const mappedClasse of mappedClasses) {
             try {
@@ -61,41 +57,10 @@ export class ImporterClasses implements UseCase<string> {
                 );
             }
         }
-        return this.processReport(parameters, report);
+        return this.referentielClasseService.processReport(parameters, report);
     }
 
-    private async processReport(
-        parameters: ReferentielImportTaskParameters,
-        report: ClasseImportReport[],
-    ): Promise<string> {
-        const fileBuffer = await this.fileGateway.generateExcel({ rapport: report });
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
-        const reportName = `rapport-classes-importees-${timestamp}.xlsx`;
-        const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
-            data: fileBuffer,
-            mimetype: MIME_TYPES.CSV,
-        });
-
-        //TODO : supprimer quand on aura l'UI des imports
-        if (parameters.auteur.email) {
-            this.notificationGateway.sendEmail<EmailParams>(
-                {
-                    to: [
-                        {
-                            email: parameters.auteur.email,
-                            name: parameters.auteur.prenom + " " + parameters.auteur.nom,
-                        },
-                    ],
-                    attachments: [{ fileName: reportName, filePath: s3File.Key }],
-                },
-                EmailTemplate.IMPORT_REFERENTIEL_GENERIQUE,
-            );
-        }
-
-        return s3File.Key;
-    }
-
-    private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportReport> {
+    private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {
         const classe = await this.classeGateway.findById(classeImport.classeId);
         if (!classe) {
             throw new Error("Classe non trouvée en base");

@@ -1,4 +1,5 @@
+import { DesisterClasses } from "@admin/core/referentiel/classe/useCase/DesisterClasses";
 import { ImporterClasses } from "@admin/core/referentiel/classe/useCase/ImporterClasses";
 import { ImporterRoutes } from "@admin/core/referentiel/routes/useCase/ImporterRoutes";
 
-export const useCaseProvider = [ImporterRoutes, ImporterClasses];
+export const useCaseProvider = [ImporterRoutes, ImporterClasses, DesisterClasses];

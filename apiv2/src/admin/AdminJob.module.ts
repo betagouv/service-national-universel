@@ -39,6 +39,8 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
+import { ReferentielClasseService } from "./core/referentiel/classe/ReferentielClasse.service";
+import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
 
 @Module({
     imports: [
@@ -82,9 +84,8 @@ import { NotificationProducer } from "@notification/infra/Notification.producer"
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
         ValiderAffectationHTS,
-        // ...referentielUseCaseProvider,
-        ImporterRoutes,
-        ImporterClasses,
+        ...referentielUseCaseProvider,
+        ...referentielServiceProvider,
         ReferentielTaskService,
     ],
 })

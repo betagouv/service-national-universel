@@ -18,7 +18,8 @@ export interface ClasseImportModel {
     sessionCode: string;
 }
 
-export interface ClasseImportReport extends ClasseImportModel {
+export interface ClasseRapport {}
+export interface ClasseImportRapport extends ClasseImportModel, ClasseRapport {
     classeStatus?: keyof typeof STATUS_CLASSE;
     sessionId?: string;
     sessionName?: string;
@@ -26,3 +27,41 @@ export interface ClasseImportReport extends ClasseImportModel {
     error?: string;
     updated?: string;
 }
+
+export interface ClasseDesisterXslx {
+    "Identifiant de la classe engagée": string;
+}
+
+export interface ClasseDesisterModel {
+    classeId: string;
+}
+
+export interface ClasseDesisterRapport extends ClasseRapport {
+    classeId: string;
+    result: "success" | "error";
+    jeunesDesistesIds: string;
+    error?: string;
+}
+
+export const DESISTER_CLASSES_ONGLET = "CLASSES DESISTEES";
+
+export interface FileValidation {
+    requiredColumns: string[];
+    sheetName: string;
+}
+
+export const ImportClasseFileValidation: FileValidation = {
+    requiredColumns: [
+        "Session formule",
+        "Identifiant de la classe engagée",
+        "Effectif de jeunes concernés",
+        "Session : Code de la session",
+        "Désignation du centre",
+    ],
+    sheetName: "CLE 2025",
+};
+
+export const DesiterClasseFileValidation: FileValidation = {
+    requiredColumns: ["Identifiant de la classe engagée"],
+    sheetName: "CLASSES DESISTEES",
+};

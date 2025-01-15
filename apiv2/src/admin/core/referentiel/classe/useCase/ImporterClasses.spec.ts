@@ -1,6 +1,6 @@
 import { ImporterClasses } from "./ImporterClasses";
 import { Logger } from "@nestjs/common";
-import { MIME_TYPES, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { MIME_TYPES, ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
 describe("ImporterClasses", () => {
     let useCase: ImporterClasses;
@@ -11,8 +11,7 @@ describe("ImporterClasses", () => {
     let mockPdrGateway: any;
     let mockJeuneGateway: any;
     let mockSejourGateway: any;
-    let mockClockGateway: any;
-    let mockNotificationGateway: any;
+    let mockReferentielService: any;
 
     beforeEach(() => {
         mockFileGateway = {
@@ -41,11 +40,8 @@ describe("ImporterClasses", () => {
         mockSejourGateway = {
             findBySejourSnuId: jest.fn(),
         };
-        mockClockGateway = {
-            getNowSafeIsoDate: jest.fn(),
-        };
-        mockNotificationGateway = {
-            sendEmail: jest.fn(),
+        mockReferentielService = {
+            processReport: jest.fn(),
         };
 
         useCase = new ImporterClasses(
@@ -56,8 +52,7 @@ describe("ImporterClasses", () => {
             mockPdrGateway,
             mockJeuneGateway,
             mockSejourGateway,
-            mockClockGateway,
-            mockNotificationGateway,
+            mockReferentielService,
             new Logger(),
         );
     });
@@ -102,12 +97,11 @@ describe("ImporterClasses", () => {
             fileKey: "test.xlsx",
             folderPath: "/test",
             auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
-            type: "",
             fileName: "",
             fileLineCount: 0,
+            type: ReferentielTaskType.IMPORT_CLASSES,
         });
 
-        expect(result).toBe("report.xlsx");
         expect(mockClasseGateway.update).toHaveBeenCalledWith(
             expect.objectContaining({
                 id: "CLASS-001",
@@ -141,12 +135,11 @@ describe("ImporterClasses", () => {
             fileKey: "test.xlsx",
             folderPath: "/test",
             auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
-            type: "",
             fileName: "",
             fileLineCount: 0,
+            type: ReferentielTaskType.IMPORT_CLASSES,
         });
 
-        expect(result).toBe("report.xlsx");
         expect(mockClasseGateway.update).not.toHaveBeenCalled();
     });
 
@@ -186,9 +179,9 @@ describe("ImporterClasses", () => {
             fileKey: "test.xlsx",
             folderPath: "/test",
             auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
-            type: "",
             fileName: "",
             fileLineCount: 0,
+            type: ReferentielTaskType.IMPORT_CLASSES,
         });
 
         expect(mockJeuneGateway.bulkUpdate).toHaveBeenCalledWith([

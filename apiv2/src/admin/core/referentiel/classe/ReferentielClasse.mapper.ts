@@ -1,7 +1,12 @@
-import { ClasseImportXslx, ClasseImportModel } from "./ReferentielClasse.model";
+import {
+    ClasseImportXslx,
+    ClasseImportModel,
+    ClasseDesisterXslx,
+    ClasseDesisterModel,
+} from "./ReferentielClasse.model";
 
 export class ReferentielClasseMapper {
-    static mapFromFile(classes: ClasseImportXslx[]): ClasseImportModel[] {
+    static mapImporterClassesFromFile(classes: ClasseImportXslx[]): ClasseImportModel[] {
         return classes.map((classe) => ({
             classeId: classe["Identifiant de la classe engagée"],
             cohortCode: classe["Session formule"],
@@ -10,5 +15,9 @@ export class ReferentielClasseMapper {
             pdrCode: classe["Code point de rassemblement initial"],
             sessionCode: `${classe["Session : Code de la session"]}_${classe["Désignation du centre"]}`,
         }));
+    }
+
+    static mapDesisterClassesFromFile(classes: ClasseDesisterXslx[]): ClasseDesisterModel[] {
+        return classes.map((classe) => ({ classeId: classe["Identifiant de la classe engagée"].toLocaleLowerCase() }));
     }
 }

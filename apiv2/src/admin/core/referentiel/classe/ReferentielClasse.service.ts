@@ -3,24 +3,26 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { TaskModel } from "@task/core/Task.model";
-import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
-import { ClasseImportXslx } from "./ReferentielClasse.model";
+import { MIME_TYPES, ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
+import {
+    ClasseDesisterXslx,
+    ClasseImportRapport,
+    ClasseImportXslx,
+    ClasseRapport,
+    DesiterClasseFileValidation,
+    ImportClasseFileValidation,
+} from "./ReferentielClasse.model";
 import { FilePath } from "../Referentiel";
 import {
     CreateReferentielImportTaskModel,
     ReferentielImportTaskAuthor,
     ReferentielImportTaskModel,
+    ReferentielImportTaskParameters,
 } from "../routes/ReferentielImportTask.model";
 import { ReferentielService } from "../Referentiel.service";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-
-const REQUIRED_COLUMN_NAMES = [
-    "Session formule",
-    "Identifiant de la classe engagée",
-    "Effectif de jeunes concernés",
-    "Session : Code de la session",
-    "Désignation du centre",
-];
+import { EmailParams, EmailTemplate } from "@notification/core/Notification";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
 
 @Injectable()
 export class ReferentielClasseService {
@@ -29,6 +31,7 @@ export class ReferentielClasseService {
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         private readonly referentielService: ReferentielService,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
+        @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
     ) {}
 
     async import({
@@ -42,22 +45,55 @@ export class ReferentielClasseService {
         mimetype: string;
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
-        // Parse file
         const classesToImport = await this.fileGateway.parseXLS<ClasseImportXslx>(buffer, {
             defval: "",
+            sheetName: ImportClasseFileValidation.sheetName,
         });
 
-        // Validate data
-        if (classesToImport.length === 0) {
+        const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXslx>(buffer, {
+            defval: "",
+            sheetName: DesiterClasseFileValidation.sheetName,
+        });
+
+        let taskType: ReferentielTaskType | null = null;
+        let missingColumns: string[] = [];
+        if (classesToImport.length > 0 && classesToDesister.length === 0) {
+            taskType = ReferentielTaskType.IMPORT_CLASSES;
+            missingColumns = this.referentielService.getMissingColumns(
+                ImportClasseFileValidation.requiredColumns,
+                classesToImport[0],
+            );
+        } else if (classesToImport.length === 0 && classesToDesister.length > 0) {
+            taskType = ReferentielTaskType.IMPORT_DESISTER_CLASSES;
+            missingColumns = this.referentielService.getMissingColumns(
+                DesiterClasseFileValidation.requiredColumns,
+                classesToDesister[0],
+            );
+        } else if (classesToImport.length > 0 && classesToDesister.length > 0) {
+            taskType = ReferentielTaskType.IMPORT_DESISTER_CLASSES_ET_IMPORTER_CLASSES;
+            const missingColumnsImport = this.referentielService.getMissingColumns(
+                ImportClasseFileValidation.requiredColumns,
+                classesToImport[0],
+            );
+            missingColumns = [
+                ...missingColumnsImport,
+                ...this.referentielService.getMissingColumns(
+                    DesiterClasseFileValidation.requiredColumns,
+                    classesToDesister[0],
+                ),
+            ];
+        } else if (classesToImport.length === 0 && classesToDesister.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_EMPTY_FILE);
         }
 
-        const missingColumns = this.referentielService.getMissingColumns(REQUIRED_COLUMN_NAMES, classesToImport[0]);
         if (missingColumns.length > 0) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_MISSING_COLUMN, missingColumns.join(", "));
         }
 
-        // Save file to S3
+        if (!taskType) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_IMPLEMENTED_YET);
+        }
+
         const timestamp = this.clockGateway.getNowSafeIsoDate();
         const folderPath = `${FilePath.CLASSES}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
@@ -65,13 +101,12 @@ export class ReferentielClasseService {
             mimetype,
         });
 
-        // Create task
         const task: CreateReferentielImportTaskModel = {
             name: TaskName.REFERENTIEL_IMPORT,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters: {
-                    type: ReferentielTaskType.IMPORT_CLASSES,
+                    type: taskType,
                     fileName,
                     fileKey: s3File.Key,
                     fileLineCount: classesToImport.length,
@@ -82,5 +117,33 @@ export class ReferentielClasseService {
         };
         const createdTask = await this.taskGateway.create(task);
         return createdTask;
+    }
+
+    async processReport(parameters: ReferentielImportTaskParameters, report: ClasseRapport[]): Promise<string> {
+        const fileBuffer = await this.fileGateway.generateExcel({ rapport: report });
+        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
+        const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
+            data: fileBuffer,
+            mimetype: MIME_TYPES.EXCEL,
+        });
+
+        //TODO : supprimer quand on aura l'UI des imports
+        if (parameters.auteur.email) {
+            this.notificationGateway.sendEmail<EmailParams>(
+                {
+                    to: [
+                        {
+                            email: parameters.auteur.email,
+                            name: parameters.auteur.prenom + " " + parameters.auteur.nom,
+                        },
+                    ],
+                    attachments: [{ fileName: reportName, filePath: s3File.Key }],
+                },
+                EmailTemplate.IMPORT_REFERENTIEL_GENERIQUE,
+            );
+        }
+
+        return s3File.Key;
     }
 }
