@@ -11,7 +11,7 @@ import ButtonLight from "../../../components/ui/buttons/ButtonLight";
 import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
 import { capture } from "@/sentry";
 
-const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Téléchargez votre fiche sanitaire", email }) => {
+const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Transmettez votre fiche sanitaire", email }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const young = useSelector((state) => state.Auth.young);

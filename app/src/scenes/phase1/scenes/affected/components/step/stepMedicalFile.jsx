@@ -30,7 +30,7 @@ export default function StepMedicalField({ data }) {
   if (!isEnabled) {
     return (
       <StepCard variant="disabled" index={index}>
-        <p className="font-medium text-gray-400">Téléchargez votre fiche sanitaire</p>
+        <p className="font-medium text-gray-400">Transmettez votre fiche sanitaire</p>
       </StepCard>
     );
   }
