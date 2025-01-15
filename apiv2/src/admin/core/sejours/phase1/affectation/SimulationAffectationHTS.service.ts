@@ -1040,7 +1040,7 @@ export class SimulationAffectationHTSService {
                 return {
                     id: sejour.id,
                     centreId: sejour.centreId,
-                    sessionName: sejour.sessionName,
+                    sessionName: sejour.sessionNom,
                     chefDeCentreReferentId: sejour.chefDeCentreReferentId,
                     placesRestantes: sejour.placesRestantes,
                     placesTotal: sejour.placesTotal,

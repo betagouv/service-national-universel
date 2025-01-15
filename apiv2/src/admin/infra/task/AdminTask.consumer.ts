@@ -4,7 +4,7 @@ import { Logger } from "@nestjs/common";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { Job } from "bullmq";
-import { TaskName, ValiderAffectationHTSTaskResult } from "snu-lib";
+import { TaskName, ValiderAffectationCLETaskResult, ValiderAffectationHTSTaskResult } from "snu-lib";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { SimulationAffectationCLE } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE";
 import { SimulationAffectationHTS } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS";
@@ -20,6 +20,8 @@ import {
     SimulationAffectationCLETaskModel,
     SimulationAffectationCLETaskResult,
 } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLETask.model";
+import { ValiderAffectationCLETaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLETask.model";
+import { ValiderAffectationCLE } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLE";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -29,6 +31,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly simulationAffectationCle: SimulationAffectationCLE,
         private readonly simulationAffectationHts: SimulationAffectationHTS,
         private readonly validerAffectationHts: ValiderAffectationHTS,
+        private readonly validerAffectationCle: ValiderAffectationCLE,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
         private readonly cls: ClsService,
     ) {
@@ -97,6 +100,31 @@ export class AdminTaskConsumer extends WorkerHost {
                             erreurs: simulationCle.analytics.erreurs,
                             classes: simulationCle.analytics.classes,
                         } as SimulationAffectationCLETaskResult;
+                        break;
+
+                    case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
+                        const validationCleTask = task as ValiderAffectationCLETaskModel;
+                        const validationCleResult = await this.validerAffectationCle.execute({
+                            ...validationCleTask.metadata!.parameters!,
+                            dateAffectation: validationCleTask.createdAt,
+                        });
+                        results = {
+                            rapportKey: validationCleResult.rapportFile.Key,
+                            jeunesAffected: validationCleResult.analytics.jeunesAffected,
+                            errors: validationCleResult.analytics.errors,
+                        } as ValiderAffectationCLETaskResult;
+                        // TODO: handle errors with partial results for all tasks
+                        if (validationCleResult.analytics.jeunesAffected === 0) {
+                            await this.adminTaskRepository.update(task.id, {
+                                ...task,
+                                metadata: {
+                                    ...task.metadata,
+                                    results,
+                                },
+                            });
+                            await this.adminTaskRepository.toFailed(job.data.id, "Aucun jeune n'a été affecté");
+                            return ConsumerResponse.FAILURE;
+                        }
                         break;
 
                     case TaskName.REFERENTIEL_IMPORT:

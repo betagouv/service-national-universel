@@ -50,6 +50,7 @@ import { ReferentRepository } from "./infra/iam/repository/mongo/ReferentMongo.r
 import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
+import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
 
 @Module({
     imports: [
@@ -103,6 +104,7 @@ import { ContactProducer } from "@notification/infra/email/Contact.producer";
         SimulationAffectationCLEService,
         SimulationAffectationCLE,
         ValiderAffectationHTS,
+        ValiderAffectationCLE,
         ...referentielUseCaseProvider,
         ...referentielServiceProvider,
         AdminTaskImportReferentielSelectorService,

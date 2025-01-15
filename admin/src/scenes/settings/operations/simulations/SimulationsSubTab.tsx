@@ -14,6 +14,7 @@ import RapportCell from "../components/RapportCell";
 import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
+import SimulationCleResultStartButton from "./affectationCle/SimulationCleResultStartButton";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -110,6 +111,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             renderCell: (simulation) => {
               if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
                 return <SimulationHtsResultStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
+                return <SimulationCleResultStartButton simulation={simulation} />;
               }
               return <HiPlay className="text-gray-400" size={50} />;
             },

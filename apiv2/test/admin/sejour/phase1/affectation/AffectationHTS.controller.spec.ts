@@ -22,7 +22,7 @@ import { setupAdminTest } from "../../../setUpAdminTest";
 import { createSession } from "../helper/SessionHelper";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 
-describe("AffectationController", () => {
+describe("AffectationController - HTS", () => {
     let app: INestApplication;
     let affectationController: AffectationController;
     let affectationService: AffectationService;
@@ -171,74 +171,13 @@ describe("AffectationController", () => {
         });
     });
 
-    describe("POST /affectation/:id/simulation/cle", () => {
-        it("should return 400 for invalid params", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`);
-
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 400 for invalid departement (empty)", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
-                departements: [],
-                etranger: true,
-            });
-
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 400 for invalid departement (inexistant)", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle`)
-                .send({
-                    departements: ["nonInexistant"],
-                    etranger: true,
-                });
-
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 400 for departement hors metropole", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
-                departements: departmentList,
-                etranger: true,
-            });
-
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 201 (valid with corse)", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle`)
-                .send({
-                    departements: RegionsMetropoleAndCorse.flatMap((region) => region2department[region]),
-                    etranger: true,
-                });
-
-            expect(response.status).toBe(201);
-            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_SIMULATION);
-            expect(response.body.status).toBe(TaskStatus.PENDING);
-            expect(response.body.metadata.parameters.sessionId).toBe(session.id);
-        });
-    });
-
-    describe("POST /affectation/:id/simulation/:taskId/valider", () => {
+    describe("POST /affectation/:id/simulation/:taskId/valider/hts", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
             const task = await createTask({ name: TaskName.AFFECTATION_HTS_SIMULATION });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${task.id}/valider`,
+                `/affectation/${session.id}/simulation/${task.id}/valider/hts`,
             );
 
             expect(response.status).toBe(400);
@@ -257,7 +196,7 @@ describe("AffectationController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/${task.id}/valider`)
+                .post(`/affectation/${session.id}/simulation/${task.id}/valider/hts`)
                 .send({ affecterPDR: true });
 
             expect(response.status).toBe(422);
@@ -283,7 +222,7 @@ describe("AffectationController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider`)
+                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider/hts`)
                 .send({ affecterPDR: true });
 
             expect(response.status).toBe(422);
@@ -309,7 +248,7 @@ describe("AffectationController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider`)
+                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider/hts`)
                 .send({ affecterPDR: true });
 
             expect(response.status).toBe(201);

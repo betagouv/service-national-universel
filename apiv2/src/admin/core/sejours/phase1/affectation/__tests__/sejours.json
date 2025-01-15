@@ -5,7 +5,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "62753c396f4b220748d9030c",
         "centreId": "657334e06e801c0816d4550c",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "6597e957b86afb08146ee26d",
@@ -13,7 +13,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "640766bbf7c8d6087769f4b4",
         "centreId": "609bebb80c1cc9a888ae8ff7",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "6597ea68b86afb08146f0372",
@@ -21,7 +21,7 @@
         "placesTotal": 112,
         "chefDeCentreReferentId": "6296293e5a4f05074b73a8ac",
         "centreId": "657338286e801c0816d598ec",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65b0e18cb597340819ebbca7",
@@ -29,7 +29,7 @@
         "placesTotal": 154,
         "chefDeCentreReferentId": "65e5b88a536f060091029acd",
         "centreId": "659fb588fc6cec0815125b75",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65b7998527e817009358017d",
@@ -37,7 +37,7 @@
         "placesTotal": 156,
         "chefDeCentreReferentId": "64940742f1db67097c817197",
         "centreId": "609bebb00c1cc9a888ae8fa8",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65b7ba1e5c2b7d0093ff8e64",
@@ -45,7 +45,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "645e0964a9b81813a9926b77",
         "centreId": "6568a9278bc29e0819aba013",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65b8aac842cecd0093879fcb",
@@ -53,7 +53,7 @@
         "placesTotal": 138,
         "chefDeCentreReferentId": "609bea6a4102a8999f9251a8",
         "centreId": "659e6f7fe34856081968e07b",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65b8ab6142cecd009387a8af",
@@ -61,7 +61,7 @@
         "placesTotal": 182,
         "chefDeCentreReferentId": "66041bbd99563da721730a26",
         "centreId": "6569b8578bc29e081912f4f4",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4b3870e0569081d394125",
@@ -69,7 +69,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "647842835c060b13f911b3b7",
         "centreId": "643fbcd7ae348d19a6cefcd3",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4b2c10e0569081d38f974",
@@ -77,7 +77,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "6283c36e0a432d07451670bb",
         "centreId": "6568a84d8bc29e0819ab5935",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4b3b50e0569081d39536c",
@@ -85,7 +85,7 @@
         "placesTotal": 96,
         "chefDeCentreReferentId": "609bea734102a8999f925287",
         "centreId": "609bebc80c1cc9a888ae90b2",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4b3e20e0569081d3966c7",
@@ -93,7 +93,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "63b42da8e566d408dd19a653",
         "centreId": "6446974adeaab4137a4d3957",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4b4ee0e0569081d39bf55",
@@ -101,7 +101,7 @@
         "placesTotal": 196,
         "chefDeCentreReferentId": "6287928ae27e55074af870a5",
         "centreId": "65c4b4ee0e0569081d39bf50",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c4f8c6139d970093e31717",
@@ -109,7 +109,7 @@
         "placesTotal": 126,
         "chefDeCentreReferentId": "65d75cb9a2d16b009744d41e",
         "centreId": "65c4f8c6139d970093e31712",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     },
     {
         "id": "65c50298f2af8800982c65aa",
@@ -117,6 +117,6 @@
         "placesTotal": 194,
         "chefDeCentreReferentId": "65e58432536f060091ffade0",
         "centreId": "63da30bc47841408c590d73f",
-        "sessionName": "Avril 2024 - C"
+        "sessionNom": "Avril 2024 - C"
     }
 ]

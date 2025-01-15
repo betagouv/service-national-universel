@@ -55,7 +55,7 @@ export class AffectationService {
         )?.[0];
         const lastTraitementCompleted = (
             await this.taskGateway.findByNames(
-                [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER],
+                [taskName],
                 {
                     status: TaskStatus.COMPLETED,
                     "metadata.parameters.sessionId": sessionId,

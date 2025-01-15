@@ -1,63 +1,56 @@
 import React, { useMemo } from "react";
-import { useSetState, useToggle } from "react-use";
+import { useToggle } from "react-use";
 import { toastr } from "react-redux-toastr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import cx from "classnames";
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
-import { AffectationRoutes, formatDepartement, region2department, RegionsMetropole, SimulationAffectationHTSTaskDto, TaskStatus, translate } from "snu-lib";
-import { Button, Modal, SectionSwitcher } from "@snu/ds/admin";
+import { AffectationRoutes, formatDepartement, region2department, RegionsMetropole, SimulationAffectationCLETaskDto, TaskStatus, translate } from "snu-lib";
+import { Button, Modal } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import { AffectationService } from "@/services/affectationService";
 import { isBefore } from "date-fns";
 
-interface SimulationHtsResultStartButtonProps {
+interface SimulationCleResultStartButtonProps {
   simulation: unknown;
 }
 
-export default function SimulationHtsResultStartButton({ simulation }: SimulationHtsResultStartButtonProps) {
-  const simulationHts = simulation as SimulationAffectationHTSTaskDto;
+export default function SimulationCleResultStartButton({ simulation }: SimulationCleResultStartButtonProps) {
+  const simulationCle = simulation as SimulationAffectationCLETaskDto;
   const queryClient = useQueryClient();
 
-  const [state, setState] = useSetState<{
-    affecterPDR: boolean;
-  }>({
-    affecterPDR: true,
-  });
   const [showModal, toggleModal] = useToggle(false);
 
   const regions = useMemo(
     () =>
       RegionsMetropole.reduce((acc, region) => {
-        acc[region] = simulationHts.metadata?.parameters?.departements?.filter((dep) => region2department[region].includes(dep)) || [];
+        acc[region] = simulationCle.metadata?.parameters?.departements?.filter((dep) => region2department[region].includes(dep)) || [];
         return acc;
       }, {}),
-    [simulationHts],
+    [simulationCle],
   );
 
-  const affectationKey = ["affectation", "hts", simulationHts.metadata!.parameters!.sessionId]; // check AffectationHTSSimulationMetropoleModal.tsx queryKey
+  const affectationKey = ["affectation", "cle", simulationCle.metadata!.parameters!.sessionId]; // check AffectationCLESimulationMetropoleModal.tsx queryKey
   const {
     isPending: isLoading,
     isError,
     data: affectationStatus,
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: affectationKey,
-    queryFn: async () => AffectationService.getAffectation(simulationHts.metadata!.parameters!.sessionId, "HTS"),
+    queryFn: async () => AffectationService.getAffectation(simulationCle.metadata!.parameters!.sessionId, "CLE"),
   });
 
   const isOutdated =
     [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.traitement?.status as TaskStatus) ||
-    (!!affectationStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationHts.createdAt), new Date(affectationStatus.traitement.lastCompletedAt)));
+    (!!affectationStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationCle.createdAt), new Date(affectationStatus.traitement.lastCompletedAt)));
 
-  const isDisabled = simulationHts.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
+  const isDisabled = simulationCle.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await AffectationService.postValiderAffectationHtsMetropole(simulationHts.metadata!.parameters!.sessionId!, simulationHts.id, {
-        affecterPDR: state.affecterPDR,
-      });
+      return await AffectationService.postValiderAffectationCleMetropole(simulationCle.metadata!.parameters!.sessionId!, simulationCle.id);
     },
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
@@ -87,27 +80,15 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
                   <HiOutlineLightningBolt className="w-6 h-6" />
                 </div>
               </div>
-              <h1 className="font-bold text-xl m-0">Affectation HTS (Metropole, hors Corse)</h1>
+              <h1 className="font-bold text-xl m-0">Affectation CLE (Metropole, hors Corse)</h1>
               <p className="text-lg">Vérifier les paramètres avant de lancer ce traitement.</p>
             </div>
             <div className="flex items-start flex-col w-full gap-8">
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Suivi</h2>
-                <div>Affectés : {simulationHts.metadata?.results?.jeunesNouvellementAffected ?? "--"}</div>
-                <div>Non affectés : {simulationHts.metadata?.results?.jeuneAttenteAffectation ?? "--"}</div>
-              </div>
-              <div className="flex flex-col w-full gap-2.5">
-                <h2 className="text-lg leading-7 font-bold m-0">Schéma de répartition</h2>
-                <div>Nom du fichier : {simulationHts?.metadata?.parameters?.sdrFileName || "--"}</div>
-              </div>
-              <div className="flex flex-col w-full gap-2.5">
-                <h2 className="text-lg leading-7 font-bold m-0">Situations scolaires</h2>
-                <div className="flex gap-2">
-                  <div className="text-gray-400">Niveaux&nbsp;:</div>
-                  <div className="text-sm leading-5 font-normal">
-                    {simulationHts.metadata?.parameters?.niveauScolaires?.map((niveau) => translate(niveau)).join(", ") || "Aucun"}
-                  </div>
-                </div>
+                <div>Classes : {simulationCle.metadata?.results?.classes ?? "--"}</div>
+                <div>Erreurs : {simulationCle.metadata?.results?.erreurs ?? "--"}</div>
+                <div>Affectés : {simulationCle.metadata?.results?.jeunesAffected ?? "--"}</div>
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Découpage territorial</h2>
@@ -121,12 +102,8 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
                 </div>
                 <div className="flex gap-2">
                   <div className="text-gray-400">Etranger&nbsp;:</div>
-                  <div className="text-sm leading-5 font-normal">{simulationHts.metadata?.parameters?.etranger ? "Oui" : "Non"}</div>
+                  <div className="text-sm leading-5 font-normal">{simulationCle.metadata?.parameters?.etranger ? "Oui" : "Non"}</div>
                 </div>
-              </div>
-              <div className="flex flex-col w-full gap-2.5">
-                <h2 className="text-lg leading-7 font-bold m-0">Points de rassemblement</h2>
-                <SectionSwitcher title="Affecter les PDR" value={state.affecterPDR} onChange={(affecterPDR) => setState({ affecterPDR })} />
               </div>
             </div>
           </div>

@@ -18,7 +18,7 @@ export class SejourMapper {
             centreId: sejourDocument.cohesionCenterId,
             centreVille: sejourDocument.cityCentre,
             centreCodePostal: sejourDocument.zipCentre,
-            sessionName: sejourDocument.cohort,
+            sessionNom: sejourDocument.cohort,
             sessionId: sejourDocument.cohortId,
             // mandatory
             // projetPedagogiqueFiles: sejourDocument.pedagoProjectFiles as any,

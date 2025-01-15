@@ -7,6 +7,7 @@ import {
     SimulationAffectationHTSTaskParameters,
     ValiderAffectationHTSTaskParameters,
     SimulationAffectationCLETaskParameters,
+    ValiderAffectationCLETaskParameters,
 } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -120,8 +121,8 @@ export class AffectationController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId/simulation/:taskId/valider")
-    async validerSimulation(
+    @Post("/:sessionId/simulation/:taskId/valider/hts")
+    async validerSimulationHTS(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
         @Param("taskId") taskId: string,
@@ -158,6 +159,49 @@ export class AffectationController {
                         sousRole: request.user.sousRole,
                     },
                 } as ValiderAffectationHTSTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider/cle")
+    async validerSimulationCLE(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+    ): Promise<AffectationRoutes["PostSimulationsCLERoute"]["response"]> {
+        const simulationTask = await this.taskGateway.findById(taskId);
+
+        // On verifie qu'une simulation n'a pas déjà été affecté en amont
+        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+            sessionId,
+            TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+        );
+
+        console.log("status", status, "lastCompletedAt", lastCompletedAt);
+        if (
+            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
+            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
+        ) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+        }
+
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    simulationTaskId: taskId,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as ValiderAffectationCLETaskParameters,
             },
         });
         return TaskMapper.toDto(task);

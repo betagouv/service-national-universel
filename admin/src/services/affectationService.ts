@@ -35,12 +35,21 @@ const AffectationService = {
     })();
   },
 
-  postValiderAffectation: async (sessionId: string, simulationId: string, { affecterPDR }: AffectationRoutes["PostValiderAffectationRoute"]["payload"]) => {
-    return await buildRequest<AffectationRoutes["PostValiderAffectationRoute"]>({
-      path: "/affectation/{sessionId}/simulation/{simulationId}/valider",
+  postValiderAffectationHtsMetropole: async (sessionId: string, simulationId: string, { affecterPDR }: AffectationRoutes["PostValiderAffectationHTSRoute"]["payload"]) => {
+    return await buildRequest<AffectationRoutes["PostValiderAffectationHTSRoute"]>({
+      path: "/affectation/{sessionId}/simulation/{simulationId}/valider/hts",
       method: "POST",
       params: { sessionId, simulationId },
       payload: { affecterPDR },
+      target: "API_V2",
+    })();
+  },
+
+  postValiderAffectationCleMetropole: async (sessionId: string, simulationId: string) => {
+    return await buildRequest<AffectationRoutes["PostValiderAffectationCLERoute"]>({
+      path: "/affectation/{sessionId}/simulation/{simulationId}/valider/cle",
+      method: "POST",
+      params: { sessionId, simulationId },
       target: "API_V2",
     })();
   },
