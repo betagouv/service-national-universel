@@ -1,5 +1,4 @@
-import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { getCohort } from "./cohorts";
+import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
@@ -264,10 +263,9 @@ export const redirectToCorrection = (young, field) => {
   return correction ? correction.redirect : "/";
 };
 
-export function shouldForceRedirectToEmailValidation(user) {
-  const cohort = getCohort(user.cohort);
+export function shouldForceRedirectToEmailValidation(user, cohort) {
   const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
-  const shouldUserValidateEmail = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const shouldUserValidateEmail = user?.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort?.inscriptionModificationEndDate);
   const pathname = window.location.pathname;
   return isEmailValidationEnabled && shouldUserValidateEmail && pathname !== "/preinscription/email-validation";
 }

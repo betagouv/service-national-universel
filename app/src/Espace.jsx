@@ -1,13 +1,13 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { getCohort } from "./utils/cohorts";
+import useAuth from "./services/useAuth";
+import useCohort from "./services/useCohort";
 import API from "./services/api";
 import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation, shouldForceRedirectToInscription } from "./utils/navigation";
+import { shouldForceRedirectToInscription } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
@@ -34,8 +34,8 @@ const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+  const { young } = useAuth();
+  const { cohort } = useCohort();
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -68,10 +68,6 @@ const Espace = () => {
   if (!young || !cohort) return <PageLoader />;
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
-
-  if (shouldForceRedirectToEmailValidation(young)) {
-    return <Redirect to="/preinscription/email-validation" />;
-  }
 
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 

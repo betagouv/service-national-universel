@@ -1,14 +1,12 @@
 import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
-import useAuth from "@/services/useAuth";
 import ReasonForm from "../components/ReasonForm";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import useInscriptionGoal from "../lib/useInscriptionGoal";
 import Loader from "@/components/Loader";
 import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
@@ -38,11 +36,11 @@ export default function NewChoiceSejour() {
 }
 
 function Modal({ open, setOpen, newCohortPeriod, reason, message }) {
-  const { young } = useAuth();
+  const { cohortDateString } = useCohort();
   const queryParams = new URLSearchParams(window.location.search);
   const cohortId = queryParams.get("cohortid") || "";
   const cohortName = queryParams.get("cohortName") || "";
-  const oldCohortPeriod = capitalizeFirstLetter(getCohortPeriod(getCohort(young.cohort)));
+  const oldCohortPeriod = capitalizeFirstLetter(cohortDateString);
   const history = useHistory();
   const sejourMutation = useChangeSejour();
   const goalQuery = useInscriptionGoal(cohortName);

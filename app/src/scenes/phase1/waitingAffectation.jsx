@@ -1,5 +1,5 @@
 import React from "react";
-import { getCohortPeriod, youngCanChangeSession } from "snu-lib";
+import { youngCanChangeSession } from "snu-lib";
 import { Link } from "react-router-dom";
 import hero2 from "../../assets/hero-2.png";
 import heroBanner from "../../assets/hero-banner.png";
@@ -15,15 +15,13 @@ import Files from "./Files";
 import ButtonExternalLinkPrimary from "../../components/ui/buttons/ButtonExternalLinkPrimary";
 import useAuth from "@/services/useAuth";
 import { RiInformationFill } from "react-icons/ri";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import plausibleEvent from "@/services/plausible";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
+  const { cohortDateString } = useCohort();
   const shouldShowChangeStayLink = !isCLE && youngCanChangeSession(young);
-
-  const cohort = getCohort(young.cohort);
-  const cohortDate = getCohortPeriod(cohort);
 
   function handleClick() {
     plausibleEvent("CLE attente affectation - desistement");
@@ -39,7 +37,7 @@ export default function WaitingAffectation() {
           <div className="mb-10 max-w-3xl">
             <header className="md:mt-12 mb-12">
               <h1 className="text-[44px] mt-0 mb-1">Mon séjour de cohésion</h1>
-              <h2 className="text-[44px] mt-0 mb-3 font-bold">{cohortDate}</h2>
+              <h2 className="text-[44px] mt-0 mb-3 font-bold">{cohortDateString}</h2>
               {shouldShowChangeStayLink && <ChangeStayLink />}
             </header>
             <div className="flex my-4 items-center gap-4 rounded-xl border-[1px] border-gray-200 bg-white p-3">

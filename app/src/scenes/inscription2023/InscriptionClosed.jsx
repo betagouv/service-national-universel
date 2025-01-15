@@ -1,13 +1,14 @@
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import { SignupButtons } from "@snu/ds/dsfr";
 import React from "react";
 import { useHistory } from "react-router-dom";
-import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS } from "snu-lib";
 
 export default function InscriptionClosed({ young, isCLE }) {
   const history = useHistory();
+  const { cohortDateString } = useCohort();
   const statusWording = (young, isCLE) => {
     if (isCLE) {
       if ([YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
@@ -29,7 +30,7 @@ export default function InscriptionClosed({ young, isCLE }) {
     <DSFRLayout title={statusTitle(isCLE)}>
       <DSFRContainer title={statusWording(young, isCLE)}>
         {!isCLE ? (
-          <p>Les inscriptions pour le séjour {getCohortPeriod(getCohort(young?.cohort))} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
+          <p>Les inscriptions pour le séjour {cohortDateString} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
         ) : (
           <p>Les inscriptions dans le cadre des classes engagées ont été clôturées.</p>
         )}
