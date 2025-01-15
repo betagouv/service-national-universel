@@ -36,7 +36,6 @@ export class ImporterClasses implements UseCase<string> {
 
     async execute(parameters: ReferentielImportTaskParameters): Promise<string> {
         const report: ClasseImportReport[] = [];
-        console.time("ImporterClasses");
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
         const classesFromXslx = await this.fileGateway.parseXLS<ClasseImportXslx>(fileContent.Body, {
             sheetIndex: 0,
@@ -62,7 +61,6 @@ export class ImporterClasses implements UseCase<string> {
                 );
             }
         }
-        console.timeEnd("ImporterClasses");
         return this.processReport(parameters, report);
     }
 
@@ -126,7 +124,6 @@ export class ImporterClasses implements UseCase<string> {
             newClasseData.statut = STATUS_CLASSE.ASSIGNED;
             updatedFields.push("statut");
         }
-
         const sejour = await this.sejourGateway.findBySejourSnuId(classeImport.sessionCode);
         if (!classeImport.sessionCode || !sejour) {
             let errorMessage = '"Session : Code de la session_Désignation du centre" est manquant';

@@ -1,123 +1,205 @@
-import { Test, TestingModule } from "@nestjs/testing";
 import { ImporterClasses } from "./ImporterClasses";
-import { FileGateway } from "@shared/core/File.gateway";
-import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
-import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
-import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway";
-import { PointDeRassemblementGateway } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.gateway";
-import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
-import { ClockGateway } from "@shared/core/Clock.gateway";
-import { ClsService } from "nestjs-cls";
-import { TaskStatus } from "snu-lib";
-import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
-import { SessionMode } from "aws-sdk/clients/s3";
-import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
-import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
-import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
+import { Logger } from "@nestjs/common";
+import { MIME_TYPES, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
 describe("ImporterClasses", () => {
     let useCase: ImporterClasses;
-    let fileGateway: jest.Mocked<FileGateway>;
-    let classeGateway: jest.Mocked<ClasseGateway>;
-    let sessionGateway: jest.Mocked<SessionGateway>;
-    let jeuneGateway: jest.Mocked<JeuneGateway>;
-    let clockGateway: jest.Mocked<ClockGateway>;
+    let mockFileGateway: any;
+    let mockClasseGateway: any;
+    let mockSessionGateway: any;
+    let mockCentreGateway: any;
+    let mockPdrGateway: any;
+    let mockJeuneGateway: any;
+    let mockSejourGateway: any;
+    let mockClockGateway: any;
+    let mockNotificationGateway: any;
 
-    beforeEach(async () => {
-        const module: TestingModule = await Test.createTestingModule({
-            providers: [
-                ImporterClasses,
-                {
-                    provide: FileGateway,
-                    useValue: {
-                        downloadFile: jest.fn(),
-                        parseXLS: jest.fn(),
-                        generateExcel: jest.fn(),
-                        uploadFile: jest.fn(),
-                    },
-                },
-                {
-                    provide: ClasseGateway,
-                    useValue: { findById: jest.fn() },
-                },
-                {
-                    provide: SessionGateway,
-                    useValue: { findBySnuId: jest.fn() },
-                },
-                {
-                    provide: CentreGateway,
-                    useValue: {},
-                },
-                {
-                    provide: PointDeRassemblementGateway,
-                    useValue: {},
-                },
-                {
-                    provide: JeuneGateway,
-                    useValue: {
-                        findByClasseId: jest.fn(),
-                        update: jest.fn(),
-                    },
-                },
-                {
-                    provide: ClockGateway,
-                    useValue: { getNowSafeIsoDate: jest.fn() },
-                },
-                {
-                    provide: ClsService,
-                    useValue: {},
-                },
-            ],
-        }).compile();
+    beforeEach(() => {
+        mockFileGateway = {
+            downloadFile: jest.fn(),
+            parseXLS: jest.fn(),
+            generateExcel: jest.fn(),
+            uploadFile: jest.fn(),
+        };
+        mockClasseGateway = {
+            findById: jest.fn(),
+            update: jest.fn(),
+        };
+        mockSessionGateway = {
+            findBySnuId: jest.fn(),
+        };
+        mockCentreGateway = {
+            findByMatricule: jest.fn(),
+        };
+        mockPdrGateway = {
+            findByMatricule: jest.fn(),
+        };
+        mockJeuneGateway = {
+            findByClasseId: jest.fn(),
+            bulkUpdate: jest.fn(),
+        };
+        mockSejourGateway = {
+            findBySejourSnuId: jest.fn(),
+        };
+        mockClockGateway = {
+            getNowSafeIsoDate: jest.fn(),
+        };
+        mockNotificationGateway = {
+            sendEmail: jest.fn(),
+        };
 
-        useCase = module.get<ImporterClasses>(ImporterClasses);
-        fileGateway = module.get(FileGateway);
-        classeGateway = module.get(ClasseGateway);
-        sessionGateway = module.get(SessionGateway);
-        jeuneGateway = module.get(JeuneGateway);
-        clockGateway = module.get(ClockGateway);
+        useCase = new ImporterClasses(
+            mockFileGateway,
+            mockClasseGateway,
+            mockSessionGateway,
+            mockCentreGateway,
+            mockPdrGateway,
+            mockJeuneGateway,
+            mockSejourGateway,
+            mockClockGateway,
+            mockNotificationGateway,
+            new Logger(),
+        );
     });
 
-    it("should be defined", () => {
-        expect(useCase).toBeDefined();
+    it("should successfully import classes", async () => {
+        const mockXlsxData = [
+            {
+                "Session formule": "2024",
+                "Identifiant de la classe engagée": "CLASS-001",
+                "Effectif de jeunes concernés": 30,
+                "Session : Code de la session": "SES001",
+                "Désignation du centre": "CENTRE-001",
+                "Code point de rassemblement initial": "PDR-001",
+            },
+        ];
+
+        mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
+        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
+        mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
+
+        mockClasseGateway.findById.mockResolvedValue({
+            id: "CLASS-001",
+            statut: STATUS_CLASSE.VERIFIED,
+        });
+        mockSessionGateway.findBySnuId.mockResolvedValue({
+            id: "SESSION-001",
+            nom: "Session 2024",
+        });
+        mockSejourGateway.findBySejourSnuId.mockResolvedValue({
+            id: "SEJOUR-001",
+        });
+        mockCentreGateway.findByMatricule.mockResolvedValue({
+            id: "CENTRE-001",
+        });
+        mockPdrGateway.findByMatricule.mockResolvedValue({
+            id: "PDR-001",
+        });
+        mockJeuneGateway.findByClasseId.mockResolvedValue([]);
+
+        const result = await useCase.execute({
+            fileKey: "test.xlsx",
+            folderPath: "/test",
+            auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
+            type: "",
+            fileName: "",
+            fileLineCount: 0,
+        });
+
+        expect(result).toBe("report.xlsx");
+        expect(mockClasseGateway.update).toHaveBeenCalledWith(
+            expect.objectContaining({
+                id: "CLASS-001",
+                statut: STATUS_CLASSE.ASSIGNED,
+                sessionId: "SESSION-001",
+                sejourId: "SEJOUR-001",
+                centreCohesionId: "CENTRE-001",
+                pointDeRassemblementId: "PDR-001",
+                statutPhase1: STATUS_PHASE1_CLASSE.AFFECTED,
+            }),
+        );
     });
 
-    it("should process classe import successfully", async () => {
-        const mockFileKey = "test-file.xlsx";
-        const mockFolderPath = "test-folder";
-        const mockTimestamp = "2023-01-01";
+    it("should handle classe not found error", async () => {
+        const mockXlsxData = [
+            {
+                "Session formule": "2024",
+                "Identifiant de la classe engagée": "CLASS-NOT-FOUND",
+                "Effectif de jeunes concernés": 30,
+            },
+        ];
 
-        fileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("test") });
-        fileGateway.parseXLS.mockResolvedValue([{ classeId: "123", sessionCode: "S1" }]);
-        classeGateway.findById.mockResolvedValue({ id: "123", sessionId: "old-session" } as ClasseModel);
-        sessionGateway.findBySnuId.mockResolvedValue({ id: "new-session", nom: "Session 1" } as SessionModel);
-        jeuneGateway.findByClasseId.mockResolvedValue([
-            { id: "Y1", sessionId: "old-session", sessionNom: "Old Session" } as JeuneModel,
+        mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
+        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
+        mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
+
+        mockClasseGateway.findById.mockResolvedValue(null);
+
+        const result = await useCase.execute({
+            fileKey: "test.xlsx",
+            folderPath: "/test",
+            auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
+            type: "",
+            fileName: "",
+            fileLineCount: 0,
+        });
+
+        expect(result).toBe("report.xlsx");
+        expect(mockClasseGateway.update).not.toHaveBeenCalled();
+    });
+
+    it("should update young session when classe session changes", async () => {
+        const mockXlsxData = [
+            {
+                "Session formule": "2024",
+                "Identifiant de la classe engagée": "CLASS-001",
+                "Effectif de jeunes concernés": 30,
+                "Session : Code de la session": "SES001",
+                "Désignation du centre": "CENTRE-001",
+            },
+        ];
+
+        mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
+        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
+        mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
+
+        mockClasseGateway.findById.mockResolvedValue({
+            id: "CLASS-001",
+            sessionId: "OLD-SESSION",
+            statut: STATUS_CLASSE.VERIFIED,
+        });
+        mockSessionGateway.findBySnuId.mockResolvedValue({
+            id: "SESSION-001",
+            nom: "Session 2024",
+        });
+        mockSejourGateway.findBySejourSnuId.mockResolvedValue({
+            id: "SEJOUR-001",
+        });
+        mockJeuneGateway.findByClasseId.mockResolvedValue([
+            { id: "YOUNG-001", sessionId: "OLD-SESSION", sessionNom: "Old Session" },
         ]);
-        clockGateway.getNowSafeIsoDate.mockReturnValue(mockTimestamp);
-        fileGateway.generateExcel.mockResolvedValue(Buffer.from("report"));
-        fileGateway.uploadFile.mockResolvedValue({ Key: "path/to/uploaded-file.xlsx" } as any);
 
-        const result = await useCase.execute({
-            fileKey: mockFileKey,
-            folderPath: mockFolderPath,
-        } as ReferentielImportTaskParameters);
+        await useCase.execute({
+            fileKey: "test.xlsx",
+            folderPath: "/test",
+            auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
+            type: "",
+            fileName: "",
+            fileLineCount: 0,
+        });
 
-        expect(result).toBe("path/to/uploaded-file.xlsx");
-        expect(jeuneGateway.update).toHaveBeenCalled();
-    });
-
-    it("should handle file processing error", async () => {
-        fileGateway.downloadFile.mockRejectedValue(new Error("File not found"));
-        fileGateway.generateExcel.mockResolvedValue(Buffer.from("error-report"));
-        fileGateway.uploadFile.mockResolvedValue({ Key: "error-report.xlsx" } as any);
-        clockGateway.getNowSafeIsoDate.mockReturnValue("2023-01-01");
-
-        const result = await useCase.execute({
-            fileKey: "invalid-file.xlsx",
-            folderPath: "test-folder",
-        } as ReferentielImportTaskParameters);
-
-        expect(result).toBe("error-report.xlsx");
+        expect(mockJeuneGateway.bulkUpdate).toHaveBeenCalledWith([
+            expect.objectContaining({
+                id: "YOUNG-001",
+                sessionId: "SESSION-001",
+                sessionNom: "Session 2024",
+                originalSessionId: "OLD-SESSION",
+                originalSessionNom: "Old Session",
+                sessionChangeReason: "Import SI-SNU",
+            }),
+        ]);
     });
 });
