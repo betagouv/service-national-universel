@@ -11,7 +11,8 @@ export default function CorrectionRequests() {
   const { young } = useAuth();
   const { cohort } = useCohort();
   const { canModifyInscription } = usePermissions();
-  const correctionRequests = young.correctionRequests?.map((c) => c.toObject()).filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any));
+  const correctionRequests = young?.correctionRequests as unknown as CorrectionRequestType[];
+  const filteredRequests = correctionRequests.filter((c) => ["SENT", "REMINDED"].includes(c.status as any));
 
   return (
     <section id="corrections">
@@ -22,7 +23,7 @@ export default function CorrectionRequests() {
       )}
 
       <div className="grid grid-cols-1 gap-2">
-        {correctionRequests?.map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+        {filteredRequests?.map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
       </div>
     </section>
   );

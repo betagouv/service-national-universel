@@ -31,10 +31,6 @@ export function isCohortNeedJdm(cohort: CohortType): boolean {
   }
 }
 
-export const canYoungResumePhase1 = (y: YoungType): boolean => {
-  return y.status === YOUNG_STATUS.WITHDRAWN && ![YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.NOT_DONE].includes(y.statusPhase1 as any);
-};
-
 export async function fetchCohort(cohortId: string): Promise<CohortType> {
   return fetch(`${apiURL}/cohort/${cohortId}/public`)
     .then((res) => res.json())
