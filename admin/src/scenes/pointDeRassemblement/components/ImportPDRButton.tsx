@@ -30,11 +30,11 @@ export default function ImportPDRButton({ className }: ImportPDRButtonProps) {
     onError: (error: Error) => {
       console.log(error);
       if (error.message.includes(ERRORS.INVALID_BODY)) {
-        toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", translate(error.message));
+        toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", translate(error.message), { timeOut: 5000 });
       } else if (error.message.includes(ERRORS.FILE_CORRUPTED)) {
-        toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", error.message.replaceAll(ERRORS.FILE_CORRUPTED, ""));
+        toastr.error("Une erreur est survenue. Nous n'avons pu enregistrer le fichier.", error.message.replaceAll(ERRORS.FILE_CORRUPTED, ""), { timeOut: 5000 });
       } else {
-        toastr.error("La requête étant trop longue, nous allons vous envoyer un mail avec le fichier de résultat dans les prochaines minutes.", "");
+        toastr.warning("La requête étant trop longue, nous allons vous envoyer un mail avec le fichier de résultat dans les prochaines minutes.", "", { timeOut: 5000 });
       }
     },
   });
