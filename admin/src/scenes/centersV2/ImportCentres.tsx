@@ -41,7 +41,7 @@ export default function ImportCentres() {
 
     setIsUploading(true);
     try {
-      const res = await api.uploadFiles(`/cohesion-center/import`, [file]);
+      const res = await api.uploadFiles(`/cohesion-center/import`, [file], {}, 0);
       if (res.code === "FILE_CORRUPTED") {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
       } else if (!res.ok) {
