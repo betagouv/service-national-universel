@@ -3,7 +3,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD, YOUNG_SOURCE } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD, YOUNG_SOURCE, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -129,12 +129,12 @@ describe("Referent", () => {
       const now = new Date();
       const tomorrow = new Date(now);
       tomorrow.setDate(now.getDate() + 1);
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: testName, instructionEndDate: tomorrow, objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
 
       // ajout d'un objectif à 1
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: testName, max: 1 }));
 
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, testName);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.objectif).toBe(1);
       expect(completionObjectif.isAtteint).toBe(false);
 
@@ -198,12 +198,12 @@ describe("Referent", () => {
       await deleteYoungByIdHelper(youngId);
     });
     it("should not update young if region goal reached (not department)", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture());
+      const cohort = await createCohortHelper(getNewCohortFixture({ objectifLevel: INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL }));
       const inscriptionGoal = await createInscriptionGoal(getNewInscriptionGoalFixture({ cohort: cohort.name, cohortId: cohort._id, max: 1 }));
       // jeune dans la region mais pas dans le departement
       await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED, region: inscriptionGoal.region, cohort: cohort.name, cohortId: cohort._id }));
 
-      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort.name);
+      let completionObjectif = await getCompletionObjectifs(inscriptionGoal.department!, cohort);
       expect(completionObjectif.department.isAtteint).toBe(false);
       expect(completionObjectif.region.isAtteint).toBe(true);
       expect(completionObjectif.isAtteint).toBe(true);

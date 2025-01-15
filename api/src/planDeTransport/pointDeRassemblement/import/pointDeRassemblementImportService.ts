@@ -47,15 +47,9 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
           matricule: pdr.matricule,
         });
         continue;
-      } else if (pdr._id) {
-        processedPdr = await processPdrWithId(pdr);
-        if (processedPdr.action === "error") {
-          processedPdr = await processPdrWithoutId(pdr);
-        }
-      } else if (pdr.matricule) {
-        processedPdr = await processPdrWithoutId(pdr);
+      } else {
+        processedPdr = await processPdrWitMatricule(pdr);
       }
-      // @ts-expect-error - processedPdr is defined
       report.push(processedPdr);
     } catch (e) {
       logger.error(e);
@@ -69,44 +63,19 @@ export const importPointDeRassemblement = async (pdrFilePath: string) => {
   }
 
   // suppression logique de tous les PDR sans matricule (legacy)
-  await PointDeRassemblementModel.updateMany({ matricule: { $exists: false } }, { $set: { deletedAt: new Date() } });
+  await PointDeRassemblementModel.updateMany({ matricule: { $exists: false }, deletedAt: { $exists: false } }, { $set: { deletedAt: new Date() } });
 
   return report;
 };
 
 const filterPdrs = (mappedPdrs: PointDeRassemblementImportMapped[]) => {
-  // on supprime les lignes avec 2 fois le même _id
-  const duplicatedPdrs = mappedPdrs.filter((pdr) => pdr._id && mappedPdrs.find(({ _id, matricule }) => _id === pdr._id && matricule !== pdr.matricule));
-  duplicatedPdrs.forEach((pdr) => {
-    logger.info(`importCohesionCenter() - remove _id from PDR ${pdr.matricule} (duplicated _id: ${pdr._id})`);
-    pdr._id = undefined;
-  });
   return mappedPdrs;
 };
 
-export const processPdrWithId = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
-  const { _id, ...pdrToUpdate } = pdr;
-  try {
-    const existingPdr = await PointDeRassemblementModel.findById(_id);
-    if (existingPdr && !existingPdr.deletedAt) {
-      return await updatePdr(pdrToUpdate, existingPdr, "Id provided - Pdr found by Id");
-    }
-  } catch (e) {
-    logger.warn(e);
-  }
-  return {
-    _id: _id,
-    matricule: "",
-    name: "",
-    action: "error",
-    comment: "Id provided - no pdr found by Id",
-  };
-};
-
-export const processPdrWithoutId = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
+export const processPdrWitMatricule = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
   const foundPdrs = await PointDeRassemblementModel.find({ matricule: pdr.matricule, deletedAt: { $exists: false } });
   if (foundPdrs.length === 1) {
-    logger.info(`processPdrWithoutId() - Pdr with matricule ${pdr.matricule} already exists`);
+    logger.info(`processPdrWitMatricule() - Pdr with matricule ${pdr.matricule} already exists`);
     return await updatePdr(pdr, foundPdrs[0], "No Id - Pdr found by matricule");
   } else if (foundPdrs.length > 1) {
     // return await processPdrsByMatriculeFound(pdr, foundPdrs);
@@ -142,7 +111,6 @@ export const processPdrsByMatriculeFound = async (pdr: PointDeRassemblementImpor
 
 export const createPdr = async (pdr: PointDeRassemblementImportMapped): Promise<PointDeRassemblementImportReport> => {
   const { extraInfos, report } = await getPdrExtraInfos(pdr);
-  pdr._id = undefined;
   const createdPdr = await PointDeRassemblementModel.create({ ...pdr, ...extraInfos });
   await createdPdr.save({ fromUser: { firstName: "IMPORT_POINT_DE_RASSEMBLEMENT" } });
   return {

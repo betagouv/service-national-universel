@@ -9,8 +9,8 @@ import YoungHeader from "../../phase0/components/YoungHeader";
 
 export default function History({ young, onChange }) {
   const user = useSelector((state) => state.Auth.user);
-  const [data, setData] = useState([]);
-  const formattedData = formatHistory(data, user.role);
+  const [data, setData] = useState();
+  const formattedData = formatHistory(data || [], user.role);
 
   const getPatches = async () => {
     try {
@@ -49,7 +49,11 @@ export default function History({ young, onChange }) {
   return (
     <>
       <YoungHeader young={young} tab="historique" onChange={onChange} />
-      <div className="p-[30px]">{!data?.length ? <Loader /> : <HistoricComponent model="young" data={formattedData} customFilterOptions={filters} />}</div>
+      <div className="p-[30px]">
+        {!data && <Loader />}
+        {data?.length === 0 && <div>Aucun historique disponible</div>}
+        {!!data?.length && <HistoricComponent model="young" data={formattedData} customFilterOptions={filters} />}
+      </div>
     </>
   );
 }

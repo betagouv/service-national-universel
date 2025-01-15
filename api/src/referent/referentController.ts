@@ -107,8 +107,10 @@ import {
   getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
+  isReferentDep,
+  canValidateYoungToLP,
 } from "snu-lib";
-import { getFilteredSessions, getAllSessions } from "../utils/cohort";
+import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { UserRequest } from "../controllers/request";
@@ -118,7 +120,9 @@ import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { isAfter } from "date-fns/isAfter";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { CohortDocumentWithPlaces } from "../utils/cohort";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -558,8 +562,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       (!canUpdateInscriptionGoals(req.user) || !req.query.forceGoal)
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (isReferentDep(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const departement = getDepartmentForInscriptionGoal(young);
-      const completionObjectif = await getCompletionObjectifs(departement, cohort.name);
+      const completionObjectif = await getCompletionObjectifs(departement, cohort);
       if (completionObjectif.isAtteint) {
         return res.status(400).send({
           ok: false,
@@ -644,7 +653,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     // verification des dates de fin d'instruction si jeune est VALIDATED
-    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.status !== YOUNG_STATUS.VALIDATED) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (young.source === YOUNG_SOURCE.CLE) {
         const classe = await ClasseModel.findById(young.classeId);
@@ -659,10 +668,9 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
-        const now = new Date();
-        const isInstructionOpen = now < cohort.instructionEndDate;
-        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
-          return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        // HTS
+        if (!canValidateYoungToLP(req.user, cohort)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
     }
@@ -857,7 +865,15 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
       youngStatus = getYoungStatusForAVenir(young) as YoungType["status"];
     }
 
-    const sessions = req.user.role === ROLES.ADMIN ? await getAllSessions(young) : await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
+    let sessions: CohortDocumentWithPlaces[] = [];
+    if (req.user.role === ROLES.ADMIN) {
+      sessions = await getAllSessions(young);
+    } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
+      sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
+    } else {
+      sessions = await getFilteredSessionsForCLE();
+    }
+
     if (cohort !== "à venir" && !sessions.some(({ name }) => name === cohort)) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const oldSessionPhase1Id = young.sessionPhase1Id;
     const oldBusId = young.ligneId;

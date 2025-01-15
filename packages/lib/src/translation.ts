@@ -379,6 +379,12 @@ const translate = (value) => {
       return "Aucun objectif d'inscription défini pour le département !";
     case "AFFECTATION_NOT_ENOUGH_DATA":
       return "Données insuffisantes pour l'affectation";
+    case "IMPORT_EMPTY_FILE":
+      return "Le fichier est vide on un onglet est manquant";
+    case "IMPORT_MISSING_COLUMN":
+      return "Impossible d'importer ce fichier car une colonne est manquante";
+    case "ERR_NETWORK":
+      return "Impossible de se connecter au serveur, vérifier votre connexion internet avant d'actualiser";
     default:
       return value;
   }
@@ -1181,7 +1187,17 @@ export const translateTaskStatus = (status: TaskType["status"]) => {
 export const translateSimulationName = (name: string) => {
   switch (name) {
     case "AFFECTATION_HTS_SIMULATION":
-      return "Affectation HTS (Hors DOM TOM)";
+    case "AFFECTATION_HTS_SIMULATION_VALIDER":
+      return "Affectation HTS (Metropole, hors Corse)";
+    default:
+      return name;
+  }
+};
+
+export const translateModifierClasse = (name: string) => {
+  switch (name) {
+    case "ROLE_NOT_REFERENT_CLASSE":
+      return "L'utilisateur n'est pas référent de classe.";
     default:
       return name;
   }

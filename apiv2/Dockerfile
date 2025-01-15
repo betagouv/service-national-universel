@@ -10,7 +10,7 @@ RUN apk update
 WORKDIR /app
 RUN npm install --global turbo@^2.0.0
 COPY . .
-RUN turbo prune $APP_NAME --docker
+RUN turbo prune $APP_NAME --docker && cp -fr patches out/full/
 
 # Add lockfile and package.json's of isolated subworkspace
 FROM base AS installer
@@ -22,6 +22,7 @@ WORKDIR /app
 COPY .gitignore .gitignore
 COPY --from=builder /app/out/json/ .
 COPY --from=builder /app/out/full/packages/ ./packages/
+COPY --from=builder /app/out/full/patches/ ./patches/
 RUN npm install
 
 # Build the project and its dependencies

@@ -141,15 +141,28 @@ const youngCanChangeSession = ({
   departSejourMotif?: string;
 }) => {
   if (source === YOUNG_SOURCE.CLE) return false;
-  if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION].includes(status as any)) return true;
-  if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION].includes(statusPhase1 as any) && status === YOUNG_STATUS.VALIDATED) {
+  if (departSejourMotif === "Exclusion") return false;
+  if (
+    [
+      YOUNG_STATUS.IN_PROGRESS,
+      YOUNG_STATUS.REINSCRIPTION,
+      YOUNG_STATUS.WAITING_LIST,
+      YOUNG_STATUS.WAITING_VALIDATION,
+      YOUNG_STATUS.WAITING_CORRECTION,
+      YOUNG_STATUS.ABANDONED,
+    ].includes(status as any)
+  ) {
+    return true;
+  }
+  if (
+    [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN].includes(status as any) &&
+    [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.NOT_DONE].includes(statusPhase1 as any)
+  ) {
     return true;
   }
   if ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE].includes(statusPhase1 as any) && SESSIONPHASE1ID_CANCHANGESESSION.includes(sessionPhase1Id as any)) {
     return true;
   }
-
-  if (statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE && departSejourMotif !== "Exclusion") return true;
   return false;
 };
 

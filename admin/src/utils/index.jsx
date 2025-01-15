@@ -408,6 +408,30 @@ export const debounce = (fn, delay) => {
   };
 };
 
+export const debouncePromise = (func, delay) => {
+  let timer;
+  let lastResult;
+
+  return function (...args) {
+    return new Promise((resolve, reject) => {
+      clearTimeout(timer);
+
+      timer = setTimeout(async () => {
+        try {
+          lastResult = await func.apply(this, args);
+          resolve(lastResult);
+        } catch (error) {
+          reject(error);
+        }
+      }, delay);
+
+      if (!lastResult) {
+        resolve(lastResult);
+      }
+    });
+  };
+};
+
 export const youngCheckinField = {
   [ROLES.ADMIN]: "youngCheckinForAdmin",
   [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",

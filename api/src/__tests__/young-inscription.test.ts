@@ -386,26 +386,26 @@ describe("Young Inscription", () => {
     });
 
     it("Should return 400 when the body sent is invalid", async () => {
-      const cohortObj = {};
-      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortObj);
+      const cohortDocument = {};
+      let res = await request(getAppHelper()).put("/young/inscription2023/changeCohort").send(cohortDocument);
       expect(res.status).toBe(400);
     });
 
     it("Should return 409 when the cohort is not found", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
 
-      const cohortObj = {
+      const cohortDocument = {
         cohort: "no existing value",
       };
-      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortDocument);
       expect(res.status).toBe(409);
     });
 
     it("Should return 404 when young is not found", async () => {
-      const cohortObj = {
+      const cohortDocument = {
         cohort: "Juillet 2023",
       };
-      let res = await request(getAppHelper({})).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
+      let res = await request(getAppHelper({})).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortDocument);
       expect(res.status).toBe(404);
     });
 
@@ -415,11 +415,11 @@ describe("Young Inscription", () => {
     it("Should return 409 if the cohort goal is reached or the cohort session is not found or full", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
 
-      const cohortObj = {
+      const cohortDocument = {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").set("x-user-timezone", "-60").send(cohortDocument);
       expect(res.status).toBe(409);
     });
 
@@ -436,11 +436,11 @@ describe("Young Inscription", () => {
         }),
       );
 
-      const cohortObj = {
+      const cohortDocument = {
         cohort: "Juillet 2023",
       };
 
-      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortObj);
+      let res = await request(getAppHelper(user)).put("/young/inscription2023/changeCohort").send(cohortDocument);
       expect(res.status).toBe(200);
       expect(res.body.data).toMatchObject({ cohort: "Juillet 2023" });
     });

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Redirect, useHistory } from "react-router-dom";
-import { supportURL } from "../../../config";
+import { knowledgebaseURL } from "../../../config";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { translate, translateCorrectionReason, translateField, YOUNG_STATUS } from "snu-lib";
@@ -74,7 +74,7 @@ export default function StepDocuments() {
     return history.push("/inscription/representants");
   }
 
-  const supportLink = `${supportURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
+  const supportLink = `${knowledgebaseURL}/base-de-connaissance/je-minscris-et-justifie-mon-identite`;
 
   if (young?.status === YOUNG_STATUS.WAITING_CORRECTION) {
     if (corrections?.length === 0) return <Redirect to="/" />;

@@ -1,3 +1,4 @@
+import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { CLE_COLORATION, CLE_FILIERE, CLE_GRADE, STATUS_CLASSE, STATUS_PHASE1_CLASSE, TYPE_CLASSE } from "snu-lib";
 
 export type ClasseModel = {
@@ -24,7 +25,7 @@ export type ClasseModel = {
     niveau?: keyof typeof CLE_GRADE;
     niveaux: (keyof typeof CLE_GRADE)[] | string[];
     centreCohesionId?: string;
-    sessionPhase1Id?: string;
+    sejourId?: string;
     ligneId?: string;
     pointDeRassemblementId?: string;
     commentaires: string;
@@ -33,3 +34,7 @@ export type ClasseModel = {
 };
 
 export type CreateClasseModel = Omit<ClasseModel, "id" | "createdAt" | "updatedAt">;
+
+export type ClasseWithReferentsModel = ClasseModel & {
+    referents: ReferentModelLight[];
+};

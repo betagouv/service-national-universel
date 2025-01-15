@@ -55,4 +55,4 @@ export type CohesionCenterImportMapped = Pick<
   | "code2022"
   | "departmentCode"
   | "matricule"
-> & { _id?: string };
+>;

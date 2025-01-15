@@ -1,13 +1,12 @@
 import React, { useState } from "react";
 import { Link } from "react-router-dom";
-import { useQuery } from "@tanstack/react-query";
+import usePrograms from "../../usePrograms";
 import Loader from "@/components/Loader";
-import { fetchPrograms } from "../../../engagement.repository";
 import plausibleEvent from "@/services/plausible";
 
 export function Programs() {
   const [open, setOpen] = useState(false);
-  const { isPending, error, data } = useQuery({ queryKey: ["program"], queryFn: fetchPrograms });
+  const { isPending, error, data } = usePrograms();
 
   if (isPending) return <Loader />;
   if (error) return <div>Erreur lors du chargement des données.</div>;

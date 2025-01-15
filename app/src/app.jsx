@@ -92,6 +92,7 @@ function App() {
             <Switch>
               <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
               <Redirect from={"/inscription2023"} to={"/inscription"} />
+              <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
 
               <SentryRoute path="/validate-contract/done" component={ContractDone} />
               <SentryRoute path="/validate-contract" component={Contract} />
@@ -101,7 +102,7 @@ function App() {
               <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
               <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
               <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-              <SentryRoute path="/besoin-d-aide" component={Contact} />
+              <SentryRoute path="/besoin-d-aide" exact component={Contact} />
               {!young && <SentryRoute path="/auth" component={Auth} />}
               <SentryRoute path="/public-engagements" component={AllEngagements} />
               <SentryRoute path="/merci" component={Thanks} />

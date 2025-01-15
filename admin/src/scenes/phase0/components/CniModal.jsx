@@ -11,6 +11,7 @@ import { capture } from "@/sentry";
 import Field from "./Field";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import { resizeImage } from "@/services/file.service";
+import dayjs from "@/utils/dayjs.utils";
 import Eye from "@/assets/icons/Eye";
 import { Spinner } from "reactstrap";
 import Download from "@/assets/icons/Download";
@@ -148,6 +149,11 @@ export function CniModal({ young, onClose, mode, blockUpload }) {
     setFilesToUpload(array);
   };
 
+  const handleChangeExpirationDate = (date) => {
+    const formattedDate = dayjs(date).toUtc().toDate();
+    setDate(formattedDate);
+  };
+
   const handlePreview = async (file) => {
     try {
       setLoadingPreviewStates((prevLoadingPreviewStates) => ({
@@ -265,7 +271,7 @@ export function CniModal({ young, onClose, mode, blockUpload }) {
                     )}
                   </div>
                   <div className="mt-4 w-full space-y-2">
-                    <DatePickerInput label="Date d'expiration" value={date} onChange={(date) => setDate(date)} />
+                    <DatePickerInput label="Date d'expiration" value={date} onChange={handleChangeExpirationDate} />
                     <Field
                       label="Catégorie"
                       value={category}

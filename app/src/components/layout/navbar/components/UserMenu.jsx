@@ -7,6 +7,7 @@ import MenuLink from "./MenuLink";
 import MenuButton from "./MenuButton";
 import useTickets from "../useTickets";
 import { toastr } from "react-redux-toastr";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function UserMenu({ onClose }) {
   const dispatch = useDispatch();
@@ -14,6 +15,7 @@ export default function UserMenu({ onClose }) {
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { data: ticketsInfo } = useTickets();
+  const { hasAccessToNavigation } = usePermissions();
 
   async function logout() {
     try {
@@ -43,7 +45,7 @@ export default function UserMenu({ onClose }) {
         </div>
       </div>
       <ul>
-        <MenuLink onClose={onClose} to="/account" text="Mon Profil" />
+        {hasAccessToNavigation && <MenuLink onClose={onClose} to="/account" text="Mon profil" />}
         {ticketsInfo?.hasMessage == true && <MenuLink onClose={onClose} ticketCount={ticketsInfo.newStatusCount} to="/echanges" text="Mes échanges" />}
         <MenuButton disabled={isLoggingOut} onClick={logout} text="Déconnexion" />
       </ul>

@@ -688,6 +688,7 @@ const TEMPLATE_DESCRIPTIONS = {
 
 const MIME_TYPES = {
   EXCEL: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+  CSV: "text/csv",
 } as const;
 
 const STRUCTURE_LEGAL_STATUS = {
@@ -779,8 +780,6 @@ const TYPE_CLASSE = {
   FULL: "FULL",
 } as const;
 
-
-
 const LIMIT_DATE_ESTIMATED_SEATS = new Date("2024-08-28");
 const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");
 
@@ -788,6 +787,11 @@ const LIMIT_DATE_TOTAL_SEATS = new Date("2024-09-30");
 const REGLEMENT_INTERIEUR_VERSION = "2024-10-20";
 
 const PHASE2_TOTAL_HOURS = 84;
+
+const INSCRIPTION_GOAL_LEVELS = {
+  DEPARTEMENTAL: "departemental",
+  REGIONAL: "regional",
+} as const;
 
 const CLE_TYPE_LIST = Object.values(CLE_TYPE);
 const CLE_SECTOR_LIST = Object.values(CLE_SECTOR);
@@ -855,6 +859,7 @@ export {
   CLE_SECTOR_LIST,
   CLE_GRADE_LIST,
   TYPE_CLASSE_LIST,
+  INSCRIPTION_GOAL_LEVELS,
   TYPE_CLASSE,
   STATUS_CLASSE_LIST,
   STATUS_PHASE1_CLASSE_LIST,
@@ -920,6 +925,7 @@ export default {
   CLE_SECTOR,
   CLE_GRADE,
   STATUS_CLASSE,
+  INSCRIPTION_GOAL_LEVELS,
   STATUS_PHASE1_CLASSE,
   YOUNG_SOURCE,
   CLE_TYPE_LIST,

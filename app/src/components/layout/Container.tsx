@@ -30,10 +30,10 @@ export default function Container({ title, subtitle, imgSrc, children, action, b
     <div className="bg-white pb-12">
       <div style={style} className={`z-0 relative w-full min-h-[12rem] ${imgSrc ? "text-white" : ""}`}>
         {imgSrc ? <div className="absolute inset-0 bg-gradient-to-b from-transparent to-gray-800 z-10"></div> : null}
-        <header className="relative z-20 max-w-6xl min-h-[12rem] p-[1rem] md:px-[3rem] mx-auto grid grid-rows-[2rem_auto_2rem] md:grid-rows-1 md:grid-cols-[8rem_auto_8rem] gap-2">
+        <header className="relative z-20 max-w-6xl min-h-[12rem] p-[0.75rem] md:px-[3rem] mx-auto grid grid-rows-[2rem_auto_2rem] md:grid-rows-1 md:grid-cols-[8rem_auto_8rem] gap-2">
           <div className="flex items-center">
             {backlink ? (
-              <Link to={backlink} className="flex items-center gap-1 row-start-1 md:row-start-2">
+              <Link to={backlink} className={`flex items-center gap-1 row-start-1 md:row-start-2 ${imgSrc ? "text-white" : "text-gray-500"}`}>
                 <HiArrowLeft className="text-2xl" />
               </Link>
             ) : (
@@ -49,7 +49,7 @@ export default function Container({ title, subtitle, imgSrc, children, action, b
           <div className="flex items-center justify-end">{action}</div>
         </header>
       </div>
-      <div className="max-w-6xl mx-auto px-4">{children}</div>
+      <div className="max-w-6xl mx-auto px-3">{children}</div>
     </div>
   );
 }
