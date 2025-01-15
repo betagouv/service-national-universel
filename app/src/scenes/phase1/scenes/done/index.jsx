@@ -171,8 +171,7 @@ export default function Done() {
           </div>
 
           <div className="md:w-3/5">
-            {showJDM &&
-              (isCohortNeedJdm(young.cohort) ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />)}
+            {showJDM && (isCohortNeedJdm ? young?.presenceJDM === "true" ? <JDMDone /> : <JDMNotDone /> : young.cohesionStayPresence === "true" ? <JDCDone /> : <JDCNotDone />)}
           </div>
         </div>
 
