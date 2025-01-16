@@ -40,10 +40,10 @@ const Forgot: React.FC = () => {
   return (
     <DSFRContainer title="Réinitialiser mon mot de passe">
       {error && Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
-      <div className="flex items-center gap-4 py-4">
-        <RightArrow />
-        <div className="text-[17px] font-bold text-[#161616]">Mon espace volontaire</div>
-      </div>
+      <p className="flex items-center gap-4 font-bold text-xl">
+        <RightArrow className="inline-block" />
+        Mon espace volontaire
+      </p>
       {!done ? (
         <>
           <form onSubmit={onSubmit}>
