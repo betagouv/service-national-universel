@@ -8,6 +8,7 @@ import { getMeetingHour, getReturnHour } from "snu-lib";
 export default function TravelInfo() {
   const { young, isCLE } = useAuth();
   const { meetingPoint, center, departureDate, returnDate } = useAffectationInfo();
+  const location = young?.meetingPointId ? meetingPoint : center;
 
   if (!location) {
     return <></>;
@@ -15,7 +16,6 @@ export default function TravelInfo() {
 
   const meetingHour = getMeetingHour(location);
   const returnHour = getReturnHour(location);
-  const location = young?.meetingPointId ? meetingPoint : center;
 
   return (
     <div className="p-4 md:ml-10">
