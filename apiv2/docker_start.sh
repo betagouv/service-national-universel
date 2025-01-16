@@ -2,7 +2,8 @@
 
 set -e
 
-config=""
+config=apiv2/docker_supervisord_api_and_tasks.ini
+
 if [[ $ENVIRONMENT == "production" || $ENVIRONMENT == "staging" || $ENVIRONMENT == "ci" ]]
 then
   if [[ $RUN_TASKS == "true" ]]
@@ -11,8 +12,6 @@ then
   else
     config=apiv2/docker_supervisord_api.ini
   fi
-else
-  config=apiv2/docker_supervisord_api_and_tasks.ini
 fi
 
 exec supervisord --configuration=$config
