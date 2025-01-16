@@ -15,7 +15,7 @@ import { environment } from "../../config";
 import { captureMessage } from "../../sentry";
 import { toastr } from "react-redux-toastr";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import { Button } from "@snu/ds/dsfr";
+import { InputPassword, Button } from "@snu/ds/dsfr";
 
 interface ErrorState {
   text?: string;
@@ -28,8 +28,6 @@ const Signin: React.FC = () => {
   const [email, setEmail] = useState<string>("");
   const [password, setPassword] = useState<string>("");
   const [confirmPassword, setConfirmPassword] = useState<string>("");
-  const [showPassword, setShowPassword] = useState<boolean>(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState<boolean>(false);
   const [disabled, setDisabled] = useState<boolean>(true);
   const [loading, setLoading] = useState<boolean>(false);
   const [error, setError] = useState<ErrorState>({});
@@ -43,7 +41,8 @@ const Signin: React.FC = () => {
     if (young) history.push("/" + (redirect || ""));
   }, [young, history, redirect]);
 
-  const onSubmit = async () => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     if (loading || disabled) return;
     if (password !== confirmPassword) return setError({ text: "Les mots de passe ne correspondent pas" });
 
@@ -55,15 +54,15 @@ const Signin: React.FC = () => {
       if (young) {
         plausibleEvent("INVITATION/ Connexion réussie");
         await login(young);
-        const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
+        // const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
 
-        if (!redirectionApproved) {
-          captureMessage("Invalid redirect url", { extra: { redirect } });
-          toastr.error("Erreur de redirection", "Url de redirection invalide : " + redirect);
-          history.push("/");
-          return;
-        }
-        window.location.href = redirect || "/";
+        // if (!redirectionApproved) {
+        //   captureMessage("Invalid redirect url", { extra: { redirect } });
+        //   toastr.error("Erreur de redirection", "Url de redirection invalide : " + redirect);
+        //   history.push("/");
+        //   return;
+        // }
+        // window.location.href = redirect || "/";
       }
     } catch (e) {
       console.error(e);
@@ -97,50 +96,36 @@ const Signin: React.FC = () => {
   }, [email, password, confirmPassword]);
 
   return (
-    // <div className="flex bg-[#F9F6F2] py-6">
     <DSFRContainer title="Activer mon compte" className="flex flex-col bg-[#F9F6F2] py-6">
-      <div className="mx-auto my-0 basis-[50%] bg-white px-[102px] py-[60px]">
-        {error?.text && <Error {...error} onClose={() => setError({})} />}
-        {/* <div className="mb-1 text-[32px] font-bold text-[#161616]">Activer mon compte</div> */}
-        <div className="mb-2 flex items-center gap-4">
-          <RightArrow />
-          <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
-        </div>
+      {error?.text && <Error {...error} onClose={() => setError({})} />}
+      <div className="mb-2 flex items-center gap-4">
+        <RightArrow />
+        <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
+      </div>
+      <form onClick={onSubmit}>
         <div className="mb-1 flex flex-col gap-1 pt-1 pb-4">
           <label className="text-base text-[#161616]">E-mail</label>
           <Input value={email} onChange={setEmail} />
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-base text-[#161616]">Mot de passe</label>
-          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
-            <Input type={showPassword ? "text" : "password"} className="w-full bg-inherit" value={password} onChange={(e) => setPassword(e.target.value)} />
-            {showPassword ? <EyeOff className="cursor-pointer" onClick={() => setShowPassword(false)} /> : <Eye className="cursor-pointer" onClick={() => setShowPassword(true)} />}
-          </div>
+          <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} />
         </div>
         <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>
           Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
         </div>
         <div className="flex flex-col gap-1">
-          <label className="text-base text-[#161616]">Confirmez votre mot de passe</label>
-          <div className="flex w-full items-center rounded-t-[4px] border-b-[2px] border-[#3A3A3A] bg-[#EEEEEE] px-4 py-2">
-            <Input type={showConfirmPassword ? "text" : "password"} className="w-full bg-inherit" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} />
-            {showConfirmPassword ? (
-              <EyeOff className="cursor-pointer" onClick={() => setShowConfirmPassword(false)} />
-            ) : (
-              <Eye className="cursor-pointer" onClick={() => setShowConfirmPassword(true)} />
-            )}
-          </div>
+          <InputPassword label="Confirmez votre mot de passe" name="confirmPassword" value={confirmPassword} onChange={setConfirmPassword} />
         </div>
         <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>{error?.passwordConfirm}</div>
         <div className="flex w-full justify-end">
           <Button
             disabled={disabled || loading}
             className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
-            onClick={onSubmit}>
+            type="submit">
             Connexion
           </Button>
         </div>
-      </div>
+      </form>
     </DSFRContainer>
   );
 };

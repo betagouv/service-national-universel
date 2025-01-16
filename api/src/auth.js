@@ -393,7 +393,9 @@ class Auth {
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
-      const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+      const match =
+        // config.ENVIRONMENT === "development" ||
+        await user.comparePassword(password);
 
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;

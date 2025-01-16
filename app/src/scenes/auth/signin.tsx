@@ -30,7 +30,8 @@ const Signin: React.FC = () => {
   const { login } = useAuth();
   const disabled = !email || !password || loading;
 
-  const onSubmit = async () => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setLoading(true);
     try {
       const { user: young, code } = await api.post(`/young/signin`, { email, password });
@@ -103,7 +104,7 @@ const Signin: React.FC = () => {
         <RightArrow />
         <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
       </div>
-      <form>
+      <form onSubmit={onSubmit}>
         <Input
           label="E-mail"
           nativeInputProps={{
@@ -114,7 +115,7 @@ const Signin: React.FC = () => {
         <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} />
         <Link to="/auth/forgot">Mot de passe perdu ?</Link>
         <div className="flex w-full justify-end">
-          <Button disabled={disabled} onClick={onSubmit}>
+          <Button disabled={disabled} type="submit">
             Connexion
           </Button>
         </div>

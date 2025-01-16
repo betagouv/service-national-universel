@@ -38,10 +38,11 @@ const Signin2FA: React.FC = () => {
   const params = queryString.parse(location.search) as Params;
   const { redirect, email } = params;
 
-  const onSubmit = async ({ email, token, rememberMe }: { email?: string; token: string; rememberMe: boolean }) => {
+  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
     setLoading(true);
     try {
-      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
+      const response = await api.post(`/young/signin-2fa`, { email, token_2fa: token2FA.trim(), rememberMe });
 
       if (!response.user) return;
 
@@ -68,47 +69,49 @@ const Signin2FA: React.FC = () => {
 
   return (
     <DSFRContainer title="Me connecter" className="flex flex-col ">
-      {error && <Error {...error} onClose={() => setError({})} />}
+      {error && Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="mb-2 flex items-center gap-4">
         <div className="flex items-center gap-2 text-[#161616] text-[21px] my-2 ">
           <BsShieldLock className="text-[#161616]text-4xl" /> Authentification à deux facteurs
         </div>
       </div>
-      <div className="mb-1 flex flex-col gap-1 py-1">
-        <label className="text-[14px] text-[#3A3A3A] mb-1">
-          Un mail contenant le code unique de connexion vous a été envoyé à l'adresse "<b>{email}</b>".
-        </label>
-        <label className="text-[14px] text-[#3A3A3A] mb-4">
-          Ce code est valable pendant {DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été
-          transmis par mail.
-        </label>
-        <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
-        <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e.target.value)} />
-      </div>
-      <div>
-        <label htmlFor="rememberMe" className="text-sm text-brand-black/80 mt-2">
-          <input
-            type="checkbox"
-            id="rememberMe"
-            name="rememberMe"
-            className="mr-2 cursor-pointer"
-            checked={rememberMe}
-            onChange={() => {
-              setRememberMe(!rememberMe);
-            }}
-          />
-          <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si vous
-          utilisez un ordinateur partagé ou public
-        </label>
-      </div>
-      <div className="flex w-full justify-end">
-        <Button
-          disabled={disabled}
-          className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 mt-4 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0"
-          onClick={() => onSubmit({ email, token: token2FA, rememberMe })}>
-          Connexion
-        </Button>
-      </div>
+      <form onSubmit={onSubmit}>
+        <div className="mb-1 flex flex-col gap-1 py-1">
+          <label className="text-[14px] text-[#3A3A3A] mb-1">
+            Un mail contenant le code unique de connexion vous a été envoyé à l'adresse "<b>{email}</b>".
+          </label>
+          <label className="text-[14px] text-[#3A3A3A] mb-4">
+            Ce code est valable pendant {DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MIN} minutes, si vous avez reçu plusieurs codes veuillez svp utiliser le dernier qui vous a été
+            transmis par mail.
+          </label>
+          <label className="text-[14px] text-[#3A3A3A] mb-2">Saisir le code reçu par email</label>
+          <Input placeholder="123abc" value={token2FA} onChange={(e) => setToken2FA(e)} />
+        </div>
+        <div>
+          <label htmlFor="rememberMe" className="text-sm text-brand-black/80 mt-2">
+            <input
+              type="checkbox"
+              id="rememberMe"
+              name="rememberMe"
+              className="mr-2 cursor-pointer"
+              checked={rememberMe}
+              onChange={() => {
+                setRememberMe(!rememberMe);
+              }}
+            />
+            <strong>Faire confiance à ce navigateur :</strong> la double authentification vous sera demandée à nouveau dans un délai d’un mois. Ne pas cocher cette case si vous
+            utilisez un ordinateur partagé ou public
+          </label>
+        </div>
+        <div className="flex w-full justify-end">
+          <Button
+            disabled={disabled}
+            className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 mt-4 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0"
+            type="submit">
+            Connexion
+          </Button>
+        </div>
+      </form>
       <hr className="mt-4"></hr>
       <div className="mt-4">
         <label className="text-gray-500 text-[12px] mb-2">Si vous ne recevez pas le mail, nous vous invitons à vérifier que :</label>

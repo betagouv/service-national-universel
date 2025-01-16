@@ -9,7 +9,7 @@ import MobileForgot from "./mobile/forgot";
 
 import DesktopReset from "./desktop/reset";
 import DesktopForgot from "./desktop/forgot";
-// import DesktopSignupInvite from "./desktop/signupInvite";
+import DesktopSignupInvite from "./desktop/signupInvite";
 // import DesktopSignin from "./desktop/signin";
 // import DesktopSignin2FA from "./desktop/signin2FA";
 
