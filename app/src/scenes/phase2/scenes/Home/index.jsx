@@ -1,6 +1,6 @@
 import React from "react";
 import EngagementSrc from "@/assets/hero/phase2.png";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
 import plausibleEvent from "@/services/plausible";
 import { YOUNG_STATUS_PHASE2 } from "../../../../utils";
@@ -15,7 +15,7 @@ import { knowledgebaseURL } from "@/config";
 import Voiture from "@/assets/Voiture";
 
 export default function HomePhase2() {
-  const { young } = useSelector((state) => state.Auth);
+  const { young } = useAuth();
 
   return (
     <div className="bg-white pt-8 pb-16">
