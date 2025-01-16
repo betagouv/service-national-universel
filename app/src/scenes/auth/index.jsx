@@ -3,15 +3,19 @@ import { Switch, useLocation, Redirect } from "react-router-dom";
 
 import MobileReset from "./mobile/reset";
 import MobileForgot from "./mobile/forgot";
-import MobileSignupInvite from "./mobile/signupInvite";
-import MobileSignin from "./mobile/signin";
-import MobileSignin2FA from "./mobile/signin2FA";
+// import MobileSignupInvite from "./mobile/signupInvite";
+// import MobileSignin from "./mobile/signin";
+// import MobileSignin2FA from "./mobile/signin2FA";
 
 import DesktopReset from "./desktop/reset";
 import DesktopForgot from "./desktop/forgot";
-import DesktopSignupInvite from "./desktop/signupInvite";
-import DesktopSignin from "./desktop/signin";
-import DesktopSignin2FA from "./desktop/signin2FA";
+// import DesktopSignupInvite from "./desktop/signupInvite";
+// import DesktopSignin from "./desktop/signin";
+// import DesktopSignin2FA from "./desktop/signin2FA";
+
+import Signin from "./signin";
+import Signin2FA from "./signin2FA";
+import SignupInvite from "./signupInvite";
 
 import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
@@ -22,11 +26,11 @@ const Render = ({ screen }) => {
   const device = useDevice();
 
   function renderScreen(screen) {
-    if (screen === "invite") return device === "desktop" ? <DesktopSignupInvite /> : <MobileSignupInvite />;
+    if (screen === "invite") return <SignupInvite />;
     if (screen === "reset") return device === "desktop" ? <DesktopReset /> : <MobileReset />;
     if (screen === "forgot") return device === "desktop" ? <DesktopForgot /> : <MobileForgot />;
-    if (screen === "auth") return device === "desktop" ? <DesktopSignin /> : <MobileSignin />;
-    if (screen === "2fa") return device === "desktop" ? <DesktopSignin2FA /> : <MobileSignin2FA />;
+    if (screen === "auth") return <Signin />;
+    if (screen === "2fa") return <Signin2FA />;
   }
 
   return <DSFRLayout>{renderScreen(screen)}</DSFRLayout>;
