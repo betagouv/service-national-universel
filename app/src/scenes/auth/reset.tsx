@@ -65,7 +65,7 @@ export default function Reset() {
         Mon espace volontaire
       </p>
       <form onSubmit={(e) => handleSubmit(e)}>
-        <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} error={error?.password} onFocus={() => setError({})} />
+        <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} error={error?.password} />
         <InputPassword label="Confirmez votre mot de passe" name="passwordConfirm" value={passwordConfirm} onChange={setPasswordConfirm} error={error?.passwordConfirm} />
         <Button type="submit" disabled={disabled}>
           Réinitialiser
