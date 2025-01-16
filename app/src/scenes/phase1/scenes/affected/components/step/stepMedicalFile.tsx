@@ -19,7 +19,7 @@ export default function StepMedicalField() {
   const [open, setOpen] = useState(false);
   const email = session?.sanitaryContactEmail;
 
-  async function onClick() {
+  async function handleClick() {
     if (young?.cohesionStayMedicalFileDownload === "true") return;
     try {
       const { ok, data, code } = await api.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
@@ -79,7 +79,7 @@ export default function StepMedicalField() {
           </button>
         </div>
       )}
-      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} onClick={onClick} email={email} />
+      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} onClick={handleClick} />
     </StepCard>
   );
 }

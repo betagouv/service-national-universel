@@ -12,10 +12,14 @@ import MeetingPointChooser from "../MeetingPointChooser";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import { getDepartureDate, getReturnDate } from "snu-lib";
 import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
+import useAffectationInfo from "../../utils/useAffectationInfo";
+import useAvailableMeetingPoints from "../../utils/useAvailableMeetingPoints";
 
-export default function PDRModal({ open, setOpen, meetingPoints, center, session }) {
+export default function PDRModal({ open, setOpen }) {
   const { young } = useAuth();
   const { cohort, pdrChoiceExpired } = useCohort();
+  const { center, session } = useAffectationInfo();
+  const { data: options } = useAvailableMeetingPoints();
   const dispatch = useDispatch();
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);
@@ -58,7 +62,7 @@ export default function PDRModal({ open, setOpen, meetingPoints, center, session
       </div>
       <p className="text-center text-lg font-bold text-gray-900">Confirmez votre point de rassemblement</p>
       <div className="flex flex-col md:flex-row items-center gap-6 mt-4">
-        {meetingPoints.map((mp) => (
+        {options?.map((mp) => (
           <MeetingPointChooser
             key={mp._id}
             meetingPoint={mp}

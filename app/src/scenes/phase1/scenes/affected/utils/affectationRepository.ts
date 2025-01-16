@@ -15,3 +15,9 @@ export async function getSession(youngId: string): Promise<SessionPhase1Type> {
   const { data: session } = await API.get(`/young/${youngId}/session/`);
   return session;
 }
+
+export async function getAvailableMeetingPoints() {
+  const { ok, data, code } = await API.get(`/point-de-rassemblement/available`);
+  if (!ok) throw new Error(code);
+  return data;
+}
