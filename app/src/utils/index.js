@@ -131,6 +131,13 @@ export function permissionPhase3(y) {
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
 
+// Only people who is already doing phase3 or has done phase3 has access to it.
+export const hasAccessToPhase3 = (young) => {
+  const { WAITING_VALIDATION, VALIDATED } = YOUNG_STATUS_PHASE3;
+  if ([WAITING_VALIDATION, VALIDATED].includes(young.statusPhase3)) return true;
+  return false;
+};
+
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {
   if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;

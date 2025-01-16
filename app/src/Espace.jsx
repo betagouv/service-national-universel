@@ -19,7 +19,6 @@ const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
 const ChangeSejour = lazy(() => import("./scenes/changeSejour"));
 const Candidature = lazy(() => import("./scenes/candidature"));
-const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
 const Echanges = lazy(() => import("./scenes/echanges"));
 const Engagement = lazy(() => import("./scenes/home/components/Engagement"));
@@ -87,7 +86,6 @@ const Espace = () => {
           <SentryRoute path="/les-programmes" component={Engagement} />
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
-          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
           <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />

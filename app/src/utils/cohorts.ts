@@ -1,4 +1,4 @@
-import { CohortType, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungType } from "snu-lib";
+import { CohortType } from "snu-lib";
 import { apiURL } from "@/config";
 
 export function cohortAssignmentAnnouncementsIsOpenForYoung(cohort: CohortType): boolean {
