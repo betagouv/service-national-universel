@@ -67,7 +67,7 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
 
   function getEligibleBirthYears(currentYear, options) {
     const birthYears = [];
-    for (let age = 17; age >= 14; age--) {
+    for (let age = 18; age >= 15; age--) {
       birthYears.push(currentYear - age);
     }
     if (options === "label") return birthYears;
