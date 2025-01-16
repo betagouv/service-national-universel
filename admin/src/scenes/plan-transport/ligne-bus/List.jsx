@@ -370,7 +370,6 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     const num = i + 1;
                     pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
-                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                     pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
@@ -387,7 +386,6 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     ...pdrs,
                     "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
                     "REGION DU CENTRE": data.centerRegion,
-                    "ID CENTRE": data.centerId,
                     "MATRICULE DU CENTRE": data.centerCode,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                     "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,

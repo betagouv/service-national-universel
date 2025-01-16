@@ -144,7 +144,6 @@ const ListPoints = ({ user }) => {
               for (const item of data) {
                 res.push({
                   // @ts-ignore
-                  Identifiant: item._id.toString(),
                   Code: item.code,
                   Matricule: item.matricule,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),

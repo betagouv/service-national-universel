@@ -290,7 +290,6 @@ const ListCenter = ({ firstSession }) => {
             transform={(all) => {
               return all?.map((data) => {
                 return {
-                  Id: data._id.toString(),
                   Matricule: data?.matricule,
                   Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
