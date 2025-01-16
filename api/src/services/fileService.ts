@@ -34,6 +34,14 @@ export function XLSXToCSVBuffer(filePath: string): Buffer {
   return Buffer.from(csvData, "utf-8");
 }
 
+export async function parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]> {
+  const workbook = xlsx.read(buffer, { type: "buffer" });
+  const sheetName = options?.sheetName || workbook.SheetNames[options?.sheetIndex || 0];
+  const worksheet = workbook.Sheets[sheetName];
+
+  return await xlsx.utils.sheet_to_json<T>(worksheet, { defval: options?.defval });
+}
+
 export function readCSVBuffer<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
   return new Promise((resolve, reject) => {
     const content: T[] = [];
