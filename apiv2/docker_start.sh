@@ -2,16 +2,17 @@
 
 set -e
 
+config=""
 if [[ $ENVIRONMENT == "production" || $ENVIRONMENT == "staging" || $ENVIRONMENT == "ci" ]]
 then
   if [[ $RUN_TASKS == "true" ]]
   then
-    # Create a httpserver for healthchecks // TODO : integrates @bull-board/nestjs instead
-    node -e 'http.createServer((req, res) => {res.end(process.env.RELEASE)}).listen(process.env.PORT)' &
-    exec node apiv2/dist/mainJob.js
+    config=apiv2/docker_supervisord_tasks.ini
   else
-    exec node apiv2/dist/main.js
+    config=apiv2/docker_supervisord_api.ini
   fi
 else
-  exec node apiv2/dist/mainApiAndJob.js
+  config=apiv2/docker_supervisord_api_and_tasks.ini
 fi
+
+exec supervisord --configuration=$config
