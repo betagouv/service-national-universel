@@ -3,18 +3,21 @@ import api from "../../../../../../services/api";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
 import { setYoung } from "@/redux/auth/actions";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 import { capture } from "@/sentry";
+import useAuth from "@/services/useAuth";
+import useAffectationData from "../../utils/useAffectationData";
 
-export default function StepMedicalField({ data }) {
+export default function StepMedicalField() {
   const index = 4;
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const { session } = useAffectationData();
   const isEnabled = isStepDone(STEPS.CONVOCATION, young);
   const isDone = isStepDone(STEPS.MEDICAL_FILE, young);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const email = data.session.sanitaryContactEmail;
+  const email = session.sanitaryContactEmail;
 
   async function onClick() {
     if (young?.cohesionStayMedicalFileDownload === "true") return;

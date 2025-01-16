@@ -6,9 +6,11 @@ import DontForget from "../assets/DontForget";
 import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
+import useAffectationData from "../utils/useAffectationData";
 
-export default function TodoBackpack({ lunchBreak, data }) {
+export default function TodoBackpack() {
   const { isCLE } = useAuth();
+  const { session, meetingPoint } = useAffectationData();
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
@@ -35,7 +37,7 @@ export default function TodoBackpack({ lunchBreak, data }) {
 
   return (
     <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none">
-      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} email={data.session.sanitaryContactEmail} />
+      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} email={session.sanitaryContactEmail} />
 
       <div className="relative p-4 xl:w-1/2">
         <h1 className="mb-6 text-xl font-bold">A préparer...</h1>
@@ -67,10 +69,10 @@ export default function TodoBackpack({ lunchBreak, data }) {
             <button onClick={() => setMedicalFileModalOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
               fiche sanitaire
             </button>{" "}
-            {data.session.sanitaryContactEmail ? (
+            {session.sanitaryContactEmail ? (
               <>
                 <p>complétée, à envoyer par e-mail à</p>
-                <p>{data.session.sanitaryContactEmail}</p>
+                <p>{session.sanitaryContactEmail}</p>
               </>
             ) : (
               "complétée, sous enveloppe destinée au référent sanitaire"
@@ -78,7 +80,7 @@ export default function TodoBackpack({ lunchBreak, data }) {
           </label>
         </div>
 
-        {lunchBreak && (
+        {meetingPoint?.bus?.lunchBreak && (
           <div className="flex items-baseline gap-4">
             <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
             <label htmlFor="collation">

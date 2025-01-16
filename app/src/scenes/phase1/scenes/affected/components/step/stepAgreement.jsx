@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import { StepCard } from "../StepCard";
 import { AgreementModal } from "../modals/AgreementModal";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
+import useAffectationData from "../../utils/useAffectationData";
 
-export default function StepAgreement({ data: { departureDate, returnDate } }) {
-  const young = useSelector((state) => state.Auth.young);
+export default function StepAgreement() {
+  const { young } = useAuth();
+  const { departureDate, returnDate } = useAffectationData();
   const index = 2;
   const isEnabled = isStepDone(STEPS.PDR, young);
   const isDone = isStepDone(STEPS.AGREEMENT, young);

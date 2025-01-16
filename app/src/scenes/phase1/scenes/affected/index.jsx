@@ -1,9 +1,7 @@
-import React, { useEffect, useState } from "react";
-import { toastr } from "react-redux-toastr";
-import { capture } from "@/sentry";
-import { isCle, youngCanChangeSession, getDepartureDate, getReturnDate, getCohortPeriod } from "snu-lib";
+import React, { useState } from "react";
+import { youngCanChangeSession, getCohortPeriod } from "snu-lib";
 import useCohort from "@/services/useCohort";
-import api from "../../../../services/api";
+import useAffectationData from "./utils/useAffectationData";
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
 import CenterInfo from "./components/CenterInfo";
@@ -21,38 +19,12 @@ import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../../../assets/hero/home.png";
 
 export default function Affected() {
-  const { young } = useAuth();
-  const [center, setCenter] = useState();
-  const [meetingPoint, setMeetingPoint] = useState();
-  const [session, setSession] = useState();
+  const { young, isCLE } = useAuth();
+  const { center, meetingPoint, departureDate, returnDate, isPending: loading } = useAffectationData();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
-  const [loading, setLoading] = useState(true);
 
   const { cohort } = useCohort();
-  const departureDate = getDepartureDate(young, session, cohort, meetingPoint);
-  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
-  const data = { center, meetingPoint, session, departureDate, returnDate };
-
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
-
-  useEffect(() => {
-    if (!young.sessionPhase1Id) return;
-    (async () => {
-      try {
-        const { data: center } = await api.get(`/session-phase1/${young.sessionPhase1Id}/cohesion-center`);
-        const { data: meetingPoint } = await api.get(`/young/${young._id}/point-de-rassemblement?withbus=true`);
-        const { data: session } = await api.get(`/young/${young._id}/session/`);
-        setCenter(center);
-        setMeetingPoint(meetingPoint);
-        setSession(session);
-      } catch (e) {
-        capture(e);
-        toastr.error("Oups, une erreur est survenue lors de la récupération des informations de votre séjour de cohésion.");
-      } finally {
-        setLoading(false);
-      }
-    })();
-  }, [young]);
 
   if (areAllStepsDone(young)) {
     window.scrollTo(0, 0);
@@ -92,15 +64,15 @@ export default function Affected() {
             <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
           </div>
           <div className="col-span-2">
-            <TodoBackpack lunchBreak={meetingPoint?.bus?.lunchBreak} data={data} />
+            <TodoBackpack />
           </div>
         </div>
       )}
 
       <div className="mt-8 grid grid-cols-1 gap-12">
-        <StepsAffected data={data} />
+        <StepsAffected />
 
-        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCle(young) && <FaqAffected />}</div>
+        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
 
         <div className="flex justify-end py-4 pr-8">
           <JDMA id="3504" />

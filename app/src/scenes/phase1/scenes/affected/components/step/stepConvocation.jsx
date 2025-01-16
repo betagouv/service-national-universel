@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
@@ -13,10 +13,12 @@ import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 import useAuth from "@/services/useAuth";
+import useAffectationData from "../../utils/useAffectationData";
 
-export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
+export default function StepConvocation() {
   const index = 3;
   const { young, isCLE } = useAuth();
+  const { center, meetingPoint, departureDate, returnDate } = useAffectationData();
   const isEnabled = isStepDone(STEPS.AGREEMENT, young);
   const isDone = isStepDone(STEPS.CONVOCATION, young);
   const dispatch = useDispatch();

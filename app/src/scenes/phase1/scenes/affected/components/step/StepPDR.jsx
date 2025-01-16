@@ -11,10 +11,12 @@ import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
+import useAffectationData from "../../utils/useAffectationData";
 
-export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
+export default function StepPDR() {
   const index = 1;
   const { young, isCLE } = useAuth();
+  const { center, session, meetingPoint, departureDate, returnDate } = useAffectationData();
   const { pdrChoiceExpired, pdrChoiceLimitDate } = useCohort();
   const [open, setOpen] = useState(false);
   const [meetingPoints, setMeetingPoints] = useState([]);

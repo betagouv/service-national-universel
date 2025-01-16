@@ -10,7 +10,7 @@ import { areAllStepsDone, countOfStepsDone } from "../utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import plausibleEvent from "@/services/plausible";
 
-export default function StepsAffected({ data }) {
+export default function StepsAffected() {
   const { isCLE, young } = useAuth();
   if (!young) return <div />;
 
@@ -67,10 +67,10 @@ export default function StepsAffected({ data }) {
       </article>
 
       <div className="grid grid-cols-1 gap-4">
-        <StepPDR data={data} />
-        <StepAgreement data={data} />
-        <StepConvocation data={data} />
-        <StepMedicalFile data={data} />
+        <StepPDR />
+        <StepAgreement />
+        <StepConvocation />
+        <StepMedicalFile />
       </div>
     </section>
   );
