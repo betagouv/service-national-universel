@@ -1,10 +1,9 @@
 import { PointDeRassemblementType } from "snu-lib";
 import { logger } from "../../../logger";
 import { CohortModel, PointDeRassemblementDocument, PointDeRassemblementModel } from "../../../models";
-import { readCSVBuffer } from "../../../services/fileService";
+import { parseXLS } from "../../../services/fileService";
 import { getNearestLocation, getSpecificAdressLocation } from "../../../services/gouv.fr/api-adresse";
-import { getFile } from "../../../utils";
-import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
+import { PDR_HEADERS, PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
 import { mapPointDeRassemblements } from "./pointDeRassemblementImportMapper";
 
 export interface PointDeRassemblementImportReport {
@@ -15,9 +14,10 @@ export interface PointDeRassemblementImportReport {
   comment: string;
 }
 
-export const importPointDeRassemblement = async (pdrFilePath: string) => {
-  const pdrFile = await getFile(pdrFilePath);
-  const pdrToImport: PointDeRassemblementCSV[] = await readCSVBuffer<PointDeRassemblementCSV>(Buffer.from(pdrFile.Body), { headers: true, delimiter: ";" });
+export const importPointDeRassemblement = async (pdrFileBuffer: Buffer) => {
+  const pdrToImport: PointDeRassemblementCSV[] = await parseXLS(pdrFileBuffer, { defval: "" });
+
+  checkColumnHeaders(Object.keys(pdrToImport[0]));
 
   // import des nouveaux PDR (création / modification)
   const mappedPdrs = mapPointDeRassemblements(pdrToImport);
@@ -123,29 +123,9 @@ export const createPdr = async (pdr: PointDeRassemblementImportMapped): Promise<
 };
 
 const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?: PointDeRassemblementDocument) => {
-  const cohorts = await CohortModel.find({ name: { $regex: "CLE 0[56]" } });
-  if (cohorts.length !== 4) {
-    throw Error("importPointDeRassemblement() - Cohortes CLE 05 et CLE 06 non trouvées");
-  }
   let cohortNames = foundPdr?.cohorts || [];
-  cohortNames = [...new Set([...cohortNames, ...cohorts.map(({ name }) => name)])];
-
   let cohortIds = foundPdr?.cohortIds || [];
-  cohortIds = [...new Set([...cohortIds, ...cohorts.map(({ _id }) => _id)])];
-
   let complementAddress = foundPdr?.complementAddress || [];
-  if (pdr.complementAddress) {
-    complementAddress = [
-      ...new Set([
-        ...complementAddress,
-        ...cohorts.map(({ name: cohort, _id: cohortId }) => ({
-          cohort,
-          cohortId,
-          complement: pdr.complementAddress,
-        })),
-      ]),
-    ];
-  }
 
   const code = foundPdr?.code || pdr.matricule;
 
@@ -175,4 +155,11 @@ const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?
       location,
     },
   };
+};
+
+export const checkColumnHeaders = (fileHeaders: string[]) => {
+  const missingHeaders = PDR_HEADERS.filter((header) => !fileHeaders.includes(header));
+  if (missingHeaders.length > 0) {
+    throw new Error(`Un fichier d'import de PDR doit contenir les colonnes suivantes: ${missingHeaders.join(", ")}`);
+  }
 };
