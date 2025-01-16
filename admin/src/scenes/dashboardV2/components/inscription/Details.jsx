@@ -65,6 +65,15 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
     fetchDetailInscriptions();
   }, [selectedFiltersBottom, selectedFilters]);
 
+  function getEligibleBirthYears(currentYear, options) {
+    const birthYears = [];
+    for (let age = 17; age >= 14; age--) {
+      birthYears.push(currentYear - age);
+    }
+    if (options === "label") return birthYears;
+    if (options === "value") return [age[birthYears[0]] || 0, age[birthYears[1]] || 0, age[birthYears[2]] || 0, age[birthYears[3]] || 0];
+  }
+
   return (
     <div className="flex w-[40%] flex-col items-center rounded-lg bg-white py-6 px-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex w-full flex-row justify-between">
@@ -88,8 +97,10 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
           <FullDoughnut
             title="Âge"
             legendSide="right"
-            labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
-            values={[age["2005"] || 0, age["2006"] || 0, age["2007"] || 0, age["2008"] || 0]}
+            //labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
+            //values={[age["2005"] || 0, age["2006"] || 0, age["2007"] || 0, age["2008"] || 0]}
+            labels={getEligibleBirthYears(new Date().getFullYear(), "label")}
+            values={getEligibleBirthYears(new Date().getFullYear(), "value")}
             maxLegends={2}
             tooltipsPercent={true}
             graphClass="relative shrink-0 w-1/2"
