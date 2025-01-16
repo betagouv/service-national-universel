@@ -42,7 +42,6 @@ const Signin: React.FC = () => {
       }
 
       if (!young) {
-        console.log("no young", young);
         return;
       }
 

@@ -1,19 +1,16 @@
-import queryString from "query-string";
 import React, { useEffect, useState } from "react";
 import useAuth from "@/services/useAuth";
 import { useHistory } from "react-router-dom";
-import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
+import { formatToActualTime } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
-import Eye from "../../assets/icons/Eye";
-import EyeOff from "../../assets/icons/EyeOff";
 import Input from "../../components/dsfr/forms/input";
 import RightArrow from "../../assets/icons/RightArrow";
 import api from "../../services/api";
 import Error from "../../components/error";
 import { getPasswordErrorMessage } from "../../utils";
 import { environment } from "../../config";
-import { captureMessage } from "../../sentry";
 import { toastr } from "react-redux-toastr";
+import { capture } from "../../sentry";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { InputPassword, Button } from "@snu/ds/dsfr";
 
@@ -33,13 +30,7 @@ const Signin: React.FC = () => {
   const [error, setError] = useState<ErrorState>({});
   const history = useHistory();
 
-  const { young, login } = useAuth();
-  const params = queryString.parse(window.location.search) as { redirect?: string };
-  const { redirect } = params;
-
-  useEffect(() => {
-    if (young) history.push("/" + (redirect || ""));
-  }, [young, history, redirect]);
+  const { login } = useAuth();
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -54,18 +45,10 @@ const Signin: React.FC = () => {
       if (young) {
         plausibleEvent("INVITATION/ Connexion réussie");
         await login(young);
-        // const redirectionApproved = environment === "development" ? redirect : isValidRedirectUrl(redirect);
-
-        // if (!redirectionApproved) {
-        //   captureMessage("Invalid redirect url", { extra: { redirect } });
-        //   toastr.error("Erreur de redirection", "Url de redirection invalide : " + redirect);
-        //   history.push("/");
-        //   return;
-        // }
-        // window.location.href = redirect || "/";
+        history.push("/home");
       }
     } catch (e) {
-      console.error(e);
+      capture(e);
       if (e.code === "PASSWORD_NOT_VALIDATED") {
         setError({ text: "Votre mot de passe doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole" });
       } else if (e.code === "TOO_MANY_REQUESTS") {
@@ -83,7 +66,13 @@ const Signin: React.FC = () => {
     setLoading(false);
   };
 
-  useEffect(() => {
+  interface ValidatePasswordProps {
+    password: string;
+    confirmPassword: string;
+    email: string;
+  }
+
+  const validatePassword = ({ password, confirmPassword, email }: ValidatePasswordProps): void => {
     const errors: ErrorState = {};
     if (password && getPasswordErrorMessage(password)) {
       errors.password = getPasswordErrorMessage(password);
@@ -93,6 +82,10 @@ const Signin: React.FC = () => {
     }
     setError(errors);
     setDisabled(!(Object.keys(errors).length === 0 && password && confirmPassword && email));
+  };
+
+  useEffect(() => {
+    validatePassword({ password, confirmPassword, email });
   }, [email, password, confirmPassword]);
 
   return (
