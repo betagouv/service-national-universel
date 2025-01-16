@@ -7,7 +7,7 @@ import { useDispatch } from "react-redux";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 import { capture } from "@/sentry";
 import useAuth from "@/services/useAuth";
-import useAffectationData from "../../utils/useAffectationData";
+import useAffectationData from "../../utils/useAffectationInfo";
 
 export default function StepMedicalField() {
   const index = 4;
@@ -17,7 +17,7 @@ export default function StepMedicalField() {
   const isDone = isStepDone(STEPS.MEDICAL_FILE, young);
   const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
-  const email = session.sanitaryContactEmail;
+  const email = session?.sanitaryContactEmail;
 
   async function onClick() {
     if (young?.cohesionStayMedicalFileDownload === "true") return;

@@ -6,7 +6,7 @@ import DontForget from "../assets/DontForget";
 import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
-import useAffectationData from "../utils/useAffectationData";
+import useAffectationData from "../utils/useAffectationInfo";
 
 export default function TodoBackpack() {
   const { isCLE } = useAuth();

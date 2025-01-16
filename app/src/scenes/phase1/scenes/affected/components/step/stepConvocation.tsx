@@ -13,7 +13,7 @@ import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 import { STEPS, isStepDone } from "../../utils/steps.utils";
 import useAuth from "@/services/useAuth";
-import useAffectationData from "../../utils/useAffectationData";
+import useAffectationData from "../../utils/useAffectationInfo";
 
 export default function StepConvocation() {
   const index = 3;
@@ -22,7 +22,12 @@ export default function StepConvocation() {
   const isEnabled = isStepDone(STEPS.AGREEMENT, young);
   const isDone = isStepDone(STEPS.CONVOCATION, young);
   const dispatch = useDispatch();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message?: string;
+    onConfirm: null | (() => void);
+  }>({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -50,13 +55,13 @@ export default function StepConvocation() {
   const handleMail = async () => {
     setLoading(true);
     try {
-      let template = "cohesion";
-      let type = "convocation";
+      const template = "cohesion";
+      const type = "convocation";
       const { ok, code } = await API.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
         fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
       });
       if (!ok) throw new Error(translate(code));
-      toastr.success(`Document envoyé à ${young.email}`);
+      toastr.success(`Document envoyé à ${young.email}`, "");
       setModal({ isOpen: false, onConfirm: null });
     } catch (e) {
       capture(e);

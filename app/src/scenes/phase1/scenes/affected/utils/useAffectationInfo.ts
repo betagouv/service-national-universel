@@ -2,9 +2,9 @@ import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
 import { useQuery } from "@tanstack/react-query";
 import { getDepartureDate, getReturnDate } from "snu-lib";
-import { getCenter, getMeetingPoint, getSession } from "./affectation.repository";
+import { getCenter, getMeetingPoint, getSession } from "./affectationRepository";
 
-export default function useAffectationData() {
+export default function useAffectationInfo() {
   const { young } = useAuth();
   const { cohort } = useCohort();
 

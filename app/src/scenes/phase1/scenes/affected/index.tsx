@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { youngCanChangeSession, getCohortPeriod } from "snu-lib";
 import useCohort from "@/services/useCohort";
-import useAffectationData from "./utils/useAffectationData";
+import useAffectationInfo from "./utils/useAffectationInfo";
 import { AlertBoxInformation } from "../../../../components/Content";
 import ChangeStayLink from "../../components/ChangeStayLink";
 import CenterInfo from "./components/CenterInfo";
@@ -20,10 +20,10 @@ import hero from "../../../../assets/hero/home.png";
 
 export default function Affected() {
   const { young, isCLE } = useAuth();
-  const { center, meetingPoint, departureDate, returnDate, isPending: loading } = useAffectationData();
+  const { cohort } = useCohort();
+  const { center, meetingPoint, isPending: loading } = useAffectationInfo();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
 
-  const { cohort } = useCohort();
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
 
   if (areAllStepsDone(young)) {
@@ -39,7 +39,7 @@ export default function Affected() {
   }
 
   if (!center && !meetingPoint) {
-    return <Problem cohort={young.cohort} />;
+    return <Problem />;
   }
 
   return (
@@ -61,7 +61,7 @@ export default function Affected() {
       {areAllStepsDone(young) && (
         <div className="mt-4 gap-6 grid grid-cols-1 md:grid-cols-3">
           <div>
-            <TravelInfo location={young?.meetingPointId ? meetingPoint : center} departureDate={departureDate} returnDate={returnDate} />
+            <TravelInfo />
           </div>
           <div className="col-span-2">
             <TodoBackpack />
@@ -72,7 +72,7 @@ export default function Affected() {
       <div className="mt-8 grid grid-cols-1 gap-12">
         <StepsAffected />
 
-        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
+        <div className={areAllStepsDone(young) ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
 
         <div className="flex justify-end py-4 pr-8">
           <JDMA id="3504" />

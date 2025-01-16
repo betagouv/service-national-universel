@@ -11,7 +11,7 @@ import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
-import useAffectationData from "../../utils/useAffectationData";
+import useAffectationData from "../../utils/useAffectationInfo";
 
 export default function StepPDR() {
   const index = 1;
