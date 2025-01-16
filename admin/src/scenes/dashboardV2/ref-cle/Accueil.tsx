@@ -49,11 +49,7 @@ export default function Accueil() {
             <p>Suivez les inscriptions aux Classes et Lycées Engagés de votre établissement et participez à l’engagement de vos élèves.</p>
             <p>
               Vous pourrez consulter les messages d’alerte sur cette page. Si vous avez une question, rendez vous sur la{" "}
-              <a
-                href="https://support.snu.gouv.fr/base-de-connaissance/les-classes-engagees"
-                target="_blank"
-                rel="noreferrer"
-                className="font-bold hover:underline hover:text-gray-900">
+              <a href="https://support.snu.gouv.fr/base-de-connaissance/les-classes-engagees" target="_blank" rel="noreferrer" className="font-bold text-blue-600 hover:underline ">
                 Base de Connaissances
               </a>
               .
