@@ -21,6 +21,7 @@ import {
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
 import { ReferentielClasseService } from "../ReferentielClasse.service";
+import { AnnulerClasseDesistee } from "../../../sejours/cle/classe/useCase/AnnulerClasseDesistee";
 
 @Injectable()
 export class ImporterClasses implements UseCase<ClasseRapport[]> {
@@ -32,7 +33,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         @Inject(PointDeRassemblementGateway) private readonly pdrGateway: PointDeRassemblementGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
-        private readonly referentielClasseService: ReferentielClasseService,
+        @Inject(AnnulerClasseDesistee) private readonly annulerClasseDesistee: AnnulerClasseDesistee,
         private readonly logger: Logger,
     ) {}
 
@@ -72,13 +73,20 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         if (!classe) {
             throw new Error("Classe non trouvée en base");
         }
+        const updatedFields: string[] = [];
+
+        // Si la classe est WITHDRAWN
+        // => usecase AnnulerClasseDesistee
+        let classeDesistee;
+        if (classe.statut === STATUS_CLASSE.WITHDRAWN) {
+            classeDesistee = await this.annulerClasseDesistee.execute(classe);
+            updatedFields.push("statut");
+        }
 
         const session = await this.sessionGateway.findBySnuId(classeImport.cohortCode);
         if (!session) {
             throw new Error("Session non trouvée en base");
         }
-
-        const updatedFields: string[] = [];
 
         if (session.id !== classe.sessionId) {
             await this.updateYoungCohorts(classe.id, session);

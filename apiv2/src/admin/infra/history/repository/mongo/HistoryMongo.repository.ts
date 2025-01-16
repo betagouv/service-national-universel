@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { Model } from "mongoose";
+import { Model, Types } from "mongoose";
 import { HistoryDocument, mapHistory } from "./HistoryMongo.provider";
 import { HistoryType } from "@admin/core/history/History";
 import { PatchType } from "snu-lib";
@@ -17,6 +17,14 @@ export class HistoryRepository implements HistoryGateway {
         @Inject(mapHistory(HistoryType.PLANDETRANSPORT))
         private readonly planDeTransportMongooseEntity: Model<HistoryDocument>,
     ) {}
+    findLastByReferenceIdAndPath(history: HistoryType, referenceId: string, path: string): Promise<PatchType | null> {
+        const instance = this.getInstance(history);
+        return instance.findOne({ ref: referenceId, "ops.path": path }).sort({ date: -1 }).lean();
+    }
+    async findLastByReferenceId(history: HistoryType, referenceId: string): Promise<PatchType | null> {
+        const instance = this.getInstance(history);
+        return instance.findOne({ ref: referenceId }).sort({ date: -1 }).lean();
+    }
 
     private getInstance(history: HistoryType) {
         switch (history) {
