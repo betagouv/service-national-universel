@@ -7,7 +7,7 @@ import { CohortType, YoungType } from "snu-lib";
 export const ALONE_ARRIVAL_HOUR = "16h";
 export const ALONE_DEPARTURE_HOUR = "11h";
 
-export const pdrChoiceLimitDate = (cohort: CohortType): Date | string => {
+export const pdrChoiceLimitDate = (cohort: CohortType): string => {
   const date = getMeetingPointChoiceLimitDateForCohort(cohort);
   return date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
 };
