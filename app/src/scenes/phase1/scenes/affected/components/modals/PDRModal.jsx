@@ -1,12 +1,9 @@
 import Close from "@/components/layout/navbar/assets/Close";
 import Modal from "@/components/ui/modals/Modal";
-import { setYoung } from "@/redux/auth/actions";
-import { capture } from "@/sentry";
-import API from "@/services/api";
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
+import useUpdateMeetingPoint from "../../utils/useUpdateMeetingPoint";
 import { toastr } from "react-redux-toastr";
 import MeetingPointChooser from "../MeetingPointChooser";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
@@ -20,9 +17,8 @@ export default function PDRModal({ open, setOpen }) {
   const { cohort, pdrChoiceExpired } = useCohort();
   const { center, session } = useAffectationInfo();
   const { data: options } = useAvailableMeetingPoints();
-  const dispatch = useDispatch();
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
-  const [loading, setLoading] = useState(false);
+  const { mutate, isPending: loading } = useUpdateMeetingPoint();
 
   function chooseMeetingPoint(meetingPoint) {
     saveChoice({ meetingPointId: meetingPoint._id, ligneId: meetingPoint.busLineId });
@@ -33,24 +29,14 @@ export default function PDRModal({ open, setOpen }) {
   }
 
   async function saveChoice(choice) {
-    try {
-      setLoading(true);
-      const result = await API.put(`/young/${young._id}/point-de-rassemblement`, choice);
-      if (result.ok) {
+    mutate(choice, {
+      onSuccess: () => {
         toastr.success("Votre choix est enregistré");
-        dispatch(setYoung(result.data));
         setOpen(false);
-      } else {
-        toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
-      }
-      setLoading(false);
-      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
-    } catch (err) {
-      setLoading(false);
-      setModalMeetingPoint({ isOpen: false, meetingPoint: null });
-      capture(err);
-      toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants.");
-    }
+        setModalMeetingPoint({ isOpen: false, meetingPoint: null });
+      },
+      onError: () => toastr.error("Erreur", "Nous n'avons pas pu enregistrer votre choix. Veuillez réessayer dans quelques instants."),
+    });
   }
 
   return (

@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { StepCard } from "../StepCard";
 import { AgreementModal } from "../modals/AgreementModal";
-import { STEPS, isStepDone } from "../../utils/steps.utils";
-import useAuth from "@/services/useAuth";
+import { STEPS, useSteps } from "../../utils/steps.utils";
 
 export default function StepAgreement() {
-  const { young } = useAuth();
+  const { isStepDone } = useSteps();
   const index = 2;
-  const isEnabled = isStepDone(STEPS.PDR, young);
-  const isDone = isStepDone(STEPS.AGREEMENT, young);
+  const isEnabled = isStepDone(STEPS.PDR);
+  const isDone = isStepDone(STEPS.AGREEMENT);
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isEnabled) {

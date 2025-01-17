@@ -3,7 +3,6 @@ import plausibleEvent from "../../../../../services/plausible";
 import MedicalFileModal from "../../../components/MedicalFileModal";
 import Arrow from "../assets/Arrow";
 import DontForget from "../assets/DontForget";
-import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
 import useAffectationData from "../utils/useAffectationInfo";
@@ -36,10 +35,11 @@ export default function TodoBackpack() {
   }
 
   return (
-    <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none">
+    <>
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
+      <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
 
-      <div className="relative p-4 xl:w-1/2">
+      <div className="relative">
         <h1 className="mb-6 text-xl font-bold">A préparer...</h1>
         {!isCLE && (
           <>
@@ -90,15 +90,11 @@ export default function TodoBackpack() {
         )}
         {!isCLE && (
           <>
-            <Arrow className="absolute left-80 top-10 hidden lg:block" />
-            <DontForget className="absolute left-80 top-20 hidden lg:block" />
+            <Arrow className="absolute left-72 top-5 hidden lg:block" />
+            <DontForget className="absolute left-72 top-10 hidden lg:block" />
           </>
         )}
       </div>
-
-      <SnuBackPack className="mt-4 block flex-none md:hidden md:h-64 md:w-64 xl:block xl:w-1/2" />
-
-      <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
-    </div>
+    </>
   );
 }

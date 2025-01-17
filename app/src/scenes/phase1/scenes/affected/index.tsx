@@ -12,7 +12,7 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
-import { areAllStepsDone } from "./utils/steps.utils";
+import { useSteps } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
@@ -21,12 +21,12 @@ import hero from "../../../../assets/hero/home.png";
 export default function Affected() {
   const { young, isCLE } = useAuth();
   const { cohort } = useCohort();
-  const { center, meetingPoint, isPending: loading } = useAffectationInfo();
+  const { center, meetingPoint, isPending: loading, isError } = useAffectationInfo();
+  const { areAllStepsDone } = useSteps();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
-
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
 
-  if (areAllStepsDone(young)) {
+  if (areAllStepsDone) {
     window.scrollTo(0, 0);
   }
 
@@ -37,29 +37,32 @@ export default function Affected() {
       </div>
     );
   }
-
+  if (isError) {
+    return <p>Erreur</p>;
+  }
   if (!center && !meetingPoint) {
     return <Problem />;
   }
-
   return (
     <HomeContainer>
       <HomeHeader title={title} img={hero}>
-        {youngCanChangeSession(young) ? <ChangeStayLink className="my-4 md:my-8" /> : null}
+        <div className="mt-4 md:mt-8 grid grid-cols-1 gap-8">
+          {youngCanChangeSession(young) ? <ChangeStayLink /> : null}
 
-        <CenterInfo center={center} />
+          <CenterInfo center={center} />
 
-        {showInfoMessage && (
-          <AlertBoxInformation
-            title="Information"
-            message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
-            onClose={() => setShowInfoMessage(false)}
-          />
-        )}
+          {showInfoMessage && (
+            <AlertBoxInformation
+              title="Information"
+              message="Suite au séjour de cohésion, les espaces volontaires vont s'actualiser dans les prochaines semaines, les attestations seront disponibles directement en ligne."
+              onClose={() => setShowInfoMessage(false)}
+            />
+          )}
+        </div>
       </HomeHeader>
 
-      {areAllStepsDone(young) && (
-        <div className="mt-4 gap-6 grid grid-cols-1 md:grid-cols-3">
+      {areAllStepsDone && (
+        <div className="mt-8 gap-12 grid grid-cols-1 md:grid-cols-3">
           <div>
             <TravelInfo />
           </div>
@@ -72,7 +75,7 @@ export default function Affected() {
       <div className="mt-8 grid grid-cols-1 gap-12">
         <StepsAffected />
 
-        <div className={areAllStepsDone(young) ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
+        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
 
         <div className="flex justify-end py-4 pr-8">
           <JDMA id="3504" />

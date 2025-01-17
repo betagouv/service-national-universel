@@ -18,7 +18,7 @@ export default function TravelInfo() {
   const returnHour = getReturnHour(location);
 
   return (
-    <div className="p-4 md:ml-10">
+    <section id="resume">
       <h1 className="mb-6 text-xl font-bold">Résumé du voyage</h1>
 
       {isCLE && <p className="mb-4 text-sm">Vos informations de transport vous seront transmises par votre établissement.</p>}
@@ -74,6 +74,6 @@ export default function TravelInfo() {
           </div>
         </div>
       )}
-    </div>
+    </section>
   );
 }
