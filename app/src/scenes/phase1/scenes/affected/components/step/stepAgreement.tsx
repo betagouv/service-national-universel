@@ -1,14 +1,13 @@
 import React, { useState } from "react";
 import { StepCard } from "../StepCard";
 import { AgreementModal } from "../modals/AgreementModal";
-import { STEPS, isStepDone } from "../../utils/steps.utils";
-import { useSelector } from "react-redux";
+import { STEPS, useSteps } from "../../utils/steps.utils";
 
-export default function StepAgreement({ data: { departureDate, returnDate } }) {
-  const young = useSelector((state) => state.Auth.young);
+export default function StepAgreement() {
+  const { isStepDone } = useSteps();
   const index = 2;
-  const isEnabled = isStepDone(STEPS.PDR, young);
-  const isDone = isStepDone(STEPS.AGREEMENT, young);
+  const isEnabled = isStepDone(STEPS.PDR);
+  const isDone = isStepDone(STEPS.AGREEMENT);
   const [isOpen, setIsOpen] = useState(false);
 
   if (!isEnabled) {
@@ -33,7 +32,7 @@ export default function StepAgreement({ data: { departureDate, returnDate } }) {
             </button>
           </div>
         </div>
-        <AgreementModal isOpen={isOpen} setIsOpen={setIsOpen} departureDate={departureDate} returnDate={returnDate} />
+        <AgreementModal isOpen={isOpen} setIsOpen={setIsOpen} />
       </StepCard>
     );
   }
@@ -51,7 +50,7 @@ export default function StepAgreement({ data: { departureDate, returnDate } }) {
           </button>
         </div>
       </div>
-      <AgreementModal isOpen={isOpen} setIsOpen={setIsOpen} departureDate={departureDate} returnDate={returnDate} />
+      <AgreementModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </StepCard>
   );
 }

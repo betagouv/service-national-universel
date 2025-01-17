@@ -1,37 +1,21 @@
 import React, { useState } from "react";
-import { toastr } from "react-redux-toastr";
 import dayjs from "dayjs";
 import utc from "dayjs/plugin/utc";
 dayjs.extend(utc);
-import { capture } from "../../../../../../sentry";
-import api from "../../../../../../services/api";
 import { getMeetingHour, getReturnHour } from "snu-lib";
 import { ALONE_ARRIVAL_HOUR, ALONE_DEPARTURE_HOUR } from "../../utils/steps.utils";
 import { StepCard } from "../StepCard";
 import PDRModal from "../modals/PDRModal";
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
+import useAffectationInfo from "../../utils/useAffectationInfo";
 
-export default function StepPDR({ data: { center, session, meetingPoint, departureDate, returnDate } }) {
+export default function StepPDR() {
   const index = 1;
   const { young, isCLE } = useAuth();
+  const { meetingPoint, departureDate, returnDate } = useAffectationInfo();
   const { pdrChoiceExpired, pdrChoiceLimitDate } = useCohort();
   const [open, setOpen] = useState(false);
-  const [meetingPoints, setMeetingPoints] = useState([]);
-
-  async function loadMeetingPoints() {
-    try {
-      const result = await api.get(`/point-de-rassemblement/available`);
-      if (!result.ok) {
-        toastr.error("Nous n'avons pas réussi à charger les points de rassemblements.", "Veuillez réessayer dans quelques instants.");
-      } else {
-        setMeetingPoints(result.data);
-      }
-    } catch (err) {
-      capture(err);
-      toastr.error("Nous n'avons pas réussi à charger les points de rassemblements.", "Veuillez réessayer dans quelques instants.");
-    }
-  }
 
   function addressOf(mp) {
     if (mp) {
@@ -42,7 +26,6 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
   }
 
   async function handleOpen() {
-    await loadMeetingPoints();
     setOpen(!open);
   }
 
@@ -81,7 +64,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
             </div>
           )}
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
+        <PDRModal open={open} setOpen={setOpen} />
       </StepCard>
     );
   }
@@ -112,7 +95,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
             </div>
           )}
         </div>
-        <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
+        <PDRModal open={open} setOpen={setOpen} />
       </StepCard>
     );
   }
@@ -150,7 +133,7 @@ export default function StepPDR({ data: { center, session, meetingPoint, departu
           </button>
         </div>
       </div>
-      <PDRModal open={open} setOpen={setOpen} meetingPoints={meetingPoints} center={center} session={session} />
+      <PDRModal open={open} setOpen={setOpen} />
     </StepCard>
   );
 }

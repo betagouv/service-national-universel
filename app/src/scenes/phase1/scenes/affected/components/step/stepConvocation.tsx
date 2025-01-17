@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
@@ -11,16 +11,22 @@ import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
 import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
-import { STEPS, isStepDone } from "../../utils/steps.utils";
+import { STEPS, useSteps } from "../../utils/steps.utils";
 import useAuth from "@/services/useAuth";
 
-export default function StepConvocation({ data: { center, meetingPoint, departureDate, returnDate } }) {
+export default function StepConvocation() {
   const index = 3;
   const { young, isCLE } = useAuth();
-  const isEnabled = isStepDone(STEPS.AGREEMENT, young);
-  const isDone = isStepDone(STEPS.CONVOCATION, young);
+  const { isStepDone } = useSteps();
+  const isEnabled = isStepDone(STEPS.AGREEMENT);
+  const isDone = isStepDone(STEPS.CONVOCATION);
   const dispatch = useDispatch();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    title?: string;
+    message?: string;
+    onConfirm: null | (() => void);
+  }>({ isOpen: false, onConfirm: null });
   const [openConvocation, setOpenConvocation] = useState(false);
   const [loading, setLoading] = useState(false);
 
@@ -48,13 +54,13 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
   const handleMail = async () => {
     setLoading(true);
     try {
-      let template = "cohesion";
-      let type = "convocation";
+      const template = "cohesion";
+      const type = "convocation";
       const { ok, code } = await API.post(`/young/${young._id}/documents/${type}/${template}/send-email`, {
         fileName: `${young.firstName} ${young.lastName} - ${template} ${type}.pdf`,
       });
       if (!ok) throw new Error(translate(code));
-      toastr.success(`Document envoyé à ${young.email}`);
+      toastr.success(`Document envoyé à ${young.email}`, "");
       setModal({ isOpen: false, onConfirm: null });
     } catch (e) {
       capture(e);
@@ -122,15 +128,7 @@ export default function StepConvocation({ data: { center, meetingPoint, departur
         title="Envoi de document par mail"
         subTitle={`Vous allez recevoir le lien de téléchargement de votre convocation par mail à l'adresse ${young.email}.`}
       />
-      <ConvocationModal
-        isOpen={openConvocation}
-        setIsOpen={setOpenConvocation}
-        loading={loading}
-        center={center}
-        meetingPoint={meetingPoint}
-        departureDate={departureDate}
-        returnDate={returnDate}
-      />
+      <ConvocationModal isOpen={openConvocation} setIsOpen={setOpenConvocation} loading={loading} />
     </StepCard>
   );
 }
