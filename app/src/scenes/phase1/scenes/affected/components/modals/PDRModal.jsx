@@ -3,18 +3,19 @@ import Modal from "@/components/ui/modals/Modal";
 import { setYoung } from "@/redux/auth/actions";
 import { capture } from "@/sentry";
 import API from "@/services/api";
-import { getCohort } from "@/utils/cohorts";
+import useAuth from "@/services/useAuth";
+import useCohort from "@/services/useCohort";
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import MeetingPointChooser from "../MeetingPointChooser";
 import MeetingPointGoAlone from "../MeetingPointGoAlone";
 import { getDepartureDate, getReturnDate } from "snu-lib";
 import MeetingPointConfirmationModal from "../MeetingPointConfirmationModal";
 
-export default function PDRModal({ open, setOpen, meetingPoints, center, session, pdrChoiceExpired }) {
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+export default function PDRModal({ open, setOpen, meetingPoints, center, session }) {
+  const { young } = useAuth();
+  const { cohort, pdrChoiceExpired } = useCohort();
   const dispatch = useDispatch();
   const [modalMeetingPoint, setModalMeetingPoint] = useState({ isOpen: false, meetingPoint: null });
   const [loading, setLoading] = useState(false);

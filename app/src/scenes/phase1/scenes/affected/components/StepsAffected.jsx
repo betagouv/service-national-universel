@@ -19,7 +19,7 @@ export default function StepsAffected({ data }) {
   }
 
   return (
-    <section className={`order-3 m-[1rem] flex flex-col md:mx-[4rem] ${areAllStepsDone(young) ? "order-4" : "order-3"}`}>
+    <section className="flex flex-col">
       <article className="mb-6">
         {isCLE && (
           <>
