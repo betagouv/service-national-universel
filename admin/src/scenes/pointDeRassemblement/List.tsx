@@ -117,6 +117,7 @@ const ListPoints = ({ user }) => {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
   ];
 
   return (
@@ -147,8 +148,8 @@ const ListPoints = ({ user }) => {
               for (const item of data) {
                 res.push({
                   // @ts-ignore
-                  Identifiant: item._id.toString(),
                   Code: item.code,
+                  Matricule: item.matricule,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,
