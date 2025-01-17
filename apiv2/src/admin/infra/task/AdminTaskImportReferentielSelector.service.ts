@@ -17,37 +17,33 @@ export class AdminTaskImportReferentielSelectorService {
         private readonly referentielClasseService: ReferentielClasseService,
     ) {}
     async handleImporterReferentiel(importTask: ReferentielImportTaskModel): Promise<ReferentielImportTaskResult> {
-        switch (importTask.metadata?.parameters?.type) {
+        const taskParameters = importTask.metadata!.parameters;
+        switch (taskParameters?.type) {
             case ReferentielTaskType.IMPORT_ROUTES:
-                await this.importerRoutes.execute(importTask.metadata!.parameters!);
+                await this.importerRoutes.execute(taskParameters);
                 return { rapportKey: "" };
             case ReferentielTaskType.IMPORT_CLASSES:
-                const rapport = await this.importerClasses.execute(importTask.metadata!.parameters!);
-                const rapportKey = await this.referentielClasseService.processReport(
-                    importTask.metadata!.parameters!,
-                    rapport,
-                );
+                const rapport = await this.importerClasses.execute(taskParameters);
+                const rapportKey = await this.referentielClasseService.processReport(taskParameters, rapport);
                 return { rapportKey };
             case ReferentielTaskType.IMPORT_DESISTER_CLASSES:
-                const rapportDesister = await this.desisterClasses.execute(importTask.metadata!.parameters!);
+                const rapportDesister = await this.desisterClasses.execute(taskParameters);
                 const rapportDesisterKey = await this.referentielClasseService.processReport(
-                    importTask.metadata!.parameters!,
+                    taskParameters,
                     rapportDesister,
                 );
                 return { rapportKey: rapportDesisterKey };
             case ReferentielTaskType.IMPORT_DESISTER_CLASSES_ET_IMPORTER_CLASSES:
-                const rapportDesisterBeforeImporter = await this.desisterClasses.execute(
-                    importTask.metadata!.parameters!,
-                );
-                const rapportImporter = await this.importerClasses.execute(importTask.metadata!.parameters!);
+                const rapportDesisterBeforeImporter = await this.desisterClasses.execute(taskParameters);
+                const rapportImporter = await this.importerClasses.execute(taskParameters);
                 const rapportDesisterImporterKey = await this.referentielClasseService.processReport(
-                    importTask.metadata!.parameters!,
+                    taskParameters,
                     rapportDesisterBeforeImporter,
                     rapportImporter,
                 );
                 return { rapportKey: rapportDesisterImporterKey };
             default:
-                throw new Error(`Task of type ${importTask.metadata?.parameters?.type} not handle yet`);
+                throw new Error(`Task of type ${taskParameters?.type} not handle yet`);
         }
     }
 }

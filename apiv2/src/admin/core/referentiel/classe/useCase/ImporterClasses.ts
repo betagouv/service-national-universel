@@ -11,6 +11,7 @@ import { STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
 import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
+import { AnnulerClasseDesistee } from "../../../sejours/cle/classe/useCase/AnnulerClasseDesistee";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import {
@@ -20,8 +21,6 @@ import {
     ClasseRapport,
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
-import { ReferentielClasseService } from "../ReferentielClasse.service";
-import { AnnulerClasseDesistee } from "../../../sejours/cle/classe/useCase/AnnulerClasseDesistee";
 
 @Injectable()
 export class ImporterClasses implements UseCase<ClasseRapport[]> {
@@ -64,22 +63,30 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
                 );
             }
         }
-        // return this.referentielClasseService.processReport(parameters, report);
         return report;
     }
 
     private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {
-        const classe = await this.classeGateway.findById(classeImport.classeId);
+        let classe = await this.classeGateway.findById(classeImport.classeId);
         if (!classe) {
             throw new Error("Classe non trouvée en base");
         }
+        let classeRapport: ClasseImportRapport = {
+            classeId: classe.id,
+            sessionCode: classeImport.sessionCode,
+            cohortCode: classeImport.cohortCode,
+        };
         const updatedFields: string[] = [];
 
         // Si la classe est WITHDRAWN
-        // => usecase AnnulerClasseDesistee
-        let classeDesistee;
         if (classe.statut === STATUS_CLASSE.WITHDRAWN) {
-            classeDesistee = await this.annulerClasseDesistee.execute(classe);
+            const annulerClasseDesistee = await this.annulerClasseDesistee.execute(classe);
+            classeRapport = {
+                ...classeRapport,
+                annulerClasseDesisteeId: classe.id,
+                annulerClasseDesisteeRapport: annulerClasseDesistee.rapport,
+            };
+            classe = annulerClasseDesistee.classe;
             updatedFields.push("statut");
         }
 
@@ -113,13 +120,11 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             const updatedClasse = await this.classeGateway.update({ ...classe, ...newClasseData });
 
             return {
-                classeId: updatedClasse.id,
+                ...classeRapport,
                 sessionId: session.id,
                 sessionName: session.nom,
                 classeStatus: updatedClasse.statut,
                 classeTotalSeats: updatedClasse.placesTotal,
-                sessionCode: classeImport.sessionCode,
-                cohortCode: classeImport.cohortCode,
                 updated: updatedFields.join(", "),
                 error: errorMessage,
                 result: "error",
@@ -130,15 +135,12 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         updatedFields.push(...(await this.addCenterAndPdrUpdates(newClasseData, classeImport)));
 
         const updatedClasse = await this.classeGateway.update({ ...classe, ...newClasseData });
-
         return {
-            classeId: updatedClasse.id,
+            ...classeRapport,
             sessionId: session.id,
             sessionName: session.nom,
             classeStatus: updatedClasse.statut,
             classeTotalSeats: updatedClasse.placesTotal,
-            sessionCode: classeImport.sessionCode,
-            cohortCode: classeImport.cohortCode,
             updated: updatedFields.join(", "),
             result: "success",
         };

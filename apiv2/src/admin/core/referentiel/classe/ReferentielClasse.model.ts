@@ -26,6 +26,8 @@ export interface ClasseImportRapport extends ClasseImportModel, ClasseRapport {
     result?: "success" | "error";
     error?: string;
     updated?: string;
+    annulerClasseDesisteeId?: string;
+    annulerClasseDesisteeRapport?: string;
 }
 
 export interface ClasseDesisterXslx {

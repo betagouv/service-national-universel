@@ -12,8 +12,4 @@ export class ReferentielService {
         }
         return missingColumns;
     }
-
-    createReport() {
-        // Create report
-    }
 }

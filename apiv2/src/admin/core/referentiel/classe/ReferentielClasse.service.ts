@@ -1,28 +1,26 @@
 import { Inject, Injectable } from "@nestjs/common";
+import { EmailParams, EmailTemplate } from "@notification/core/Notification";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskModel } from "@task/core/Task.model";
 import { MIME_TYPES, ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
+import { FilePath } from "../Referentiel";
+import { ReferentielService } from "../Referentiel.service";
+import {
+    CreateReferentielImportTaskModel,
+    ReferentielImportTaskAuthor,
+    ReferentielImportTaskParameters,
+} from "../routes/ReferentielImportTask.model";
 import {
     ClasseDesisterXslx,
-    ClasseImportRapport,
     ClasseImportXslx,
     ClasseRapport,
     DesiterClasseFileValidation,
     ImportClasseFileValidation,
 } from "./ReferentielClasse.model";
-import { FilePath } from "../Referentiel";
-import {
-    CreateReferentielImportTaskModel,
-    ReferentielImportTaskAuthor,
-    ReferentielImportTaskModel,
-    ReferentielImportTaskParameters,
-} from "../routes/ReferentielImportTask.model";
-import { ReferentielService } from "../Referentiel.service";
-import { ClockGateway } from "@shared/core/Clock.gateway";
-import { EmailParams, EmailTemplate } from "@notification/core/Notification";
-import { NotificationGateway } from "@notification/core/Notification.gateway";
 
 @Injectable()
 export class ReferentielClasseService {
