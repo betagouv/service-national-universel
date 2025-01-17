@@ -341,7 +341,7 @@ export async function sync(obj, type, { force } = { force: false }) {
   }
   try {
     const user = JSON.parse(JSON.stringify(obj));
-    if (!user) throw new Error("NO USER TO SYNC", { cause: { obj } });
+    if (!user) throw new Error("NO USER TO SYNC");
 
     const email = user.email;
     let parents: Contact[] = [];
