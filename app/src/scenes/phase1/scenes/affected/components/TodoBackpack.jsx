@@ -35,7 +35,7 @@ export default function TodoBackpack() {
   }
 
   return (
-    <>
+    <section id="a-faire">
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
       <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
 
@@ -95,6 +95,6 @@ export default function TodoBackpack() {
           </>
         )}
       </div>
-    </>
+    </section>
   );
 }

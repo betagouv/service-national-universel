@@ -16,7 +16,7 @@ import { useSteps } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import hero from "../../../../assets/hero/home.png";
+import hero from "../../../../assets/hero/phase1.png";
 
 export default function Affected() {
   const { young, isCLE } = useAuth();
