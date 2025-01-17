@@ -52,18 +52,21 @@ export default function View() {
 
   if (!etablissement) return <Loader />;
 
+  const breadcrumb = ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)
+    ? [
+        { title: "Séjours" },
+        {
+          title: "Établissements",
+          to: "/etablissement",
+        },
+      ]
+    : [{ title: "Fiche de l'établissement" }];
+
   return (
     <Page>
       <Header
         title={etablissement.name}
-        breadcrumb={[
-          { title: "Séjours" },
-          ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && {
-            title: "Établissements",
-            to: "/etablissement",
-          },
-          { title: "Fiche de l'établissement" },
-        ].filter(Boolean)}
+        breadcrumb={breadcrumb}
         actions={[
           [ROLES.ADMIN].includes(user.role) && (
             <Button

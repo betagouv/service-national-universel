@@ -128,12 +128,13 @@ export default function List() {
 
   if (!isClasses) return null;
   const isCohortSelected = selectedFilters.cohort && selectedFilters.cohort.filter?.length > 0;
+  const breadcrumb = [![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && { title: "Séjours" }, { title: "Classes" }].filter(Boolean);
 
   return (
     <Page>
       <Header
         title="Classes"
-        breadcrumb={[{ title: "Séjours" }, { title: "Classes" }]}
+        breadcrumb={breadcrumb}
         actions={[
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
             <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />

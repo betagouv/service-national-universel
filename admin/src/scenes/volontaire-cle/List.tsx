@@ -162,7 +162,7 @@ export default function List() {
     <Page>
       <Header
         title="Liste de mes élèves"
-        breadcrumb={[{ title: <HiHome size={20} className="text-gray-400 hover:text-gray-500" />, to: "/" }, { title: "Mes élèves" }]}
+        breadcrumb={[{ title: "Mes élèves" }]}
         actions={students ? [<Button key="export" title="Exporter la liste des élèves (.xlsx)" type="primary" onClick={() => setIsExportOpen(true)} />] : []}
       />
       {!students && (

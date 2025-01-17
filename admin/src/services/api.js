@@ -300,12 +300,12 @@ class api {
     });
   }
 
-  uploadFiles(path, arr, properties) {
+  uploadFiles(path, arr, properties = {}, retries = 3) {
     const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
-          retries: 3,
+          retries,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",

@@ -1,6 +1,6 @@
 import React from "react";
 import { YOUNG_STATUS } from "../../utils";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
@@ -13,7 +13,7 @@ import SejourNotice from "./components/SejourNotice";
 export default function EnAttente() {
   const { young, isCLE } = useAuth();
   const title = `${young.firstName}, bienvenue sur votre compte ${isCLE ? "élève" : "volontaire"}`;
-  const cohort = getCohort(young.cohort);
+  const { cohort } = useCohort();
 
   return (
     <HomeContainer>

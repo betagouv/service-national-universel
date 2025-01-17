@@ -3,12 +3,13 @@ import plausibleEvent from "../../../../../services/plausible";
 import MedicalFileModal from "../../../components/MedicalFileModal";
 import Arrow from "../assets/Arrow";
 import DontForget from "../assets/DontForget";
-import SnuBackPack from "../assets/SnuBackPack";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
+import useAffectationData from "../utils/useAffectationInfo";
 
-export default function TodoBackpack({ lunchBreak, data }) {
+export default function TodoBackpack() {
   const { isCLE } = useAuth();
+  const { session, meetingPoint } = useAffectationData();
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
@@ -34,10 +35,11 @@ export default function TodoBackpack({ lunchBreak, data }) {
   }
 
   return (
-    <div className="mx-[0.5rem] flex overflow-hidden rounded-xl bg-white shadow-nina md:mx-[0rem] md:shadow-none">
-      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} email={data.session.sanitaryContactEmail} />
+    <section id="a-faire">
+      <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
+      <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
 
-      <div className="relative p-4 xl:w-1/2">
+      <div className="relative">
         <h1 className="mb-6 text-xl font-bold">A préparer...</h1>
         {!isCLE && (
           <>
@@ -67,10 +69,10 @@ export default function TodoBackpack({ lunchBreak, data }) {
             <button onClick={() => setMedicalFileModalOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
               fiche sanitaire
             </button>{" "}
-            {data.session.sanitaryContactEmail ? (
+            {session.sanitaryContactEmail ? (
               <>
                 <p>complétée, à envoyer par e-mail à</p>
-                <p>{data.session.sanitaryContactEmail}</p>
+                <p>{session.sanitaryContactEmail}</p>
               </>
             ) : (
               "complétée, sous enveloppe destinée au référent sanitaire"
@@ -78,7 +80,7 @@ export default function TodoBackpack({ lunchBreak, data }) {
           </label>
         </div>
 
-        {lunchBreak && (
+        {meetingPoint?.bus?.lunchBreak && (
           <div className="flex items-baseline gap-4">
             <input type="checkbox" name="collation" id="collation" checked={todo.collation} onChange={handleCheck} />
             <label htmlFor="collation">
@@ -88,15 +90,11 @@ export default function TodoBackpack({ lunchBreak, data }) {
         )}
         {!isCLE && (
           <>
-            <Arrow className="absolute left-80 top-10 hidden lg:block" />
-            <DontForget className="absolute left-80 top-20 hidden lg:block" />
+            <Arrow className="absolute left-72 top-5 hidden lg:block" />
+            <DontForget className="absolute left-72 top-10 hidden lg:block" />
           </>
         )}
       </div>
-
-      <SnuBackPack className="mt-4 block flex-none md:hidden md:h-64 md:w-64 xl:block xl:w-1/2" />
-
-      <ModalConvocation open={modalConvocationOpen} setOpen={setModalConvocationOpen} />
-    </div>
+    </section>
   );
 }
