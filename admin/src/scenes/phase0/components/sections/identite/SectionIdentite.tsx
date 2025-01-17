@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
 
-import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES, YoungDto, CohortDto, CorrectionRequest } from "snu-lib";
+import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES, YoungDto, CohortDto, CorrectionRequest, ROLES } from "snu-lib";
 
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -21,6 +21,7 @@ import SectionIdentiteCni from "./SectionIdentiteCni";
 import SectionIdentiteContact from "./SectionIdentiteContact";
 import { MiniTitle } from "../../commons/MiniTitle";
 import { HiOutlineCheckCircle, HiOutlineExclamation } from "react-icons/hi";
+import { User } from "@/types";
 
 interface SectionIdentiteProps {
   young: YoungDto;
@@ -32,6 +33,7 @@ interface SectionIdentiteProps {
   globalMode: "correction" | "readonly";
   onChange: (options?: any) => Promise<any>;
   readonly?: boolean;
+  user: User;
 }
 
 interface ErrorInterface {
@@ -50,6 +52,7 @@ export default function SectionIdentite({
   globalMode,
   onChange,
   readonly = false,
+  user,
 }: SectionIdentiteProps) {
   const [sectionMode, setSectionMode] = useState<"edition" | "readonly" | "correction">(globalMode);
   const [youngFiltered, setYoungFiltered] = useState(filterDataForYoungSection(young, "identite"));
@@ -133,14 +136,17 @@ export default function SectionIdentite({
 
     result = validateEmpty(youngFiltered, "lastName", errors) && result;
     result = validateEmpty(youngFiltered, "firstName", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCity", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCityZip", errors) && result;
-    result = validateEmpty(youngFiltered, "birthCountry", errors) && result;
 
-    result = validateEmpty(youngFiltered, "address", errors) && result;
-    result = validateEmpty(youngFiltered, "zip", errors) && result;
-    result = validateEmpty(youngFiltered, "city", errors) && result;
-    result = validateEmpty(youngFiltered, "country", errors) && result;
+    if (!(user.role === ROLES.ADMIN && young.status === YOUNG_STATUS.IN_PROGRESS)) {
+      result = validateEmpty(youngFiltered, "birthCity", errors) && result;
+      result = validateEmpty(youngFiltered, "birthCityZip", errors) && result;
+      result = validateEmpty(youngFiltered, "birthCountry", errors) && result;
+
+      result = validateEmpty(youngFiltered, "address", errors) && result;
+      result = validateEmpty(youngFiltered, "zip", errors) && result;
+      result = validateEmpty(youngFiltered, "city", errors) && result;
+      result = validateEmpty(youngFiltered, "country", errors) && result;
+    }
 
     setErrors(errors);
     return result;
