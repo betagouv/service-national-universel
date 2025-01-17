@@ -124,7 +124,7 @@ export async function exportLigneBus(cohort) {
             "Email représentant légal 2": young.parent2Email,
             "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone || getPhoneZoneByDepartment(young.department)),
 
-            "Matricule du centre)": center.matricule,
+            "Matricule du centre": center.matricule,
             "Nom du centre": center.name,
             "Adresse du centre": center.address,
             "Ville du centre": center.city,
