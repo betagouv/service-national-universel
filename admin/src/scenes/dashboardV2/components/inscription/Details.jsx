@@ -97,8 +97,6 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
           <FullDoughnut
             title="Âge"
             legendSide="right"
-            //labels={["Né en 2005", "Né en 2006", "Né en 2007", "Né en 2008"]}
-            //values={[age["2005"] || 0, age["2006"] || 0, age["2007"] || 0, age["2008"] || 0]}
             labels={getEligibleBirthYears(new Date().getFullYear(), "label")}
             values={getEligibleBirthYears(new Date().getFullYear(), "value")}
             maxLegends={2}
