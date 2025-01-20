@@ -325,7 +325,6 @@ class Auth {
         classeId: classe._id,
         etablissementId: etablissement._id,
         cohort: classe.cohort,
-        //TODO ajouter le grade de la classe selectionné par le jeune
         cohesionCenterId: classe.cohesionCenterId,
         sessionPhase1Id: classe.sessionId,
         meetingPointId: classe.pointDeRassemblementId,
