@@ -1,4 +1,3 @@
-import queryString from "query-string";
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
@@ -34,6 +33,8 @@ export default function Reset() {
   const disabled = !password || !passwordConfirm || loading;
   const [error, setError] = React.useState<Errors>({});
   const history = useHistory();
+  const params = new URLSearchParams(location.search);
+  const token = params.get("token");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -46,7 +47,6 @@ export default function Reset() {
 
     setLoading(true);
     try {
-      const { token } = queryString.parse(location.search);
       const res = await api.post("/young/forgot_password_reset", { password, token });
       if (!res.ok) return setError({ text: translate(res.code) });
       toastr.success("Mot de passe changé avec succès", "");
@@ -64,7 +64,6 @@ export default function Reset() {
         <RightArrow className="inline-block" />
         Mon espace volontaire
       </p>
-
       <form onSubmit={(e) => handleSubmit(e)}>
         <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} error={error?.password} />
         <InputPassword label="Confirmez votre mot de passe" name="passwordConfirm" value={passwordConfirm} onChange={setPasswordConfirm} error={error?.passwordConfirm} />
@@ -74,8 +73,6 @@ export default function Reset() {
       </form>
       <br />
       <Link to="/auth">Retourner à la connexion</Link>
-      <br />
-      <br />
     </DSFRContainer>
   );
 }

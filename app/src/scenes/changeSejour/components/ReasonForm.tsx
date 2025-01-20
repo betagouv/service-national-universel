@@ -19,7 +19,7 @@ const ReasonForm: React.FC<ReasonMotifSectionProps> = ({ reason, setReason, mess
   const filteredWithdrawnReasons = WITHRAWN_REASONS.filter(
     (r) =>
       (!r.phase2Only || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED) &&
-      (!r.cohortOnly || r.cohortOnly.includes(young.cohort)),
+      (!r.cohortOnly || r.cohortOnly.includes(young.cohort!)),
   );
 
   return (

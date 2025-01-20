@@ -13,10 +13,9 @@ dayjs.locale("fr");
 import "bootstrap/dist/css/bootstrap.min.css";
 import "./index.css";
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { Redirect, Link, Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { setYoung } from "./redux/auth/actions";
 import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
 import { maintenance } from "./config";
 import api, { initApi } from "./services/api";
@@ -26,6 +25,7 @@ import useAuth from "./services/useAuth";
 
 import PageLoader from "./components/PageLoader";
 import FallbackComponent from "./components/FallBackComponent";
+import useCohort from "./services/useCohort";
 
 const AccountAlreadyExists = lazy(() => import("./scenes/account/AccountAlreadyExists"));
 const AllEngagements = lazy(() => import("./scenes/all-engagements/index"));
@@ -50,26 +50,15 @@ startReactDsfr({ defaultColorScheme: "light", Link });
 
 function App() {
   const [loading, setLoading] = useState(true);
-  const dispatch = useDispatch();
-  const young = useSelector((state) => state.Auth.young);
-  const { login } = useAuth();
+  const { young, login } = useAuth();
+  const { cohort } = useCohort();
 
   async function fetchData() {
     try {
-      const { ok, user } = await api.checkToken();
-
-      if (!ok || !user) {
-        dispatch(setYoung(null));
-        return;
-      }
-
-      await login(user);
-
-      if (shouldForceRedirectToEmailValidation(user)) {
-        history.push("/preinscription/email-validation");
-      }
+      const { user } = await api.checkToken();
+      if (user) await login(user);
     } catch (e) {
-      console.log(e);
+      console.error(e);
     } finally {
       setLoading(false);
     }
@@ -89,29 +78,33 @@ function App() {
         <Router history={history}>
           <AutoScroll />
           <Suspense fallback={<PageLoader />}>
-            <Switch>
-              <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
-              <Redirect from={"/inscription2023"} to={"/inscription"} />
-              <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
+            {shouldForceRedirectToEmailValidation(young, cohort) ? (
+              <Redirect to="/preinscription/email-validation" />
+            ) : (
+              <Switch>
+                <Redirect from={"/public-besoin-d-aide"} to={"/besoin-d-aide"} />
+                <Redirect from={"/inscription2023"} to={"/inscription"} />
+                <Redirect from={"/phase1/changer-de-sejour"} to={"/changer-de-sejour"} />
 
-              <SentryRoute path="/validate-contract/done" component={ContractDone} />
-              <SentryRoute path="/validate-contract" component={Contract} />
-              <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-              <SentryRoute path="/noneligible" component={NonEligible} />
-              <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
-              <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
-              <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
-              <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
-              <SentryRoute path="/besoin-d-aide" exact component={Contact} />
-              {!young && <SentryRoute path="/auth" component={Auth} />}
-              <SentryRoute path="/public-engagements" component={AllEngagements} />
-              <SentryRoute path="/merci" component={Thanks} />
-              <SentryRoute path="/preinscription" component={PreInscription} />
+                <SentryRoute path="/validate-contract/done" component={ContractDone} />
+                <SentryRoute path="/validate-contract" component={Contract} />
+                <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
+                <SentryRoute path="/noneligible" component={NonEligible} />
+                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
+                <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
+                <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
+                <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />
+                <SentryRoute path="/besoin-d-aide" exact component={Contact} />
+                {!young && <SentryRoute path="/auth" component={Auth} />}
+                <SentryRoute path="/public-engagements" component={AllEngagements} />
+                <SentryRoute path="/merci" component={Thanks} />
+                <SentryRoute path="/preinscription" component={PreInscription} />
 
-              <SecureRoute path="/inscription" component={Inscription2023} />
-              <SecureRoute path="/reinscription" component={ReInscription} />
-              <SecureRoute path="/" component={Espace} />
-            </Switch>
+                <SecureRoute path="/inscription" component={Inscription2023} />
+                <SecureRoute path="/reinscription" component={ReInscription} />
+                <SecureRoute path="/" component={Espace} />
+              </Switch>
+            )}
           </Suspense>
         </Router>
       </QueryClientProvider>

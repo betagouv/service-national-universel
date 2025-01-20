@@ -1,10 +1,9 @@
 import React from "react";
 import Unlock from "../../../../../assets/icons/Unlock";
-import { isCohortNeedJdm } from "../../../../../utils/cohorts";
 
-export default function JDMNotDone({ cohort }) {
+export default function JDMNotDone() {
   return (
-    <div className="mt-8 mb-16 space-y-3 px-6 md:mt-0 md:mb-8 md:max-w-md md:px-10">
+    <div className="space-y-3">
       <div className="flex justify-center">
         <Unlock className="saturate-0" />
       </div>

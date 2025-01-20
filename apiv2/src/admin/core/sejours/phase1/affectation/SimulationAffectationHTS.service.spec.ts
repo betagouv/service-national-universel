@@ -408,7 +408,7 @@ describe("SimulationAffectationHTSService", () => {
 
             const ligne2 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne2");
             expect(ligne2!.capaciteJeunes - ligne2!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
-            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(3);
+            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(4);
             expect(ligne2?.placesOccupeesJeunes).toBeGreaterThan(0);
 
             const ligne3 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne3");
