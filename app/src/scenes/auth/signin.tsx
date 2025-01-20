@@ -30,7 +30,7 @@ const Signin: React.FC = () => {
   const { login } = useAuth();
   const disabled = !email || !password || loading;
 
-  const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setLoading(true);
     try {
@@ -103,7 +103,7 @@ const Signin: React.FC = () => {
         <RightArrow />
         <div className="text-[21px] font-bold text-[#161616]">Mon espace volontaire</div>
       </div>
-      <form onSubmit={onSubmit}>
+      <form onSubmit={handleSubmit}>
         <Input
           label="E-mail"
           nativeInputProps={{
@@ -137,16 +137,14 @@ const Signin: React.FC = () => {
           <>
             <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
             <div className="flex w-full justify-center">
-              <Button
-                priority="secondary"
-                onClick={() => {
-                  plausibleEvent("Connexion/Lien vers preinscription");
-                  return window.location.replace(
-                    "https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire",
-                  );
-                }}>
+              <a
+                href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire"
+                target="_blank"
+                rel="noreferrer"
+                className="text-[#161616]"
+                onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}>
                 Recevoir une alerte par email
-              </Button>
+              </a>
             </div>
           </>
         )}

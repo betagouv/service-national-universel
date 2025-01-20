@@ -16,16 +16,11 @@ const Forgot: React.FC = () => {
   const [done, setDone] = useState<boolean>(false);
   const [email, setEmail] = useState<string>("");
   const [loading, setLoading] = useState<boolean>(false);
-  const [disabled, setDisabled] = useState<boolean>(true);
   const [error, setError] = useState<ErrorState>({});
-
-  useEffect(() => {
-    setDisabled(!email);
-  }, [email]);
 
   const onSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (loading || disabled) return;
+    if (loading) return;
     try {
       setLoading(true);
       await api.post("/young/forgot_password", { email });
@@ -45,20 +40,18 @@ const Forgot: React.FC = () => {
         <div className="text-[17px] font-bold text-[#161616]">Mon espace volontaire</div>
       </div>
       {!done ? (
-        <>
-          <form onSubmit={onSubmit}>
-            <div className="flex flex-col gap-1 py-3">
-              <label className="text-base text-[#161616]">E-mail</label>
-              <Input value={email} onChange={setEmail} />
-            </div>
-            <Button
-              disabled={disabled || loading}
-              className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
-              type="submit">
-              M&apos;envoyer le lien de réinitialisation
-            </Button>
-          </form>
-        </>
+        <form onSubmit={onSubmit}>
+          <div className="flex flex-col gap-1 py-3">
+            <label className="text-base text-[#161616]">E-mail</label>
+            <Input value={email} onChange={setEmail} />
+          </div>
+          <Button
+            disabled={!email}
+            className="flex cursor-pointer items-center justify-center bg-[#000091] px-3 py-2 text-white hover:border hover:border-[#000091] hover:bg-white hover:!text-[#000091]  disabled:cursor-default disabled:border-0 disabled:bg-[#E5E5E5] disabled:!text-[#929292]"
+            type="submit">
+            M&apos;envoyer le lien de réinitialisation
+          </Button>
+        </form>
       ) : (
         <div className="text-base text-[#161616] ">
           <span className="font-medium"> Un email de réinitialisation de mot de passe a été envoyé à </span> "<b>{email}</b>" <br /> <br /> Cet email contient un lien permettant de

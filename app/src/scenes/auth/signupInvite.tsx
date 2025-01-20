@@ -84,10 +84,6 @@ const Signin: React.FC = () => {
     setDisabled(!(Object.keys(errors).length === 0 && password && confirmPassword && email));
   };
 
-  useEffect(() => {
-    validatePassword({ password, confirmPassword, email });
-  }, [email, password, confirmPassword]);
-
   return (
     <DSFRContainer title="Activer mon compte" className="flex flex-col bg-[#F9F6F2] py-6">
       {error?.text && <Error {...error} onClose={() => setError({})} />}
@@ -101,13 +97,29 @@ const Signin: React.FC = () => {
           <Input value={email} onChange={setEmail} />
         </div>
         <div className="flex flex-col gap-1">
-          <InputPassword label="Mot de passe" name="password" value={password} onChange={setPassword} />
+          <InputPassword
+            label="Mot de passe"
+            name="password"
+            value={password}
+            onChange={(value) => {
+              setPassword(value);
+              validatePassword({ password, confirmPassword: value, email });
+            }}
+          />
         </div>
         <div className={`pb-4 ${error?.password ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>
           Il doit contenir au moins 12 caractères, dont une majuscule, une minuscule, un chiffre et un symbole.
         </div>
         <div className="flex flex-col gap-1">
-          <InputPassword label="Confirmez votre mot de passe" name="confirmPassword" value={confirmPassword} onChange={setConfirmPassword} />
+          <InputPassword
+            label="Confirmez votre mot de passe"
+            name="confirmPassword"
+            value={confirmPassword}
+            onChange={(value) => {
+              setConfirmPassword(value);
+              validatePassword({ password, confirmPassword: value, email });
+            }}
+          />
         </div>
         <div className={`pb-7 ${error?.passwordConfirm ? "text-[#CE0500]" : "text-[#3A3A3A]"} mt-1 text-xs`}>{error?.passwordConfirm}</div>
         <div className="flex w-full justify-end">
