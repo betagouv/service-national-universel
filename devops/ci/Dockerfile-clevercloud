@@ -26,6 +26,23 @@ COPY apiv2/ apiv2/
 COPY app/ app/
 COPY admin/ admin/
 
+ARG VITE_ENVIRONMENT
+ARG VITE_RELEASE
+ARG VITE_API_URL
+ARG VITE_APIV2_URL
+ARG VITE_APP_URL
+ARG VITE_ADMIN_URL
+ARG VITE_SUPPORT_URL
+ARG VITE_KNOWLEDGEBASE_URL
+ARG VITE_MAINTENANCE
+ARG VITE_SENTRY_SESSION_SAMPLE_RATE
+ARG VITE_SENTRY_TRACING_SAMPLE_RATE
+ARG VITE_SENTRY_ON_ERROR_SAMPLE_RATE
+ARG VITE_FRANCE_CONNECT_URL
+ARG VITE_API_ENGAGEMENT_URL
+ARG VITE_API_ENGAGEMENT_SNU_ID
+ARG SENTRY_AUTH_TOKEN
+
 WORKDIR /app/packages/ds
 RUN npm run build
 
@@ -33,20 +50,16 @@ WORKDIR /app/packages/lib
 RUN npm run build
 
 WORKDIR /app/api
-RUN --mount=type=secret,id=BUILD_SECRETS \
-    export $(cat /run/secrets/BUILD_SECRETS | xargs) && npm run build
+RUN npm run build
 
 WORKDIR /app/apiv2
-RUN --mount=type=secret,id=BUILD_SECRETS \
-    export $(cat /run/secrets/BUILD_SECRETS | xargs) && npm run build
+RUN npm run build
 
 WORKDIR /app/admin
-RUN --mount=type=secret,id=BUILD_SECRETS \
-    export $(cat /run/secrets/BUILD_SECRETS | xargs) && npm run build
+RUN npm run build
 
 WORKDIR /app/app
-RUN --mount=type=secret,id=BUILD_SECRETS \
-    export $(cat /run/secrets/BUILD_SECRETS | xargs) && npm run build
+RUN npm run build
 
 WORKDIR /app
 
