@@ -1,29 +1,25 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { Link } from "react-router-dom";
 import EngagementCard from "./EngagementCard";
-import { toastr } from "react-redux-toastr";
-import API from "@/services/api";
+import usePrograms from "@/scenes/phase2/scenes/usePrograms";
+import Loader from "@/components/Loader";
 
 export default function EngagementPrograms() {
-  const [programs, setPrograms] = useState([]);
-
-  useEffect(() => {
-    (async () => {
-      const { data, ok } = await API.get("/program/public/engagements");
-      if (!ok) return toastr.error("Une erreur est survenue.");
-      setPrograms(data);
-    })();
-  }, []);
-
+  const { data: programs, isPending, isError } = usePrograms();
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur lors du chargement des données.</div>;
   return (
     <>
       <h2 className="my-4 text-xl font-bold">Découvrez d’autres formes d’engagement</h2>
       <div className="flex gap-8 overflow-x-auto md:grid md:grid-cols-2">
-        {programs.slice(0, 4).map((program) => (
-          <div className="w-72 flex-none md:w-full" key={program._id}>
-            <EngagementCard program={program} />
-          </div>
-        ))}
+        {programs
+          .sort((a, b) => a.order - b.order)
+          .slice(0, 4)
+          .map((program) => (
+            <div className="w-72 flex-none md:w-full" key={program._id}>
+              <EngagementCard program={program} />
+            </div>
+          ))}
       </div>
       <div className="mt-6 flex justify-center">
         <Link

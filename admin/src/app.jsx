@@ -55,6 +55,7 @@ const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
 const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
 const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
 const Team = lazy(() => import("./scenes/team"));
+const Accueil = lazy(() => import("./scenes/dashboardV2/ref-cle/Accueil"));
 
 import Loader from "./components/Loader";
 import Footer from "./components/footer";
@@ -225,7 +226,7 @@ const Home = () => {
               <Suspense fallback={<Loader />}>
                 <Switch>
                   <RestrictedRoute path="/structure" component={Structure} />
-                  <RestrictedRoute path="/settings" component={Settings} />
+                  <RestrictedRoute path="/settings/:tab?" component={Settings} />
                   <RestrictedRoute path="/alerte" component={Alerte} />
                   <RestrictedRoute path="/profil" component={Profil} />
                   <RestrictedRoute path="/volontaire" component={renderVolontaire} />
@@ -253,6 +254,7 @@ const Home = () => {
                   <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
                   <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
                   {/* Institution */}
+                  <RestrictedRoute path="/accueil" component={Accueil} />
                   <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
                   <RestrictedRoute path="/etablissement" component={Etablissement} />
 
@@ -298,12 +300,12 @@ const limitedAccess = {
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
-    default: "/mon-etablissement",
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
+    default: "/accueil",
   },
   [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide"],
-    default: "/mon-etablissement",
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
+    default: "/accueil",
   },
 };
 

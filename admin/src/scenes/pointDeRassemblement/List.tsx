@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useHistory, useParams, useLocation } from "react-router-dom";
-import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber, getParticularitesAcces } from "snu-lib";
+import { PointDeRassemblementType, ROLES, canCreateMeetingPoint, getDepartmentNumber, getParticularitesAcces, isSuperAdmin } from "snu-lib";
 import BusSvg from "../../assets/icons/Bus";
 import ExternalLink from "../../assets/icons/ExternalLink";
 import Menu from "../../assets/icons/Menu";
@@ -21,6 +21,7 @@ import { Button } from "@snu/ds/admin";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { Filter } from "@/components/filters-system-v2/components/Filters";
+import ImportPDRButton from "./components/ImportPDRButton";
 
 export default function List() {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -47,16 +48,19 @@ export default function List() {
     <>
       <Breadcrumbs items={[{ title: "Séjours" }, { label: "Points de rassemblement" }]} />
       <div className="flex w-full flex-col px-8">
-        <div className="flex items-center justify-between py-8">
+        <div className="flex items-center justify-between pt-8">
           <Title>Points de rassemblement</Title>
-          {canCreateMeetingPoint(user) ? (
-            <Button
-              title="Rattacher un point à un séjour"
-              disabled
-              tooltip="La gestion des points de rassemblement se fait uniquement dans le SI-SNU"
-              onClick={() => setModal({ isOpen: true })}
-            />
-          ) : null}
+          <div className="flex gap-4">
+            {isSuperAdmin(user) && <ImportPDRButton className="mb-8" />}
+            {canCreateMeetingPoint(user) ? (
+              <Button
+                title="Rattacher un point à un séjour"
+                disabled
+                tooltip="La gestion des points de rassemblement se fait uniquement dans le SI-SNU"
+                onClick={() => setModal({ isOpen: true })}
+              />
+            ) : null}
+          </div>
         </div>
         <div>
           <div className="flex flex-1">
@@ -113,6 +117,7 @@ const ListPoints = ({ user }) => {
       defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
   ];
 
   return (
@@ -143,8 +148,8 @@ const ListPoints = ({ user }) => {
               for (const item of data) {
                 res.push({
                   // @ts-ignore
-                  Identifiant: item._id.toString(),
                   Code: item.code,
+                  Matricule: item.matricule,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,
                   Adresse: item.address,

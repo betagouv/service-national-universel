@@ -1,6 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
-import { isCle } from "./young";
+import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
@@ -24,7 +23,7 @@ const getSchoolYear = (etablissement?: EtablissementDto) => {
   return schoolYears[schoolYears.length - 1];
 };
 
-const getCohortYear = (cohort?: CohortType & { dateStart?: string }) => cohort?.dateStart?.slice(0, 4);
+const getCohortYear = (cohort?: CohortType) => cohort?.dateStart?.toString().slice(0, 4);
 
 const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
   if (!cohort?.dateStart || !cohort?.dateEnd) return cohort?.name || cohort;
@@ -127,72 +126,18 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-function shouldForceRedirectToReinscription(young) {
-  return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
-}
-
 const isCohortTooOld = (cohort: CohortType) => {
-  return cohort.status === COHORT_STATUS.ARCHIVED;
+  return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
-function hasAccessToReinscription(young: YoungType, cohort: CohortType) {
+function hasAccessToReinscription(young: YoungType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
-
-  if (isCle(young)) {
-    if (young.frenchNationality === "false") {
-      return false;
-    }
-
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE) {
-      return false;
-    }
-
-    if (young.status === YOUNG_STATUS.ABANDONED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      return true;
-    }
-
-    if (young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-      return true;
-    }
-
+  if ([YOUNG_STATUS.DELETED].includes(young.status as any)) {
     return false;
   }
-
-  if (isCohortTooOld(cohort)) {
-    return false;
-  }
-
-  if (
-    young.cohort === "à venir" &&
-    young.status !== YOUNG_STATUS.NOT_AUTORISED &&
-    young.status !== YOUNG_STATUS.REFUSED &&
-    young.status !== YOUNG_STATUS.DELETED &&
-    young.status !== YOUNG_STATUS.NOT_ELIGIBLE
-  ) {
-    return true;
-  }
-  if (young.status === YOUNG_STATUS.ABANDONED) {
-    return true;
-  }
-  if (young.status === YOUNG_STATUS.WITHDRAWN && !(young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED || young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE)) {
-    return true;
-  }
-  if (young.status === YOUNG_STATUS.VALIDATED && young.statusPhase1 === YOUNG_STATUS_PHASE1.NOT_DONE) {
-    return true;
-  }
-
-  return false;
-}
-
-function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
-  return (
-    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
-    (isInscriptionModificationOpen &&
-      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
-      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
-  );
+  return young.cohort === "à venir";
 }
 
 //@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
@@ -210,8 +155,6 @@ export {
   formatCohortPeriod,
   getCohortPeriodTemp,
   inscriptionCreationOpenForYoungs,
-  shouldForceRedirectToReinscription,
-  shouldForceRedirectToInscription,
   hasAccessToReinscription,
   isCohortTooOld,
   canApplyToPhase2,

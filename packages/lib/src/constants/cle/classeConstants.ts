@@ -6,6 +6,7 @@ export enum ClasseFileKeys {
   INSCRIPTION = "inscription",
   CONSENT = "consent",
   REGLEMENT = "reglement",
+  SANITAIRE = "sanitaire",
 }
 
 export enum ClasseCertificateKeys {

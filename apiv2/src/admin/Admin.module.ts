@@ -3,7 +3,7 @@ import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
 import { QueueModule } from "@infra/Queue.module";
-import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, ParseEnumPipe, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
@@ -23,15 +23,52 @@ import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provi
 import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
-import { gatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
+import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
+import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
-import { useCaseProvider as useCaseProviders } from "./infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
+import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
+import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
+import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
+import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
+import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
+import { ligneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { pointDeRassemblementMongoProviders } from "./infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
+import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/SejourMongo.provider";
+import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/SessionMongo.provider";
+import { FileGateway } from "@shared/core/File.gateway";
+import { FileProvider } from "@shared/infra/File.provider";
+import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
+import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { HistoryController } from "./infra/history/api/History.controller";
+import { historyProvider } from "./infra/history/historyProvider";
+import { serviceProvider } from "./infra/iam/service/serviceProvider";
+import { ReferentController } from "./infra/iam/api/Referent.controller";
+import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
+import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
+
+import { ClsPluginTransactional } from "@nestjs-cls/transactional";
+
+import { DATABASE_CONNECTION } from "@infra/Database.provider";
+import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 
 @Module({
     imports: [
-        ClsModule.forRoot({}),
+        ClsModule.forRoot({
+            plugins: [
+                new ClsPluginTransactional({
+                    imports: [DatabaseModule],
+                    adapter: new TransactionalAdapterMongoose({
+                        mongooseConnectionToken: DATABASE_CONNECTION,
+                    }),
+                }),
+            ],
+        }),
         ConfigModule,
         DatabaseModule,
         JwtAuthModule,
@@ -39,22 +76,48 @@ import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
         QueueModule,
         TaskModule,
     ],
-    controllers: [ClasseController, AuthController, AdminTaskController],
+    controllers: [
+        ClasseController,
+        AffectationController,
+        Phase1Controller,
+        ImportReferentielController,
+        AuthController,
+        AdminTaskController,
+        HistoryController,
+        ReferentController,
+    ],
     providers: [
         ClasseService,
+        AffectationService,
+        SimulationAffectationHTSService,
+        ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,
         ...etablissementMongoProviders,
+        ...jeuneMongoProviders,
+        ...centreMongoProviders,
+        ...planDeTransportMongoProviders,
+        ...ligneDeBusMongoProviders,
+        ...pointDeRassemblementMongoProviders,
+        ...sejourMongoProviders,
+        ...sessionMongoProviders,
         ...guardProviders,
         ...taskMongoProviders,
+        ...historyProvider,
         Logger,
         SigninReferent,
+        { provide: FileGateway, useClass: FileProvider },
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
-        ...useCaseProviders,
-        ...gatewayProviders,
+        ...cleUseCaseProviders,
+        ...phase1UseCaseProviders,
+        ...cleGatewayProviders,
+        ...phase1GatewayProviders,
+        ...jeuneGatewayProviders,
+        ...referentielUseCaseProvider,
+        ...serviceProvider,
     ],
 })
 export class AdminModule {

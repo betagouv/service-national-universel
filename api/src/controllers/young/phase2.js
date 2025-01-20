@@ -3,15 +3,17 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { config } = require("../../config");
-
+const { deleteFilesByList, listFiles, getFile } = require("../../utils/index");
+const { isYoung } = require("../../utils/index");
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
-const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours, getFile } = require("../../utils");
+const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours } = require("../../utils");
 const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
 const { sendTemplate } = require("../../brevo");
 const { validateId, validatePhase2Preference } = require("../../utils/validator");
 const { decrypt } = require("../../cryptoUtils");
 const { getMimeFromBuffer } = require("../../utils/file");
+const { PHASE2_TOTAL_HOURS } = require("snu-lib");
 const mime = require("mime-types");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
@@ -32,7 +34,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
       city: Joi.string().trim().required(),
       startDate: Joi.string().trim().required(),
       endDate: Joi.string().trim().required(),
-      missionDuration: Joi.number().required(),
+      missionDuration: Joi.number().allow(null),
       contactFullName: Joi.string().trim().required(),
       contactEmail: Joi.string().trim().required(),
       files: Joi.array().items(Joi.string().required()).required().min(1),
@@ -53,8 +55,13 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     const youngId = value.id;
     delete value.id;
-    const data = await MissionEquivalenceModel.create({ ...value, youngId, status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED" });
-    // Si c'est un jeune, on met à jour le statut d'équivalence
+    const data = await MissionEquivalenceModel.create({
+      ...value,
+      youngId,
+      status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED",
+      // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
+      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+    }); // Si c'est un jeune, on met à jour le statut d'équivalence
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
     }
@@ -132,7 +139,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
       startDate: Joi.string().trim(),
       endDate: Joi.string().trim(),
       contactFullName: Joi.string().trim(),
-      missionDuration: Joi.number(),
+      missionDuration: Joi.number().allow(null),
       contactEmail: Joi.string().trim(),
       files: Joi.array().items(Joi.string()),
       message: Joi.string().trim(),
@@ -140,7 +147,6 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }
-
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
@@ -152,15 +158,27 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const cohort = await CohortModel.findById(young.cohortId);
 
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    let missionDuration;
+    if (value?.type === "Autre" || equivalence.type === "Autre") {
+      // Priorité à la durée de mission dans `value` si elle existe, sinon utiliser celle de `equivalence`
+      missionDuration = value?.missionDuration || equivalence.missionDuration;
+    } else {
+      // Si le type n'est pas "Autre", utiliser la valeur par défaut
+      missionDuration = PHASE2_TOTAL_HOURS;
+    }
+
     delete value.id;
     delete value.idEquivalence;
-    equivalence.set(value);
+    equivalence.set({
+      ...value,
+      missionDuration: missionDuration,
+    });
     const data = await equivalence.save({ fromUser: req.user });
 
-    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED"].includes(value.status) && req.user?.role) {
+    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED", "WAITING_VERIFICATION"].includes(value.status)) {
       await updateYoungPhase2StatusAndHours(young, req.user);
     }
 
@@ -220,10 +238,47 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+    if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND });
     res.status(200).send({ ok: true, data: equivalence });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
+
+    if (error) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: error.details });
+    }
+
+    const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
+
+    if (!equivalence) {
+      return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND, message: "Equivalence not found" });
+    }
+
+    if (!isYoung(req.user) || equivalence.youngId.toString() !== req.user._id.toString() || equivalence.status !== "WAITING_VERIFICATION") {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Unauthorized to delete this equivalence" });
+    }
+    const files = await listFiles(`app/young/${req.user._id}/equivalenceFiles/`);
+    const missionEquivalencesFiles = equivalence.files;
+    const equivalenceFilesArray = files
+      .filter((e) => missionEquivalencesFiles.includes(e.Key.split("/").pop()))
+      .map((e) => {
+        return { Key: e.Key };
+      });
+    if (equivalenceFilesArray.length !== 0) {
+      await deleteFilesByList(equivalenceFilesArray);
+    }
+    await equivalence.deleteOne();
+
+    return res.status(200).send({ ok: true, message: "Equivalence deleted successfully" });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, message: "An error occurred while deleting equivalence" });
   }
 });
 

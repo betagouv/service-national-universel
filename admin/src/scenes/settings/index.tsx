@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
+import { useHistory, useParams } from "react-router-dom";
 import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
+import { HiOutlineLightningBolt } from "react-icons/hi";
 
 import { CohortDto, isSuperAdmin, ROLES } from "snu-lib";
 import { NavbarControlled } from "@snu/ds/admin";
@@ -19,15 +20,18 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 import Loader from "@/components/Loader";
 
-import EligibilityTab from "./tabs/EligibilityTab";
-import GeneralTab from "./tabs/GeneralTab";
+import EligibilityTab from "./eligibility/EligibilityTab";
+import GeneralTab from "./general/GeneralTab";
+import OperationsTab from "./operations/OperationsTab";
 
 export default function Settings() {
   const history = useHistory();
+  const { tab } = useParams<{ tab: string }>();
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
-  const [currentTab, setCurrentTab] = useState<"general" | "eligibility">("general");
+  const currentTab = (tab || "general") as "general" | "eligibility" | "operations";
+
   const [cohort, setCohort] = useState<CohortDto>();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -96,6 +100,12 @@ export default function Settings() {
             leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
             content: <EligibilityTab cohort={cohort} getCohort={getCohort} />,
           },
+          {
+            id: "operations" as const,
+            title: "Opérations",
+            leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
+            content: <OperationsTab session={cohort} />,
+          },
         ]
       : []),
   ];
@@ -108,7 +118,7 @@ export default function Settings() {
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
           <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
         </div>
-        <NavbarControlled tabs={tabs} active={currentTab} onTabChange={(id: typeof currentTab) => setCurrentTab(id)} />
+        <NavbarControlled tabs={tabs} active={currentTab} onTabChange={(id: typeof currentTab) => history.push(`/settings/${id}?cohort=${currentCohortName}`)} />
 
         {isLoading && (
           <div className="flex items-center justify-center h-screen-1/4">

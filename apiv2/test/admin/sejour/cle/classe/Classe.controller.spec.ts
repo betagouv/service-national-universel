@@ -2,7 +2,7 @@ import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 import { EmailTemplate } from "@notification/core/Notification";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
-import { STATUS_CLASSE } from "snu-lib";
+import { ROLES, STATUS_CLASSE } from "snu-lib";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
 import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
@@ -12,6 +12,8 @@ import { setupAdminTest } from "../../../setUpAdminTest";
 import { createEtablissement } from "../EtablissementHelper";
 import { createClasse } from "./ClasseHelper";
 import mongoose from "mongoose";
+import { ContactGateway } from "@admin/infra/iam/Contact.gateway";
+import { OperationType } from "@notification/infra/email/Contact";
 
 describe("ClasseController", () => {
     let app: INestApplication;
@@ -21,6 +23,7 @@ describe("ClasseController", () => {
     let module: TestingModule;
     let notificationGateway: NotificationGateway;
     let referentGateway: ReferentGateway;
+    let contactGateway: ContactGateway;
     beforeAll(async () => {
         const appSetup = await setupAdminTest();
         app = appSetup.app;
@@ -39,6 +42,7 @@ describe("ClasseController", () => {
 
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
         referentGateway = module.get<ReferentGateway>(ReferentGateway);
+        contactGateway = module.get<ContactGateway>(ContactGateway);
         await app.init();
     });
 
@@ -46,7 +50,7 @@ describe("ClasseController", () => {
         expect(classeController).toBeDefined();
     });
 
-    it("/PUT classe/:id/verify should return 200", async () => {
+    it("/POST classe/:id/verify should return 200", async () => {
         const referent = await createReferent({ email: "mon_ref@mail.com" });
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -59,14 +63,17 @@ describe("ClasseController", () => {
 
         jest.spyOn(notificationGateway, "sendEmail").mockImplementation(() => Promise.resolve());
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
         const updatedClasse = await classeGateway.findById(createdClasse.id);
         expect(updatedClasse.statut).toBe(STATUS_CLASSE.VERIFIED);
         const updatedReferent = await referentGateway.findById(referent.id);
         expect(updatedReferent.invitationToken).toHaveLength(36);
         expect(updatedReferent.invitationExpires).toBeTruthy();
-        expect(response.status).toBe(200);
+        expect(response.status).toBe(201);
         expect(response.body).toMatchObject({ statut: STATUS_CLASSE.VERIFIED });
+        expect(response.body.referents).toHaveLength(1);
+        expect(response.body.referents[0].role).toBeUndefined();
+        expect(response.body.referents[0].email).toEqual(referent.email);
         expect(notificationGateway.sendEmail).toHaveBeenNthCalledWith(
             1,
             expect.objectContaining({
@@ -91,7 +98,7 @@ describe("ClasseController", () => {
         );
     });
 
-    it("/PUT classe/:id/verify should throw an error for wrong statut", async () => {
+    it("/POST classe/:id/verify should throw an error for wrong statut", async () => {
         const referent = await createReferent();
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -103,22 +110,22 @@ describe("ClasseController", () => {
 
         jest.spyOn(notificationGateway, "sendEmail").mockImplementation(() => Promise.resolve());
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
         const updatedClasse = await classeGateway.findById(createdClasse.id);
         expect(response.status).toBe(422);
         expect(updatedClasse.statut).toBe(STATUS_CLASSE.ASSIGNED);
     });
-    it("/PUT classe/:id/verify should throw error for unknown classe", async () => {
+    it("/POST classe/:id/verify should throw error for unknown classe", async () => {
         const classe = {
             id: "657b21cc848b66081224d90a",
             nom: "Classe Test",
         };
-        const response = await request(app.getHttpServer()).put(`/classe/${classe.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${classe.id}/verify`);
 
         expect(response.status).toBe(422);
     });
 
-    it("/PUT classe/:id/verify should throw error for unauthorized user", async () => {
+    it("/POST classe/:id/verify should throw error for unauthorized user", async () => {
         const referent = await createReferent();
         const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
 
@@ -135,9 +142,56 @@ describe("ClasseController", () => {
             next();
         });
 
-        const response = await request(app.getHttpServer()).put(`/classe/${createdClasse.id}/verify`);
+        const response = await request(app.getHttpServer()).post(`/classe/${createdClasse.id}/verify`);
 
         expect(response.status).toBe(403);
+    });
+
+    it("/POST classe/:id/referent/modifier-ou-creer should return 200 and update referent", async () => {
+        const referent = await createReferent({ role: ROLES.REFERENT_CLASSE, sousRole: undefined });
+        const etablissement = await createEtablissement({ referentEtablissementIds: [referent.id] });
+
+        const createdClasse = await createClasse({
+            nom: "Classe Test",
+            statut: STATUS_CLASSE.VERIFIED,
+            etablissementId: etablissement.id,
+            referentClasseIds: [referent.id],
+        });
+        const newReferentEmail = "my_new_email@mail.com";
+        jest.spyOn(contactGateway, "syncReferent").mockImplementation(() => Promise.resolve());
+        const response = await request(app.getHttpServer())
+            .post(`/classe/${createdClasse.id}/referent/modifier-ou-creer`)
+            .send({
+                email: newReferentEmail,
+                prenom: "New",
+                nom: "Referent",
+            });
+
+        const updatedClasse = await classeGateway.findById(createdClasse.id);
+        const updatedReferent = await referentGateway.findByEmail(newReferentEmail);
+        expect(response.status).toBe(201);
+        expect(response.body).toMatchObject({
+            email: newReferentEmail,
+            prenom: "New",
+            nom: "Referent",
+        });
+        expect(updatedClasse.referentClasseIds).toContain(updatedReferent.id);
+        expect(updatedReferent.email).toBe(newReferentEmail);
+        expect(updatedReferent.prenom).toBe("New");
+        expect(updatedReferent.nom).toBe("Referent");
+        expect(contactGateway.syncReferent).toHaveBeenCalledTimes(2);
+        expect(contactGateway.syncReferent).toHaveBeenNthCalledWith(1, {
+            ...updatedReferent,
+            invitationExpires: undefined,
+            invitationToken: "",
+            updatedAt: expect.any(Date),
+            operation: OperationType.CREATE,
+        });
+        expect(contactGateway.syncReferent).toHaveBeenNthCalledWith(2, {
+            ...referent,
+            updatedAt: expect.any(Date),
+            operation: OperationType.DELETE,
+        });
     });
 
     afterAll(async () => {

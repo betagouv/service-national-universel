@@ -1,6 +1,6 @@
-import React, { useEffect } from "react";
-import EngagementSrc from "@/assets/engagement/engagement-home.png";
-import { useSelector } from "react-redux";
+import React from "react";
+import EngagementSrc from "@/assets/hero/phase2.png";
+import useAuth from "@/services/useAuth";
 import { Link } from "react-router-dom";
 import plausibleEvent from "@/services/plausible";
 import { YOUNG_STATUS_PHASE2 } from "../../../../utils";
@@ -11,11 +11,11 @@ import { FAQ } from "./components/FAQ";
 import { RiAttachmentLine } from "react-icons/ri";
 import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
-import { supportURL } from "@/config";
+import { knowledgebaseURL } from "@/config";
 import Voiture from "@/assets/Voiture";
 
 export default function HomePhase2() {
-  const { young } = useSelector((state) => state.Auth);
+  const { young } = useAuth();
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -68,7 +68,7 @@ export default function HomePhase2() {
             </div>
 
             <a
-              href={`${supportURL}/base-de-connaissance/permis-et-code-de-la-route`}
+              href={`${knowledgebaseURL}/base-de-connaissance/permis-et-code-de-la-route`}
               target="_blank"
               rel="noopener noreferrer"
               className="relative mt-6 flex flex-col md:flex-row bg-white border rounded-xl p-4 gap-5 items-center">

@@ -18,8 +18,8 @@
     "clean": "rm -fr node_modules .turbo build .swc"
   },
   "devDependencies": {
-    "@types/react-redux-toastr": "^7.0.0",
     "@swc/plugin-styled-components": "1.5.111",
+    "@types/react-redux-toastr": "^7.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "eslint": "^8.56.0",
     "eslint-config-prettier": "^9.1.0",
@@ -68,10 +68,11 @@
     "react-redux-toastr": "^7.6.13",
     "react-responsive-carousel": "3.2.23",
     "react-router-dom": "5.3.4",
-    "react-select": "^5.6.0",
-    "react-tooltip": "^4.4.3",
+    "react-select": "^5.9.0",
+    "react-tooltip": "^4.5.1",
     "reactstrap": "8.10.1",
     "redux": "4.2.1",
+    "redux-thunk": "^2.4.0",
     "regenerator-runtime": "0.13.9",
     "remark-gfm": "^4.0.0",
     "slugify": "^1.6.5",

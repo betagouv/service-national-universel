@@ -2,9 +2,9 @@ import React from "react";
 import ArrowUpRight from "../../../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "../../../components/QuestionBlock";
 
-const FaqAffected = ({ className }) => {
+const FaqAffected = () => {
   return (
-    <section className={`m-[1rem] md:mx-[4rem] ${className}`}>
+    <section id="faq">
       <h2 className="my-4 text-xl font-bold">Questions fréquentes</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock

@@ -7,7 +7,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, translate } from "snu-lib";
+import { ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -26,6 +26,7 @@ import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
+import ImportSDRButton from "./ImportSDRButton";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -79,7 +80,7 @@ export default function List() {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Matricule", name: "pointDeRassemblements.matricule", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
     { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
@@ -90,7 +91,7 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
-    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Matricule", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
       title: "Modification demandée",
 
@@ -181,6 +182,7 @@ export default function List() {
           />
         }
       />
+      {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
       {hasValue && (
         <Navbar
           tab={[
@@ -368,7 +370,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     const num = i + 1;
                     pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
-                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
+                    pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
                     pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
@@ -384,7 +386,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     ...pdrs,
                     "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
                     "REGION DU CENTRE": data.centerRegion,
-                    "ID CENTRE": data.centerId,
+                    "MATRICULE DU CENTRE": data.centerCode,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                     "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
                     "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,

@@ -1,34 +1,28 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import styled from "styled-components";
-import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
-import { supportURL } from "../../../../../config";
-import api from "../../../../../services/api";
-import { translate } from "../../../../../utils";
-import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner, getParticularitesAcces, DepartmentServiceType } from "snu-lib";
+import { knowledgebaseURL } from "../../../../../config";
+import { useQuery } from "@tanstack/react-query";
+import { getDepartmentService } from "../utils/affectationRepository";
+import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner, getParticularitesAcces } from "snu-lib";
 import useAuth from "@/services/useAuth";
-
+import useAffectationInfo from "../utils/useAffectationInfo";
 import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
 
-export default function Convocation({ center, meetingPoint, departureDate, returnDate }) {
+export default function Convocation() {
   const history = useHistory();
   const { young, isCLE } = useAuth();
-
-  const [service, setService] = useState<DepartmentServiceType>();
-
-  useEffect(() => {
-    if (young?.department && !service) getService();
-  }, [young]);
-
-  const getService = async () => {
-    const { data, code, ok } = await api.get(`/department-service/${young.department}`);
-    if (!ok) return toastr.error("error", translate(code));
-    setService(data);
-  };
+  const { center, meetingPoint, departureDate, returnDate } = useAffectationInfo();
+  const { data: service } = useQuery({
+    queryKey: ["department-service", young?.department],
+    queryFn: () => getDepartmentService(young.department!),
+    enabled: !!young?.department,
+  });
 
   const getMeetingAddress = () => {
+    if (!center) throw new Error("Center is missing");
     if (young.deplacementPhase1Autonomous === "true" || !meetingPoint) return `${center.address} ${center.zip} ${center.city}`;
     const complement = getParticularitesAcces(meetingPoint, young.cohort);
     const complementText = complement ? ", " + complement : "";
@@ -174,7 +168,7 @@ export default function Convocation({ center, meetingPoint, departureDate, retur
         )}
         <ConvocText style={{ border: "solid 1px #666", padding: "1rem" }}>
           Pour toute information complémentaire, rendez-vous sur votre compte volontaire (rubrique «{" "}
-          <a className="underline" href={`${supportURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
+          <a className="underline" href={`${knowledgebaseURL}/base-de-connaissance/phase-1-1-1`} target="_blank" rel="noreferrer">
             Besoin d&apos;aide
           </a>{" "}
           »).

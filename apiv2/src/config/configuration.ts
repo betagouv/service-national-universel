@@ -24,15 +24,17 @@ export default () => ({
         port: _env(envInt, "PORT", 8086),
     },
     database: {
-        url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/snu_dev"), // MONGO_URL in v1
+        url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"), // MONGO_URL in v1
     },
     broker: {
         url: _env(envStr, "BROKER_URL", "redis://127.0.0.1:6379"), // REDIS_URL in v1
         queuePrefix: _env(envStr, "BROKER_QUEUE_PREFIX", environment), // TASK_QUEUE_PREFIX in v1
     },
     email: {
-        provider: _env(envStr, "EMAIL_PROVIDER", "mock"), // MAIL_TRANSPORT in v1
+        provider: _env(envStr, "EMAIL_PROVIDER", "mailcatcher"), // MAIL_TRANSPORT in v1
         apiKey: _env(envStr, "EMAIL_SERVICE_API_KEY"), // SENDINBLUEKEY in v1
+        smtpHost: _env(envStr, "SMTP_HOST", "localhost"),
+        smtpPort: _env(envInt, "SMTP_PORT", 1025),
     },
     urls: {
         admin: _env(envStr, "ADMIN_URL", "http://localhost:8082"),
@@ -42,5 +44,11 @@ export default () => ({
     },
     auth: {
         jwtSecret: _env(envStr, "JWT_SECRET", "my-secret"),
+    },
+    bucket: {
+        name: _env(envStr, "BUCKET_NAME", "BUCKET_NAME"),
+        endpoint: _env(envStr, "CELLAR_ENDPOINT", "CELLAR_ENDPOINT"),
+        accessKeyId: _env(envStr, "CELLAR_KEYID", "CELLAR_KEYID"),
+        secretAccessKey: _env(envStr, "CELLAR_KEYSECRET", "CELLAR_KEYSECRET"),
     },
 });

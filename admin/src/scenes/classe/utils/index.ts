@@ -68,7 +68,7 @@ export function getRights(user: User, classe?: Pick<ClasseType, "status" | "scho
     canEditEstimatedSeats: canEditEstimatedSeats(user),
     canEditTotalSeats: canEditTotalSeats(user),
     canEditColoration: [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role),
-    canEditRef: classe.status === STATUS_CLASSE.CREATED && [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(user.role),
+    canEditRef: [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role),
 
     canEditCohort: cohort ? canUpdateCohort(cohort, user) : isAdmin(user) && classe.status === STATUS_CLASSE.VERIFIED,
     canEditCenter: cohort ? canUpdateCenter(cohort, user) : false,
@@ -207,11 +207,14 @@ export interface ClasseExport extends ClasseType {
     email: string;
   }[];
   studentInProgress: number;
-  studentWaiting: number;
+  studentWaitingValidation: number;
+  studentWaitingCorrection: number;
   studentValidated: number;
   studentAbandoned: number;
   studentNotAutorized: number;
   studentWithdrawn: number;
+  studentAffected: number;
+  openFiles: number;
 }
 
 export type typeExport = "export-des-classes" | "schema-de-repartition";
@@ -233,8 +236,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       estimatedSeats: c.estimatedSeats,
       totalSeats: c.totalSeats,
       seatsTaken: c.seatsTaken,
+      openFiles: c.openFiles ?? 0,
       studentInProgress: c.studentInProgress ?? 0,
-      studentWaiting: c.studentWaiting ?? 0,
+      studentWaitingValidation: c.studentWaitingValidation ?? 0,
+      studentWaitingCorrection: c.studentWaitingCorrection ?? 0,
+      studentAffected: c.studentAffected ?? 0,
       studentWithdrawn: c.studentWithdrawn ?? 0,
       academy: c.academy,
       region: c.region,
@@ -244,7 +250,8 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       updatedAt: dayjs(c.updatedAt).format("DD/MM/YYYY HH:mm"),
       // ref classe
       classeRefId: c.referents?.length ? c.referents[0]?._id : "",
-      classeRefFullName: c.referents?.length ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
+      classeRefLastName: c.referents?.length ? `${c.referents[0]?.lastName}` : "",
+      classeReFirstName: c.referents?.length ? `${c.referents[0]?.firstName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       classeRefActive: c.referents ? c.referents[0]?.state : "",
@@ -253,15 +260,18 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       etablissementName: c.etablissement?.name,
       // chef d'etablissement
       etabRefId: c.referentEtablissement.length ? c.referentEtablissement[0]?._id : "",
-      etabRefFullName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.firstName} ${c.referentEtablissement[0]?.lastName}` : "",
+      etabRefLastName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.lastName}` : "",
+      etabRefFirstName: c.referentEtablissement.length ? `${c.referentEtablissement[0]?.firstName}` : "",
       etabRefPhone: c.referentEtablissement ? c.referentEtablissement[0]?.phone : "",
       etabRefEmail: c.referentEtablissement ? c.referentEtablissement[0]?.email : "",
       etabRefActive: c.referentEtablissement ? c.referentEtablissement[0]?.state : "",
       //coordinateurs
-      coordinateur1FullName: c.coordinateurs.length ? `${c.coordinateurs[0]?.firstName} ${c.coordinateurs[0]?.lastName}` : "",
+      coordinateur1LastName: c.coordinateurs.length ? `${c.coordinateurs[0]?.lastName}` : "",
+      coordinateur1FirstName: c.coordinateurs.length ? `${c.coordinateurs[0]?.firstName}` : "",
       coordinateur1Phone: c.coordinateurs ? c.coordinateurs[0]?.phone : "",
       coordinateur1Email: c.coordinateurs ? c.coordinateurs[0]?.email : "",
-      coordinateur2FullName: c.coordinateurs.length > 1 ? `${c.coordinateurs[1]?.firstName} ${c.coordinateurs[1]?.lastName}` : "",
+      coordinateur2LastName: c.coordinateurs.length > 1 ? `${c.coordinateurs[1]?.lastName}` : "",
+      coordinateur2FirstName: c.coordinateurs.length > 1 ? `${c.coordinateurs[1]?.firstName}` : "",
       coordinateur2Phone: c.coordinateurs ? c.coordinateurs[1]?.phone : "",
       coordinateur2Email: c.coordinateurs ? c.coordinateurs[1]?.email : "",
     }));
@@ -278,8 +288,11 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Effectif prévisionnel",
       "Effectif ajusté",
       "Élèves validés",
+      "Dossiers ouverts",
       "Élèves en cours d'inscription",
       "Élèves en attente de validation",
+      "Élèves en attente de correction",
+      "Élèves affectés",
       "Élèves désistés",
       "Académie",
       "Région",
@@ -289,6 +302,7 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Dernière modification",
       "ID du référent de classe",
       "Nom du référent de classe",
+      "Prénom du référent de classe",
       "Téléphone du référent de classe",
       "Email du référent de classe",
       "Statut du référent de classe",
@@ -296,13 +310,16 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Nom de l'établissement",
       "ID du chef d'établissement",
       "Nom du chef d'établissement",
+      "Prénom du chef d'établissement",
       "Téléphone du chef d'établissement",
       "Email du chef d'établissement",
       "Statut du chef d'établissement",
       "Nom du coordinateur 1",
+      "Prénom du coordinateur 1",
       "Téléphone du coordinateur 1",
       "Email du coordinateur 1",
       "Nom du coordinateur 2",
+      "Prénom du coordinateur 2",
       "Téléphone du coordinateur 2",
       "Email du coordinateur 2",
     ];
@@ -319,21 +336,25 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       department: c.etablissement?.department,
       uai: c.etablissement?.uai,
       etablissementName: c.etablissement?.name,
-      classeRefFullName: c.referents ? `${c.referents[0]?.firstName} ${c.referents[0]?.lastName}` : "",
+      classeRefLastName: c.referents ? `${c.referents[0]?.lastName}` : "",
+      classeRefFirstName: c.referents ? `${c.referents[0]?.firstName}` : "",
       classeRefPhone: c.referents ? c.referents[0]?.phone : "",
       classeRefEmail: c.referents ? c.referents[0]?.email : "",
       youngsVolume: c.totalSeats ?? 0,
+      openFiles: c.openFiles ?? 0,
       studentInProgress: c.studentInProgress,
-      studentWaiting: c.studentWaiting,
+      studentWaitingValidation: c.studentWaitingValidation ?? 0,
+      studentWaitingCorrection: c.studentWaitingCorrection ?? 0,
+      studentAffected: c.studentAffected ?? 0,
       studentValidated: c.studentValidated,
       studentAbandoned: c.studentAbandoned,
       studentNotAutorized: c.studentNotAutorized,
       studentWithdrawn: c.studentWithdrawn,
-      centerId: c.cohesionCenterId,
+      centerMatricule: c.cohesionCenter?.matricule,
       centerName: c.cohesionCenter ? `${c.cohesionCenter?.name}, ${c.cohesionCenter?.address}, ${c.cohesionCenter?.zip} ${c.cohesionCenter?.city}` : "",
       centerDepartment: c.cohesionCenter?.department,
       centerRegion: c.cohesionCenter?.region,
-      pointDeRassemblementId: c.pointDeRassemblementId,
+      pointDeRassemblementMatricule: c.pointDeRassemblement?.matricule,
       pointDeRassemblementName: c.pointDeRassemblement?.name,
       pointDeRassemblementAddress: c.pointDeRassemblement ? `${c.pointDeRassemblement?.address}, ${c.pointDeRassemblement?.zip} ${c.pointDeRassemblement?.city}` : "",
     }));
@@ -365,19 +386,23 @@ export function exportExcelSheet(classes: ClasseExport[], type: typeExport) {
       "Nom de l'établissement",
       "Nom du référent de classe",
       "Prénom du référent de classe",
+      "Téléphone du référent de classe",
       "Email du référent de classe",
       "Nombre de places total",
+      "Dossiers ouverts",
       "Nombre d'élèves en cours",
-      "Nombre d'élèves en attente",
+      "Nombre d'élèves en attente de validation",
+      "Nombre d'élèves en attente de correction",
+      "Nombre d'élèves affectés",
       "Nombre d'élèves validés",
       "Nombre d'élèves abandonnés",
       "Nombre d'élèves non autorisés",
       "Nombre d'élèves désistés",
-      "ID centre",
+      "Matricule du centre",
       "Désignation du centre",
       "Département du centre",
       "Région du centre",
-      "ID du point de rassemblement",
+      "Matricule du point de rassemblement",
       "Désignation du point de rassemblement",
       "Adresse du point de rassemblement",
     ];

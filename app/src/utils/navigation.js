@@ -1,5 +1,4 @@
 import { FEATURES_NAME, isFeatureEnabled, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
-import { getCohort } from "./cohorts";
 import { environment } from "@/config";
 
 export const INSCRIPTION_STEPS = {
@@ -264,10 +263,31 @@ export const redirectToCorrection = (young, field) => {
   return correction ? correction.redirect : "/";
 };
 
-export function shouldForceRedirectToEmailValidation(user) {
-  const cohort = getCohort(user.cohort);
+export function shouldForceRedirectToEmailValidation(user, cohort) {
   const isEmailValidationEnabled = isFeatureEnabled(FEATURES_NAME.EMAIL_VALIDATION, undefined, environment);
-  const shouldUserValidateEmail = user.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort.inscriptionModificationEndDate);
+  const shouldUserValidateEmail = user?.status === YOUNG_STATUS.IN_PROGRESS && user.emailVerified === "false" && new Date() < new Date(cohort?.inscriptionModificationEndDate);
   const pathname = window.location.pathname;
   return isEmailValidationEnabled && shouldUserValidateEmail && pathname !== "/preinscription/email-validation";
+}
+
+export function shouldForceRedirectToReinscription(young) {
+  return young.cohort === "à venir" && [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status);
+}
+
+export function shouldRedirectToReinscription(young) {
+  if ([YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WITHDRAWN].includes(young.status)) {
+    return false;
+  }
+  return young.cohort === "à venir";
+}
+
+export function shouldForceRedirectToInscription(young, isInscriptionModificationOpen = false) {
+  if (window.location.pathname.includes("/changer-de-sejour")) return false;
+  if (young.cohort === "à venir") return false;
+  return (
+    [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED, YOUNG_STATUS.REINSCRIPTION].includes(young.status) ||
+    (isInscriptionModificationOpen &&
+      young.status === YOUNG_STATUS.WAITING_VALIDATION &&
+      ((young.hasStartedReinscription && young.reinscriptionStep2023 !== "DONE") || (!young.hasStartedReinscription && young.inscriptionStep2023 !== "DONE")))
+  );
 }

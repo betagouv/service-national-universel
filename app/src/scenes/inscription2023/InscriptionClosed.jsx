@@ -1,17 +1,21 @@
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
+import { SignupButtons } from "@snu/ds/dsfr";
 import React from "react";
-import { getCohortPeriod, YOUNG_STATUS } from "snu-lib";
+import { useHistory } from "react-router-dom";
+import { YOUNG_STATUS } from "snu-lib";
 
 export default function InscriptionClosed({ young, isCLE }) {
+  const history = useHistory();
+  const { cohortDateString } = useCohort();
   const statusWording = (young, isCLE) => {
     if (isCLE) {
       if ([YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
-        return "Votre inscription n'a pas été complétée à temps.";
+        return "Votre inscription n'a pas été complétée à temps";
       }
     } else if (!isCLE && [YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
-      return "Vous n'avez pas complété votre dossier d'inscription à temps.";
+      return "Vous n'avez pas complété votre dossier d'inscription à temps";
     }
   };
 
@@ -22,15 +26,18 @@ export default function InscriptionClosed({ young, isCLE }) {
       return "Inscription au séjour de cohésion";
     }
   };
-  console.log(statusTitle(isCLE), statusWording(young, isCLE));
   return (
     <DSFRLayout title={statusTitle(isCLE)}>
       <DSFRContainer title={statusWording(young, isCLE)}>
         {!isCLE ? (
-          <p className="mb-16">Les inscriptions pour le séjour {getCohortPeriod(getCohort(young?.cohort))} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
+          <p>Les inscriptions pour le séjour {cohortDateString} sont clôturées. Vous ne pourrez donc pas participer au séjour.</p>
         ) : (
-          <p>Les inscriptions dans le cadre des classes engagées ont été clôturées pour l'année scolaire 2023-2024.</p>
+          <p>Les inscriptions dans le cadre des classes engagées ont été clôturées.</p>
         )}
+        <p>
+          Si vous restez éligible, <strong>vous serez basculé(e) automatiquement sur le prochain séjour</strong> ou vous pouvez en choisir un dès maintenant.
+        </p>
+        <SignupButtons onClickNext={() => history.push("/changer-de-sejour")} labelNext="Choisir un nouveau séjour" />
       </DSFRContainer>
     </DSFRLayout>
   );

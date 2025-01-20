@@ -6,8 +6,8 @@ import { CreateTaskModel, TaskModel } from "@task/core/Task.model";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { Queue } from "bullmq";
 import { Model } from "mongoose";
-import { TASK_MONGOOSE_ENTITY, TaskDocument } from "src/task/infra/TaskMongo.provider";
-import { TaskRepository } from "src/task/infra/TaskMongo.repository";
+import { TASK_MONGOOSE_ENTITY, TaskDocument } from "@task/infra/TaskMongo.provider";
+import { TaskRepository } from "@task/infra/TaskMongo.repository";
 
 @Injectable()
 export class AdminTaskRepository extends TaskRepository implements TaskGateway {

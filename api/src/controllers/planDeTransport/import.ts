@@ -3,7 +3,15 @@ import passport from "passport";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import Joi from "joi";
-import { canSendPlanDeTransport, MIME_TYPES, COHORT_TYPE, TRANSPORT_MODES, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES_DEFAULT, TRANSPORT_CONVOCATION_SUBTRACT_MINUTES } from "snu-lib";
+import {
+  canSendPlanDeTransport,
+  MIME_TYPES,
+  COHORT_TYPE,
+  TRANSPORT_MODES,
+  TRANSPORT_CONVOCATION_SUBTRACT_MINUTES_DEFAULT,
+  TRANSPORT_CONVOCATION_SUBTRACT_MINUTES,
+  FUNCTIONAL_ERRORS,
+} from "snu-lib";
 import fs from "fs";
 import { parse as parseDate } from "date-fns";
 import fileUpload from "express-fileupload";
@@ -121,7 +129,7 @@ router.post(
 
       const { centerCount, classeCount, pdrCount, maxPdrOnLine } = computeImportSummary(lines);
 
-      const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, lines });
+      const { _id } = await ImportPlanTransportModel.create({ cohort: cohort.name, cohortId: cohort._id, lines });
 
       res.status(200).send({
         ok: true,
@@ -154,7 +162,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const lines = importData.lines as ImportPlanTransportLine[];
-      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("MATRICULE PDR")).length;
 
       // Vérification des lignes existantes
       const newLines: ImportPlanTransportLine[] = [];
@@ -174,26 +182,35 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
       // Import des nouvelles lignes
       for (const line of newLines) {
-        const pdrIds: string[] = [];
+        const pdrMatriculeIdMap = new Map();
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
-          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+          const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrValue = line[pdrKey]?.toString();
           if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
-            pdrIds.push(line[pdrKey] as string);
+            const pdr = await PointDeRassemblementModel.findOne({ matricule: pdrValue });
+            if (!pdr) {
+              throw new Error(ERRORS.NOT_FOUND, { cause: `Pdr not found for matricule : ${pdrValue}` });
+            }
+            pdrMatriculeIdMap.set(line[pdrKey] as string, pdr._id);
           }
         }
+        const meetingPointsIds = Array.from(pdrMatriculeIdMap.values());
 
-        const session = await SessionPhase1Model.findOne({
-          cohort: importData.cohort,
-          cohesionCenterId: line["ID CENTRE"],
-        });
-
+        const cohesionCenter = await CohesionCenterModel.find({ matricule: line["MATRICULE CENTRE"] });
+        if (cohesionCenter.length > 1) {
+          throw new Error(FUNCTIONAL_ERRORS.MORE_THAN_ONE_CENTER_FOR_ONE_MATRICULE, { cause: `More than one cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+        }
+        if (cohesionCenter.length === 0) {
+          throw new Error(ERRORS.NOT_FOUND, { cause: `No cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+        }
+        const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: cohesionCenter[0]._id });
         const busLineData = {
           cohort: importData.cohort,
+          cohortId: importData.cohortId,
           busId: line["NUMERO DE LIGNE"],
           departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
           returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
-          centerId: line["ID CENTRE"],
+          centerId: cohesionCenter[0]._id,
           centerArrivalTime: formatTime(line["HEURE D'ARRIVEE AU CENTRE"]),
           centerDepartureTime: formatTime(line["HEURE DE DÉPART DU CENTRE"]),
           followerCapacity: line["TOTAL ACCOMPAGNATEURS"],
@@ -201,17 +218,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           totalCapacity: line["CAPACITE TOTALE LIGNE"],
           youngSeatsTaken: 0,
           lunchBreak: (line["PAUSE DÉJEUNER ALLER"] || "").toLowerCase() === "oui",
-          lunchBreakReturn: (line["PAUSE DÉJEUNER RETOUR"] || "").toLowerCase() === "oui",
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
-          meetingPointsIds: pdrIds,
-          classeId: line["ID CLASSE"],
+          meetingPointsIds: meetingPointsIds,
+          classeId: line["ID CLASSE"] ? line["ID CLASSE"].toLowerCase() : undefined,
           mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
         };
 
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
-
         // Mise à jour des lignes fusionnées existantes
         for (const mergedBusId of busLineData.mergedBusIds) {
           const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
@@ -222,15 +237,15 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         }
 
         const lineToPointWithCorrespondance: LineToPoint[] = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc: LineToPoint[], pdrNumber) => {
-          const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
-          const pdrValue = line[pdrKey]?.toString().toLowerCase();
+          const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrValue = line[pdrKey]?.toString();
 
           if (pdrNumber > 1 && !line[pdrKey]) return acc;
 
           if (!["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             acc.push({
               lineId: busLine._id.toString(),
-              meetingPointId: line[pdrKey] as string,
+              meetingPointId: pdrMatriculeIdMap.get(line[pdrKey] as string),
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
@@ -243,6 +258,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             });
           } else {
             if (pdrValue === "correspondance") {
+              // Special case: when correspondance is not aller or retour
+              // We create 2 step points (aller and retour).
               acc[acc.length - 1].stepPoints.push({
                 type: "aller",
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
@@ -336,7 +353,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               centerZip: center?.zip,
               centerAddress: center?.address,
               centerName: center?.name,
-              centerCode: center?.code2022,
+              centerCode: center?.matricule,
               centerArrivalTime: busLine.centerArrivalTime,
               centerDepartureTime: busLine.centerDepartureTime,
               pointDeRassemblements,

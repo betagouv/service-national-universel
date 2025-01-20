@@ -3,6 +3,7 @@ import fetchRetry from "fetch-retry";
 import { capture } from "../sentry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload, ERRORS } from "snu-lib";
+import { apiv2 } from "./apiv2";
 
 let fetch = window.fetch;
 
@@ -22,6 +23,7 @@ class api {
 
   setToken(token) {
     this.token = token;
+    apiv2.setToken(token);
   }
 
   checkToken(shouldRefresh) {
@@ -298,12 +300,12 @@ class api {
     });
   }
 
-  uploadFiles(path, arr, properties) {
+  uploadFiles(path, arr, properties = {}, retries = 3) {
     const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
-          retries: 3,
+          retries,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",

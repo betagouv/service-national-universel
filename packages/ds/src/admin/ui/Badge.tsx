@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
 
-type TStatus =
+export type TBadgeStatus =
   | "none"
   | "DRAFT"
   | "CANCEL"
@@ -16,7 +16,7 @@ type TStatus =
 
 type OwnProps = {
   title: React.ReactNode;
-  status?: TStatus;
+  status?: TBadgeStatus;
   mode?: "default" | "editable";
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;

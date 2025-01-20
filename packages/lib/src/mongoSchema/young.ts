@@ -2056,3 +2056,6 @@ const schema = new Schema({
   },
 });
 export type YoungType = InterfaceExtended<InferSchemaType<typeof schema>>;
+
+const correctionSchema = new Schema(YoungSchemaCorrectionRequest);
+export type CorrectionRequestType = InterfaceExtended<InferSchemaType<typeof correctionSchema>>;

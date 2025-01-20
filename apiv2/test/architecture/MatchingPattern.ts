@@ -14,15 +14,19 @@ export enum MatchingPattern {
     ADMIN_USECASE = "src.admin..core..useCase..",
     ADMIN_INFRA = "src.admin..infra..",
     ADMIN_REPOSITORY = "src.admin..infra..repository..",
+    ADMIN_SERVICE = "src.admin..core..service..",
 
     NOTIFICATION_CORE = "src.notification.core..",
 
+    TASK_CORE = "..task.core..",
     SHARED_CORE = "..shared.core..",
 
     NESTJS_COMMON = "@nestjs.common",
     NESTJS_CONFIG = "@nestjs.config",
     NESTJS_TESTING = "@nestjs.testing",
     NESTJS_BULLMQ = "@nestjs.bullmq",
+    NESTJS_CLS = "nestjs-cls",
+    NESTJS_TRANSACTIONAL = "@nestjs-cls.transactional",
 
     SNU_LIB = "packages",
 }

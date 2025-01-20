@@ -6,6 +6,7 @@ export const mapSessionCohesionCentersForSept2024 = (sessionsCcohesionCenters: S
     const sessionCohesionCenterWithoutId: SessionCohesionCenterImportMapped = {
       sessionFormule: sessionCohesionCenter["Session formule"],
       cohesionCenterMatricule: sessionCohesionCenter["Désignation du centre"],
+      cohesionCenterPlacesTotal: Number(sessionCohesionCenter["Capacité d'accueil Maximale"] || 0),
       sessionPlaces: getSessionPlaces(sessionCohesionCenter),
       sejourSnuId: sessionCohesionCenter["Code du centre pour la session"],
     };
@@ -20,10 +21,11 @@ export const getSessionPlaces = (sessionCohesionCenterCSV: SessionCohesionCenter
   let sessionPlaces = 0;
   if (sessionCohesionCenterCSV["Session formule"].includes("HTS")) {
     sessionPlaces = sessionCohesionCenterCSV["Effectif d'individuels"];
+  } else {
+    sessionPlaces = sessionCohesionCenterCSV["Effectif d'élèves (CLE)"];
   }
-  sessionPlaces = sessionCohesionCenterCSV["Effectif d'élèves (CLE)"];
   if (isNaN(sessionPlaces)) {
     logger.warn(`sessionPlaces is not a number for code : ${sessionCohesionCenterCSV["Code du centre pour la session"]}`);
   }
-  return sessionPlaces || 0;
+  return sessionPlaces ? Number(sessionPlaces) : 0;
 };

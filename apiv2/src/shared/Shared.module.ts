@@ -1,18 +1,32 @@
 import { Global, Logger, Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+
 import { AllExceptionsFilter } from "./infra/AllExceptions.filter";
 import { ClockGateway } from "./core/Clock.gateway";
 import { ClockProvider } from "./infra/Clock.provider";
+import { FileProvider } from "./infra/File.provider";
+import { FileController } from "./infra/File.controller";
+import { FileGateway } from "./core/File.gateway";
+import { DatabaseModule } from "@infra/Database.module";
 
 @Global()
 @Module({
+    imports: [DatabaseModule, ConfigModule],
     providers: [
         AllExceptionsFilter,
         Logger,
+        FileProvider,
+        // TODO: à déplacer dans le module "file"
+        {
+            provide: FileGateway,
+            useClass: FileProvider,
+        },
         {
             provide: ClockGateway,
             useClass: ClockProvider,
         },
     ],
+    controllers: [FileController],
     exports: [AllExceptionsFilter, ClockGateway],
 })
 export class SharedModule {}

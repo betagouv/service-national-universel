@@ -1,22 +1,13 @@
 import React, { lazy, Suspense, useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { getCohort } from "./utils/cohorts";
+import useAuth from "./services/useAuth";
+import useCohort from "./services/useCohort";
 import API from "./services/api";
-import {
-  ENABLE_PM,
-  FEATURES_NAME,
-  YOUNG_STATUS,
-  isFeatureEnabled,
-  shouldForceRedirectToInscription,
-  shouldForceRedirectToReinscription,
-  shouldReAcceptRI,
-  youngCanChangeSession,
-} from "./utils";
+import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToEmailValidation } from "./utils/navigation";
+import { shouldForceRedirectToInscription } from "./utils/navigation";
 
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
@@ -26,9 +17,8 @@ import ModalRI from "./components/modals/ModalRI";
 
 const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
-const ChangeSejour = lazy(() => import("./scenes/phase1/changeSejour"));
+const ChangeSejour = lazy(() => import("./scenes/changeSejour"));
 const Candidature = lazy(() => import("./scenes/candidature"));
-const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
 const Echanges = lazy(() => import("./scenes/echanges"));
 const Engagement = lazy(() => import("./scenes/home/components/Engagement"));
@@ -43,8 +33,8 @@ const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
 
-  const young = useSelector((state) => state.Auth.young);
-  const cohort = getCohort(young.cohort);
+  const { young } = useAuth();
+  const { cohort } = useCohort();
 
   const handleModalCGUConfirm = async () => {
     setIsModalCGUOpen(false);
@@ -78,12 +68,6 @@ const Espace = () => {
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
 
-  if (shouldForceRedirectToEmailValidation(young)) {
-    return <Redirect to="/preinscription/email-validation" />;
-  }
-
-  if (shouldForceRedirectToReinscription(young)) return <Redirect to="/reinscription" />;
-
   const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
 
   if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
@@ -96,16 +80,15 @@ const Espace = () => {
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
-          <SentryRoute path="/phase2" component={Phase2} />
+          {permissionPhase2(young) && <SentryRoute path="/phase2" component={Phase2} />}
           <SentryRoute path="/phase3" component={Phase3} />
           <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
-          {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/develop-assets" component={DevelopAssetsPresentationPage} />}
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
           <SentryRoute path="/diagoriente" component={Diagoriente} />
-          {youngCanChangeSession(young) ? <SentryRoute path="/changer-de-sejour" component={ChangeSejour} /> : null}
+          <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
         </Switch>

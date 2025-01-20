@@ -144,7 +144,20 @@ function normalizeDepartmentName(deptName) {
   }
 }
 
-const getDepartmentNumber = (depNum: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(depNum));
+const getDepartmentNumber = (deptName: string | number) => Object.keys(departmentLookUp).find((key) => departmentLookUp[key] === normalizeDepartmentName(deptName));
+
+export const formatDepartement = (department: string) => `${department} (${getDepartmentNumber(department)})`;
+
+export const getDepartmentByNumber = (numDepartement: string) => {
+  let numero = numDepartement;
+  if (numDepartement.length === 3 && numDepartement.startsWith("0")) {
+    numero = numDepartement.substring(1);
+  }
+  if (numero.length < 2 || numero.length > 3) {
+    throw Error("Invalid department number " + numDepartement);
+  }
+  return departmentLookUp[numero];
+};
 
 const getDepartmentByZip = (zip?: string) => {
   if (!zip) return;
@@ -194,6 +207,24 @@ const regionList = [
 
 // Attention : Polynésie française et Nouvelle-Calédonie ne sont pas des DROMS mais des cas à part.
 const regionsListDROMS = ["Guadeloupe", "Martinique", "Guyane", "La Réunion", "Saint-Pierre-et-Miquelon", "Mayotte", "Terres australes et antarctiques françaises"];
+
+export const RegionsHorsMetropole = [
+  "Mayotte",
+  "Wallis-et-Futuna",
+  "Saint-Martin",
+  "Polynésie française",
+  "La Réunion",
+  "Saint-Pierre-et-Miquelon",
+  "Guyane",
+  "Nouvelle-Calédonie",
+  "Guadeloupe",
+  "Martinique",
+  "Corse",
+  "Haute-Corse",
+  "Corse-du-Sud",
+];
+
+export const RegionsMetropole = regionList.filter((region) => !RegionsHorsMetropole.includes(region));
 
 const department2region = {
   Ain: "Auvergne-Rhône-Alpes",
@@ -386,7 +417,7 @@ const getDepartmentForEligibility = (
   young: Pick<YoungType, "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "schoolCountry" | "zip"> & { _id?: YoungType["_id"] },
 ) => {
   let dep;
-  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" ? young?.schoolDepartment : null;
+  const schoolDepartment = !young?.schoolCountry || young.schoolCountry === "FRANCE" || young.schoolCountry === "France" ? young?.schoolDepartment : null;
   if (young._id && young.schooled === "true") dep = schoolDepartment;
   if (young._id && young.schooled === "false") dep = young.department;
 

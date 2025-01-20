@@ -4,6 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
 import {
   canManageMig,
+  canValidateYoungToLP,
   canViewEmailHistory,
   canViewNotes,
   isCle,
@@ -51,6 +52,8 @@ const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
 
 export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.INSCRIPTION, isStructure = false, applicationId = null }) {
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const cohortYoung = cohorts.find((cohort) => cohort._id === young.cohortId);
   const [isConfirmDeleteModalOpen, setIsConfirmDeleteModalOpen] = useState(false);
   const [confirmModal, setConfirmModal] = useState(null);
   const [viewedNotes, setVieweNotes] = useState([]);
@@ -66,7 +69,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         switch (young.status) {
           case YOUNG_STATUS.WAITING_LIST:
-            options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            if (canValidateYoungToLP(user, cohortYoung)) {
+              options = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WITHDRAWN];
+            } else {
+              options = [YOUNG_STATUS.WITHDRAWN];
+            }
             break;
           case YOUNG_STATUS.WITHDRAWN:
             if (user.role === ROLES.ADMIN) {
@@ -144,6 +151,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     }
   };
 
+  // ! Fonction à revoir ! Si le call API échoue le statut est qd mm changé en front et il faut un F5 pour voir le vrai statut
   async function changeStatus(status, values = {}) {
     const prevStatus = young.status;
     if (status === "WITHDRAWN") {

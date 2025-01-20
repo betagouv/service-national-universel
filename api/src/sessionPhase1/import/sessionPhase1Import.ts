@@ -24,6 +24,7 @@ export interface SessionCohesionCenterCSV {
 export type SessionCohesionCenterImportMapped = {
   sessionFormule: string;
   cohesionCenterMatricule: string;
+  cohesionCenterPlacesTotal: number;
   sessionPlaces: number;
   sejourSnuId: string;
 };

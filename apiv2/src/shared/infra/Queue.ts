@@ -1,4 +1,4 @@
-import { TaskModel } from "src/task/core/Task.model";
+import { TaskModel } from "@task/core/Task.model";
 
 export enum QueueName {
     EMAIL = "email",

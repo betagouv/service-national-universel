@@ -2,8 +2,9 @@ import React from "react";
 import { Switch } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { useQuery } from "@tanstack/react-query";
+import { isBefore } from "date-fns";
 
-import { YoungDto, isReferentReg, isAdmin } from "snu-lib";
+import { YoungDto, isAdmin } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import useDocumentTitle from "@/hooks/useDocumentTitle";
 import { SentryRoute } from "@/sentry";
@@ -23,7 +24,6 @@ import FormEquivalence from "./FormEquivalence";
 import VolontairePhase0View from "../../phase0/view";
 import ProposeMission from "./proposalMission";
 import CustomMission from "./customMission";
-import { isAfter } from "date-fns";
 
 export default function Index({ ...props }) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
@@ -44,7 +44,8 @@ export default function Index({ ...props }) {
       ? "correction"
       : "readonly";
     const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
-    if (!isAdmin(user) && !isReferentReg(user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
+    const isInstructionOpen = cohort && isBefore(new Date(), new Date(cohort.instructionEndDate));
+    if (!isInstructionOpen && !isAdmin(user)) {
       mode = "readonly";
     }
 
