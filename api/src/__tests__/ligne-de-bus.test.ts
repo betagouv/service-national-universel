@@ -627,4 +627,232 @@ describe("LigneDeBus", () => {
       expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
+
+  describe("PUT /:id/updatePDRForLine", () => {
+
+    it("should return 403 if user is not a super admin", async () => {
+      const user = { _id: "123", role: "admin" };
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: "oldMeetingPointId",
+        newMeetingPointId: "newMeetingPointId",
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(403);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe("FORBIDDEN");
+    });
+
+    it("should return 404 if ligne bus is not found", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: "oldMeetingPointId",
+        newMeetingPointId: "newMeetingPointId",
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(404);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe("NOT_FOUND");
+    });
+
+    it("should update PDR for line successfully", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+      const cohort = await CohortModel.create({ name: "Février 2023 - C", dateStart: new Date("2023-02-01"), dateEnd: new Date("2023-02-28") });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort: cohort.name }));
+      const oldPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      const newPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      await LigneToPointModel.create({
+        lineId: ligneBus._id,
+        meetingPointId: oldPDR._id,
+        transportType: "bus",
+        meetingHour: "07:00",
+        busArrivalHour: "06:30",
+        departureHour: "07:30",
+        returnHour: "17:00",
+      });
+      await PlanTransportModel.create({
+        _id: ligneBus._id,
+        pointDeRassemblements: [{ meetingPointId: oldPDR._id }],
+      });
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: oldPDR._id.toString(),
+        newMeetingPointId: newPDR._id.toString(),
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data).toBeDefined();
+
+      const updatedLigneBus = await LigneBusModel.findById(ligneBus._id);
+      expect(updatedLigneBus.meetingPointsIds).toContain(newPDR._id.toString());
+      expect(updatedLigneBus.meetingPointsIds).not.toContain(oldPDR._id.toString());
+
+      const updatedLigneToPoint = await LigneToPointModel.findOne({ lineId: ligneBus._id });
+      expect(updatedLigneToPoint.meetingPointId.toString()).toBe(newPDR._id.toString());
+      expect(updatedLigneToPoint.meetingHour).toBe("08:00");
+
+      const updatedPlanTransport = await PlanTransportModel.findById(ligneBus._id);
+      expect(updatedPlanTransport.pointDeRassemblements[0].meetingPointId.toString()).toBe(newPDR._id.toString());
+    });
+
+    it("should send email campaign when sendEmailCampaign is true", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+      const cohort = await CohortModel.create({ name: "Février 2023 - C", dateStart: new Date("2023-02-01"), dateEnd: new Date("2023-02-28") });
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ cohort: cohort.name }));
+      const oldPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      const newPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      await LigneToPointModel.create({
+        lineId: ligneBus._id,
+        meetingPointId: oldPDR._id,
+        transportType: "bus",
+        meetingHour: "07:00",
+        busArrivalHour: "06:30",
+        departureHour: "07:30",
+        returnHour: "17:00",
+      });
+      await PlanTransportModel.create({
+        _id: ligneBus._id,
+        pointDeRassemblements: [{ meetingPointId: oldPDR._id }],
+      });
+      await YoungModel.create({
+        ...getNewYoungFixture(),
+        ligneId: ligneBus._id.toString(),
+        meetingPointId: oldPDR._id.toString(),
+      });
+
+      const mockSendTemplate = jest.fn();
+      jest.mock("../../brevo", () => ({
+        sendTemplate: mockSendTemplate,
+      }));
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: oldPDR._id.toString(),
+        newMeetingPointId: newPDR._id.toString(),
+        sendEmailCampaign: true,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(mockSendTemplate).toHaveBeenCalled();
+
+      const updatedYoung = await YoungModel.findOne({ ligneId: ligneBus._id.toString() });
+      expect(updatedYoung.meetingPointId.toString()).toBe(newPDR._id.toString());
+    });
+
+    it("should return 500 when there's an error", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+
+      jest.spyOn(LigneToPointModel, "findOne").mockImplementation(() => {
+        throw new Error("Test error");
+      });
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: "oldMeetingPointId",
+        newMeetingPointId: "newMeetingPointId",
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(500);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe("SERVER_ERROR");
+
+      jest.spyOn(LigneToPointModel, "findOne").mockRestore();
+    });
+
+    it("should return 400 if meeting hour is after departure hour", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+      const oldPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      const newPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      await LigneToPointModel.create({
+        lineId: ligneBus._id,
+        meetingPointId: oldPDR._id,
+        transportType: "bus",
+        meetingHour: "07:00",
+        busArrivalHour: "06:30",
+        departureHour: "07:30",
+        returnHour: "17:00",
+      });
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "09:00", // After departure hour
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: oldPDR._id.toString(),
+        newMeetingPointId: newPDR._id.toString(),
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe("INVALID_BODY");
+      expect(res.body.errors).toHaveProperty("meetingHour", "L'heure de convocation doit être avant l'heure de départ");
+    });
+
+    it("should return 400 if bus arrival hour is after departure hour", async () => {
+      const user = { _id: "123", role: "admin", subRole: "god" };
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+      const oldPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      const newPDR = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      await LigneToPointModel.create({
+        lineId: ligneBus._id,
+        meetingPointId: oldPDR._id,
+        transportType: "bus",
+        meetingHour: "07:00",
+        busArrivalHour: "06:30",
+        departureHour: "07:30",
+        returnHour: "17:00",
+      });
+
+      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        transportType: "bus",
+        meetingHour: "07:00",
+        busArrivalHour: "09:00", // After departure hour
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: oldPDR._id.toString(),
+        newMeetingPointId: newPDR._id.toString(),
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(400);
+      expect(res.body.ok).toBe(false);
+      expect(res.body.code).toBe("INVALID_BODY");
+      expect(res.body.errors).toHaveProperty("busArrivalHour", "L'heure d'arrivée du bus doit être avant l'heure de départ");
+    });
+  });
 });
