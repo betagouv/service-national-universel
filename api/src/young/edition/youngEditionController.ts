@@ -184,7 +184,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
 
     // --- validate data
     const bodySchema = Joi.object().keys({
-      situation: Joi.string().valid(...Object.keys(YOUNG_SITUATIONS)),
       schoolId: Joi.string().trim().allow(""),
       schoolName: Joi.string().trim().allow(""),
       schoolCity: Joi.string().trim().allow(""),
@@ -195,7 +194,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       schoolZip: Joi.string().trim().allow(""),
       schoolDepartment: Joi.string().trim().allow(""),
       schoolRegion: Joi.string().trim().allow(""),
-      grade: Joi.string().valid(...Object.keys(GRADES)),
       sameSchoolCLE: Joi.string().trim(),
 
       parent1Status: Joi.string().trim().allow(""),
