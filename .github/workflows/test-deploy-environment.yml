@@ -113,9 +113,6 @@ jobs:
   deploy:
     needs: [prepare, build]
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
 
     steps:
       - name: Create SSH key
