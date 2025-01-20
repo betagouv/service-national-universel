@@ -1,3 +1,4 @@
+const path = require("node:path");
 const UserInput = require("../scripts/lib/user-input");
 const {
   childProcess,
@@ -35,7 +36,7 @@ async function main() {
   ];
 
   args.push("--secret");
-  args.push(`id=BUILD_SECRETS,src=${input.secretsFile}`);
+  args.push(`id=BUILD_SECRETS,src=${path.resolve(input.secretsFile)}`);
 
   await childProcess("docker", args);
 
