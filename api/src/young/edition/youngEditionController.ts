@@ -82,12 +82,12 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       latestCNIFileCategory: Joi.string().trim(),
       frenchNationality: Joi.string().trim(),
       birthdateAt: Joi.date(),
-      birthCity: Joi.string().trim(),
-      birthCityZip: Joi.string().trim(),
-      birthCountry: Joi.string().trim(),
-      address: Joi.string().trim(),
-      zip: Joi.string().trim(),
-      city: Joi.string().trim(),
+      birthCity: Joi.string().trim().allow(""),
+      birthCityZip: Joi.string().trim().allow(""),
+      birthCountry: Joi.string().trim().allow(""),
+      address: Joi.string().trim().allow(""),
+      zip: Joi.string().trim().allow(""),
+      city: Joi.string().trim().allow(""),
       country: Joi.string().trim().allow(""),
       cityCode: Joi.string().trim().allow(""),
       region: Joi.string().trim().allow(""),
@@ -117,10 +117,6 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (value.zip && value.city && value.address) {
       const qpv = await getQPV(value.zip, value.city, value.address);
@@ -265,10 +261,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     if (!canEditYoung(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
-
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!isAdmin(req.user) && !isReferentReg(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate)))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(value);
     young.set({

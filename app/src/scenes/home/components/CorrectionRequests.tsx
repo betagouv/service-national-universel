@@ -1,6 +1,6 @@
 import usePermissions from "@/hooks/usePermissions";
 import useAuth from "@/services/useAuth";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import { redirectToCorrection } from "@/utils/navigation";
 import React from "react";
 import { HiExclamation, HiPencilAlt } from "react-icons/hi";
@@ -9,21 +9,21 @@ import { CorrectionRequestType, translateCorrectionReason, translateField } from
 
 export default function CorrectionRequests() {
   const { young } = useAuth();
-  const cohort = getCohort(young.cohort);
+  const { cohort } = useCohort();
   const { canModifyInscription } = usePermissions();
+  const correctionRequests = young?.correctionRequests as unknown as CorrectionRequestType[];
+  const filteredRequests = correctionRequests.filter((c) => ["SENT", "REMINDED"].includes(c.status as any));
 
   return (
     <section id="corrections">
       {canModifyInscription ? (
-        <p className="my-4 font-bold">Correction(s) à apporter avant le {new Date(cohort.inscriptionModificationEndDate).toLocaleDateString("fr-FR")}&nbsp;:</p>
+        <p className="my-4 font-bold">Correction(s) à apporter avant le {new Date(cohort.inscriptionModificationEndDate!).toLocaleDateString("fr-FR")}&nbsp;:</p>
       ) : (
         <p className="my-4 font-bold">Les corrections demandées n’ont pas été effectuées à temps.</p>
       )}
 
       <div className="grid grid-cols-1 gap-2">
-        {young.correctionRequests
-          ?.filter((c: CorrectionRequestType) => ["SENT", "REMINDED"].includes(c.status as any))
-          .map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
+        {filteredRequests?.map((correction: CorrectionRequestType) => <CorrectionRequest key={correction._id} correction={correction} />)}
       </div>
     </section>
   );

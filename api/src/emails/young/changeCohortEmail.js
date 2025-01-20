@@ -56,7 +56,7 @@ module.exports = (emailsEmitter) => {
             cohort: cohortName,
             youngFirstName: young.firstName,
             youngName: young.lastName,
-            cta: `${config.APP_URL}/change-cohort`,
+            cta: config.APP_URL,
           },
         });
       }
@@ -77,6 +77,7 @@ module.exports = (emailsEmitter) => {
           newcohortdate: cohortPeriod,
           oldprogram: programs[previousYoung.source],
           newprogram: young.source !== previousYoung.source ? programs[young.source] : false,
+          cta: config.APP_URL,
         },
       });
     } catch (error) {

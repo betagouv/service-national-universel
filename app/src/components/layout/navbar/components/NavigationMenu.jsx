@@ -2,7 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment, knowledgebaseURL } from "../../../../config";
-import { permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
+import { hasAccessToPhase3, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
 
 import Diagoriente from "./Diagoriente";
@@ -18,13 +18,6 @@ import MenuLinkExternal from "./MenuLinkExternal";
 import { HiOutlineQuestionMarkCircle } from "react-icons/hi";
 import { CiPalette } from "react-icons/ci";
 import usePermissions from "@/hooks/usePermissions";
-
-// Only people who is already doing phase3 or has done phase3 has access to it.
-const hasAccessToPhase3 = (young) => {
-  const { WAITING_VALIDATION, VALIDATED } = YOUNG_STATUS_PHASE3;
-  if ([WAITING_VALIDATION, VALIDATED].includes(young.statusPhase3)) return true;
-  return false;
-};
 
 export default function NavigationMenu({ onClose = () => {} }) {
   const young = useSelector((state) => state.Auth.young);
