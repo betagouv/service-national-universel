@@ -2,7 +2,8 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
+import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
+import { isBefore } from "date-fns";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
@@ -830,7 +831,16 @@ function canCreateAlerteMessage(actor) {
 }
 
 function canReadAlerteMessage(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.RESPONSIBLE,
+    ROLES.HEAD_CENTER,
+    ROLES.SUPERVISOR,
+    ROLES.REFERENT_CLASSE,
+    ROLES.ADMINISTRATEUR_CLE,
+  ].includes(actor.role);
 }
 
 function canViewTableDeRepartition(actor) {
@@ -1082,6 +1092,23 @@ const phaseStatusOptionsByRole = {
 
 function getPhaseStatusOptions(actor: UserDto, phase: number) {
   return phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
+}
+
+export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "instructionEndDate" | "youngHTSBasculeLPDisabled">) {
+  if (!cohort) return false;
+
+  const isInstructionOpen = isBefore(new Date(), new Date(cohort.instructionEndDate));
+  if (isAdmin(actor) || isInstructionOpen) {
+    return true;
+  }
+  if (isReferentDep(actor)) {
+    return false;
+  }
+  if (cohort.youngHTSBasculeLPDisabled) {
+    return false;
+  }
+  // referent regional
+  return true;
 }
 
 export {

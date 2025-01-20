@@ -35,22 +35,12 @@ export function XLSXToCSVBuffer(filePath: string): Buffer {
   return Buffer.from(csvData, "utf-8");
 }
 
-export function getHeadersFromXLSX(filePath: string): string[] {
-  const fileBuffer = fs.readFileSync(filePath);
+export async function parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]> {
+  const workbook = xlsx.read(buffer, { type: "buffer" });
+  const sheetName = options?.sheetName || workbook.SheetNames[options?.sheetIndex || 0];
+  const worksheet = workbook.Sheets[sheetName];
 
-  const workbook = xlsx.read(fileBuffer, { type: "buffer" });
-  const sheetName = workbook.SheetNames[0];
-  if (!sheetName) {
-    throw new Error("The workbook has no sheets.");
-  }
-  const sheet = workbook.Sheets[sheetName];
-
-  const headers = xlsx.utils.sheet_to_json(sheet, { header: 1 })[0];
-  if (!Array.isArray(headers)) {
-    throw new Error("Failed to extract headers from the Excel file.");
-  }
-
-  return headers.map((header) => String(header).trim());
+  return await xlsx.utils.sheet_to_json<T>(worksheet, { defval: options?.defval });
 }
 
 export function readCSVBuffer<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {

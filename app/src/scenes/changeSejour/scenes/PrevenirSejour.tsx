@@ -1,12 +1,10 @@
 import React, { useState } from "react";
 import ReasonForm from "../components/ReasonForm";
 import { useHistory } from "react-router-dom";
-import useAuth from "@/services/useAuth";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import ResponsiveModal from "@/components/modals/ResponsiveModal";
-import { getCohortPeriod } from "snu-lib";
 import useChangeSejour from "../lib/useChangeSejour";
-import { getCohort } from "@/utils/cohorts";
+import useCohort from "@/services/useCohort";
 import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
 import { HiOutlineXCircle } from "react-icons/hi2";
 import { HiOutlineCheckCircle } from "react-icons/hi2";
@@ -26,9 +24,8 @@ export default function PrevenirSejour() {
 }
 
 function Modal({ open, setOpen, reason, message }) {
-  const { young } = useAuth();
+  const { cohortDateString } = useCohort();
   const history = useHistory();
-  const date = capitalizeFirstLetter(getCohortPeriod(getCohort(young.cohort)));
   const { mutate, isPending: loading } = useChangeSejour();
 
   const handleChangeCohort = async () => {
@@ -58,7 +55,7 @@ function Modal({ open, setOpen, reason, message }) {
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
             <HiOutlineXCircle className="text-red-600 h-5 w-5 inline-block stroke-2" />
             <p className="text-gray-500 text-sm">Ancien séjour</p>
-            <p className="text-gray-900 font-medium">{date}</p>
+            <p className="text-gray-900 font-medium">{capitalizeFirstLetter(cohortDateString)}</p>
           </div>
           <div className="bg-gray-100 pt-1 pb-2.5 px-4 rounded-md text-center leading-loose">
             <HiOutlineCheckCircle className="text-blue-600 h-5 w-5 inline-block stroke-2" />

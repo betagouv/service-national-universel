@@ -60,7 +60,7 @@ schema.methods.anonymise = function () {
 //Sync with brevo
 schema.post<SchemaExtended>("save", async function (doc) {
   //TODO ajouter la transaction
-  if (doc.source === YOUNG_SOURCE.CLE && doc.status === YOUNG_STATUS.VALIDATED) {
+  if (doc.source === YOUNG_SOURCE.CLE && (doc.status === YOUNG_STATUS.VALIDATED || doc.status === YOUNG_STATUS.WITHDRAWN)) {
     await ClasseStateManager.compute(doc.classeId, doc._user, { YoungModel });
   }
 

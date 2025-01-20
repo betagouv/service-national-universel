@@ -1,5 +1,6 @@
 import { buildFileRequest, buildRequest } from "@/utils/buildRequest";
 import { ReferentielRoutes } from "snu-lib";
+import api from "./api";
 
 const ReferentielService = {
   importFile: async (name: string, file: File) => {
@@ -21,6 +22,14 @@ const ReferentielService = {
       query,
       target: "API_V2",
     })();
+  },
+
+  importPDR: async (file: File) => {
+    const res = await api.uploadFiles(`/point-de-rassemblement/import`, [file], {}, 0);
+    if (!res.ok) {
+      throw new Error(res.code + (res.message || ""));
+    }
+    return res.data;
   },
 };
 

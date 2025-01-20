@@ -108,6 +108,7 @@ import {
   isAdmin,
   isReferentReg,
   isReferentDep,
+  canValidateYoungToLP,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -562,7 +563,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     ) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (isReferentDep(req.user) && cohort?.instructionEndDate && isAfter(new Date(), new Date(cohort.instructionEndDate))) {
+      if (!canValidateYoungToLP(req.user, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
@@ -652,7 +653,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     // verification des dates de fin d'instruction si jeune est VALIDATED
-    if (newYoung.status === YOUNG_STATUS.VALIDATED) {
+    if (newYoung.status === YOUNG_STATUS.VALIDATED && young.status !== YOUNG_STATUS.VALIDATED) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       if (young.source === YOUNG_SOURCE.CLE) {
         const classe = await ClasseModel.findById(young.classeId);
@@ -667,9 +668,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       } else {
-        const now = new Date();
-        const isInstructionOpen = now < cohort.instructionEndDate;
-        if (!isInstructionOpen && !isAdmin(req.user) && !isReferentReg(req.user)) {
+        // HTS
+        if (!canValidateYoungToLP(req.user, cohort)) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }

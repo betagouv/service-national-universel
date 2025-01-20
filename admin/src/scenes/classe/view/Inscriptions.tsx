@@ -20,8 +20,8 @@ export default function Inscriptions(props) {
   const [isLoading, setIsLoading] = useState(true);
   const [patches, setPatches] = useState<ClasseYoungPatchesType[]>([]);
   const [oldYoungPatches, setOldYoungPatches] = useState<ClasseYoungPatchesType[]>([]);
-  const [allPatches, setAllPatches] = useState<ClasseYoungPatchesType[]>([]);
-  const [isNoYoung, setIsNoYoung] = useState(false);
+  const allPatches = [...patches, ...oldYoungPatches];
+  const isNoYoung = allPatches.length === 0 && !isLoading;
   const [youngFilter, setYoungFilter] = useState("");
   const [valueFilter, setValueFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
@@ -65,12 +65,6 @@ export default function Inscriptions(props) {
     }
   }, [classe]);
 
-  useEffect(() => {
-    setAllPatches([...patches, ...oldYoungPatches]);
-    if (patches.length === 0 && oldYoungPatches.length === 0 && !isLoading) setIsNoYoung(true);
-    else setIsNoYoung(false);
-  }, [patches, oldYoungPatches]);
-
   function getFilteredPatches(patches: ClasseYoungPatchesType[]) {
     let filteredPatches = patches;
     if (youngFilter !== "") {
@@ -104,13 +98,13 @@ export default function Inscriptions(props) {
     <Page>
       <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Inscriptions"} />
       <Container className="!px-0">
-        {allPatches.length === 0 ? (
-          <Loader />
-        ) : isNoYoung ? (
+        {isNoYoung ? (
           <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
             <LuHistory size={64} className="text-gray-400 mb-8" strokeWidth="1" />
             <p className="text-base leading-5 text-gray-400">Il n'y a aucun élève inscrit dans cette classe</p>
           </div>
+        ) : isLoading ? (
+          <Loader />
         ) : (
           <>
             <FilterComponent

@@ -1,25 +1,21 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { PHASE_STATUS_COLOR, translatePhase1, translatePhase2 } from "../../utils";
+import useAuth from "@/services/useAuth";
+import { hasAccessToPhase3, permissionPhase3, PHASE_STATUS_COLOR, translate, translatePhase1, translatePhase2, YOUNG_STATUS, YOUNG_STATUS_PHASE3 } from "../../utils";
 import Badge from "../../components/Badge";
-import Img2 from "../../assets/homePhase2Desktop.png";
-import Img3 from "../../assets/homePhase2Mobile.png";
+import hero from "../../assets/hero/home.png";
 import { Link } from "react-router-dom";
+import HomeContainer from "@/components/layout/HomeContainer";
+import HomeHeader from "@/components/layout/HomeHeader";
 
 export default function HomeDefault() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const title = `${young.firstName}, ravi de vous retrouver !`;
+
   return (
-    <main className="bg-white md:rounded-xl shadow-sm md:m-8 flex flex-col md:flex-row max-w-7xl pb-20 md:pb-0">
-      <img className="block md:hidden" src={Img3} />
-      <div className="px-[1rem] md:p-[4rem]">
-        <h1 className="text-3xl md:text-5xl md:mt-16 mb-8 max-w-lg">
-          <strong>{young.firstName}</strong>, ravi de vous retrouver&nbsp;!
-        </h1>
-
-        <p className="leading-relaxed">Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
-
+    <HomeContainer>
+      <HomeHeader title={title} img={hero}>
+        <p className="mt-4 leading-relaxed">Votre espace volontaire vous accompagne à chaque étape de votre SNU.</p>
         <hr className="my-4" />
-
         <p className="text-xl font-bold leading-loose text-gray-700">Votre parcours</p>
 
         <Link to="/phase1">
@@ -35,8 +31,16 @@ export default function HomeDefault() {
             <Badge text={translatePhase2(young.statusPhase2)} color={PHASE_STATUS_COLOR[young.statusPhase2]} />
           </p>
         </Link>
-      </div>
-      <img className="flex-1 hidden xl:block" src={Img2} />
-    </main>
+
+        {hasAccessToPhase3(young) && (
+          <Link to="/phase3">
+            <p className="leading-loose">
+              <span className="mr-2">3. Une phase d&apos;engagement volontaire</span>
+              <Badge text={translate(young.statusPhase3)} color={PHASE_STATUS_COLOR[young.statusPhase3]} />
+            </p>
+          </Link>
+        )}
+      </HomeHeader>
+    </HomeContainer>
   );
 }

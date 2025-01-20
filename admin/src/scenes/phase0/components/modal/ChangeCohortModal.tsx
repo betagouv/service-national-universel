@@ -14,6 +14,7 @@ import api from "@/services/api";
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
 import { getClasses, searchEtablissement } from "../../utils/service";
+import { statusClassForBadge } from "../../../classe/utils";
 interface Step {
   icon?: React.ReactNode;
   title?: string;
@@ -437,7 +438,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de la classe :</div>
-                  <Badge title={translateStatusClasse(classe?.status)} status={classe?.status as any} />
+                  <Badge title={translateStatusClasse(classe?.status)} status={statusClassForBadge(classe?.status) as any} />
                 </div>
                 <div className="flex items-center justify-between min-h-[32px] mb-2">
                   <div className="text-sm">Statut de l'élève :</div>

@@ -2,9 +2,10 @@ import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld, EQUIVALENCE_STATUS } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { getCohort, isCohortDone } from "./cohorts";
+import { isCohortDone } from "./cohorts";
 import { toastr } from "react-redux-toastr";
 import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
+import store from "@/redux/store";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -104,7 +105,7 @@ export function hasAccessToPhase2(young) {
   const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
   const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
-  const cohort = getCohort(young.cohort);
+  const { cohort } = store.getState().Cohort;
   if (isCohortTooOld(cohort) && !userIsDoingAMission && !hasEquivalence) {
     return false;
   }
@@ -129,6 +130,13 @@ export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
 }
+
+// Only people who is already doing phase3 or has done phase3 has access to it.
+export const hasAccessToPhase3 = (young) => {
+  const { WAITING_VALIDATION, VALIDATED } = YOUNG_STATUS_PHASE3;
+  if ([WAITING_VALIDATION, VALIDATED].includes(young.statusPhase3)) return true;
+  return false;
+};
 
 // from the end of the cohort's last day
 export function isYoungCanApplyToPhase2Missions(young) {

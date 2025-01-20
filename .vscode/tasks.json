@@ -61,10 +61,10 @@
     {
       "label": "Start Admin Applications",
       "dependsOn": [
-        "Start Lib",
-        "Start DS",
-        "Start Api",
-        "Start Apiv2",
+        "Start snu-lib",
+        "Start snu-ds",
+        "Start Api-v1",
+        "Start Api-v2",
         "Start Admin"
       ],
       "problemMatcher": []
@@ -72,10 +72,10 @@
     {
       "label": "Start App Applications",
       "dependsOn": [
-        "Start Lib",
-        "Start DS",
-        "Start Api",
-        "Start Apiv2",
+        "Start snu-lib",
+        "Start snu-ds",
+        "Start Api-v1",
+        "Start Api-v2",
         "Start App"
       ],
       "problemMatcher": []
@@ -83,10 +83,10 @@
     {
       "label": "Start All Applications",
       "dependsOn": [
-        "Start Lib",
-        "Start DS",
-        "Start Api",
-        "Start Apiv2",
+        "Start snu-lib",
+        "Start snu-ds",
+        "Start Api-v1",
+        "Start Api-v2",
         "Start Admin",
         "Start App",
         "Start Support"
@@ -112,21 +112,49 @@
       }
     },
     {
-      "label": "Start Api",
-      "command": "npm run dev:app api",
+      "label": "Start Api-v1",
+      "dependsOn": ["Start Api-v1 API", "Start Api-v1 TASKS"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Api-v1 API",
+      "command": "npm run dev:api",
       "type": "shell",
       "problemMatcher": [],
       "options": {
-        "cwd": "./"
+        "cwd": "./api"
       }
     },
     {
-      "label": "Start Apiv2",
-      "command": "npm run dev:app apiv2",
+      "label": "Start Api-v1 TASKS",
+      "command": "npm run dev:tasks",
       "type": "shell",
       "problemMatcher": [],
       "options": {
-        "cwd": "./"
+        "cwd": "./api"
+      }
+    },
+    {
+      "label": "Start Api-v2",
+      "dependsOn": ["Start Api-v2 API", "Start Api-v2 TASKS"],
+      "problemMatcher": []
+    },
+    {
+      "label": "Start Api-v2 API",
+      "command": "npm run dev:api",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./apiv2"
+      }
+    },
+    {
+      "label": "Start Api-v2 TASKS",
+      "command": "npm run dev:tasks",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./apiv2"
       }
     },
     {
@@ -139,7 +167,7 @@
       }
     },
     {
-      "label": "Start Lib",
+      "label": "Start snu-lib",
       "command": "npm run dev:app snu-lib",
       "type": "shell",
       "problemMatcher": [],
@@ -148,7 +176,7 @@
       }
     },
     {
-      "label": "Start DS",
+      "label": "Start snu-ds",
       "command": "npm run dev:app @snu/ds",
       "type": "shell",
       "problemMatcher": [],
@@ -212,7 +240,7 @@
     },
     {
       "label": "Pull staging db",
-      "command": "source .env && export $(cut -d= -f1 .env) && ./pull_staging.sh",
+      "command": "source ../../.env && export $(cut -d= -f1 ../../.env) && ./pull_staging.sh",
       "type": "shell",
       "problemMatcher": [],
       "options": {

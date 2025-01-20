@@ -40,7 +40,7 @@ export default function ResponsiveModal({ isOpen, setOpen, title, children, onCo
               </div>
               {children}
               {onConfirm ? (
-                <div className="absolute bottom-0 md:relative w-full p-3 grid gap-3 bg-gray-50">
+                <div className="absolute bottom-0 md:relative w-full p-3 grid gap-3 bg-gray-50 mt-2">
                   <button
                     onClick={onConfirm}
                     disabled={loading || disabled}
