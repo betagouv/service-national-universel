@@ -1,5 +1,6 @@
 import { ImporterClasses } from "./ImporterClasses";
 import { Logger } from "@nestjs/common";
+import { warn } from "console";
 import { MIME_TYPES, ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
 
 describe("ImporterClasses", () => {
@@ -12,7 +13,7 @@ describe("ImporterClasses", () => {
     let mockJeuneGateway: any;
     let mockSejourGateway: any;
     let mockReferentielService: any;
-
+    let mockLogger: any;
     beforeEach(() => {
         mockFileGateway = {
             downloadFile: jest.fn(),
@@ -43,6 +44,10 @@ describe("ImporterClasses", () => {
         mockReferentielService = {
             processReport: jest.fn(),
         };
+        mockLogger = {
+            log: jest.fn(),
+            warn: jest.fn(),
+        };
 
         useCase = new ImporterClasses(
             mockFileGateway,
@@ -53,7 +58,7 @@ describe("ImporterClasses", () => {
             mockJeuneGateway,
             mockSejourGateway,
             mockReferentielService,
-            new Logger(),
+            mockLogger,
         );
     });
 

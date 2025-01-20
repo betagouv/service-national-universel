@@ -78,7 +78,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         };
         const updatedFields: string[] = [];
 
-        // Si la classe est WITHDRAWN
+        // Si la classe est désistée => annuler le désistement de la classe
         if (classe.statut === STATUS_CLASSE.WITHDRAWN) {
             const annulerClasseDesistee = await this.annulerClasseDesistee.execute(classe);
             classeRapport = {
