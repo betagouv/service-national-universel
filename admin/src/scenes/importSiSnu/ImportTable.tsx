@@ -1,67 +1,61 @@
+import UserCard from "@/components/UserCard";
 import { ReferentielService } from "@/services/ReferentielService";
 import { DataTable } from "@snu/ds/admin";
 import { useQuery } from "@tanstack/react-query";
 import React, { useMemo, useState } from "react";
-import { useLocation } from "react-router-dom";
-import { ReferentielRoutes } from "snu-lib";
-import RapportCell from "../settings/operations/components/RapportCell";
+import { ReferentielRoutes, TaskName } from "snu-lib";
 import StatusCell from "../settings/operations/components/StatusCell";
+import ImportFileTypeCell from "./ImportFileTypeCell";
+import ImportRapportCell from "./ImportRapportCell";
 
-export interface ImportTableProps {
-  // data:
-}
-
-interface ImportRow {
+interface ImportFileRow {
   id: string;
   data: {
-    typeFichier: string;
-    importDate: string;
-    statut: string;
-    auteur: string;
-    fichier: string;
-    resultat: string;
+    fileType?: string;
+    importDate?: string;
+    status?: string;
+    author?: string;
+    file?: string;
+    report?: string;
+    rawTask: ReferentielRoutes["GetImports"]["response"][0];
   };
 }
 
-export default function ImportTable() {
-  const { search } = useLocation();
-  const currentAction = new URLSearchParams(search).get("action") || "";
-  const currentId = new URLSearchParams(search).get("id") || "";
-
+export default function ImportTable({ lastTask }: { lastTask: ReferentielRoutes["GetImports"]["response"][0] | null }) {
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [filters, setFilters] = useState({
-    action: currentAction,
     createdAt: "",
     author: "",
     statut: "",
   });
+
   const {
     isFetching: isLoading,
     error,
     data: imports,
   } = useQuery<ReferentielRoutes["GetImports"]["response"]>({
-    queryKey: ["import-si-snu", filters.action, sort],
-    queryFn: async () => ReferentielService.getImports({ name: filters.action, order: sort }),
+    queryKey: ["import-si-snu", filters, sort, lastTask],
+    queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, sort }),
   });
-
-  const importRows: ImportRow[] = useMemo(() => {
+  const importRows: ImportFileRow[] = useMemo<ImportFileRow[]>(() => {
     return (
-      imports?.map((importRow: ReferentielRoutes["GetImports"]["response"][0]) => ({
-        id: importRow.id,
+      imports?.map((task: ReferentielRoutes["GetImports"]["response"][0]) => ({
+        id: task.id,
         data: {
-          typeFichier: importRow.metadata?.parameters?.type || "",
-          importDate: importRow.createdAt || "",
-          statut: importRow.status || "",
-          auteur: `${importRow.metadata?.parameters?.auteur?.prenom || ""} ${importRow.metadata?.parameters?.auteur?.nom || ""}`,
-          fichier: importRow.metadata?.parameters?.fileName || "",
-          resultat: importRow.metadata?.results?.rapportKey || "",
+          fileType: task.metadata?.parameters?.type,
+          importDate: task.createdAt,
+          status: task.status,
+          author: `${task.metadata?.parameters?.auteur?.prenom} ${task.metadata?.parameters?.auteur?.nom}`,
+          file: task.metadata?.parameters?.fileKey,
+          report: task.metadata?.results?.rapportKey,
+          rawTask: task,
         },
       })) || []
     );
   }, [imports]);
-  console.log(importRows);
+
   return (
-    <DataTable<ImportRow>
+    <DataTable<ImportFileRow>
       isLoading={isLoading}
       isError={!!error}
       rows={importRows}
@@ -72,37 +66,40 @@ export default function ImportTable() {
       onFiltersChange={(filtersUpdated) => setFilters(filtersUpdated as any)}
       columns={[
         {
-          key: "typeFichier",
+          key: "fileType",
           title: "Type de fichier",
           filtrable: true,
-          filterKeys: [
-            { key: "action", label: "Action", externalKey: "name", external: true },
-            { key: "date", label: "Date" },
-            { key: "author", label: "Auteur" },
-          ],
-          //   renderCell: (simulation) => <ActionCell simulation={simulation} session={session} />,
+          renderCell: (importRow) => <ImportFileTypeCell fileType={importRow.fileType} date={importRow.importDate} />,
         },
         {
-          key: "statut",
+          key: "status",
           title: "Statut",
           filtrable: true,
           renderCell: StatusCell,
         },
         {
-          key: "auteur",
+          key: "author",
           title: "Auteur",
           filtrable: true,
-          renderCell: StatusCell,
+          renderCell: (importRow) => {
+            const user = {
+              _id: importRow.rawTask?.metadata?.parameters?.auteur?.id,
+              firstName: importRow.rawTask?.metadata?.parameters?.auteur?.prenom,
+              lastName: importRow.rawTask?.metadata?.parameters?.auteur?.nom,
+              role: importRow.rawTask?.metadata?.parameters?.auteur?.role,
+            };
+            return <UserCard user={user} />;
+          },
         },
         {
-          key: "fichier",
+          key: "file",
           title: "Fichier",
-          renderCell: RapportCell,
+          renderCell: (importRow) => <ImportRapportCell fileKey={importRow.file} />,
         },
         {
-          key: "resultat",
+          key: "report",
           title: "Résultat",
-          renderCell: RapportCell,
+          renderCell: (importRow) => <ImportRapportCell fileKey={importRow.report} />,
         },
       ]}
     />

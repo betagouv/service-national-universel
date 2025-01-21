@@ -36,7 +36,6 @@ export default function ImportSelectModal({ onSubmit, onClose }: ImportSelectMod
       onClose();
     }
   };
-  console.log("acceptedFiles", selectedFile);
   return (
     <Modal
       isOpen
