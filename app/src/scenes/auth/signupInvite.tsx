@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib";
@@ -8,8 +8,6 @@ import RightArrow from "../../assets/icons/RightArrow";
 import api from "../../services/api";
 import Error from "../../components/error";
 import { getPasswordErrorMessage } from "../../utils";
-import { environment } from "../../config";
-import { toastr } from "react-redux-toastr";
 import { capture } from "../../sentry";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import { InputPassword, Button } from "@snu/ds/dsfr";
