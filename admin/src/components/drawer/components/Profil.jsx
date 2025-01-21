@@ -14,6 +14,7 @@ import Support from "../icons/Support";
 import User from "../icons/User";
 import VericalDot from "../icons/VerticalDot";
 import Separator from "./Separator";
+import { HiOutlinePaperClip } from "react-icons/hi";
 
 export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -133,9 +134,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
                         {<NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />}
-                        {/* <NavItem />
-                    <NavItem />
-                    <NavItem /> */}
+                        {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={() => <HiOutlinePaperClip size={22} />} title="Import SI-SNU" link={"/import-si-snu"} />}
                       </div>
                       <div className="bg-[#EEEFF5] h-[1px] mx-auto w-[247px] !mt-1" />
                       {/* Footer */}
