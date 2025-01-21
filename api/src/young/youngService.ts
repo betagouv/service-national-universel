@@ -1,13 +1,42 @@
 import { format } from "date-fns";
 
-import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, YoungType } from "snu-lib";
+import {
+  ERRORS,
+  FUNCTIONAL_ERRORS,
+  UserDto,
+  YOUNG_PHASE,
+  YOUNG_SOURCE,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YoungDto,
+  YoungType,
+  ROLES,
+  REFERENT_DEPARTMENT_SUBROLE,
+  SENDINBLUE_TEMPLATES,
+  getDepartmentByZip,
+} from "snu-lib";
 
-import { YoungDocument, YoungModel } from "../models";
+import {
+  YoungDocument,
+  YoungModel,
+  ReferentModel,
+  ReferentDocument,
+  ClasseModel,
+  ClasseDocument,
+  CohesionCenterModel,
+  CohesionCenterDocument,
+  DepartmentServiceDocument,
+  DepartmentServiceModel,
+  EtablissementModel,
+  EtablissementDocument,
+} from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
+import { config } from "../config";
+import { sendTemplate } from "../brevo";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -169,3 +198,86 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
     logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
   }
 };
+
+export async function handleNotificationForDeparture(young: YoungType, departSejourMotif: string, departSejourMotifComment: string) {
+  const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+
+  if (!referentsDep) throw new Error(ERRORS.NOT_FOUND);
+
+  // on envoie au chef de projet departemental (ou assistant)
+  const managers = referentsDep.filter(
+    (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
+  );
+
+  // sinon on envoie au secretariat du departement ou au manager de phase2
+  const secretariat = referentsDep.filter(
+    (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
+  );
+
+  // si toujours rien on envoie a son contact Convocation
+
+  let contactsConv = [] as any;
+  if (!managers.length && !secretariat.length) {
+    const serviceDep = await DepartmentServiceModel.find({ department: young.department });
+    if (!serviceDep) throw new Error(ERRORS.NOT_FOUND);
+
+    contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
+    contactsConv = contactsConv.map((contact) => {
+      const [firstName, lastName] = contact.contactName!.split(" ");
+      const email = contact.contactMail;
+
+      return {
+        ...contact,
+        firstName,
+        lastName,
+        email,
+      };
+    });
+  }
+
+  let contactCLE: ReferentDocument[] = [];
+  if (young.source === YOUNG_SOURCE.CLE) {
+    let contactCLEId: string[] = [];
+    const classe = await ClasseModel.findById(young.classeId);
+    if (!classe) throw new Error(ERRORS.NOT_FOUND);
+    contactCLEId.push(classe.referentClasseIds[0]);
+    const etablissement = await EtablissementModel.findById(classe.etablissementId);
+    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+    contactCLEId.push(etablissement.referentEtablissementIds[0]);
+    contactCLEId.push(...etablissement.coordinateurIds);
+
+    contactCLE = await ReferentModel.find({ _id: { $in: contactCLEId } });
+  }
+
+  const sendContact = [...(managers.length ? managers : secretariat.length ? secretariat : contactsConv), ...contactCLE];
+
+  type ResultType = {
+    email: string;
+    firstName: string;
+    lastName: string;
+  };
+  const result: ResultType[] = sendContact.map((referent) => ({
+    email: referent.email,
+    firstName: referent.firstName,
+    lastName: referent.lastName,
+  }));
+
+  const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+
+  let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
+  await sendTemplate(template, {
+    emailTo: result.map((referent) => ({
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    })),
+    params: {
+      youngFirstName: young.firstName,
+      youngLastName: young.lastName,
+      centreName: center?.name || young.cohesionCenterName,
+      centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
+      departureReason: departSejourMotif,
+      departureNote: departSejourMotifComment,
+      cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+    },
+  });
+}
