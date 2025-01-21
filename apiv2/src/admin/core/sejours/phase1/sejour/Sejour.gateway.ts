@@ -6,6 +6,7 @@ export interface SejourGateway {
     findBySessionId(sessionId: string): Promise<SejourModel[]>;
     update(sejour: SejourModel): Promise<SejourModel>;
     bulkUpdate(sejours: SejourModel[]): Promise<number>;
+    findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null>;
 }
 
 export const SejourGateway = Symbol("SejourGateway");

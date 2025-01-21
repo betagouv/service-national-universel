@@ -6,6 +6,7 @@ import { ClasseGateway } from "../../../../../../core/sejours/cle/classe/Classe.
 import { ClasseModel } from "../../../../../../core/sejours/cle/classe/Classe.model";
 import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "../../provider/ClasseMongo.provider";
 import { ClasseMapper } from "../Classe.mapper";
+import { STATUS_CLASSE } from "snu-lib";
 
 @Injectable()
 export class ClasseRepository implements ClasseGateway {
@@ -14,6 +15,13 @@ export class ClasseRepository implements ClasseGateway {
 
         private readonly cls: ClsService,
     ) {}
+    async updateStatut(classeId: string, statut: keyof typeof STATUS_CLASSE): Promise<ClasseModel> {
+        const classe = await this.classeMongooseEntity.findByIdAndUpdate(classeId, { status: statut });
+        if (!classe) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return ClasseMapper.toModel(classe);
+    }
 
     async findByReferentId(referentId: string): Promise<ClasseModel[]> {
         const classes = await this.classeMongooseEntity.find({ referentClasseIds: [referentId] });
