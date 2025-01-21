@@ -19,6 +19,7 @@ import {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
+  isSuperAdmin,
 } from "snu-lib";
 import {
   LigneBusModel,

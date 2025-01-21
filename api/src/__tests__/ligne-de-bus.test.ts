@@ -26,12 +26,7 @@ const mockModelMethodWithError = (model, method) => {
   });
 };
 
-jest.mock("../../services/ligneBusService");
-
-const mockSendTemplate = jest.fn();
-jest.mock("../../brevo", () => ({
-  sendTemplate: mockSendTemplate,
-}));
+jest.mock("../services/LigneDeBusService");
 
 const userSuperAdmin = {
   role: ROLES.ADMIN,
@@ -469,6 +464,7 @@ describe("LigneDeBus", () => {
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("NOT_FOUND");
     });
+
     it.skip("should return 500 when there's an error", async () => {
       mockModelMethodWithError(LigneBusModel, "find");
       let res;
@@ -652,6 +648,7 @@ describe("LigneDeBus", () => {
       const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
 
       const res = await request(getAppHelper(userAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -668,9 +665,11 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 404 if ligne bus is not found", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
       (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("NOT_FOUND"));
 
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -691,6 +690,7 @@ describe("LigneDeBus", () => {
       (updatePDRForLine as jest.Mock).mockResolvedValue(ligneBus);
 
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -704,13 +704,26 @@ describe("LigneDeBus", () => {
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toBeDefined();
-      expect(updatePDRForLine).toHaveBeenCalledWith(ligneBus._id.toString(), "bus", "08:00", "07:30", "08:30", "18:00", "oldMeetingPointId", "newMeetingPointId", false, user);
+      expect(updatePDRForLine).toHaveBeenCalledWith(
+        ligneBus._id.toString(),
+        "bus",
+        "08:00",
+        "07:30",
+        "08:30",
+        "18:00",
+        "oldMeetingPointId",
+        "newMeetingPointId",
+        false,
+        userSuperAdmin,
+      );
     });
 
     it("should return 400 if meeting hour is after departure hour", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
       (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("INVALID_BODY"));
 
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "09:00",
         busArrivalHour: "07:30",
@@ -727,9 +740,11 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 500 when there's an error", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
       (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("Test error"));
 
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -745,33 +760,15 @@ describe("LigneDeBus", () => {
       expect(res.body.code).toBe("SERVER_ERROR");
     });
 
-    it("should return 400 if meeting hour is after departure hour", async () => {
-      (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("INVALID_BODY"));
-
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
-        transportType: "bus",
-        meetingHour: "09:00", // After departure hour
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
-        sendEmailCampaign: false,
-      });
-
-      expect(res.status).toBe(400);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("INVALID_BODY");
-      expect(updatePDRForLine).toHaveBeenCalled();
-    });
-
     it("should return 400 if bus arrival hour is after departure hour", async () => {
+      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
       (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("INVALID_BODY"));
 
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "07:00",
-        busArrivalHour: "09:00", // After departure hour
+        busArrivalHour: "09:00",
         departureHour: "08:30",
         returnHour: "18:00",
         meetingPointId: "oldMeetingPointId",
@@ -793,6 +790,7 @@ describe("LigneDeBus", () => {
       (sendTemplate as jest.Mock).mockResolvedValue({});
 
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -805,7 +803,18 @@ describe("LigneDeBus", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
-      expect(updatePDRForLine).toHaveBeenCalledWith(ligneBus._id.toString(), "bus", "08:00", "07:30", "08:30", "18:00", "oldMeetingPointId", "newMeetingPointId", true, user);
+      expect(updatePDRForLine).toHaveBeenCalledWith(
+        ligneBus._id.toString(),
+        "bus",
+        "08:00",
+        "07:30",
+        "08:30",
+        "18:00",
+        "oldMeetingPointId",
+        "newMeetingPointId",
+        true,
+        userSuperAdmin,
+      );
     });
   });
 });
