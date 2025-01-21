@@ -24,7 +24,7 @@ const router = express.Router();
 
 router.post(
   "/eligibility/2023/:id?",
-  authMiddleware("referent"),
+  authMiddleware(["referent", "young"]),
   requestValidatorMiddleware({ ...CohortsRoutesSchema.PostEligibility, body: undefined }),
   async function (req: RouteRequest<CohortsRoutes["PostEligibility"]>, res: RouteResponse<CohortsRoutes["PostEligibility"]>) {
     try {

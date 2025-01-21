@@ -1,7 +1,7 @@
 import React from "react";
 import { BsCheck2 } from "react-icons/bs";
 
-export function StepCard({ variant, index, children }) {
+export function StepCard({ variant = "", index, children }) {
   if (variant === "done") {
     return (
       <div className="w-full flex items-center -ml-4">

@@ -31,6 +31,7 @@ import LocationIcon from "./icons/Location";
 import ClipboardIcon from "./icons/Clipboard";
 import InstitutionIcon from "./icons/Institution";
 import StudentIcon from "./icons/Student";
+import HomeIcon from "./icons/Home";
 
 import Header from "./components/Header";
 import MultiNavItem from "./components/MultiNavItem";
@@ -95,6 +96,7 @@ const SideBar = ({ sessionsList }) => {
   const Session = () => <SwitchSession sideBarOpen={open} sessionsList={sessionsList} sessionPhase1={sessionPhase1} />;
 
   //NavLinks
+  const Accueil = () => <SimpleNavItem sideBarOpen={open} Icon={HomeIcon} title="Accueil" link="/accueil" active={path === "accueil"} setCurrentOpen={setDropDownOpen} />;
   const Dashboard = () => (
     <SimpleNavItem sideBarOpen={open} Icon={DashboardIcon} title="Tableau de bord" link="/dashboard" active={path === "dashboard"} setCurrentOpen={setDropDownOpen} />
   );
@@ -246,7 +248,7 @@ const SideBar = ({ sessionsList }) => {
   const visitorItems = [Dashboard];
   const dsnjItems = [ExportDsnj];
   const injepItems = [ExportInjep];
-  const institutionItems = [Institution, Classe, VolontaireCle, Contact];
+  const institutionItems = [Accueil, Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
     switch (user?.role) {

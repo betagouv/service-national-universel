@@ -32,12 +32,14 @@ COPY turbo.json turbo.json
 RUN npm run build
 
 FROM base AS runner
+
+RUN apk add supervisor
+
 WORKDIR /app
 
 COPY --from=installer /app .
 
-LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
-      org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
+LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel"
 
 
 ARG ENVIRONMENT

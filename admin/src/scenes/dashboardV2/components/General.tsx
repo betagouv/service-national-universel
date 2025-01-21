@@ -1,7 +1,6 @@
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
-import { HiHome } from "react-icons/hi";
 import { useQuery } from "@tanstack/react-query";
 
 import { ROLES, translate, AlerteMessageDto } from "snu-lib";

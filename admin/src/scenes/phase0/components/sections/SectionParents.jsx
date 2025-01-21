@@ -424,7 +424,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                     young={young}
                     transformer={translateEtablissementSector}
                   />
-                  <Field name="classeGrade" label="Classe" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
+                  <Field name="classeGrade" label="Niveau Scolaire" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
                   <MiniTitle>Établissement</MiniTitle>
                   <div className="flex items-center gap-4 mb-[16px]">
                     <Field name="etablissementZone" label="Zone" value={region2zone[youngFiltered?.etablissement?.region]} mode="readonly" className="w-1/2" young={young} />

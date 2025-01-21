@@ -831,7 +831,16 @@ function canCreateAlerteMessage(actor) {
 }
 
 function canReadAlerteMessage(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.SUPERVISOR].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.RESPONSIBLE,
+    ROLES.HEAD_CENTER,
+    ROLES.SUPERVISOR,
+    ROLES.REFERENT_CLASSE,
+    ROLES.ADMINISTRATEUR_CLE,
+  ].includes(actor.role);
 }
 
 function canViewTableDeRepartition(actor) {

@@ -2,16 +2,19 @@ import React from "react";
 import { setYoung } from "@/redux/auth/actions";
 import API from "@/services/api";
 import plausibleEvent from "@/services/plausible";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
 import { Modal } from "reactstrap";
-import { isCle, transportDatesToString } from "snu-lib";
+import { transportDatesToString } from "snu-lib";
 import Close from "@/components/layout/navbar/assets/Close";
 import { ModalContainer } from "@/components/modals/Modal";
+import useAuth from "@/services/useAuth";
+import useAffectationInfo from "../../utils/useAffectationInfo";
 
-export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate }) {
-  const young = useSelector((state) => state.Auth.young);
+export function AgreementModal({ isOpen, setIsOpen }) {
+  const { young, isCLE } = useAuth();
+  const { departureDate, returnDate } = useAffectationInfo();
   const dispatch = useDispatch();
 
   const handleSubmit = async (e) => {
@@ -57,7 +60,7 @@ export function AgreementModal({ isOpen, setIsOpen, departureDate, returnDate })
             </div>
             <div className="flex flex-col rounded-2xl border-[1px] border-gray-100 py-5 px-5 shadow-sm w-80">
               <h1 className="pb-4 text-xl font-bold leading-7">J&apos;ai changé d&apos;avis</h1>
-              {!isCle(young) && (
+              {!isCLE && (
                 <>
                   <p className="pb-3 text-sm text-gray-600">Les dates ne me conviennent plus ({transportDatesToString(departureDate, returnDate)})</p>
                   <Link to="/changer-de-sejour" className="whitespace-nowrap pb-4 text-sm text-blue-600 hover:underline hover:underline-offset-2">
