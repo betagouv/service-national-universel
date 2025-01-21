@@ -36,6 +36,24 @@ import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { getInfoBus } from "./ligneDeBusService";
+import { updatePDRForLine } from "../../services/LigneDeBusService";
+
+interface MeetingPointResult {
+  youngsCount: number;
+  meetingPointId: string;
+}
+
+interface Patch {
+  modelName: string;
+  date: Date;
+  ref: string;
+  refName: string;
+  op: string;
+  path: string;
+  value: any;
+  originalValue: any;
+  user: any;
+}
 
 const router = express.Router();
 
@@ -447,121 +465,35 @@ router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session:
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
 
     if (!isSuperAdmin(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
     }
 
-    const ligneBus = await LigneBusModel.findById(id);
-    if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
 
-    const cohort = await CohortModel.findOne({ name: ligneBus.cohort });
-    if (cohort === null) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Add hours constraints from FO
-    if (checkTime(departureHour, meetingHour) || checkTime(departureHour, busArrivalHour)) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
-    if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // Update LigneToPoint
-    ligneToPoint.set({
+    const updatedLigneBus = await updatePDRForLine(
+      id,
       transportType,
       meetingHour,
       busArrivalHour,
       departureHour,
       returnHour,
-      ...(meetingPointId !== newMeetingPointId && { meetingPointId: newMeetingPointId }),
-    });
-
-    await ligneToPoint.save({ fromUser: req.user });
-
-    // Update LigneBus
-    if (meetingPointId !== newMeetingPointId) {
-      const meetingPointsIds = ligneBus.meetingPointsIds.filter((id) => id !== meetingPointId);
-      meetingPointsIds.push(newMeetingPointId);
-      ligneBus.set({ meetingPointsIds });
-      await ligneBus.save({ fromUser: req.user });
-    }
-
-    // * Update slave PlanTransport
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
-    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
-      return meetingPoint.meetingPointId === meetingPointId;
-    });
-
-    if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    meetingPoint.set({
-      meetingPointId: newMeetingPointId,
-      ...pointDeRassemblement._doc,
-      busArrivalHour: ligneToPoint.busArrivalHour,
-      meetingHour: ligneToPoint.meetingHour,
-      departureHour: ligneToPoint.departureHour,
-      returnHour: ligneToPoint.returnHour,
-      transportType: ligneToPoint.transportType,
-    });
-
-    await planDeTransport.save({ fromUser: req.user });
-    // * End update slave PlanTransport
-
-    // Update des youngs
-    const youngUpdateResult = await YoungModel.updateMany(
-      {
-        ligneId: id,
-        meetingPointId: meetingPointId,
-      },
-      {
-        $set: {
-          meetingPointId: newMeetingPointId,
-        },
-      },
-      { fromUser: req.user },
+      meetingPointId,
+      newMeetingPointId,
+      sendEmailCampaign,
+      req.user,
     );
 
-    // Send Email Campaign
-    if (sendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
-      const updatedYoungs = await YoungModel.find({
-        ligneId: id,
-        meetingPointId: newMeetingPointId,
-      }).select("email parent1Email parent2Email");
-
-      let templateId: string | null = null;
-      if (new Date() < new Date(cohort.dateStart)) {
-        templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
-      } else if (new Date() < new Date(cohort.dateEnd)) {
-        templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
-      }
-
-      // If templateId is null, we don't send an email
-      // because we're no longer in the modification range.
-      if (!templateId) throw new Error("Modification date is out of range, no email sent.");
-
-      for (const young of updatedYoungs) {
-        const cc: { email: string }[] = [];
-        if (young.parent1Email) cc.push({ email: young.parent1Email });
-        if (young.parent2Email) cc.push({ email: young.parent2Email });
-
-        await sendTemplate(templateId, {
-          emailTo: [{ email: young.email }],
-          cc,
-        });
-      }
-    }
-
-    const infoBus = await getInfoBus(ligneBus);
+    const infoBus = await getInfoBus(updatedLigneBus);
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
+    if (error.message === ERRORS.NOT_FOUND) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (error.message === ERRORS.INVALID_BODY) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
