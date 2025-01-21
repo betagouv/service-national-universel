@@ -16,20 +16,7 @@ import {
   getDepartmentByZip,
 } from "snu-lib";
 
-import {
-  YoungDocument,
-  YoungModel,
-  ReferentModel,
-  ReferentDocument,
-  ClasseModel,
-  ClasseDocument,
-  CohesionCenterModel,
-  CohesionCenterDocument,
-  DepartmentServiceDocument,
-  DepartmentServiceModel,
-  EtablissementModel,
-  EtablissementDocument,
-} from "../models";
+import { YoungDocument, YoungModel, ReferentModel, ReferentDocument, ClasseModel, CohesionCenterModel, DepartmentServiceModel, EtablissementModel } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
@@ -235,6 +222,7 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
     });
   }
 
+  // Si CLE on envoie aussi au contact CLE
   let contactCLE: ReferentDocument[] = [];
   if (young.source === YOUNG_SOURCE.CLE) {
     let contactCLEId: string[] = [];
