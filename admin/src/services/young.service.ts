@@ -121,3 +121,17 @@ export const updateYoungTravelingByPlane = async ({ youngId, value }) => {
     };
   }
 };
+
+export const getYoungCountByCohort = async (cohortName: string, filters = {}) => {
+  const data = await API.post(`/elasticsearch/young/search?tab=volontaire`, {
+    filters: {
+      cohort: [cohortName],
+      ...filters,
+    },
+  });
+  if (!data.took) {
+    console.log(data);
+    throw new Error(data.code);
+  }
+  return data.responses?.[0]?.hits?.total?.value;
+};

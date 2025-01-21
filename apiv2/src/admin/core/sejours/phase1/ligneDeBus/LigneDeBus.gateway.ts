@@ -7,6 +7,7 @@ export interface LigneDeBusGateway {
     findBySessionNom(sessionNom: string): Promise<LigneDeBusModel[]>;
     update(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel>;
     bulkUpdate(ligneDeBusList: LigneDeBusModel[]): Promise<number>;
+    delete(ligneDeBus: LigneDeBusModel): Promise<void>;
 }
 
 export const LigneDeBusGateway = Symbol("LigneDeBusGateway");

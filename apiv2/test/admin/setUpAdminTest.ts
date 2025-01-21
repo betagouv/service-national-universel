@@ -46,10 +46,16 @@ import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affec
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { historyProvider } from "@admin/infra/history/historyProvider";
+import { segmentDeLigneMongoProviders } from "@admin/infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
+import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
 }
+
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
 
 let adminTestModule: TestingModule;
 export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer: false }) => {
@@ -87,6 +93,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...planDeTransportMongoProviders,
             ...ligneDeBusMongoProviders,
             ...pointDeRassemblementMongoProviders,
+            ...segmentDeLigneMongoProviders,
+            ...demandeModificationLigneDeBusMongoProviders,
             ...sejourMongoProviders,
             ...sessionMongoProviders,
             ...taskMongoProviders,
