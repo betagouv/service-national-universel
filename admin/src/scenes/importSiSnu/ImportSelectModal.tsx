@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { HiOutlineDownload } from "react-icons/hi";
-import { Button, Modal, Select } from "@snu/ds/admin";
+import { Button, Modal, Select, SelectOption } from "@snu/ds/admin";
 import { ReferentielTaskType } from "snu-lib";
-import { SelectOption } from "../../../../packages/ds/src/admin/form/Select/Select";
 
 interface ImportSelectModalProps {
   onSubmit: (importType: keyof typeof ReferentielTaskType, file: File) => void;
