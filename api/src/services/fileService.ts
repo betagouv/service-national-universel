@@ -2,6 +2,7 @@ import { format } from "@fast-csv/format";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
 import { Transform } from "stream";
 import xlsx from "xlsx";
+import fs from "fs";
 
 import { ERRORS } from "snu-lib";
 
@@ -32,6 +33,24 @@ export function XLSXToCSVBuffer(filePath: string): Buffer {
   const csvData = xlsx.utils.sheet_to_csv(worksheet, { FS: "," });
 
   return Buffer.from(csvData, "utf-8");
+}
+
+export function getHeadersFromXLSX(filePath: string): string[] {
+  const fileBuffer = fs.readFileSync(filePath);
+
+  const workbook = xlsx.read(fileBuffer, { type: "buffer" });
+  const sheetName = workbook.SheetNames[0];
+  if (!sheetName) {
+    throw new Error("The workbook has no sheets.");
+  }
+  const sheet = workbook.Sheets[sheetName];
+
+  const headers = xlsx.utils.sheet_to_json(sheet, { header: 1 })[0];
+  if (!Array.isArray(headers)) {
+    throw new Error("Failed to extract headers from the Excel file.");
+  }
+
+  return headers.map((header) => String(header).trim());
 }
 
 export async function parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]> {

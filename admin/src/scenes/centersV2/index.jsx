@@ -9,6 +9,7 @@ import View from "./view";
 import Youngs from "./youngs";
 import Team from "./view/team";
 import ListPresence from "./ListPresence";
+import Import from "./Import";
 
 export default function Index() {
   useDocumentTitle("Centres");
@@ -16,6 +17,7 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/centre/nouveau" component={Create} />
+      <SentryRoute path="/centre/import" component={Import} />
       <SentryRoute path="/centre/:id/:sessionId/equipe" component={Team} />
       <SentryRoute path="/centre/:id/:sessionId/:currentTab" component={Youngs} />
       <SentryRoute path="/centre/liste/presence" component={ListPresence} />
