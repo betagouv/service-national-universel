@@ -18,7 +18,7 @@ import {
     ClasseDesisterXslx,
     ClasseImportXslx,
     ClasseRapport,
-    DesiterClasseFileValidation,
+    DesisterClasseFileValidation,
     ImportClasseFileValidation,
 } from "./ReferentielClasse.model";
 
@@ -50,7 +50,7 @@ export class ReferentielClasseService {
 
         const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXslx>(buffer, {
             defval: "",
-            sheetName: DesiterClasseFileValidation.sheetName,
+            sheetName: DesisterClasseFileValidation.sheetName,
         });
 
         let taskType: ReferentielTaskType | null = null;
@@ -64,7 +64,7 @@ export class ReferentielClasseService {
         } else if (classesToImport.length === 0 && classesToDesister.length > 0) {
             taskType = ReferentielTaskType.IMPORT_DESISTER_CLASSES;
             missingColumns = this.referentielService.getMissingColumns(
-                DesiterClasseFileValidation.requiredColumns,
+                DesisterClasseFileValidation.requiredColumns,
                 classesToDesister[0],
             );
         } else if (classesToImport.length > 0 && classesToDesister.length > 0) {
@@ -76,7 +76,7 @@ export class ReferentielClasseService {
             missingColumns = [
                 ...missingColumnsImport,
                 ...this.referentielService.getMissingColumns(
-                    DesiterClasseFileValidation.requiredColumns,
+                    DesisterClasseFileValidation.requiredColumns,
                     classesToDesister[0],
                 ),
             ];

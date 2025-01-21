@@ -58,10 +58,10 @@ export const ImportClasseFileValidation: FileValidation = {
         "Session : Code de la session",
         "Désignation du centre",
     ],
-    sheetName: "CLE2025",
+    sheetName: "CLE 2025",
 };
 
-export const DesiterClasseFileValidation: FileValidation = {
+export const DesisterClasseFileValidation: FileValidation = {
     requiredColumns: ["Identifiant de la classe engagée"],
     sheetName: "CLASSES DESISTEES",
 };

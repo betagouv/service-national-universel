@@ -4,10 +4,12 @@ import { ImporterClasses } from "@admin/core/referentiel/classe/useCase/Importer
 import {
     ReferentielImportTaskModel,
     ReferentielImportTaskResult,
-} from "@admin/core/referentiel/routes/ReferentielImportTask.model";
+} from "@admin/core/referentiel/ReferentielImportTask.model";
 import { ImporterRoutes } from "@admin/core/referentiel/routes/useCase/ImporterRoutes";
 import { Injectable } from "@nestjs/common";
 import { ReferentielTaskType } from "snu-lib";
+import { RegionAcademiqueImportService } from "@admin/core/referentiel/regionAcademique/RegionAcademiqueImport.service";
+import { ImporterRegionsAcademiques } from "@admin/core/referentiel/regionAcademique/useCase/ImporterRegionsAcademiques/ImporterRegionsAcademiques";
 @Injectable()
 export class AdminTaskImportReferentielSelectorService {
     constructor(
@@ -15,13 +17,19 @@ export class AdminTaskImportReferentielSelectorService {
         private readonly importerClasses: ImporterClasses,
         private readonly desisterClasses: DesisterClasses,
         private readonly referentielClasseService: ReferentielClasseService,
-    ) {}
+        private readonly importerRegionsAcademiques: ImporterRegionsAcademiques,
+        private readonly regionAcademiqueService: RegionAcademiqueImportService,
+    ) { }
     async handleImporterReferentiel(importTask: ReferentielImportTaskModel): Promise<ReferentielImportTaskResult> {
         const taskParameters = importTask.metadata!.parameters;
         switch (taskParameters?.type) {
             case ReferentielTaskType.IMPORT_ROUTES:
                 await this.importerRoutes.execute(taskParameters);
                 return { rapportKey: "" };
+            case ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES:
+                const rapportRegionsAcademiques = await this.importerRegionsAcademiques.execute(taskParameters);
+                const rapportRegionAcademiqueKey = await this.regionAcademiqueService.processReport(taskParameters, rapportRegionsAcademiques);
+                return { rapportKey: rapportRegionAcademiqueKey };
             case ReferentielTaskType.IMPORT_CLASSES:
                 const rapport = await this.importerClasses.execute(taskParameters);
                 const rapportKey = await this.referentielClasseService.processReport(taskParameters, rapport);

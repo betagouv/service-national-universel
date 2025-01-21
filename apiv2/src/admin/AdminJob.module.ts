@@ -21,7 +21,7 @@ import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { referentielUseCaseProviders } from "./infra/referentiel/initProvider/useCase";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
@@ -38,6 +38,7 @@ import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
@@ -68,6 +69,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         ConfigModule,
         TaskModule,
         DatabaseModule,
+        ReferentielModule,
     ],
     providers: [
         Logger,
@@ -106,7 +108,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         SimulationAffectationCLE,
         ValiderAffectationHTS,
         ValiderAffectationCLE,
-        ...referentielUseCaseProvider,
+        ...referentielUseCaseProviders,
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,
         AdminTaskImportReferentielSelectorService,
