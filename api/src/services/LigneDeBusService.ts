@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import { LigneBusModel, LigneToPointModel, PlanTransportModel, YoungModel, CohortModel, PointDeRassemblementModel } from "../models";
-import { CohortType, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
+import { CohortType, ERRORS, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
 import { sendTemplate } from "../brevo";
 
 const { ObjectId } = Types;
@@ -18,17 +18,17 @@ export const updatePDRForLine = async (
   user: UserDto,
 ) => {
   const ligneBus = await LigneBusModel.findById(ligneBusId);
-  if (!ligneBus) throw new Error("NOT_FOUND");
+  if (!ligneBus) throw new Error(ERRORS.NOT_FOUND);
 
   const cohort = await CohortModel.findOne({ name: ligneBus.cohort });
-  if (!cohort) throw new Error("NOT_FOUND");
+  if (!cohort) throw new Error(ERRORS.NOT_FOUND);
 
   if (checkTime(departureHour, meetingHour) || checkTime(departureHour, busArrivalHour)) {
-    throw new Error("INVALID_BODY");
+    throw new Error(ERRORS.INVALID_BODY);
   }
 
   const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneBusId, meetingPointId });
-  if (!ligneToPoint) throw new Error("NOT_FOUND");
+  if (!ligneToPoint) throw new Error(ERRORS.NOT_FOUND);
 
   ligneToPoint.set({
     transportType,
@@ -49,13 +49,13 @@ export const updatePDRForLine = async (
   }
 
   const planDeTransport = await PlanTransportModel.findById(ligneBusId);
-  if (!planDeTransport) throw new Error("NOT_FOUND");
+  if (!planDeTransport) throw new Error(ERRORS.NOT_FOUND);
 
   const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
-  if (!pointDeRassemblement) throw new Error("NOT_FOUND");
+  if (!pointDeRassemblement) throw new Error(ERRORS.NOT_FOUND);
 
   const meetingPoint = planDeTransport.pointDeRassemblements.find((mp) => mp.meetingPointId === meetingPointId);
-  if (!meetingPoint) throw new Error("NOT_FOUND");
+  if (!meetingPoint) throw new Error(ERRORS.NOT_FOUND);
 
   meetingPoint.set({
     meetingPointId: newMeetingPointId,

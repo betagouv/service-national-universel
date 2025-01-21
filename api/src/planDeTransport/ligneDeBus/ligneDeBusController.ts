@@ -468,7 +468,7 @@ router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session:
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     if (!isSuperAdmin(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
