@@ -1,5 +1,5 @@
 const { logger } = require("../src/logger");
-const { YoungModel, ClasseModel, EtablissementModel } = require("../src/models");
+const { YoungModel, EtablissementModel } = require("../src/models");
 
 module.exports = {
   async up() {
@@ -13,16 +13,10 @@ module.exports = {
         continue;
       }
 
-      const classe = await ClasseModel.findById(young.classeId);
-      if (!classe) {
-        logger.info(`Classe ${young.classeId} not found for Young ${young._id}, skipping...`);
-        continue;
-      }
-
       // Récupérer l'établissement associé à la classe
-      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      const etablissement = await EtablissementModel.findById(young.etablissementId);
       if (!etablissement) {
-        logger.info(`Etablissement ${classe.etablissementId} not found for Classe ${classe._id}, skipping...`);
+        logger.info(`Etablissement ${young.etablissementId} not found, skipping...`);
         continue;
       }
 
