@@ -76,8 +76,6 @@ export const validatePdtFile = async (
     errors["ID CLASSE"] = [];
   }
 
-  console.log("countPdr", countPdr, Object.keys(lines[0]));
-  console.log("errors", errors);
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
