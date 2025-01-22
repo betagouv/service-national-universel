@@ -1,15 +1,18 @@
+import { ReferentielService } from "@/services/ReferentielService";
+import { Button, Modal, Select, SelectOption } from "@snu/ds/admin";
+import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { HiOutlineDownload } from "react-icons/hi";
-import { Button, Modal, Select, SelectOption } from "@snu/ds/admin";
-import { ReferentielTaskType } from "snu-lib";
+import { HiOutlineDocumentAdd, HiOutlineDownload, HiOutlineX } from "react-icons/hi";
+import { toastr } from "react-redux-toastr";
+import { ReferentielRoutes, ReferentielTaskType, translateImportReferentiel } from "snu-lib";
 
 interface ImportSelectModalProps {
-  onSubmit: (importType: keyof typeof ReferentielTaskType, file: File) => void;
+  onSuccess: (task: ReferentielRoutes["Import"]["response"]) => void;
   onClose: () => void;
 }
 
-export default function ImportSelectModal({ onSubmit, onClose }: ImportSelectModalProps) {
+export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectModalProps) {
   const [importType, setImportType] = useState<SelectOption<string> | null>(null);
 
   const {
@@ -18,6 +21,14 @@ export default function ImportSelectModal({ onSubmit, onClose }: ImportSelectMod
     getRootProps: dropzoneRootProps,
     getInputProps: dropzoneInputProps,
   } = useDropzone({
+    onDrop: () => {
+      reset();
+      toastr.clean();
+    },
+    onFileDialogOpen() {
+      reset();
+      toastr.clean();
+    },
     accept: {
       "application/vnd.ms-excel": [".xlsx"],
     },
@@ -29,12 +40,19 @@ export default function ImportSelectModal({ onSubmit, onClose }: ImportSelectMod
     label: ReferentielTaskType[key as keyof typeof ReferentielTaskType],
   }));
 
-  const handleSubmit = async () => {
-    if (selectedFile?.handle && importType && ReferentielTaskType[importType.value]) {
-      onSubmit(ReferentielTaskType[importType.value], await selectedFile.handle.getFile());
-      onClose();
-    }
-  };
+  const { isPending, mutate, error, reset } = useMutation({
+    mutationFn: async () => {
+      return await ReferentielService.importFile(ReferentielTaskType.IMPORT_CLASSES, selectedFile);
+    },
+    onSuccess: (task) => {
+      toastr.success("L'import est en cours", "", { timeOut: 5000 });
+      onSuccess(task!);
+    },
+    onError: () => {
+      toastr.error("Erreur", "Le fichier ne contient pas les colonnes requises", { timeOut: 5000 });
+    },
+  });
+
   return (
     <Modal
       isOpen
@@ -64,27 +82,40 @@ export default function ImportSelectModal({ onSubmit, onClose }: ImportSelectMod
 
           <div
             {...dropzoneRootProps()}
-            className={`w-full h-[148px] max-w p-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors
-            ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"}`}>
+            className={`relative w-full h-[160px] max-w p-8 border-2 border-dashed rounded-lg cursor-pointer transition-colors
+            ${isDragActive ? "border-blue-500 bg-blue-50" : "border-gray-300 hover:border-gray-400"} ${selectedFile ? "bg-gray-50" : ""}`}>
             <input {...dropzoneInputProps()} />
-            <div className="text-center">
-              {isDragActive ? (
-                <p className="text-blue-500">Déposez le fichier ici...</p>
-              ) : (
+            <div className={`text-center`}>
+              {!selectedFile &&
+                (isDragActive ? (
+                  <p className="text-blue-500">Déposez le fichier ici...</p>
+                ) : (
+                  <div className="flex flex-col items-center gap-2">
+                    <HiOutlineDocumentAdd size={42} className="text-gray-500" style={{ strokeWidth: 1 }} />
+                    <p>Téléversez votre fichier ou glissez-déposez</p>
+                    <p className="text-sm text-gray-500 mt-2">Fichier accepté : XSLX</p>
+                  </div>
+                ))}
+
+              {selectedFile && (
                 <div>
-                  <p>Téléversez votre fichier ou glissez-déposez</p>
-                  <p className="text-sm text-gray-500 mt-2">Fichier accepté : XSLX</p>
+                  <HiOutlineX className="absolute top-4 right-4 cursor-pointer" />
+                  <p className="mt-4 text-lg text-gray-900">{selectedFile.name}</p>
                 </div>
               )}
-              {selectedFile && <p className="mt-4 text-sm text-gray-600">Fichier sélectionné : {selectedFile.name}</p>}
             </div>
           </div>
+          {error && (
+            <p className="text-red-500">
+              {translateImportReferentiel(error.message)} : {(error as any).description}
+            </p>
+          )}
         </div>
       }
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onClose} />
-          <Button disabled={!selectedFile || !importType} onClick={handleSubmit} title="Importer" className="flex-1" />
+          <Button disabled={!selectedFile || !importType || isPending} onClick={() => mutate()} loading={isPending} title="Importer" className="flex-1" />
         </div>
       }
     />
