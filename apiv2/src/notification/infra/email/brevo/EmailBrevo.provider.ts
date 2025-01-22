@@ -1,6 +1,6 @@
 import * as brevo from "@getbrevo/brevo";
-import { CreateUpdateContactModel } from "@getbrevo/brevo";
-import { Injectable } from "@nestjs/common";
+import { CreateUpdateContactModel, SendSmtpEmail, SendSmtpEmailAttachmentInner } from "@getbrevo/brevo";
+import { Inject, Injectable } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
@@ -10,6 +10,7 @@ import { OperationType, ReferentSyncDto } from "../Contact";
 import { ContactProvider, ContactProviderError } from "../Contact.provider";
 import { EmailProvider } from "../Email.provider";
 import { EmailBrevoMapper } from "./EmailBrevo.mapper";
+import { FileGateway } from "@shared/core/File.gateway";
 
 function setApiKey(apiInstance: brevo.TransactionalEmailsApi | brevo.ContactsApi, value: string) {
     //@ts-ignore
@@ -21,7 +22,10 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
     emailsApi: brevo.TransactionalEmailsApi;
     contactsApi: brevo.ContactsApi;
 
-    constructor(private readonly config: ConfigService) {
+    constructor(
+        private readonly config: ConfigService,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
+    ) {
         let apiKey = this.config.getOrThrow("email.apiKey");
 
         this.emailsApi = new brevo.TransactionalEmailsApi();
@@ -35,7 +39,14 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         let sendSmtpEmail = new brevo.SendSmtpEmail();
 
-        const smtpEmailWithData = { ...brevoParams, ...sendSmtpEmail };
+        let attachments: SendSmtpEmailAttachmentInner[] = [];
+        if (emailParams.attachments && emailParams.attachments.length > 0) {
+            for (const attachment of emailParams.attachments) {
+                const file = await this.fileGateway.downloadFile(attachment.filePath);
+                attachments.push({ content: file.Body.toString("base64"), name: file.FileName });
+            }
+        }
+        const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail, attachment: attachments };
 
         return await this.emailsApi.sendTransacEmail(smtpEmailWithData);
     }

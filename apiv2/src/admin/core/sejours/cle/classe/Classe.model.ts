@@ -38,3 +38,8 @@ export type CreateClasseModel = Omit<ClasseModel, "id" | "createdAt" | "updatedA
 export type ClasseWithReferentsModel = ClasseModel & {
     referents: ReferentModelLight[];
 };
+
+export interface AnnulerClasseDesisteeModel {
+    classe: ClasseModel;
+    rapport: string;
+}

@@ -14,6 +14,13 @@ export class SessionRepository implements SessionGateway {
         @Inject(SESSION_MONGOOSE_ENTITY) private sesssionMongooseEntity: Model<SessionDocument>,
         private readonly cls: ClsService,
     ) {}
+    async findBySnuId(snuId: string): Promise<SessionModel | null> {
+        const session = await this.sesssionMongooseEntity.findOne({ snuId });
+        if (!session) {
+            return null;
+        }
+        return SessionMapper.toModel(session);
+    }
 
     async create(session: CreateSessionModel): Promise<SessionModel> {
         const sessionEntity = SessionMapper.toEntityCreate(session);
