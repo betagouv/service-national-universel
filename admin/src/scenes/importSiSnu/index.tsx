@@ -17,7 +17,7 @@ interface ImportFileRow {
   id: string;
   data: {
     fileType?: string;
-    importDate?: string;
+    createdAt?: string;
     status?: string;
     author?: string;
     file?: string;
@@ -32,9 +32,10 @@ export default function ImportSiSnu() {
 
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [filters, setFilters] = useState({
-    createdAt: "",
+    fileType: "",
     author: "",
     statut: "",
+    createdAt: "",
   });
 
   const {
@@ -51,7 +52,8 @@ export default function ImportSiSnu() {
         id: task.id,
         data: {
           fileType: task.metadata?.parameters?.type,
-          importDate: task.createdAt,
+          createdAt: task.createdAt,
+          importDate: new Date(task.createdAt).toLocaleDateString("fr-FR"),
           status: task.status,
           author: `${task.metadata?.parameters?.auteur?.prenom} ${task.metadata?.parameters?.auteur?.nom}`,
           file: task.metadata?.parameters?.fileKey,
@@ -96,7 +98,11 @@ export default function ImportSiSnu() {
                   key: "fileType",
                   title: "Type de fichier",
                   filtrable: true,
-                  renderCell: (importRow) => <ImportFileTypeCell fileType={importRow.fileType} date={importRow.importDate} />,
+                  renderCell: (importRow) => <ImportFileTypeCell fileType={importRow.fileType} date={importRow.createdAt} />,
+                  filterKeys: [
+                    { key: "fileType", label: "Type de fichier" },
+                    { key: "importDate", label: "Date" },
+                  ],
                 },
                 {
                   key: "status",
