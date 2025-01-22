@@ -1,8 +1,34 @@
 #!/bin/bash
 
+if [[ $SOURCE_DATABASE_URI == "" || $TARGET_DATABASE_URI == "" || $ES_ENDPOINT == "" ]]
+then
+    echo "You must specify SOURCE_DATABASE_URI, TARGET_DATABASE_URI and ES_ENDPOINT in your environment"
+    exit 1
+fi
+
+if ! [[ -x "$(command -v monstache)" ]]; then
+  echo 'ERROR: monstache is not installed : https://github.com/rwynn/monstache' >&2
+  exit 1
+fi
+
 cd "$(dirname $0)"
 
 set -o pipefail
 set -e
 
+echo "Start anonymization"
 ./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
+
+echo "Remove elastic search indexes"
+cat config/index_whitelist.txt \
+| while read name
+do
+    echo "Deleting index $name"
+    curl -sSw "\n" -X DELETE "$ES_ENDPOINT/$name"
+done
+
+echo "Start elastic search full synchronization with monstache"
+DB_NAME=$(echo "$TARGET_DATABASE_URI" | sed 's#^.*/\([a-zA-Z0-9]*\)?.*$#\1#')
+DB_NAME=$DB_NAME envsubst < config/monstache-template.toml > config/monstache.toml
+
+MONSTACHE_ES_URLS=$ES_ENDPOINT MONSTACHE_MONGO_URL=$TARGET_DATABASE_URI monstache -f config/monstache.toml
