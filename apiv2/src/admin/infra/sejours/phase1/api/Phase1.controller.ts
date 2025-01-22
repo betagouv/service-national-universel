@@ -5,7 +5,7 @@ import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
-import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/PlanDeTransport/SupprimerPlanDeTransport";
+import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 
 const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION];

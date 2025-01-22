@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { CohortDto, HttpError, translate, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { Button, Modal } from "@snu/ds/admin";
+import { Button, Modal, Tooltip } from "@snu/ds/admin";
 
 import { getYoungCountByCohort } from "@/services/young.service";
 import { Link } from "react-router-dom";
@@ -41,7 +41,7 @@ export default function DeletePDTButton({ cohort, disabled, onChange, className 
     queryFn: async () =>
       getYoungCountByCohort(cohort.name, {
         status: [YOUNG_STATUS.VALIDATED],
-        statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE],
+        statusPhase1: [YOUNG_STATUS_PHASE1.AFFECTED],
       }),
   });
 
@@ -70,13 +70,18 @@ export default function DeletePDTButton({ cohort, disabled, onChange, className 
               </p>
             </div>
             <div className="flex justify-center items-center gap-8 mb-6">
-              <div className="w-fit font-bold">{youngAffectedCount} jeune(s) déjà affecté(s)</div>
+              <div className="w-fit font-bold">{youngAffectedCount} jeunes déjà affectés</div>
               <div className="flex justify-center items-center gap-2.5">
                 <Link to={`/volontaire?cohort=${encodeURIComponent(cohort.name)}&statusPhase1=${YOUNG_STATUS_PHASE1.AFFECTED}&page=1`} target="_blank" className="w-full">
                   <Button className="w-full max-w-none" type="tertiary" title="Voir les volontaires"></Button>
                 </Link>
               </div>
             </div>
+            {youngAffectedCount > 0 && (
+              <p className="text-red-600 text-sm mb-8">
+                La suppression du PDT va désaffecter les jeunes associés, assurez vous d'exporter les jeunes au préalable afin de pouvoir les réaffecter manuellement si nécessaire.
+              </p>
+            )}
             <p className="text-sm mb-2">
               Veuillez indiquer "<i>{confirmText}</i>" dans le champ ci-desous pour confirmer
             </p>
