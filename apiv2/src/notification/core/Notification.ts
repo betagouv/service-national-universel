@@ -2,6 +2,12 @@ export interface EmailParams {
     from?: string;
     to: { email: string; name: string }[];
     subject?: string;
+    attachments?: Attachment[];
+}
+
+export interface Attachment {
+    fileName: string;
+    filePath: string;
 }
 
 export interface VerifierClasseEmailAdminCleParams extends EmailParams {
@@ -43,4 +49,5 @@ export enum EmailTemplate {
     SUPPRIMER_REFERENT_CLASSE = "2349",
     SUPPRIMER_CLASSE_ENGAGEE = "2331",
     NOUVELLE_CLASSE_ENGAGEE = "2350",
+    IMPORT_REFERENTIEL_GENERIQUE = "2324",
 }
