@@ -26,6 +26,8 @@ async function main() {
 
   const args = [
     "build",
+    "--progress",
+    "plain",
     "--label",
     `created_at=${new Date().toISOString()}`,
     "-t",
