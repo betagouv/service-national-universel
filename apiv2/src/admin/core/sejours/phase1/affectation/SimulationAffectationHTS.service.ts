@@ -161,6 +161,7 @@ export class SimulationAffectationHTSService {
             (acc, line, index) => {
                 const commentaire = line["Commentaire interne sur l'enregistrement"];
                 const pdrMatricule = line["Code point de rassemblement initial"];
+                const codeRoute = line["Code court de Route"];
                 const centreMatricule = line["Désignation du centre"];
                 // ex: DEPARTEMENT 93
                 const numDepartement = commentaire?.match(/DEPARTEMENT ([0-9]{2})/)?.[1];
@@ -172,6 +173,9 @@ export class SimulationAffectationHTSService {
                             FunctionalExceptionCode.NOT_FOUND,
                             `Departement "${numDepartement}" introuvable`,
                         );
+                    }
+                    if (!codeRoute) {
+                        throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, `Code route ${index}`);
                     }
                     if (!pdrMatricule) {
                         throw new FunctionalException(
@@ -188,63 +192,71 @@ export class SimulationAffectationHTSService {
                     if (!acc[departementNom]) {
                         acc[departementNom] = [];
                     }
-                    acc[departementNom].push({ pdrMatricule, centreMatricule });
+                    acc[departementNom].push({ pdrMatricule, centreMatricule, codeRoute });
                 }
                 return acc;
             },
-            {} as Record<string, { pdrMatricule: string; centreMatricule: string }[]>,
+            {} as Record<string, { pdrMatricule: string; centreMatricule: string; codeRoute: string }[]>,
         );
 
         let errors: string[] = [];
-        const changementDepartement: Array<ChangementDepartement> = [];
+        const changementDepartements: Array<ChangementDepartement> = [];
         for (const departement of Object.keys(changementDepartementPdrs)) {
-            const pdrCentreLignesList = changementDepartementPdrs[departement].map((pdrCentre) => {
-                const pdr = pdrList.find((pdr) => pdr.matricule === pdrCentre.pdrMatricule);
-                if (!pdr) {
-                    this.logger.error(`Point de rassemblement introuvable pour le matricule ${pdrCentre.pdrMatricule}`);
-                    return { error: `PDR introuvable ${pdrCentre.pdrMatricule}` };
+            const routesList = changementDepartementPdrs[departement].map((route) => {
+                const ligne = ligneDeBusList.find((ligne) => ligne.codeCourtDeRoute === route.codeRoute);
+                if (!ligne) {
+                    this.logger.error(`Aucune ligne de bus trouvée pour le code route ${route.codeRoute}`);
+                    return {
+                        error: `Aucune ligne de bus pour le code route ${route.codeRoute}`,
+                    };
                 }
-                const centre = centreList.find((centre) => centre.matricule === pdrCentre.centreMatricule);
+                const centre = centreList.find((centre) => centre.matricule === route.centreMatricule);
                 if (!centre) {
-                    this.logger.error(`Centre introuvable pour le matricule ${pdrCentre.centreMatricule}`);
-                    return { error: `Centre introuvable ${pdrCentre.centreMatricule}` };
+                    this.logger.error(`Centre introuvable pour le matricule ${route.centreMatricule}`);
+                    return { error: `Centre introuvable pour le matricule ${route.centreMatricule}` };
                 }
-                const lignes = ligneDeBusList.filter(
-                    (ligne) => ligne.centreId === centre.id && ligne.pointDeRassemblementIds.includes(pdr.id),
-                );
-                if (lignes.length === 0) {
+                const pdr = pdrList.find((pdr) => pdr.matricule === route.pdrMatricule);
+                if (!pdr) {
+                    this.logger.error(`Point de rassemblement introuvable pour le matricule ${route.pdrMatricule}`);
+                    return { error: `Point de rassemblement introuvable pour le matricule ${route.pdrMatricule}` };
+                }
+                if (ligne.centreId !== centre.id || !ligne.pointDeRassemblementIds.includes(pdr.id)) {
                     this.logger.error(
-                        `Aucune ligne de bus trouvée pour le pdr ${pdr.matricule} et le centre ${centre.matricule}`,
+                        `Ligne de bus ${ligne.id} incohérente: ${ligne.centreId}!=${centre.id} || ${
+                            pdr.id
+                        }!=${ligne.pointDeRassemblementIds.join(",")}`,
                     );
-                    return { error: `Aucune ligne de bus pour PDR ${pdr.matricule} et centre ${centre.matricule}` };
+                    return {
+                        error: `Ligne de bus incohérente pour le code ${route.codeRoute}, pdr ${pdr.matricule} et le centre ${centre.matricule}: ${ligne.id}`,
+                    };
                 }
                 return {
                     pdrId: pdr.id,
                     departement: pdr.departement,
                     centreId: centre.id,
-                    ligneIdList: lignes.map((ligne) => ligne.id),
+                    ligneIdList: [ligne.id],
                 };
             });
-            const errorsDepartement = pdrCentreLignesList.reduce((acc: string[], pdrCentreLigne) => {
-                if (pdrCentreLigne.error) {
-                    acc.push(pdrCentreLigne.error);
+            const errorsDepartement = routesList.reduce((acc: string[], currRoute) => {
+                if (currRoute.error) {
+                    acc.push(currRoute.error);
                 }
                 return acc;
             }, []);
             if (errorsDepartement.length > 0) {
-                errors = [...errors, `Departement ${departement}: ${errorsDepartement.join(", ")}`];
+                errors = [...errors, `[${departement}] ${errorsDepartement.join(", ")}`];
             }
 
             this.logger.log(
-                `Changement de département pour ${departement}, destination: ${JSON.stringify(pdrCentreLignesList)}`,
+                `Changement de département pour ${departement}, destination: ${JSON.stringify(routesList)}`,
             );
-            changementDepartement.push({ origine: departement, destination: pdrCentreLignesList as any });
-        }
-        if (errors.length > 0) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, errors.join("; "));
+            changementDepartements.push({
+                origine: departement,
+                destination: routesList.filter((currRoute) => !currRoute.error) as any,
+            });
         }
 
-        return changementDepartement;
+        return { changementDepartements, changementDepartementsErreurs: errors };
     }
 
     computeRatioRepartition(jeunesList: JeuneModel[]): RatioRepartition {
@@ -543,7 +555,7 @@ export class SimulationAffectationHTSService {
     ): DistributionJeunesParDepartement {
         // on recupere les departements, comme on veut boucler sur les departements, on enleve les doublons
         const departementList = [
-            ...new Set([...jeunesList.map((jeune) => jeune.departement), ...pdrList.map((pdr) => pdr.departement)]),
+            ...new Set([...jeunesList.map((jeune) => jeune.departement!), ...pdrList.map((pdr) => pdr.departement)]),
         ];
 
         const distributionJeunesDepartement: DistributionJeunesParDepartement = {
@@ -812,7 +824,7 @@ export class SimulationAffectationHTSService {
         centreList: CentreModel[],
         sejourList: SejourModel[],
         regionsConcerneeList: string[],
-        changementDepartements: ChangementDepartement[],
+        distributionJeunesDepartement: DistributionJeunesParDepartement,
     ): {
         jeunes: {
             "Ligne Theorique": string;
@@ -847,48 +859,34 @@ export class SimulationAffectationHTSService {
             let isProblemePlaceCentre = false;
             let isProblemePlaceBus = false;
 
-            // on récupère les pdr du département du jeune
-            const pdrSameDepartementList = pdrList
-                .filter((pdr) => pdr.departement === departement)
-                .map((pdr) => pdr.id);
-            // on ajoute les PDR de changement de zone
-            const pdrOtherDepartementList = changementDepartements.reduce((acc, changement) => {
-                if (changement.origine === departement) {
-                    changement.destination.forEach((dest) => {
-                        acc = [...new Set([...acc, dest.pdrId])];
-                    });
+            const departementIndex = distributionJeunesDepartement.departementList.indexOf(departement);
+            const ligneDeBusIdList = distributionJeunesDepartement.ligneIdListParDepartement[departementIndex];
+            const centreIdListParLigne = distributionJeunesDepartement.centreIdListParLigne[departementIndex];
+
+            const lignesThorique = ligneDeBusList.filter((ligne) => ligneDeBusIdList?.includes(ligne.id));
+            const centresTheorique = centreList.filter((centre) => centreIdListParLigne?.includes(centre.id));
+
+            for (const currentLigne of lignesThorique) {
+                // on récupère les infos du bus si on ne les a pas déjà
+                if (!busIdList.includes(currentLigne.numeroLigne)) {
+                    const nbPlaceDispoLigne = currentLigne.capaciteJeunes - currentLigne.placesOccupeesJeunes;
+                    busIdList.push(currentLigne.numeroLigne);
+                    placesLigneList.push(nbPlaceDispoLigne);
+                    resumeJeune += `Ligne : ${currentLigne.numeroLigne} (${currentLigne?.placesOccupeesJeunes}/${currentLigne?.capaciteJeunes})`;
                 }
-                return acc;
-            }, [] as string[]);
 
-            const pdrIdDepartementList = [...pdrSameDepartementList, ...pdrOtherDepartementList];
-
-            for (const pdrId of pdrIdDepartementList) {
-                // on récupère les lignes de bus associées au pdr
-                const pdrLigneList = ligneDeBusList.filter((ligne) => ligne.pointDeRassemblementIds.includes(pdrId));
-
-                for (const currentLigne of pdrLigneList) {
-                    // on récupère les infos du bus si on ne les a pas déjà
-                    if (!busIdList.includes(currentLigne.numeroLigne)) {
-                        const nbPlaceDispoLigne = currentLigne.capaciteJeunes - currentLigne.placesOccupeesJeunes;
-                        busIdList.push(currentLigne.numeroLigne);
-                        placesLigneList.push(nbPlaceDispoLigne);
-                        resumeJeune += `Ligne : ${currentLigne.numeroLigne} (${currentLigne?.placesOccupeesJeunes}/${currentLigne?.capaciteJeunes})`;
-                    }
-
-                    // on récupère les centres associés à la ligne de bus
-                    const centreListLigne = centreList.filter((centre) => centre.id === currentLigne.centreId);
-                    for (const centre of centreListLigne) {
-                        // on récupère les infos du centre si on ne les a pas déjà
-                        if (!centreNameList.includes(centre.nom || "")) {
-                            const sejour = sejourList.find((sejour) => sejour.centreId === centre.id);
-                            const placesPrises = (sejour?.placesTotal || 0) - (sejour?.placesRestantes || 0);
-                            centreNameList.push(centre.nom || "");
-                            placesCentreList.push(Number(sejour?.placesRestantes));
-                            resumeJeune += ` - Centre : ${centre.nom} (${placesPrises}/${sejour?.placesTotal}).\n`;
-                        }
-                    }
+                // on récupère les centres associés à la ligne de bus
+                const centre = centresTheorique.find((centre) => centre.id === currentLigne.centreId);
+                // on récupère les infos du centre si on ne les a pas déjà
+                if (centre && !centreNameList.includes(centre.nom || "")) {
+                    const sejour = sejourList.find((sejour) => sejour.centreId === centre.id);
+                    const placesPrises = (sejour?.placesTotal || 0) - (sejour?.placesRestantes || 0);
+                    centreNameList.push(centre.nom || "");
+                    placesCentreList.push(Number(sejour?.placesRestantes));
+                    resumeJeune += ` - Centre : ${centre.nom} (${placesPrises}/${sejour?.placesTotal}).`;
                 }
+
+                resumeJeune += "\n";
             }
 
             if (busIdList.length === 0 && centreNameList.length === 0) {
@@ -951,7 +949,9 @@ export class SimulationAffectationHTSService {
         pdrList: PointDeRassemblementModel[],
         jeunesAvantAffectationList: JeuneModel[],
         jeuneIntraDepartementList: JeuneAffectationModel[],
+        distributionJeunesDepartement: DistributionJeunesParDepartement,
         changementDepartements: ChangementDepartement[],
+        changementDepartementsErreur: string[],
         analytics: Analytics,
     ): RapportData {
         const jeunesAffectedList = jeunesList.filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
@@ -1022,7 +1022,7 @@ export class SimulationAffectationHTSService {
             centreList,
             sejourList,
             regionsConcerneeList,
-            changementDepartements,
+            distributionJeunesDepartement,
         );
 
         jeuneAttenteAffectationList = jeuneAttenteAffectationList.map((jeune, index) => ({
@@ -1151,7 +1151,8 @@ export class SimulationAffectationHTSService {
                                 .map(formatDepartement)
                                 .join("-")}`,
                     )
-                    .join("; "),
+                    .join("; \n"),
+            "Erreurs changement de département : " + changementDepartementsErreur.join(".\n"),
         ].map((ligne) => ({
             "": ligne,
         }));

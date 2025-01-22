@@ -2,6 +2,7 @@
 export type LigneDeBusModel = {
     id: string;
     numeroLigne: string;
+    codeCourtDeRoute?: string;
     capaciteJeunes: number;
     capaciteTotal: number;
     capaciteAccompagnateurs: any;

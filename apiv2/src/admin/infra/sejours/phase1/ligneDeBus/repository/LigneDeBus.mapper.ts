@@ -10,6 +10,7 @@ export class LigneDeBusMapper {
     static toModel(ligneDeBusDocument: LigneDeBusDocument): LigneDeBusModel {
         return {
             id: ligneDeBusDocument._id.toString(),
+            codeCourtDeRoute: ligneDeBusDocument.codeCourtDeRoute,
             pointDeRassemblementIds: ligneDeBusDocument.meetingPointsIds,
             capaciteJeunes: ligneDeBusDocument.youngCapacity,
             placesOccupeesJeunes: ligneDeBusDocument.youngSeatsTaken,
@@ -34,6 +35,7 @@ export class LigneDeBusMapper {
     static toEntity(ligneDeBusModel: LigneDeBusModel): Omit<LigneBusType, "createdAt" | "updatedAt" | "team"> {
         return {
             _id: ligneDeBusModel.id,
+            codeCourtDeRoute: ligneDeBusModel.codeCourtDeRoute,
             meetingPointsIds: ligneDeBusModel.pointDeRassemblementIds,
             youngCapacity: ligneDeBusModel.capaciteJeunes,
             youngSeatsTaken: ligneDeBusModel.placesOccupeesJeunes,
