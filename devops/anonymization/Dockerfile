@@ -12,11 +12,6 @@ COPY devops/anonymization/ ./
 COPY api/src/anonymization/ /build/api/src/anonymization/
 COPY devops/elastic-search/config/index_whitelist.txt ./config/index_whitelist.txt
 
-RUN cat >> ./config/monstache-template.toml <<EOF
-disable-change-events = true
-exit-after-direct-reads = true
-EOF
-
 RUN --mount=type=bind,src=devops/elastic-search-datariver/collections.csv,target=/tmp/collections.csv \
     bash generate_monstache_config.sh '$DB_NAME' /tmp/collections.csv > ./config/monstache-template.toml
 
