@@ -10,11 +10,17 @@ import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gatew
 import { SessionRepository } from "../session/repository/mongo/SessionMongo.repository";
 import { PlanDeTransportGateway } from "@admin/core/sejours/phase1/PlanDeTransport/PlanDeTransport.gateway";
 import { PlanDeTransportRepository } from "../planDeTransport/repository/mongo/PlanDeTransportMongo.repository";
+import { SegmentDeLigneGateway } from "@admin/core/sejours/phase1/segmentDeLigne/SegmentDeLigne.gateway";
+import { SegmentDeLigneRepository } from "../segmentDeLigne/repository/mongo/SegmentDeLigneMongo.repository";
+import { DemandeModificationLigneDeBusGateway } from "@admin/core/sejours/phase1/demandeModificationLigneDeBus/DemandeModificationLigneDeBus.gateway";
+import { DemandeModificationLigneDeBusRepository } from "../demandeModificationLigneDeBus/repository/mongo/DemandeModificationLigneDeBusMongo.repository";
 
 export const gatewayProviders = [
     { provide: PlanDeTransportGateway, useClass: PlanDeTransportRepository },
     { provide: LigneDeBusGateway, useClass: LigneDeBusRepository },
     { provide: PointDeRassemblementGateway, useClass: PointDeRassemblementRepository },
+    { provide: SegmentDeLigneGateway, useClass: SegmentDeLigneRepository },
+    { provide: DemandeModificationLigneDeBusGateway, useClass: DemandeModificationLigneDeBusRepository },
     { provide: SejourGateway, useClass: SejourRepository },
     { provide: CentreGateway, useClass: CentreRepository },
     { provide: SessionGateway, useClass: SessionRepository },
