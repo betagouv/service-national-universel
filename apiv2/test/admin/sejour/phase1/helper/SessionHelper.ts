@@ -6,7 +6,7 @@ import { COHORT_STATUS, COHORT_TYPE, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
 
-import { getAdminTestModuleRef } from "../../setUpAdminTest";
+import { getAdminTestModuleRef } from "../../../setUpAdminTest";
 
 export const createSession = async (session?: Partial<SessionModel>) => {
     const adminTestModule = getAdminTestModuleRef();

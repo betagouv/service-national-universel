@@ -1,4 +1,4 @@
-import { PlanDeTransportModel } from "./PlanDeTransport.model";
+import { CreatePlanDeTransportModel, PlanDeTransportModel } from "./PlanDeTransport.model";
 
 export interface PlanDeTransportGateway {
     findById(id: string): Promise<PlanDeTransportModel>;
@@ -8,6 +8,7 @@ export interface PlanDeTransportGateway {
     update(planDeTransport: PlanDeTransportModel): Promise<PlanDeTransportModel>;
     bulkUpdate(planDeTransports: PlanDeTransportModel[]): Promise<number>;
     delete(planDeTransport: PlanDeTransportModel): Promise<void>;
+    create(planDeTransport: CreatePlanDeTransportModel): Promise<PlanDeTransportModel>;
 }
 
 export const PlanDeTransportGateway = Symbol("PlanDeTransportGateway");

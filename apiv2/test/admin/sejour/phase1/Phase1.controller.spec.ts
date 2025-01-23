@@ -8,7 +8,12 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 
 import { setupAdminTest } from "../../setUpAdminTest";
-import { createSession } from "./SessionHelper";
+import { createSession } from "./helper/SessionHelper";
+import { createLigneDeBus } from "./helper/LigneDeBusHelper";
+import { createSejour } from "./helper/SejourHelper";
+import { createPointDeRassemblement } from "./helper/PointDeRassemblementHelper";
+import { createPlanDeTransport } from "./helper/PlanDeTransportHelper";
+import { ClsService } from "nestjs-cls";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -16,6 +21,7 @@ jest.mock("@nestjs-cls/transactional", () => ({
 
 describe("Phase1Controller", () => {
     let app: INestApplication;
+    let cls: ClsService;
     let phase1Controller: Phase1Controller;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
@@ -33,9 +39,11 @@ describe("Phase1Controller", () => {
             };
             next();
         });
+
         app.use(mockedAddUserToRequestMiddleware);
 
         taskGateway = module.get<TaskGateway>(TaskGateway);
+        cls = module.get<ClsService>(ClsService);
         await app.init();
         const tasks = await taskGateway.findAll();
         taskGateway.deleteMany(tasks.map((task) => task.id));
@@ -48,7 +56,27 @@ describe("Phase1Controller", () => {
     describe("DELETE /phase1/:id/plan-de-transport", () => {
         it("should return 200", async () => {
             const session = await createSession();
-            const response = await request(app.getHttpServer()).delete(`/phase1/${session.id}/plan-de-transport`);
+            console.log("createPointDeRassemblement");
+            const pdr = await createPointDeRassemblement();
+            console.log("createSejour");
+            await createSejour({ sessionId: session.id });
+            console.log("createLigneDeBus");
+            await createLigneDeBus({
+                sessionNom: session.nom,
+                sessionId: session.id,
+                pointDeRassemblementIds: [pdr.id],
+            });
+            await createPlanDeTransport({
+                sessionNom: session.nom,
+                sessionId: session.id,
+            });
+
+            console.log("api");
+            const response = await cls.runWith(
+                // @ts-ignore
+                { user: null },
+                () => request(app.getHttpServer()).delete(`/phase1/${session.id}/plan-de-transport`),
+            );
 
             expect(response.status).toBe(200);
         });
