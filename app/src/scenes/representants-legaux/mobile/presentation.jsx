@@ -48,7 +48,6 @@ export default function Presentation({ step, parentId }) {
 
   const title = parentId === 2 ? `${young.firstName} s'est inscrit(e) au SNU !` : `${young.firstName} souhaite s'inscrire au SNU !`;
 
-  console.log(cohort);
   function onSubmit() {
     plausibleEvent("Phase0/CTA representant legal - continuer etape 1");
     const route = parentId === 2 ? "verification-parent2" : "verification";
@@ -60,8 +59,6 @@ export default function Presentation({ step, parentId }) {
         <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
       </DSFRContainer>
     );
-
-  console.log(cohort?.instructionEndDate, formattedDate);
 
   if (cohort?.instructionEndDate < formattedDate)
     return (
