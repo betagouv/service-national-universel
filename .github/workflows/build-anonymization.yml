@@ -1,0 +1,42 @@
+name: Build anonymization image
+
+on:
+  push:
+    branches:
+      - production
+      - full-sync-es-no-ci # TODO : REMOVE
+    paths:
+      - 'api/src/anonymization/**'
+      - 'devops/anonymization/**'
+      - 'devops/elastic-search/config/index_whitelist.txt'
+      - 'devops/elastic-search-datariver/collections.csv'
+      - '.github/workflows/build-anonymization.yml'
+
+env:
+  PROD_REGISTRY: rg.fr-par.scw.cloud/snu-production
+  APP_NAME: anonymization
+
+jobs:
+  build:
+    needs: [prepare, test]
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Login to Docker Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+          registry: ${{ env.PROD_REGISTRY }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: devops/anonymization/Dockerfile
+          tags:
+            - '${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:latest'
+            - '${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:${{ github.sha }}'
