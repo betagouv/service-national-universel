@@ -6,6 +6,7 @@ export interface ClasseGateway {
     update(classe: ClasseModel): Promise<ClasseModel>;
     create(classe: CreateClasseModel): Promise<ClasseModel>;
     findByReferentId(referentId: string): Promise<ClasseModel[]>;
+    findByLigneDeBusIds(ids: string[]): Promise<ClasseModel[]>;
 }
 
 export const ClasseGateway = Symbol("ClasseGateway");

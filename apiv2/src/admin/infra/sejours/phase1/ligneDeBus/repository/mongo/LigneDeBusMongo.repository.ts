@@ -99,4 +99,12 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
 
         return updateLignes.modifiedCount;
     }
+
+    async delete(ligneDeBus: LigneDeBusModel): Promise<void> {
+        const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
+        if (!retrievedLigneDeBus) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        await retrievedLigneDeBus.deleteOne();
+    }
 }
