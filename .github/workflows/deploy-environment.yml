@@ -37,12 +37,12 @@ jobs:
         id: config
         run: |
           # ENV_NAME
-          env_name=$(devops/scripts/node get-environment-name.js ${{ env.BRANCH_NAME }})
+          env_name=$(node devops/scripts/get-environment-name.js ${{ env.BRANCH_NAME }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
           git switch ${{ env.BRANCH_NAME }}
-          
+
           # BUILD MATRIX
           echo "[]" \
           | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
