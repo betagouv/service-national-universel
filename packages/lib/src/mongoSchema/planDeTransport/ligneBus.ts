@@ -75,6 +75,13 @@ export const LigneBusSchema = {
     },
   },
 
+  codeCourtDeRoute: {
+    type: String,
+    documentation: {
+      description: "code court de la route (SI SNU)",
+    },
+  },
+
   busId: {
     type: String,
     required: true,
