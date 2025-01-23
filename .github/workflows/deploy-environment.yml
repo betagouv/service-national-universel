@@ -14,55 +14,35 @@ concurrency:
 
 jobs:
   prepare:
-    # if: github.ref_name != 'production' && github.ref_name != 'main' && contains(github.event.pull_request.labels.*.name, 'deploy')
+    if: |
+      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
+      (github.ref_name != 'production' && github.ref_name != 'main')
     runs-on: ubuntu-latest
     outputs:
-      env_name: ${{ steps.env_name.outputs.env_name }}
+      env_name: ${{ steps.config.outputs.env_name }}
       build_matrix: ${{ steps.config.outputs.build }}
       deploy_matrix: ${{ steps.config.outputs.deploy }}
 
     steps:
       - uses: actions/checkout@v4
-        # with:
-        #   ref: ${{ github.ref_name }}
-        #   fetch-depth: 0
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20.17"
 
-      - name: Get environment name
-        id: env_name
-        working-directory: devops/scripts
+      - name: Get environment configuration
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
+        id: config
         run: |
-          echo "github.sha=${{ github.sha }}"
-          echo "github.ref=${{ github.ref }}"
-          echo "github.ref_name=${{ github.ref_name }}"
-          echo "github.base_ref=${{ github.base_ref }}"
-          echo "github.head_ref=${{ github.head_ref }}"
-          echo "github.event_name=${{ github.event_name }}"
-          echo "github.event_path=${{ github.event_path }}"
-
-          echo "github.event.ref=${{ github.event.ref }}"
-          echo "github.event.base_ref=${{ github.event.base_ref }}"
-          echo "github.event.after=${{ github.event.after }}"
-          echo "github.event.before=${{ github.event.before }}"
-
-          echo "github.event.pull_request.head.ref=${{ github.event.pull_request.head.ref }}"
-          echo "github.event.pull_request.head.sha=${{ github.event.pull_request.head.sha }}"
-          echo "github.event.pull_request.head.label=${{ github.event.pull_request.head.label }}"
-          echo "github.event.pull_request.base.ref=${{ github.event.pull_request.base.ref }}"
-          echo "github.event.pull_request.base.sha=${{ github.event.pull_request.base.sha }}"
-          echo "github.event.pull_request.base.label=${{ github.event.pull_request.base.label }}"
-
-          env_name=$(node get-environment-name.js ${{ github.ref_name }})
+          # ENV_NAME
+          env_name=$(devops/scripts/node get-environment-name.js ${{ env.BRANCH_NAME }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
-      - name: Get matrices configuration
-        id: config
-        run: |
+          git switch ${{ env.BRANCH_NAME }}
+          
           # BUILD MATRIX
           echo "[]" \
           | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
@@ -118,8 +98,6 @@ jobs:
 
   #   steps:
   #     - uses: actions/checkout@v4
-  #       # with:
-  #       #   ref: ${{ github.ref_name }}
 
   #     - name: Login to Docker Container Registry
   #       uses: docker/login-action@v2
@@ -150,8 +128,6 @@ jobs:
 
   #   steps:
   #     - uses: actions/checkout@v4
-  #       # with:
-  #       #   ref: ${{ github.ref_name }}
 
   #     - name: Use Node.js
   #       uses: actions/setup-node@v4
