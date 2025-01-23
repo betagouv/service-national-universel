@@ -2,6 +2,9 @@ name: Deploy environment
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - manual-deploy-env-no-ci
   pull_request:
     types: [ labeled, synchronize, opened, reopened ]
 
@@ -11,7 +14,7 @@ concurrency:
 
 jobs:
   prepare:
-    if: github.ref_name != 'production' && github.ref_name != 'main' && contains(github.event.pull_request.labels.*.name, 'deploy')
+    # if: github.ref_name != 'production' && github.ref_name != 'main' && contains(github.event.pull_request.labels.*.name, 'deploy')
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.env_name.outputs.env_name }}
@@ -33,7 +36,25 @@ jobs:
         id: env_name
         working-directory: devops/scripts
         run: |
+          echo "github.sha=${{ github.sha }}"
+          echo "github.ref=${{ github.ref }}"
           echo "github.ref_name=${{ github.ref_name }}"
+          echo "github.base_ref=${{ github.base_ref }}"
+          echo "github.head_ref=${{ github.head_ref }}"
+          echo "github.event_name=${{ github.event_name }}"
+          echo "github.event_path=${{ github.event_path }}"
+
+          echo "github.event.ref=${{ github.event.ref }}"
+          echo "github.event.base_ref=${{ github.event.base_ref }}"
+          echo "github.event.after=${{ github.event.after }}"
+          echo "github.event.before=${{ github.event.before }}"
+
+          echo "github.event.pull_request.head.ref=${{ github.event.pull_request.head.ref }}"
+          echo "github.event.pull_request.head.sha=${{ github.event.pull_request.head.sha }}"
+          echo "github.event.pull_request.head.label=${{ github.event.pull_request.head.label }}"
+          echo "github.event.pull_request.base.ref=${{ github.event.pull_request.base.ref }}"
+          echo "github.event.pull_request.base.sha=${{ github.event.pull_request.base.sha }}"
+          echo "github.event.pull_request.base.label=${{ github.event.pull_request.base.label }}"
 
           env_name=$(node get-environment-name.js ${{ github.ref_name }})
           echo "env_name: $env_name"
@@ -60,87 +81,87 @@ jobs:
           cat deploy.json
           echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
 
-  create_environment:
-    needs: prepare
-    runs-on: ubuntu-latest
-    outputs:
-      registry: ${{ steps.registry.outputs.registry }}
-    steps:
-      - uses: actions/checkout@v4
-        # with:
-        #   ref: ${{ github.ref_name }}
+  # create_environment:
+  #   needs: prepare
+  #   runs-on: ubuntu-latest
+  #   outputs:
+  #     registry: ${{ steps.registry.outputs.registry }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       # with:
+  #       #   ref: ${{ github.ref_name }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Create environment
-        id: registry
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node create-environment.js ${{ needs.prepare.outputs.env_name }}
+  #     - name: Create environment
+  #       id: registry
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node create-environment.js ${{ needs.prepare.outputs.env_name }}
 
-          registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
-          echo "registry: $registry"
-          echo "registry=$registry" >> $GITHUB_OUTPUT
+  #         registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
+  #         echo "registry: $registry"
+  #         echo "registry=$registry" >> $GITHUB_OUTPUT
 
-  build:
-    needs: [prepare, create_environment]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
+  # build:
+  #   needs: [prepare, create_environment]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
-    steps:
-      - uses: actions/checkout@v4
-        # with:
-        #   ref: ${{ github.ref_name }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       # with:
+  #       #   ref: ${{ github.ref_name }}
 
-      - name: Login to Docker Container Registry
-        uses: docker/login-action@v2
-        with:
-          username: nologin
-          password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-          registry: ${{ needs.create_environment.outputs.registry }}
+  #     - name: Login to Docker Container Registry
+  #       uses: docker/login-action@v2
+  #       with:
+  #         username: nologin
+  #         password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #         registry: ${{ needs.create_environment.outputs.registry }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Build image
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+  #     - name: Build image
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
-  deploy:
-    needs: [prepare, build]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
+  # deploy:
+  #   needs: [prepare, build]
+  #   runs-on: ubuntu-latest
+  #   strategy:
+  #     matrix:
+  #       app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
 
-    steps:
-      - uses: actions/checkout@v4
-        # with:
-        #   ref: ${{ github.ref_name }}
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #       # with:
+  #       #   ref: ${{ github.ref_name }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+  #     - name: Use Node.js
+  #       uses: actions/setup-node@v4
+  #       with:
+  #         node-version: "20.17"
 
-      - name: Deploy image on Scaleway
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
+  #     - name: Deploy image on Scaleway
+  #       working-directory: devops/scripts
+  #       env:
+  #         SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+  #         SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+  #       run: |
+  #         node deploy-scaleway.js ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
