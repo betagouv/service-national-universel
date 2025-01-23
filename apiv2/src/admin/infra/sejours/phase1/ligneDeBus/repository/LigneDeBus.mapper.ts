@@ -43,7 +43,7 @@ export class LigneDeBusMapper {
             busId: ligneDeBusModel.numeroLigne,
             cohort: ligneDeBusModel.sessionNom!,
             cohortId: ligneDeBusModel.sessionId,
-            sessionId: ligneDeBusModel.sejourId!,
+            sessionId: ligneDeBusModel.sejourId,
             totalCapacity: ligneDeBusModel.capaciteTotal,
             followerCapacity: ligneDeBusModel.capaciteAccompagnateurs,
             travelTime: ligneDeBusModel.dureeTrajet,

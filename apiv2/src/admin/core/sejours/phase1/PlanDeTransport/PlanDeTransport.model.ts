@@ -27,3 +27,5 @@ export type PlanDeTransportModel = {
     tempsRetardDepart: string;
     tempsRetardRetour: string;
 };
+
+export type CreatePlanDeTransportModel = Omit<PlanDeTransportModel, "id" | "tempsRetardDepart" | "tempsRetardRetour">;
