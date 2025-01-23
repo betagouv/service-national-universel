@@ -14,6 +14,7 @@ import { shouldDisplayDateByCohortName } from "snu-lib";
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
   const { young, token, cohort } = useContext(RepresentantsLegauxContext);
+  const isCLE = young?.source === "CLE";
   if (!young) return <Loader />;
 
   if (isReturningParent(young, parentId)) {
@@ -40,7 +41,7 @@ export default function Presentation({ step, parentId }) {
         <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
       </DSFRContainer>
     );
-  if (new Date(cohort?.inscriptionEndDate) < new Date())
+  if (new Date(cohort?.inscriptionEndDate) < new Date() && !isCLE)
     return (
       <DSFRContainer title={"Les inscriptions pour le séjour sont clôturées"}>
         <p>
