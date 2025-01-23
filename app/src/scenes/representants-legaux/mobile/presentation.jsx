@@ -10,29 +10,10 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import plausibleEvent from "@/services/plausible";
 import { SignupButtons } from "@snu/ds/dsfr";
 import { shouldDisplayDateByCohortName } from "snu-lib";
-import useCohort from "@/services/useCohort";
-import { YOUNG_STATUS } from "snu-lib";
 
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
-  const { cohortDateString } = useCohort();
   const { young, token, cohort } = useContext(RepresentantsLegauxContext);
-
-  const isCLE = young?.source === "CLE";
-  const formattedDate = new Date().toLocaleDateString("fr-FR", {
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  });
-  const statusWording = (young, isCLE) => {
-    if (isCLE) {
-      if ([YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
-        return "Votre inscription n'a pas été complétée à temps";
-      }
-    } else if (!isCLE && [YOUNG_STATUS.REINSCRIPTION, YOUNG_STATUS.IN_PROGRESS].includes(young.status)) {
-      return "Vous n'avez pas complété le dossier d'inscription à temps";
-    }
-  };
   if (!young) return <Loader />;
 
   if (isReturningParent(young, parentId)) {
@@ -59,18 +40,14 @@ export default function Presentation({ step, parentId }) {
         <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
       </DSFRContainer>
     );
-
-  if (cohort?.instructionEndDate < formattedDate)
+  if (new Date(cohort?.inscriptionEndDate) < new Date())
     return (
-      <DSFRContainer title={statusWording(young, isCLE)}>
-        {!isCLE ? (
-          <p>Les inscriptions pour le séjour {cohortDateString} sont clôturées. Votre enfant ne pourra donc pas participer au séjour.</p>
-        ) : (
-          <p>Les inscriptions dans le cadre des classes engagées ont été clôturées.</p>
-        )}
+      <DSFRContainer title={"Les inscriptions pour le séjour sont clôturées"}>
         <p>
-          Si votre enfant reste éligible, <strong>il sera basculé automatiquement sur le prochain séjour</strong> ou vous pouvez en choisir un dès maintenant.
+          {" "}
+          Votre enfant ne pourra donc pas participer <strong>à ce séjour</strong>
         </p>
+        <p>Si votre enfant reste éligible, vous pouvez également choisir de le positionner dès maintenant sur un prochain séjour en vous connectant à son compte.</p>
       </DSFRContainer>
     );
   return (
