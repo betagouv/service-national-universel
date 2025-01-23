@@ -41,6 +41,7 @@ jobs:
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
+          git fetch origin ${{ env.BRANCH_NAME }}
           git switch ${{ env.BRANCH_NAME }}
 
           # BUILD MATRIX
