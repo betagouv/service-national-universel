@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - production
-      - full-sync-es-no-ci # TODO : REMOVE
     paths:
       - 'api/src/anonymization/**'
       - 'devops/anonymization/**'
