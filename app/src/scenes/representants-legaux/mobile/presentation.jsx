@@ -44,10 +44,7 @@ export default function Presentation({ step, parentId }) {
   if (new Date(cohort?.inscriptionEndDate) < new Date() && !isCLE)
     return (
       <DSFRContainer title={"Les inscriptions pour le séjour sont clôturées"}>
-        <p>
-          {" "}
-          Votre enfant ne pourra donc pas participer <strong>à ce séjour</strong>
-        </p>
+        <p> Votre enfant ne pourra donc pas participer à ce séjour</p>
         <p>Si votre enfant reste éligible, vous pouvez également choisir de le positionner dès maintenant sur un prochain séjour en vous connectant à son compte.</p>
       </DSFRContainer>
     );
