@@ -4,7 +4,7 @@ import { updateStatusPhase1 } from "../utils";
 import { capture } from "../sentry";
 import slack from "../slack";
 import { CohortModel, LigneBusModel, YoungModel } from "../models";
-import { getDepartureDate, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { getDepartureDate, YOUNG_STATUS, YOUNG_STATUS_PHASE1, DEPART_SEJOUR_MOTIFS_NOT_DONE, DepartSejourMotif } from "snu-lib";
 
 export const handler = async (): Promise<void> => {
   try {
@@ -21,18 +21,27 @@ export const handler = async (): Promise<void> => {
     for (const cohort of onGoingCohorts) {
       const cursor = await YoungModel.find({ cohortId: cohort._id, status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED }).cursor();
 
+      const autoValidationUser = {
+        firstName: `[CRON] Autovalidation de la phase 1 après ${cohort.daysToValidate} jours après le départ`,
+      };
+
       let nbYoungs = 0;
       await cursor.eachAsync(async (young) => {
         const bus = await LigneBusModel.findById(young.ligneId);
         const sessionPhase1 = await CohortModel.findById(young.sessionPhase1Id);
         const dateStart = getDepartureDate(young, sessionPhase1, cohort, { bus });
 
-        if (differenceInDays(now, dateStart) !== cohort.daysToValidate) return;
+        if (differenceInDays(now, dateStart) <= cohort.daysToValidate) {
+          const isMotifNotDone = young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as DepartSejourMotif);
+
+          if (isMotifNotDone) {
+            young.set({ statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE });
+            await young.save({ fromUser: autoValidationUser });
+          }
+        }
 
         const validationDateWithDays = addDays(new Date(dateStart), cohort.daysToValidate).toISOString();
-        const modified = await updateStatusPhase1(young, validationDateWithDays, {
-          firstName: `[CRON] Autovalidation de la phase 1 après ${cohort.daysToValidate} jours après le départ`,
-        });
+        const modified = await updateStatusPhase1(young, validationDateWithDays, autoValidationUser);
         if (modified) nbYoungs++;
       });
 
