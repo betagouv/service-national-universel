@@ -129,24 +129,17 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
 
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
-    const isCLE = await YoungModel.exists({
-      source: "CLE",
-      classeId: { $exists: true, $ne: null },
-    });
-
-    if (!isCLE) {
-      if (sessionPhase1.length === 0) {
-        contextFilters.push({ terms: { "department.keyword": user.department } });
-      } else {
-        contextFilters.push({
-          bool: {
-            should: [
-              { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-              { terms: { "department.keyword": user.department } },
-            ],
-          },
-        });
-      }
+    if (sessionPhase1.length === 0) {
+      contextFilters.push({ terms: { "department.keyword": user.department } });
+    } else {
+      contextFilters.push({
+        bool: {
+          should: [
+            { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
+            { terms: { "department.keyword": user.department } },
+          ],
+        },
+      });
     }
   }
 
