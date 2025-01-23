@@ -43,6 +43,7 @@ jobs:
 
           git fetch origin ${{ env.BRANCH_NAME }}
           git switch ${{ env.BRANCH_NAME }}
+          git log
 
           # BUILD MATRIX
           echo "[]" \
