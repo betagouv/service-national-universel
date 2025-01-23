@@ -19,13 +19,16 @@ set -e
 echo "Start anonymization"
 ./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
 
-echo "Remove elastic search indexes"
-cat config/index_whitelist.txt \
-| while read name
-do
-    echo "Deleting index $name"
-    curl -sSw "\n" -X DELETE "$ES_ENDPOINT/$name"
-done
+if [[ $DELETE_ES_INDEXES == "true" ]]
+then
+  echo "Remove elastic search indexes"
+  cat config/index_whitelist.txt \
+  | while read name
+  do
+      echo "Deleting index $name"
+      curl -sSw "\n" -X DELETE "$ES_ENDPOINT/$name"
+  done
+fi
 
 echo "Start elastic search full synchronization with monstache"
 DB_NAME=$(echo "$TARGET_DATABASE_URI" | sed 's#^.*/\([a-zA-Z0-9]*\)?.*$#\1#')
