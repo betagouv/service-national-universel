@@ -37,4 +37,4 @@ jobs:
         with:
           push: true
           file: devops/anonymization/Dockerfile
-          tags: ['${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:latest', '${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:${{ github.sha }}']
+          tags: ${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:latest,${{ env.PROD_REGISTRY }}/${{ env.anonymization }}:${{ github.sha }}
