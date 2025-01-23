@@ -43,7 +43,7 @@ jobs:
 
           git fetch --depth=0 origin ${{ env.BRANCH_NAME }}
           git switch ${{ env.BRANCH_NAME }}
-          git log -n 10
+          git log -n 100
 
           # BUILD MATRIX
           echo "[]" \
