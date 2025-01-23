@@ -10,7 +10,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
-const { StructureModel, ApplicationModel, YoungModel, SessionPhase1Model, CohesionCenterModel, MissionModel } = require("../../models");
+const { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel } = require("../../models");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 const { populateYoungExport } = require("./populate/populateYoung");
 const { addMonths } = require("date-fns");
@@ -126,7 +126,9 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
       });
     }
   }
-
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+    contextFilters.push({ terms: { "department.keyword": user.department } });
+  }
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
     if (sessionPhase1.length === 0) {
