@@ -1,11 +1,7 @@
-name: Test and deploy environment
+name: Deploy environment
 
 on:
   workflow_dispatch:
-  push:
-    branches-ignore:
-      - main
-      - production
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -13,12 +9,12 @@ concurrency:
 
 jobs:
   prepare:
+    if: github.ref_name != 'production' && github.ref_name != 'main'
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.env_name.outputs.env_name }}
       build_matrix: ${{ steps.config.outputs.build }}
       deploy_matrix: ${{ steps.config.outputs.deploy }}
-      test_matrix: ${{ steps.config.outputs.test }}
 
     steps:
       - uses: actions/checkout@v4
@@ -60,49 +56,7 @@ jobs:
           cat deploy.json
           echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
 
-          # TEST MATRIX
-          git switch main
-
-          echo "[]" \
-          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > test.json
-
-          echo "Test matrix"
-          cat test.json
-          echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
-
-  test:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Run tests
-        uses: jenseng/dynamic-uses@v1
-        if: ${{matrix.app.run_test}}
-        with:
-          uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
-
   create_environment:
-    if: |
-      !(contains(github.ref_name, '-no-ci-') ||
-        startsWith(github.ref_name, 'no-ci-') ||
-        endsWith(github.ref_name, 'no-ci') ||
-        contains(github.ref_name, '_no_ci_') ||
-        startsWith(github.ref_name, 'no_ci_') ||
-        endsWith(github.ref_name, '_no_ci') ||
-        startsWith(github.ref_name, 'renovate') ||
-        startsWith(github.ref_name, 'gh-readonly-')
-      )
     needs: prepare
     runs-on: ubuntu-latest
     outputs:
