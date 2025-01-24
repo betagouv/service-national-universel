@@ -13,6 +13,7 @@ import { LigneDeBusMapper } from "../LigneDeBus.mapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class LigneDeBusRepository implements LigneDeBusGateway {
@@ -86,7 +87,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
             lignesEntity.map((ligne) => ({
                 updateOne: {
                     filter: { _id: ligne.updated._id },
-                    update: { $set: ligne.updated },
+                    update: getEntityUpdateSetUnset(ligne.updated),
                     upsert: false,
                 },
             })),
