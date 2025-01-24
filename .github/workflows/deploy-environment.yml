@@ -13,7 +13,7 @@ jobs:
   prepare:
     if: |
       (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
-      (github.ref_name != 'production' && github.ref_name != 'main')
+      (github.event_name=='workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.config.outputs.env_name }}
