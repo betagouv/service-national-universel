@@ -4,7 +4,7 @@ import { updateStatusPhase1 } from "../utils";
 import { capture } from "../sentry";
 import slack from "../slack";
 import { CohortModel, LigneBusModel, YoungModel } from "../models";
-import { getDepartureDate, YOUNG_STATUS, YOUNG_STATUS_PHASE1, DEPART_SEJOUR_MOTIFS_NOT_DONE, DepartSejourMotif } from "snu-lib";
+import { getDepartureDate, YOUNG_STATUS, YOUNG_STATUS_PHASE1, DEPART_SEJOUR_MOTIFS_NOT_DONE } from "snu-lib";
 
 export const handler = async (): Promise<void> => {
   try {
@@ -32,7 +32,7 @@ export const handler = async (): Promise<void> => {
         const dateStart = getDepartureDate(young, sessionPhase1, cohort, { bus });
 
         if (differenceInDays(now, dateStart) <= cohort.daysToValidate) {
-          const isMotifNotDone = young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as DepartSejourMotif);
+          const isMotifNotDone = young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as (typeof DEPART_SEJOUR_MOTIFS_NOT_DONE)[number]);
 
           if (isMotifNotDone) {
             young.set({ statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE });
