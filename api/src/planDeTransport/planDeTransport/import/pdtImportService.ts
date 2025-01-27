@@ -37,11 +37,8 @@ export const validatePdtFile = async (
     return { ok: false, code: ERRORS.INVALID_BODY };
   }
 
-  // Count columns that start with "MATRICULE DU PDR" to know how many PDRs there are.
-  const countPdr = lines.reduce((acc, line) => {
-    const count = getLinePdrCount(line);
-    return count > acc ? count : acc;
-  }, 0);
+  // Count columns that start with "ID PDR" to know how many PDRs there are.
+  const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
   let maxPdrOnLine = 0;
 
   const errors: PdtErrors = {
@@ -50,7 +47,7 @@ export const validatePdtFile = async (
     "DATE DE TRANSPORT RETOUR": [],
     ...Array.from({ length: countPdr }, (_, i) => ({
       [`N° DE DEPARTEMENT PDR ${i + 1}`]: [],
-      [`MATRICULE DU PDR ${i + 1}`]: [],
+      [`ID PDR ${i + 1}`]: [],
       [`TYPE DE TRANSPORT PDR ${i + 1}`]: [],
       [`NOM + ADRESSE DU PDR ${i + 1}`]: [],
       [`HEURE ALLER ARRIVÉE AU PDR ${i + 1}`]: [],
@@ -58,7 +55,7 @@ export const validatePdtFile = async (
       [`HEURE DE RETOUR ARRIVÉE AU PDR ${i + 1}`]: [],
     })).reduce((acc, cur) => ({ ...acc, ...cur }), {}),
     "N° DU DEPARTEMENT DU CENTRE": [],
-    "MATRICULE DU CENTRE": [],
+    "ID CENTRE": [],
     "NOM + ADRESSE DU CENTRE": [],
     "HEURE D'ARRIVEE AU CENTRE": [],
     "HEURE DE DÉPART DU CENTRE": [],
@@ -137,7 +134,7 @@ export const validatePdtFile = async (
     // Check each PDR
     for (let i = 1; i <= countPdr; i++) {
       // Skip empty PDR
-      if (i > 1 && !line[`MATRICULE DU PDR ${i}`]) continue;
+      if (i > 1 && !line[`ID PDR ${i}`]) continue;
 
       if (!line[`N° DE DEPARTEMENT PDR ${i}`]) {
         errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -145,14 +142,14 @@ export const validatePdtFile = async (
       if (line[`N° DE DEPARTEMENT PDR ${i}`] && !isValidDepartment(line[`N° DE DEPARTEMENT PDR ${i}`])) {
         errors[`N° DE DEPARTEMENT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_DEPARTMENT, extra: line[`N° DE DEPARTEMENT PDR ${i}`] });
       }
-      if (!line[`MATRICULE DU PDR ${i}`]) {
-        errors[`MATRICULE DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
+      if (!line[`ID PDR ${i}`]) {
+        errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
       }
-      if (line[`MATRICULE DU PDR ${i}`]) {
-        const isValidString = typeof line[`MATRICULE DU PDR ${i}`] === "string";
-        const isValidCorrespondance = i > 1 && ["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE DU PDR ${i}`].toLowerCase());
-        if (!(isValidString || isValidCorrespondance)) {
-          errors[`MATRICULE DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+      if (line[`ID PDR ${i}`]) {
+        const isValidObjectId = mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`]);
+        const isValidCorrespondance = i > 1 && ["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${i}`].toLowerCase());
+        if (!(isValidObjectId || isValidCorrespondance)) {
+          errors[`ID PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
         }
       }
       if (!line[`TYPE DE TRANSPORT PDR ${i}`]) {
@@ -173,13 +170,13 @@ export const validatePdtFile = async (
       if (line[`HEURE ALLER ARRIVÉE AU PDR ${i}`] && !isValidTime(line[`HEURE ALLER ARRIVÉE AU PDR ${i}`])) {
         errors[`HEURE ALLER ARRIVÉE AU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      if (!line[`HEURE DEPART DU PDR ${i}`] && (line[`MATRICULE DU PDR ${i}`] || "").toLowerCase() !== "correspondance retour") {
+      if (!line[`HEURE DEPART DU PDR ${i}`] && (line[`ID PDR ${i}`] || "").toLowerCase() !== "correspondance retour") {
         errors[`HEURE DEPART DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
       }
       if (line[`HEURE DEPART DU PDR ${i}`] && !isValidTime(line[`HEURE DEPART DU PDR ${i}`])) {
         errors[`HEURE DEPART DU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      if (!line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`] && (line[`MATRICULE DU PDR ${i}`] || "").toLowerCase() !== "correspondance aller") {
+      if (!line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`] && (line[`ID PDR ${i}`] || "").toLowerCase() !== "correspondance aller") {
         errors[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
       }
       if (line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`] && !isValidTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${i}`])) {
@@ -192,11 +189,11 @@ export const validatePdtFile = async (
     if (line["N° DU DEPARTEMENT DU CENTRE"] && !isValidDepartment(line["N° DU DEPARTEMENT DU CENTRE"])) {
       errors["N° DU DEPARTEMENT DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_DEPARTMENT });
     }
-    if (!line["MATRICULE DU CENTRE"]) {
-      errors["MATRICULE DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
+    if (!line["ID CENTRE"]) {
+      errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
     }
-    if (line["MATRICULE DU CENTRE"] && typeof line["MATRICULE DU CENTRE"] !== "string") {
-      errors["MATRICULE DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+    if (line["ID CENTRE"] && !mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
+      errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
     if (!line["NOM + ADRESSE DU CENTRE"]) {
       errors["NOM + ADRESSE DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -326,17 +323,17 @@ export const validatePdtFile = async (
       errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_CLASSE, extra: line["ID CLASSE"] });
     }
   }
-  // Check if "MATRICULE DU CENTRE" exists in DB
+  // Check if "ID CENTRE" exists in DB
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-    if (line["MATRICULE DU CENTRE"] && typeof line["MATRICULE DU CENTRE"] !== "string") {
-      const center = await CohesionCenterModel.findOne({ matricule: line["MATRICULE DU CENTRE"] });
+    if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
+      const center = await CohesionCenterModel.findById(line["ID CENTRE"]);
       if (!center) {
-        errors["MATRICULE DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_MATRICULE, extra: line["MATRICULE DU CENTRE"] });
+        errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
       }
-      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: center?._id });
+      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"] });
       if (!session) {
-        errors["MATRICULE DU CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["MATRICULE DU CENTRE"] });
+        errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
       }
     }
   }
@@ -352,20 +349,20 @@ export const validatePdtFile = async (
       }
     }
   }
-  // Check if `MATRICULE DU PDR ${i}` exists in DB, and if departement is the same as the PDR.
+  // Check if `ID PDR ${i}` exists in DB, and if departement is the same as the PDR.
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-      if (line[`MATRICULE DU PDR ${pdrNumber}`]) {
-        if (typeof line[`MATRICULE DU PDR ${pdrNumber}`] === "string") {
-          const pdr = await PointDeRassemblementModel.findOne({ matricule: line[`MATRICULE DU PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+      if (line[`ID PDR ${pdrNumber}`]) {
+        if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
+          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
           if (!pdr) {
-            errors[`MATRICULE DU PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_MATRICULE, extra: line[`MATRICULE DU PDR ${pdrNumber}`] });
+            errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
           } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
-            errors[`MATRICULE DU PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_DEPARTEMENT, extra: line[`MATRICULE DU PDR ${pdrNumber}`] });
+            errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_DEPARTEMENT, extra: line[`ID PDR ${pdrNumber}`] });
           }
-        } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE DU PDR ${pdrNumber}`]?.toLowerCase())) {
-          errors[`MATRICULE DU PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_MATRICULE, extra: line[`MATRICULE DU PDR ${pdrNumber}`] });
+        } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+          errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
         }
       }
     }
@@ -374,14 +371,14 @@ export const validatePdtFile = async (
   // and check the max number of PDR on a line
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
-    const pdrMatricules = getLinePdrMatricules(line);
-    if (pdrMatricules.length > maxPdrOnLine) {
-      maxPdrOnLine = pdrMatricules.length;
+    const pdrIds = getLinePdrIds(line);
+    if (pdrIds.length > maxPdrOnLine) {
+      maxPdrOnLine = pdrIds.length;
     }
     //check and return duplicate pdr
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-      if (line[`MATRICULE DU PDR ${pdrNumber}`] && pdrMatricules.filter((pdrMatricule) => pdrMatricule === line[`MATRICULE DU PDR ${pdrNumber}`]).length > 1) {
-        errors[`MATRICULE DU PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_PDR_ON_LINE, extra: line[`MATRICULE DU PDR ${pdrNumber}`] });
+      if (line[`ID PDR ${pdrNumber}`] && pdrIds.filter((pdrId) => pdrId === line[`ID PDR ${pdrNumber}`]).length > 1) {
+        errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_PDR_ON_LINE, extra: line[`ID PDR ${pdrNumber}`] });
       }
     }
   }
@@ -393,7 +390,7 @@ export const computeImportSummary = (lines: PdtLine[]) => {
   const countPdr = getLinePdrCount(lines[0]);
   let maxPdrOnLine = 0;
   for (const line of lines.entries()) {
-    const currentLinePDRCount = getLinePdrMatricules(line).length;
+    const currentLinePDRCount = getLinePdrIds(line).length;
     if (currentLinePDRCount > maxPdrOnLine) {
       maxPdrOnLine = currentLinePDRCount;
     }
@@ -401,8 +398,8 @@ export const computeImportSummary = (lines: PdtLine[]) => {
 
   // Count total unique centers
   const centers = lines.reduce((acc: { [key: string]: number }, line: PdtLine) => {
-    if (line["MATRICULE DU CENTRE"]) {
-      acc[line["MATRICULE DU CENTRE"]] = (acc[line["MATRICULE DU CENTRE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
+    if (line["ID CENTRE"]) {
+      acc[line["ID CENTRE"]] = (acc[line["ID CENTRE"]] || 0) + parseInt(line["CAPACITÉ VOLONTAIRE TOTALE"]);
     }
     return acc;
   }, {});
@@ -418,8 +415,8 @@ export const computeImportSummary = (lines: PdtLine[]) => {
   // Count total unique PDR
   const pdrCount = lines.reduce((acc: string[], line: PdtLine) => {
     for (let i = 1; i <= countPdr; i++) {
-      if (line[`MATRICULE DU PDR ${i}`] && !acc.includes(line[`MATRICULE DU PDR ${i}`])) {
-        acc.push(line[`MATRICULE DU PDR ${i}`]);
+      if (line[`ID PDR ${i}`] && !acc.includes(line[`ID PDR ${i}`]) && mongoose.Types.ObjectId.isValid(line[`ID PDR ${i}`])) {
+        acc.push(line[`ID PDR ${i}`]);
       }
     }
     return acc;
@@ -433,20 +430,17 @@ export const computeImportSummary = (lines: PdtLine[]) => {
   };
 };
 
-export const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("MATRICULE DU PDR")).length;
+const getLinePdrCount = (line) => {
+  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
 };
 
-const getLinePdrMatricules = (line) => {
+const getLinePdrIds = (line) => {
   const countPdr = getLinePdrCount(line);
-  const pdrMatricules: string[] = [];
+  const pdrIds: string[] = [];
   for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (
-      line[`MATRICULE DU PDR ${pdrNumber}`] &&
-      !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE DU PDR ${pdrNumber}`]?.toLowerCase())
-    ) {
-      pdrMatricules.push(line[`MATRICULE DU PDR ${pdrNumber}`]);
+    if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+      pdrIds.push(line[`ID PDR ${pdrNumber}`]);
     }
   }
-  return pdrMatricules;
+  return pdrIds;
 };
