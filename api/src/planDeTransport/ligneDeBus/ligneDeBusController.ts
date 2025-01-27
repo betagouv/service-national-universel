@@ -615,7 +615,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
       }
     }
 
-    const PDR = await PointDeRassemblementModel.find({ _id: { $in: idPDR } });
+    const PDR = await PointDeRassemblementModel.find({ _id: { $in: idPDR }, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: PDR });
   } catch (error) {

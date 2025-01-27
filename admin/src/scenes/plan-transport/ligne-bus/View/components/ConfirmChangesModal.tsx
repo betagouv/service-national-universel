@@ -10,20 +10,23 @@ import { CohortType, SENDINBLUE_TEMPLATES } from "snu-lib";
 interface ConfirmChangesModalProps {
   isOpen: boolean;
   cohort: CohortType | null;
+  youngsCount: number;
   beforeChangeFormData: PointDeRassemblementFormValueChanges;
   afterChangeFormData: PointDeRassemblementFormValueChanges;
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
 }
 
-export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel }: ConfirmChangesModalProps) {
+export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
+
+  const isBeforeDeparture = cohort ? new Date() < new Date(cohort.dateStart) : false;
 
   // CHANGE_PDR_BEFORE_DEPARTURE: this default template is used.
   let templateId: string | null = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
   if (!cohort) {
     templateId = null;
-  } else if (new Date() < new Date(cohort.dateStart)) {
+  } else if (isBeforeDeparture) {
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
   } else if (new Date() < new Date(cohort.dateEnd)) {
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
@@ -111,7 +114,11 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
               <label className="flex items-start space-x-2">
                 <input type="checkbox" className="mt-1" checked={isEmailing} onChange={toggleEmailing} />
                 <div className="flex flex-col items-start">
-                  <span>Envoyer une campagne d'emailing aux représentants légaux.</span>
+                  {isBeforeDeparture ? (
+                    <span>Envoyer une campagne d’emailing aux volontaires ({youngsCount}) et à leurs représentants légaux.</span>
+                  ) : (
+                    <span>Envoyer une campagne d'emailing aux représentants légaux.</span>
+                  )}
                   {templateId ? (
                     <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
                       Visualiser l'aperçu

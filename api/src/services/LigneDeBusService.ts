@@ -95,8 +95,10 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
     meetingPointId: newMeetingPointId,
   }).select("email parent1Email parent2Email");
 
+  let isBeforeDeparture = false;
   let templateId: string | null = null;
   if (new Date() < new Date(cohort.dateStart)) {
+    isBeforeDeparture = true;
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
   } else if (new Date() < new Date(cohort.dateEnd)) {
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
@@ -109,9 +111,15 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
     if (young.parent1Email) cc.push({ email: young.parent1Email });
     if (young.parent2Email) cc.push({ email: young.parent2Email });
 
-    await sendTemplate(templateId, {
-      emailTo: [{ email: young.email }],
-      cc,
-    });
+    const contacts = isBeforeDeparture
+      ? {
+          emailTo: [{ email: young.email }],
+          cc,
+        }
+      : {
+          emailTo: cc,
+        };
+
+    await sendTemplate(templateId, contacts);
   }
 };
