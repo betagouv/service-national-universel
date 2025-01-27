@@ -77,18 +77,20 @@ export const validatePdtFile = async (
     errors["ID CLASSE"] = [];
   }
 
+  const OPTIONAL_COLUMNS = ["LIGNE MIROIR"];
+
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
   const columns = Object.keys(lines[0]).filter((col) => !col.includes("__EMPTY"));
   const expectedColumns = Object.keys(errors);
-  const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
+  const missingColumns = expectedColumns.filter((col) => !columns.includes(col) && !OPTIONAL_COLUMNS.includes(col));
+
   //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
-    return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 
   //check if there are unexpected columns
