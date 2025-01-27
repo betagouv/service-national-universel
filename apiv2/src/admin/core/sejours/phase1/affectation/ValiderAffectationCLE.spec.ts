@@ -151,7 +151,6 @@ describe("ValiderAffectationCLE", () => {
                 }),
         );
 
-        console.log(result);
         expect(result.analytics.errors).toEqual(0);
         expect(result.analytics.jeunesAffected).toEqual(1);
         expect(result.rapportData[0]).toEqual({

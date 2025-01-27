@@ -4,23 +4,16 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import {
-    departmentList,
-    GRADES,
-    region2department,
-    RegionsMetropole,
-    RegionsMetropoleAndCorse,
-    TaskName,
-    TaskStatus,
-} from "snu-lib";
+import { departmentList, region2department, RegionsMetropoleAndCorse, TaskName, TaskStatus } from "snu-lib";
 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
-import { createSession } from "../SessionHelper";
+
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { createSession } from "../helper/SessionHelper";
 
 describe("AffectationController - CLE", () => {
     let app: INestApplication;

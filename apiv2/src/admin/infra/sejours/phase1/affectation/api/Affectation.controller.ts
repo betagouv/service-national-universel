@@ -179,7 +179,6 @@ export class AffectationController {
             TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
         );
 
-        console.log("status", status, "lastCompletedAt", lastCompletedAt);
         if (
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
