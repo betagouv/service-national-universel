@@ -31,14 +31,7 @@ export const handler = async (): Promise<void> => {
         const sessionPhase1 = await CohortModel.findById(young.sessionPhase1Id);
         const dateStart = getDepartureDate(young, sessionPhase1, cohort, { bus });
 
-        if (differenceInDays(now, dateStart) <= cohort.daysToValidate) {
-          const isMotifNotDone = young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as (typeof DEPART_SEJOUR_MOTIFS_NOT_DONE)[number]);
-
-          if (isMotifNotDone) {
-            young.set({ statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE });
-            await young.save({ fromUser: autoValidationUser });
-          }
-        }
+        if (differenceInDays(now, dateStart) !== cohort.daysToValidate) return;
 
         const validationDateWithDays = addDays(new Date(dateStart), cohort.daysToValidate).toISOString();
         const modified = await updateStatusPhase1(young, validationDateWithDays, autoValidationUser);
