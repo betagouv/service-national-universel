@@ -160,12 +160,12 @@ export async function syncMissions() {
 async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
   logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
 
-  if (JvaStructureException.includes(mission.organizationId)) {
-    logger.info(`Structure ${mission.organizationId} is in JVA exception list, skipping mission ${mission.clientId}`);
+  if (JvaStructureException.includes(mission.organizationClientId.toString())) {
+    logger.info(`Structure ${mission.organizationClientId} is in JVA exception list, skipping mission ${mission.clientId}`);
     return;
   }
 
-  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
+  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
   if (!structure) {
     const newStructure = await createStructure(mission);
     if (!newStructure) throw new Error("No structure created");
