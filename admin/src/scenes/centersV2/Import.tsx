@@ -7,7 +7,7 @@ import ImportCentresSessions from "./ImportCentresSession";
 export default function Import() {
   return (
     <Page>
-      <Header title="Import des centres et sessions" breadcrumb={[{ title: "Séjours" }, { title: "Classes" }, { title: "Import" }]} />
+      <Header title="Import des centres et sessions" breadcrumb={[{ title: "Séjours" }, { title: "Centres" }, { title: "Import" }]} />
       <ImportCentres />
       <ImportCentresSessions />
     </Page>

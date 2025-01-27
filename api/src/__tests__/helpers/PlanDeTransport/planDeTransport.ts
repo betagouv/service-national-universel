@@ -11,7 +11,7 @@ import { createPointDeRassemblementHelper } from "./pointDeRassemblement";
 async function initPlanTransport(planTransport) {
   const matricules = planTransport.lines.reduce(
     (acc, line) => {
-      const { "MATRICULE CENTRE": centreMatricule, "MATRICULE PDR 1": pdr1Matricule, "MATRICULE PDR 2": pdr2Matricule, "MATRICULE PDR 3": pdr3Matricule } = line;
+      const { "MATRICULE DU CENTRE": centreMatricule, "MATRICULE DU PDR 1": pdr1Matricule, "MATRICULE DU PDR 2": pdr2Matricule, "MATRICULE DU PDR 3": pdr3Matricule } = line;
       if (centreMatricule) acc.centreMatricules[centreMatricule] = centreMatricule;
       if (pdr1Matricule) acc.pdrMatricules[pdr1Matricule] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 1"]] };
       if (pdr2Matricule) acc.pdrMatricules[pdr2Matricule] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 2"]] };

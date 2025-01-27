@@ -101,4 +101,12 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
 
         return updatePdts.modifiedCount;
     }
+
+    async delete(planDeTransport: PlanDeTransportModel): Promise<void> {
+        const retrievedPlanDeTransport = await this.planDeTransportMongooseEntity.findById(planDeTransport.id);
+        if (!retrievedPlanDeTransport) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        await retrievedPlanDeTransport.deleteOne();
+    }
 }

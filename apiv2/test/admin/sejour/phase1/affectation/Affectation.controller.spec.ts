@@ -11,7 +11,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
-import { createSession } from "../SessionHelper";
+import { createSession } from "../helper/SessionHelper";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 
 describe("AffectationController", () => {

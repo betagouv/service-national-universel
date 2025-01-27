@@ -45,6 +45,8 @@ export class SejourMapper {
             status: sejourModel.status,
             hasTimeSchedule: sejourModel.hasTimeSchedule,
             hasPedagoProject: sejourModel.hasPedagoProject,
+            cohort: sejourModel.sessionName,
+            cohortId: sejourModel.sessionId,
         };
     }
 }

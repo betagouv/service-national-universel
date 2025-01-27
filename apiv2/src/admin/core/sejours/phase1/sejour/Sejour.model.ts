@@ -42,3 +42,5 @@ interface SejourFile {
     size?: number;
     mimetype?: string;
 }
+
+export type CreateSejourModel = Omit<SejourModel, "id" | "listeAttente" | "hasTimeSchedule" | "hasPedagoProject">;
