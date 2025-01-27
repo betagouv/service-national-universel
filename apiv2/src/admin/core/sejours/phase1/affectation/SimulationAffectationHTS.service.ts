@@ -26,6 +26,8 @@ type JeuneRapport = Pick<
     | "sessionNom"
     | "region"
     | "departement"
+    | "regionScolarite"
+    | "departementScolarite"
     | "pointDeRassemblementId"
     | "ligneDeBusId"
     | "centreId"
@@ -37,6 +39,8 @@ type JeuneRapport = Pick<
     pointDeRassemblementMatricule?: string;
     ligneDeBusNumeroLigne?: string;
     centreMatricule?: string;
+    HZR?: string;
+    etranger?: string;
 };
 
 export interface ChangementDepartement {
@@ -1152,7 +1156,9 @@ export class SimulationAffectationHTSService {
                                 .join("-")}`,
                     )
                     .join("; \n"),
-            "Erreurs changement de département : " + changementDepartementsErreur.join(".\n"),
+            ...(changementDepartementsErreur.length > 0
+                ? ["Erreurs changement de département : " + changementDepartementsErreur.join(".\n")]
+                : []),
         ].map((ligne) => ({
             "": ligne,
         }));
@@ -1216,6 +1222,10 @@ export class SimulationAffectationHTSService {
             sessionNom: jeune.sessionNom,
             region: jeune.region,
             departement: jeune.departement,
+            regionScolarite: jeune.regionScolarite,
+            departementScolarite: jeune.departementScolarite,
+            etranger: jeune.paysScolarite !== "FRANCE" ? "oui" : "non",
+            HZR: jeune.departementScolarite !== jeune.departement ? "oui" : "non",
             pointDeRassemblementId: jeune.pointDeRassemblementId,
             pointDeRassemblementMatricule: pdr?.matricule,
             ligneDeBusId: jeune.ligneDeBusId,
