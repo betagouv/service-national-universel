@@ -130,7 +130,7 @@ router.put("/:id/session-phase1", passport.authenticate("referent", { session: f
       placesLeft: value.placesTotal,
       department: center.department,
       region: center.region,
-      codeCentre: center.matricule,
+      codeCentre: center.code2022,
       nameCentre: center.name,
       cityCentre: center.city,
       zipCentre: center.zip,

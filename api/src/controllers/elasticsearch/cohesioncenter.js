@@ -14,8 +14,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     // Configuration
     const { user, body } = req;
 
-    const searchFields = ["name", "city", "zip", "matricule", "typology", "domain"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "matricule.keyword", "typology.keyword", "domain.keyword"];
+    const searchFields = ["name", "city", "zip", "code2022", "typology", "domain"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "typology.keyword", "domain.keyword"];
     const sortFields = [];
     // Authorization
     if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -62,7 +62,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
-    const searchFields = ["name", "city", "zip", "matricule", "typology", "domain", "centerDesignation"];
+    const searchFields = ["name", "city", "zip", "code2022", "typology", "domain", "centerDesignation"];
 
     // Authorization
     if (!canSearchInElasticSearch(req.user, "cohesioncenter")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -92,9 +92,9 @@ router.post("/not-in-cohort/:cohort", passport.authenticate(["referent"], { sess
 router.post("/presence/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
     // Configuration
-    const searchFields = ["name", "city", "zip", "matricule"];
-    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "matricule.keyword", "academy.keyword", "status.keyword", "statusPhase1.keyword"];
-    const filterFieldsCenter = ["department.keyword", "region.keyword", "cohorts.keyword", "matricule.keyword", "academy.keyword"];
+    const searchFields = ["name", "city", "zip", "code2022"];
+    const filterFields = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword", "status.keyword", "statusPhase1.keyword"];
+    const filterFieldsCenter = ["department.keyword", "region.keyword", "cohorts.keyword", "code2022.keyword", "academy.keyword"];
     const sortFields = [];
 
     // Authorization

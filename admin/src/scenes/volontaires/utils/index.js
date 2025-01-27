@@ -208,7 +208,7 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
         if (item === "N/A" || !session.length) return item;
         const res = session.find((option) => option._id.toString() === item);
         if (!res) return "N/A - Supprimé";
-        return res?.codeCentre;
+        return (res?.codeCentre || "N/A") + " - " + res?.cohesionCenterId;
       },
     },
     {
@@ -478,7 +478,8 @@ export async function transformVolontaires(data, values) {
       },
       phase1Affectation: {
         "ID centre": center._id || "",
-        "Matricule centre": center.matricule || "",
+        // "Code centre (2021)": center.code || "",
+        "Code centre (2022)": center.code2022 || "",
         "Nom du centre": center.name || "",
         "Ville du centre": center.city || "",
         "Département du centre": center.department || "",
