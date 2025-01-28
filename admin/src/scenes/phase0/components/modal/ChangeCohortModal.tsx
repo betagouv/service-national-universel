@@ -11,6 +11,7 @@ import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
 import api from "@/services/api";
 import { apiv2 } from "@/services/apiv2";
+import { Phase1Service } from "@/services/phase1Service";
 
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
@@ -273,8 +274,8 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                   cohortDetailedChangeReason: emailMessage,
                   cohortChangeReason: motif?.label,
                 };
-                await apiv2
-                  .put<YoungRoutes["Update"]["response"]["data"]>(`/young/${young?._id}/change-cohort`, payload)
+
+                Phase1Service.changeSession(young._id, payload)
                   .then(() => {
                     toastr.success("Opération réussie", "Cohorte modifiée avec succès");
                     onChange();
@@ -471,8 +472,7 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                     etablissementId: etablissement?._id,
                     classeId: classe?._id,
                   };
-                  await apiv2
-                    .put<YoungRoutes["Update"]["response"]["data"]>(`/young/${young?._id}/change-cohort`, payload)
+                  Phase1Service.changeSession(young._id, payload)
                     .then(() => {
                       toastr.success("Opération réussie", "Cohorte modifiée avec succès");
                       onChange();

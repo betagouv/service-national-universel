@@ -22,7 +22,7 @@ import { JwtTokenService } from "./infra/iam/auth/JwtToken.service";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
 import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
-import { JeuneController } from "./infra/sejours/jeune/api/Jeune.controller";
+import { BasculeController } from "./infra/sejours/phase1/bascule/api/Bascule.controller";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
@@ -31,7 +31,6 @@ import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune
 import { guardProviders as cleGuardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { guardProviders as jeuneGuardProviders } from "./infra/sejours/jeune/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
-import { useCaseProvider as JeuneUseCaseProviders } from "@admin/infra/sejours/jeune/initProvider/useCase";
 import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
@@ -85,7 +84,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     ],
     controllers: [
         ClasseController,
-        JeuneController,
+        BasculeController,
         AffectationController,
         Phase1Controller,
         ImportReferentielController,
@@ -124,7 +123,6 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         ...cleUseCaseProviders,
-        ...JeuneUseCaseProviders,
         ...phase1UseCaseProviders,
         ...cleGatewayProviders,
         ...phase1GatewayProviders,

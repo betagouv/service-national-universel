@@ -1,7 +1,7 @@
 import { IsNotEmpty, IsString, IsEmail, IsIn, ValidateIf } from "class-validator";
 import { YOUNG_SOURCE, YOUNG_SOURCE_LIST } from "snu-lib";
 
-export class ChangerLaCohorteDuJeunePayloadDto {
+export class ChangerLaSessionDuJeunePayloadDto {
     @IsNotEmpty()
     @IsString()
     @IsIn(YOUNG_SOURCE_LIST)
