@@ -14,7 +14,7 @@ import { shouldDisplayDateByCohortName } from "snu-lib";
 export default function Presentation({ step, parentId }) {
   const history = useHistory();
   const { young, token, cohort } = useContext(RepresentantsLegauxContext);
-
+  const isCLE = young?.source === "CLE";
   if (!young) return <Loader />;
 
   if (isReturningParent(young, parentId)) {
@@ -39,6 +39,13 @@ export default function Presentation({ step, parentId }) {
     return (
       <DSFRContainer title="Votre accord n'est plus requis">
         <p className="mb-8">Le jeune dont vous êtes représentant légal {translateNonNecessary(young.status)} au SNU. Votre accord n&apos;est plus requis.</p>
+      </DSFRContainer>
+    );
+  if (new Date(cohort?.inscriptionEndDate) < new Date() && !isCLE)
+    return (
+      <DSFRContainer title={"Les inscriptions pour le séjour sont clôturées"}>
+        <p> Votre enfant ne pourra donc pas participer à ce séjour</p>
+        <p>Si votre enfant reste éligible, vous pouvez également choisir de le positionner dès maintenant sur un prochain séjour en vous connectant à son compte.</p>
       </DSFRContainer>
     );
   return (
