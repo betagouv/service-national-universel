@@ -1,4 +1,4 @@
-import { YoungType } from "snu-lib";
+import { YoungType, YoungDto } from "snu-lib";
 
 import { JeuneModel } from "../../../../core/sejours/jeune/Jeune.model";
 import { JeuneDocument } from "../provider/JeuneMongo.provider";
@@ -149,6 +149,15 @@ export class JeuneMapper {
             parent2Phone: jeuneModel.parent2Telephone,
             youngPhase1Agreement: jeuneModel.youngPhase1Agreement,
             cohortChangeReason: jeuneModel.sessionChangeReason,
+        };
+    }
+    static toDto(jeune: JeuneModel): YoungDto {
+        return {
+            id: jeune.id,
+            firstName: jeune.prenom,
+            lastName: jeune.nom,
+
+            //etc.....
         };
     }
 }

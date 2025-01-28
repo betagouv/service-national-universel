@@ -3,14 +3,15 @@ import { UseCase } from "@shared/core/UseCase";
 import { JeuneGateway } from "../../../jeune/Jeune.gateway";
 import { JeuneModel } from "../../../jeune/Jeune.model";
 import { ChangerLaSessionDuJeunePayloadDto } from "@admin/infra/sejours/phase1/bascule/api/Bascule.validation";
-import { JeuneMapper } from "@admin/core/sejours/jeune/Jeune.mapper";
+import { JeuneMapper } from "@admin/infra/sejours/jeune/repository/Jeune.mapper";
+import { YoungDto } from "snu-lib";
 
 @Injectable()
-export class BasculeCLEtoCLE implements UseCase<JeuneModel> {
+export class BasculeCLEtoCLE implements UseCase<YoungDto> {
     constructor(@Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway) {}
-    async execute(jeuneId: string, payload: ChangerLaSessionDuJeunePayloadDto): Promise<JeuneModel> {
+    async execute(jeuneId: string, payload: ChangerLaSessionDuJeunePayloadDto): Promise<YoungDto> {
         console.log("BasculeCLEtoCLE.execute", payload);
         const jeune = await this.jeuneGateway.findById(jeuneId);
-        return JeuneMapper.mapJeuneModelToYoungDto(jeune);
+        return JeuneMapper.toDto(jeune);
     }
 }
