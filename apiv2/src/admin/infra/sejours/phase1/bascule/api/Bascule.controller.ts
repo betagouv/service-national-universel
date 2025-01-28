@@ -40,7 +40,8 @@ export class BasculeController {
             changerLaSessionDuJeune.source === YOUNG_SOURCE.VOLONTAIRE
         ) {
             return this.basculeHTStoHTS.execute(id, changerLaSessionDuJeune);
+        } else {
+            throw new Error("Unhandled source combination");
         }
-        return JeuneMapper.mapJeuneModelToYoungDto(jeune);
     }
 }
