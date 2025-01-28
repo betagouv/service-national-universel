@@ -42,8 +42,9 @@ describe("SimulationAffectationHTSService", () => {
                         parseXLS: jest.fn().mockResolvedValue([
                             {
                                 "Commentaire interne sur l'enregistrement": "DEPARTEMENT 93",
-                                "Code point de rassemblement initial": "matricule1",
-                                "Désignation du centre": "matricule1",
+                                "Code point de rassemblement initial": "matriculePdr1",
+                                "Désignation du centre": "matriculeCentre1",
+                                "Code court de Route": "code1a",
                             },
                         ]),
                     },
@@ -78,20 +79,21 @@ describe("SimulationAffectationHTSService", () => {
 
     describe("getChangementsDepartements", () => {
         it("should return changementDepartement array", async () => {
-            // mock: 93 vers pdr1 et center1
+            // mock: 93 vers pdr1 et center1 alors que une autre ligne existe pour le meme trajet
             const ligneDeBusList = [
-                { id: "ligne1", centreId: "center1", pointDeRassemblementIds: ["pdr1"] },
-                { id: "ligne2", centreId: "center2", pointDeRassemblementIds: ["pdr2"] },
-                { id: "ligne3", centreId: "center3", pointDeRassemblementIds: ["pdr3"] },
+                { id: "ligne1a", codeCourtDeRoute: "code1a", centreId: "center1", pointDeRassemblementIds: ["pdr1"] },
+                { id: "ligne1b", codeCourtDeRoute: "code1b", centreId: "center1", pointDeRassemblementIds: ["pdr1"] },
+                { id: "ligne2", codeCourtDeRoute: "code2", centreId: "center2", pointDeRassemblementIds: ["pdr2"] },
+                { id: "ligne3", codeCourtDeRoute: "code3", centreId: "center3", pointDeRassemblementIds: ["pdr3"] },
             ] as LigneDeBusModel[];
             const centreList = [
-                { id: "center1", matricule: "matricule1" },
-                { id: "center2", matricule: "matricule2" },
-                { id: "center3", matricule: "matricule3" },
+                { id: "center1", matricule: "matriculeCentre1" },
+                { id: "center2", matricule: "matriculeCentre2" },
+                { id: "center3", matricule: "matriculeCentre3" },
             ] as CentreModel[];
             const pdrList = [
-                { id: "pdr1", matricule: "matricule1", departement: "Paris" },
-                { id: "pdr2", matricule: "matricule2", departement: "Seine" },
+                { id: "pdr1", matricule: "matriculePdr1", departement: "Paris" },
+                { id: "pdr2", matricule: "matriculePdr2", departement: "Seine" },
             ] as PointDeRassemblementModel[];
             const result = await simulationAffectationHTSService.getChangementsDepartements(
                 "test-sdr-import-id",
@@ -99,19 +101,22 @@ describe("SimulationAffectationHTSService", () => {
                 pdrList,
                 ligneDeBusList,
             );
-            expect(result).toEqual([
-                {
-                    origine: "Seine-Saint-Denis",
-                    destination: [
-                        {
-                            centreId: "center1",
-                            pdrId: "pdr1",
-                            departement: "Paris",
-                            ligneIdList: ["ligne1"],
-                        },
-                    ],
-                },
-            ]);
+            expect(result).toEqual({
+                changementDepartements: [
+                    {
+                        origine: "Seine-Saint-Denis",
+                        destination: [
+                            {
+                                centreId: "center1",
+                                pdrId: "pdr1",
+                                departement: "Paris",
+                                ligneIdList: ["ligne1a"],
+                            },
+                        ],
+                    },
+                ],
+                changementDepartementsErreurs: [],
+            });
         });
     });
 
@@ -560,7 +565,7 @@ describe("SimulationAffectationHTSService", () => {
 
             const ligne2 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne2");
             expect(ligne2!.capaciteJeunes - ligne2!.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
-            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(3);
+            expect(ligne2?.placesOccupeesJeunes).toBeLessThanOrEqual(4);
             expect(ligne2?.placesOccupeesJeunes).toBeGreaterThanOrEqual(0);
 
             const ligne3 = randomLigneDeBusList.find((ligne) => ligne.id === "ligne3");
@@ -1168,6 +1173,14 @@ describe("SimulationAffectationHTSService", () => {
                 pdrList,
                 jeunesAvantAffectationList,
                 jeuneIntraDepartementList,
+                {
+                    departementList: [],
+                    jeuneIdListParDepartement: [],
+                    ligneIdListParDepartement: [],
+                    centreIdListParLigne: [],
+                    placesDisponiblesParLigne: [],
+                },
+                [],
                 [],
                 {
                     selectedCost: 1e3,

@@ -33,16 +33,15 @@ import { AdminTaskImportReferentielSelectorService } from "./infra/task/AdminTas
 import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
 import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
-import { ImporterRoutes } from "./core/referentiel/routes/useCase/ImporterRoutes";
-import { ImporterClasses } from "./core/referentiel/classe/useCase/ImporterClasses";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
-import { ReferentielClasseService } from "./core/referentiel/classe/ReferentielClasse.service";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
 import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
 import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
+import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
+import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 
 @Module({
     imports: [
@@ -69,6 +68,8 @@ import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMon
         ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
+        ...segmentDeLigneMongoProviders,
+        ...demandeModificationLigneDeBusMongoProviders,
         ...sejourMongoProviders,
         ...sessionMongoProviders,
         ...taskMongoProviders,

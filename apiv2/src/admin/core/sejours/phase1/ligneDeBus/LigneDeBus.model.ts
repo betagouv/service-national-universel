@@ -2,6 +2,7 @@
 export type LigneDeBusModel = {
     id: string;
     numeroLigne: string;
+    codeCourtDeRoute?: string;
     capaciteJeunes: number;
     capaciteTotal: number;
     capaciteAccompagnateurs: any;
@@ -10,7 +11,7 @@ export type LigneDeBusModel = {
     sessionNom?: string;
     sessionId?: string;
     centreId: string;
-    sejourId?: string;
+    sejourId: string;
     pointDeRassemblementIds: string[];
     dureeTrajet: any;
     heureArriveeCentre: any;
@@ -21,3 +22,8 @@ export type LigneDeBusModel = {
     dateRetour: any;
     ligneFusionneIds: any;
 };
+
+export type CreateLigneDeBusModel = Omit<
+    LigneDeBusModel,
+    "id" | "tempsRetardDepart" | "tempsRetardRetour" | "ligneFusionneIds"
+>;

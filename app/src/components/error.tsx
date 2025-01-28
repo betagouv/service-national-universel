@@ -2,7 +2,13 @@ import React from "react";
 import ErrorIcon from "../assets/icons/ErrorIcon";
 import { IoCloseOutline } from "react-icons/io5";
 
-export default function Error({ text, subText, onClose }) {
+interface ErrorProps {
+  text?: string;
+  subText?: string;
+  onClose: () => void;
+}
+
+const Error: React.FC<ErrorProps> = ({ text, subText, onClose }) => {
   return (
     <div className="mb-3 flex border-[1px] border-[#CE0500] ">
       <div className="bg-[#CE0500] py-4 px-2">
@@ -17,4 +23,6 @@ export default function Error({ text, subText, onClose }) {
       </div>
     </div>
   );
-}
+};
+
+export default Error;

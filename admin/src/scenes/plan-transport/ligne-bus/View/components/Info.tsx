@@ -172,6 +172,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
         <div className="flex w-[45%] flex-col justify-between gap-4">
           <div className="flex flex-col gap-4">
             <Field label="Numéro de ligne" onChange={(e) => setData({ ...data, busId: e.target.value })} value={data.busId} error={errors?.busId} readOnly={!editInfo} />
+            <Field label="Code court de route" value={bus.codeCourtDeRoute} readOnly={true} />
             <div className="flex items-center gap-4">
               <DatePickerList
                 label="Date de départ"

@@ -61,6 +61,8 @@ import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
+import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 
 @Module({
     imports: [
@@ -106,6 +108,8 @@ import { referentielServiceProvider } from "./infra/referentiel/initProvider/ser
         ...centreMongoProviders,
         ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
+        ...segmentDeLigneMongoProviders,
+        ...demandeModificationLigneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
         ...sessionMongoProviders,
