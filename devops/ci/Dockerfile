@@ -30,6 +30,12 @@ RUN mkdir admin/public app/public
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --no-audit --no-fund
 
+ARG ENVIRONMENT
+ARG RELEASE
+
+ENV VITE_ENVIRONMENT=${ENVIRONMENT}
+ENV VITE_RELEASE=${RELEASE}
+
 COPY --from=pruner /build/full/ .
 RUN --mount=type=bind,src=tsconfig.front.json,target=/build/tsconfig.front.json \
     --mount=type=secret,id=BUILD_SECRETS \
@@ -71,6 +77,12 @@ COPY --from=builder /build/api/package.json api/
 COPY --from=builder /build/package.json ./
 COPY --from=builder /build/node_modules/ node_modules/
 
+
+ARG ENVIRONMENT
+ARG RELEASE
+
+ENV ENVIRONMENT=${ENVIRONMENT}
+ENV RELEASE=${RELEASE}
 
 EXPOSE 8080
 

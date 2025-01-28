@@ -4,69 +4,35 @@ on:
   workflow_dispatch:
   push:
     branches:
-      - main
+      # - main
+      - poc-ci-no-ci
 
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref_name }}
-  cancel-in-progress: true
+# concurrency:
+#   group: ${{ github.workflow }}-${{ github.ref_name }}
+#   cancel-in-progress: true
+
 
 env:
-  CI_ENV_NAME: ci
+  APP_NAME: all
+  CI_REGISTRY: rg.fr-par.scw.cloud/snu-ci
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      registry: ${{ steps.registry.outputs.registry }}
-      build_matrix: ${{ steps.config.outputs.build }}
-      deploy_matrix: ${{ steps.config.outputs.deploy }}
       test_matrix: ${{ steps.config.outputs.test }}
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-          fetch-depth: 0
 
       - name: Use Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "20.17"
 
-      - name: Get registry
-        id: registry
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-        run: |
-          registry=$(node get-environment-registry.js ${{ env.CI_ENV_NAME }})
-          echo "registry: $registry"
-          echo "registry=$registry" >> $GITHUB_OUTPUT
-
       - name: Get matrices configuration
         id: config
         run: |
-          # BUILD MATRIX
-          echo "[]" \
-          | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-          | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
-
-          echo "Build matrix"
-          cat build.json
-          echo "build=$(jq -c < build.json)" >> $GITHUB_OUTPUT
-
-          # DEPLOY MATRIX
-          cat build.json \
-          | jq '. + [{name:"tasks", tag:.[]|select(.name == "api")|.tag}]' \
-          | jq '. + [{name:"tasksv2", tag:.[]|select(.name == "apiv2")|.tag}]' > deploy.json
-
-          echo "Deploy matrix"
-          cat deploy.json
-          echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
-
           # TEST MATRIX
           echo "[]" \
           | jq  '. + [{name:"api"}]' \
@@ -87,8 +53,6 @@ jobs:
         app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
       - name: Run tests
         uses: jenseng/dynamic-uses@v1
@@ -97,23 +61,21 @@ jobs:
           with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
   build:
-    needs: [prepare, test]
+    # needs: test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
       - name: Login to Docker Container Registry
-        uses: docker/login-action@v2
+        uses: docker/login-action@v3
         with:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-          registry: ${{ needs.prepare.outputs.registry }}
+          registry: ${{ env.CI_REGISTRY }}
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Use Node.js
         uses: actions/setup-node@v4
@@ -121,34 +83,49 @@ jobs:
           node-version: "20.17"
 
       - name: Build image
-        working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          node build-application-docker.js --push ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          node devops/scripts/get-secrets.js snu-ci snu-ci-build > build.env
+
+      - name: Build and push
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: devops/ci/Dockerfile
+          tags: ${{ env.CI_REGISTRY }}/${{ env.APP_NAME }}:latest,${{ env.CI_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}
+          build-args: |
+            "RELEASE=${{ github.sha }},ENVIRONMENT=ci"
+          secret-files: |
+            "BUILD_SECRETS=./build.env"
 
   deploy:
-    needs: [prepare, build]
+    needs: build
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
 
     steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
-
-      - name: Deploy image on Scaleway
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+      - name: Create SSH key
         run: |
-          node deploy-scaleway.js ${{ env.CI_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          mkdir -p ~/.ssh/
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+          echo "$SSH_KNOWN_HOSTS" >> ~/.ssh/known_hosts
+          chmod go-rwx ~/.ssh/id_ed25519
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+          SSH_KNOWN_HOSTS: ${{ secrets.SSH_KNOWN_HOSTS }}
+
+      - name: Push
+        run: |
+          mkdir docker
+          cd docker
+          image_tag=${{ env.CI_REGISTRY }}/${{ env.APP_NAME }}:latest
+          echo "FROM $image_tag" > Dockerfile
+          git init
+          git config user.email "github.deployer@gmail.com"
+          git config user.name "Github Deployer"
+          git remote add cloud "${{ secrets.CLEVER_CLOUD_GIT_REMOTE_CI }}"
+          git add -A
+          git commit -m "For deploy"
+          git push -f -u cloud master
