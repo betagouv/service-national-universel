@@ -96,7 +96,7 @@ jobs:
           file: devops/ci/Dockerfile
           tags: ${{ env.CI_REGISTRY }}/${{ env.APP_NAME }}:latest,${{ env.CI_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}
           build-args: |
-            "RELEASE=${{ github.sha }}
+            "RELEASE=${{ github.sha }}"
             "ENVIRONMENT=ci"
           secret-files: |
             "BUILD_SECRETS=./build.env"
