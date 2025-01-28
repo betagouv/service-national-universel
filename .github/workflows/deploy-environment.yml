@@ -92,7 +92,7 @@ jobs:
           URL: ${{ github.event.pull_request.comments_url }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          endpoints=$(node devops/scripts/get-applications-endpoints.js ${{ needs.prepare.outputs.env_name }})
+          endpoints=$(node get-applications-endpoints.js ${{ needs.prepare.outputs.env_name }})
           curl \
             -X POST \
             $URL \
