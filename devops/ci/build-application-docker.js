@@ -9,7 +9,8 @@ const {
 
 async function main() {
   const input = new UserInput(`Build application docker image`)
-    .arg("image", "Tag of the image (ex: rg.fr-par.scw.cloud/snu-ci:latest)")
+    .arg("image", "Tag of the image (ex: rg.fr-par.scw.cloud/snu-ci:$(git rev-parse HEAD))")
+    .arg("environment", "Build environment (ex: ci)")
     .arg("secrets-file", "Path to envfile with secrets")
     .optBool("push", "Push image on registry", {
       default: false,
@@ -36,6 +37,12 @@ async function main() {
     "devops/ci/Dockerfile",
     ".",
   ];
+
+  args.push("--build-arg");
+  args.push(`RELEASE=${tagName}`);
+
+  args.push("--build-arg");
+  args.push(`ENVIRONMENT=${tagName}`);
 
   args.push("--secret");
   args.push(`id=BUILD_SECRETS,src=${path.resolve(input.secretsFile)}`);
