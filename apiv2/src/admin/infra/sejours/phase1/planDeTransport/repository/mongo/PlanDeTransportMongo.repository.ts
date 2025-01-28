@@ -15,6 +15,7 @@ import { PlanDeTransportMapper } from "../PlanDeTransport.mapper";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class PlanDeTransportRepository implements PlanDeTransportGateway {
@@ -88,7 +89,7 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
             pdtsEntity.map((pdt) => ({
                 updateOne: {
                     filter: { _id: pdt.updated._id },
-                    update: { $set: pdt.updated },
+                    update: getEntityUpdateSetUnset(pdt.updated),
                     upsert: false,
                 },
             })),

@@ -10,6 +10,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
@@ -102,7 +103,7 @@ export class JeuneRepository implements JeuneGateway {
             jeunesEntity.map((jeune) => ({
                 updateOne: {
                     filter: { _id: jeune.updated._id },
-                    update: { $set: jeune.updated },
+                    update: getEntityUpdateSetUnset(jeune.updated),
                     upsert: false,
                 },
             })),
