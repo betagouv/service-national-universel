@@ -4,8 +4,10 @@ import mongoose from "mongoose";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { TaskGateway } from "@task/core/Task.gateway";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
+import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 import { setupAdminTest } from "../../setUpAdminTest";
 import { createSession } from "./helper/SessionHelper";
@@ -14,6 +16,7 @@ import { createSejour } from "./helper/SejourHelper";
 import { createPointDeRassemblement } from "./helper/PointDeRassemblementHelper";
 import { createPlanDeTransport } from "./helper/PlanDeTransportHelper";
 import { ClsService } from "nestjs-cls";
+import { createJeune } from "./helper/JeuneHelper";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -25,7 +28,7 @@ describe("Phase1Controller", () => {
     let phase1Controller: Phase1Controller;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
-    let taskGateway: TaskGateway;
+    let jeuneGateway: JeuneGateway;
     beforeAll(async () => {
         const appSetup = await setupAdminTest();
         app = appSetup.app;
@@ -42,11 +45,9 @@ describe("Phase1Controller", () => {
 
         app.use(mockedAddUserToRequestMiddleware);
 
-        taskGateway = module.get<TaskGateway>(TaskGateway);
+        jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
         cls = module.get<ClsService>(ClsService);
         await app.init();
-        const tasks = await taskGateway.findAll();
-        taskGateway.deleteMany(tasks.map((task) => task.id));
     });
 
     it("should be defined", () => {
@@ -56,14 +57,11 @@ describe("Phase1Controller", () => {
     describe("DELETE /phase1/:id/plan-de-transport", () => {
         it("should return 200", async () => {
             const session = await createSession();
-            console.log("createPointDeRassemblement");
             const pdr = await createPointDeRassemblement();
-            console.log("createSejour");
-            await createSejour({ sessionId: session.id });
-            console.log("createLigneDeBus");
-            await createLigneDeBus({
-                sessionNom: session.nom,
+            const sejour = await createSejour({ sessionId: session.id });
+            const ligne = await createLigneDeBus({
                 sessionId: session.id,
+                sessionNom: session.nom,
                 pointDeRassemblementIds: [pdr.id],
             });
             await createPlanDeTransport({
@@ -71,7 +69,15 @@ describe("Phase1Controller", () => {
                 sessionId: session.id,
             });
 
-            console.log("api");
+            const jeuneBefore = await createJeune({
+                statut: YOUNG_STATUS.VALIDATED,
+                statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+                sessionId: session.id,
+                sessionNom: session.nom,
+                sejourId: sejour.id,
+                ligneDeBusId: ligne.id,
+                pointDeRassemblementId: pdr.id,
+            });
             const response = await cls.runWith(
                 // @ts-ignore
                 { user: null },
@@ -79,6 +85,13 @@ describe("Phase1Controller", () => {
             );
 
             expect(response.status).toBe(200);
+
+            const jeuneAfter = await jeuneGateway.findById(jeuneBefore.id);
+            expect(jeuneAfter.statutPhase1).toBe(YOUNG_STATUS_PHASE1.WAITING_AFFECTATION);
+            expect(jeuneAfter.youngPhase1Agreement).toBe("false");
+            expect(jeuneAfter.centreId).toBeUndefined();
+            expect(jeuneAfter.pointDeRassemblementId).toBeUndefined();
+            expect(jeuneAfter.ligneDeBusId).toBeUndefined();
         });
     });
 

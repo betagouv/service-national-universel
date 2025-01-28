@@ -34,12 +34,9 @@ RUN npm run build
 FROM base AS runner
 WORKDIR /app
 
-RUN apk --no-cache add rsyslog rsyslog-elasticsearch rsyslog-mmjsonparse
-
 COPY --from=installer /app .
 
-LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel" \
-      org.opencontainers.image.description="This image provides a consistent and reproducible environment for the backend, ensuring it deploys faster and runs the same way regardless of the deployment environment."
+LABEL org.opencontainers.image.source="https://github.com/betagouv/service-national-universel"
 
 
 ENV PATH=/app/node_modules/pm2/bin/:$PATH
