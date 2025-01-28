@@ -13,6 +13,7 @@ import { SejourMapper } from "../Sejour.mapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class SejourRepository implements SejourGateway {
@@ -21,6 +22,13 @@ export class SejourRepository implements SejourGateway {
         @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
+    async findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null> {
+        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuId });
+        if (!sejour) {
+            return null;
+        }
+        return SejourMapper.toModel(sejour);
+    }
 
     async create(sejour: SejourModel): Promise<SejourModel> {
         const sejourEntity = SejourMapper.toEntity(sejour);
@@ -81,7 +89,7 @@ export class SejourRepository implements SejourGateway {
             sejoursEntity.map((sejour) => ({
                 updateOne: {
                     filter: { _id: sejour.updated._id },
-                    update: { $set: sejour.updated },
+                    update: getEntityUpdateSetUnset(sejour.updated),
                     upsert: false,
                 },
             })),

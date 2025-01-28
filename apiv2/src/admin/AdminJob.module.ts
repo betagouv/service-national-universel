@@ -29,6 +29,17 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
 import { historyProvider } from "./infra/history/historyProvider";
+import { AdminTaskImportReferentielSelectorService } from "./infra/task/AdminTaskImportReferentielSelector.service";
+import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
+import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
+import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+import { ClockProvider } from "@shared/infra/Clock.provider";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { NotificationProducer } from "@notification/infra/Notification.producer";
+import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
+import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 
 @Module({
     imports: [
@@ -55,20 +66,28 @@ import { historyProvider } from "./infra/history/historyProvider";
         ...planDeTransportMongoProviders,
         ...ligneDeBusMongoProviders,
         ...pointDeRassemblementMongoProviders,
+        ...segmentDeLigneMongoProviders,
+        ...demandeModificationLigneDeBusMongoProviders,
         ...sejourMongoProviders,
         ...sessionMongoProviders,
         ...taskMongoProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         ...historyProvider,
+        ...classeMongoProviders,
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
+        { provide: ClasseGateway, useClass: ClasseRepository },
+        { provide: ClockGateway, useClass: ClockProvider },
+        { provide: NotificationGateway, useClass: NotificationProducer },
         // add use case here
         AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
         ValiderAffectationHTS,
         ...referentielUseCaseProvider,
+        ...referentielServiceProvider,
+        AdminTaskImportReferentielSelectorService,
     ],
 })
 export class AdminJobModule {

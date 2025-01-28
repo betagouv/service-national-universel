@@ -28,11 +28,11 @@ import {
   type PlanTransportModesType,
 } from "../../models";
 
-const scanFile = require("../../utils/virusScanner");
+import scanFile from "../../utils/virusScanner";
 import { getMimeFromFile } from "../../utils/file";
 import { validateId } from "../../utils/validator";
-import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
-import { formatTime } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
+import { validatePdtFile, computeImportSummary, getLinePdrCount } from "../../planDeTransport/planDeTransport/import/pdtImportService";
+import { formatTime, mapTransportType } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
 import { UserRequest } from "../request";
 
@@ -50,6 +50,7 @@ interface ImportPlanTransportLine {
   "PAUSE DÉJEUNER ALLER"?: string;
   "PAUSE DÉJEUNER RETOUR"?: string;
   "TEMPS DE ROUTE": string;
+  "Code court de route": string;
   "ID CLASSE"?: string;
   "LIGNES FUSIONNÉES"?: string;
 }
@@ -162,7 +163,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const lines = importData.lines as ImportPlanTransportLine[];
-      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("MATRICULE PDR")).length;
+      const countPdr = lines.reduce((acc, line) => {
+        const count = getLinePdrCount(line);
+        return count > acc ? count : acc;
+      }, 0);
 
       // Vérification des lignes existantes
       const newLines: ImportPlanTransportLine[] = [];
@@ -184,7 +188,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       for (const line of newLines) {
         const pdrMatriculeIdMap = new Map();
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-          const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrKey = `MATRICULE DU PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
           const pdrValue = line[pdrKey]?.toString();
           if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             const pdr = await PointDeRassemblementModel.findOne({ matricule: pdrValue });
@@ -196,18 +200,19 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         }
         const meetingPointsIds = Array.from(pdrMatriculeIdMap.values());
 
-        const cohesionCenter = await CohesionCenterModel.find({ matricule: line["MATRICULE CENTRE"] });
+        const cohesionCenter = await CohesionCenterModel.find({ matricule: line["MATRICULE DU CENTRE"] });
         if (cohesionCenter.length > 1) {
-          throw new Error(FUNCTIONAL_ERRORS.MORE_THAN_ONE_CENTER_FOR_ONE_MATRICULE, { cause: `More than one cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+          throw new Error(FUNCTIONAL_ERRORS.MORE_THAN_ONE_CENTER_FOR_ONE_MATRICULE, { cause: `More than one cohesionCenter for matricule : ${line["MATRICULE DU CENTRE"]}` });
         }
         if (cohesionCenter.length === 0) {
-          throw new Error(ERRORS.NOT_FOUND, { cause: `No cohesionCenter for matricule : ${line["MATRICULE CENTRE"]}` });
+          throw new Error(ERRORS.NOT_FOUND, { cause: `No cohesionCenter for matricule : ${line["MATRICULE DU CENTRE"]}` });
         }
         const session = await SessionPhase1Model.findOne({ cohort: importData.cohort, cohesionCenterId: cohesionCenter[0]._id });
         const busLineData = {
           cohort: importData.cohort,
           cohortId: importData.cohortId,
           busId: line["NUMERO DE LIGNE"],
+          codeCourtDeRoute: line["Code court de route"],
           departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
           returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
           centerId: cohesionCenter[0]._id,
@@ -237,7 +242,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         }
 
         const lineToPointWithCorrespondance: LineToPoint[] = Array.from({ length: countPdr }, (_, i) => i + 1).reduce((acc: LineToPoint[], pdrNumber) => {
-          const pdrKey = `MATRICULE PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
+          const pdrKey = `MATRICULE DU PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
           const pdrValue = line[pdrKey]?.toString();
 
           if (pdrNumber > 1 && !line[pdrKey]) return acc;
@@ -246,7 +251,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             acc.push({
               lineId: busLine._id.toString(),
               meetingPointId: pdrMatriculeIdMap.get(line[pdrKey] as string),
-              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+              transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
               meetingHour: getPDRMeetingHour(
@@ -265,14 +270,14 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
                 returnHour: "",
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
               acc[acc.length - 1].stepPoints.push({
                 type: "retour",
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: "",
                 returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
             } else {
               const isAller = pdrValue === "correspondance aller";
@@ -281,7 +286,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: isAller ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string) : "",
                 returnHour: isAller ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
             }
           }
@@ -329,7 +334,9 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             {
               _id: busLine._id,
               cohort: busLine.cohort,
+              cohortId: busLine.cohortId,
               busId: busLine.busId,
+              codeCourtDeRoute: busLine.codeCourtDeRoute,
               departureString: busLine.departuredDate.toLocaleDateString("fr-FR", {
                 day: "2-digit",
                 month: "2-digit",

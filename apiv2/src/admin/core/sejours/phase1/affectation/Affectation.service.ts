@@ -139,13 +139,16 @@ export class AffectationService {
                 lignesDeBusUpdatedList.push(ligneDeBus);
 
                 // Do the same update with planTransport
-                const pdt = pdtList.find((pdt) => pdt.id === ligneDeBus.id)!;
-                pdt.placesOccupeesJeunes = placesOccupeesJeunes;
-                if (pdt.capaciteJeunes) {
-                    pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                const pdt = pdtList.find((pdt) => pdt.id === ligneDeBus.id);
+                if (pdt) {
+                    pdt.placesOccupeesJeunes = placesOccupeesJeunes;
+                    if (pdt.capaciteJeunes) {
+                        pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                    }
+                    pdtUpdatedList.push(pdt);
+                } else {
+                    this.logger.warn(`PDT does not exist for ligneDeBusId ${ligneDeBus.id}`);
                 }
-
-                pdtUpdatedList.push(pdt);
             }
         }
 

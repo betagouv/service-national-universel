@@ -1,17 +1,22 @@
-import { Controller, Get, Inject, Param, ParseArrayPipe, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Inject, Param, ParseArrayPipe, Query, UseGuards } from "@nestjs/common";
 
 import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
+import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 
 const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION];
 const PHASE1_TRAITEMENTS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER];
 
 @Controller("phase1")
 export class Phase1Controller {
-    constructor(@Inject(TaskGateway) private readonly taskGateway: TaskGateway) {}
+    constructor(
+        private readonly supprimerPlanDeTransport: SupprimerPlanDeTransport,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+    ) {}
 
     @UseGuards(AdminGuard)
     @Get("/:sessionId/simulations")
@@ -63,5 +68,14 @@ export class Phase1Controller {
             sort,
         );
         return simulations.map(TaskMapper.toDto);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Delete("/:sessionId/plan-de-transport")
+    async deletePlanDeTransport(
+        @Param("sessionId")
+        sessionId: string,
+    ): Promise<Phase1Routes["DeletePDT"]["response"]> {
+        return await this.supprimerPlanDeTransport.execute(sessionId);
     }
 }

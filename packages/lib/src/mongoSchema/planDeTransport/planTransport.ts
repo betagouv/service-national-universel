@@ -66,6 +66,14 @@ export const PlanTransportSchema = {
       description: "Id de la cohorte",
     },
   },
+
+  codeCourtDeRoute: {
+    type: String,
+    documentation: {
+      description: "code court de la route (SI SNU)",
+    },
+  },
+
   busId: {
     type: String,
     required: true,

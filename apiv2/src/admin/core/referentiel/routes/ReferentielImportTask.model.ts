@@ -1,4 +1,5 @@
 import { TaskModel } from "@task/core/Task.model";
+import { ReferentielTaskType } from "snu-lib";
 
 export interface ReferentielImportTaskAuthor {
     id?: string;
@@ -6,14 +7,16 @@ export interface ReferentielImportTaskAuthor {
     nom?: string;
     role?: string;
     sousRole?: string;
+    email?: string;
 }
 
 export interface ReferentielImportTaskParameters {
-    type: string;
+    type: ReferentielTaskType;
     fileName: string;
     fileKey: string;
     fileLineCount: number;
     auteur: ReferentielImportTaskAuthor;
+    folderPath: string;
 }
 
 export type ReferentielImportTaskResult = {
@@ -21,3 +24,4 @@ export type ReferentielImportTaskResult = {
 };
 
 export type ReferentielImportTaskModel = TaskModel<ReferentielImportTaskParameters, ReferentielImportTaskResult>;
+export type CreateReferentielImportTaskModel = Omit<ReferentielImportTaskModel, "id" | "createdAt" | "updatedAt">;
