@@ -3,14 +3,13 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle, HiOutlineExclamation } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, HttpError, YoungRoutes } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, HttpError } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
 import api from "@/services/api";
-import { apiv2 } from "@/services/apiv2";
 import { Phase1Service } from "@/services/phase1Service";
 
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
