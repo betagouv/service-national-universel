@@ -19,6 +19,7 @@ import Details from "../components/phase1/Details";
 export default function Phase1(props) {
   const user = useSelector((state) => state.Auth.user);
   const [meetingPoint, setMeetingPoint] = useState();
+  const [pointDeRassemblement, setPointDeRassemblement] = useState();
   const [young, setYoung] = useState(props.young);
   const [cohesionCenter, setCohesionCenter] = useState();
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -40,17 +41,31 @@ export default function Phase1(props) {
       }
     })();
 
-    if (!young.meetingPointId || !young.ligneId) return;
-    (async () => {
-      try {
-        const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
-        if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-        setMeetingPoint(data);
-      } catch (err) {
-        capture(err);
-        toastr.error("Impossible de récupérer les informations du point de rassemblement");
-      }
-    })();
+    if (!young?.meetingPointId) return;
+
+    if (young.meetingPointId && young.ligneId) {
+      (async () => {
+        try {
+          const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
+          if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
+          setMeetingPoint(data);
+        } catch (err) {
+          capture(err);
+          toastr.error("Impossible de récupérer les informations du point de rassemblement");
+        }
+      })();
+    } else if (young.meetingPointId) {
+      (async () => {
+        try {
+          const { data, code, ok } = await api.get(`/point-de-rassemblement/${young?.meetingPointId}`);
+          if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
+          setPointDeRassemblement(data);
+        } catch (err) {
+          capture(err);
+          toastr.error("Impossible de récupérer les informations du point de rassemblement");
+        }
+      })();
+    }
   }, [young]);
 
   if (!young) return <Loader />;
@@ -74,7 +89,15 @@ export default function Phase1(props) {
         <Phase1Header user={user} young={young} setYoung={setYoung} setValues={setValues} />
         <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
 
-        <Details young={young} setYoung={setYoung} cohesionCenter={cohesionCenter} meetingPoint={meetingPoint} cohort={cohort} user={user} />
+        <Details
+          young={young}
+          setYoung={setYoung}
+          cohesionCenter={cohesionCenter}
+          meetingPoint={meetingPoint}
+          pointDeRassemblement={pointDeRassemblement}
+          cohort={cohort}
+          user={user}
+        />
 
         {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
         young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
