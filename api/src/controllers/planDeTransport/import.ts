@@ -359,6 +359,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               centerDepartureTime: busLine.centerDepartureTime,
               pointDeRassemblements,
               classeId: busLine.classeId,
+              mergedBusIds: busLine.mergedBusIds,
+              mirrorBusId: busLine.mirrorBusId,
             },
           ],
           { session: transaction },
