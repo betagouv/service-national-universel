@@ -3,7 +3,7 @@ name: Deploy environment
 on:
   workflow_dispatch:
   pull_request:
-    types: [ labeled, synchronize, opened, reopened ]
+    types: [ labeled ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -84,6 +84,21 @@ jobs:
           registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
           echo "registry: $registry"
           echo "registry=$registry" >> $GITHUB_OUTPUT
+
+      - name: Add comment to PR
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy') && contains(fromJSON('["labeled"]'), github.event.action)
+        working-directory: devops/scripts
+        env:
+          URL: ${{ github.event.pull_request.comments_url }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          endpoints=$(node devops/scripts/get-applications-endpoints.js ${{ needs.prepare.outputs.env_name }})
+          curl \
+            -X POST \
+            $URL \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            --data "{ \"body\": \"Application endpoints :\n```\n$endpoints\n```\" }"
 
   build:
     needs: [prepare, create_environment]
