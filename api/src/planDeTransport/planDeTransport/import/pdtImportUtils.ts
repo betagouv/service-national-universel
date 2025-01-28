@@ -26,7 +26,15 @@ export function isValidBoolean(b) {
     .match(/^(oui|non)$/);
 }
 
-export function isValidDepartment(department) {
+export function isValidDepartment(department?: string) {
   const ids = Object.keys(departmentLookUp);
   return ids.includes((department || "").toUpperCase());
+}
+
+export function mapTransportType(transportType?: string) {
+  const result = transportType?.toString()?.toLowerCase() || "";
+  if (result === "autocar") {
+    return "bus";
+  }
+  return result;
 }
