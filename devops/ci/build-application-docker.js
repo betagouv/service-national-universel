@@ -42,7 +42,7 @@ async function main() {
   args.push(`RELEASE=${tagName}`);
 
   args.push("--build-arg");
-  args.push(`ENVIRONMENT=${tagName}`);
+  args.push(`ENVIRONMENT=${input.environment}`);
 
   args.push("--secret");
   args.push(`id=BUILD_SECRETS,src=${path.resolve(input.secretsFile)}`);
