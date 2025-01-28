@@ -11,12 +11,12 @@
     "build": "NODE_OPTIONS=--max_old_space_size=8192 vite build --mode \"$VITE_ENVIRONMENT\"",
     "preview": "vite preview",
     "postinstall": "npm run copy:dsfr",
-    "copy:dsfr": "copy-dsfr-to-public ",
+    "copy:dsfr": "copy-dsfr-to-public",
     "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.ts --fix",
     "lint:report": "eslint src --ext .js,.ts --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif",
-    "clean": "rm -fr node_modules .turbo build .swc"
+    "clean": "rm -fr node_modules public/dsfr .turbo build .swc"
   },
   "dependencies": {
     "@codegouvfr/react-dsfr": "^1.9.2",
