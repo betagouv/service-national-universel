@@ -158,7 +158,7 @@ export const validatePdtFile = async (
       if (!line[`TYPE DE TRANSPORT PDR ${i}`]) {
         errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
       }
-      if (line[`TYPE DE TRANSPORT PDR ${i}`] && !["bus", "train", "avion"].includes(line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase())) {
+      if (line[`TYPE DE TRANSPORT PDR ${i}`] && !["bus", "autocar", "train", "avion"].includes(line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase())) {
         errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_TRANSPORT_TYPE, extra: line[`TYPE DE TRANSPORT PDR ${i}`] });
       }
       if (!line[`NOM + ADRESSE DU PDR ${i}`]) {

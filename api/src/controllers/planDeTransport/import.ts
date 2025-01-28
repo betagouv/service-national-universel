@@ -32,7 +32,7 @@ import scanFile from "../../utils/virusScanner";
 import { getMimeFromFile } from "../../utils/file";
 import { validateId } from "../../utils/validator";
 import { validatePdtFile, computeImportSummary, getLinePdrCount } from "../../planDeTransport/planDeTransport/import/pdtImportService";
-import { formatTime } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
+import { formatTime, mapTransportType } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
 import { UserRequest } from "../request";
 
@@ -251,7 +251,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             acc.push({
               lineId: busLine._id.toString(),
               meetingPointId: pdrMatriculeIdMap.get(line[pdrKey] as string),
-              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+              transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
               meetingHour: getPDRMeetingHour(
@@ -270,14 +270,14 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
                 returnHour: "",
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
               acc[acc.length - 1].stepPoints.push({
                 type: "retour",
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: "",
                 returnHour: formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
             } else {
               const isAller = pdrValue === "correspondance aller";
@@ -286,7 +286,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
                 address: line[`NOM + ADRESSE DU PDR ${pdrNumber}`] as string,
                 departureHour: isAller ? formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string) : "",
                 returnHour: isAller ? "" : formatTime(line[`HEURE DE RETOUR ARRIVÉE AU PDR ${pdrNumber}`] as string),
-                transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+                transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               });
             }
           }
