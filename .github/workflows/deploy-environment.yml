@@ -94,13 +94,15 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
-          endpoints=$(node get-applications-endpoints.js ${{ needs.prepare.outputs.env_name }})
+          node get-applications-endpoints.js ${{ needs.prepare.outputs.env_name }} > endpoints.json
+
+          
           curl \
             -X POST \
             $URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            --data "{ \"body\": \"Application endpoints :\n```\n$(echo $endpoints)\n```\" }"
+            --data "{ \"body\": \"Application endpoints :\n\n- $(jq < endpoints.json -r '.admin')\n- $(jq < endpoints.json -r '.app')\n- $(jq < endpoints.json -r '.api')\n- $(jq < endpoints.json -r '.apiv2')\" }"
 
   build:
     needs: [prepare, create_environment]

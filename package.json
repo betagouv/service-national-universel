@@ -10,7 +10,7 @@
     "lint": "turbo run lint --continue --filter=$APP_NAME",
     "check-types": "turbo run check-types --continue --filter=$APP_NAME",
     "clean": "turbo run clean",
-    "endpoints": "node devops/scripts/get-applications-endpoints $(git rev-parse --abbrev-ref HEAD)"
+    "endpoints": "node devops/scripts/get-applications-endpoints $(git rev-parse --abbrev-ref HEAD) | jq"
   },
   "dependencies": {
     "classnames": "^2.5.1",
