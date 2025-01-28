@@ -41,6 +41,8 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { ReferentielClasseService } from "./core/referentiel/classe/ReferentielClasse.service";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
+import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
 
 @Module({
     imports: [
@@ -77,6 +79,7 @@ import { referentielServiceProvider } from "./infra/referentiel/initProvider/ser
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: ClasseGateway, useClass: ClasseRepository },
+        { provide: JeuneGateway, useClass: JeuneRepository },
         { provide: ClockGateway, useClass: ClockProvider },
         { provide: NotificationGateway, useClass: NotificationProducer },
         // add use case here

@@ -1,9 +1,11 @@
+import { YOUNG_SOURCE } from "snu-lib";
 // TODO: Mettre à niveau pour de l'ecriture
 export type JeuneModel = {
     id: string;
     statut: string;
     statutPhase1: string;
     email: string;
+    source: keyof typeof YOUNG_SOURCE;
     telephone?: string;
     dateNaissance?: Date;
     centreId?: string;

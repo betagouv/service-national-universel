@@ -3,13 +3,14 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle, HiOutlineExclamation } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, HttpError, YoungRoutes } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
 import api from "@/services/api";
+import { apiv2 } from "@/services/apiv2";
 
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
@@ -264,26 +265,28 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
               disabled: !emailMessage,
               loading: isSaving,
               onClick: async () => {
-                try {
-                  if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
-                  setIsSaving(true);
-                  const { ok } = await api.put(`/referent/young/${young._id}/change-cohort`, {
-                    source: YOUNG_SOURCE.VOLONTAIRE,
-                    cohort: cohort?.value,
-                    message: emailMessage,
-                    cohortChangeReason: motif?.label,
+                if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
+                setIsSaving(true);
+                const payload = {
+                  source: YOUNG_SOURCE.VOLONTAIRE,
+                  cohort: cohort?.value,
+                  cohortDetailedChangeReason: emailMessage,
+                  cohortChangeReason: motif?.label,
+                };
+                await apiv2
+                  .put<YoungRoutes["Update"]["response"]["data"]>(`/young/${young?._id}/change-cohort`, payload)
+                  .then(() => {
+                    toastr.success("Opération réussie", "Cohorte modifiée avec succès");
+                    onChange();
+                  })
+                  .catch((error: HttpError) => {
+                    if (error?.statusCode === 422) {
+                      toastr.error("Oups, une erreur est survenue lors de la modification de la cohorte", "");
+                    }
+                  })
+                  .finally(() => {
+                    setIsSaving(false);
                   });
-                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
-                  await onChange();
-                  if (!ok) return toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
-                  toastr.success("Cohorte modifiée avec succès", "");
-                } catch (error) {
-                  capture(error);
-                  toastr.error(error.message, "");
-                } finally {
-                  setIsSaving(false);
-                }
               },
             },
           ],
@@ -462,21 +465,26 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                       fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
                     });
                   }
-                  const { ok, code } = await api.put(`/referent/young/${young._id}/change-cohort`, {
+                  const payload = {
                     source: YOUNG_SOURCE.CLE,
                     cohort: classe?.cohort,
                     etablissementId: etablissement?._id,
                     classeId: classe?._id,
-                  });
-                  if (!ok) {
-                    if (code === ERRORS.OPERATION_NOT_ALLOWED) {
-                      setModaleError(true);
-                    }
-                    toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
-                  } else {
-                    await onChange();
-                    toastr.success("Cohorte modifiée avec succès", "");
-                  }
+                  };
+                  await apiv2
+                    .put<YoungRoutes["Update"]["response"]["data"]>(`/young/${young?._id}/change-cohort`, payload)
+                    .then(() => {
+                      toastr.success("Opération réussie", "Cohorte modifiée avec succès");
+                      onChange();
+                    })
+                    .catch((error: HttpError) => {
+                      if (error?.statusCode === 422) {
+                        toastr.error("Oups, une erreur est survenue lors de la modification de la cohorte", "");
+                      }
+                      if (error?.description === ERRORS.OPERATION_NOT_ALLOWED) {
+                        setModaleError(true);
+                      }
+                    });
                 } catch (error) {
                   capture(error);
                   toastr.error(error.message, "");

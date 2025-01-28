@@ -14,6 +14,7 @@ export class JeuneMapper {
             statut: jeuneDocument.status,
             statutPhase1: jeuneDocument.statusPhase1,
             email: jeuneDocument.email,
+            source: jeuneDocument.source,
             dateNaissance: jeuneDocument.birthdateAt,
             telephone: jeuneDocument.phone,
             centreId: jeuneDocument.cohesionCenterId,

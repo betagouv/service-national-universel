@@ -1,18 +1,18 @@
 import { ExecutionContext, Logger } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
-import { ClasseRegionGuard } from "./ClasseRegion.guard";
+import { ClasseDepartementGuard } from "./ClasseDepartement.guard";
 import { ClasseGuardService } from "./ClasseGuard.service";
 import { ROLES } from "snu-lib";
 
-describe("ClasseRegion.guard", () => {
-    let guard: ClasseRegionGuard;
+describe("ClasseDepartement.guard", () => {
+    let guard: ClasseDepartementGuard;
     let classeGuardService: ClasseGuardService;
     let logger: Logger;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                ClasseRegionGuard,
+                ClasseDepartementGuard,
                 {
                     provide: ClasseGuardService,
                     useValue: {
@@ -28,7 +28,7 @@ describe("ClasseRegion.guard", () => {
             ],
         }).compile();
 
-        guard = module.get<ClasseRegionGuard>(ClasseRegionGuard);
+        guard = module.get<ClasseDepartementGuard>(ClasseDepartementGuard);
         classeGuardService = module.get<ClasseGuardService>(ClasseGuardService);
         logger = module.get<Logger>(Logger);
     });
@@ -38,11 +38,11 @@ describe("ClasseRegion.guard", () => {
     });
 
     describe("canActivate", () => {
-        it("should return true if user region matches classe region && role is referent_region", async () => {
+        it("should return true if user departement matches classe departement && role is referent_departement", async () => {
             const request = {
-                user: { region: "testRegion", role: ROLES.REFERENT_REGION },
+                user: { departement: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
             };
-            const classe = { region: "testRegion" };
+            const classe = { departement: "testDepartement" };
             jest.spyOn(classeGuardService, "findClasse").mockResolvedValue(classe as any);
             const context = {
                 switchToHttp: () => ({
@@ -53,11 +53,11 @@ describe("ClasseRegion.guard", () => {
             expect(await guard.canActivate(context)).toBe(true);
         });
 
-        it("should return false if user region matches classe region but wrong role", async () => {
+        it("should return false if user departement matches classe departement but wrong role", async () => {
             const request = {
-                user: { region: "testRegion", role: "wrongRole" },
+                user: { departement: "testDepartement", role: "wrongRole" },
             };
-            const classe = { region: "testRegion" };
+            const classe = { departement: "testDepartement" };
             jest.spyOn(classeGuardService, "findClasse").mockResolvedValue(classe as any);
             const context = {
                 switchToHttp: () => ({
@@ -68,11 +68,11 @@ describe("ClasseRegion.guard", () => {
             expect(await guard.canActivate(context)).toBe(true);
         });
 
-        it("should return false if user region does not match classe region", async () => {
+        it("should return false if user departement does not match classe departement", async () => {
             const request = {
-                user: { region: "testRegion", role: ROLES.REFERENT_REGION },
+                user: { departement: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
             };
-            const classe = { region: "differentRegion" };
+            const classe = { departement: "differentDepartement" };
             jest.spyOn(classeGuardService, "findClasse").mockResolvedValue(classe as any);
             const context = {
                 switchToHttp: () => ({
@@ -85,10 +85,10 @@ describe("ClasseRegion.guard", () => {
 
         it("should add class to request object", async () => {
             const request = {
-                user: { region: "testRegion" },
+                user: { departement: "testDepartement" },
                 params: { id: "testId" },
             } as any;
-            const classe = { id: "testId", region: "testRegion" };
+            const classe = { id: "testId", departement: "testDepartement" };
             jest.spyOn(classeGuardService, "findClasse").mockResolvedValue(classe as any);
             const context = {
                 switchToHttp: () => ({

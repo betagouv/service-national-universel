@@ -6,4 +6,5 @@ export interface CustomRequest extends Request {
     correlationId: string;
     token: string;
     classe: any;
+    jeune: any;
 }
