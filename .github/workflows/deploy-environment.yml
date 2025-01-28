@@ -100,7 +100,7 @@ jobs:
             $URL \
             -H "Content-Type: application/json" \
             -H "Authorization: token $GITHUB_TOKEN" \
-            --data "{ \"body\": \"Application endpoints :\n```\n$endpoints\n```\" }"
+            --data "{ \"body\": \"Application endpoints :\n```\n$(echo $endpoints)\n```\" }"
 
   build:
     needs: [prepare, create_environment]
