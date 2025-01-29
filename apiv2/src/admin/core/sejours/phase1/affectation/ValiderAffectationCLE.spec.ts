@@ -51,7 +51,7 @@ describe("ValiderAffectationCLE", () => {
                         downloadFile: jest.fn().mockResolvedValue({ Body: null }),
                         parseXLS: jest.fn().mockResolvedValue([
                             {
-                                "_id du volontaire": "jeune1",
+                                "id du volontaire": "jeune1",
                                 jeuneLigneId: "65f9c8bb735e0e12a4213c18",
                                 sejourId: "6597e6acb86afb08146e8f86",
                                 classeCenterId: "609bebb00c1cc9a888ae8fa8",
@@ -160,7 +160,7 @@ describe("ValiderAffectationCLE", () => {
             dateNaissance: undefined,
             departement: undefined,
             email: undefined,
-            error: "",
+            erreur: "",
             genre: "garçon",
             id: "jeune1",
             ligneDeBusId: "65f9c8bb735e0e12a4213c18",
