@@ -8,8 +8,11 @@ import { TaskMapper } from "@task/infra/Task.mapper";
 import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 
-const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION];
-const PHASE1_TRAITEMENTS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER];
+const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION, TaskName.AFFECTATION_CLE_SIMULATION];
+const PHASE1_TRAITEMENTS_TASK_NAMES = [
+    TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+    TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+];
 
 @Controller("phase1")
 export class Phase1Controller {

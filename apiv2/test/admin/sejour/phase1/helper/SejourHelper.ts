@@ -10,7 +10,7 @@ export const createSejour = async (sejour?: Partial<SejourModel>) => {
 
     return await sejourGateway.create({
         sessionId: new mongoose.Types.ObjectId().toString(),
-        sessionName: "2021",
+        sessionNom: "2021",
         departement: "Yvelines",
         placesTotal: 15,
         placesRestantes: 15,

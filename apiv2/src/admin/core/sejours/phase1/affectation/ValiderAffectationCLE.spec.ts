@@ -10,7 +10,7 @@ import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
 
-import { ValiderAffectationHTS } from "./ValiderAffectationHTS";
+import { ValiderAffectationCLE } from "./ValiderAffectationCLE";
 
 import { CentreGateway } from "../centre/Centre.gateway";
 
@@ -22,15 +22,16 @@ import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { YOUNG_STATUS } from "snu-lib";
 
-const cohortName = "Avril 2024 - C";
+const sessionNom = "2025 CLE 03 Fevrier";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
 }));
 
-describe("ValiderAffectationHTS", () => {
-    let validerAffectationHTS: ValiderAffectationHTS;
+describe("ValiderAffectationCLE", () => {
+    let validerAffectationCLE: ValiderAffectationCLE;
     let cls: ClsService;
 
     beforeEach(async () => {
@@ -39,7 +40,7 @@ describe("ValiderAffectationHTS", () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [ClsModule],
             providers: [
-                ValiderAffectationHTS,
+                ValiderAffectationCLE,
                 AffectationService,
                 Logger,
                 {
@@ -50,12 +51,11 @@ describe("ValiderAffectationHTS", () => {
                         downloadFile: jest.fn().mockResolvedValue({ Body: null }),
                         parseXLS: jest.fn().mockResolvedValue([
                             {
-                                id: "jeune1",
-                                ligneDeBusId: "65f9c8bb735e0e12a4213c18",
+                                "id du volontaire": "jeune1",
+                                jeuneLigneId: "65f9c8bb735e0e12a4213c18",
                                 sejourId: "6597e6acb86afb08146e8f86",
-                                centreId: "609bebb00c1cc9a888ae8fa8",
-                                sessionNom: "Avril 2024 - C",
-                                "Point de rassemblement calculé": "6398797d3bc18708cc3981f6",
+                                classeCenterId: "609bebb00c1cc9a888ae8fa8",
+                                pointDeRassemblementId: "6398797d3bc18708cc3981f6",
                             },
                         ]),
                     },
@@ -66,7 +66,9 @@ describe("ValiderAffectationHTS", () => {
                         findByIds: jest.fn().mockResolvedValue([
                             {
                                 id: "jeune1",
-                                sessionNom: "Avril 2024 - C",
+                                statut: YOUNG_STATUS.VALIDATED,
+                                sessionNom: sessionNom,
+                                classeId: "classe1",
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
@@ -111,7 +113,9 @@ describe("ValiderAffectationHTS", () => {
                 {
                     provide: SejourGateway,
                     useValue: {
-                        findBySessionId: jest.fn().mockResolvedValue(mockSejours),
+                        findBySessionId: jest
+                            .fn()
+                            .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom: sessionNom }))),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -132,7 +136,7 @@ describe("ValiderAffectationHTS", () => {
             ],
         }).compile();
         cls = module.get<ClsService>(ClsService);
-        validerAffectationHTS = module.get<ValiderAffectationHTS>(ValiderAffectationHTS);
+        validerAffectationCLE = module.get<ValiderAffectationCLE>(ValiderAffectationCLE);
     });
 
     it("should simulate young affectation", async () => {
@@ -140,10 +144,9 @@ describe("ValiderAffectationHTS", () => {
             // @ts-ignore
             { user: null },
             () =>
-                validerAffectationHTS.execute({
-                    sessionId: cohortName,
+                validerAffectationCLE.execute({
+                    sessionId: sessionNom,
                     simulationTaskId: "simulationTaskId",
-                    affecterPDR: true,
                     dateAffectation: new Date(),
                 }),
         );
@@ -153,10 +156,11 @@ describe("ValiderAffectationHTS", () => {
         expect(result.rapportData[0]).toEqual({
             centreId: "657334e06e801c0816d4550c",
             centreNom: "",
+            classeId: "classe1",
             dateNaissance: undefined,
             departement: undefined,
             email: undefined,
-            error: "",
+            erreur: "",
             genre: "garçon",
             id: "jeune1",
             ligneDeBusId: "65f9c8bb735e0e12a4213c18",
@@ -179,7 +183,7 @@ describe("ValiderAffectationHTS", () => {
             qpv: "non",
             region: undefined,
             sessionId: "6597e6acb86afb08146e8f86",
-            sessionNom: "Avril 2024 - C",
+            sessionNom: sessionNom,
             statut: "VALIDATED",
             statutPhase1: "AFFECTED",
             telephone: undefined,

@@ -69,4 +69,13 @@ export class ClasseRepository implements ClasseGateway {
         const classes = await this.classeMongooseEntity.find({ ligneId: { $in: ids } });
         return ClasseMapper.toModels(classes);
     }
+
+    async findBySessionIdAndDepartmentNotWithdrawn(sessionId: string, departements: string[]): Promise<ClasseModel[]> {
+        const classes = await this.classeMongooseEntity.find({
+            cohortId: sessionId,
+            status: { $nin: [STATUS_CLASSE.WITHDRAWN] },
+            department: { $in: departements },
+        });
+        return ClasseMapper.toModels(classes);
+    }
 }

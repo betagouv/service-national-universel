@@ -18,7 +18,7 @@ export class SejourMapper {
             centreId: sejourDocument.cohesionCenterId,
             centreVille: sejourDocument.cityCentre,
             centreCodePostal: sejourDocument.zipCentre,
-            sessionName: sejourDocument.cohort,
+            sessionNom: sejourDocument.cohort,
             sessionId: sejourDocument.cohortId,
             // mandatory
             // projetPedagogiqueFiles: sejourDocument.pedagoProjectFiles as any,
@@ -45,7 +45,7 @@ export class SejourMapper {
             status: sejourModel.status,
             hasTimeSchedule: sejourModel.hasTimeSchedule,
             hasPedagoProject: sejourModel.hasPedagoProject,
-            cohort: sejourModel.sessionName,
+            cohort: sejourModel.sessionNom,
             cohortId: sejourModel.sessionId,
         };
     }
