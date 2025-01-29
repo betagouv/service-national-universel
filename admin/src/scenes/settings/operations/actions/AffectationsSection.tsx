@@ -3,7 +3,8 @@ import { Collapsable } from "@snu/ds/admin";
 
 import { CohortDto } from "snu-lib";
 
-import AffectationSimulationMetropole from "./AffectationSimulationMetropole/AffectationSimulationMetropole";
+import AffectationHTSSimulationMetropole from "./AffectationSimulation/AffectationHTSSimulationMetropole";
+import AffectationCLESimulationMetropole from "./AffectationSimulation/AffectationCLESimulationMetropole";
 
 interface AffectationsSectionProps {
   session: CohortDto;
@@ -12,7 +13,8 @@ interface AffectationsSectionProps {
 export default function AffectationsSection({ session }: AffectationsSectionProps) {
   return (
     <Collapsable title="Affectations">
-      <AffectationSimulationMetropole session={session} />
+      <AffectationHTSSimulationMetropole session={session} />
+      <AffectationCLESimulationMetropole session={session} />
     </Collapsable>
   );
 }
