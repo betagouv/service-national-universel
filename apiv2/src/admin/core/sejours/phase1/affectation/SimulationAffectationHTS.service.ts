@@ -24,8 +24,6 @@ type JeuneRapport = Pick<
     | "qpv"
     | "psh"
     | "sessionNom"
-    | "region"
-    | "departement"
     | "regionScolarite"
     | "departementScolarite"
     | "pointDeRassemblementId"
@@ -39,6 +37,8 @@ type JeuneRapport = Pick<
     pointDeRassemblementMatricule?: string;
     ligneDeBusNumeroLigne?: string;
     centreMatricule?: string;
+    regionResidence?: string;
+    departementResidence?: string;
     HZR?: string;
     etranger?: string;
 };
@@ -850,7 +850,7 @@ export class SimulationAffectationHTSService {
 
         let limite = 0;
 
-        const jeunes = jeuneAttenteAffectationList.map(({ departement, region }) => {
+        const jeunes = jeuneAttenteAffectationList.map(({ departementResidence, regionResidence }) => {
             let resumeJeune: string = "";
             const busIdList: string[] = [];
             const centreNameList: string[] = [];
@@ -863,7 +863,7 @@ export class SimulationAffectationHTSService {
             let isProblemePlaceCentre = false;
             let isProblemePlaceBus = false;
 
-            const departementIndex = distributionJeunesDepartement.departementList.indexOf(departement);
+            const departementIndex = distributionJeunesDepartement.departementList.indexOf(departementResidence);
             const ligneDeBusIdList = distributionJeunesDepartement.ligneIdListParDepartement[departementIndex];
             const centreIdListParLigne = distributionJeunesDepartement.centreIdListParLigne[departementIndex];
 
@@ -895,8 +895,8 @@ export class SimulationAffectationHTSService {
 
             if (busIdList.length === 0 && centreNameList.length === 0) {
                 probHorsZone += 1;
-                if (!departmentHortZone.includes(departement!)) {
-                    departmentHortZone.push(departement!);
+                if (!departmentHortZone.includes(departementResidence!)) {
+                    departmentHortZone.push(departementResidence!);
                 }
                 isHorsZone = true;
             } else if (busIdList.length === 0 && centreNameList.length !== 0) {
@@ -922,7 +922,7 @@ export class SimulationAffectationHTSService {
                 "Centre Theorique": centreNameList.join(";"), // centre associés au lignes théorique
                 "Lignes Places Restantes": placesLigneList.join(";"), // places restantes dans les lignes theoriques
                 "Centres Places Restantes": placesCentreList.join(";"), // places restantes dans les centres theoriques
-                "Hors Zone (région)": regionsConcerneeList.includes(region || "") ? "non" : "oui", // la region du jeune n'a pas de pdr
+                "Hors Zone (région)": regionsConcerneeList.includes(regionResidence || "") ? "non" : "oui", // la region du jeune n'a pas de pdr
                 "Probablement hors zones (département)": isHorsZone ? "oui" : "non", // aucune ligne ni centre théorique trouvé
                 "Pas de ligne disponible": isSansLigne ? "oui" : "non", // à un centre théorique mais pas de ligne
                 "Pas de centre disponible": isSansCentre ? "oui" : "non", // à une ligne théorique mais pas de centre
@@ -1220,8 +1220,8 @@ export class SimulationAffectationHTSService {
             psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
             handicapMemeDepartement: ["true", "oui"].includes(jeune.handicapMemeDepartement!) ? "oui" : "non",
             sessionNom: jeune.sessionNom,
-            region: jeune.region,
-            departement: jeune.departement,
+            regionResidence: jeune.region,
+            departementResidence: jeune.departement,
             regionScolarite: jeune.regionScolarite,
             departementScolarite: jeune.departementScolarite,
             etranger: jeune.paysScolarite !== "FRANCE" ? "oui" : "non",
@@ -1236,15 +1236,20 @@ export class SimulationAffectationHTSService {
     }
 
     sortRegionEtDepartement(
-        itemA: { departement?: string; region?: string },
-        itemB: { departement?: string; region?: string },
+        itemA: { departement?: string; departementResidence?: string; region?: string; regionResidence?: string },
+        itemB: { departement?: string; departementResidence?: string; region?: string; regionResidence?: string },
     ) {
-        const regionComparison = itemA.region?.localeCompare(itemB.region!) || 0;
+        const departementA = itemA.departement || itemA.departementResidence;
+        const regionA = itemA.region || itemA.regionResidence;
+        const departementB = itemB.departement || itemB.departementResidence;
+        const regionB = itemB.region || itemB.regionResidence;
+
+        const regionComparison = regionA?.localeCompare(regionB!) || 0;
         if (regionComparison !== 0) {
             return regionComparison;
         }
         // si c'est la même région on tri par departement
-        return itemA.departement?.localeCompare(itemB.departement!) || 0;
+        return departementA?.localeCompare(departementB!) || 0;
     }
 
     randomizeArray(array: any[], returnIndexes: boolean = false): any[] {
