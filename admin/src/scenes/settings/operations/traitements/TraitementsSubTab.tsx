@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useLocation } from "react-router-dom";
 
-import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { DataTable } from "@snu/ds/admin";
 
 import { Phase1Service } from "@/services/phase1Service";
@@ -10,6 +10,8 @@ import ActionCell from "../components/ActionCell";
 import StatusCell from "../components/StatusCell";
 import RapportCell from "../components/RapportCell";
 import AffectationHtsResultCell from "./affectationHts/AffectationHtsResultCell";
+import { tr } from "date-fns/locale";
+import BasculeJeuneValidesResultCell from "./basculeJeuneValides/BasculeJeuneValidesResultCell";
 
 interface TraitementsSubTabProps {
   session: CohortDto;
@@ -77,8 +79,16 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
           {
             key: "metadata",
             title: "Resultats",
-            // TODO: switch en fonction de Task.name
-            renderCell: (traitement) => <AffectationHtsResultCell simulation={traitement} />,
+            renderCell: (traitement) => {
+              switch (traitement.name) {
+                case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
+                case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
+                  return <AffectationHtsResultCell simulation={traitement} />;
+                case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
+                  return <BasculeJeuneValidesResultCell simulation={traitement} />;
+              }
+              return null;
+            },
           },
           {
             key: "statut",

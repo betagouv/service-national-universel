@@ -11,6 +11,7 @@ import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
 import { AdminTaskAffectationSelectorService } from "./AdminTaskAffectationSelector.service";
+import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelectorService";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -18,6 +19,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly logger: Logger,
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly adminTaskAffectationSelectorService: AdminTaskAffectationSelectorService,
+        private readonly adminTaskInscriptionSelectorService: AdminTaskInscriptionSelectorService,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
         private readonly cls: ClsService,
     ) {
@@ -41,6 +43,10 @@ export class AdminTaskConsumer extends WorkerHost {
                     case TaskName.AFFECTATION_CLE_SIMULATION:
                     case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
                         results = await this.adminTaskAffectationSelectorService.handleAffectation(job, task);
+                        break;
+                    case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
+                    case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
+                        results = await this.adminTaskInscriptionSelectorService.handleInscription(job, task);
                         break;
                     case TaskName.REFERENTIEL_IMPORT:
                         const importTask = task as ReferentielImportTaskModel;
