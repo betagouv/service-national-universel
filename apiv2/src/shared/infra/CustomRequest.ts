@@ -7,6 +7,6 @@ export interface CustomRequest extends Request {
     user: Partial<ReferentModel>;
     correlationId: string;
     token: string;
-    classe: Partial<ClasseModel>;
+    classe: ClasseModel;
     jeune: Partial<JeuneModel>;
 }
