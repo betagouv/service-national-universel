@@ -37,8 +37,11 @@ export const validatePdtFile = async (
     return { ok: false, code: ERRORS.INVALID_BODY };
   }
 
-  // Count columns that start with "ID PDR" to know how many PDRs there are.
-  const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+  // Count columns that start with "MATRICULE DU PDR" to know how many PDRs there are.
+  const countPdr = lines.reduce((acc, line) => {
+    const count = getLinePdrCount(line);
+    return count > acc ? count : acc;
+  }, 0);
   let maxPdrOnLine = 0;
 
   const errors: PdtErrors = {
@@ -430,7 +433,7 @@ export const computeImportSummary = (lines: PdtLine[]) => {
   };
 };
 
-const getLinePdrCount = (line) => {
+export const getLinePdrCount = (line) => {
   return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
 };
 
@@ -439,7 +442,7 @@ const getLinePdrIds = (line) => {
   const pdrIds: string[] = [];
   for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
     if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-      pdrIds.push(line[`ID PDR ${pdrNumber}`]);
+      pdrIds.push(line[`ID PDR ${pdrNumber}`]?.toLowerCase());
     }
   }
   return pdrIds;

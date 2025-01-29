@@ -23,7 +23,7 @@ import {
 import scanFile from "../../utils/virusScanner";
 import { getMimeFromFile } from "../../utils/file";
 import { validateId } from "../../utils/validator";
-import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
+import { validatePdtFile, computeImportSummary, getLinePdrCount } from "../../planDeTransport/planDeTransport/import/pdtImportService";
 import { formatTime, mapTransportType } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
 import { UserRequest } from "../request";
@@ -155,7 +155,10 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const lines = importData.lines as ImportPlanTransportLine[];
-      const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+      const countPdr = lines.reduce((acc, line) => {
+        const count = getLinePdrCount(line);
+        return count > acc ? count : acc;
+      }, 0);
 
       // Vérification des lignes existantes
       const newLines: ImportPlanTransportLine[] = [];
