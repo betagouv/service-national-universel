@@ -58,6 +58,8 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
+import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 
 @Module({
     imports: [
@@ -82,6 +84,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     controllers: [
         ClasseController,
         AffectationController,
+        InscriptionController,
         Phase1Controller,
         AuthController,
         AdminTaskController,
@@ -91,6 +94,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     providers: [
         ClasseService,
         AffectationService,
+        InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
         { provide: AuthProvider, useClass: JwtTokenService },

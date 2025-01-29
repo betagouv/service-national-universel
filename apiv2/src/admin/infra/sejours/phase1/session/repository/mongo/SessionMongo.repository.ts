@@ -35,6 +35,13 @@ export class SessionRepository implements SessionGateway {
         }
         return SessionMapper.toModel(session);
     }
+    async findByName(name: string): Promise<SessionModel> {
+        const session = await this.sesssionMongooseEntity.findOne({ name });
+        if (!session) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return SessionMapper.toModel(session);
+    }
     async update(session: SessionModel): Promise<SessionModel> {
         const sessionEntity = SessionMapper.toEntity(session);
         const retrievedSession = await this.sesssionMongooseEntity.findById(session.id);

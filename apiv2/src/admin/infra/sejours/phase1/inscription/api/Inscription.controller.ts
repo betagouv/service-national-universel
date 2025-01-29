@@ -1,0 +1,122 @@
+import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+
+import {
+    InscriptionRoutes,
+    TaskName,
+    TaskStatus,
+    ValiderAffectationHTSTaskParameters,
+    SimulationBasculerJeunesValidesTaskParameters,
+} from "snu-lib";
+
+import { TaskGateway } from "@task/core/Task.gateway";
+import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { TaskMapper } from "@task/infra/Task.mapper";
+import { CustomRequest } from "@shared/infra/CustomRequest";
+
+import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Inscription.validation";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
+
+@Controller("inscription")
+export class InscriptionController {
+    constructor(
+        private readonly inscriptionService: InscriptionService,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+    ) {}
+
+    @UseGuards(AdminGuard)
+    @Get("/:sessionId/bacule-jeunes-valides/status")
+    async getBaculeJeunesValidesStatus(
+        @Param("sessionId") sessionId: string,
+    ): Promise<InscriptionRoutes["GetBasculerJeunesValides"]["response"]> {
+        const traitement = await this.inscriptionService.getStatusValidation(
+            sessionId,
+            TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+        );
+        return {
+            simulation: await this.inscriptionService.getStatusSimulation(
+                sessionId,
+                TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+            ),
+            traitement: {
+                ...traitement,
+                lastCompletedAt: traitement.lastCompletedAt?.toISOString(),
+            },
+        };
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/bacule-jeunes-valides/simulation")
+    async basuleJeunesValidesSimulation(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Body() payload: PostSimulationsPayloadDto,
+    ): Promise<InscriptionRoutes["PostBasculerJeunesValides"]["response"]> {
+        const task = await this.taskGateway.create({
+            name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    status: payload.status,
+                    statusPhase1: payload.statusPhase1,
+                    statusPhase1Motif: payload.statusPhase1Motif,
+                    departements: payload.departements,
+                    niveauScolaires: payload.niveauScolaires,
+                    avenir: payload.avenir,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as SimulationBasculerJeunesValidesTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/bacule-jeunes-valides/valider")
+    async basuleJeunesValidesValider(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+        @Body() payload: PostSimulationValiderPayloadDto,
+    ): Promise<InscriptionRoutes["PostValiderBasculerJeunesValides"]["response"]> {
+        const simulationTask = await this.taskGateway.findById(taskId);
+
+        // On verifie qu'une simulation n'a pas déjà été affecté en amont
+        const { status, lastCompletedAt } = await this.inscriptionService.getStatusValidation(
+            sessionId,
+            TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+        );
+
+        if (
+            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
+            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
+        ) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+        }
+
+        const task = await this.taskGateway.create({
+            name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    simulationTaskId: taskId,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as ValiderAffectationHTSTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+}

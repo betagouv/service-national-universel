@@ -1192,6 +1192,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_CLE_SIMULATION":
     case "AFFECTATION_CLE_SIMULATION_VALIDER":
       return "Affectation CLE (Metropole)";
+    case "BACULE_JEUNES_VALIDES_SIMULATION":
+    case "BACULE_JEUNES_VALIDES_SIMULATION_VALIDER":
+      return "Bascule des jeunes validés";
     default:
       return name;
   }

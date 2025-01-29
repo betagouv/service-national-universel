@@ -9,3 +9,4 @@ export type Phase1Routes = {
 };
 
 export type { AffectationRoutes } from "./affectation";
+export type { InscriptionRoutes } from "./inscription";
