@@ -13,31 +13,29 @@ import { EtablissementModel } from "../../cle/etablissement/Etablissement.model"
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 
 type JeuneRapport = {
-    "_id du volontaire": string;
+    "id du volontaire": string;
     Cohort: string;
     Statut: string;
     "Statut de phase 1": string;
-    "_id du bus": string;
+    "id du bus": string;
     "Nom du bus": string;
-    "_id du centre": string;
+    "id du centre": string;
     "Nom du centre": string;
     "Département du centre": string;
     "Région du centre": string;
-    "_id classe": string;
+    "id classe": string;
     "Nom de la classe": string;
     "Nom de l'établissement": string;
     "Département de l'établissement": string;
     "Région de l'établissement": string;
-    dev_sessionPhase1Id: string;
-    dev_cohesionCenterId: string;
-    dev_pointDeRassemblementId: string;
-    dev_ligneId: string;
-    dev_status: string;
-    dev_statusPhase1: string;
+    sejourId: string;
+    classeCenterId: string;
+    pointDeRassemblementId: string;
+    jeuneLigneId: string;
 };
 
 type CentreRapport = {
-    _id: string;
+    id: string;
     "Nom du centre": string;
     "Département du centre": string;
     "Région du centre": string;
@@ -47,9 +45,9 @@ type CentreRapport = {
 };
 
 type LigneBusRapport = {
-    _id: string;
+    id: string;
     "Nom du bus": string;
-    "_id du centre": string;
+    "id du centre": string;
     "Nom du centre": string;
     "Département du centre": string;
     "Région du centre": string;
@@ -62,13 +60,13 @@ type LigneBusRapport = {
 };
 
 type ErreurRapport = {
-    "_id classe": string;
+    "id classe": string;
     "Nom de la classe": string;
     "Nom de l'établissement": string;
     "Département de l'établissement": string;
     "Région de l'établissement": string;
-    "_id du centre": string;
-    "_id du bus": string;
+    "id du centre": string;
+    "id du bus": string;
     Erreur: string;
     "Nombre de volontaires": number;
     "Capacité du bus ou de la session"?: number;
@@ -90,7 +88,7 @@ export const RAPPORT_SHEETS = {
     VOLONTAIRES: "Volontaires",
     CENTRES: "Centres",
     BUS: "Bus",
-    ERREURS: "Bugs",
+    ERREURS: "Erreurs",
 };
 
 @Injectable()
@@ -107,7 +105,7 @@ export class SimulationAffectationCLEService {
             placeOccupees: number;
             placeRestantes: number;
         }[],
-        centreList: {
+        sejourList: {
             sejour: SejourModel;
             placeOccupees: number;
             placeRestantes: number;
@@ -129,7 +127,7 @@ export class SimulationAffectationCLEService {
                 const ligneBus = ligneDeBusList.find(
                     (ligneBus) => ligneBus.ligneDeBus.id === jeune.ligneDeBusId,
                 )!.ligneDeBus;
-                const sejour = centreList.find((centre) => centre.sejour.id === jeune.sejourId)!.sejour;
+                const sejour = sejourList.find((centre) => centre.sejour.id === jeune.sejourId)?.sejour;
                 const classe = classeList.find((classe) => classe.id === jeune.classeId)!;
                 const etablissement = etablissementList.find(
                     (etablissement) => etablissement.id === classe.etablissementId,
@@ -138,56 +136,55 @@ export class SimulationAffectationCLEService {
                 const referentClasse = referentsList.find((referent) => classe.referentClasseIds.includes(referent.id));
 
                 return {
-                    "_id du volontaire": jeune.id,
+                    "id du volontaire": jeune.id,
                     Nom: jeune.nom,
                     Prenom: jeune.prenom,
                     Email: jeune.email,
                     Cohort: jeune.sessionNom!,
                     Statut: jeune.statut,
-                    "Statut de phase 1": "AFFECTED",
-                    "_id du bus": ligneBus.id,
-                    "Nom du bus": jeune.ligneDeBusId,
-                    "_id du centre": jeune.centreId!,
-                    "Nom du centre": sejour.centreNom!,
-                    "Département du centre": sejour.departement!,
-                    "Région du centre": sejour.region!,
-                    "_id classe": jeune.classeId!,
+                    "Statut de phase 1": jeune.statutPhase1,
+                    "id du bus": ligneBus.id,
+                    "Nom du bus": ligneBus.numeroLigne,
+                    "id du centre": jeune.centreId!,
+                    // "matricule du centre": centre?.,
+                    "Nom du centre": sejour?.centreNom!,
+                    "Département du centre": sejour?.departement!,
+                    "Région du centre": sejour?.region!,
+                    "id classe": jeune.classeId!,
                     "Nom de la classe": classe.nom!,
                     "Nom de l'établissement": etablissement?.nom,
                     "Département de l'établissement": etablissement?.departement,
                     "Région de l'établissement": etablissement?.region,
                     "Référent de classe Nom": referentClasse?.nomComplet,
                     "Référent de classe Email": referentClasse?.email,
-                    dev_sessionPhase1Id: jeune.sejourId!,
-                    dev_cohesionCenterId: classe.centreCohesionId!,
-                    dev_pointDeRassemblementId: jeune.pointDeRassemblementId!,
-                    dev_ligneId: jeune.ligneDeBusId!,
-                    dev_status: jeune.statut,
-                    dev_statusPhase1: "AFFECTED",
+                    sejourId: jeune.sejourId!,
+                    classeCenterId: classe.centreCohesionId!,
+                    pointDeRassemblementId: jeune.pointDeRassemblementId!,
+                    jeuneLigneId: jeune.ligneDeBusId!,
                 } as JeuneRapport;
             });
 
-        const centreListRapport = centreList.map((centre) => {
-            const sejour = centre.sejour;
+        const centreListRapport = sejourList.map((info) => {
+            const sejour = info.sejour;
             return {
-                _id: sejour.id,
+                id: sejour.id,
                 "Nom du centre": sejour.centreNom,
                 "Département du centre": sejour.departement,
                 "Région du centre": sejour.region,
                 "Places disponibles": sejour.placesTotal || 0,
-                "Places occupées": centre.placeOccupees,
-                "Places restantes": centre.placeRestantes,
+                "Places occupées": info.placeOccupees,
+                "Places restantes": info.placeRestantes,
             } as CentreRapport;
         });
 
         const ligneBusRapport = ligneDeBusList.map((ligneBusResults) => {
             const ligneDeBus = ligneBusResults.ligneDeBus;
             const classe = classeList.find((classe) => classe.id === ligneBusResults.classeId)!;
-            const sejour = centreList.find((centre) => centre.sejour.id === ligneBusResults.sejourId)!.sejour;
+            const sejour = sejourList.find((centre) => centre.sejour.id === ligneBusResults.sejourId)!.sejour;
             return {
-                _id: ligneDeBus.id,
+                id: ligneDeBus.id,
                 "Nom du bus": ligneDeBus.numeroLigne,
-                "_id du centre": classe.centreCohesionId,
+                "id du centre": classe.centreCohesionId,
                 "Nom du centre": sejour.centreNom,
                 "Département du centre": sejour.departement,
                 "Région du centre": sejour.region,
@@ -215,13 +212,13 @@ export class SimulationAffectationCLEService {
                 placesRestantes = sejour.placesRestantes;
             }
             return {
-                "_id classe": classe.id,
+                "id classe": classe.id,
                 "Nom de la classe": classe.nom,
                 "Nom de l'établissement": etablissement?.nom,
                 "Département de l'établissement": etablissement?.departement,
                 "Région de l'établissement": etablissement?.region,
-                "_id du centre": classe.centreCohesionId,
-                "_id du bus": ligneBus?.id,
+                "id du centre": classe.centreCohesionId,
+                "id du bus": ligneBus?.id,
                 "Nom du bus": ligneBus?.numeroLigne,
                 Erreur: erreur.message,
                 "Nombre de volontaires": erreur.jeunesNombre,

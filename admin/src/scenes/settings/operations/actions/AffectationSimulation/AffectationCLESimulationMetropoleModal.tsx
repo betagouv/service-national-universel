@@ -2,7 +2,7 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { CohortDto, formatDepartement, Phase1Routes, region2department, RegionsMetropoleAndCorse, translate } from "snu-lib";
+import { CohortDto, formatDepartement, Phase1Routes, region2department, RegionsMetropole, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -22,8 +22,8 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
     departements: Record<string, string[]>;
     etranger: boolean;
   }>({
-    departements: RegionsMetropoleAndCorse.reduce((acc, region) => {
-      acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
+    departements: RegionsMetropole.reduce((acc, region) => {
+      acc[region] = region2department[region];
       return acc;
     }, {}),
     etranger: true,
@@ -70,7 +70,7 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
             <div className="flex flex-col w-full gap-2.5">
               <h2 className="text-lg leading-7 font-bold m-0">Découpage territorial</h2>
               <div className="flex flex-col w-full">
-                {RegionsMetropoleAndCorse.map((region) => (
+                {RegionsMetropole.map((region) => (
                   <CollapsableSelectSwitcher
                     key={region}
                     title={region}

@@ -31,7 +31,7 @@ import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 type Resultats = {
     jeunesList: JeuneModel[];
     jeunesDejaAffectedList: JeuneModel[];
-    centreList: {
+    sejourList: {
         sejour: SejourModel;
         placeOccupees: number;
         placeRestantes: number;
@@ -111,7 +111,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
         const resultats: Resultats = {
             jeunesList: [],
             jeunesDejaAffectedList: [],
-            centreList: [],
+            sejourList: [],
             ligneDeBusList: [],
             classeErreurList: [],
         };
@@ -214,7 +214,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
             }
 
             // Gestion place dans le centre
-            const resultatCentre = resultats.centreList.find((r) => r.sejour.id === sejour.id);
+            const resultatCentre = resultats.sejourList.find((r) => r.sejour.id === sejour.id);
             placesRestantes = resultatCentre?.placeRestantes || sejour.placesRestantes || 0;
             if (placesRestantes < jeunesList.length) {
                 resultats.classeErreurList.push({
@@ -227,7 +227,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
                 continue;
             }
             if (!resultatCentre) {
-                resultats.centreList.push({
+                resultats.sejourList.push({
                     sejour: sejour,
                     placeOccupees: (sejour.placesTotal || 0) - (sejour.placesRestantes || 0) + jeunesList.length,
                     placeRestantes: (sejour.placesRestantes || 0) - jeunesList.length,
@@ -253,7 +253,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
         const rapportData = this.simulationAffectationCLEService.calculRapportAffectation(
             resultats.jeunesList,
             resultats.ligneDeBusList,
-            resultats.centreList,
+            resultats.sejourList,
             resultats.classeErreurList,
             classeList,
             etablissementList,

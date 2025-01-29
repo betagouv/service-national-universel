@@ -58,7 +58,7 @@ export type ValiderAffectationRapportData = Array<
         centreNom: string;
         "places restantes après l'inscription (centre)": string | number;
         "places totale (centre)": string | number;
-        error?: string;
+        erreur?: string;
     }
 >;
 
@@ -104,7 +104,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         this.logger.debug("Young to affect: " + simulationJeunesAAffecterList.length);
 
         const jeuneAAffecterList = await this.jeuneGateway.findByIds(
-            simulationJeunesAAffecterList.map((jeune) => jeune["_id du volontaire"]),
+            simulationJeunesAAffecterList.map((jeune) => jeune["id du volontaire"]),
         );
         if (jeuneAAffecterList.length !== simulationJeunesAAffecterList.length) {
             throw new FunctionalException(
@@ -123,11 +123,11 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
         // Traitement des jeunes
         for (const jeuneRapport of simulationJeunesAAffecterList) {
-            const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport["_id du volontaire"])!;
+            const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport["id du volontaire"])!;
 
-            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.dev_ligneId);
-            const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.dev_sessionPhase1Id);
-            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport.dev_pointDeRassemblementId); // TODO: utiliser le matricule
+            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.jeuneLigneId);
+            const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
+            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport.pointDeRassemblementId); // TODO: utiliser le matricule
 
             // Controle de coherence
             if (jeune.statut !== YOUNG_STATUS.VALIDATED) {
@@ -141,10 +141,10 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             }
 
             if (!sejour) {
-                this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.dev_sessionPhase1Id} (jeune: ${jeune.id})`);
+                this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
                 throw new FunctionalException(
                     FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `sejour non trouvé ${jeuneRapport.dev_sessionPhase1Id} (jeune: ${jeune.id})`,
+                    `sejour non trouvé ${jeuneRapport.sejourId} (jeune: ${jeune.id})`,
                 );
             }
             if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
@@ -174,20 +174,20 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             }
             if (!ligneDeBus) {
                 this.logger.error(
-                    `🚩 Ligne de bus introuvable (${jeuneRapport.dev_ligneId}) => jeune ${jeune.id} ignored.`,
+                    `🚩 Ligne de bus introuvable (${jeuneRapport.jeuneLigneId}) => jeune ${jeune.id} ignored.`,
                 );
                 throw new FunctionalException(
                     FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `ligne de bus non trouvée ${jeuneRapport.dev_ligneId} (jeune: ${jeune.id})`,
+                    `ligne de bus non trouvée ${jeuneRapport.jeuneLigneId} (jeune: ${jeune.id})`,
                 );
             }
             if (!pdr) {
                 this.logger.error(
-                    `🚩 Point de rassemblement introuvable (${jeuneRapport.dev_pointDeRassemblementId}) => jeune ${jeune.id} ignored.`,
+                    `🚩 Point de rassemblement introuvable (${jeuneRapport.pointDeRassemblementId}) => jeune ${jeune.id} ignored.`,
                 );
                 throw new FunctionalException(
                     FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `point de rassemblement non trouvé ${jeuneRapport.dev_pointDeRassemblementId} (jeune: ${jeune.id})`,
+                    `point de rassemblement non trouvé ${jeuneRapport.pointDeRassemblementId} (jeune: ${jeune.id})`,
                 );
             }
 
@@ -196,12 +196,12 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
             const jeuneUpdated: JeuneModel = {
                 ...jeune,
-                centreId: jeuneRapport.dev_cohesionCenterId,
-                sejourId: jeuneRapport.dev_sessionPhase1Id,
+                centreId: jeuneRapport.classeCenterId,
+                sejourId: jeuneRapport.sejourId,
                 statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
 
-                pointDeRassemblementId: jeuneRapport.dev_pointDeRassemblementId,
-                ligneDeBusId: jeuneRapport.dev_ligneId,
+                pointDeRassemblementId: jeuneRapport.pointDeRassemblementId,
+                ligneDeBusId: jeuneRapport.jeuneLigneId,
                 hasPDR: "true",
                 transportInfoGivenByLocal: undefined,
 
@@ -269,7 +269,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         sejour?: SejourModel,
         ligneDeBus?: LigneDeBusModel,
         pdr?: PointDeRassemblementModel,
-        error = "",
+        erreur = "",
     ): ValiderAffectationRapportData[0] {
         return {
             id: jeune.id,
@@ -292,8 +292,8 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             centreNom: sejour?.centreNom || "",
             "places restantes après l'inscription (centre)": sejour?.placesRestantes || "",
             "places totale (centre)": sejour?.placesTotal || "",
-            error,
-            ...(!error
+            erreur,
+            ...(!erreur
                 ? {
                       prenom: jeune.prenom,
                       nom: jeune.nom,
