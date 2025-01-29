@@ -29,7 +29,7 @@ export const createPlanDeTransport = async (planDeTransport?: Partial<PlanDeTran
         centreNom: "centreNom",
         centreRegion: "centreRegion",
         centreDepartement: "centreDepartement",
-        ligneFusionneIds: [],
+        ligneFusionneeIds: [],
         ...planDeTransport,
     });
 };

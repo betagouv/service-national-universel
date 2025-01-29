@@ -31,7 +31,7 @@ export class PlanDeTransportMapper {
             centreCodePostal: planDeTransportDocument.centerZip,
             centreNom: planDeTransportDocument.centerName,
             centreCode: planDeTransportDocument.centerCode,
-            ligneFusionneIds: planDeTransportDocument.mergedBusIds,
+            ligneFusionneeIds: planDeTransportDocument.mergedBusIds,
             ligneMirroirId: planDeTransportDocument.mirrorBusId,
         };
     }
@@ -62,7 +62,7 @@ export class PlanDeTransportMapper {
             centerZip: planDeTransportModel.centreCodePostal,
             centerName: planDeTransportModel.centreNom,
             centerCode: planDeTransportModel.centreCode,
-            mergedBusIds: planDeTransportModel.ligneFusionneIds,
+            mergedBusIds: planDeTransportModel.ligneFusionneeIds,
             mirrorBusId: planDeTransportModel.ligneMirroirId,
             // TODO: map pointDeRassemblements...
         };
