@@ -58,10 +58,10 @@ export default function VolontaireList() {
           filters: {},
           exportFields: ["busId"],
         });
-        // const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
-        //   filters: {},
-        //   exportFields: ["name", "uniqueKeyAndId"],
-        // });
+        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
+          filters: {},
+          exportFields: ["name", "uniqueKeyAndId"],
+        });
         const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
           filters: {},
           exportFields: ["name", "uai"],
@@ -76,7 +76,7 @@ export default function VolontaireList() {
     })();
   }, []);
 
-  if (!sessionsPhase1 || !bus || !etablissements) return <Loader />;
+  if (!sessionsPhase1 || !bus || !classes || !etablissements) return <Loader />;
 
   return (
     <>
