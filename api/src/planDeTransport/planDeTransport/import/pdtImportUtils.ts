@@ -114,7 +114,7 @@ export const computeMergedBusIds = (lines: Partial<ImportPlanTransportLine>[], e
   const mergedBusIds = existingMergedBusIds;
   for (const line of lines) {
     const busId = line["NUMERO DE LIGNE"];
-    const mergedLines = (line["LIGNES FUSIONNÉES"]?.split(",") || []).filter((mergedLine) => !!mergedLine);
+    const mergedLines = (line["LIGNES FUSIONNÉES"]?.replaceAll(" ", "")?.split(",") || []).filter((mergedLine) => !!mergedLine);
 
     // console.log("busId", busId, mergedBusIds);
     if (!mergedBusIds[busId!]) {
