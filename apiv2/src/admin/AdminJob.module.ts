@@ -7,6 +7,7 @@ import { TaskModule } from "@task/Task.module";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { AdminTaskConsumer } from "./infra/task/AdminTask.consumer";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
+import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
 import { ligneDeBusMongoProviders } from "./infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
@@ -32,7 +33,6 @@ import { historyProvider } from "./infra/history/historyProvider";
 import { AdminTaskImportReferentielSelectorService } from "./infra/task/AdminTaskImportReferentielSelector.service";
 import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
 import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
-import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
@@ -42,6 +42,18 @@ import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
 import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
+import { SimulationAffectationCLE } from "./core/sejours/phase1/affectation/SimulationAffectationCLE";
+import { EtablissementGateway } from "./core/sejours/cle/etablissement/Etablissement.gateway";
+import { EtablissementRepository } from "./infra/sejours/cle/etablissement/Etablissement.repository";
+import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
+import { ReferentGateway } from "./core/iam/Referent.gateway";
+import { ReferentRepository } from "./infra/iam/repository/mongo/ReferentMongo.repository";
+import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
+import { ContactGateway } from "./infra/iam/Contact.gateway";
+import { ContactProducer } from "@notification/infra/email/Contact.producer";
+import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
+import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffectationSelector.service";
 
 @Module({
     imports: [
@@ -63,6 +75,9 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         Logger,
         AdminTaskConsumer,
         AdminTaskRepository,
+        ...classeMongoProviders,
+        ...etablissementMongoProviders,
+        ...referentMongoProviders,
         ...jeuneMongoProviders,
         ...centreMongoProviders,
         ...planDeTransportMongoProviders,
@@ -73,23 +88,30 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         ...sejourMongoProviders,
         ...sessionMongoProviders,
         ...taskMongoProviders,
+        // ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
         ...historyProvider,
-        ...classeMongoProviders,
+        { provide: ClasseGateway, useClass: ClasseRepository },
+        { provide: ReferentGateway, useClass: ReferentRepository },
+        { provide: EtablissementGateway, useClass: EtablissementRepository },
+        { provide: ContactGateway, useClass: ContactProducer },
+        { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
-        { provide: ClasseGateway, useClass: ClasseRepository },
         { provide: JeuneGateway, useClass: JeuneRepository },
         { provide: ClockGateway, useClass: ClockProvider },
-        { provide: NotificationGateway, useClass: NotificationProducer },
         // add use case here
         AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        SimulationAffectationCLEService,
+        SimulationAffectationCLE,
         ValiderAffectationHTS,
+        ValiderAffectationCLE,
         ...referentielUseCaseProvider,
         ...referentielServiceProvider,
+        AdminTaskAffectationSelectorService,
         AdminTaskImportReferentielSelectorService,
     ],
 })

@@ -1,6 +1,6 @@
 import { Inject, Logger } from "@nestjs/common";
 
-import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, GRADES, department2region } from "snu-lib";
+import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, department2region, MIME_TYPES } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -104,7 +104,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         );
 
         this.logger.log(
-            `Jeunes a affectés : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
+            `Jeunes à affecter : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
         );
 
         // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
@@ -237,7 +237,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
-                mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mimetype: MIME_TYPES.EXCEL,
             },
         );
 
