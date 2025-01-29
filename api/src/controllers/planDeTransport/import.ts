@@ -179,24 +179,24 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
           const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
           const pdrValue = line[pdrKey]?.toString().toLowerCase();
-          if (line[pdrKey] && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
-            pdrIds.push(line[pdrKey] as string);
+          if (pdrValue && !["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
+            pdrIds.push(pdrValue);
           }
         }
 
         const session = await SessionPhase1Model.findOne({
           cohort: importData.cohort,
-          cohesionCenterId: line["ID CENTRE"],
+          cohesionCenterId: line["ID CENTRE"]?.toLowerCase(),
         });
 
         const busLineData = {
           cohort: importData.cohort,
-          cohortId: importData.cohortId,
+          cohortId: importData.cohortId?.toLowerCase(),
           busId: line["NUMERO DE LIGNE"],
           codeCourtDeRoute: line["Code court de route"],
           departuredDate: parseDate(line["DATE DE TRANSPORT ALLER"], "dd/MM/yyyy", new Date()),
           returnDate: parseDate(line["DATE DE TRANSPORT RETOUR"], "dd/MM/yyyy", new Date()),
-          centerId: line["ID CENTRE"],
+          centerId: line["ID CENTRE"]?.toLowerCase(),
           centerArrivalTime: formatTime(line["HEURE D'ARRIVEE AU CENTRE"]),
           centerDepartureTime: formatTime(line["HEURE DE DÉPART DU CENTRE"]),
           followerCapacity: line["TOTAL ACCOMPAGNATEURS"],
@@ -208,8 +208,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
           meetingPointsIds: pdrIds,
-          classeId: line["ID CLASSE"],
-          mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"].split(",") : [],
+          classeId: line["ID CLASSE"]?.toLowerCase(),
+          mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"]?.toLowerCase().split(",") : [],
         };
 
         const newBusLine = new LigneBusModel(busLineData);
@@ -228,12 +228,12 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           const pdrKey = `ID PDR ${pdrNumber}` as keyof ImportPlanTransportLine;
           const pdrValue = line[pdrKey]?.toString().toLowerCase();
 
-          if (pdrNumber > 1 && !line[pdrKey]) return acc;
+          if (pdrNumber > 1 && !pdrValue) return acc;
 
           if (!["correspondance aller", "correspondance retour", "correspondance"].includes(pdrValue || "")) {
             acc.push({
-              lineId: busLine._id.toString(),
-              meetingPointId: line[pdrKey] as string,
+              lineId: busLine._id.toString()?.toLowerCase(),
+              meetingPointId: pdrValue as string,
               transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
