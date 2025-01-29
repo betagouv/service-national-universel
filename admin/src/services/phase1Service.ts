@@ -21,6 +21,14 @@ const Phase1Service = {
       target: "API_V2",
     })();
   },
+  deletePlanDeTransport: async (sessionId: string) => {
+    return await buildRequest<Phase1Routes["DeletePDT"]>({
+      path: "/phase1/{sessionId}/plan-de-transport",
+      method: "DELETE",
+      params: { sessionId },
+      target: "API_V2",
+    })();
+  },
 };
 
 export { Phase1Service };

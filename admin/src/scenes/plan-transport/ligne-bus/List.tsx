@@ -27,10 +27,13 @@ import ListPanel from "./modificationPanel/List";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
 import ImportSDRButton from "./ImportSDRButton";
+import DeletePDTButton from "./DeletePDTButton";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { AuthState } from "@/redux/auth/reducer";
 
 export default function List() {
-  const { user, sessionPhase1 } = useSelector((state) => state.Auth);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
   const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
@@ -44,13 +47,15 @@ export default function List() {
   const [panel, setPanel] = React.useState({ open: false, id: null });
   const cohortInURL = new URLSearchParams(history.location.search).get("cohort");
 
-  const [data, setData] = React.useState([]);
+  const [data, setData] = React.useState<any[]>([]);
   const pageId = "plandetransport";
-  const [selectedFilters, setSelectedFilters] = React.useState({});
+  const [selectedFilters, setSelectedFilters] = React.useState<any>({});
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
+
+  const cohortDto = cohorts?.find((c) => c.name === cohort);
 
   const filterArray = [
     { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
@@ -69,14 +74,12 @@ export default function List() {
       name: "pointDeRassemblements.region",
       parentGroup: "Points de rassemblement",
       missingLabel: "Non renseigné",
-      defaultValue: user.role === ROLES.REFERENT_REGION ? [user.region] : [],
     },
     {
       title: "Département",
       name: "pointDeRassemblements.department",
       parentGroup: "Points de rassemblement",
       missingLabel: "Non renseigné",
-      defaultValue: user.role === ROLES.REFERENT_DEPARTMENT ? user.department : [],
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
@@ -152,7 +155,7 @@ export default function List() {
       setIsLoading(false);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
     }
   };
 
@@ -172,17 +175,21 @@ export default function List() {
       <Header
         title="Plan de transport"
         breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
-        actions={
+        actions={[
           <SelectCohort
+            key="select-cohort"
             cohort={cohort}
             onChange={(cohortName) => {
               setCohort(cohortName);
               history.replace({ search: `?cohort=${cohortName}` });
             }}
-          />
-        }
+          />,
+        ]}
       />
-      {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
+      <div className="flex gap-2">
+        {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
+        {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
+      </div>
       {hasValue && (
         <Navbar
           tab={[
@@ -255,6 +262,7 @@ export default function List() {
                 pageId={pageId}
                 route="/elasticsearch/plandetransport/search"
                 setData={(value) => setData(value)}
+                // @ts-ignore
                 filters={filterArray}
                 searchPlaceholder="Rechercher une ligne (numéro, ville, region)"
                 selectedFilters={selectedFilters}
@@ -346,6 +354,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
         {
           action: async () => {},
           render: (
+            // @ts-ignore
             <ExportComponent
               title="Plan de transport"
               exportTitle="Plan_de_transport"
@@ -358,12 +367,12 @@ const returnSelect = (cohort, selectedFilters, user) => {
                 loadingButton: `text-sm text-gray-700`,
               }}
               transform={async (data) => {
-                let all = data;
+                const all = data;
                 // Get the length of the longest array of PDRs
                 const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
 
                 return all.map((data) => {
-                  let pdrs = {};
+                  const pdrs = {};
 
                   for (let i = 0; i < maxPDRs; i++) {
                     const pdr = data.pointDeRassemblements?.[i];
@@ -435,6 +444,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
       ].filter((x) => x),
     },
   ];
+  // @ts-ignore
   return <DropdownButton title={"Exporter"} optionsGroup={selectTest} position={"right"} />;
 };
 
@@ -577,7 +587,7 @@ const translateLineFillingRate = (e) => {
   return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
 };
 const transformDataTaux = (data) => {
-  const newData = [];
+  const newData: { key: string; doc_count: number }[] = [];
   data.map((d) => {
     const dizaine = translateLineFillingRate(parseInt(d.key));
     const val = newData.find((e) => e.key === dizaine);
