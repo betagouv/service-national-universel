@@ -141,9 +141,10 @@ function hasAccessToReinscription(young: YoungType) {
 }
 
 function canApplyToPhase2(young: YoungType, cohort: CohortType) {
-  const statusCheck = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED || !!young.statusPhase2OpenedAt;
-  const dateCheck = new Date() > getCohortEndDate(cohort) || (young.statusPhase2OpenedAt && new Date() > new Date(young.statusPhase2OpenedAt));
-  return statusCheck && dateCheck;
+  const hasStartedPhase2 = young.statusPhase2OpenedAt && new Date() > new Date(young.statusPhase2OpenedAt);
+  const cohortHasStarted = new Date() < getCohortStartDate(cohort);
+  const cohortHasEnded = new Date() > getCohortEndDate(cohort);
+  return hasStartedPhase2 && !cohortHasStarted && cohortHasEnded;
 }
 
 export {
