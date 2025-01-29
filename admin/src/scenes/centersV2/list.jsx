@@ -156,7 +156,7 @@ const ListSession = ({ firstSession }) => {
                   const hasSanitaryContactEmail = Boolean(data?.sanitaryContactEmail).toString();
                   return {
                     "Id centre": center?._id?.toString(),
-                    "Code du centre": center?.code2022,
+                    Matricule: center?.matricule,
                     "Nom du centre": center?.name,
                     "Désignation du centre": center?.centerDesignation,
                     "Id de la session": data?._id?.toString(),
@@ -238,6 +238,7 @@ const ListCenter = ({ firstSession }) => {
   });
   const [size, setSize] = useState(10);
   const filterArray = [
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
       title: "Région",
@@ -265,7 +266,6 @@ const ListCenter = ({ firstSession }) => {
       translate: (e) => translateDomainCenter(e),
     },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
 
   const history = useHistory();
 
@@ -295,8 +295,7 @@ const ListCenter = ({ firstSession }) => {
             transform={(all) => {
               return all?.map((data) => {
                 return {
-                  Id: data._id.toString(),
-                  "Code du centre": data?.code2022,
+                  Matricule: data?.matricule,
                   Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
                   "Cohorte(s)": data?.cohorts
