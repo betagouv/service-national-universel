@@ -25,7 +25,7 @@ import { orderCohort } from "../../../components/filters-system-v2/components/fi
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 import { youngCheckinField } from "@/utils";
 
-export const getFilterArray = (user, bus, session, classes, etablissements) => {
+export const getFilterArray = (user, bus, session, etablissements) => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -175,18 +175,18 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       missingLabel: "Non renseigné",
       translate: translatePhase1,
     },
-    {
-      title: "Classe Engagée ID",
-      name: "classeId",
-      parentGroup: "Phase 1",
-      missingLabel: "Non renseigné",
-      translate: (item) => {
-        if (item === "N/A" || !classes.length) return item;
-        const res = classes.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.uniqueKeyAndId;
-      },
-    },
+    // {
+    //   title: "Classe Engagée ID",
+    //   name: "classeId",
+    //   parentGroup: "Phase 1",
+    //   missingLabel: "Non renseigné",
+    //   translate: (item) => {
+    //     if (item === "N/A" || !classes.length) return item;
+    //     const res = classes.find((option) => option._id.toString() === item);
+    //     if (!res) return "N/A - Supprimé";
+    //     return res?.uniqueKeyAndId;
+    //   },
+    // },
     {
       title: "Etablissement CLE",
       name: "etablissementId",
