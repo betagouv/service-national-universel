@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
@@ -140,12 +140,10 @@ function hasAccessToReinscription(young: YoungType) {
   return young.cohort === "à venir";
 }
 
-//@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
-function canApplyToPhase2(young, cohort) {
-  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
-  const now = new Date();
-  const dateEnd = getCohortEndDate(cohort);
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
+function canApplyToPhase2(young: YoungType, cohort: CohortType) {
+  const statusCheck = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED || !!young.statusPhase2OpenedAt;
+  const dateCheck = new Date() > getCohortEndDate(cohort) || (young.statusPhase2OpenedAt && new Date() > new Date(young.statusPhase2OpenedAt));
+  return statusCheck && dateCheck;
 }
 
 export {
