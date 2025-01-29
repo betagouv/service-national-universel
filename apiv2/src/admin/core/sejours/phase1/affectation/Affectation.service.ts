@@ -28,9 +28,9 @@ export class AffectationService {
         private readonly logger: Logger,
     ) {}
 
-    async getStatusSimulation(sessionId: string) {
+    async getStatusSimulation(sessionId: string, taskName: TaskName) {
         const simulations = await this.taskGateway.findByNames(
-            [TaskName.AFFECTATION_HTS_SIMULATION],
+            [taskName],
             {
                 "metadata.parameters.sessionId": sessionId,
             },
@@ -42,10 +42,10 @@ export class AffectationService {
         };
     }
 
-    async getStatusValidation(sessionId: string) {
+    async getStatusValidation(sessionId: string, taskName: TaskName) {
         const lastTraitement = (
             await this.taskGateway.findByNames(
-                [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER],
+                [taskName],
                 {
                     "metadata.parameters.sessionId": sessionId,
                 },
@@ -55,7 +55,7 @@ export class AffectationService {
         )?.[0];
         const lastTraitementCompleted = (
             await this.taskGateway.findByNames(
-                [TaskName.AFFECTATION_HTS_SIMULATION_VALIDER],
+                [taskName],
                 {
                     status: TaskStatus.COMPLETED,
                     "metadata.parameters.sessionId": sessionId,

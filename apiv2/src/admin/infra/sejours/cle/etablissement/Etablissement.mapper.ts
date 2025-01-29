@@ -6,7 +6,7 @@ import e from "express";
 export class EtablissementMapper {
     static toModel(etablissementDocument: EtablissementDocument): EtablissementModel {
         return {
-            id: etablissementDocument._id,
+            id: etablissementDocument._id.toString(),
             adresse: etablissementDocument.address,
             codePostal: etablissementDocument.zip,
             commune: etablissementDocument.city,
@@ -52,5 +52,9 @@ export class EtablissementMapper {
             deletedAt: etablissementModel.deletedAt,
             schoolId: etablissementModel.schoolId,
         };
+    }
+
+    static toModels(etablissementDocuments: EtablissementDocument[]): EtablissementModel[] {
+        return etablissementDocuments.map((etablissementDocument) => this.toModel(etablissementDocument));
     }
 }
