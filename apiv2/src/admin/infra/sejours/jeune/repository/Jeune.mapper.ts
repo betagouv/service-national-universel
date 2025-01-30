@@ -195,6 +195,7 @@ export class JeuneMapper {
                 lat: jeuneDocument.medicosocialStructureLocation?.lat,
                 lon: jeuneDocument.medicosocialStructureLocation?.lon,
             },
+            cohesionStayMedicalFileReceived: jeuneDocument.cohesionStayMedicalFileReceived,
             structureEngagee: jeuneDocument.engagedStructure,
             memeEcoleCLE: jeuneDocument.sameSchoolCLE,
             amenagementSpecifique: jeuneDocument.specificAmenagment,
@@ -254,7 +255,7 @@ export class JeuneMapper {
             fichiersPreparationMilitaireCertificat: jeuneDocument.militaryPreparationFilesCertificate,
             statutFichiersPreparationMilitaire: jeuneDocument.statusMilitaryPreparationFiles,
             messageCorrectionPreparationMilitaire: jeuneDocument.militaryPreparationCorrectionMessage,
-
+            cniFiles: jeuneDocument.cniFiles,
             fichiers: {
                 cniFiles: jeuneDocument.files?.cniFiles,
                 highSkilledActivityProofFiles: jeuneDocument.files.highSkilledActivityProofFiles,
@@ -653,6 +654,7 @@ export class JeuneMapper {
             militaryPreparationFilesCertificate: jeune.fichiersPreparationMilitaireCertificat,
             statusMilitaryPreparationFiles: jeune.statutFichiersPreparationMilitaire,
             militaryPreparationCorrectionMessage: jeune.messageCorrectionPreparationMilitaire,
+            cniFiles: jeune.cniFiles,
             files: {
                 cniFiles: jeune.fichiers?.cniFiles,
                 highSkilledActivityProofFiles: jeune.fichiers?.highSkilledActivityProofFiles,
@@ -671,6 +673,7 @@ export class JeuneMapper {
             latestCNIFileCategory: jeune.categorieDernierFichierCNI,
             missionsInMail: jeune.missionsInMail,
             youngPhase1Agreement: jeune.youngPhase1Agreement,
+            cohesionStayMedicalFileReceived: jeune.cohesionStayMedicalFileReceived,
             status_equivalence: jeune.status_equivalence,
             correctionRequests: jeune.correctionRequests,
             notes: jeune.notes,

@@ -29,13 +29,13 @@ interface Referent {
     role?: string;
 }
 
-interface Note {
+export type NoteType = {
     phase?: string;
     note?: string;
     referent?: Referent;
     createdAt?: Date;
     updatedAt?: Date;
-}
+};
 
 export type JeuneModel = {
     id: string;
@@ -168,6 +168,7 @@ export type JeuneModel = {
     autresTransportsMobilite?: string;
     formatMission?: string;
     engagement?: string;
+    cniFiles?: string[];
     fichiers?: {
         cniFiles?: File[];
         highSkilledActivityProofFiles?: File[];
@@ -195,7 +196,7 @@ export type JeuneModel = {
     missionsInMail?: { missionId?: string; date?: Date }[];
     status_equivalence?: string;
     correctionRequests?: CorrectionRequest[];
-    notes?: Note[];
+    notes?: NoteType[];
     hasNotes?: string;
     defenseInterest?: string;
     defenseTypeInterest?: string;
@@ -261,6 +262,7 @@ export type JeuneModel = {
     departSejourMotif?: string;
     departSejourMotifComment?: string;
     youngPhase1Agreement: string;
+    cohesionStayMedicalFileReceived?: string;
 
     // Parent 1 Information
     parent1Prenom?: string;

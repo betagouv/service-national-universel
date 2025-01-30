@@ -201,6 +201,7 @@ export interface YoungDto {
   parent2AllowImageRights?: string;
   parent2AllowImageRightsReset?: string;
   parent2ContactPreference?: string;
+  cohesionStayMedicalFileReceived?: string;
   hostLastName?: string;
   hostFirstName?: string;
   hostRelationship?: string;
@@ -285,6 +286,7 @@ export interface YoungDto {
   militaryPreparationFilesCertificate?: string[];
   statusMilitaryPreparationFiles?: string;
   militaryPreparationCorrectionMessage?: string;
+  cniFiles?: string[];
   files?: {
     cniFiles?: File[];
     highSkilledActivityProofFiles?: File[];

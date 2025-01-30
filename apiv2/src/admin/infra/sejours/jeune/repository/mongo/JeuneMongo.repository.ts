@@ -152,4 +152,9 @@ export class JeuneRepository implements JeuneGateway {
             ],
         });
     }
+
+    async find(): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find();
+        return JeuneMapper.toModels(jeunes);
+    }
 }

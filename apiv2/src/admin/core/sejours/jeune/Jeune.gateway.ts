@@ -23,6 +23,7 @@ export interface JeuneGateway {
     create(jeune: CreateJeuneModel): Promise<JeuneModel>;
     countAffectedByLigneDeBus(ligneDeBusId: string): Promise<number>;
     findByClasseId(classeId: string): Promise<JeuneModel[]>;
+    find(query: any): Promise<JeuneModel[]>;
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");
