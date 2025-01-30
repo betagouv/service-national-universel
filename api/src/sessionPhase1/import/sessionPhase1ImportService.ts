@@ -99,7 +99,7 @@ const createSession = async (
     warning = "session places > center places";
   }
 
-  const foundSession = await SessionPhase1Model.findOne({ cohesionCenterId: foundCenter._id, cohortId: foundCohort.id });
+  const foundSession = await SessionPhase1Model.findOne({ sejourSnuId: sessionCenter.sejourSnuId });
   if (foundSession?._id) {
     // on met à jour les places disponibles si la session existe déjà
     logger.warn(`Session already exists for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
