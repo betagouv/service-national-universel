@@ -590,7 +590,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { id } = value;
+
+    const ligneBus = await LigneBusModel.findById(id);
+    if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohesionCenter = await CohesionCenterModel.findById(ligneBus.centerId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const PDR = await PointDeRassemblementModel.find({ region: cohesionCenter.region, deletedAt: { $exists: false } });
+
+    return res.status(200).send({ ok: true, data: PDR });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
