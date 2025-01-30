@@ -56,6 +56,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
 import { AdminTaskInscriptionSelectorService } from "./infra/task/AdminTaskInscriptionSelectorService";
 import { SimulationBasculeJeunesValides } from "./core/sejours/phase1/inscription/SimulationBasculeJeunesValides";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
+import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesValides";
 
 @Module({
     imports: [
@@ -116,6 +117,7 @@ import { InscriptionService } from "./core/sejours/phase1/inscription/Inscriptio
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,
         SimulationBasculeJeunesValides,
+        ValiderBasculeJeunesValides,
         ...referentielUseCaseProvider,
         ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,

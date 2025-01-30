@@ -9,7 +9,7 @@ import {
   GRADES,
   Phase1Routes,
   region2department,
-  RegionsMetropole,
+  regionList,
   translate,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -45,7 +45,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     statusPhase1Motif: [],
     cohesionStayPresence: false,
     niveauScolaires: session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
-    departements: RegionsMetropole.reduce((acc, region) => {
+    departements: regionList.reduce((acc, region) => {
       acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
       return acc;
     }, {}),
@@ -158,7 +158,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
             <div className="flex flex-col w-full gap-2.5">
               <h2 className="text-lg leading-7 font-bold m-0">Départements de résidence</h2>
               <div className="flex flex-col w-full">
-                {RegionsMetropole.map((region) => (
+                {regionList.map((region) => (
                   <CollapsableSelectSwitcher
                     key={region}
                     title={region}

@@ -7,4 +7,7 @@ export interface PostValiderBasculerJeunesValidesRoute extends BasicRoute {
   path: "/inscription/{sessionId}/simulation/{simulationId}/bacule-jeunes-valides/valider";
   params: { sessionId: string; simulationId: string };
   response: RouteResponseBodyV2<ValiderBasculerJeunesValidesTaskDto>;
+  payload: {
+    sendEmail: boolean;
+  };
 }

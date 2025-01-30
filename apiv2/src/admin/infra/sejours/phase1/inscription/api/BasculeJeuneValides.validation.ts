@@ -1,13 +1,6 @@
-import { ArrayMinSize, IsArray, IsBoolean, IsIn, IsMongoId } from "class-validator";
+import { ArrayMinSize, IsArray, IsBoolean, IsIn } from "class-validator";
 
-import {
-    DEPART_SEJOUR_MOTIFS,
-    GRADES,
-    region2department,
-    RegionsMetropole,
-    YOUNG_STATUS,
-    YOUNG_STATUS_PHASE1,
-} from "snu-lib";
+import { DEPART_SEJOUR_MOTIFS, departmentList, GRADES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 export class PostSimulationsPayloadDto {
     @IsArray()
@@ -28,7 +21,7 @@ export class PostSimulationsPayloadDto {
     statusPhase1Motif: Array<keyof typeof DEPART_SEJOUR_MOTIFS>;
 
     @IsArray()
-    @IsIn(RegionsMetropole.flatMap((region) => region2department[region]), { each: true })
+    @IsIn(departmentList, { each: true })
     @ArrayMinSize(1)
     departements: string[];
 
@@ -44,4 +37,7 @@ export class PostSimulationsPayloadDto {
     avenir: boolean;
 }
 
-export class PostSimulationValiderPayloadDto {}
+export class PostSimulationValiderPayloadDto {
+    @IsBoolean()
+    sendEmail: boolean;
+}

@@ -5,7 +5,7 @@ export interface SimulationBasculeJeunesValidesTaskParameters {
     sessionId: string;
     status: string[];
     statusPhase1: string[];
-    cohesionStayPresence: boolean;
+    presenceArrivee: boolean;
     statusPhase1Motif: string[];
     niveauScolaires: string[];
     departements: string[];
@@ -34,25 +34,28 @@ export type RapportData = {
 export type JeuneRapport = Pick<
     JeuneModel,
     | "id"
+    | "nom"
+    | "prenom"
+    | "statut"
     | "statutPhase1"
-    | "genre"
-    | "qpv"
-    | "psh"
-    | "sessionNom"
-    | "region"
-    | "departement"
     | "regionScolarite"
     | "departementScolarite"
-    | "pointDeRassemblementId"
-    | "ligneDeBusId"
-    | "centreId"
-    | "statut"
-    | "prenom"
-    | "nom"
-    | "handicapMemeDepartement"
->;
+    | "paysScolarite"
+    | "presenceArrivee"
+    | "departSejourMotif"
+> & {
+    regionResidence?: string;
+    departementResidence?: string;
+    nouvelleSession?: string;
+    nouvelleSessionId?: string;
+    ancienneSession?: string;
+    ancienneSessionId?: string;
+    dateNaissance?: string;
+    age?: string;
+};
 
 export const RAPPORT_SHEETS = {
+    RESUME: "Résumé",
     PROCHAINSEJOUR: "Prochain séjour",
     AVENIR: "À venir",
     REFUSES: "Refusés",

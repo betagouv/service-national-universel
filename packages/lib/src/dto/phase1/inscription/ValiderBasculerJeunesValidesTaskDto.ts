@@ -1,14 +1,14 @@
 import { TaskDto } from "../../taskDto";
 import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
-export interface ValiderBasculerJeunesValidesTaskParameters extends Phase1TaskParameters {
-  affecterPDR: boolean;
+export interface ValiderBasculeJeunesValidesTaskParameters extends Phase1TaskParameters {
+  sendEmail: boolean;
 }
 
-export type ValiderBasculerJeunesValidesTaskResult = {
-  rapportKey: string;
-  jeunesUpdated: number;
+export type ValiderBasculeJeunesValidesTaskResult = {
+  jeunesBascules: number;
+  jeunesRefuses: number;
   errors: number;
 };
 
-export interface ValiderBasculerJeunesValidesTaskDto extends TaskDto<ValiderBasculerJeunesValidesTaskParameters, ValiderBasculerJeunesValidesTaskResult> {}
+export interface ValiderBasculerJeunesValidesTaskDto extends TaskDto<ValiderBasculeJeunesValidesTaskParameters, ValiderBasculeJeunesValidesTaskResult> {}

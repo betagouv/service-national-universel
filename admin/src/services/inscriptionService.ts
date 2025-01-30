@@ -25,12 +25,13 @@ const InscriptionService = {
     })();
   },
 
-  postValiderBasculerJeunesValides: async (sessionId: string, simulationId: string) => {
+  postValiderBasculerJeunesValides: async (sessionId: string, simulationId: string, payload: InscriptionRoutes["PostValiderBasculerJeunesValides"]["payload"]) => {
     return await buildRequest<InscriptionRoutes["PostValiderBasculerJeunesValides"]>({
       path: "/inscription/{sessionId}/simulation/{simulationId}/bacule-jeunes-valides/valider",
       method: "POST",
       params: { sessionId, simulationId },
       target: "API_V2",
+      payload,
     })();
   },
 };

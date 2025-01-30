@@ -3,6 +3,11 @@ export interface ClockGateway {
     now(): Date;
     getNowSafeIsoDate(): string;
     isValidDate(date: Date): boolean;
+    formatShort(date: Date): string;
+    isAfter(dateA: Date, dateB: Date);
+    isBefore(dateA: Date, dateB: Date);
+    isWithinInterval(date: Date, params: { start: Date; end: Date });
+    computeAge(dateNaissance: Date);
 }
 
 export const ClockGateway = Symbol("ClockGateway");

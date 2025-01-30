@@ -60,7 +60,7 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await InscriptionService.postValiderBasculerJeunesValides(simulationBascule.metadata!.parameters!.sessionId!, simulationBascule.id);
+      return await InscriptionService.postValiderBasculerJeunesValides(simulationBascule.metadata!.parameters!.sessionId!, simulationBascule.id, { sendEmail });
     },
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });

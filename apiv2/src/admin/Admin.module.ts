@@ -3,7 +3,7 @@ import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
 import { QueueModule } from "@infra/Queue.module";
-import { Logger, MiddlewareConsumer, Module, ParseEnumPipe, RequestMethod } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
@@ -58,7 +58,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
-import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
+import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 
 @Module({
@@ -84,7 +84,7 @@ import { InscriptionService } from "./core/sejours/phase1/inscription/Inscriptio
     controllers: [
         ClasseController,
         AffectationController,
-        InscriptionController,
+        BasculeJeuneValidesController,
         Phase1Controller,
         AuthController,
         AdminTaskController,

@@ -4,8 +4,8 @@ import {
     InscriptionRoutes,
     TaskName,
     TaskStatus,
-    ValiderAffectationHTSTaskParameters,
     SimulationBasculerJeunesValidesTaskParameters,
+    ValiderBasculeJeunesValidesTaskParameters,
 } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -13,12 +13,12 @@ import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Inscription.validation";
+import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./BasculeJeuneValides.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
 
 @Controller("inscription")
-export class InscriptionController {
+export class BasculeJeuneValidesController {
     constructor(
         private readonly inscriptionService: InscriptionService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
@@ -97,7 +97,7 @@ export class InscriptionController {
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
         ) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
         const task = await this.taskGateway.create({
@@ -107,6 +107,7 @@ export class InscriptionController {
                 parameters: {
                     sessionId,
                     simulationTaskId: taskId,
+                    ...payload,
                     auteur: {
                         id: request.user.id,
                         prenom: request.user.prenom,
@@ -114,7 +115,7 @@ export class InscriptionController {
                         role: request.user.role,
                         sousRole: request.user.sousRole,
                     },
-                } as ValiderAffectationHTSTaskParameters,
+                } as ValiderBasculeJeunesValidesTaskParameters,
             },
         });
         return TaskMapper.toDto(task);
