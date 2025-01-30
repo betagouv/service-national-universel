@@ -1,4 +1,4 @@
-import { FilterLabelDto } from "src/dto/filterLabelDto";
+import { FilterLabelDto } from "src/dto";
 import { BasicRoute, RouteResponseBody } from "..";
 
 interface GetFilterLabelRoute extends BasicRoute {
