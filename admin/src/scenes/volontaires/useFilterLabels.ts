@@ -17,5 +17,6 @@ export default function useFilterLabels(listType: string) {
   return useQuery({
     queryKey: ["filter-label", listType],
     queryFn: () => getFilterLabels(listType),
+    refetchOnWindowFocus: false,
   });
 }
