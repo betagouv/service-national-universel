@@ -7,23 +7,23 @@ function formatLabel(data, key: string) {
   }, {});
 }
 
-export async function getBus() {
+export async function getLigneLabel() {
   const data = await LigneBusModel.find({}, { busId: 1 });
   return formatLabel(data, "busId");
 }
 
-export async function getClasses() {
+export async function getClasseLabel() {
   // Pourquoi ça renvoit les patches ça ?
   const data = await ClasseModel.find({}, { uniqueKeyAndId: 1 });
   return formatLabel(data, "uniqueKeyAndId");
 }
 
-export async function getEtablissements() {
+export async function getEtablissementLabel() {
   const data = await EtablissementModel.find({}, { name: 1 });
   return formatLabel(data, "name");
 }
 
-export async function getSessions() {
+export async function getSessionLabel() {
   const data = await SessionPhase1Model.find({}, { codeCentre: 1 });
   return formatLabel(data, "codeCentre");
 }

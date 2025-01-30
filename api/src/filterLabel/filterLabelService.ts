@@ -1,11 +1,11 @@
-import { getBus, getClasses, getEtablissements, getSessions } from "./filterLabelRepository";
+import { getClasseLabel, getEtablissementLabel, getLigneLabel, getSessionLabel } from "./filterLabelRepository";
 
 export const listTypes = { INSCRIPTION: "inscription", VOLONTAIRES: "volontaires" };
 
 export async function getLabelVolontaires() {
-  const sessions = await getSessions();
-  const bus = await getBus();
-  const classes = await getClasses();
-  const etablissements = await getEtablissements();
+  const sessions = await getSessionLabel();
+  const bus = await getLigneLabel();
+  const classes = await getClasseLabel();
+  const etablissements = await getEtablissementLabel();
   return { sessions, bus, classes, etablissements };
 }
