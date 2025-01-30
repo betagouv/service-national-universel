@@ -2,13 +2,11 @@ import Joi from "joi";
 import { ERRORS } from "snu-lib";
 import passport from "passport";
 import express, { Response } from "express";
-import { ClasseModel, EtablissementModel, LigneBusModel, SessionPhase1Model } from "../models";
 import { capture } from "../sentry";
-import { UserRequest } from "./request";
+import { UserRequest } from "../controllers/request";
+import { getLabelVolontaires, listTypes } from "./filterLabelService";
 
 const router = express.Router();
-
-const listTypes = { INSCRIPTION: "inscription", VOLONTAIRES: "volontaires" };
 
 const validator = Joi.string().valid(listTypes.INSCRIPTION, listTypes.VOLONTAIRES).required();
 
@@ -20,14 +18,11 @@ router.get("/:list", passport.authenticate("referent", { session: false, failWit
   }
 
   if (value === listTypes.VOLONTAIRES) {
-    const sessions = await SessionPhase1Model.find({}, { codeCentre: 1 });
-    const bus = await LigneBusModel.find({}, { busId: 1 });
-    const classes = await ClasseModel.find({}, { uniqueKeyAndId: 1 });
-    // console.log("🚀 ~ router.get ~ classes:", classes);
-    const etablissements = await EtablissementModel.find({}, { name: 1 });
-    const data = { sessions, bus, classes, etablissements };
+    const data = await getLabelVolontaires();
     return res.status(200).send({ ok: true, data });
   }
+
+  // TODO: getLabelInscriptions
 });
 
 module.exports = router;

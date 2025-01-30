@@ -26,6 +26,7 @@ import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 import { youngCheckinField } from "@/utils";
 
 export const getFilterArray = (user, bus, session, classes, etablissements) => {
+  console.log("🚀 ~ getFilterArray ~ classes:", classes);
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -181,10 +182,9 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
+        console.log("🚀 ~ getFilterArray ~ item:", typeof item);
         if (item === "N/A" || !classes.length) return item;
-        const res = classes.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.uniqueKeyAndId;
+        return classes[item] || "N/A - Supprimé";
       },
     },
     {
@@ -194,9 +194,7 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A" || !etablissements.length) return item;
-        const res = etablissements.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.name;
+        return etablissements[item] || "N/A - Supprimé";
       },
     },
     {
@@ -206,9 +204,7 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A" || !session.length) return item;
-        const res = session.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.codeCentre;
+        return session[item] || "N/A - Supprimé";
       },
     },
     {
@@ -274,7 +270,7 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       missingLabel: "Non renseigné",
       translate: (item) => {
         if (item === "N/A" || !bus?.length) return item;
-        return bus.find((option) => option._id.toString() === item)?.busId || item;
+        return bus[item] || item;
       },
     },
     {
