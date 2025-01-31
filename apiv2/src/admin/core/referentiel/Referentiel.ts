@@ -4,13 +4,17 @@ import { RegionAcademiqueImportFileValidation } from "./regionAcademique/RegionA
 import { DepartementImportFileValidation } from "./departement/Departement.model";
 import { AcademieImportFileValidation } from "./academie/Academie.model";
 
-export enum FilePath {
-    CLASSES = "file/si-snu/classes",
-}
-
 export interface FileValidation {
     requiredColumns: string[];
     sheetName: string;
+}
+
+export const FilePath = {
+    [ReferentielTaskType.IMPORT_CLASSES]: "file/si-snu/classes",
+    [ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES]: "file/si-snu/regions-academiques",
+    [ReferentielTaskType.IMPORT_ROUTES]: "file/si-snu/routes",
+    [ReferentielTaskType.IMPORT_DEPARTEMENTS]: "file/si-snu/departements",
+    [ReferentielTaskType.IMPORT_ACADEMIES]: "file/si-snu/academies",
 }
 
 export const IMPORT_TAB_NAMES =  {

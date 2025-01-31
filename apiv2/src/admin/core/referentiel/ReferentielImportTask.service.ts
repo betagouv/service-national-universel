@@ -6,7 +6,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
 import { TaskModel } from "@task/core/Task.model";
 import { ReferentielImportTaskAuthor } from "./ReferentielImportTask.model";
-import { IMPORT_REQUIRED_COLUMN_NAMES, IMPORT_TAB_NAMES } from "./Referentiel";
+import { FilePath, IMPORT_REQUIRED_COLUMN_NAMES, IMPORT_TAB_NAMES } from "./Referentiel";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
@@ -45,7 +45,8 @@ export class ReferentielImportTaskService {
         }
 
         const timestamp = this.clockGateway.getNowSafeIsoDate();
-        const s3File = await this.fileGateway.uploadFile(`file/admin/referentiel/${importType}/export-${timestamp}_${fileName}`, {
+        const folderPath = `${FilePath[importType]}/export-${timestamp}`;
+        const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,
             mimetype,
         });

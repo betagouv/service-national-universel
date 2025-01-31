@@ -1,4 +1,0 @@
-[ ] - Remove useless imports in AdminJob.module.ts, Admin.module.ts and SetUpAdminTest.ts
-[X] - Add the Département referentiel
-[X] - Add the Academie referentiel import
-[ ] - Add the Routes report

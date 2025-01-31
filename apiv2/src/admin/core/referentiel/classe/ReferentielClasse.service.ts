@@ -93,7 +93,7 @@ export class ReferentielClasseService {
         }
 
         const timestamp = this.clockGateway.getNowSafeIsoDate();
-        const folderPath = `${FilePath.CLASSES}/export-${timestamp}`;
+        const folderPath = `${FilePath[ReferentielTaskType.IMPORT_CLASSES]}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,
             mimetype,
