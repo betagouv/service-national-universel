@@ -5,7 +5,7 @@ import React, { useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { HiOutlineDocumentAdd, HiOutlineDownload, HiOutlineX } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
-import { ReferentielRoutes, ReferentielTaskType, translateImportReferentiel } from "snu-lib";
+import { HttpError, ReferentielRoutes, ReferentielTaskType, translateImportReferentiel } from "snu-lib";
 
 interface ImportSelectModalProps {
   onSuccess: (task: ReferentielRoutes["Import"]["response"]) => void;
@@ -13,7 +13,7 @@ interface ImportSelectModalProps {
 }
 
 export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectModalProps) {
-  const [importType, setImportType] = useState<SelectOption<string> | null>(null);
+  const [importType, setImportType] = useState<SelectOption<ReferentielTaskType> | null>(null);
 
   const {
     acceptedFiles: [selectedFile],
@@ -35,14 +35,20 @@ export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectMo
     maxFiles: 1,
   });
 
-  const importTypeOptions: SelectOption<string>[] = Object.keys(ReferentielTaskType).map((key) => ({
-    value: key,
-    label: ReferentielTaskType[key as keyof typeof ReferentielTaskType],
-  }));
+  const importTypeOptions: SelectOption<string>[] = [
+    {
+      value: ReferentielTaskType.IMPORT_CLASSES,
+      label: "Classes",
+    },
+    {
+      value: ReferentielTaskType.IMPORT_ROUTES,
+      label: "Routes HTS",
+    },
+  ];
 
-  const { isPending, mutate, error, reset } = useMutation({
+  const { isPending, mutate, error, reset } = useMutation<ReferentielRoutes["Import"]["response"], HttpError>({
     mutationFn: async () => {
-      return await ReferentielService.importFile(ReferentielTaskType.IMPORT_CLASSES, selectedFile);
+      return await ReferentielService.importFile(importType!.value, selectedFile);
     },
     onSuccess: (task) => {
       toastr.success("L'import est en cours", "", { timeOut: 5000 });
@@ -70,7 +76,7 @@ export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectMo
           <div className="w-full max-w">
             <Select
               value={importType}
-              onChange={(importTypeOption: SelectOption<string>) => {
+              onChange={(importTypeOption: SelectOption<ReferentielTaskType>) => {
                 setImportType(importTypeOption);
               }}
               options={importTypeOptions}
@@ -107,7 +113,8 @@ export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectMo
           </div>
           {error && (
             <p className="text-red-500">
-              {translateImportReferentiel(error.message)} : {(error as any).description}
+              {translateImportReferentiel(error.message)}
+              {error.description && ` : ${error.description}`}
             </p>
           )}
         </div>
