@@ -4,12 +4,12 @@ import { FileGateway } from '@shared/core/File.gateway';
 import { ReferentielTaskType } from 'snu-lib';
 import { RegionAcademiqueGateway } from '../../RegionAcademique.gateway';
 import { ImporterRegionsAcademiques } from './ImporterRegionsAcademiques';
-import { REGION_ACADEMIQUE_COLUMN_NAMES } from "@admin/core/referentiel/Referentiel";
 import { RegionAcademiqueImportDto } from './dto/RegionAcademiqueImportDto';
 import { ReferentielImportTaskParameters } from '@admin/core/referentiel/ReferentielImportTask.model';
 import { Logger } from '@nestjs/common';
 import { ClockGateway } from '@shared/core/Clock.gateway';
 import { NotificationGateway } from '@notification/core/Notification.gateway';
+import { REGION_ACADEMIQUE_COLUMN_NAMES } from '../../RegionAcademique.model';
 
 describe('ImporterRegionsAcademiques', () => {
   let useCase: ImporterRegionsAcademiques;
@@ -322,10 +322,10 @@ describe('ImporterRegionsAcademiques', () => {
 
         expect(result).toEqual([{
           code: "BRE",
-          dateDerniereModificationSI: new Date("2024-07-31T00:00:00.000Z"),
-          libelle: "BRETAGNE",
+          dateDerniereModificationSI: new Date("2024-07-31"),
+          libelle: "BRETAGNE", 
           result: "success",
-          zone: "A",
+          zone: "A"
         }]);
       });
     });

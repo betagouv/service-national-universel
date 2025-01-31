@@ -7,12 +7,14 @@ import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
 import { TaskModel } from "@task/core/Task.model";
 import { ReferentielImportTaskAuthor } from "./ReferentielImportTask.model";
 import { IMPORT_REQUIRED_COLUMN_NAMES, IMPORT_TAB_NAMES } from "./Referentiel";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class ReferentielImportTaskService {
     constructor(
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
 
     async import({
@@ -42,12 +44,13 @@ export class ReferentielImportTaskService {
             }
         }
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
-        const s3File = await this.fileGateway.uploadFile(`file/admin/referentiel/${importType}/${timestamp}_${fileName}`, {
+        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const s3File = await this.fileGateway.uploadFile(`file/admin/referentiel/${importType}/export-${timestamp}_${fileName}`, {
             data: buffer,
             mimetype,
         });
 
+        // TODO: a quoi sert le folderPath
         const task = await this.taskGateway.create({
             name: TaskName.REFERENTIEL_IMPORT,
             status: TaskStatus.PENDING,

@@ -1,6 +1,5 @@
 import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
-import { setupAdminTest } from "../setUpAdminTest";
 import mongoose from "mongoose";
 import { MIME_TYPES, ReferentielTaskType, ROLES, SUB_ROLE_GOD, TaskName, TaskStatus } from "snu-lib";
 import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
@@ -11,6 +10,10 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileProvider } from "@shared/infra/File.provider";
 import { ConfigService } from "@nestjs/config";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
+import { ReferentielService } from "@admin/core/referentiel/Referentiel.service";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
 
 describe("ImportReferentielController", () => {
     let app: INestApplication;
@@ -31,12 +34,23 @@ describe("ImportReferentielController", () => {
             };
             next();
         });
+    
+        const mockClockGateway = {
+            getNowSafeIsoDate: jest.fn(),
+        };
+        const mockNotificationGateway = {
+            sendEmail: jest.fn(),
+        };
+        
          module = await Test.createTestingModule({
-            imports: [],
             controllers: [ImportReferentielController],
             providers: [
                 ConfigService,
+                ReferentielClasseService,
                 ReferentielImportTaskService,
+                ReferentielService,
+                { provide: NotificationGateway, useValue: mockNotificationGateway },
+                { provide: ClockGateway, useValue: mockClockGateway},
                 { provide: FileGateway,
                      useFactory: () => ({
                     uploadFile: jest.fn(),
@@ -69,7 +83,7 @@ describe("ImportReferentielController", () => {
         describe("422 - INVALID_FILE_FORMAT", () => {
             it(`no file provided`, async () => {
                 const response = await request(app.getHttpServer())
-                    .post("/referentiel/import/:name")
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES}`)
                     .field("name", "test")
                 expect(response.statusCode).toEqual(422);
                 expect(response.body.message).toEqual(FunctionalExceptionCode.INVALID_FILE_FORMAT);

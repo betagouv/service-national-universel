@@ -1,5 +1,4 @@
-import { REGION_ACADEMIQUE_COLUMN_NAMES } from "@admin/core/referentiel/Referentiel";
-import { ImportRegionAcademiqueModel } from "../../../RegionAcademique.model";
+import { ImportRegionAcademiqueModel, REGION_ACADEMIQUE_COLUMN_NAMES } from "../../../RegionAcademique.model";
 
 export class RegionAcademiqueImportDto {  
     static fromRecord(record: Record<string, string>): ImportRegionAcademiqueModel {

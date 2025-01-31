@@ -6,18 +6,26 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
 import { ReferentielImportTaskService } from "./ReferentielImportTask.service";
-import { REGION_ACADEMIQUE_COLUMN_NAMES } from "./Referentiel";
+import { IMPORT_REQUIRED_COLUMN_NAMES } from "./Referentiel";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 describe("ReferentielImportTaskService", () => {
     let referentielImportTaskService: ReferentielImportTaskService;
     let fileGateway: FileGateway;
     let taskGateway: TaskGateway;
+    const REGION_ACADEMIQUE_COLUMN_NAMES = IMPORT_REQUIRED_COLUMN_NAMES[ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES];
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ReferentielImportTaskService,
                 Logger,
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        getNowSafeIsoDate: jest.fn().mockReturnValue("2024-07-31T00:00:00.000Z"),
+                    },
+                },
                 {
                     provide: FileGateway,
                     useValue: {
@@ -35,10 +43,10 @@ describe("ReferentielImportTaskService", () => {
     });
 
     const regionAcademiqueRecord = {
-        [REGION_ACADEMIQUE_COLUMN_NAMES.code]: "BRE",
-        [REGION_ACADEMIQUE_COLUMN_NAMES.libelle]: "BRETAGNE",
-        [REGION_ACADEMIQUE_COLUMN_NAMES.zone]: "A",
-        [REGION_ACADEMIQUE_COLUMN_NAMES.date_derniere_modification_si]: "31/07/2024"
+        [REGION_ACADEMIQUE_COLUMN_NAMES[0]]: "BRE",
+        [REGION_ACADEMIQUE_COLUMN_NAMES[1]]: "BRETAGNE",
+        [REGION_ACADEMIQUE_COLUMN_NAMES[2]]: "A",
+        [REGION_ACADEMIQUE_COLUMN_NAMES[3]]: "31/07/2024"
     };
     
 

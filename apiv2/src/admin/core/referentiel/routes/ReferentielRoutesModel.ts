@@ -58,8 +58,6 @@ export const RouteImportFileValidation: FileValidation = {
         "Session : Date de début de la session",
         "Session : Date de fin de la session",
         "Route",
-            : "Code point de rassemblement initial",
-    point_rassemblement: "Point de rassemblement initial"
     ],
     sheetName: "",
 };

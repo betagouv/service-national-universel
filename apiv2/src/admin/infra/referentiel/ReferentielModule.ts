@@ -40,6 +40,9 @@ import { sejourMongoProviders } from "../sejours/phase1/sejour/provider/SejourMo
 import { historyMongoProviders } from "../history/repository/mongo/HistoryMongo.provider";
 import { ImporterRegionsAcademiques } from "@admin/core/referentiel/regionAcademique/useCase/ImporterRegionsAcademiques/ImporterRegionsAcademiques";
 import { NotificationModule } from "@notification/Notification.module";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+import { ClockProvider } from "@shared/infra/Clock.provider";
+import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
 
 @Module({
     imports: [DatabaseModule, ConfigModule, ClsModule],
@@ -48,8 +51,10 @@ import { NotificationModule } from "@notification/Notification.module";
         ...taskMongoProviders,
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: FileGateway, useClass: FileProvider },
+        { provide: ClockGateway, useClass: ClockProvider },
         RegionAcademiqueImportService,
         ReferentielImportTaskService,
+        ReferentielClasseService,
         ...referentielGatewayProviders,
         ...referentielUseCaseProviders,
         ...regionAcademiqueMongoProviders,

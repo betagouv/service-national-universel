@@ -40,7 +40,6 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
-import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
