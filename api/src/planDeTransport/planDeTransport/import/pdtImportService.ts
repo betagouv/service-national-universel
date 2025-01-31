@@ -353,11 +353,11 @@ export const validatePdtFile = async (
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
-      const center = await CohesionCenterModel.findById(line["ID CENTRE"]);
+      const center = await CohesionCenterModel.findById(line["ID CENTRE"]?.toLowerCase());
       if (!center) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
       }
-      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"] });
+      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"]?.toLowerCase() });
       if (!session) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
       }
@@ -368,7 +368,7 @@ export const validatePdtFile = async (
     for (const [i, line] of lines.entries()) {
       const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
       if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
-        const classe = await ClasseModel.findById(line["ID CLASSE"]);
+        const classe = await ClasseModel.findById(line["ID CLASSE"]?.toLowerCase());
         if (!classe) {
           errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
         }
@@ -381,7 +381,7 @@ export const validatePdtFile = async (
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
       if (line[`ID PDR ${pdrNumber}`]) {
         if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
-          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`]?.toLowerCase(), deletedAt: { $exists: false } });
           if (!pdr) {
             errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
           } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
