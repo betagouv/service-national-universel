@@ -8,14 +8,6 @@ export const DEPARTEMENT_MONGOOSE_ENTITY = "DEPARTEMENT_MONGOOSE_ENTITY";
 
 const DepartementSchemaRef = new mongoose.Schema(DepartementSchema);
 
-DepartementSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
-    this.updatedAt = new Date();
-    next();
-});
-
 export const departementMongoProviders = [
     {
         provide: DEPARTEMENT_MONGOOSE_ENTITY,

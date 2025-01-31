@@ -8,14 +8,6 @@ export const REGION_ACADEMIQUE_MONGOOSE_ENTITY = "REGION_ACADEMIQUE_MONGOOSE_ENT
 
 const RegionAcademiqueSchemaRef = new mongoose.Schema(RegionAcademiqueSchema);
 
-RegionAcademiqueSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
-    this.updatedAt = new Date();
-    next();
-});
-
 export const regionAcademiqueMongoProviders = [
     {
         provide: REGION_ACADEMIQUE_MONGOOSE_ENTITY,

@@ -8,14 +8,6 @@ export const ACADEMIE_MONGOOSE_ENTITY = "ACADEMIE_MONGOOSE_ENTITY";
 
 const AcademieSchemaRef = new mongoose.Schema(AcademieSchema);
 
-AcademieSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
-    this.updatedAt = new Date();
-    next();
-});
-
 export const academieMongoProviders = [
     {
         provide: ACADEMIE_MONGOOSE_ENTITY,
