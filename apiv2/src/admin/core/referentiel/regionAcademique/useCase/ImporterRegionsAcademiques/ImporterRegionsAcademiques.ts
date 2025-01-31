@@ -4,7 +4,7 @@ import { UseCase } from "@shared/core/UseCase";
 import { isValidDate } from "snu-lib";
 import { RegionAcademiqueImportService } from "../../RegionAcademiqueImport.service";
 import { RegionAcademiqueValidationError } from "./RegionAcademiqueValidationError";
-import { RegionAcademiqueImportDto } from "./dto/RegionAcademiqueImportDto";
+import { RegionAcademiqueMapper } from "../../RegionAcademiqueMapper";
 import { ImportRegionAcademiqueModel, RegionAcademiqueImportRapport } from "../../RegionAcademique.model";
 import { ReferentielImportTaskParameters } from "@admin/core/referentiel/ReferentielImportTask.model";
 
@@ -69,7 +69,7 @@ export class ImporterRegionsAcademiques implements UseCase<RegionAcademiqueImpor
       defval: "",
     });
 
-    const regionsAcademiques = RegionAcademiqueImportDto.fromRecords(regionsAcademiquesXLSX);
+    const regionsAcademiques = RegionAcademiqueMapper.fromRecords(regionsAcademiquesXLSX);
 
     return regionsAcademiques;
   }

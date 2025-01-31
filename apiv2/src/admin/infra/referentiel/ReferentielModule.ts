@@ -1,7 +1,5 @@
-import { RegionAcademiqueImportService } from "@admin/core/referentiel/regionAcademique/RegionAcademiqueImport.service";
 import { Logger, Module } from "@nestjs/common";
 import { ImportReferentielController } from "./api/ImportReferentiel.controller";
-import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
 import { referentielGatewayProviders } from "./initProvider/gateway";
 import { referentielUseCaseProviders } from "./initProvider/useCase";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -43,6 +41,8 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { departementMongoProviders } from "./departement/DepartementMongo.provider";
 import { ImporterDepartements } from "@admin/core/referentiel/departement/useCase/ImporterDepartements/ImporterDepartements";
+import { ImporterAcademies } from "@admin/core/referentiel/academie/useCase/ImporterAcademies/ImporterAcademies";
+import { academieMongoProviders } from "./academie/Academie.provider";
 
 @Module({
     imports: [DatabaseModule, ConfigModule, ClsModule],
@@ -56,6 +56,7 @@ import { ImporterDepartements } from "@admin/core/referentiel/departement/useCas
         ...referentielUseCaseProviders,
         ...regionAcademiqueMongoProviders,
         ...departementMongoProviders,
+        ...academieMongoProviders,
         ...referentielServiceProvider,
         {provide: SessionGateway, useClass: SessionRepository},
         {provide: CentreGateway, useClass: CentreRepository},
@@ -78,6 +79,7 @@ import { ImporterDepartements } from "@admin/core/referentiel/departement/useCas
         ImporterRegionsAcademiques,
         ImporterRoutes,
         ImporterDepartements,
+        ImporterAcademies,
         ...referentielServiceProvider,
         ...referentielGatewayProviders
     ],

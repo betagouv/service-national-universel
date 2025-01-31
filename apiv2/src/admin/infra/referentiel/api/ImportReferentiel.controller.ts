@@ -68,6 +68,7 @@ export class ImportReferentielController {
                 return TaskMapper.toDto(importTask);
             case ReferentielTaskType.IMPORT_ROUTES:
             case ReferentielTaskType.IMPORT_DEPARTEMENTS:
+            case ReferentielTaskType.IMPORT_ACADEMIES:
             case ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES:
                 importTask = await this.referentielImportTaskService.import({
                     importType: name,

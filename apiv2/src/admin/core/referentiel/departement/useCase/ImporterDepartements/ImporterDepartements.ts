@@ -6,8 +6,7 @@ import { ReferentielImportTaskParameters } from "@admin/core/referentiel/Referen
 import { DepartementImportRapport, ImportDepartementModel } from "../../Departement.model";
 import { DepartementImportService } from "../../DepartementImport.service";
 import { DepartementValidationError } from "./DepartementValidationError";
-import { DepartementImportDto } from "./dto/DepartementImportDto";
-
+import { DepartementMapper } from "../../DepartementMapper";
 
 @Injectable()
 export class ImporterDepartements implements UseCase<DepartementImportRapport[]> {
@@ -72,7 +71,7 @@ export class ImporterDepartements implements UseCase<DepartementImportRapport[]>
       defval: "",
     });
 
-    const departements = DepartementImportDto.fromRecords(departementsXLSX);
+    const departements = DepartementMapper.fromRecords(departementsXLSX);
 
     return departements;
   }

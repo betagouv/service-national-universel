@@ -1,8 +1,4 @@
 [ ] - Remove useless imports in AdminJob.module.ts, Admin.module.ts and SetUpAdminTest.ts
-[ ] - Integrate the logic of the import of classes and desister classes in the import referentiel service
--- [ ] -- Desister classes
--- [ ] -- Import classes
 [X] - Add the Département referentiel
-[ ] - Add the Academie referentiel import
+[X] - Add the Academie referentiel import
 [ ] - Add the Routes report
-[] warning sur le DTO région academiques.

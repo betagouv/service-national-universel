@@ -32,6 +32,7 @@ export * from "./program";
 export * from "./referent";
 export * from "./referentiel/regionAcademique";
 export * from "./referentiel/departement";
+export * from "./referentiel/academie";
 export * from "./sessionPhase1";
 export * from "./sessionPhase1Token";
 export * from "./school";

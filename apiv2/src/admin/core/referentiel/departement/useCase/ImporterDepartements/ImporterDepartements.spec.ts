@@ -8,8 +8,8 @@ import { NotificationGateway } from '@notification/core/Notification.gateway';
 import { DepartementImportService } from '../../DepartementImport.service';
 import { ImporterDepartements } from './ImporterDepartements';
 import { DepartementGateway } from '../../Departement.gateway';
-import { DepartementImportDto } from './dto/DepartementImportDto';
 import { DEPARTEMENT_COLUMN_NAMES } from '../../Departement.model';
+import { DepartementMapper } from '../../DepartementMapper';
 
 describe('ImporterDepartements', () => {
   let useCase: ImporterDepartements;
@@ -30,7 +30,7 @@ describe('ImporterDepartements', () => {
     [DEPARTEMENT_COLUMN_NAMES.dateDerniereModificationSI]: mockDate
   }
 
-  const importDepartementModel = DepartementImportDto.fromRecord(departementRecord);
+  const importDepartementModel = DepartementMapper.fromRecord(departementRecord);
 
   let mockDepartementDb = {
     ...importDepartementModel,

@@ -1,3 +1,4 @@
+import { ImporterAcademies } from "@admin/core/referentiel/academie/useCase/ImporterAcademies/ImporterAcademies";
 import { DesisterClasses } from "@admin/core/referentiel/classe/useCase/DesisterClasses";
 import { ImporterClasses } from "@admin/core/referentiel/classe/useCase/ImporterClasses";
 import { ImporterDepartements } from "@admin/core/referentiel/departement/useCase/ImporterDepartements/ImporterDepartements";
@@ -12,4 +13,5 @@ export const referentielUseCaseProviders = [
     DesisterClasses,
     AnnulerClasseDesistee,
     ImporterDepartements,
+    ImporterAcademies,
 ];

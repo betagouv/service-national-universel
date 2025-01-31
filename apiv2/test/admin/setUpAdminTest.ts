@@ -52,6 +52,8 @@ import { ReferentielImportTaskService } from "@admin/core/referentiel/Referentie
 import { segmentDeLigneMongoProviders } from "@admin/infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
+import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academie.provider";
+import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -120,6 +122,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...referentielGatewayProviders,
             ...regionAcademiqueMongoProviders,
             ...serviceProvider,
+            ...academieMongoProviders,
+            ...departementMongoProviders,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

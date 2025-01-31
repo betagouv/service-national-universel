@@ -309,6 +309,34 @@ describe("ImportReferentielController", () => {
                     });
                 expect(response.statusCode).toEqual(201);
             });
+
+            it(`imports ACADEMIES`, async () => {
+                const testFile = require('fs')
+                    .readFileSync("./test/admin/referentiel/fixtures/academies.xlsx");
+
+                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
+                    Location: "test",
+                    ETag: "test",
+                    Bucket: "test", 
+                    Key: "test",
+                });
+
+                jest.spyOn(taskGateway, "create").mockResolvedValue({
+                    id: "task-id",
+                    name: TaskName.REFERENTIEL_IMPORT,
+                    status: TaskStatus.PENDING,
+                    createdAt: new Date(),
+                    updatedAt: new Date(),
+                });
+
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_ACADEMIES}`)
+                    .attach("file", testFile, {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+                expect(response.statusCode).toEqual(201);
+            });
         });
     });
 

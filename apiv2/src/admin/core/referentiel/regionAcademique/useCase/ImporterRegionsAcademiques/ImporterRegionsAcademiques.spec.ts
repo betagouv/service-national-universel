@@ -4,12 +4,12 @@ import { FileGateway } from '@shared/core/File.gateway';
 import { ReferentielTaskType } from 'snu-lib';
 import { RegionAcademiqueGateway } from '../../RegionAcademique.gateway';
 import { ImporterRegionsAcademiques } from './ImporterRegionsAcademiques';
-import { RegionAcademiqueImportDto } from './dto/RegionAcademiqueImportDto';
 import { ReferentielImportTaskParameters } from '@admin/core/referentiel/ReferentielImportTask.model';
 import { Logger } from '@nestjs/common';
 import { ClockGateway } from '@shared/core/Clock.gateway';
 import { NotificationGateway } from '@notification/core/Notification.gateway';
 import { REGION_ACADEMIQUE_COLUMN_NAMES } from '../../RegionAcademique.model';
+import { RegionAcademiqueMapper } from '../../RegionAcademiqueMapper';
 
 describe('ImporterRegionsAcademiques', () => {
   let useCase: ImporterRegionsAcademiques;
@@ -27,7 +27,7 @@ describe('ImporterRegionsAcademiques', () => {
     [REGION_ACADEMIQUE_COLUMN_NAMES.date_derniere_modification_si]: mockDate
   }
 
-  const importRegionAcademiqueModel = RegionAcademiqueImportDto.fromRecord(regionAcademiqueRecord);
+  const importRegionAcademiqueModel = RegionAcademiqueMapper.fromRecord(regionAcademiqueRecord);
 
   let mockRegionAcademiqueDb = {
     ...importRegionAcademiqueModel,

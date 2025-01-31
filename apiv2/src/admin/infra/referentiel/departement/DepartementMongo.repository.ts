@@ -19,7 +19,6 @@ export class DepartementMongoRepository implements DepartementGateway {
     }
 
     async create(departement: DepartementModel): Promise<DepartementModel> {
-        console.log("departement", departement);
         const document = DepartementMapper.toDocument(departement);
         const departementDocument = await this.departementMongooseEntity.create(document);
         return DepartementMapper.toModel(departementDocument);
