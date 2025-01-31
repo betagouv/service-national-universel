@@ -1,17 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { isValidDate } from "snu-lib";
 import { ReferentielImportTaskParameters } from "@admin/core/referentiel/ReferentielImportTask.model";
 import { DepartementImportRapport, ImportDepartementModel } from "../../Departement.model";
 import { DepartementImportService } from "../../DepartementImport.service";
 import { DepartementValidationError } from "./DepartementValidationError";
-import { DepartementMapper } from "../../DepartementMapper";
+import { DepartementImportMapper } from "../../DepartementMapper";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class ImporterDepartements implements UseCase<DepartementImportRapport[]> {
   constructor(@Inject( ) private readonly departementImportService: DepartementImportService,
     @Inject(FileGateway) private readonly fileGateway: FileGateway,
+    @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     private readonly logger: Logger,
   ) {}
 
@@ -60,7 +61,7 @@ export class ImporterDepartements implements UseCase<DepartementImportRapport[]>
       throw new DepartementValidationError('Invalid format - academie');
     }
 
-    if (!departement.dateDerniereModificationSI || !isValidDate(departement.dateDerniereModificationSI)) {
+    if (!departement.dateDerniereModificationSI || !this.clockGateway.isValidDate(departement.dateDerniereModificationSI)) {
       throw new DepartementValidationError('Invalid format - dateDerniereModificationSI');
     }
   }
@@ -71,7 +72,7 @@ export class ImporterDepartements implements UseCase<DepartementImportRapport[]>
       defval: "",
     });
 
-    const departements = DepartementMapper.fromRecords(departementsXLSX);
+    const departements = DepartementImportMapper.fromRecords(departementsXLSX);
 
     return departements;
   }

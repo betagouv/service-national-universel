@@ -1,18 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { isValidDate } from "snu-lib";
 import { RegionAcademiqueImportService } from "../../RegionAcademiqueImport.service";
 import { RegionAcademiqueValidationError } from "./RegionAcademiqueValidationError";
-import { RegionAcademiqueMapper } from "../../RegionAcademiqueMapper";
+import { RegionAcademiqueImportMapper } from "../../RegionAcademiqueMapper";
 import { ImportRegionAcademiqueModel, RegionAcademiqueImportRapport } from "../../RegionAcademique.model";
 import { ReferentielImportTaskParameters } from "@admin/core/referentiel/ReferentielImportTask.model";
-
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class ImporterRegionsAcademiques implements UseCase<RegionAcademiqueImportRapport[]> {
   constructor(@Inject( ) private readonly regionAcademiqueImportService: RegionAcademiqueImportService,
     @Inject(FileGateway) private readonly fileGateway: FileGateway,
+    @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     private readonly logger: Logger,
   ) {}
 
@@ -58,7 +58,7 @@ export class ImporterRegionsAcademiques implements UseCase<RegionAcademiqueImpor
       throw new RegionAcademiqueValidationError('Invalid format - zone');
     }
 
-    if (!regionAcademique.dateDerniereModificationSI || !isValidDate(regionAcademique.dateDerniereModificationSI)) {
+    if (!regionAcademique.dateDerniereModificationSI || !this.clockGateway.isValidDate(regionAcademique.dateDerniereModificationSI)) {
       throw new RegionAcademiqueValidationError('Invalid format - dateDerniereModificationSI');
     }
   }
@@ -69,7 +69,7 @@ export class ImporterRegionsAcademiques implements UseCase<RegionAcademiqueImpor
       defval: "",
     });
 
-    const regionsAcademiques = RegionAcademiqueMapper.fromRecords(regionsAcademiquesXLSX);
+    const regionsAcademiques = RegionAcademiqueImportMapper.fromRecords(regionsAcademiquesXLSX);
 
     return regionsAcademiques;
   }

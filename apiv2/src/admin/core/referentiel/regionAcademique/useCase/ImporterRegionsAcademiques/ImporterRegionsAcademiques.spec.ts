@@ -9,13 +9,14 @@ import { Logger } from '@nestjs/common';
 import { ClockGateway } from '@shared/core/Clock.gateway';
 import { NotificationGateway } from '@notification/core/Notification.gateway';
 import { REGION_ACADEMIQUE_COLUMN_NAMES } from '../../RegionAcademique.model';
-import { RegionAcademiqueMapper } from '../../RegionAcademiqueMapper';
+import { RegionAcademiqueImportMapper } from '../../RegionAcademiqueMapper';
 
 describe('ImporterRegionsAcademiques', () => {
   let useCase: ImporterRegionsAcademiques;
   let regionAcademiqueImportService: RegionAcademiqueImportService;
   let regionAcademiqueGateway: RegionAcademiqueGateway;
   let fileGateway: FileGateway;
+  let clockGateway: ClockGateway;
 
   const mockDate = "31/07/2024";
   const mockDatePlus1 = "01/08/2024";
@@ -27,7 +28,7 @@ describe('ImporterRegionsAcademiques', () => {
     [REGION_ACADEMIQUE_COLUMN_NAMES.date_derniere_modification_si]: mockDate
   }
 
-  const importRegionAcademiqueModel = RegionAcademiqueMapper.fromRecord(regionAcademiqueRecord);
+  const importRegionAcademiqueModel = RegionAcademiqueImportMapper.fromRecord(regionAcademiqueRecord);
 
   let mockRegionAcademiqueDb = {
     ...importRegionAcademiqueModel,
@@ -58,7 +59,8 @@ describe('ImporterRegionsAcademiques', () => {
         {
           provide: ClockGateway,
           useValue: {
-            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate)
+            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate),
+            isValidDate: jest.fn().mockReturnValue(true)
           }
         },
         {
@@ -90,6 +92,7 @@ describe('ImporterRegionsAcademiques', () => {
     regionAcademiqueGateway = module.get<RegionAcademiqueGateway>(RegionAcademiqueGateway);
 
     fileGateway = module.get<FileGateway>(FileGateway);
+    clockGateway = module.get<ClockGateway>(ClockGateway);
   });
 
   describe('execute', () => {
@@ -154,7 +157,7 @@ describe('ImporterRegionsAcademiques', () => {
       });
     });
 
-    describe('no createion, No update', () => {
+    describe('no creation, No update', () => {
       it('Empty buffer', async () => {
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([]);
 
@@ -266,6 +269,7 @@ describe('ImporterRegionsAcademiques', () => {
         };
 
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([regionAcademiqueRecordEmpty]);
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
 
         const result = await useCase.execute(mockParams);
 
@@ -287,6 +291,7 @@ describe('ImporterRegionsAcademiques', () => {
           ...regionAcademiqueRecord,
           [REGION_ACADEMIQUE_COLUMN_NAMES.date_derniere_modification_si]: "jeudi dernier",
         }]);
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
 
         const result = await useCase.execute(mockParams);
 
@@ -313,7 +318,6 @@ describe('ImporterRegionsAcademiques', () => {
         };
 
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([regionAcademiqueRecordLessThanMockDate]);        
-        
         jest.spyOn(regionAcademiqueGateway, 'findByCode').mockResolvedValue(mockRegionAcademiqueDb);
 
         const result = await useCase.execute(mockParams);

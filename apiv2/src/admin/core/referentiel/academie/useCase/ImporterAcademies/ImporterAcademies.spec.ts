@@ -9,13 +9,14 @@ import { AcademieImportService } from '../../AcademieImport.service';
 import { ImporterAcademies } from './ImporterAcademies';
 import { AcademieGateway } from '../../Academie.gateway';
 import { ACADEMIE_COLUMN_NAMES } from '../../Academie.model';
-import { AcademieMapper } from '../../AcademieMapper';
+import { AcademieImportMapper } from '../../AcademieMapper';
 
 describe('ImporterAcademies', () => {
   let useCase: ImporterAcademies;
   let academieImportService: AcademieImportService;
   let academieGateway: AcademieGateway;
   let fileGateway: FileGateway;
+  let clockGateway: ClockGateway;
 
   const mockDate = "31/07/2024";
   const mockDatePlus1 = "01/08/2024";
@@ -28,7 +29,7 @@ describe('ImporterAcademies', () => {
     [ACADEMIE_COLUMN_NAMES.dateDerniereModificationSI]: mockDate
   }
 
-  const importAcademieModel = AcademieMapper.fromRecord(academieRecord);
+  const importAcademieModel = AcademieImportMapper.fromRecord(academieRecord);
 
   let mockAcademieDb = {
     ...importAcademieModel,
@@ -59,9 +60,10 @@ describe('ImporterAcademies', () => {
         {
           provide: ClockGateway,
           useValue: {
-            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate)
+            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate),
+            isValidDate: jest.fn().mockReturnValue(true)
           }
-        },
+        },  
         {
           provide: NotificationGateway,
           useValue: {
@@ -90,6 +92,7 @@ describe('ImporterAcademies', () => {
     academieImportService = module.get<AcademieImportService>(AcademieImportService);
     academieGateway = module.get<AcademieGateway>(AcademieGateway);
     fileGateway = module.get<FileGateway>(FileGateway);
+    clockGateway = module.get<ClockGateway>(ClockGateway);
   });
 
   describe('execute', () => {
@@ -229,7 +232,7 @@ describe('ImporterAcademies', () => {
           ...academieRecord,
           [ACADEMIE_COLUMN_NAMES.dateDerniereModificationSI]: ""
         };
-
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([academieRecordEmpty]);
 
         const result = await useCase.execute(mockParams);
@@ -248,11 +251,12 @@ describe('ImporterAcademies', () => {
         expect(academieGateway.update).toHaveBeenCalledTimes(0);
       });
 
-      it('Data Validation - Date creation SI - Invalid format - Invalid date format', async () => {
+      it('Data Validation - Date modification SI - Invalid format - Invalid date format', async () => {
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([{
           ...academieRecord,
           [ACADEMIE_COLUMN_NAMES.dateDerniereModificationSI]: "jeudi dernier",
         }]);
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
 
         const result = await useCase.execute(mockParams);
 

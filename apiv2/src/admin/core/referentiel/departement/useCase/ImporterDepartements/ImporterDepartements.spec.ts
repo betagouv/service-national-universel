@@ -9,13 +9,14 @@ import { DepartementImportService } from '../../DepartementImport.service';
 import { ImporterDepartements } from './ImporterDepartements';
 import { DepartementGateway } from '../../Departement.gateway';
 import { DEPARTEMENT_COLUMN_NAMES } from '../../Departement.model';
-import { DepartementMapper } from '../../DepartementMapper';
+import { DepartementImportMapper } from '../../DepartementMapper';
 
 describe('ImporterDepartements', () => {
   let useCase: ImporterDepartements;
   let departementImportService: DepartementImportService;
   let departementGateway: DepartementGateway;
   let fileGateway: FileGateway;
+  let clockGateway: ClockGateway;
 
   const mockDate = "31/07/2024";
   const mockDatePlus1 = "01/08/2024";
@@ -30,7 +31,7 @@ describe('ImporterDepartements', () => {
     [DEPARTEMENT_COLUMN_NAMES.dateDerniereModificationSI]: mockDate
   }
 
-  const importDepartementModel = DepartementMapper.fromRecord(departementRecord);
+  const importDepartementModel = DepartementImportMapper.fromRecord(departementRecord);
 
   let mockDepartementDb = {
     ...importDepartementModel,
@@ -61,7 +62,8 @@ describe('ImporterDepartements', () => {
         {
           provide: ClockGateway,
           useValue: {
-            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate)
+            getNowSafeIsoDate: jest.fn().mockReturnValue(mockDate),
+            isValidDate: jest.fn().mockReturnValue(true)
           }
         },
         {
@@ -92,6 +94,7 @@ describe('ImporterDepartements', () => {
     departementImportService = module.get<DepartementImportService>(DepartementImportService);
     departementGateway = module.get<DepartementGateway>(DepartementGateway);
     fileGateway = module.get<FileGateway>(FileGateway);
+    clockGateway = module.get<ClockGateway>(ClockGateway);
   });
 
   describe('execute', () => {
@@ -236,6 +239,7 @@ describe('ImporterDepartements', () => {
           [DEPARTEMENT_COLUMN_NAMES.dateDerniereModificationSI]: ""
         };
 
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
         jest.spyOn(fileGateway, 'parseXLS').mockResolvedValue([departementRecordEmpty]);
 
         const result = await useCase.execute(mockParams);
@@ -260,6 +264,7 @@ describe('ImporterDepartements', () => {
           ...departementRecord,
           [DEPARTEMENT_COLUMN_NAMES.dateDerniereModificationSI]: "jeudi dernier",
         }]);
+        jest.spyOn(clockGateway, 'isValidDate').mockRestore();
 
         const result = await useCase.execute(mockParams);
 

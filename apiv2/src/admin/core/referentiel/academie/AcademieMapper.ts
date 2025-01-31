@@ -1,6 +1,6 @@
 import { ACADEMIE_COLUMN_NAMES, ImportAcademieModel } from "./Academie.model";
 
-export class AcademieMapper {
+export class AcademieImportMapper {
     static fromRecord(record: Record<string, string>): ImportAcademieModel {
         const dateDerniereModificationSI = this.parseDate(record[ACADEMIE_COLUMN_NAMES.dateDerniereModificationSI]);
         const dateCreationSI = this.parseDate(record[ACADEMIE_COLUMN_NAMES.dateCreationSI]);
@@ -15,7 +15,7 @@ export class AcademieMapper {
     }
 
     static fromRecords(records: Record<string, string>[]): ImportAcademieModel[] {
-        return records.map(record => AcademieMapper.fromRecord(record));
+        return records.map(record => AcademieImportMapper.fromRecord(record));
     }
 
     private static parseDate(dateString: string): Date {

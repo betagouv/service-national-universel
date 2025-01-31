@@ -1,6 +1,6 @@
 import { ImportDepartementModel, DEPARTEMENT_COLUMN_NAMES } from "./Departement.model";
 
-export class DepartementMapper {  
+export class DepartementImportMapper {  
     static fromRecord(record: Record<string, string>): ImportDepartementModel {
         const dateDerniereModificationSI = this.parseDate(record[DEPARTEMENT_COLUMN_NAMES.dateDerniereModificationSI]);
         const dateCreationSI = this.parseDate(record[DEPARTEMENT_COLUMN_NAMES.dateCreationSI]);
@@ -17,7 +17,7 @@ export class DepartementMapper {
     }
 
     static fromRecords(records: Record<string, string>[]): ImportDepartementModel[] {
-        return records.map(record => DepartementMapper.fromRecord(record));
+        return records.map(record => DepartementImportMapper.fromRecord(record));
     }
 
     private static parseDate(dateString: string): Date {

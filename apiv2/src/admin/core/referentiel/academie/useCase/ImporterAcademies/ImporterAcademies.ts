@@ -1,18 +1,18 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { isValidDate } from "snu-lib";
 import { ReferentielImportTaskParameters } from "@admin/core/referentiel/ReferentielImportTask.model";
 import { AcademieImportRapport, ImportAcademieModel } from "../../Academie.model";
 import { AcademieImportService } from "../../AcademieImport.service";
 import { AcademieValidationError } from "./AcademieValidationError";
-import { AcademieMapper } from "../../AcademieMapper";
-
+import { AcademieImportMapper } from "../../AcademieMapper";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class ImporterAcademies implements UseCase<AcademieImportRapport[]> {
   constructor(@Inject( ) private readonly academieImportService: AcademieImportService,
     @Inject(FileGateway) private readonly fileGateway: FileGateway,
+    @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     private readonly logger: Logger,
   ) {}
 
@@ -57,11 +57,7 @@ export class ImporterAcademies implements UseCase<AcademieImportRapport[]> {
       throw new AcademieValidationError('Invalid format - regionAcademique');
     }
 
-    if (!academie.dateCreationSI || !isValidDate(academie.dateCreationSI)) {
-      throw new AcademieValidationError('Invalid format - dateCreationSI');
-    }
-
-    if (!academie.dateDerniereModificationSI || !isValidDate(academie.dateDerniereModificationSI)) {
+    if (!academie.dateDerniereModificationSI || !this.clockGateway.isValidDate(academie.dateDerniereModificationSI)) {
       throw new AcademieValidationError('Invalid format - dateDerniereModificationSI');
     }
   }
@@ -72,7 +68,7 @@ export class ImporterAcademies implements UseCase<AcademieImportRapport[]> {
       defval: "",
     });
 
-    const academies = AcademieMapper.fromRecords(academiesXLSX);
+    const academies = AcademieImportMapper.fromRecords(academiesXLSX);
 
     return academies;
   }
