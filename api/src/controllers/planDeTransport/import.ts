@@ -23,29 +23,18 @@ import {
 import scanFile from "../../utils/virusScanner";
 import { getMimeFromFile } from "../../utils/file";
 import { validateId } from "../../utils/validator";
-import { validatePdtFile, computeImportSummary, getLinePdrCount } from "../../planDeTransport/planDeTransport/import/pdtImportService";
-import { formatTime, mapTransportType } from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
+import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
+import {
+  computeMergedBusIds,
+  formatTime,
+  getLinePdrCount,
+  getMergedBusIdsFromLigneBus,
+  ImportPlanTransportLine,
+  mapTransportType,
+} from "../../planDeTransport/planDeTransport/import/pdtImportUtils";
 import { startSession, withTransaction, endSession } from "../../mongo";
 import { UserRequest } from "../request";
-
-interface ImportPlanTransportLine {
-  [key: string]: string | string[] | undefined;
-  "NUMERO DE LIGNE": string;
-  "DATE DE TRANSPORT ALLER": string;
-  "DATE DE TRANSPORT RETOUR": string;
-  "ID CENTRE": string;
-  "HEURE D'ARRIVEE AU CENTRE": string;
-  "HEURE DE DÉPART DU CENTRE": string;
-  "TOTAL ACCOMPAGNATEURS": string;
-  "CAPACITÉ VOLONTAIRE TOTALE": string;
-  "CAPACITE TOTALE LIGNE": string;
-  "PAUSE DÉJEUNER ALLER"?: string;
-  "PAUSE DÉJEUNER RETOUR"?: string;
-  "TEMPS DE ROUTE": string;
-  "Code court de route": string;
-  "ID CLASSE"?: string;
-  "LIGNES FUSIONNÉES"?: string;
-}
+import { syncMergedBus } from "../../planDeTransport/ligneDeBus/ligneDeBusService";
 
 interface StepPoint {
   type: string;
@@ -159,22 +148,18 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
         const count = getLinePdrCount(line);
         return count > acc ? count : acc;
       }, 0);
+      const linesIds = lines.map((line) => line["NUMERO DE LIGNE"]);
 
       // Vérification des lignes existantes
-      const newLines: ImportPlanTransportLine[] = [];
-      const promises = lines.map((line) =>
-        LigneBusModel.findOne({
-          cohort: importData.cohort,
-          busId: line["NUMERO DE LIGNE"],
-        }),
-      );
-
-      const oldLines = await Promise.all(promises);
-      lines.forEach((line, i) => {
-        if (!oldLines[i]) {
-          newLines.push(line);
-        }
+      const oldLines = await LigneBusModel.find({
+        cohort: importData.cohort,
+        busId: { $in: linesIds },
       });
+      const newLines: ImportPlanTransportLine[] = lines.filter((line) => !oldLines.find((oldLine) => oldLine.busId === line["NUMERO DE LIGNE"]));
+
+      const existingMergedBusIds = getMergedBusIdsFromLigneBus(oldLines);
+      // calcul de la listes des lignes fusionnées associées à la colonne LIGNES FUSIONNÉES
+      const newMergedBusIds = computeMergedBusIds(newLines, existingMergedBusIds);
 
       // Import des nouvelles lignes
       for (const line of newLines) {
@@ -211,19 +196,28 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
           travelTime: formatTime(line["TEMPS DE ROUTE"]),
           sessionId: session?._id.toString(),
           meetingPointsIds: pdrIds,
-          classeId: line["ID CLASSE"]?.toLowerCase(),
-          mergedBusIds: line["LIGNES FUSIONNÉES"] ? line["LIGNES FUSIONNÉES"]?.toLowerCase().split(",") : [],
+          classeId: line["ID CLASSE"] ? line["ID CLASSE"].toLowerCase() : undefined,
+          mergedBusIds: newMergedBusIds[line["NUMERO DE LIGNE"]] || [],
+          mirrorBusId: line["LIGNE MIROIR"],
         };
 
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
 
         // Mise à jour des lignes fusionnées existantes
-        for (const mergedBusId of busLineData.mergedBusIds) {
-          const oldMergeLine = await LigneBusModel.findOne({ busId: mergedBusId });
-          if (oldMergeLine) {
-            oldMergeLine.set({ mergedBusIds: busLineData.mergedBusIds });
-            await oldMergeLine.save({ session: transaction });
+        await syncMergedBus({
+          ligneBus: busLine,
+          busIdsToUpdate: busLineData.mergedBusIds.filter((busId) => busId !== busLineData.busId),
+          newMergedBusIds: busLineData.mergedBusIds,
+          transaction: transaction,
+        });
+
+        if (line["LIGNE MIROIR"]) {
+          // Mise à jour de la ligne miroir associée si nécessaire
+          for (const [mi, mline] of lines.entries()) {
+            if (mline["NUMERO DE LIGNE"] === line["LIGNE MIROIR"] && !mline["LIGNE MIROIR"]) {
+              mline["LIGNE MIROIR"] = line["NUMERO DE LIGNE"];
+            }
           }
         }
 
@@ -349,6 +343,8 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
               centerDepartureTime: busLine.centerDepartureTime,
               pointDeRassemblements,
               classeId: busLine.classeId,
+              mergedBusIds: busLine.mergedBusIds,
+              mirrorBusId: busLine.mirrorBusId,
             },
           ],
           { session: transaction },

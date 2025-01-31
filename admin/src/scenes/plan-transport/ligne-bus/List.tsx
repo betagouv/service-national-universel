@@ -7,7 +7,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
+import { PlanTransportType, ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -368,8 +368,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                 button: `flex items-center gap-2 p-2 px-3 text-gray-700 cursor-pointer w-full text-sm text-gray-700`,
                 loadingButton: `text-sm text-gray-700`,
               }}
-              transform={async (data) => {
-                const all = data;
+              transform={async (all: PlanTransportType[]) => {
                 // Get the length of the longest array of PDRs
                 const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
 
@@ -415,6 +414,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
                     "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
                     "LIGNES FUSIONNÉES": data.mergedBusIds?.join(",") || "",
+                    "LIGNE MIROIR": data.mirrorBusId || "",
                   };
                 });
               }}

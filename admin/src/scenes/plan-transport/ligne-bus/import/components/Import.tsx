@@ -61,7 +61,7 @@ export default function Import({ cohort, onFileVerified, addLigne }: Props) {
           setImportErrors(res.errors);
         } else {
           capture(res.code);
-          setUploadError("Une erreur s'est produite lors du téléversement de votre fichier.");
+          setUploadError("Une erreur s'est produite lors du téléversement de votre fichier (vérifiez que l'onglet ALLER-RETOUR existe bien)");
         }
       } else {
         onFileVerified && onFileVerified(res.data);

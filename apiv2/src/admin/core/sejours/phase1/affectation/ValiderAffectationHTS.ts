@@ -2,6 +2,8 @@ import { Inject, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { Transactional } from "@nestjs-cls/transactional";
 
+import { MIME_TYPES } from "snu-lib";
+
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileGateway } from "@shared/core/File.gateway";
@@ -143,9 +145,9 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
                 continue;
             }
             // session
-            if (jeune?.sessionNom !== sejour?.sessionName) {
+            if (jeune?.sessionNom !== sejour?.sessionNom) {
                 this.logger.warn(
-                    `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionName}, jeune: ${jeune?.sessionNom})`,
+                    `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionNom}, jeune: ${jeune?.sessionNom})`,
                 );
                 rapportData.push(
                     this.formatJeuneRapport(
@@ -232,7 +234,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
-                mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mimetype: MIME_TYPES.EXCEL,
             },
         );
 

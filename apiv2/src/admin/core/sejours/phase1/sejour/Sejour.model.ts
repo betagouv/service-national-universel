@@ -13,7 +13,7 @@ export type SejourModel = {
     centreNom?: string;
     centreVille?: string;
     centreCodePostal?: string;
-    sessionName?: string;
+    sessionNom?: string;
     sessionId?: string;
     // equipe: {
     //     firstName?: string;
