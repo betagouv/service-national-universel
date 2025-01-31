@@ -5,9 +5,8 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
 import {
-  CohesionCenterType,
   CohortType,
-  LigneBusType,
+  LigneBusDto,
   PointDeRassemblementType,
   ROLES,
   canExportLigneBus,
@@ -35,6 +34,7 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
+import { useMount, useUpdateEffect } from "react-use";
 
 export interface DataForCheck {
   meetingPoints: { youngsCount: number; meetingPointId: string }[];
@@ -45,9 +45,7 @@ export interface DataForCheck {
 export default function View(props: RouteComponentProps<{ id: string }>) {
   const user = useSelector((state: AuthState) => state.Auth.user);
 
-  const [data, setData] = React.useState<(LigneBusType & { centerDetail?: CohesionCenterType; meetingsPointsDetail?: Array<PointDeRassemblementType & LigneBusType> }) | null>(
-    null,
-  );
+  const [data, setData] = React.useState<LigneBusDto | null>(null);
   const [cohort, setCohort] = React.useState<CohortType | null>(null);
   const [dataForCheck, setDataForCheck] = React.useState<DataForCheck | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
@@ -144,11 +142,16 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     }
   };
 
-  React.useEffect(() => {
+  useMount(() => {
     getBus();
     getDataForCheck();
     getDemandeDeModification();
-  }, []);
+  });
+  useUpdateEffect(() => {
+    getBus();
+    getDataForCheck();
+    getDemandeDeModification();
+  }, [props.match?.params?.id]);
   React.useEffect(() => {
     setAddOpen(false);
   }, [data]);
@@ -198,7 +201,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   return (
     <>
       <div className="flex justify-between mr-8 items-center">
-        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche ligne" }]} />
+        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche de la ligne" }]} />
         {canExportLigneBus(user) && data.team.length > 0 ? (
           <SelectAction
             title="Exporter la ligne"
@@ -289,7 +292,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
               {data.meetingsPointsDetail?.map((pdr, index) => (
                 <PointDeRassemblement
                   bus={data}
-                  pdr={pdr}
+                  pdr={pdr as any}
                   onBusChange={setData}
                   index={index + 1}
                   key={index}

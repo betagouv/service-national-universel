@@ -10,6 +10,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
@@ -18,6 +19,24 @@ export class JeuneRepository implements JeuneGateway {
         @Inject(HistoryGateway) private historyGateway: HistoryGateway,
         private readonly cls: ClsService,
     ) {}
+    async updateSession(
+        jeune: Pick<
+            JeuneModel,
+            "id" | "sessionId" | "sessionNom" | "originalSessionId" | "originalSessionNom" | "sessionChangeReason"
+        >,
+    ): Promise<void> {
+        await this.jeuneMongooseEntity.findByIdAndUpdate(jeune.id, {
+            sessionId: jeune.sessionId,
+            sessionNom: jeune.sessionNom,
+            originalSessionId: jeune.originalSessionId,
+            originalSessionNom: jeune.originalSessionNom,
+            sessionChangeReason: jeune.sessionChangeReason,
+        });
+    }
+    async findByClasseId(classeId: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({ classeId });
+        return JeuneMapper.toModels(jeunes);
+    }
 
     async create(jeune: JeuneModel): Promise<JeuneModel> {
         const jeuneEntity = JeuneMapper.toEntity(jeune);
@@ -44,6 +63,15 @@ export class JeuneRepository implements JeuneGateway {
             status,
             grade: { $in: niveauScolaires },
             department: { $in: departements },
+        });
+        return JeuneMapper.toModels(jeunes);
+    }
+
+    async findBySessionIdClasseIdAndStatus(sessionId: string, classeId: string, status: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({
+            cohortId: sessionId,
+            classeId,
+            status,
         });
         return JeuneMapper.toModels(jeunes);
     }
@@ -84,7 +112,7 @@ export class JeuneRepository implements JeuneGateway {
             jeunesEntity.map((jeune) => ({
                 updateOne: {
                     filter: { _id: jeune.updated._id },
-                    update: { $set: jeune.updated },
+                    update: getEntityUpdateSetUnset(jeune.updated),
                     upsert: false,
                 },
             })),

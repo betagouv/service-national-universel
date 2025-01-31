@@ -1,6 +1,6 @@
 import { Inject, Logger } from "@nestjs/common";
 
-import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, GRADES, department2region } from "snu-lib";
+import { RegionsHorsMetropole, YOUNG_STATUS, YOUNG_STATUS_PHASE1, department2region, MIME_TYPES } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -21,7 +21,7 @@ import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationH
 import { AffectationService } from "./Affectation.service";
 
 // TODO: déplacer dans un paramétrage dynamique
-const NB_MAX_ITERATION = 150;
+const NB_MAX_ITERATION = 300;
 
 export type SimulationAffectationHTSResult = {
     rapportData: RapportData;
@@ -78,12 +78,13 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
         }
 
-        const changementDepartements = await this.simulationAffectationHTSService.getChangementsDepartements(
-            sdrImportId,
-            centreList,
-            pdrList,
-            ligneDeBusList,
-        );
+        const { changementDepartements, changementDepartementsErreurs } =
+            await this.simulationAffectationHTSService.getChangementsDepartements(
+                sdrImportId,
+                centreList,
+                pdrList,
+                ligneDeBusList,
+            );
 
         // on sépare les jeunes intra dep des autres
         const { jeunesList, jeuneIntraDepartementList } = allJeunes.reduce(
@@ -103,7 +104,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         );
 
         this.logger.log(
-            `Jeunes a affectés : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
+            `Jeunes à affecter : ${allJeunes.length} (jeunes: ${jeunesList.length}, intradep: ${jeuneIntraDepartementList.length})`,
         );
 
         // On calcul les taux de repartition (garcon/fille, qpv+/qpv-, psh+/psh-)
@@ -182,9 +183,12 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 randomSejourList,
             );
 
+            const jeunesAffectedCount = randomJeuneList.filter(
+                (jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED,
+            ).length;
             // si la nouvelle simulation a un meilleur cout que la précedente, on la garde
             if (isCoherent && coutSimulation < coutSimulationList[coutSimulationList.length - 1]) {
-                this.logger.log(`Better simulation found ${coutSimulation}`);
+                this.logger.log(`Better simulation found ${coutSimulation} (${jeunesAffectedCount} affectés)`);
                 coutSimulationList.push(coutSimulation);
 
                 // résultats de l'affectation
@@ -199,7 +203,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 results.analytics.tauxRemplissageCentreList = tauxRemplissageCentres;
                 results.analytics.tauxOccupationLignesParCentreList = tauxOccupationLignesParCentreList;
             } else {
-                this.logger.debug(`Worth simulation cost ${coutSimulation}`);
+                this.logger.debug(`Worth simulation cost ${coutSimulation} (${jeunesAffectedCount} affectés)`);
             }
         }
 
@@ -219,7 +223,9 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             pdrList,
             jeunesList,
             jeuneIntraDepartementList,
+            distributionJeunesDepartement,
             changementDepartements,
+            changementDepartementsErreurs,
             results.analytics,
         );
 
@@ -231,7 +237,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
-                mimetype: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+                mimetype: MIME_TYPES.EXCEL,
             },
         );
 

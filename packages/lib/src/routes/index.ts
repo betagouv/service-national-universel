@@ -3,7 +3,7 @@ export interface BasicRoute {
   params?: Record<string, number | string | null | undefined>;
   payload?: Record<string, any>;
   query?: Record<string, any>;
-  response?: RouteResponseBody<Record<string, any> | Record<string, any>[] | number | boolean> | RouteResponseBodyV2<object>;
+  response?: RouteResponseBody<Record<string, any> | Record<string, any>[] | number | boolean> | RouteResponseBodyV2<object> | void;
   method: "GET" | "POST" | "DELETE" | "PUT";
 }
 

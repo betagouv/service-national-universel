@@ -22,7 +22,7 @@ import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
 import { environment, knowledgebaseURL } from "@/config";
 import { SignupButtons, Checkbox } from "@snu/ds/dsfr";
-import ErrorComponent from "@/components/error";
+import ErrorComponent from "app/src/components/error";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 
 export default function StepEligibilite() {

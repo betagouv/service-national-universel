@@ -33,6 +33,8 @@ export class JeuneMapper {
             hasPDR: jeuneDocument.hasMeetingInformation,
             sessionId: jeuneDocument.cohortId,
             sessionNom: jeuneDocument.cohort,
+            originalSessionId: jeuneDocument.originalCohortId,
+            originalSessionNom: jeuneDocument.originalCohort,
             prenom: jeuneDocument.firstName,
             nom: jeuneDocument.lastName,
             deplacementPhase1Autonomous: jeuneDocument.deplacementPhase1Autonomous,
@@ -48,6 +50,9 @@ export class JeuneMapper {
             parent2Email: jeuneDocument.parent2Email,
             parent2Telephone: jeuneDocument.parent2Phone,
             youngPhase1Agreement: jeuneDocument.youngPhase1Agreement,
+            sessionChangeReason: jeuneDocument.cohortChangeReason,
+            // CLE
+            classeId: jeuneDocument.classeId,
         };
     }
 
@@ -127,6 +132,8 @@ export class JeuneMapper {
             hasMeetingInformation: jeuneModel.hasPDR,
             cohortId: jeuneModel.sessionId,
             cohort: jeuneModel.sessionNom,
+            originalCohortId: jeuneModel.originalSessionId,
+            originalCohort: jeuneModel.originalSessionNom,
             firstName: jeuneModel.prenom,
             lastName: jeuneModel.nom,
             deplacementPhase1Autonomous: jeuneModel.deplacementPhase1Autonomous,
@@ -142,6 +149,9 @@ export class JeuneMapper {
             parent2Email: jeuneModel.parent2Email,
             parent2Phone: jeuneModel.parent2Telephone,
             youngPhase1Agreement: jeuneModel.youngPhase1Agreement,
+            cohortChangeReason: jeuneModel.sessionChangeReason,
+            // CLE
+            classeId: jeuneModel.classeId,
         };
     }
 }

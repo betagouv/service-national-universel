@@ -26,6 +26,8 @@ export type JeuneModel = {
     hasPDR?: string;
     sessionId?: string;
     sessionNom?: string;
+    originalSessionId?: string;
+    originalSessionNom?: string;
     prenom?: string;
     nom?: string;
     deplacementPhase1Autonomous?: string;
@@ -47,6 +49,8 @@ export type JeuneModel = {
     parent2Email?: string;
     parent2Telephone?: string;
     youngPhase1Agreement: string;
+    sessionChangeReason?: string;
+    classeId?: string;
 };
 
 export type CreateJeuneModel = Omit<JeuneModel, "id" | "createdAt" | "updatedAt">;
