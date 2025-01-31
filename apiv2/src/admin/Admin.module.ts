@@ -33,6 +33,7 @@ import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
 import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
+import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
 import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
@@ -93,6 +94,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         ClasseService,
         AffectationService,
         SimulationAffectationHTSService,
+        SimulationAffectationCLEService,
         ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,

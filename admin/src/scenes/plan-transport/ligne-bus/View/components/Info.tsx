@@ -1,10 +1,9 @@
 import React from "react";
-import { BsArrowLeft, BsArrowRight } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useHistory, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 
-import { canEditLigneBusGeneralInfo, CohortType, getZonedDate, isBusEditionOpen, LigneBusType, translate } from "snu-lib";
+import { canEditLigneBusGeneralInfo, CohortType, isBusEditionOpen, LigneBusDto, translate } from "snu-lib";
 
 import Pencil from "@/assets/icons/Pencil";
 import Loader from "@/components/Loader";
@@ -17,6 +16,8 @@ import DatePickerList from "../../components/DatePickerList";
 import Field from "../../components/Field";
 import Select from "../../components/Select";
 import { DataForCheck } from "../View";
+import MergedBus from "./Partials/MergedBus";
+import MirrorBus from "./Partials/MirrorBus";
 
 const options = [
   { label: "Oui", value: true },
@@ -34,8 +35,8 @@ interface FormErrors {
 }
 
 interface InfoProps {
-  bus: LigneBusType;
-  setBus: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  bus: LigneBusDto;
+  setBus: React.Dispatch<React.SetStateAction<LigneBusDto>>;
   dataForCheck: DataForCheck | null;
   nbYoung?: number;
   cohort: CohortType | null;
@@ -57,8 +58,6 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
     lunchBreak: bus.lunchBreak || false,
     lunchBreakReturn: bus.lunchBreakReturn || false,
   });
-
-  const history = useHistory();
 
   React.useEffect(() => {
     setData({
@@ -137,7 +136,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
   return (
     <div className="w-full rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
-        <div className="text-xl leading-6 text-[#242526]">Informations générales</div>
+        <div className="text-lg leading-7 text-gray-900 font-bold">Informations générales</div>
         {canEditLigneBusGeneralInfo(user) || isBusEditionOpen(user, cohort) ? (
           <>
             {!editInfo ? (
@@ -169,31 +168,38 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
         ) : null}
       </div>
       <div className="my-8 flex">
-        <div className="flex w-[45%] flex-col justify-between gap-4">
+        <div className="flex w-[45%] flex-col gap-4">
           <div className="flex flex-col gap-4">
-            <Field label="Numéro de ligne" onChange={(e) => setData({ ...data, busId: e.target.value })} value={data.busId} error={errors?.busId} readOnly={!editInfo} />
-            <Field label="Code court de route" value={bus.codeCourtDeRoute} readOnly={true} />
-            <div className="flex items-center gap-4">
-              <DatePickerList
-                label="Date de départ"
-                Icon={BsArrowRight}
-                // @ts-ignore
-                onChange={(e) => setData({ ...data, departuredDate: e })}
-                // @ts-ignore
-                value={getZonedDate(data.departuredDate)}
-                error={errors?.departuredDate}
-                readOnly={!editInfo}
-              />
-              <DatePickerList
-                label="Date de retour"
-                Icon={BsArrowLeft}
-                // @ts-ignore
-                onChange={(e) => setData({ ...data, returnDate: e })}
-                // @ts-ignore
-                value={getZonedDate(data.returnDate)}
-                error={errors?.returnDate}
-                readOnly={!editInfo}
-              />
+            <div className="flex flex-col gap-3">
+              <div>Identification</div>
+              <Field label="Numéro de ligne" onChange={(e) => setData({ ...data, busId: e.target.value })} value={data.busId} error={errors?.busId} readOnly={!editInfo} />
+              <Field label="Code court de route" value={bus.codeCourtDeRoute} readOnly={true} />
+            </div>
+            <div className="flex flex-col gap-3">
+              <div>Capacité</div>
+              <div className="flex gap-4">
+                <Field
+                  label="Totale"
+                  onChange={(e) => setData({ ...data, totalCapacity: e.target.value })}
+                  value={data.totalCapacity as string}
+                  error={errors?.totalCapacity as string}
+                  readOnly={!editInfo}
+                />
+                <Field
+                  label="Accompagnateurs"
+                  onChange={(e) => setData({ ...data, followerCapacity: e.target.value })}
+                  value={data.followerCapacity as string}
+                  error={errors?.followerCapacity as string}
+                  readOnly={!editInfo}
+                />
+                <Field
+                  label="Volontaires"
+                  onChange={(e) => setData({ ...data, youngCapacity: e.target.value })}
+                  value={data.youngCapacity as string}
+                  error={errors?.youngCapacity as string}
+                  readOnly={!editInfo}
+                />
+              </div>
             </div>
           </div>
           <Link to={`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`} className="w-full">
@@ -204,65 +210,68 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
               <Button type="tertiary" title="Voir la classe" className="w-full max-w-none" />
             </Link>
           )}
+          <div className="flex items-center gap-4"></div>
         </div>
         <div className="flex w-[10%] items-center justify-center">
           <div className="my-2 h-full w-[1px] border-r-[1px] border-gray-300"></div>
         </div>
-        <div className="flex w-[45%] flex-col gap-4 ">
-          <div className="flex items-center gap-4">
-            <Field
-              label="Capacité accompagnateur"
-              onChange={(e) => setData({ ...data, followerCapacity: e.target.value })}
-              value={data.followerCapacity as string}
-              error={errors?.followerCapacity}
-              readOnly={!editInfo}
-            />
-            <Field
-              label="Capacité volontaire"
-              onChange={(e) => setData({ ...data, youngCapacity: e.target.value })}
-              value={data.youngCapacity as string}
-              error={errors?.youngCapacity}
-              readOnly={!editInfo}
-            />
+        <div className="flex w-[45%] flex-col gap-8">
+          <div className="flex flex-col gap-3">
+            <div>Trajets</div>
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <DatePickerList
+                  label="Aller"
+                  onChange={(e) => setData({ ...data, departuredDate: e })}
+                  // @ts-ignore
+                  value={new Date(data.departuredDate)}
+                  error={errors?.departuredDate}
+                  readOnly={!editInfo}
+                />
+                <DatePickerList
+                  label="Retour"
+                  onChange={(e) => setData({ ...data, returnDate: e })}
+                  // @ts-ignore
+                  value={new Date(data.returnDate)}
+                  error={errors?.returnDate}
+                  readOnly={!editInfo}
+                />
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
+              <Select
+                label="Pause déjeuner aller"
+                // @ts-ignore
+                options={options}
+                // @ts-ignore
+                selected={options.find((e) => e.value === data.lunchBreak)}
+                // @ts-ignore
+                setSelected={(e) => setData({ ...data, lunchBreak: e.value })}
+                readOnly={!editInfo}
+              />
+              <Select
+                label="Pause déjeuner retour"
+                // @ts-ignore
+                options={options}
+                // @ts-ignore
+                selected={options.find((e) => e.value === data.lunchBreakReturn)}
+                // @ts-ignore
+                setSelected={(e) => setData({ ...data, lunchBreakReturn: e.value })}
+                readOnly={!editInfo}
+              />
+            </div>
+            <div>
+              <Field
+                label="Temps de route"
+                onChange={(e) => setData({ ...data, travelTime: e.target.value })}
+                value={data.travelTime}
+                error={errors?.travelTime}
+                readOnly={!editInfo}
+              />
+            </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Field
-              label="Capacité totale"
-              onChange={(e) => setData({ ...data, totalCapacity: e.target.value })}
-              value={data.totalCapacity as string}
-              error={errors?.totalCapacity}
-              readOnly={!editInfo}
-            />
-            <Field
-              label="Temps de route"
-              onChange={(e) => setData({ ...data, travelTime: e.target.value })}
-              value={data.travelTime}
-              error={errors?.travelTime}
-              readOnly={!editInfo}
-            />
-          </div>
-          <div className="flex items-center gap-4">
-            <Select
-              label="Pause déjeuner aller"
-              // @ts-ignore
-              options={options}
-              // @ts-ignore
-              selected={options.find((e) => e.value === data.lunchBreak)}
-              // @ts-ignore
-              setSelected={(e) => setData({ ...data, lunchBreak: e.value })}
-              readOnly={!editInfo}
-            />
-            <Select
-              label="Pause déjeuner retour"
-              // @ts-ignore
-              options={options}
-              // @ts-ignore
-              selected={options.find((e) => e.value === data.lunchBreakReturn)}
-              // @ts-ignore
-              setSelected={(e) => setData({ ...data, lunchBreakReturn: e.value })}
-              readOnly={!editInfo}
-            />
-          </div>
+          <MergedBus bus={bus} />
+          <MirrorBus bus={bus} />
         </div>
       </div>
     </div>

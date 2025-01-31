@@ -51,6 +51,8 @@ export class JeuneMapper {
             parent2Telephone: jeuneDocument.parent2Phone,
             youngPhase1Agreement: jeuneDocument.youngPhase1Agreement,
             sessionChangeReason: jeuneDocument.cohortChangeReason,
+            // CLE
+            classeId: jeuneDocument.classeId,
         };
     }
 
@@ -148,6 +150,8 @@ export class JeuneMapper {
             parent2Phone: jeuneModel.parent2Telephone,
             youngPhase1Agreement: jeuneModel.youngPhase1Agreement,
             cohortChangeReason: jeuneModel.sessionChangeReason,
+            // CLE
+            classeId: jeuneModel.classeId,
         };
     }
 }

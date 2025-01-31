@@ -1189,6 +1189,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_HTS_SIMULATION":
     case "AFFECTATION_HTS_SIMULATION_VALIDER":
       return "Affectation HTS (Metropole, hors Corse)";
+    case "AFFECTATION_CLE_SIMULATION":
+    case "AFFECTATION_CLE_SIMULATION_VALIDER":
+      return "Affectation CLE (Metropole)";
     default:
       return name;
   }
