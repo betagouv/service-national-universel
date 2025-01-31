@@ -61,7 +61,7 @@ describe("POST /plan-de-transport/import/:cohort", () => {
       .attach("file", Buffer.from("test"), { filename: "test.xslx" });
     expect(response.status).toBe(404);
   });
-  it.skip("should return 200 if import plan created successfully", async () => {
+  it("should return 200 if import plan created successfully", async () => {
     await createCohortHelper(getNewCohortFixture({ name: "Avril 2023 - A" }));
     const importPlanTransport = await ImportPlanTransportModel.create(getNewImportPlanTransportFixture());
     await initPlanTransport(importPlanTransport);
@@ -128,7 +128,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     expect(response.status).toBe(404);
   });
 
-  it.skip("should execute import plan successfully", async () => {
+  it("should execute import plan successfully", async () => {
     const importPlanTransport = await ImportPlanTransportModel.create(getNewImportPlanTransportFixture());
     await initPlanTransport(importPlanTransport);
 
