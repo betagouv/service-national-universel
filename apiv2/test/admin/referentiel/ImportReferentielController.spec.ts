@@ -282,9 +282,9 @@ describe("ImportReferentielController", () => {
                 expect(response.statusCode).toEqual(201);
             });
 
-            it(`imports CLASSES`, async () => {
+            it(`imports DEPARTEMENTS`, async () => {
                 const testFile = require('fs')
-                    .readFileSync("./test/admin/referentiel/fixtures/classes.xlsx");
+                    .readFileSync("./test/admin/referentiel/fixtures/departements.xlsx");
 
                 jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
                     Location: "test",
@@ -302,12 +302,11 @@ describe("ImportReferentielController", () => {
                 });
 
                 const response = await request(app.getHttpServer())
-                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_CLASSES}`)
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_DEPARTEMENTS}`)
                     .attach("file", testFile, {
                         filename: "test.xlsx",
                         contentType: MIME_TYPES.EXCEL,
                     });
-                console.log(response.body);
                 expect(response.statusCode).toEqual(201);
             });
         });

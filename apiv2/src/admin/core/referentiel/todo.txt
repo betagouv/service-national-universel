@@ -2,6 +2,7 @@
 [ ] - Integrate the logic of the import of classes and desister classes in the import referentiel service
 -- [ ] -- Desister classes
 -- [ ] -- Import classes
-[ ] - Add the Département referentiel
+[X] - Add the Département referentiel
 [ ] - Add the Academie referentiel import
 [ ] - Add the Routes report
+[] warning sur le DTO région academiques.

@@ -39,10 +39,10 @@ import { jeuneMongoProviders } from "../sejours/jeune/provider/JeuneMongo.provid
 import { sejourMongoProviders } from "../sejours/phase1/sejour/provider/SejourMongo.provider";
 import { historyMongoProviders } from "../history/repository/mongo/HistoryMongo.provider";
 import { ImporterRegionsAcademiques } from "@admin/core/referentiel/regionAcademique/useCase/ImporterRegionsAcademiques/ImporterRegionsAcademiques";
-import { NotificationModule } from "@notification/Notification.module";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
-import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
+import { departementMongoProviders } from "./departement/DepartementMongo.provider";
+import { ImporterDepartements } from "@admin/core/referentiel/departement/useCase/ImporterDepartements/ImporterDepartements";
 
 @Module({
     imports: [DatabaseModule, ConfigModule, ClsModule],
@@ -52,12 +52,10 @@ import { ReferentielClasseService } from "@admin/core/referentiel/classe/Referen
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: FileGateway, useClass: FileProvider },
         { provide: ClockGateway, useClass: ClockProvider },
-        RegionAcademiqueImportService,
-        ReferentielImportTaskService,
-        ReferentielClasseService,
         ...referentielGatewayProviders,
         ...referentielUseCaseProviders,
         ...regionAcademiqueMongoProviders,
+        ...departementMongoProviders,
         ...referentielServiceProvider,
         {provide: SessionGateway, useClass: SessionRepository},
         {provide: CentreGateway, useClass: CentreRepository},
@@ -78,8 +76,12 @@ import { ReferentielClasseService } from "@admin/core/referentiel/classe/Referen
         ],
     exports: [
         ImporterRegionsAcademiques,
-         ImporterRoutes,
-          RegionAcademiqueImportService],
+        ImporterRoutes,
+        ImporterDepartements,
+        ...referentielServiceProvider,
+        ...referentielGatewayProviders
+    ],
+    
 })
 
 export class ReferentielModule {}
