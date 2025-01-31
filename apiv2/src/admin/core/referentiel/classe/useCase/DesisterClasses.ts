@@ -10,7 +10,7 @@ import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import {
     ClasseDesisterModel,
     ClasseDesisterRapport,
-    ClasseDesisterXslx,
+    ClasseDesisterXlsx,
     ClasseRapport,
     DesisterClasseFileValidation,
 } from "../ReferentielClasse.model";
@@ -24,7 +24,7 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseDesisterRapport[]> {
         const report: ClasseDesisterRapport[] = [];
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
-        const classesFromXslx = await this.fileGateway.parseXLS<ClasseDesisterXslx>(fileContent.Body, {
+        const classesFromXslx = await this.fileGateway.parseXLS<ClasseDesisterXlsx>(fileContent.Body, {
             sheetName: DesisterClasseFileValidation.sheetName,
         });
         const mappedClasses = ReferentielClasseMapper.mapDesisterClassesFromFile(classesFromXslx);

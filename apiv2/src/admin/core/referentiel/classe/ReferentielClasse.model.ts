@@ -1,6 +1,7 @@
 import { STATUS_CLASSE } from "snu-lib";
+import { FileValidation } from "../Referentiel";
 
-export interface ClasseImportXslx {
+export interface ClasseImportXlsx {
     "Session formule": string;
     "Identifiant de la classe engagée": string;
     "Effectif de jeunes concernés": number;
@@ -30,7 +31,7 @@ export interface ClasseImportRapport extends ClasseImportModel, ClasseRapport {
     annulerClasseDesisteeRapport?: string;
 }
 
-export interface ClasseDesisterXslx {
+export interface ClasseDesisterXlsx {
     "Identifiant de la classe engagée"?: string;
 }
 
@@ -43,11 +44,6 @@ export interface ClasseDesisterRapport extends ClasseRapport {
     result: "success" | "error";
     jeunesDesistesIds: string;
     error?: string;
-}
-
-export interface FileValidation {
-    requiredColumns: string[];
-    sheetName: string;
 }
 
 export const ImportClasseFileValidation: FileValidation = {

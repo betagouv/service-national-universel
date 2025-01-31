@@ -15,8 +15,8 @@ import {
     ReferentielImportTaskParameters,
 } from "../routes/ReferentielImportTask.model";
 import {
-    ClasseDesisterXslx,
-    ClasseImportXslx,
+    ClasseDesisterXlsx,
+    ClasseImportXlsx,
     ClasseRapport,
     DesisterClasseFileValidation,
     ImportClasseFileValidation,
@@ -43,12 +43,12 @@ export class ReferentielClasseService {
         mimetype: string;
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
-        const classesToImport = await this.fileGateway.parseXLS<ClasseImportXslx>(buffer, {
+        const classesToImport = await this.fileGateway.parseXLS<ClasseImportXlsx>(buffer, {
             defval: "",
             sheetName: ImportClasseFileValidation.sheetName,
         });
 
-        const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXslx>(buffer, {
+        const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXlsx>(buffer, {
             defval: "",
             sheetName: DesisterClasseFileValidation.sheetName,
         });

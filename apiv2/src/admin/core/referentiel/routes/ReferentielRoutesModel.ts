@@ -1,4 +1,6 @@
-export interface RouteXLS {
+import { FileValidation } from "../Referentiel";
+
+export interface RouteXlsx {
     "Session formule"?: string;
     "Code court de Route"?: string;
     "Commentaire interne sur l'enregistrement"?: string;
@@ -31,3 +33,33 @@ export interface RouteXLS {
     "Classe engagée"?: string;
     "Identifiant de la classe engagée"?: string;
 }
+
+export interface RouteImportModel {
+    sessionCode: string;
+    routeCode: string;
+    routeName: string;
+    routeDescription: string;
+}
+
+export interface RouteRapport {}
+export interface RouteImportRapport extends RouteImportModel, RouteRapport {
+    result: "success" | "error";
+    error?: string;
+    updated?: string;
+}
+
+export const RouteImportFileValidation: FileValidation = {
+    requiredColumns: [
+        "Session formule",
+        "Code court de Route",
+        "Commentaire interne sur l'enregistrement",
+        "Session : Code de la session",
+        "Session : Désignation de la session",
+        "Session : Date de début de la session",
+        "Session : Date de fin de la session",
+        "Route",
+            : "Code point de rassemblement initial",
+    point_rassemblement: "Point de rassemblement initial"
+    ],
+    sheetName: "",
+};
