@@ -1,11 +1,16 @@
 import { getClasseLabelMap, getEtablissementLabelMap, getLigneLabelMap, getSessionLabelMap } from "./filterLabelRepository";
 
-export const listTypes = { INSCRIPTION: "inscription", VOLONTAIRES: "volontaires" };
+export const listTypes = { INSCRIPTION: "inscription-list", VOLONTAIRES: "young-list", VOLONTAIRES_CLE: "youngCle-list" };
 
-export async function getLabelVolontaires() {
-  const sessions = await getSessionLabelMap();
-  const bus = await getLigneLabelMap();
-  const classes = await getClasseLabelMap();
-  const etablissements = await getEtablissementLabelMap();
-  return { sessions, bus, classes, etablissements };
+const labelMaps = {
+  [listTypes.VOLONTAIRES]: [getSessionLabelMap, getLigneLabelMap, getClasseLabelMap, getEtablissementLabelMap],
+  [listTypes.VOLONTAIRES_CLE]: [getSessionLabelMap, getLigneLabelMap, getClasseLabelMap],
+  [listTypes.INSCRIPTION]: [getClasseLabelMap, getEtablissementLabelMap],
+};
+
+export async function getLabels(listType: string): Promise<{ [key: string]: string }> {
+  const labelMap = labelMaps[listType];
+  if (!labelMap) throw new Error("Invalid list type");
+  const labels = await Promise.all(labelMap.map((fn) => fn()));
+  return labels.reduce((acc, curr) => ({ ...acc, ...curr }), {});
 }

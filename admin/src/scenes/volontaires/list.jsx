@@ -24,10 +24,10 @@ import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 
 export default function VolontaireList() {
+  const pageId = "young-list";
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
-  const { data: filterLabels, isPending, isError } = useFilterLabels("volontaires");
-  const { sessions, bus, classes, etablissements } = filterLabels || {};
+  const { data: labels, isPending, isError } = useFilterLabels(pageId);
   if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
@@ -36,7 +36,6 @@ export default function VolontaireList() {
 
   //List state
   const [data, setData] = useState([]);
-  const pageId = "young-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     page: 0,
@@ -46,7 +45,7 @@ export default function VolontaireList() {
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur lors de la récupération des filtres</div>;
 
-  const filterArray = getFilterArray(user, bus, sessions, classes, etablissements);
+  const filterArray = getFilterArray(user, labels);
 
   return (
     <>

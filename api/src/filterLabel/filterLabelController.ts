@@ -4,11 +4,11 @@ import passport from "passport";
 import express, { Response } from "express";
 import { capture } from "../sentry";
 import { UserRequest } from "../controllers/request";
-import { getLabelVolontaires, listTypes } from "./filterLabelService";
+import { getLabels, listTypes } from "./filterLabelService";
 
 const router = express.Router();
 
-const validator = Joi.string().valid(listTypes.INSCRIPTION, listTypes.VOLONTAIRES).required();
+const validator = Joi.string().valid(listTypes.INSCRIPTION, listTypes.VOLONTAIRES, listTypes.VOLONTAIRES_CLE).required();
 
 router.get("/:list", passport.authenticate("referent", { session: false, failWithError: true }), GetFilterLabels);
 
@@ -20,12 +20,9 @@ async function GetFilterLabels(req: UserRequest, res: Response) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (value === listTypes.VOLONTAIRES) {
-      const data = await getLabelVolontaires();
-      return res.status(200).send({ ok: true, data });
-    }
+    const data = await getLabels(value);
 
-    // TODO: getLabelInscriptions
+    return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
