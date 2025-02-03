@@ -10,6 +10,7 @@ export class LigneDeBusMapper {
     static toModel(ligneDeBusDocument: LigneDeBusDocument): LigneDeBusModel {
         return {
             id: ligneDeBusDocument._id.toString(),
+            codeCourtDeRoute: ligneDeBusDocument.codeCourtDeRoute,
             pointDeRassemblementIds: ligneDeBusDocument.meetingPointsIds,
             capaciteJeunes: ligneDeBusDocument.youngCapacity,
             placesOccupeesJeunes: ligneDeBusDocument.youngSeatsTaken,
@@ -27,13 +28,15 @@ export class LigneDeBusMapper {
             tempsRetardRetour: ligneDeBusDocument.delayedBack,
             dateDepart: ligneDeBusDocument.departuredDate,
             dateRetour: ligneDeBusDocument.returnDate,
-            ligneFusionneIds: ligneDeBusDocument.mergedBusIds,
+            ligneFusionneeIds: ligneDeBusDocument.mergedBusIds,
+            ligneMirroirId: ligneDeBusDocument.mirrorBusId,
         };
     }
 
     static toEntity(ligneDeBusModel: LigneDeBusModel): Omit<LigneBusType, "createdAt" | "updatedAt" | "team"> {
         return {
             _id: ligneDeBusModel.id,
+            codeCourtDeRoute: ligneDeBusModel.codeCourtDeRoute,
             meetingPointsIds: ligneDeBusModel.pointDeRassemblementIds,
             youngCapacity: ligneDeBusModel.capaciteJeunes,
             youngSeatsTaken: ligneDeBusModel.placesOccupeesJeunes,
@@ -41,7 +44,7 @@ export class LigneDeBusMapper {
             busId: ligneDeBusModel.numeroLigne,
             cohort: ligneDeBusModel.sessionNom!,
             cohortId: ligneDeBusModel.sessionId,
-            sessionId: ligneDeBusModel.sejourId!,
+            sessionId: ligneDeBusModel.sejourId,
             totalCapacity: ligneDeBusModel.capaciteTotal,
             followerCapacity: ligneDeBusModel.capaciteAccompagnateurs,
             travelTime: ligneDeBusModel.dureeTrajet,
@@ -51,7 +54,8 @@ export class LigneDeBusMapper {
             delayedBack: ligneDeBusModel.tempsRetardRetour,
             departuredDate: ligneDeBusModel.dateDepart,
             returnDate: ligneDeBusModel.dateRetour,
-            mergedBusIds: ligneDeBusModel.ligneFusionneIds,
+            mergedBusIds: ligneDeBusModel.ligneFusionneeIds,
+            mirrorBusId: ligneDeBusModel.ligneMirroirId,
         };
     }
 }

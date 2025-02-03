@@ -9,7 +9,7 @@ export default function Input({
   label = null,
   state = "default",
   stateRelatedMessage = null,
-  placeholder = null,
+  placeholder = "",
   iconId = null,
   disabled = false,
   type = "text",

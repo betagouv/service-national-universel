@@ -1,12 +1,12 @@
 {
-  "min_scale": 0,
+  "min_scale": 1,
   "max_scale": 1,
   "protocol": "http1",
   "port": 8080,
   "http_option": "redirected",
   "privacy": "public",
   "timeout": "60s",
-  "cpu_limit": 768,
-  "memory_limit": 2048,
+  "cpu_limit": 2000,
+  "memory_limit": 4096,
   "sandbox": "v1"
 }

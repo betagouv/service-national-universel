@@ -10,6 +10,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class JeuneRepository implements JeuneGateway {
@@ -66,6 +67,15 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModels(jeunes);
     }
 
+    async findBySessionIdClasseIdAndStatus(sessionId: string, classeId: string, status: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({
+            cohortId: sessionId,
+            classeId,
+            status,
+        });
+        return JeuneMapper.toModels(jeunes);
+    }
+
     async findBySessionId(sessionId: string): Promise<JeuneModel[]> {
         const jeunes = await this.jeuneMongooseEntity.find({ cohortId: sessionId });
         return JeuneMapper.toModels(jeunes);
@@ -102,7 +112,7 @@ export class JeuneRepository implements JeuneGateway {
             jeunesEntity.map((jeune) => ({
                 updateOne: {
                     filter: { _id: jeune.updated._id },
-                    update: { $set: jeune.updated },
+                    update: getEntityUpdateSetUnset(jeune.updated),
                     upsert: false,
                 },
             })),
