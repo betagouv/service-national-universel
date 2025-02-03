@@ -91,7 +91,7 @@ async function createReferentIfNotExists(resp, structureId: string): Promise<Ref
 }
 
 async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
-  const jvaStructure = await fetchStructureById(mission.organizationId);
+  const jvaStructure = await fetchStructureById(mission.organizationClientId);
   if (!jvaStructure) {
     return;
   }
@@ -160,12 +160,12 @@ export async function syncMissions() {
 async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
   logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
 
-  if (JvaStructureException.includes(mission.organizationId)) {
-    logger.info(`Structure ${mission.organizationId} is in JVA exception list, skipping mission ${mission.clientId}`);
+  if (JvaStructureException.includes(mission.organizationClientId.toString())) {
+    logger.info(`Structure ${mission.organizationClientId} is in JVA exception list, skipping mission ${mission.clientId}`);
     return;
   }
 
-  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationId });
+  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
   if (!structure) {
     const newStructure = await createStructure(mission);
     if (!newStructure) throw new Error("No structure created");
@@ -206,6 +206,8 @@ async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument
 }
 
 export async function cancelOldMissions(startTime: Date) {
+  // TODO: Trouver un moyen de distinguer les missions non trouvées (= celles annulées par JVA) de celles qui n'ont pas été synchronisées à cause d'une erreur.
+  // Actuellement, on annule toutes les missions non synchronisées, qu'elles soient fournies par JVA ou non.
   const missionsToCancel = await MissionModel.find({
     isJvaMission: "true",
     lastSyncAt: { $lte: startTime },

@@ -12,13 +12,14 @@ import { createFixtureClasse } from "../fixtures/classe";
 import { getNewReferentFixture, getNewSignupReferentFixture } from "../fixtures/referent";
 import { createReferentHelper } from "../helpers/referent";
 
-import { dbConnect, dbClose } from "../helpers/db";
+import { dbConnect, dbClose, mockTransaction } from "../helpers/db";
 
 import * as apiEducationModule from "../../services/gouv.fr/api-education";
 import { getEtablissementsFromAnnuaire } from "../fixtures/providers/annuaireEtablissement";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
+mockTransaction();
 
 describe("PUT /cle/etablissement/:id", () => {
   it("should return 400 when id is invalid", async () => {

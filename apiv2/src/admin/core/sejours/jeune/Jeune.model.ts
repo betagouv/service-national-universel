@@ -50,6 +50,7 @@ export type JeuneModel = {
     parent2Telephone?: string;
     youngPhase1Agreement: string;
     sessionChangeReason?: string;
+    classeId?: string;
 };
 
 export type CreateJeuneModel = Omit<JeuneModel, "id" | "createdAt" | "updatedAt">;

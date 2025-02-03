@@ -68,7 +68,7 @@ export default function Modification({ demandeDeModification, getModification })
 
   return (
     <div className="w-1/2 rounded-xl bg-white p-8">
-      <div className="text-xl leading-6 text-[#242526]">Demandes de modifications ({demandeDeModification.length})</div>
+      <div className="text-lg leading-7 text-gray-900 font-bold">Demandes de modifications ({demandeDeModification.length})</div>
       <div className="mt-4 flex max-h-[300px] flex-col gap-4 overflow-y-auto">
         {demandeDeModification.map((modification, index) => (
           <div key={index} className=" mr-1 flex flex-col gap-2">

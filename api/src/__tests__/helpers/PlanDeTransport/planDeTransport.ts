@@ -9,25 +9,25 @@ import { createCohesionCenterWithSession } from "../cohesionCenter";
 import { createPointDeRassemblementHelper } from "./pointDeRassemblement";
 
 async function initPlanTransport(planTransport) {
-  const matricules = planTransport.lines.reduce(
+  const ids = planTransport.lines.reduce(
     (acc, line) => {
-      const { "MATRICULE CENTRE": centreMatricule, "MATRICULE PDR 1": pdr1Matricule, "MATRICULE PDR 2": pdr2Matricule, "MATRICULE PDR 3": pdr3Matricule } = line;
-      if (centreMatricule) acc.centreMatricules[centreMatricule] = centreMatricule;
-      if (pdr1Matricule) acc.pdrMatricules[pdr1Matricule] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 1"]] };
-      if (pdr2Matricule) acc.pdrMatricules[pdr2Matricule] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 2"]] };
-      if (pdr3Matricule) acc.pdrMatricules[pdr3Matricule] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 3"]] };
+      const { "ID CENTRE": centreId, "ID PDR 1": pdr1Id, "ID PDR 2": pdr2Id, "ID PDR 3": pdr3Id } = line;
+      if (centreId) acc.centreIds[centreId] = centreId;
+      if (pdr1Id) acc.pdrIds[pdr1Id] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 1"]] };
+      if (pdr2Id) acc.pdrIds[pdr2Id] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 2"]] };
+      if (pdr3Id) acc.pdrIds[pdr3Id] = { department: departmentLookUp[line["N° DE DEPARTEMENT PDR 3"]] };
       return acc;
     },
-    { centreMatricules: {}, pdrMatricules: {} },
+    { centreIds: {}, pdrIds: {} },
   );
-  for (const centreMatricule of Object.keys(matricules.centreMatricules)) {
+  for (const centreId of Object.keys(ids.centreIds)) {
     await createCohesionCenterWithSession(
-      getNewCohesionCenterFixture({ cohorts: [planTransport.cohort], matricule: centreMatricule }),
+      getNewCohesionCenterFixture({ _id: centreId, cohorts: [planTransport.cohort] }),
       getNewSessionPhase1Fixture({ cohort: planTransport.cohort }),
     );
   }
-  for (const pdrMatricule of Object.keys(matricules.pdrMatricules)) {
-    await createPointDeRassemblementHelper(getNewPointDeRassemblementFixture({ department: matricules.pdrMatricules[pdrMatricule].department, matricule: pdrMatricule }));
+  for (const pdrId of Object.keys(ids.pdrIds)) {
+    await createPointDeRassemblementHelper(getNewPointDeRassemblementFixture({ _id: pdrId, department: ids.pdrIds[pdrId].department }));
   }
 }
 
