@@ -1,12 +1,12 @@
 import { Injectable, Inject } from "@nestjs/common";
 import { NoteType } from "@admin/core/sejours/jeune/Jeune.model";
 import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
-import { SessionModel } from "../../session/Session.model";
+import { SessionModel } from "../session/Session.model";
 import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
 import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
-import { YOUNG_SOURCE, getCohortPeriod } from "snu-lib";
+import { YOUNG_SOURCE, getCohortPeriod, CLE_FILIERE, YOUNG_SITUATIONS } from "snu-lib";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import {
     EmailTemplate,
@@ -41,7 +41,7 @@ export class BasculeService {
         @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
     ) {}
-    generateYoungNoteForBascule({
+    static generateYoungNoteForBascule({
         jeune,
         session,
         sessionChangeReason,
@@ -163,5 +163,24 @@ export class BasculeService {
             params,
             EmailTemplate.JEUNE_CHANGE_SESSION_CLE_TO_HTS,
         );
+    }
+
+    static getYoungSituationIfCLE(filiere: string): string {
+        if (filiere === CLE_FILIERE.GENERAL_AND_TECHNOLOGIC) {
+            return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+        }
+        if (filiere === CLE_FILIERE.PROFESSIONAL) {
+            return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
+        }
+        if (filiere === CLE_FILIERE.APPRENTICESHIP) {
+            return YOUNG_SITUATIONS.APPRENTICESHIP;
+        }
+        if (filiere === CLE_FILIERE.ADAPTED) {
+            return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
+        }
+        if (filiere === CLE_FILIERE.MIXED) {
+            return YOUNG_SITUATIONS.GENERAL_SCHOOL;
+        }
+        return filiere;
     }
 }

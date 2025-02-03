@@ -5,15 +5,13 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 @Injectable()
 export class SejourService {
     constructor(
-        @Inject(SejourGateway)
-        @Inject(JeuneGateway)
-        private readonly sejourGateway: SejourGateway,
-        private readonly jeuneGateway: JeuneGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
+        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
     ) {}
 
-    async updatePlacesSessionPhase1(idSejour: string) {
+    async updatePlacesSejour(idSejour: string) {
         const sejour = await this.sejourGateway.findById(idSejour);
-        const jeunes = await this.jeuneGateway.findBySessionId(idSejour);
+        const jeunes = await this.jeuneGateway.findBySejourId(idSejour);
         const placesTaken = jeunes.filter(
             (jeune) =>
                 ["AFFECTED", "DONE"].includes(jeune.statutPhase1) &&

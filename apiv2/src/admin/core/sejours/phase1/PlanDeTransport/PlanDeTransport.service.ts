@@ -6,30 +6,14 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 @Injectable()
 export class PlanDeTransportService {
     constructor(
-        @Inject(PlanDeTransportGateway)
-        @Inject(JeuneGateway)
-        @Inject(LigneDeBusGateway)
-        private readonly planDeTransportGateway: PlanDeTransportGateway,
-        private readonly jeuneGateway: JeuneGateway,
-        private readonly ligneDeBusGateway: LigneDeBusGateway,
+        @Inject(PlanDeTransportGateway) private readonly planDeTransportGateway: PlanDeTransportGateway,
+        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
+        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
     ) {}
 
     async updateSeatsTakenInBusLine(busId: string) {
         const ligneBus = await this.ligneDeBusGateway.findById(busId);
-        const jeuneDansLeBus = await this.jeuneGateway.find({
-            $and: [
-                {
-                    status: "VALIDATED",
-                    ligneId: busId,
-                },
-                {
-                    $or: [
-                        { statusPhase1: { $in: ["AFFECTED", "DONE"] } },
-                        { statusPhase1Tmp: { $in: ["AFFECTED", "DONE"] } },
-                    ],
-                },
-            ],
-        });
+        const jeuneDansLeBus = await this.jeuneGateway.findInBus(busId);
         const placesPrises = jeuneDansLeBus.length;
         if (ligneBus.placesOccupeesJeunes !== placesPrises) {
             ligneBus.placesOccupeesJeunes = placesPrises;

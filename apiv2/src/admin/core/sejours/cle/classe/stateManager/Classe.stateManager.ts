@@ -14,7 +14,7 @@ export class ClasseStateManager {
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
     ) {}
 
-    async execute(classeId: string): Promise<ClasseModel> {
+    async compute(classeId: string): Promise<ClasseModel> {
         // Get classe
         let classe = await this.classeGateway.findById(classeId);
         if (!classe.sessionId) throw new Error("Classe has no session");

@@ -6,18 +6,10 @@ import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etab
 import { SessionGateway } from "../../session/Session.gateway";
 import { ChangerLaSessionDuJeunePayloadDto } from "@admin/infra/sejours/phase1/bascule/api/Bascule.validation";
 import { JeuneMapper } from "@admin/infra/sejours/jeune/repository/Jeune.mapper";
-import {
-    YoungDto,
-    YOUNG_SOURCE,
-    YOUNG_STATUS,
-    YOUNG_STATUS_PHASE1,
-    CLE_FILIERE,
-    YOUNG_SITUATIONS,
-    STEPS2023,
-} from "snu-lib";
+import { YoungDto, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, STEPS2023 } from "snu-lib";
 import { SessionService } from "../../session/Session.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { BasculeService } from "../service";
+import { BasculeService } from "../Bascule.service";
 import { SejourService } from "../../sejour/Sejour.Service";
 import { PlanDeTransportService } from "../../PlanDeTransport/PlanDeTransport.service";
 import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
@@ -88,7 +80,7 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
         const correctionRequestsFiltered =
             jeune.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
 
-        const newNote = this.basculeService.generateYoungNoteForBascule({
+        const newNote = BasculeService.generateYoungNoteForBascule({
             jeune,
             session,
             sessionChangeReason: null,
@@ -112,12 +104,12 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
 
         await this.jeuneGateway.update(newJeune);
 
-        await this.classeStateManager.execute(ancienneClasse.id);
-        await this.classeStateManager.execute(classe.id);
+        await this.classeStateManager.compute(ancienneClasse.id);
+        await this.classeStateManager.compute(classe.id);
 
         // if they had a session, we check if we need to update the places taken / left
         if (oldSessionPhase1Id) {
-            await this.sejourService.updatePlacesSessionPhase1(oldSessionPhase1Id);
+            await this.sejourService.updatePlacesSejour(oldSessionPhase1Id);
         }
 
         // if they had a meetingPoint, we check if we need to update the places taken / left in the bus
@@ -140,29 +132,16 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
     static getStatutJeuneForBasculeCLEtoCLE(statut: string): string {
         switch (statut) {
             case YOUNG_STATUS.IN_PROGRESS:
+            case YOUNG_STATUS.REFUSED:
+            case YOUNG_STATUS.WITHDRAWN:
+            case YOUNG_STATUS.REINSCRIPTION:
+            case YOUNG_STATUS.NOT_AUTORISED:
+            case YOUNG_STATUS.ABANDONED:
+            case YOUNG_STATUS.DELETED:
                 return YOUNG_STATUS.IN_PROGRESS;
             default:
                 return YOUNG_STATUS.WAITING_VALIDATION;
         }
-    }
-
-    static getYoungSituationIfCLE(filiere: string): string {
-        if (filiere === CLE_FILIERE.GENERAL_AND_TECHNOLOGIC) {
-            return YOUNG_SITUATIONS.GENERAL_SCHOOL;
-        }
-        if (filiere === CLE_FILIERE.PROFESSIONAL) {
-            return YOUNG_SITUATIONS.PROFESSIONAL_SCHOOL;
-        }
-        if (filiere === CLE_FILIERE.APPRENTICESHIP) {
-            return YOUNG_SITUATIONS.APPRENTICESHIP;
-        }
-        if (filiere === CLE_FILIERE.ADAPTED) {
-            return YOUNG_SITUATIONS.SPECIALIZED_SCHOOL;
-        }
-        if (filiere === CLE_FILIERE.MIXED) {
-            return YOUNG_SITUATIONS.GENERAL_SCHOOL;
-        }
-        return filiere;
     }
 
     static updateYoungForBasculeCLEtoCLE(
@@ -218,7 +197,7 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
         jeune.regionEtablissement = etablissement.region;
         jeune.paysEtablissement = etablissement.pays;
         jeune.ecoleRamsesId = undefined;
-        jeune.situation = BasculeCLEtoCLE.getYoungSituationIfCLE(classe.filiere || "");
+        jeune.situation = BasculeService.getYoungSituationIfCLE(classe.filiere || "");
         jeune.hasMeetingInformation = hasMeetingInformation;
         jeune.notes = [...(jeune.notes ?? []), newNote];
         jeune.hasNotes = "true";
