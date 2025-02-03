@@ -67,6 +67,15 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModels(jeunes);
     }
 
+    async findBySessionIdClasseIdAndStatus(sessionId: string, classeId: string, status: string): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({
+            cohortId: sessionId,
+            classeId,
+            status,
+        });
+        return JeuneMapper.toModels(jeunes);
+    }
+
     async findBySessionId(sessionId: string): Promise<JeuneModel[]> {
         const jeunes = await this.jeuneMongooseEntity.find({ cohortId: sessionId });
         return JeuneMapper.toModels(jeunes);
