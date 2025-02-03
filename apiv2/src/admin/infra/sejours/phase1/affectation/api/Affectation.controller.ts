@@ -6,6 +6,8 @@ import {
     TaskStatus,
     SimulationAffectationHTSTaskParameters,
     ValiderAffectationHTSTaskParameters,
+    SimulationAffectationCLETaskParameters,
+    ValiderAffectationCLETaskParameters,
 } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -13,7 +15,11 @@ import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./Affectation.validation";
+import {
+    PostSimulationsClePayloadDto,
+    PostSimulationsHtsPayloadDto,
+    PostSimulationValiderPayloadDto,
+} from "./Affectation.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
@@ -26,11 +32,20 @@ export class AffectationController {
     ) {}
 
     @UseGuards(AdminGuard)
-    @Get("/:sessionId")
-    async getStatus(@Param("sessionId") sessionId: string): Promise<AffectationRoutes["GetAffectation"]["response"]> {
-        const traitement = await this.affectationService.getStatusValidation(sessionId);
+    @Get("/:sessionId/:type")
+    async getStatus(
+        @Param("sessionId") sessionId: string,
+        @Param("type") type: string,
+    ): Promise<AffectationRoutes["GetAffectation"]["response"]> {
+        const traitement = await this.affectationService.getStatusValidation(
+            sessionId,
+            type === "CLE" ? TaskName.AFFECTATION_CLE_SIMULATION_VALIDER : TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+        );
         return {
-            simulation: await this.affectationService.getStatusSimulation(sessionId),
+            simulation: await this.affectationService.getStatusSimulation(
+                sessionId,
+                type === "CLE" ? TaskName.AFFECTATION_CLE_SIMULATION : TaskName.AFFECTATION_HTS_SIMULATION,
+            ),
             traitement: {
                 ...traitement,
                 lastCompletedAt: traitement.lastCompletedAt?.toISOString(),
@@ -39,12 +54,12 @@ export class AffectationController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId/simulations")
-    async simulate(
+    @Post("/:sessionId/simulation/hts")
+    async simulateHts(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
-        @Body() payload: PostSimulationsPayloadDto,
-    ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+        @Body() payload: PostSimulationsHtsPayloadDto,
+    ): Promise<AffectationRoutes["PostSimulationsHTSRoute"]["response"]> {
         const importTask: ReferentielImportTaskModel = await this.taskGateway.findById(payload.sdrImportId);
         if (!importTask.metadata?.parameters?.fileKey) {
             throw new FunctionalException(
@@ -78,17 +93,48 @@ export class AffectationController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId/simulation/:taskId/valider")
-    async validerSimulation(
+    @Post("/:sessionId/simulation/cle")
+    async simulateCle(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Body() payload: PostSimulationsClePayloadDto,
+    ): Promise<AffectationRoutes["PostSimulationsCLERoute"]["response"]> {
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_CLE_SIMULATION,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    departements: payload.departements,
+                    etranger: payload.etranger,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as SimulationAffectationCLETaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider/hts")
+    async validerSimulationHTS(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
         @Param("taskId") taskId: string,
         @Body() payload: PostSimulationValiderPayloadDto,
-    ): Promise<AffectationRoutes["PostSimulationsRoute"]["response"]> {
+    ): Promise<AffectationRoutes["PostSimulationsHTSRoute"]["response"]> {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(sessionId);
+        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+            sessionId,
+            TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+        );
 
         if (
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
@@ -113,6 +159,48 @@ export class AffectationController {
                         sousRole: request.user.sousRole,
                     },
                 } as ValiderAffectationHTSTaskParameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider/cle")
+    async validerSimulationCLE(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+    ): Promise<AffectationRoutes["PostSimulationsCLERoute"]["response"]> {
+        const simulationTask = await this.taskGateway.findById(taskId);
+
+        // On verifie qu'une simulation n'a pas déjà été affecté en amont
+        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+            sessionId,
+            TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+        );
+
+        if (
+            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
+            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
+        ) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+        }
+
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters: {
+                    sessionId,
+                    simulationTaskId: taskId,
+                    auteur: {
+                        id: request.user.id,
+                        prenom: request.user.prenom,
+                        nom: request.user.nom,
+                        role: request.user.role,
+                        sousRole: request.user.sousRole,
+                    },
+                } as ValiderAffectationCLETaskParameters,
             },
         });
         return TaskMapper.toDto(task);

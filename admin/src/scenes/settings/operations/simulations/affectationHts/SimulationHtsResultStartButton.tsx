@@ -37,25 +37,25 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
     [simulationHts],
   );
 
-  const affectationKey = ["affectation", simulationHts.metadata!.parameters!.sessionId]; // check AffectationSimulationMetropoleModal.tsx queryKey
+  const affectationKey = ["affectation", "hts", simulationHts.metadata!.parameters!.sessionId]; // check AffectationHTSSimulationMetropoleModal.tsx queryKey
   const {
     isPending: isLoading,
     isError,
     data: affectationStatus,
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: affectationKey,
-    queryFn: async () => AffectationService.getAffectation(simulationHts.metadata!.parameters!.sessionId),
+    queryFn: async () => AffectationService.getAffectation(simulationHts.metadata!.parameters!.sessionId, "HTS"),
   });
 
   const isOutdated =
-    [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.traitement.status as TaskStatus) ||
+    [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.traitement?.status as TaskStatus) ||
     (!!affectationStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationHts.createdAt), new Date(affectationStatus.traitement.lastCompletedAt)));
 
   const isDisabled = simulationHts.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await AffectationService.postValiderAffectation(simulationHts.metadata!.parameters!.sessionId!, simulationHts.id, {
+      return await AffectationService.postValiderAffectationHtsMetropole(simulationHts.metadata!.parameters!.sessionId!, simulationHts.id, {
         affecterPDR: state.affecterPDR,
       });
     },
@@ -87,7 +87,7 @@ export default function SimulationHtsResultStartButton({ simulation }: Simulatio
                   <HiOutlineLightningBolt className="w-6 h-6" />
                 </div>
               </div>
-              <h1 className="font-bold text-xl m-0">Affectation HTS (Hors DOM TOM)</h1>
+              <h1 className="font-bold text-xl m-0">Affectation HTS (Metropole, hors Corse)</h1>
               <p className="text-lg">Vérifier les paramètres avant de lancer ce traitement.</p>
             </div>
             <div className="flex items-start flex-col w-full gap-8">

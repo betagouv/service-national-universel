@@ -3,21 +3,21 @@ import { AffectationRoutes } from "snu-lib";
 import { buildRequest } from "@/utils/buildRequest";
 
 const AffectationService = {
-  getAffectation: async (sessionId: string) => {
+  getAffectation: async (sessionId: string, type: "HTS" | "CLE") => {
     return await buildRequest<AffectationRoutes["GetAffectation"]>({
-      path: "/affectation/{sessionId}",
+      path: "/affectation/{sessionId}/{type}",
       method: "GET",
-      params: { sessionId },
+      params: { sessionId, type },
       target: "API_V2",
     })();
   },
 
-  postAffectationMetropole: async (
+  postSimulationAffectationHTSMetropole: async (
     sessionId: string,
-    { niveauScolaires, departements, etranger, affecterPDR, sdrImportId }: AffectationRoutes["PostSimulationsRoute"]["payload"],
+    { niveauScolaires, departements, etranger, affecterPDR, sdrImportId }: AffectationRoutes["PostSimulationsHTSRoute"]["payload"],
   ) => {
-    return await buildRequest<AffectationRoutes["PostSimulationsRoute"]>({
-      path: "/affectation/{sessionId}/simulations",
+    return await buildRequest<AffectationRoutes["PostSimulationsHTSRoute"]>({
+      path: "/affectation/{sessionId}/simulation/hts",
       method: "POST",
       params: { sessionId },
       payload: { niveauScolaires, departements, etranger, affecterPDR, sdrImportId },
@@ -25,12 +25,31 @@ const AffectationService = {
     })();
   },
 
-  postValiderAffectation: async (sessionId: string, simulationId: string, { affecterPDR }: AffectationRoutes["PostValiderAffectationRoute"]["payload"]) => {
-    return await buildRequest<AffectationRoutes["PostValiderAffectationRoute"]>({
-      path: "/affectation/{sessionId}/simulation/{simulationId}/valider",
+  postSimulationAffectationCLEMetropole: async (sessionId: string, { departements, etranger }: AffectationRoutes["PostSimulationsCLERoute"]["payload"]) => {
+    return await buildRequest<AffectationRoutes["PostSimulationsCLERoute"]>({
+      path: "/affectation/{sessionId}/simulation/cle",
+      method: "POST",
+      params: { sessionId },
+      payload: { departements, etranger },
+      target: "API_V2",
+    })();
+  },
+
+  postValiderAffectationHtsMetropole: async (sessionId: string, simulationId: string, { affecterPDR }: AffectationRoutes["PostValiderAffectationHTSRoute"]["payload"]) => {
+    return await buildRequest<AffectationRoutes["PostValiderAffectationHTSRoute"]>({
+      path: "/affectation/{sessionId}/simulation/{simulationId}/valider/hts",
       method: "POST",
       params: { sessionId, simulationId },
       payload: { affecterPDR },
+      target: "API_V2",
+    })();
+  },
+
+  postValiderAffectationCleMetropole: async (sessionId: string, simulationId: string) => {
+    return await buildRequest<AffectationRoutes["PostValiderAffectationCLERoute"]>({
+      path: "/affectation/{sessionId}/simulation/{simulationId}/valider/cle",
+      method: "POST",
+      params: { sessionId, simulationId },
       target: "API_V2",
     })();
   },

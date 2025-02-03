@@ -83,7 +83,9 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     if (meetingPointId) {
       const meetingPoint = await PointDeRassemblementModel.findOne({ _id: meetingPointId });
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
 
+    if (ligneId) {
       bus = await LigneBusModel.findById(ligneId);
       if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const isFull = bus.youngCapacity - bus.youngSeatsTaken <= 0;

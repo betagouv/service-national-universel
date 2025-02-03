@@ -1,5 +1,7 @@
+require('dotenv').config()
+
 module.exports = {
-  ENVIRONMENT: process.env.DEV ? "development" : "production",
+  ENVIRONMENT: process.env.ENVIRONMENT || "development",
   PORT: process.env.PORT || 8085,
   POSTGRESQL: process.env.POSTGRESQL,
   REDIS_URL: process.env.REDIS_URL,
