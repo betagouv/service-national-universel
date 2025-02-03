@@ -7,7 +7,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
+import { getLinePdrCount, getLinePdrMatricules, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -70,24 +70,27 @@ export const validatePdtFile = async (
     "TEMPS DE ROUTE": [],
     "Code court de route": [],
     "LIGNES FUSIONNÉES": [],
+    "LIGNE MIROIR": [],
   };
 
   if (isCle) {
     errors["ID CLASSE"] = [];
   }
 
+  const OPTIONAL_COLUMNS = ["LIGNE MIROIR"];
+
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
   const columns = Object.keys(lines[0]).filter((col) => !col.includes("__EMPTY"));
   const expectedColumns = Object.keys(errors);
-  const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
+  const missingColumns = expectedColumns.filter((col) => !columns.includes(col) && !OPTIONAL_COLUMNS.includes(col));
+
   //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
-    return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 
   //check if there are unexpected columns
@@ -253,20 +256,40 @@ export const validatePdtFile = async (
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
     if (line["LIGNES FUSIONNÉES"]) {
-      const mergedLines = line["LIGNES FUSIONNÉES"].split(",");
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mergedLines = line["LIGNES FUSIONNÉES"].replaceAll(" ", "").split(",");
       if (mergedLines.length > 5) {
         errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      for (const mergedLine of mergedLines) {
+      for (const mergedLine of mergedLines.filter((b) => b !== currentBusId)) {
         let found = false;
-        for (const [i, line] of lines.entries()) {
-          if (line["NUMERO DE LIGNE"] === mergedLine.trim()) {
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mergedLine) {
             found = true;
             break;
           }
         }
         if (!found) {
           errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
+        }
+      }
+    }
+    if (line["LIGNE MIROIR"]) {
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mirrorLine = line["LIGNE MIROIR"].replaceAll(" ", "");
+
+      if (mirrorLine === currentBusId) {
+        errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_MIRROR_LINE_ID, extra: mirrorLine });
+      } else {
+        let found = false;
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mirrorLine) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MIRROR_LINE_ID, extra: mirrorLine });
         }
       }
     }
@@ -431,22 +454,4 @@ export const computeImportSummary = (lines: PdtLine[]) => {
     pdrCount,
     maxPdrOnLine,
   };
-};
-
-export const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("MATRICULE DU PDR")).length;
-};
-
-const getLinePdrMatricules = (line) => {
-  const countPdr = getLinePdrCount(line);
-  const pdrMatricules: string[] = [];
-  for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (
-      line[`MATRICULE DU PDR ${pdrNumber}`] &&
-      !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE DU PDR ${pdrNumber}`]?.toLowerCase())
-    ) {
-      pdrMatricules.push(line[`MATRICULE DU PDR ${pdrNumber}`]);
-    }
-  }
-  return pdrMatricules;
 };
