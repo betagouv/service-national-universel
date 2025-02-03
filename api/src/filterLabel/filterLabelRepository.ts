@@ -24,7 +24,26 @@ export async function getEtablissementLabelMap() {
   return data[0];
 }
 export async function getSessionLabelMap() {
-  const pipeline = buildPipeline("codeCentre");
+  const pipeline = [
+    { $project: { _id: 1, codeCentre: 1, cohesionCenterId: 1 } },
+    {
+      $group: {
+        _id: null,
+        keyValuePairs: {
+          $push: {
+            k: { $toString: "$_id" },
+            v: {
+              $toString: {
+                $concat: [{ $ifNull: ["$codeCentre", "N/A"] }, " - ", "$cohesionCenterId"],
+              },
+            },
+          },
+        },
+      },
+    },
+    { $replaceRoot: { newRoot: { $arrayToObject: "$keyValuePairs" } } },
+  ];
+  buildPipeline("codeCentre");
   const data = await SessionPhase1Model.aggregate(pipeline);
   return data[0];
 }
