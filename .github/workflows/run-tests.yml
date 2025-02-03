@@ -1,0 +1,55 @@
+name: Run tests
+
+on:
+  workflow_dispatch:
+  push:
+    branches-ignore:
+      - main
+      - production
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      test_matrix: ${{ steps.config.outputs.test }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Get matrices configuration
+        id: config
+        run: |
+          # TEST MATRIX
+          git switch main
+
+          echo "[]" \
+          | jq  '. + [{name:"api", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- api packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"apiv2", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"app", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- app packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"admin", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- admin packages package-lock.json | cut -d " " -f 1)" \
+          | jq  '. + [{name:"lib", run_test:$tag}]' --arg tag "$(git log --max-count=1 --oneline main..${{ github.ref_name }} -- packages package-lock.json | cut -d " " -f 1)" > test.json
+
+          echo "Test matrix"
+          cat test.json
+          echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
+
+  test:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Run tests
+        uses: jenseng/dynamic-uses@v1
+        if: ${{matrix.app.run_test}}
+        with:
+          uses: ./.github/actions/run-tests-${{matrix.app.name}}
+          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'

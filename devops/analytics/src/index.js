@@ -1,12 +1,11 @@
 (async () => {
-  await require("./env-manager")();
+  const { PORT } = require("./config");
 
   const helmet = require("helmet");
   const bodyParser = require("body-parser");
   const express = require("express");
   const cors = require("cors");
   const { initSentry, capture } = require("./sentry");
-  const { PORT } = require("./config");
 
   const app = express();
 
