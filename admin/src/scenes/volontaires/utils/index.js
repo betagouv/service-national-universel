@@ -473,6 +473,7 @@ export async function transformVolontaires(data, values) {
       phase1Affectation: {
         "ID centre": center._id || "",
         "Matricule centre": center.matricule || "",
+        "Code centre (2022)": center.code2022 || "",
         "Nom du centre": center.name || "",
         "Ville du centre": center.city || "",
         "Département du centre": center.department || "",

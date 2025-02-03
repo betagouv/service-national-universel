@@ -24,7 +24,7 @@ async function main() {
     name: config.containerNamespace(),
   });
 
-  console.log(config.applicationUrls(namespace.registry_endpoint));
+  console.log(JSON.stringify(config.applicationUrls(namespace.registry_endpoint)));
 }
 
 if (require.main === module) {
