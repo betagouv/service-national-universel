@@ -22,4 +22,12 @@ export class SessionService {
         );
         return sessions;
     }
+
+    static isCohortInscriptionOpen(session: SessionModel): boolean {
+        const now = new Date();
+        const inscriptionStartDate = session.inscriptionStartDate;
+        const inscriptionEndDate = session.inscriptionEndDate;
+        const isInscriptionOpen = now >= inscriptionStartDate && now <= inscriptionEndDate;
+        return isInscriptionOpen;
+    }
 }

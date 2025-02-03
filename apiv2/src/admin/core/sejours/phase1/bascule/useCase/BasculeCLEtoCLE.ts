@@ -1,18 +1,26 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
-import { JeuneGateway } from "../../../jeune/Jeune.gateway";
+import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
 import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
 import { SessionGateway } from "../../session/Session.gateway";
 import { ChangerLaSessionDuJeunePayloadDto } from "@admin/infra/sejours/phase1/bascule/api/Bascule.validation";
 import { JeuneMapper } from "@admin/infra/sejours/jeune/repository/Jeune.mapper";
-import { YoungDto, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, CLE_FILIERE, YOUNG_SITUATIONS } from "snu-lib";
-import { STEPS2023 } from "snu-lib/src/constants/inscription";
+import {
+    YoungDto,
+    YOUNG_SOURCE,
+    YOUNG_STATUS,
+    YOUNG_STATUS_PHASE1,
+    CLE_FILIERE,
+    YOUNG_SITUATIONS,
+    STEPS2023,
+} from "snu-lib";
 import { SessionService } from "../../session/Session.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { BasculeService } from "../service";
 import { SejourService } from "../../sejour/Sejour.Service";
 import { PlanDeTransportService } from "../../PlanDeTransport/PlanDeTransport.service";
+import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
 
 @Injectable()
 export class BasculeCLEtoCLE implements UseCase<YoungDto> {
@@ -25,6 +33,7 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
         private readonly basculeService: BasculeService,
         private readonly sejourService: SejourService,
         private readonly planDeTransportService: PlanDeTransportService,
+        private readonly classeStateManager: ClasseStateManager,
     ) {}
     async execute(
         jeuneId: string,
@@ -89,59 +98,22 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
             user,
         });
 
-        if (jeune.sejourId || jeune.pointDeRassemblementId) {
-            jeune.originalSessionNom = jeune.sessionNom;
-            jeune.originalSessionId = jeune.sessionId;
-            jeune.statut = BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE(jeune.statut);
-            jeune.statutPhase1 = statutPhase1;
-            jeune.sessionNom = classe.sessionNom;
-            jeune.sessionId = classe.sessionId;
-            jeune.centreId = classe.centreCohesionId;
-            jeune.sejourId = classe.sessionId;
-            jeune.etablissementId = etablissement.id;
-            jeune.pointDeRassemblementId = classe.pointDeRassemblementId;
-            jeune.ligneDeBusId = classe.ligneId;
-            jeune.deplacementPhase1Autonomous = undefined;
-            jeune.transportInfoGivenByLocal = undefined;
-            jeune.cohesionStayPresence = undefined;
-            jeune.presenceJDM = undefined;
-            jeune.departInform = undefined;
-            jeune.departSejourAt = undefined;
-            jeune.departSejourMotif = undefined;
-            jeune.departSejourMotifComment = undefined;
-            jeune.youngPhase1Agreement = "false";
-            jeune.hasMeetingInformation = hasMeetingInformation;
-            jeune.cohesionStayMedicalFileReceived = undefined;
-            jeune.cohesionStayPresence = undefined;
-            jeune.source = YOUNG_SOURCE.CLE;
-            jeune.cniFiles = [];
-            jeune.fichiers = jeune.fichiers || {};
-            jeune.fichiers.cniFiles = [];
-            jeune.etapeInscription2023 = inscriptionStep;
-            jeune.etapeReinscription2023 = reinscriptionStep;
-            jeune.dateExpirationDernierFichierCNI = undefined;
-            jeune.categorieDernierFichierCNI = undefined;
-            jeune.correctionRequests = correctionRequestsFiltered;
-            jeune.scolarise = "true";
-            jeune.nomEtablissement = etablissement.nom;
-            jeune.typeEtablissement = etablissement.type[0];
-            jeune.adresseEtablissement = etablissement.adresse;
-            jeune.codePostalEtablissement = etablissement.codePostal;
-            jeune.villeEtablissement = etablissement.commune;
-            jeune.departementEtablissement = etablissement.departement;
-            jeune.regionEtablissement = etablissement.region;
-            jeune.paysEtablissement = etablissement.pays;
-            jeune.ecoleRamsesId = undefined;
-            jeune.situation = BasculeCLEtoCLE.getYoungSituationIfCLE(classe.filiere || "");
-            jeune.hasMeetingInformation = hasMeetingInformation;
-            jeune.notes = [...(jeune.notes ?? []), newNote];
-            jeune.hasNotes = "true";
-        }
+        const newJeune = BasculeCLEtoCLE.updateYoungForBasculeCLEtoCLE(
+            jeune,
+            statutPhase1,
+            classe,
+            etablissement,
+            hasMeetingInformation,
+            inscriptionStep,
+            reinscriptionStep,
+            correctionRequestsFiltered,
+            newNote,
+        );
 
-        await this.jeuneGateway.update(jeune);
+        await this.jeuneGateway.update(newJeune);
 
-        //await ClasseStateManager.compute(ancienneClasse.id, user, { YoungModel });
-        //await ClasseStateManager.compute(classe.id, user, { YoungModel });
+        await this.classeStateManager.execute(ancienneClasse.id);
+        await this.classeStateManager.execute(classe.id);
 
         // if they had a session, we check if we need to update the places taken / left
         if (oldSessionPhase1Id) {
@@ -153,19 +125,14 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
             await this.planDeTransportService.updateSeatsTakenInBusLine(oldBusId);
         }
 
-        /*         await this.notificationGateway.sendEmail<VerifierClasseEmailAdminCleParams>(
-            params,
-            EmailTemplate.VERIFIER_CLASSE_EMAIL_ADMIN_CLE,
-        ); */
-
-        /*         emailsEmitter.emit(SENDINBLUE_TEMPLATES.young.CHANGE_COHORT, {
-            young,
-            previousYoung,
-            cohortName: cohort,
-            cohortChangeReason,
-            message: payload.message,
+        await this.basculeService.generateNotificationForBascule({
+            jeune,
+            originaleSource,
+            session,
+            sessionChangeReason: "",
+            message: "",
             classe,
-        }); */
+        });
 
         return JeuneMapper.toDto(jeune);
     }
@@ -196,5 +163,65 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
             return YOUNG_SITUATIONS.GENERAL_SCHOOL;
         }
         return filiere;
+    }
+
+    static updateYoungForBasculeCLEtoCLE(
+        jeune,
+        statutPhase1,
+        classe,
+        etablissement,
+        hasMeetingInformation,
+        inscriptionStep,
+        reinscriptionStep,
+        correctionRequestsFiltered,
+        newNote,
+    ) {
+        jeune.originalSessionNom = jeune.sessionNom;
+        jeune.originalSessionId = jeune.sessionId;
+        jeune.statut = BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE(jeune.statut);
+        jeune.statutPhase1 = statutPhase1;
+        jeune.sessionNom = classe.sessionNom;
+        jeune.sessionId = classe.sessionId;
+        jeune.centreId = classe.centreCohesionId;
+        jeune.sejourId = classe.sessionId;
+        jeune.etablissementId = etablissement.id;
+        jeune.pointDeRassemblementId = classe.pointDeRassemblementId;
+        jeune.ligneDeBusId = classe.ligneId;
+        jeune.deplacementPhase1Autonomous = undefined;
+        jeune.transportInfoGivenByLocal = undefined;
+        jeune.cohesionStayPresence = undefined;
+        jeune.presenceJDM = undefined;
+        jeune.departInform = undefined;
+        jeune.departSejourAt = undefined;
+        jeune.departSejourMotif = undefined;
+        jeune.departSejourMotifComment = undefined;
+        jeune.youngPhase1Agreement = "false";
+        jeune.hasMeetingInformation = hasMeetingInformation;
+        jeune.cohesionStayMedicalFileReceived = undefined;
+        jeune.cohesionStayPresence = undefined;
+        jeune.source = YOUNG_SOURCE.CLE;
+        jeune.cniFiles = [];
+        jeune.fichiers = jeune.fichiers || {};
+        jeune.fichiers.cniFiles = [];
+        jeune.etapeInscription2023 = inscriptionStep;
+        jeune.etapeReinscription2023 = reinscriptionStep;
+        jeune.dateExpirationDernierFichierCNI = undefined;
+        jeune.categorieDernierFichierCNI = undefined;
+        jeune.correctionRequests = correctionRequestsFiltered;
+        jeune.scolarise = "true";
+        jeune.nomEtablissement = etablissement.nom;
+        jeune.typeEtablissement = etablissement.type[0];
+        jeune.adresseEtablissement = etablissement.adresse;
+        jeune.codePostalEtablissement = etablissement.codePostal;
+        jeune.villeEtablissement = etablissement.commune;
+        jeune.departementEtablissement = etablissement.departement;
+        jeune.regionEtablissement = etablissement.region;
+        jeune.paysEtablissement = etablissement.pays;
+        jeune.ecoleRamsesId = undefined;
+        jeune.situation = BasculeCLEtoCLE.getYoungSituationIfCLE(classe.filiere || "");
+        jeune.hasMeetingInformation = hasMeetingInformation;
+        jeune.notes = [...(jeune.notes ?? []), newNote];
+        jeune.hasNotes = "true";
+        return jeune;
     }
 }

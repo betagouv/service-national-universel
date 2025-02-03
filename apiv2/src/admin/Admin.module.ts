@@ -15,6 +15,9 @@ import { ClsMiddleware, ClsModule } from "nestjs-cls";
 import { SigninReferent } from "./core/iam/useCase/SigninReferent";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { SessionService } from "./core/sejours/phase1/session/Session.service";
+import { SejourService } from "./core/sejours/phase1/sejour/Sejour.service";
+import { PlanDeTransportService } from "./core/sejours/phase1/planDeTransport/PlanDeTransport.service";
 import { AuthController } from "./infra/iam/api/Auth.controller";
 import { AddUserToRequestMiddleware } from "./infra/iam/auth/AddUserToRequest.middleware";
 import { AuthProvider } from "./infra/iam/auth/Auth.provider";
@@ -97,6 +100,9 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     providers: [
         ClasseService,
         JeuneService,
+        SessionService,
+        SejourService,
+        PlanDeTransportService,
         AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
