@@ -17,7 +17,7 @@ export async function fetchMissions(skip = 0): Promise<Response> {
     .catch((error) => capture(error));
 }
 
-export async function fetchStructureById(id: string) {
+export async function fetchStructureById(id: number) {
   return fetch(`https://www.jeveuxaider.gouv.fr/api/api-engagement/organisations/${id}?apikey=${config.JVA_API_KEY}`, {
     method: "GET",
     redirect: "follow",
@@ -63,7 +63,7 @@ export type JeVeuxAiderMission = {
   organizationActions: string[];
   organizationBeneficiaries: string[];
   organizationCity: string;
-  organizationClientId: string;
+  organizationClientId: number;
   organizationDescription: string;
   organizationFullAddress: string;
   organizationId: string;

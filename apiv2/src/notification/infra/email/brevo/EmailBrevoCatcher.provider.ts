@@ -1,7 +1,7 @@
 import * as brevo from "@getbrevo/brevo";
 
 import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 // import nodemailer from "nodemailer";
@@ -14,12 +14,16 @@ import { GetSmtpTemplateOverview } from "@getbrevo/brevo";
 import { EmailProviderParams } from "./EmailBrevo.provider";
 import { EmailBrevoMapper } from "./EmailBrevo.mapper";
 import Mail from "nodemailer/lib/mailer";
+import { FileGateway } from "@shared/core/File.gateway";
 
 @Injectable()
 export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider {
     emailsApi: brevo.TransactionalEmailsApi;
 
-    constructor(private readonly config: ConfigService) {
+    constructor(
+        private readonly config: ConfigService,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
+    ) {
         let apiKeyConfig = this.config.getOrThrow("email.apiKey");
         this.emailsApi = new brevo.TransactionalEmailsApi();
         //@ts-ignore
@@ -37,15 +41,20 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
             port: Number(this.config.get("email.smtpPort")),
             secure: false,
         });
+        let attachments: Mail.Attachment[] = [];
+        if (emailParams.attachments && emailParams.attachments.length > 0) {
+            for (const attachment of emailParams.attachments) {
+                const file = await this.fileGateway.downloadFile(attachment.filePath);
+                attachments.push({ content: file.Body, filename: file.FileName, contentType: file.ContentType });
+            }
+        }
         const mailOptions: Mail.Options = {
             to: brevoParams.to.map((to) => to.email).join(","),
             cc: brevoParams.cc?.map((cc) => cc.email).join(","),
             bcc: brevoParams.bcc?.map((bcc) => bcc.email).join(","),
             subject,
             html,
-            // TODO : ajouter les pièces jointes
-            // attachments:
-            //     attachment?.map((file) => ({ filename: file.name, content: file.content, encoding: "base64" })) || [],
+            attachments,
         };
         const messageSent = await transporter.sendMail(mailOptions);
         return {

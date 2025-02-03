@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import Modal from "../../../components/ui/modals/Modal";
 import { SENDINBLUE_TEMPLATES } from "../../../utils";
@@ -10,11 +10,14 @@ import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import ButtonLight from "../../../components/ui/buttons/ButtonLight";
 import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
 import { capture } from "@/sentry";
+import useAffectationInfo from "../scenes/affected/utils/useAffectationInfo";
 
-const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Transmettez votre fiche sanitaire", email }) => {
+const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Transmettez votre fiche sanitaire" }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const { session } = useAffectationInfo();
+  const email = session?.sanitaryContactEmail;
 
   const handleClick = async () => {
     if (onClick) {

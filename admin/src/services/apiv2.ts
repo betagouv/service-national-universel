@@ -82,9 +82,9 @@ class Apiv2 implements IApiV2 {
         }
         capture(error);
         if (error.code === "ERR_NETWORK") {
-          toastr.error("Oups, une erreur est survenue", translate(error.code));
+          toastr.error("Oups, une erreur est survenue", translate(error.code), { timeOut: 5000 });
         } else {
-          toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response?.data.correlationId || error.code}`);
+          toastr.error("Oups, une erreur est survenue", `Code d'erreur: ${error.response?.data.correlationId || error.code}`, { timeOut: 5000 });
         }
         return Promise.reject();
       },

@@ -13,6 +13,7 @@ import { LigneDeBusMapper } from "../LigneDeBus.mapper";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
+import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
 
 @Injectable()
 export class LigneDeBusRepository implements LigneDeBusGateway {
@@ -69,6 +70,14 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         return LigneDeBusMapper.toModels(lignesDeBus);
     }
 
+    async findBySessionIdAndClasseId(sessionId: string, classeId: string): Promise<LigneDeBusModel> {
+        const ligneDeBus = await this.ligneDeBusMongooseEntity.findOne({ cohortId: sessionId, classeId });
+        if (!ligneDeBus) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return LigneDeBusMapper.toModel(ligneDeBus);
+    }
+
     async bulkUpdate(lignesUpdated: LigneDeBusModel[]): Promise<number> {
         const lignesOriginal = await this.findByIds(lignesUpdated.map((ligne) => ligne.id));
         if (lignesOriginal.length !== lignesUpdated.length) {
@@ -86,7 +95,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
             lignesEntity.map((ligne) => ({
                 updateOne: {
                     filter: { _id: ligne.updated._id },
-                    update: { $set: ligne.updated },
+                    update: getEntityUpdateSetUnset(ligne.updated),
                     upsert: false,
                 },
             })),
@@ -98,5 +107,13 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         );
 
         return updateLignes.modifiedCount;
+    }
+
+    async delete(ligneDeBus: LigneDeBusModel): Promise<void> {
+        const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
+        if (!retrievedLigneDeBus) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        await retrievedLigneDeBus.deleteOne();
     }
 }

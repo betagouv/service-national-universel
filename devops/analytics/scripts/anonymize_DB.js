@@ -1,7 +1,6 @@
 (async () => {
   try {
     const { Op } = require("sequelize");
-    await require("../src/env-manager")();
 
     const modelMongo = require("../../api/src/models/young");
     const modelPostgres = require("../src/models/log-youngs.model");
