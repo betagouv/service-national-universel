@@ -57,19 +57,20 @@ export function mapTransportType(transportType?: string) {
   }
   return result;
 }
+
 export const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("MATRICULE DU PDR")).length;
+  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
 };
 
-export const getLinePdrMatricules = (line) => {
+export const getLinePdrIds = (line) => {
   const countPdr = getLinePdrCount(line);
-  const pdrMatricules: string[] = [];
+  const pdrIds: string[] = [];
   for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (line[`MATRICULE PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`MATRICULE PDR ${pdrNumber}`]?.toLowerCase())) {
-      pdrMatricules.push(line[`MATRICULE PDR ${pdrNumber}`]);
+    if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
+      pdrIds.push(line[`ID PDR ${pdrNumber}`]?.toLowerCase());
     }
   }
-  return pdrMatricules;
+  return pdrIds;
 };
 
 export const getMergedBusIdsFromLigneBus = (lignesDeBus: LigneBusType[]) => {

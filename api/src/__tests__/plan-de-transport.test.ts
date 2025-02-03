@@ -145,6 +145,10 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     expect(pdt.pointDeRassemblements[0].__t).toBe("Enriched");
     expect(pdt.pointDeRassemblements[0].returnHour).toBeDefined();
     expect(pdt.pointDeRassemblements[0].cohorts).toBeDefined();
+    // check lowercase
+    expect(importedLigneDeBus[2].meetingPointsIds).toEqual(["63da1f2547841408c58e53ca", "63da1f2547841408c58e53cb"]);
+    // check lowercase
+    expect(importedLigneDeBus[2].centerId).toBe("63c919d5700cce08ce846633");
     expect(importedLigneDeBus[0].mirrorBusId).toBe("OCC034008");
     expect(importedLigneDeBus[0].toJSON().mergedBusIds).toStrictEqual(["OCC034006", "OCC034008"]);
     expect(importedLigneDeBus[1].mirrorBusId).toBe("OCC034006");
