@@ -18,7 +18,6 @@ export type SimulationBasculerJeunesValidesTaskResult = {
   rapportKey: string;
   jeunesAvenir: number;
   jeunesProchainSejour: number;
-  jeunesRefuses: number;
 };
 
 export interface SimulationBasculerJeunesValidesTaskDto extends TaskDto<SimulationBasculerJeunesValidesTaskParameters, SimulationBasculerJeunesValidesTaskResult> {}

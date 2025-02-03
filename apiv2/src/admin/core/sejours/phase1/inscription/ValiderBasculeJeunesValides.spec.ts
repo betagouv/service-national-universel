@@ -114,7 +114,6 @@ describe("ValiderBasculeJeunesValides", () => {
 
         expect(result.analytics.errors).toEqual(0);
         expect(result.analytics.jeunesBascules).toEqual(2);
-        expect(result.analytics.jeunesRefuses).toEqual(1);
         expect(result.rapportData[0]).toEqual({
             age: "",
             ancienneSession: "mockedSessionName",

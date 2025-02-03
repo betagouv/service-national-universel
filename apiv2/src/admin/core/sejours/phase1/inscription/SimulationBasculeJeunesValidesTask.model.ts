@@ -16,7 +16,6 @@ export interface SimulationBasculeJeunesValidesTaskParameters {
 export type SimulationBasculeJeunesValidesTaskResult = {
     jeunesAvenir: number;
     jeunesProchainSejour: number;
-    jeunesRefuses: number;
     rapportKey: string;
 };
 
@@ -28,7 +27,6 @@ export type SimulationBasculeJeunesValidesTaskModel = TaskModel<
 export type RapportData = {
     jeunesProchainSejour: JeuneRapport[];
     jeunesAvenir: JeuneRapport[];
-    jeunesRefuses: JeuneRapport[];
 };
 
 export type JeuneRapport = Pick<

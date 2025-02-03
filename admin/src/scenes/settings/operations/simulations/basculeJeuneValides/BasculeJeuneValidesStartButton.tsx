@@ -51,12 +51,8 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
 
   const isDisabled = simulationBascule.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
 
-  const totalJeunes =
-    (simulationBascule.metadata?.results?.jeunesProchainSejour || 0) +
-    (simulationBascule.metadata?.results?.jeunesAvenir || 0) +
-    (simulationBascule.metadata?.results?.jeunesRefuses || 0);
+  const totalJeunes = (simulationBascule.metadata?.results?.jeunesProchainSejour || 0) + (simulationBascule.metadata?.results?.jeunesAvenir || 0);
   const totalJeunesAcceptes = (simulationBascule.metadata?.results?.jeunesProchainSejour || 0) + (simulationBascule.metadata?.results?.jeunesAvenir || 0);
-  const totalRefuses = simulationBascule.metadata?.results?.jeunesRefuses || 0;
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
@@ -98,7 +94,6 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
                 <h2 className="text-lg leading-7 font-bold m-0">Suivi</h2>
                 <div>Sur un séjour : {simulationBascule.metadata?.results?.jeunesProchainSejour ?? "--"}</div>
                 <div>Sur le séjour à venir : {simulationBascule.metadata?.results?.jeunesAvenir ?? "--"}</div>
-                <div>Refusés : {simulationBascule.metadata?.results?.jeunesRefuses ?? "--"}</div>
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Statuts de phase</h2>
@@ -167,11 +162,6 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
                       <Link to={`/email-preview/1633`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
                         Visualiser l'aperçu du template 1633
                       </Link>
-                    )}{" "}
-                    {totalRefuses > 0 && (
-                      <Link to={`/email-preview/1632`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                        Visualiser l'aperçu du template 1632
-                      </Link>
                     )}
                   </div>
                   <div>
@@ -179,11 +169,6 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
                     {totalJeunesAcceptes > 0 && (
                       <Link to={`/email-preview/1265`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
                         Visualiser l'aperçu du template 1265
-                      </Link>
-                    )}{" "}
-                    {totalRefuses > 0 && (
-                      <Link to={`/email-preview/1264`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center ml-2">
-                        Visualiser l'aperçu du template 1264
                       </Link>
                     )}
                   </div>

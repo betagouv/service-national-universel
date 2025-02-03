@@ -7,7 +7,6 @@ export interface ValiderBasculeJeunesValidesTaskParameters extends Phase1TaskPar
 
 export type ValiderBasculeJeunesValidesTaskResult = {
   jeunesBascules: number;
-  jeunesRefuses: number;
   errors: number;
 };
 

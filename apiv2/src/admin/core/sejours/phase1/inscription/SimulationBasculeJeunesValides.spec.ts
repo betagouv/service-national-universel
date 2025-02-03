@@ -100,10 +100,8 @@ describe("SimulationBasculeJeunesValides", () => {
 
         expect(result.analytics.jeunesAvenir).toEqual(20);
         expect(result.analytics.jeunesProchainSejour).toEqual(0);
-        expect(result.analytics.jeunesRefuses).toEqual(0);
         expect(result.rapportData.jeunesAvenir.length).toEqual(20);
         expect(result.rapportData.jeunesProchainSejour.length).toEqual(0);
-        expect(result.rapportData.jeunesRefuses.length).toEqual(0);
     });
 
     it("should bascule young to next session", async () => {
@@ -142,11 +140,9 @@ describe("SimulationBasculeJeunesValides", () => {
             etranger: true,
             avenir: false,
         });
-        expect(result.analytics.jeunesAvenir).toEqual(0);
+        expect(result.analytics.jeunesAvenir).toEqual(19);
         expect(result.analytics.jeunesProchainSejour).toEqual(result.rapportData.jeunesProchainSejour.length);
-        expect(result.analytics.jeunesRefuses).toEqual(result.rapportData.jeunesRefuses.length);
-        expect(result.rapportData.jeunesAvenir.length).toEqual(0);
         expect(result.rapportData.jeunesProchainSejour.length).toEqual(1);
-        expect(result.rapportData.jeunesRefuses.length).toEqual(19);
+        expect(result.rapportData.jeunesAvenir.length).toEqual(19);
     });
 });

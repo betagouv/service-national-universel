@@ -23,7 +23,6 @@ export type SimulationBasculeJeunesValidesResult = {
     analytics: {
         jeunesAvenir: number;
         jeunesProchainSejour: number;
-        jeunesRefuses: number;
     };
     rapportData: RapportData;
     rapportFile: {
@@ -84,17 +83,15 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         const rapportData: RapportData = {
             jeunesAvenir: [],
             jeunesProchainSejour: [],
-            jeunesRefuses: [],
         };
-
+        const sessionAVenir = await this.sessionGateway.findByName(COHORTS.AVENIR);
+        if (!sessionAVenir) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `Session ${COHORTS.AVENIR} introuvable`,
+            );
+        }
         if (avenir) {
-            const sessionAVenir = await this.sessionGateway.findByName(COHORTS.AVENIR);
-            if (!sessionAVenir) {
-                throw new FunctionalException(
-                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
-                    `Session ${COHORTS.AVENIR} introuvable`,
-                );
-            }
             for (const jeune of jeuneList) {
                 rapportData.jeunesAvenir.push(
                     this.mapJeuneRapport(jeune, {
@@ -120,17 +117,14 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
                         }),
                     );
                 } else {
-                    // aucune session n'est disponible pour ce jeune
-                    rapportData.jeunesRefuses.push(
-                        this.mapJeuneRapport(
-                            {
-                                ...jeune,
-                                statut: YOUNG_STATUS.REFUSED,
-                            },
-                            {
-                                ancienneSession: jeune.sessionNom,
-                            },
-                        ),
+                    // aucune session n'est disponible pour ce jeune (=> avenir)
+                    rapportData.jeunesAvenir.push(
+                        this.mapJeuneRapport(jeune, {
+                            ancienneSession: jeune.sessionNom,
+                            nouvelleSession: sessionAVenir.nom,
+                            ancienneSessionId: jeune.sessionId,
+                            nouvelleSessionId: sessionAVenir.id,
+                        }),
                     );
                 }
             }
@@ -149,13 +143,11 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             [RAPPORT_SHEETS.RESUME]: [
                 ...Object.keys(countBySession).map((key) => `${key} : ${countBySession[key]}`),
                 `Séjour à venir : ${rapportData.jeunesAvenir.length}`,
-                `Refusés : ${rapportData.jeunesRefuses.length}`,
             ].map((ligne) => ({
                 "": ligne,
             })),
             [RAPPORT_SHEETS.PROCHAINSEJOUR]: rapportData.jeunesProchainSejour,
             [RAPPORT_SHEETS.AVENIR]: rapportData.jeunesAvenir,
-            [RAPPORT_SHEETS.REFUSES]: rapportData.jeunesRefuses,
         });
 
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
@@ -172,7 +164,6 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             analytics: {
                 jeunesAvenir: rapportData.jeunesAvenir.length,
                 jeunesProchainSejour: rapportData.jeunesProchainSejour.length,
-                jeunesRefuses: rapportData.jeunesRefuses.length,
             },
             rapportData,
             rapportFile,

@@ -12,7 +12,6 @@ export default function BasculeJeuneValidesResultCell({ simulation }: BasculeJeu
   return (
     <div className="text-xs leading-4 font-normal">
       <div>Basculés : {simulationHts.metadata?.results?.jeunesBascules ?? "--"}</div>
-      <div>Refusés : {simulationHts.metadata?.results?.jeunesRefuses ?? "--"}</div>
       <div>En erreur : {simulationHts.metadata?.results?.errors ?? "--"}</div>
     </div>
   );

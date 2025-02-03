@@ -39,7 +39,6 @@ export type ValiderBasculeJeunesValidesResult = {
     };
     analytics: {
         jeunesBascules: number;
-        jeunesRefuses: number;
         errors: number;
     };
 };
@@ -70,7 +69,6 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
 
         this.logger.debug("Jeunes prochain sejour: " + simulationData.jeunesProchainSejour.length);
         this.logger.debug("Jeunes avenir: " + simulationData.jeunesAvenir.length);
-        this.logger.debug("Jeunes refuses: " + simulationData.jeunesRefuses.length);
 
         const jeunesAvenir = await this.jeuneGateway.findByIds(simulationData.jeunesAvenir.map((jeune) => jeune.id));
         if (jeunesAvenir.length !== simulationData.jeunesAvenir.length) {
@@ -88,13 +86,6 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                 "Impossible de récupérer tous les jeunes (ProchainSejour)",
             );
         }
-        const jeunesRefuses = await this.jeuneGateway.findByIds(simulationData.jeunesRefuses.map((jeune) => jeune.id));
-        if (jeunesRefuses.length !== simulationData.jeunesRefuses.length) {
-            throw new FunctionalException(
-                FunctionalExceptionCode.NOT_ENOUGH_DATA,
-                "Impossible de récupérer tous les jeunes (Refuses)",
-            );
-        }
 
         // update jeunes with transaction
         const { analytics, rapportData } = await this.updateJeunes(
@@ -102,7 +93,6 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
             simulationData,
             jeunesProchainSejour,
             jeunesAvenir,
-            jeunesRefuses,
         );
 
         // send emails when transaction is commited
@@ -145,11 +135,10 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
     }
 
     @Transactional()
-    async updateJeunes(session, simulationData, jeunesProchainSejour, jeunesAvenir, jeunesRefuses) {
+    async updateJeunes(session, simulationData, jeunesProchainSejour, jeunesAvenir) {
         // resultats
         const analytics = {
             jeunesBascules: 0,
-            jeunesRefuses: 0,
             errors: 0,
         };
         const jeunesUpdatedList: JeuneModel[] = [];
@@ -171,21 +160,6 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                 jeunesUpdatedList.push(jeuneUpdated);
                 rapportData.push(this.formatJeuneRapport(jeuneUpdated, jeuneRapportSimu, { emailTemplateId }));
                 analytics.jeunesBascules += 1;
-            }
-        }
-        // Traitement des jeunes à refuser
-        for (const jeuneRapportSimu of simulationData.jeunesRefuses) {
-            const jeune = jeunesRefuses.find((jeune) => jeune.id === jeuneRapportSimu.id)!;
-            const erreur = await this.checkJeune(jeune, session);
-            if (erreur) {
-                rapportData.push(this.formatJeuneRapport(jeune, jeuneRapportSimu, { erreur }));
-                analytics.errors += 1;
-            } else {
-                const emailTemplateId = this.getEmailTemplate(jeune, jeuneRapportSimu);
-                const jeuneUpdated = await this.refuserJeune(jeune);
-                jeunesUpdatedList.push(jeuneUpdated);
-                rapportData.push(this.formatJeuneRapport(jeuneUpdated, jeuneRapportSimu, { emailTemplateId }));
-                analytics.jeunesRefuses += 1;
             }
         }
 
@@ -328,13 +302,9 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                 sheetName: RAPPORT_SHEETS.PROCHAINSEJOUR,
             },
         );
-        const jeunesRefuses = await this.fileGateway.parseXLS<RapportData["jeunesRefuses"][0]>(importedFile.Body, {
-            sheetName: RAPPORT_SHEETS.REFUSES,
-        });
         return {
             jeunesAvenir,
             jeunesProchainSejour,
-            jeunesRefuses,
         };
     }
 }
