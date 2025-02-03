@@ -1,0 +1,27 @@
+name: Destroy environment (CRON)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "33 20 * * *" # Every day at 20:33
+  
+defaults:
+  run:
+    working-directory: devops/scripts
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20.17"
+
+      - name: Destroy environment
+        env:
+          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
+          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
+        run: node destroy-all-environment.js --apply-changes

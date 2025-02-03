@@ -1,5 +1,5 @@
 {
-  "min_scale": 0,
+  "min_scale": 1,
   "max_scale": 1,
   "protocol": "http1",
   "port": 8080,

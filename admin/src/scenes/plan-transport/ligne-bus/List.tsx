@@ -83,6 +83,7 @@ export default function List() {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Matricule", name: "pointDeRassemblements.matricule", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
     { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
@@ -94,6 +95,7 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     { title: "Matricule", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
       title: "Modification demandée",
@@ -378,6 +380,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     const num = i + 1;
                     pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
+                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                     pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
@@ -394,6 +397,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     ...pdrs,
                     "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
                     "REGION DU CENTRE": data.centerRegion,
+                    "ID CENTRE": data.centerId,
                     "MATRICULE DU CENTRE": data.centerCode,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                     "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
