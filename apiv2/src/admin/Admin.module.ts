@@ -60,6 +60,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 
 @Module({
     imports: [
@@ -79,6 +80,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         NotificationModule,
         QueueModule,
         TaskModule,
+        PlanMarketingModule,
     ],
     controllers: [
         ClasseController,
