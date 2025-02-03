@@ -28,6 +28,7 @@ export class EmailBrevoMapper {
                 return this.mapInviterReferentClasse(template, emailParams as InviterReferentClasseParams);
             }
             case EmailTemplate.SUPPRIMER_REFERENT_CLASSE:
+            case EmailTemplate.IMPORT_REFERENTIEL_GENERIQUE:
                 return this.mapGenericEmailToBrevo(template, emailParams);
             case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
             case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:

@@ -75,6 +75,13 @@ export const LigneBusSchema = {
     },
   },
 
+  codeCourtDeRoute: {
+    type: String,
+    documentation: {
+      description: "code court de la route (SI SNU)",
+    },
+  },
+
   busId: {
     type: String,
     required: true,
@@ -227,6 +234,12 @@ export const LigneBusSchema = {
     default: [],
     documentation: {
       description: "Liste des lignes de bus fusionnées",
+    },
+  },
+  mirrorBusId: {
+    type: String,
+    documentation: {
+      description: "Numero de ligne du bus miroir",
     },
   },
 

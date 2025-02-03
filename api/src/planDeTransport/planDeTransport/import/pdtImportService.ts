@@ -7,7 +7,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
+import { getLinePdrCount, getLinePdrIds, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -37,8 +37,11 @@ export const validatePdtFile = async (
     return { ok: false, code: ERRORS.INVALID_BODY };
   }
 
-  // Count columns that start with "ID PDR" to know how many PDRs there are.
-  const countPdr = Object.keys(lines[0]).filter((e) => e.startsWith("ID PDR")).length;
+  // Count columns that start with "MATRICULE DU PDR" to know how many PDRs there are.
+  const countPdr = lines.reduce((acc, line) => {
+    const count = getLinePdrCount(line);
+    return count > acc ? count : acc;
+  }, 0);
   let maxPdrOnLine = 0;
 
   const errors: PdtErrors = {
@@ -65,25 +68,29 @@ export const validatePdtFile = async (
     "PAUSE DÉJEUNER ALLER": [],
     "PAUSE DÉJEUNER RETOUR": [],
     "TEMPS DE ROUTE": [],
+    "Code court de route": [],
     "LIGNES FUSIONNÉES": [],
+    "LIGNE MIROIR": [],
   };
 
   if (isCle) {
     errors["ID CLASSE"] = [];
   }
 
+  const OPTIONAL_COLUMNS = ["LIGNE MIROIR"];
+
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
 
   //Check columns names
   const columns = Object.keys(lines[0]).filter((col) => !col.includes("__EMPTY"));
   const expectedColumns = Object.keys(errors);
-  const missingColumns = expectedColumns.filter((e) => !columns.includes(e));
+  const missingColumns = expectedColumns.filter((col) => !columns.includes(col) && !OPTIONAL_COLUMNS.includes(col));
+
   //check if all columns are present
   if (missingColumns.length) {
     missingColumns.forEach((e) => {
       errors[e].push({ line: 1, error: PDT_IMPORT_ERRORS.MISSING_COLUMN });
     });
-    return { ok: false, code: ERRORS.INVALID_BODY, errors };
   }
 
   //check if there are unexpected columns
@@ -113,6 +120,9 @@ export const validatePdtFile = async (
     }
     if (line["NUMERO DE LIGNE"] && !line["NUMERO DE LIGNE"]?.length) {
       errors["NUMERO DE LIGNE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
+    }
+    if (!line["Code court de route"]) {
+      errors["Code court de route"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
     }
     if (!line["DATE DE TRANSPORT ALLER"]) {
       errors["DATE DE TRANSPORT ALLER"].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
@@ -151,7 +161,7 @@ export const validatePdtFile = async (
       if (!line[`TYPE DE TRANSPORT PDR ${i}`]) {
         errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.MISSING_DATA });
       }
-      if (line[`TYPE DE TRANSPORT PDR ${i}`] && !["bus", "train", "avion"].includes(line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase())) {
+      if (line[`TYPE DE TRANSPORT PDR ${i}`] && !["bus", "autocar", "train", "avion"].includes(line[`TYPE DE TRANSPORT PDR ${i}`].toLowerCase())) {
         errors[`TYPE DE TRANSPORT PDR ${i}`].push({ line: index, error: PDT_IMPORT_ERRORS.UNKNOWN_TRANSPORT_TYPE, extra: line[`TYPE DE TRANSPORT PDR ${i}`] });
       }
       if (!line[`NOM + ADRESSE DU PDR ${i}`]) {
@@ -246,20 +256,40 @@ export const validatePdtFile = async (
       errors["TEMPS DE ROUTE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
     }
     if (line["LIGNES FUSIONNÉES"]) {
-      const mergedLines = line["LIGNES FUSIONNÉES"].split(",");
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mergedLines = line["LIGNES FUSIONNÉES"].replaceAll(" ", "").split(",");
       if (mergedLines.length > 5) {
         errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_FORMAT });
       }
-      for (const mergedLine of mergedLines) {
+      for (const mergedLine of mergedLines.filter((b) => b !== currentBusId)) {
         let found = false;
-        for (const [i, line] of lines.entries()) {
-          if (line["NUMERO DE LIGNE"] === mergedLine.trim()) {
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mergedLine) {
             found = true;
             break;
           }
         }
         if (!found) {
           errors["LIGNES FUSIONNÉES"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MERGED_LINE_ID, extra: mergedLine });
+        }
+      }
+    }
+    if (line["LIGNE MIROIR"]) {
+      const currentBusId = line["NUMERO DE LIGNE"];
+      const mirrorLine = line["LIGNE MIROIR"].replaceAll(" ", "");
+
+      if (mirrorLine === currentBusId) {
+        errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.SAME_MIRROR_LINE_ID, extra: mirrorLine });
+      } else {
+        let found = false;
+        for (const [mi, mline] of lines.entries()) {
+          if (mline["NUMERO DE LIGNE"] === mirrorLine) {
+            found = true;
+            break;
+          }
+        }
+        if (!found) {
+          errors["LIGNE MIROIR"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_MIRROR_LINE_ID, extra: mirrorLine });
         }
       }
     }
@@ -323,11 +353,11 @@ export const validatePdtFile = async (
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
-      const center = await CohesionCenterModel.findById(line["ID CENTRE"]);
+      const center = await CohesionCenterModel.findById(line["ID CENTRE"]?.toLowerCase());
       if (!center) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
       }
-      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"] });
+      const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"]?.toLowerCase() });
       if (!session) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
       }
@@ -338,7 +368,7 @@ export const validatePdtFile = async (
     for (const [i, line] of lines.entries()) {
       const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
       if (line["ID CLASSE"] && mongoose.Types.ObjectId.isValid(line["ID CLASSE"])) {
-        const classe = await ClasseModel.findById(line["ID CLASSE"]);
+        const classe = await ClasseModel.findById(line["ID CLASSE"]?.toLowerCase());
         if (!classe) {
           errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CLASSE_ID, extra: line["ID CLASSE"] });
         }
@@ -351,7 +381,7 @@ export const validatePdtFile = async (
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
       if (line[`ID PDR ${pdrNumber}`]) {
         if (mongoose.Types.ObjectId.isValid(line[`ID PDR ${pdrNumber}`])) {
-          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`], deletedAt: { $exists: false } });
+          const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`]?.toLowerCase(), deletedAt: { $exists: false } });
           if (!pdr) {
             errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
           } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
@@ -424,19 +454,4 @@ export const computeImportSummary = (lines: PdtLine[]) => {
     pdrCount,
     maxPdrOnLine,
   };
-};
-
-const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
-};
-
-const getLinePdrIds = (line) => {
-  const countPdr = getLinePdrCount(line);
-  const pdrIds: string[] = [];
-  for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
-    if (line[`ID PDR ${pdrNumber}`] && !["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
-      pdrIds.push(line[`ID PDR ${pdrNumber}`]);
-    }
-  }
-  return pdrIds;
 };

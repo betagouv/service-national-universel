@@ -3,7 +3,7 @@ import Iceberg from "../../../../../assets/Iceberg";
 
 export default function CenterInfo({ center }) {
   return (
-    <div className="md:w-fit my-2 flex items-center justify-between gap-4 rounded-2xl bg-gray-100 p-4 md:bg-gray-50">
+    <div className="flex items-center gap-4 rounded-2xl bg-gray-100 p-4 md:bg-gray-50">
       <article className="md:order-last">
         <h1 className="text-xl font-semibold leading-7">Votre lieu d&apos;affectation</h1>
         <p className="text-sm leading-5 text-gray-700">

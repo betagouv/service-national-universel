@@ -19,6 +19,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       "cohort.keyword",
       "code.keyword",
       "placesLeft",
+      "codeCentre.keyword",
       "hasTimeSchedule.keyword",
       "typology.keyword",
       "domain.keyword",

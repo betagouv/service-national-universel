@@ -66,6 +66,14 @@ export const PlanTransportSchema = {
       description: "Id de la cohorte",
     },
   },
+
+  codeCourtDeRoute: {
+    type: String,
+    documentation: {
+      description: "code court de la route (SI SNU)",
+    },
+  },
+
   busId: {
     type: String,
     required: true,
@@ -264,6 +272,19 @@ export const PlanTransportSchema = {
     default: "false",
     documentation: {
       description: "La ligne est retardée au Retour",
+    },
+  },
+  mergedBusIds: {
+    type: [String],
+    default: [],
+    documentation: {
+      description: "Liste des lignes de bus fusionnées",
+    },
+  },
+  mirrorBusId: {
+    type: String,
+    documentation: {
+      description: "Numero de ligne du bus miroir",
     },
   },
 

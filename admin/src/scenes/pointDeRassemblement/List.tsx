@@ -148,6 +148,7 @@ const ListPoints = ({ user }) => {
                 res.push({
                   // @ts-ignore
                   Identifiant: item._id.toString(),
+                  Matricule: item.matricule,
                   Code: item.code,
                   Cohortes: item?.cohorts.map((e) => e).join(", "),
                   Nom: item.name,

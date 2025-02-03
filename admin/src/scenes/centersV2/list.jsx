@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { BsDownload } from "react-icons/bs";
 import { useSelector } from "react-redux";
+import { Link } from "react-router-dom";
 import {
   ROLES,
   canCreateOrUpdateCohesionCenter,
@@ -10,13 +11,13 @@ import {
   translate,
   translateDomainCenter,
   translateTypologieCenter,
+  isSuperAdmin,
 } from "snu-lib";
 import Calendar from "../../assets/icons/Calendar";
 import Menu from "../../assets/icons/Menu";
-import Breadcrumbs from "../../components/Breadcrumbs";
-import { Title } from "../pointDeRassemblement/components/common";
 import { Badge, TabItem } from "./components/commons";
 import { orderCohort, transformExistingField } from "../../components/filters-system-v2/components/filters/utils";
+import { Button, Header, Page } from "@snu/ds/admin";
 
 import { useHistory, useParams } from "react-router-dom";
 
@@ -43,36 +44,41 @@ export default function List() {
   const firstSession = getDefaultCohort(cohorts);
 
   return (
-    <div className="mb-8">
-      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres" }]} />
-      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
-      <div className="flex flex-row">
-        <div className="flex w-full flex-1 flex-col px-8">
-          <div className="flex items-center justify-between py-8">
-            <Title>Centres</Title>
-            {canCreateOrUpdateCohesionCenter(user) ? (
-              <button
-                className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
-                onClick={() => setModalVisible(true)}>
-                Rattacher un centre à un séjour
-              </button>
-            ) : null}
-          </div>
-          <div>
-            <div className="flex flex-1">
-              <TabItem icon={<Menu />} title="Liste des centres" onClick={() => history.replace(`/centre/liste/liste-centre`)} active={currentTab === "liste-centre"} />
-              <TabItem icon={<Calendar />} title="Sessions" onClick={() => history.replace(`/centre/liste/session`)} active={currentTab === "session"} />
-            </div>
-            <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
-              <div className="flex w-full flex-col pt-4">
-                {currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}
-                {currentTab === "session" && <ListSession firstSession={firstSession} />}
-              </div>
-            </div>
+    <Page>
+      <Header
+        title="Centres"
+        breadcrumb={[{ title: "Séjours" }, { title: "Centres" }]}
+        actions={[
+          canCreateOrUpdateCohesionCenter(user) && (
+            <button
+              className="rounded-lg border-[1px] border-blue-600 bg-blue-600 px-4 py-2 mr-2 text-white shadow-sm transition duration-300 ease-in-out hover:bg-white hover:!text-blue-600"
+              onClick={() => setModalVisible(true)}>
+              Rattacher un centre à un séjour
+            </button>
+          ),
+
+          isSuperAdmin(user) && (
+            <Link to="/centre/import">
+              <Button title="Mettre à jour" className="mr-2" />
+            </Link>
+          ),
+        ].filter(Boolean)}
+      />
+
+      <div>
+        <div className="flex flex-1">
+          <TabItem icon={<Menu />} title="Liste des centres" onClick={() => history.replace(`/centre/liste/liste-centre`)} active={currentTab === "liste-centre"} />
+          <TabItem icon={<Calendar />} title="Sessions" onClick={() => history.replace(`/centre/liste/session`)} active={currentTab === "session"} />
+        </div>
+        <div className={`relative mb-8 items-start rounded-b-lg rounded-tr-lg bg-white`}>
+          <div className="flex w-full flex-col pt-4">
+            {currentTab === "liste-centre" && <ListCenter firstSession={firstSession} />}
+            {currentTab === "session" && <ListSession firstSession={firstSession} />}
           </div>
         </div>
       </div>
-    </div>
+      <ModalRattacherCentre isOpen={modalVisible} onCancel={() => setModalVisible(false)} user={user} />
+    </Page>
   );
 }
 
@@ -150,7 +156,7 @@ const ListSession = ({ firstSession }) => {
                   const hasSanitaryContactEmail = Boolean(data?.sanitaryContactEmail).toString();
                   return {
                     "Id centre": center?._id?.toString(),
-                    "Code du centre": center?.code2022,
+                    Matricule: center?.matricule,
                     "Nom du centre": center?.name,
                     "Désignation du centre": center?.centerDesignation,
                     "Id de la session": data?._id?.toString(),
@@ -232,6 +238,7 @@ const ListCenter = ({ firstSession }) => {
   });
   const [size, setSize] = useState(10);
   const filterArray = [
+    { title: "Matricule", name: "matricule", missingLabel: "Non renseigné" },
     { title: "Cohorte", name: "cohorts", missingLabel: "Non renseignée", sort: (e) => orderCohort(e) },
     {
       title: "Région",
@@ -259,7 +266,6 @@ const ListCenter = ({ firstSession }) => {
       translate: (e) => translateDomainCenter(e),
     },
   ];
-  if (user.role === ROLES.ADMIN) filterArray.push({ title: "Code", name: "code2022", missingLabel: "Non renseignée" });
 
   const history = useHistory();
 
@@ -289,8 +295,7 @@ const ListCenter = ({ firstSession }) => {
             transform={(all) => {
               return all?.map((data) => {
                 return {
-                  Id: data._id.toString(),
-                  "Code du centre": data?.code2022,
+                  Matricule: data?.matricule,
                   Nom: data?.name,
                   "Désignation du centre": data?.centerDesignation,
                   "Cohorte(s)": data?.cohorts

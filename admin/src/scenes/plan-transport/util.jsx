@@ -125,6 +125,7 @@ export async function exportLigneBus(cohort) {
             "Téléphone représentant légal 2": formatPhoneE164(young.parent2Phone, young.parent2PhoneZone || getPhoneZoneByDepartment(young.department)),
 
             "ID centre": center._id,
+            "Matricule du centre": center.matricule,
             "Code centre (2022)": center.code2022,
             "Nom du centre": center.name,
             "Adresse du centre": center.address,
@@ -133,6 +134,7 @@ export async function exportLigneBus(cohort) {
             "Région du centre": center.region,
 
             "Id du point de rassemblement": young.meetingPointId,
+            "Matricule du point de rassemblement": meetingPoint.matricule,
             "Nom du point de rassemblement": meetingPoint.name,
             "Adresse point de rassemblement": meetingPoint.address,
             "Ville du point de rassemblement": meetingPoint.city,
@@ -343,7 +345,7 @@ export async function exportConvoyeur(cohort) {
       const matchingCenter = centers.find((c) => c._id === currentLigneBus.centerId);
 
       if (matchingCenter) {
-        currentLigneBus.centerCode = matchingCenter.code2022;
+        currentLigneBus.centerCode = matchingCenter.matricule;
         currentLigneBus.centerDepartment = matchingCenter.department;
       }
     }
@@ -410,7 +412,7 @@ export async function exportConvoyeur(cohort) {
 
       const dataItem = {
         "Bus n˚": item.busId,
-        "Code centre (2022)": item.centerCode,
+        "Matricule Centre": item.centerCode,
         Département: item.centerDepartment,
         ...team,
       };

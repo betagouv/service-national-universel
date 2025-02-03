@@ -15,4 +15,8 @@ export type PointDeRassemblementModel = {
     sessionIds: string[];
     sessionNoms: string[];
     complementAddress: any;
+    uai?: string;
+    numeroOrdre?: string;
 };
+
+export type CreatePointDeRassemblementModel = Omit<PointDeRassemblementModel, "id" | "complementAddress">;

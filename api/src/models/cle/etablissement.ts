@@ -24,6 +24,7 @@ schema.pre<SchemaExtended>("save", async function (next, params: CustomSaveParam
   if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {
     const classes = await ClasseModel.find({ etablissementId: this._id });
     if (classes.length > 0) {
+      const transaction = this.$session();
       await ClasseModel.updateMany(
         { etablissementId: this._id },
         {
@@ -31,6 +32,7 @@ schema.pre<SchemaExtended>("save", async function (next, params: CustomSaveParam
           region: this.region,
           academy: this.academy,
         },
+        { session: transaction },
       );
     }
   }

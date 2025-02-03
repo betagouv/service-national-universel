@@ -15,7 +15,7 @@ import {
   CohortModel,
 } from "../models";
 
-import { getNewImportPlanTransportFixture } from "./fixtures/PlanDeTransport/importPlanTransport";
+import { getNewImportPlanTransportFixture, getNewImportPlanTransportLineFixture } from "./fixtures/PlanDeTransport/importPlanTransport";
 import getNewCohortFixture from "./fixtures/cohort";
 
 import { dbConnect, dbClose, mockTransaction } from "./helpers/db";
@@ -69,6 +69,27 @@ describe("POST /plan-de-transport/import/:cohort", () => {
     const response = await request(getAppHelper({ role: ROLES.ADMIN }))
       .post("/plan-de-transport/import/Avril 2023 - A")
       .attach("file", xlsxFile, { filename: "test.xslx" });
+    expect(response.body.errors).toBeUndefined();
+    expect(response.status).toBe(200);
+  });
+
+  it("should return 200 if import plan with optionnal column", async () => {
+    await createCohortHelper(getNewCohortFixture({ name: "Avril 2023 - A" }));
+    const importPlanTransport = await ImportPlanTransportModel.create(
+      getNewImportPlanTransportFixture([
+        // without LIGNE MIROIR
+        getNewImportPlanTransportLineFixture({
+          "Code court de route": "2025-02_HTS-01_075-010_003",
+          "LIGNES FUSIONNÉES": null,
+        }),
+      ]),
+    );
+    await initPlanTransport(importPlanTransport);
+    const xlsxFile = await getXlsxBufferPlanTransport(importPlanTransport);
+    const response = await request(getAppHelper({ role: ROLES.ADMIN }))
+      .post("/plan-de-transport/import/Avril 2023 - A")
+      .attach("file", xlsxFile, { filename: "test.xslx" });
+    expect(response.body.errors).toBeUndefined();
     expect(response.status).toBe(200);
   });
 });
@@ -119,10 +140,21 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
     expect(response.body.ok).toBe(true);
 
     const importedPdts = await PlanTransportModel.find({ cohort: importPlanTransport.cohort });
+    const importedLigneDeBus = await LigneBusModel.find({ cohort: importPlanTransport.cohort });
     const pdt = importedPdts[0];
     expect(pdt.pointDeRassemblements[0].__t).toBe("Enriched");
     expect(pdt.pointDeRassemblements[0].returnHour).toBeDefined();
     expect(pdt.pointDeRassemblements[0].cohorts).toBeDefined();
+    // check lowercase
+    expect(importedLigneDeBus[2].meetingPointsIds).toEqual(["63da1f2547841408c58e53ca", "63da1f2547841408c58e53cb"]);
+    // check lowercase
+    expect(importedLigneDeBus[2].centerId).toBe("63c919d5700cce08ce846633");
+    expect(importedLigneDeBus[0].mirrorBusId).toBe("OCC034008");
+    expect(importedLigneDeBus[0].toJSON().mergedBusIds).toStrictEqual(["OCC034006", "OCC034008"]);
+    expect(importedLigneDeBus[1].mirrorBusId).toBe("OCC034006");
+    expect(importedLigneDeBus[1].toJSON().mergedBusIds).toStrictEqual(["OCC034006", "OCC034008"]);
+    expect(importedLigneDeBus[2].mirrorBusId).toBe("");
+    expect(importedLigneDeBus[2].toJSON().mergedBusIds).toStrictEqual([]);
   });
 
   it("should set meetingHour correctly for bus transport", async () => {
@@ -198,7 +230,7 @@ describe("POST /plan-de-transport/import/:importId/execute", () => {
           "HEURE DEPART DU PDR 1": "09:00",
           "TYPE DE TRANSPORT PDR 2": TRANSPORT_MODES.TRAIN,
           "HEURE DEPART DU PDR 2": "10:00",
-        }
+        },
       ],
     };
     const importPlanTransport = await ImportPlanTransportModel.create(planTransportModified);
