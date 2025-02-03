@@ -1,12 +1,9 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const { ObjectId } = require("mongoose").Types;
-const mongoose = require("mongoose");
-const { config } = require("../../config");
-
-const {
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
+import mongoose from "mongoose";
+import { config } from "../../config";
+import {
   canViewLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
@@ -22,9 +19,8 @@ const {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
-} = require("snu-lib");
-
-const {
+} from "snu-lib";
+import {
   LigneBusModel,
   LigneToPointModel,
   PlanTransportModel,
@@ -33,20 +29,24 @@ const {
   SchemaDeRepartitionModel,
   ReferentModel,
   CohortModel,
-} = require("../../models");
+} from "../../models";
+import { capture } from "../../sentry";
+import { sendTemplate } from "../../brevo";
+import { ERRORS } from "../../utils";
+import { validateId } from "../../utils/validator";
+import { UserRequest } from "../../controllers/request";
+import { getInfoBus } from "./ligneDeBusService";
 
-const { capture } = require("../../sentry");
-const { sendTemplate } = require("../../brevo");
-const { ERRORS } = require("../../utils");
-const { validateId } = require("../../utils/validator");
+const router = express.Router();
 
 /**
  * Récupère toutes les ligneBus +  les points de rassemblemnts associés
  */
-router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/all", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false } });
     let arrayMeetingPoints = [];
+    // @ts-ignore
     ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
     const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
     const ligneToPoints = await LigneToPointModel.find({ lineId: { $in: ligneBus.map((l) => l._id) } });
@@ -59,7 +59,7 @@ router.get("/all", passport.authenticate("referent", { session: false, failWithE
 
 //Récupère toutes les ligneBus + les centres associés
 
-router.get("/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/cohort/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -71,6 +71,7 @@ router.get("/cohort/:cohort", passport.authenticate("referent", { session: false
 
     const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
     let arrayCenter = [];
+    // @ts-ignore
     ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
     const centers = await CohesionCenterModel.find({ _id: { $in: arrayCenter } });
     return res.status(200).send({ ok: true, data: { ligneBus, centers } });
@@ -80,7 +81,7 @@ router.get("/cohort/:cohort", passport.authenticate("referent", { session: false
   }
 });
 
-router.put("/:id/info", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/info", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -117,6 +118,11 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     if (totalCapacity < youngCapacity + followerCapacity) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
+    const planDeTransport = await PlanTransportModel.findById(id);
+    if (!planDeTransport) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
     //add some checks
 
     ligne.set({
@@ -137,7 +143,6 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     // * Update slave PlanTransport
     // ! Gerer logique si il y a deja des inscrits
-    const planDeTransport = await PlanTransportModel.findById(id);
     planDeTransport.set({
       busId,
       departureString: departuredDate.toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit", year: "numeric" }),
@@ -166,7 +171,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -232,7 +237,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/teamDelete", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -278,7 +283,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
   }
 });
 
-router.put("/:id/centre", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/centre", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -311,6 +316,9 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     await ligne.save({ fromUser: req.user });
 
     const planDeTransport = await PlanTransportModel.findById(id);
+    if (!planDeTransport) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     planDeTransport.set({
       centerArrivalTime,
       centerDepartureTime,
@@ -329,7 +337,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
   }
 });
 
-router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -387,10 +395,19 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
     // * Update slave PlanTransport
     const planDeTransport = await PlanTransportModel.findById(id);
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
+    if (!planDeTransport) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(new mongoose.Types.ObjectId(newMeetingPointId));
+    if (!pointDeRassemblement) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     const meetingPoint = planDeTransport.pointDeRassemblements.find((meetingPoint) => {
       return meetingPoint.meetingPointId === meetingPointId;
     });
+    if (!meetingPoint) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     meetingPoint.set({
       meetingPointId: newMeetingPointId,
       ...pointDeRassemblement._doc,
@@ -415,7 +432,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
   }
 });
 
-router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -454,7 +471,13 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 
     // * Update slave PlanTransport
     const planDeTransport = await PlanTransportModel.findById(id);
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(meetingPoint._id));
+    if (!planDeTransport) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(new mongoose.Types.ObjectId(meetingPoint._id));
+    if (!pointDeRassemblement) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
     planDeTransport.pointDeRassemblements.push({
       meetingPointId: meetingPoint._id,
       ...pointDeRassemblement._doc,
@@ -477,7 +500,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
   }
 });
 
-router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -499,7 +522,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -515,7 +538,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
 
     const listGroup = await SchemaDeRepartitionModel.find({ centerId: ligneBus.centerId });
 
-    let idPDR = [];
+    let idPDR: string[] = [];
     for (let group of listGroup) {
       for (let pdr of group.gatheringPlaces) {
         if (!idPDR.includes(pdr)) {
@@ -533,7 +556,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
   }
 });
 
-router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -551,6 +574,7 @@ router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: 
 
     for (let ligneToPoint of ligneToPoints) {
       const meetingPoint = await PointDeRassemblementModel.findById(ligneToPoint.meetingPointId);
+      // @ts-ignore
       ligneToPoint._doc.meetingPoint = meetingPoint;
     }
 
@@ -561,7 +585,7 @@ router.get("/:id/ligne-to-points", passport.authenticate("referent", { session: 
   }
 });
 
-router.get("/:id/data-for-check", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/data-for-check", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
 
@@ -621,7 +645,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
 
     const dataYoung = await LigneBusModel.aggregate(queryYoung).exec();
 
-    let result = {
+    let result: any = {
       meetingPoints: [],
     };
     let youngsCountBus = 0;
@@ -648,7 +672,7 @@ router.get("/:id/data-for-check", passport.authenticate("referent", { session: f
   }
 });
 
-router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -668,20 +692,6 @@ router.get("/cohort/:cohort/hasValue", passport.authenticate("referent", { sessi
   }
 });
 
-async function getInfoBus(line) {
-  const ligneToBus = await LigneToPointModel.find({ lineId: line._id });
-
-  let meetingsPointsDetail = [];
-  for (let line of ligneToBus) {
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(line.meetingPointId);
-    meetingsPointsDetail.push({ ...line._doc, ...pointDeRassemblement._doc });
-  }
-
-  const centerDetail = await CohesionCenterModel.findById(line.centerId);
-
-  return { ...line._doc, meetingsPointsDetail, centerDetail };
-}
-
 const PATCHES_COUNT_PER_PAGE = 20;
 const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
 const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
@@ -689,7 +699,7 @@ const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
 /**
  * Pour l'historique du plan de transport, permet de récupérer la liste des options des filtres
  */
-router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const db = mongoose.connection.db;
     const busline = {
@@ -726,7 +736,7 @@ router.get("/patches/filter-options", passport.authenticate("referent", { sessio
  * Historique des plan de transports
  * (on cherche l'historique dans 3 patches (lignebus, modificationBus et ligneToPoint)
  */
-router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/patches/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     // --- validate data
     const { error, value } = Joi.object({
@@ -810,7 +820,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 
       // --- get all ops...
       const db = mongoose.connection.db;
-      let patches = [];
+      let patches: any[] = [];
 
       // --- lignebus patches...
       let cursor = db.collection("lignebus_patches").find({ ref: { $in: lineIds } });
@@ -930,7 +940,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
   }
 });
 
-router.post("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/notifyRef", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -951,10 +961,10 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     if (!center) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const departmentListToNotify = pdrs.map((pdr) => pdr.department);
-    departmentListToNotify.push(center.department);
+    departmentListToNotify.push(center.department!);
 
     const regionListToNotify = pdrs.map((pdr) => pdr.region);
-    regionListToNotify.push(center.region);
+    regionListToNotify.push(center.region!);
 
     const subRoleRefDep = ["manager_department", "assistant_manager_department", "secretariat", "manager_phase2"];
     const subRoleRefReg = ["coordinator", "assistant_coordinator", "manager_phase2"];
@@ -981,13 +991,13 @@ router.post("/:id/notifyRef", passport.authenticate("referent", { session: false
     //on prend un ref de chaque departement de la liste trié par subRole
     //et un ref de chaque region de la liste trié par subRole
 
-    const referentsToNotify = [];
+    const referentsToNotify: any[] = [];
 
     const getRefListToNotify = (type, list, subRoles) => {
       for (let i = 0; i < list.length; i++) {
         //place = soit une region soit un departement
         const place = list[i];
-        let referentsFromPlace = null;
+        let referentsFromPlace: any = null;
         //on filtre les user du departement ou de la region
         if (type === "region") {
           referentsFromPlace = referents.filter((u) => u.region === place && u.role === "referent_region");
@@ -1063,7 +1073,7 @@ function filterPatchWithQuery(p, query) {
   );
 }
 
-function mergeArrayItems(array, subProperty) {
+function mergeArrayItems(array: any[], subProperty?: string | null | undefined) {
   let set = {};
   for (const item of array) {
     if (subProperty) {
@@ -1100,3 +1110,5 @@ async function notifyTranporteurs(ligne, type) {
     },
   });
 }
+
+export default router;

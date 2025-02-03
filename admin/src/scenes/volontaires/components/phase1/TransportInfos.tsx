@@ -33,6 +33,7 @@ type ModalAffectationsType = {
 
 interface Props {
   meetingPoint: meetingPointType;
+  pointDeRassemblement: PointDeRassemblementType;
   young: YoungType;
   cohesionCenter: CohesionCenterType;
   cohort: CohortType;
@@ -44,6 +45,7 @@ interface Props {
 
 export default function TransportInfos({
   meetingPoint,
+  pointDeRassemblement,
   young,
   cohesionCenter,
   cohort,
@@ -54,7 +56,33 @@ export default function TransportInfos({
 }: Props) {
   return (
     <div className="flex flex-col w-full">
-      {meetingPoint ? (
+      {pointDeRassemblement ? (
+        <div>
+          <Label title="Point de rassemblement" name="meetingPoint" />
+          <div className="mb-2 flex flex-col bg-gray-50 gap-1 py-[10px] px-4">
+            <p>
+              <span className="text-gray-500">Nom : </span>
+              {pointDeRassemblement.name}
+            </p>
+            <p>
+              <span className="text-gray-500">Adresse : </span>
+              {pointDeRassemblement.address && formatNameAndAddress(pointDeRassemblement.address) + " "}
+              {pointDeRassemblement.zip + " " + (pointDeRassemblement.city && formatNameAndAddress(pointDeRassemblement.city))}
+            </p>
+            <p>
+              <span className="text-gray-500">Département : </span>
+              {pointDeRassemblement.department}
+            </p>
+            <p>
+              <span className="text-gray-500">Région : </span>
+              {pointDeRassemblement.region}
+            </p>
+          </div>
+          <Link to={`/point-de-rassemblement/${pointDeRassemblement._id}`} className="w-full" target="blank">
+            <Button type="tertiary" title="Voir le point de rassemblement" className="w-full max-w-none" />
+          </Link>
+        </div>
+      ) : meetingPoint ? (
         <>
           <div>
             <Label title="Point de rassemblement" name="meetingPoint" />

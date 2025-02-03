@@ -7,7 +7,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
+import { PlanTransportType, ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
 import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -83,6 +83,7 @@ export default function List() {
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
     { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Matricule", name: "pointDeRassemblements.matricule", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
     { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
     { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
@@ -94,6 +95,7 @@ export default function List() {
       missingLabel: "Non renseigné",
       translate: (e) => getDepartmentNumber(e) + " - " + e,
     },
+    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     { title: "Matricule", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
     {
       title: "Modification demandée",
@@ -366,8 +368,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                 button: `flex items-center gap-2 p-2 px-3 text-gray-700 cursor-pointer w-full text-sm text-gray-700`,
                 loadingButton: `text-sm text-gray-700`,
               }}
-              transform={async (data) => {
-                const all = data;
+              transform={async (all: PlanTransportType[]) => {
                 // Get the length of the longest array of PDRs
                 const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
 
@@ -379,6 +380,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     const num = i + 1;
                     pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
                     pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
+                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
                     pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
                     pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
                     pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
@@ -395,6 +397,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     ...pdrs,
                     "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
                     "REGION DU CENTRE": data.centerRegion,
+                    "ID CENTRE": data.centerId,
                     "MATRICULE DU CENTRE": data.centerCode,
                     "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
                     "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
@@ -411,6 +414,7 @@ const returnSelect = (cohort, selectedFilters, user) => {
                     "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
                     "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
                     "LIGNES FUSIONNÉES": data.mergedBusIds?.join(",") || "",
+                    "LIGNE MIROIR": data.mirrorBusId || "",
                   };
                 });
               }}

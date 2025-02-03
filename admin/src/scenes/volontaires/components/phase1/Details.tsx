@@ -26,13 +26,14 @@ type meetingPointType = {
 interface Props {
   cohesionCenter: CohesionCenterType;
   meetingPoint: meetingPointType;
+  pointDeRassemblement: PointDeRassemblementType;
   cohort: CohortType;
   young: YoungType;
   setYoung: () => void;
   user: User;
 }
 
-export default function Details({ cohesionCenter, meetingPoint, cohort, young, setYoung, user }: Props) {
+export default function Details({ cohesionCenter, meetingPoint, pointDeRassemblement, cohort, young, setYoung, user }: Props) {
   const [modalAffectations, setModalAffectation] = useState<ModalAffectationsType>({
     isOpen: false,
     center: null,
@@ -81,6 +82,7 @@ export default function Details({ cohesionCenter, meetingPoint, cohort, young, s
           <div className="w-[1px] mx-8 bg-gray-200 shrink-0">&nbsp;</div>
           <TransportInfos
             meetingPoint={meetingPoint}
+            pointDeRassemblement={pointDeRassemblement}
             young={young}
             cohesionCenter={cohesionCenter}
             cohort={cohort}
