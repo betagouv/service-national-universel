@@ -166,19 +166,12 @@ describe("BasculeCLEtoCLE", () => {
             expect(sejourService.updatePlacesSejour).toHaveBeenCalled();
             expect(planDeTransportService.updateSeatsTakenInBusLine).toHaveBeenCalled();
             expect(basculeService.generateNotificationForBascule).toHaveBeenCalled();
+            expect(BasculeService.generateYoungNoteForBascule).toHaveBeenCalled();
         });
 
         describe("BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE", () => {
             it("should return IN_PROGRESS for specific statuses", () => {
-                const statuses = [
-                    YOUNG_STATUS.IN_PROGRESS,
-                    YOUNG_STATUS.REFUSED,
-                    YOUNG_STATUS.WITHDRAWN,
-                    YOUNG_STATUS.REINSCRIPTION,
-                    YOUNG_STATUS.NOT_AUTORISED,
-                    YOUNG_STATUS.ABANDONED,
-                    YOUNG_STATUS.DELETED,
-                ];
+                const statuses = [YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.NOT_AUTORISED];
 
                 statuses.forEach((status) => {
                     expect(BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE(status)).toBe(YOUNG_STATUS.IN_PROGRESS);
@@ -186,12 +179,7 @@ describe("BasculeCLEtoCLE", () => {
             });
 
             it("should return WAITING_VALIDATION for any other status", () => {
-                const otherStatuses = [
-                    YOUNG_STATUS.VALIDATED,
-                    YOUNG_STATUS.WAITING_VALIDATION,
-                    YOUNG_STATUS.WAITING_CORRECTION,
-                    YOUNG_STATUS.WAITING_LIST,
-                ];
+                const otherStatuses = [YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WITHDRAWN];
 
                 otherStatuses.forEach((status) => {
                     expect(BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE(status)).toBe(

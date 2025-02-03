@@ -132,12 +132,7 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
     static getStatutJeuneForBasculeCLEtoCLE(statut: string): string {
         switch (statut) {
             case YOUNG_STATUS.IN_PROGRESS:
-            case YOUNG_STATUS.REFUSED:
-            case YOUNG_STATUS.WITHDRAWN:
-            case YOUNG_STATUS.REINSCRIPTION:
             case YOUNG_STATUS.NOT_AUTORISED:
-            case YOUNG_STATUS.ABANDONED:
-            case YOUNG_STATUS.DELETED:
                 return YOUNG_STATUS.IN_PROGRESS;
             default:
                 return YOUNG_STATUS.WAITING_VALIDATION;

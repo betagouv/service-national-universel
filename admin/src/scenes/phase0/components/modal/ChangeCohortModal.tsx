@@ -265,28 +265,24 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
               disabled: !emailMessage,
               loading: isSaving,
               onClick: async () => {
-                if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
-                setIsSaving(true);
-                const payload = {
-                  source: YOUNG_SOURCE.VOLONTAIRE,
-                  cohort: cohort?.value,
-                  cohortDetailedChangeReason: emailMessage,
-                  cohortChangeReason: motif?.label,
-                };
-
-                Phase1Service.changeSession(young._id, payload)
-                  .then(() => {
-                    toastr.success("Opération réussie", "Cohorte modifiée avec succès");
-                    onChange();
-                  })
-                  .catch((error: HttpError) => {
-                    if (error?.statusCode === 422) {
-                      toastr.error("Oups, une erreur est survenue lors de la modification de la cohorte", "");
-                    }
-                  })
-                  .finally(() => {
-                    setIsSaving(false);
+                try {
+                  if (!emailMessage) return toastr.error("Veuillez indiquer un message", "");
+                  setIsSaving(true);
+                  const { ok } = await api.put(`/referent/young/${young._id}/change-cohort`, {
+                    source: YOUNG_SOURCE.VOLONTAIRE,
+                    cohort: cohort?.value,
+                    message: emailMessage,
+                    cohortChangeReason: motif?.label,
                   });
+                  await onChange();
+                  if (!ok) return toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
+                  toastr.success("Cohorte modifiée avec succès", "");
+                } catch (error) {
+                  capture(error);
+                  toastr.error(error.message, "");
+                } finally {
+                  setIsSaving(false);
+                }
               },
             },
           ],

@@ -65,7 +65,7 @@ describe("ClasseDepartement.guard", () => {
                 }),
             } as ExecutionContext;
 
-            expect(await guard.canActivate(context)).toBe(true);
+            expect(await guard.canActivate(context)).toBe(false);
         });
 
         it("should return false if user departement does not match classe departement", async () => {

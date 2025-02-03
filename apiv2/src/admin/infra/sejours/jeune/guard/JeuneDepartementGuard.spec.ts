@@ -40,9 +40,9 @@ describe("JeuneDepartement.guard", () => {
     describe("canActivate", () => {
         it("should return true if user departement matches jeune departement and role is referent_department", async () => {
             const request = {
-                user: { department: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
+                user: { departement: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
             };
-            const jeune = { department: "testDepartement" };
+            const jeune = { departement: "testDepartement" };
             jest.spyOn(jeuneGuardService, "findJeune").mockResolvedValue(jeune as any);
             const context = {
                 switchToHttp: () => ({
@@ -55,9 +55,9 @@ describe("JeuneDepartement.guard", () => {
 
         it("should return false if user departement does not match jeune departement", async () => {
             const request = {
-                user: { department: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
+                user: { departement: "testDepartement", role: ROLES.REFERENT_DEPARTMENT },
             };
-            const jeune = { department: "differentDepartement" };
+            const jeune = { departement: "differentDepartement" };
             jest.spyOn(jeuneGuardService, "findJeune").mockResolvedValue(jeune as any);
             const context = {
                 switchToHttp: () => ({
@@ -70,9 +70,9 @@ describe("JeuneDepartement.guard", () => {
 
         it("should return false if user departement matches jeune departement but is wrong role", async () => {
             const request = {
-                user: { department: "testDepartement", role: "wrongRole" },
+                user: { departement: "testDepartement", role: "wrongRole" },
             };
-            const jeune = { department: "testDepartement" };
+            const jeune = { departement: "testDepartement" };
             jest.spyOn(jeuneGuardService, "findJeune").mockResolvedValue(jeune as any);
             const context = {
                 switchToHttp: () => ({
@@ -85,10 +85,10 @@ describe("JeuneDepartement.guard", () => {
 
         it("should add jeune to request object", async () => {
             const request = {
-                user: { department: "testDepartement" },
+                user: { departement: "testDepartement" },
                 params: { id: "testId" },
             } as any;
-            const jeune = { id: "testId", department: "testDepartement" };
+            const jeune = { id: "testId", departement: "testDepartement" };
             jest.spyOn(jeuneGuardService, "findJeune").mockResolvedValue(jeune as any);
             const context = {
                 switchToHttp: () => ({

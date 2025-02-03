@@ -20,8 +20,8 @@ interface generateYoungNoteForBaculeProps {
     jeune: JeuneModel;
     session: SessionModel;
     sessionChangeReason: string | null;
-    previousEtablissement: EtablissementModel;
-    previousClasse: ClasseModel;
+    previousEtablissement: EtablissementModel | null;
+    previousClasse: ClasseModel | null;
     newSource: keyof typeof YOUNG_SOURCE;
     user: Partial<ReferentModel>;
 }

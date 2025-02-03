@@ -65,7 +65,7 @@ describe("ClasseRegion.guard", () => {
                 }),
             } as ExecutionContext;
 
-            expect(await guard.canActivate(context)).toBe(true);
+            expect(await guard.canActivate(context)).toBe(false);
         });
 
         it("should return false if user region does not match classe region", async () => {
