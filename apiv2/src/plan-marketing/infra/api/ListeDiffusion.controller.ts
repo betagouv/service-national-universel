@@ -1,6 +1,7 @@
 import { Controller, Post, Body, UseGuards } from "@nestjs/common";
 import { ImporterContacts } from "../../core/useCase/ImporterContacts";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { BrevoIpGuard } from "../guard/BrevoIpGuard";
 
 @Controller("plan-marketing/liste-diffusion")
 export class CreerListeDiffusionController {
@@ -12,7 +13,7 @@ export class CreerListeDiffusionController {
         await this.creerListeDiffusion.execute(nom, campagneId);
     }
 
-    // TODO: finir webhook
+    @UseGuards(BrevoIpGuard)
     async webhook(@Body("processId") processId: string) {
         // await this.creerListeDiffusion.execute(processId);
     }
