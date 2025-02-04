@@ -175,7 +175,7 @@ export async function getEmailContent(uuid) {
   }
 }
 
-interface BrevoEmailTemplate {
+export interface BrevoEmailTemplate {
   id: number;
   name: string;
   subject: string;
@@ -184,6 +184,13 @@ interface BrevoEmailTemplate {
   modifiedAt: string;
   doiTemplate: boolean;
 }
+
+export interface BrevoApiError {
+  code: string;
+  message: string;
+}
+
+export const BREVO_ERROR_TEMPLATE_NOT_FOUND = "document_not_found";
 
 function replaceTemplateParams(content: string, params: SendMailParameters["params"] = {}) {
   let hydratedContent = content;
@@ -208,6 +215,25 @@ async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachme
   } else {
     fs.writeFileSync(`${new Date().toISOString()}-${id}.email.html`, `<!-- EMAIL (${id}) TO ${emailTo?.map(({ email }) => email).join(",")}. SUBJECT: ${subject} -->` + html);
   }
+}
+
+/**
+ * getPreviewTemplate
+ *
+ * @param id template id
+ * @returns
+ */
+export async function getPreviewTemplate(id: string) {
+  if (!config.SENDINBLUEKEY){
+    captureMessage("NO SENDINBLUE KEY");
+  }
+  const template: BrevoEmailTemplate | BrevoApiError = await api(`/smtp/templates/${id}`, undefined, true);
+
+  if ((template as BrevoApiError).code === BREVO_ERROR_TEMPLATE_NOT_FOUND) {
+    captureMessage("NO TEMPLATE FOUND");
+  }
+
+  return template;
 }
 
 export type SendMailParameters = {
