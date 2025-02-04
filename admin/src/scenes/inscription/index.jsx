@@ -1,7 +1,7 @@
 import dayjs from "dayjs";
-import React, { Fragment, useCallback, useEffect, useMemo, useState } from "react";
+import React, { Fragment, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link, useHistory } from "react-router-dom";
+import { Link } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 
 import { Listbox, Transition } from "@headlessui/react";
@@ -15,7 +15,6 @@ import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOptio
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 import SelectStatus from "../../components/selectStatus";
 import { appURL } from "../../config";
-import api from "../../services/api";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -26,125 +25,37 @@ import { toastr } from "react-redux-toastr";
 import Loader from "@/components/Loader";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
+import useClass from "../classe/utils/useClass";
+import useFilterLabels from "../volontaires/useFilterLabels";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
+  const pageId = "inscription-list";
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
-  const [classes, setClasses] = useState(null);
-  const [etablissements, setEtablissements] = useState(null);
+  const { data: labels, isPending: isLabelsPending } = useFilterLabels(pageId);
 
   //List state
   const [data, setData] = useState([]);
-  const pageId = "inscription-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
   const [size, setSize] = useState(10);
-  const [invitationState, setInvitationState] = useState({
-    canInvite: false,
-    isLoading: true,
-  });
 
-  const history = useHistory();
+  const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
+  const selectedClassId = selectedFilters?.classeId?.filter[0];
+  const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
+  const baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
-          filters: {},
-          exportFields: ["name", "uniqueKeyAndId", "cohort"],
-        });
-        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
-          filters: {},
-          exportFields: ["name", "uai"],
-        });
+  if (isLabelsPending) return <Loader />;
 
-        setClasses(classes);
-        setEtablissements(etablissements);
-      } catch (e) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-      }
-    })();
-  }, []);
-
-  const baseInscriptionPath = useMemo(() => {
-    const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
-    const selectedClassId = selectedFilters?.classeId?.filter[0];
-
-    if (!hasFilterSelectedOneClass) {
-      return "/volontaire/create";
-    }
-
-    const classe = classes?.find((c) => c._id === selectedClassId);
-
-    if (!classe) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la classe");
-      throw new Error("Failed to fetch class");
-    }
-
-    return `/volontaire/create?classeId=${selectedClassId}`;
-  }, [classes, selectedFilters?.classeId?.filter]);
-
-  const fetchCohortAndResolveInscriptionPath = useCallback(async () => {
-    if (!baseInscriptionPath.includes("classeId")) {
-      return baseInscriptionPath;
-    }
-
-    const selectedClassId = selectedFilters?.classeId?.filter[0];
-    const classe = classes?.find((c) => c._id === selectedClassId);
-
-    try {
-      const { ok, data: cohort } = await api.get(`/cohort/${classe.cohort}`);
-      if (!ok) {
-        throw new Error("Failed to fetch cohort");
-      }
-
-      if (!canInviteYoung(user, cohort)) {
-        return null;
-      }
-
-      return baseInscriptionPath;
-    } catch (error) {
-      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte");
-      throw new Error("Failed to fetch cohort");
-    }
-  }, [baseInscriptionPath, classes, selectedFilters?.classeId?.filter, user]);
-
-  useEffect(() => {
-    const checkCanInvite = async () => {
-      setInvitationState((prev) => ({ ...prev, isLoading: true }));
-
-      if (!baseInscriptionPath.includes("classeId")) {
-        setInvitationState({
-          canInvite: true,
-          isLoading: false,
-        });
-        return;
-      }
-
-      const resultFetchCohortPath = await fetchCohortAndResolveInscriptionPath();
-      setInvitationState({
-        canInvite: !!resultFetchCohortPath,
-        isLoading: false,
-      });
-    };
-
-    checkCanInvite();
-  }, [baseInscriptionPath, fetchCohortAndResolveInscriptionPath]);
-
-  if (!classes || !etablissements) return <Loader />;
-
-  const handleClickInscription = async (event) => {
-    event.preventDefault();
+  const handleClickInscription = () => {
     plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-
-    const inscriptionPath = await fetchCohortAndResolveInscriptionPath();
-    if (inscriptionPath) {
-      history.push(inscriptionPath);
-    }
   };
 
   const filterArray = [
@@ -158,10 +69,8 @@ export default function Inscription() {
       parentGroup: "Général",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !classes.length) return item;
-        const res = classes.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.uniqueKeyAndId;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     {
@@ -170,10 +79,8 @@ export default function Inscription() {
       parentGroup: "Général",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !etablissements.length) return item;
-        const res = etablissements.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.name;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     { title: "Pays de résidence", name: "country", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
@@ -318,7 +225,7 @@ export default function Inscription() {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            {!invitationState.isLoading && invitationState.canInvite ? (
+            {!isClassLoading && invitationState ? (
               <Link
                 to={baseInscriptionPath}
                 onClick={handleClickInscription}
