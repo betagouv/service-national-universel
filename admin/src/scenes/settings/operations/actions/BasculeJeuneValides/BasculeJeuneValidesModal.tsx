@@ -90,6 +90,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
   return (
     <Modal
       isOpen
+      noBodyScroll
       onClose={onClose}
       className="md:max-w-[800px]"
       content={
