@@ -19,6 +19,7 @@ import {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
+  isSuperAdmin,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -36,6 +37,24 @@ import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { getInfoBus } from "./ligneDeBusService";
+import { updatePDRForLine } from "../../services/LigneDeBusService";
+
+interface MeetingPointResult {
+  youngsCount: number;
+  meetingPointId: string;
+}
+
+interface Patch {
+  modelName: string;
+  date: Date;
+  ref: string;
+  refName: string;
+  op: string;
+  path: string;
+  value: any;
+  originalValue: any;
+  user: any;
+}
 
 const router = express.Router();
 
@@ -432,6 +451,55 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
   }
 });
 
+router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+      transportType: Joi.string().required(),
+      meetingHour: Joi.string().required(),
+      busArrivalHour: Joi.string().required(),
+      departureHour: Joi.string().required(),
+      returnHour: Joi.string().required(),
+      meetingPointId: Joi.string().required(),
+      newMeetingPointId: Joi.string().required(),
+      sendEmailCampaign: Joi.boolean().required(),
+    }).validate({ ...req.params, ...req.body });
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
+
+    const updatedLigneBus = await updatePDRForLine(
+      id,
+      transportType,
+      meetingHour,
+      busArrivalHour,
+      departureHour,
+      returnHour,
+      meetingPointId,
+      newMeetingPointId,
+      sendEmailCampaign,
+      req.user,
+    );
+
+    const infoBus = await getInfoBus(updatedLigneBus);
+    return res.status(200).send({ ok: true, data: infoBus });
+  } catch (error) {
+    if (error.message === ERRORS.NOT_FOUND) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (error.message === ERRORS.INVALID_BODY) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
@@ -522,7 +590,33 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
+  try {
+    const { error, value } = Joi.object({
+      id: Joi.string().required(),
+    }).validate(req.params);
+
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (!canViewLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { id } = value;
+
+    const ligneBus = await LigneBusModel.findById(id);
+    if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const cohesionCenter = await CohesionCenterModel.findById(ligneBus.centerId);
+    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const PDR = await PointDeRassemblementModel.find({ region: cohesionCenter.region, deletedAt: { $exists: false } });
+
+    return res.status(200).send({ ok: true, data: PDR });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:id/availablePDR", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -547,7 +641,7 @@ router.get("/:id/availablePDR", passport.authenticate("referent", { session: fal
       }
     }
 
-    const PDR = await PointDeRassemblementModel.find({ _id: { $in: idPDR } });
+    const PDR = await PointDeRassemblementModel.find({ _id: { $in: idPDR }, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: PDR });
   } catch (error) {
