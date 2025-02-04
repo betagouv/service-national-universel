@@ -2,7 +2,7 @@ import { Inject, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { Transactional } from "@nestjs-cls/transactional";
 
-import { MIME_TYPES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { COHORTS, MIME_TYPES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -101,7 +101,25 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                 if (jeuneRapport.emailTemplateId) {
                     await this.notificationGateway.sendEmail<BasculeJeuneParams>(
                         {
-                            to: [{ email: jeuneRapport.email, name: `${jeuneRapport.prenom} ${jeuneRapport.nom}` }],
+                            to: [
+                                { email: jeuneRapport.email, name: `${jeuneRapport.prenom} ${jeuneRapport.nom}` },
+                                ...(jeuneRapport.parent1Email
+                                    ? [
+                                          {
+                                              email: jeuneRapport.parent1Email,
+                                              name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
+                                          },
+                                      ]
+                                    : []),
+                                ...(jeuneRapport.parent2Email
+                                    ? [
+                                          {
+                                              email: jeuneRapport.parent2Email,
+                                              name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
+                                          },
+                                      ]
+                                    : []),
+                            ],
                             prenom: jeuneRapport.prenom!,
                             nom: jeuneRapport.nom!,
                             ancienneSessionNom: jeuneRapport.ancienneSession!,
@@ -135,7 +153,12 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
     }
 
     @Transactional()
-    async updateJeunes(session, simulationData, jeunesProchainSejour, jeunesAvenir) {
+    async updateJeunes(
+        session: SessionModel,
+        simulationData: RapportData,
+        jeunesProchainSejour: JeuneModel[],
+        jeunesAvenir: JeuneModel[],
+    ) {
         // resultats
         const analytics = {
             jeunesBascules: 0,
@@ -155,7 +178,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                 rapportData.push(this.formatJeuneRapport(jeune, jeuneRapportSimu, { erreur }));
                 analytics.errors += 1;
             } else {
-                const emailTemplateId = this.getEmailTemplate(jeune, jeuneRapportSimu);
+                const emailTemplateId = this.getEmailTemplate(jeuneRapportSimu);
                 const jeuneUpdated = await this.basculerJeune(jeune, jeuneRapportSimu.nouvelleSessionId!);
                 jeunesUpdatedList.push(jeuneUpdated);
                 rapportData.push(this.formatJeuneRapport(jeuneUpdated, jeuneRapportSimu, { emailTemplateId }));
@@ -185,19 +208,10 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
         }
     }
 
-    getEmailTemplate(jeune: JeuneModel, jeuneRapportSimu: JeuneRapport) {
-        const isRefuse = jeuneRapportSimu.statut === YOUNG_STATUS.REFUSED;
-        let emailTemplateId: ValiderBasculeRapportData[0]["emailTemplateId"] = "";
-        if (jeune.statut === YOUNG_STATUS.WAITING_LIST) {
-            emailTemplateId = isRefuse
-                ? EmailTemplate.BASCULE_SEJOUR_WAITING_LIST_REFUSE
-                : EmailTemplate.BASCULE_SEJOUR_WAITING_LIST_ELIGIBLE;
-        } else if (jeune.statut === YOUNG_STATUS.VALIDATED) {
-            emailTemplateId = isRefuse
-                ? EmailTemplate.BASCULE_SEJOUR_VALIDATED_REFUSE
-                : EmailTemplate.BASCULE_SEJOUR_VALIDATED_ELIGIBLE;
-        }
-        return emailTemplateId;
+    getEmailTemplate(jeuneRapportSimu: JeuneRapport) {
+        return jeuneRapportSimu.nouvelleSession === COHORTS.AVENIR
+            ? EmailTemplate.BASCULE_SEJOUR_AVENIR
+            : EmailTemplate.BASCULE_SEJOUR_ELIGIBLE;
     }
 
     async basculerJeune(jeune: JeuneModel, nouvelleSessionId: string) {
@@ -244,7 +258,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
             erreur,
             emailTemplateId,
         }: { erreur?: string; emailTemplateId?: ValiderBasculeRapportData[0]["emailTemplateId"] },
-    ): ValiderBasculeRapportData[0] {
+    ) {
         return {
             id: jeune.id,
             prenom: jeune.prenom,

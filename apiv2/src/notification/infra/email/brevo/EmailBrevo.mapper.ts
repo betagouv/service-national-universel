@@ -35,10 +35,8 @@ export class EmailBrevoMapper {
             case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
                 return this.mapSupprimerClasseEngagee(template, emailParams as SupprimerClasseEngageeParams);
 
-            case EmailTemplate.BASCULE_SEJOUR_VALIDATED_ELIGIBLE:
-            case EmailTemplate.BASCULE_SEJOUR_VALIDATED_REFUSE:
-            case EmailTemplate.BASCULE_SEJOUR_WAITING_LIST_ELIGIBLE:
-            case EmailTemplate.BASCULE_SEJOUR_WAITING_LIST_REFUSE:
+            case EmailTemplate.BASCULE_SEJOUR_AVENIR:
+            case EmailTemplate.BASCULE_SEJOUR_ELIGIBLE:
                 return this.mapBasculeJeune(template, emailParams as BasculeJeuneParams);
         }
     }

@@ -177,6 +177,7 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             nom: jeune.nom?.toUpperCase(),
             dateNaissance: jeune.dateNaissance ? this.clockGateway.formatShort(jeune.dateNaissance) : "",
             age: jeune.dateNaissance ? this.clockGateway.computeAge(jeune.dateNaissance) : "",
+            niveauScolaire: jeune.niveauScolaire,
             regionResidence: jeune.region,
             departementResidence: jeune.departement,
             regionScolarite: jeune.regionScolarite,

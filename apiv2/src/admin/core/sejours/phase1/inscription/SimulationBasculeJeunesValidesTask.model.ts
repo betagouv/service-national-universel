@@ -36,6 +36,7 @@ export type JeuneRapport = Pick<
     | "prenom"
     | "statut"
     | "statutPhase1"
+    | "niveauScolaire"
     | "regionScolarite"
     | "departementScolarite"
     | "paysScolarite"

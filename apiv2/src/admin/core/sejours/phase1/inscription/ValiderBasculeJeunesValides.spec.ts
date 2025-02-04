@@ -123,7 +123,7 @@ describe("ValiderBasculeJeunesValides", () => {
             departementResidence: undefined,
             departementScolarite: undefined,
             email: undefined,
-            emailTemplateId: "1633",
+            emailTemplateId: "2407",
             erreur: "",
             id: "jeune1",
             nom: undefined,
