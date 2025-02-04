@@ -469,7 +469,8 @@ router.get("/:id/bus/:cohort", passport.authenticate("referent", { session: fals
     if (errorId || errorCohort) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     if (!canViewMeetingPoints(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const data = await PointDeRassemblementModel.findOne({ _id: checkedId, deletedAt: { $exists: false } });
+    const data = await PointDeRassemblementModel.findOne({ _id: checkedId });
+
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const lignes = await LigneBusModel.find({ cohort: checkedCohort, meetingPointsIds: checkedId });
