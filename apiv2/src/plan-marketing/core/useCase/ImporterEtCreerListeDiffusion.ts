@@ -4,13 +4,15 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { PlanMarketingCreateTaskModel, PlanMarketingTaskModel } from "../PlanMarketing.model";
 import { TaskName, TaskStatus } from "snu-lib";
 import { UseCase } from "@shared/core/UseCase";
+import { ConfigService } from "@nestjs/config";
 
 // TODO: finir usecase
 @Injectable()
-export class ImporterContacts implements UseCase<void> {
+export class ImporterEtCreerListeDiffusion implements UseCase<void> {
     constructor(
         private readonly listeDiffusionGateway: PlanMarketingGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        private readonly config: ConfigService,
     ) {}
 
     async execute(nomListe: string, campagneId: string): Promise<void> {
@@ -19,10 +21,14 @@ export class ImporterContacts implements UseCase<void> {
         // Mapper les champs
 
         // Importer les contacts via
-        const processId = await this.listeDiffusionGateway.importerContacts(nomListe, []);
+        const processId = await this.listeDiffusionGateway.importerContacts(
+            nomListe,
+            [],
+            `${this.config.get("urls.apiv2")}/plan-marketing/import/webhook`,
+        );
 
         const planMarketingTaskModel: PlanMarketingCreateTaskModel = {
-            name: TaskName.PLAN_MARKETING_IMPORT_CONTACTS,
+            name: TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters: {

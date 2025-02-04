@@ -14,14 +14,13 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         this.setApiKey(this.contactsApi, apiKey);
     }
 
-    async importerContacts(nomListe: string, contacts: any): Promise<number> {
+    async importerContacts(nomListe: string, contacts: any, notifyUrl: string): Promise<number> {
         const requestContactImport = new brevo.RequestContactImport();
         requestContactImport.fileBody = contacts;
         requestContactImport.newList = { listName: nomListe };
-        requestContactImport.emailBlacklist = false;
-        requestContactImport.smsBlacklist = false;
         requestContactImport.updateExistingContacts = true;
         requestContactImport.emptyContactsAttributes = false;
+        requestContactImport.notifyUrl = notifyUrl;
 
         try {
             const result = await this.contactsApi.importContacts(requestContactImport);

@@ -16,6 +16,7 @@ export interface TaskGateway {
     toSuccess(id: string, result: object): Promise<TaskModel>;
     toInProgress(id: string): Promise<TaskModel>;
     toFailed(id: string, code?: string, description?: string): Promise<TaskModel>;
+    findByMetatdata<T, U>(metadata: object): Promise<TaskModel<T, U>[]>;
 }
 
 export const TaskGateway = Symbol("TaskGateway");

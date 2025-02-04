@@ -1,6 +1,6 @@
 import { CreateTaskModel, TaskModel } from "@task/core/Task.model";
 
-export interface PlanMarketingTaskMetadata {
+export interface PlanMarketingTaskParameters {
     processId: number;
     nomListe: string;
     campagneId: string;
@@ -8,7 +8,7 @@ export interface PlanMarketingTaskMetadata {
 
 export interface PlanMarketingTaskResults {}
 
-export interface PlanMarketingTaskModel extends TaskModel<PlanMarketingTaskMetadata, PlanMarketingTaskResults> {}
+export interface PlanMarketingTaskModel extends TaskModel<PlanMarketingTaskParameters, PlanMarketingTaskResults> {}
 
 export interface PlanMarketingCreateTaskModel
-    extends CreateTaskModel<PlanMarketingTaskMetadata, PlanMarketingTaskResults> {}
+    extends CreateTaskModel<PlanMarketingTaskParameters, PlanMarketingTaskResults> {}
