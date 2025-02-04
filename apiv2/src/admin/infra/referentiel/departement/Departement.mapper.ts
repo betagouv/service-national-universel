@@ -15,7 +15,13 @@ export class DepartementMapper {
 
   static toModel(departementDocument: DepartementDocument): DepartementModel {
     return {
-      ...departementDocument,
+      code: departementDocument.code,
+      libelle: departementDocument.libelle,
+      academie: departementDocument.academie,
+      regionAcademique: departementDocument.regionAcademique,
+      chefLieu: departementDocument.chefLieu,
+      dateCreationSI: departementDocument.dateCreationSI,
+      dateDerniereModificationSI: departementDocument.dateDerniereModificationSI,
       id: departementDocument._id.toString(),
     };
   }

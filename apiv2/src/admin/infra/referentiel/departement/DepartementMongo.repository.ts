@@ -10,6 +10,11 @@ export class DepartementMongoRepository implements DepartementGateway {
     constructor(
         @Inject(DEPARTEMENT_MONGOOSE_ENTITY) private readonly departementMongooseEntity: Model<DepartementDocument>,
     ) { }
+
+    async deleteAll(): Promise<void> {
+        await this.departementMongooseEntity.deleteMany({});
+    }
+
     async findByCode(code: string): Promise<DepartementModel | undefined> {
         const departement = await this.departementMongooseEntity.findOne({ code });
         if (!departement) {

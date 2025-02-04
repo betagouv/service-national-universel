@@ -15,3 +15,9 @@ export const createRegionAcademique = async (regionAcademique?: Partial<RegionAc
         ...regionAcademique,
     });
 };
+
+export const deleteAllRegionAcademiques = async () => {
+    const adminTestModule = getAdminTestModuleRef();
+    const regionAcademiqueGateway = adminTestModule.get<RegionAcademiqueGateway>(RegionAcademiqueGateway);
+    await regionAcademiqueGateway.deleteAll();
+};

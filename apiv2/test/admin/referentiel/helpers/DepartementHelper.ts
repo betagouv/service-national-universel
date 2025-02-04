@@ -11,9 +11,16 @@ export const createDepartement = async (departement?: Partial<DepartementModel>)
         code: "01",
         libelle: "AIN",
         academie: "LYON",
+        chefLieu: "Bourge En Bresse",
         regionAcademique: "AUVERGNE-RHONE-ALPES",
         dateCreationSI: new Date("2024-07-31"),
         dateDerniereModificationSI: new Date("2024-07-31"),
         ...departement,
     });
+};
+
+export const deleteAllDepartements = async () => {
+    const adminTestModule = getAdminTestModuleRef();
+    const departementGateway = adminTestModule.get<DepartementGateway>(DepartementGateway);
+    await departementGateway.deleteAll();
 };

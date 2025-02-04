@@ -10,6 +10,11 @@ export class RegionAcademiqueMongoRepository implements RegionAcademiqueGateway 
     constructor(
         @Inject(REGION_ACADEMIQUE_MONGOOSE_ENTITY) private readonly regionAcademiqueMongooseEntity: Model<RegionAcademiqueDocument>,
     ) {}
+    
+    async deleteAll(): Promise<void> {
+        await this.regionAcademiqueMongooseEntity.deleteMany({});
+    }
+
     async findByCode(code: string): Promise<RegionAcademiqueModel | undefined> {
         const regionAcademique = await this.regionAcademiqueMongooseEntity.findOne({ code });
         if (!regionAcademique) {

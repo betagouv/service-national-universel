@@ -15,7 +15,11 @@ export class AcademieMapper {
 
   static toModel(academieDocument: AcademieDocument): AcademieModel {
     return {
-      ...academieDocument,
+      code: academieDocument.code,
+      libelle: academieDocument.libelle,
+      regionAcademique: academieDocument.regionAcademique,
+      dateCreationSI: academieDocument.dateCreationSI,
+      dateDerniereModificationSI: academieDocument.dateDerniereModificationSI,
       id: academieDocument._id.toString(),
     };
   }

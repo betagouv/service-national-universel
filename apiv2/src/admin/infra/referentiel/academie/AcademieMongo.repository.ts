@@ -10,6 +10,11 @@ export class AcademieMongoRepository implements AcademieGateway {
     constructor(
         @Inject(ACADEMIE_MONGOOSE_ENTITY) private readonly academieMongooseEntity: Model<AcademieDocument>,
     ) { }
+    
+    async deleteAll(): Promise<void> {
+        await this.academieMongooseEntity.deleteMany({});
+    }
+
     async findByCode(code: string): Promise<AcademieModel | undefined> {
         const academie = await this.academieMongooseEntity.findOne({ code });
         if (!academie) {

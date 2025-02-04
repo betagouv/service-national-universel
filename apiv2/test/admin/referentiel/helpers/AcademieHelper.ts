@@ -16,3 +16,10 @@ export const createAcademie = async (academie?: Partial<AcademieModel>) => {
         ...academie,
     });
 };
+
+
+export const deleteAllAcademies = async () => {
+    const adminTestModule = getAdminTestModuleRef();
+    const academieGateway = adminTestModule.get<AcademieGateway>(AcademieGateway);
+    await academieGateway.deleteAll();
+};
