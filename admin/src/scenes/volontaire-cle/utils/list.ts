@@ -14,7 +14,7 @@ import {
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (bus, session, classes) => {
+export const getFilterArray = (labels) => {
   return [
     {
       title: "Classe Engagée ID",
@@ -22,10 +22,8 @@ export const getFilterArray = (bus, session, classes) => {
       parentGroup: "Général",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !classes.length) return item;
-        const res = classes.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.uniqueKeyAndId;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
@@ -163,10 +161,8 @@ export const getFilterArray = (bus, session, classes) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !session.length) return item;
-        const res = session.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return (res?.codeCentre || "N/A") + " - " + res?.cohesionCenterId;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     {
@@ -225,8 +221,8 @@ export const getFilterArray = (bus, session, classes) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !bus?.length) return item;
-        return bus.find((option) => option._id.toString() === item)?.busId;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
   ].filter(Boolean);
