@@ -19,7 +19,7 @@ export function injectRoutes(app) {
   app.use("/filters", require("./controllers/filters"));
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal").default);
-  app.use("/ligne-de-bus", require("./controllers/planDeTransport/ligne-de-bus"));
+  app.use("/ligne-de-bus", require("./planDeTransport/ligneDeBus/ligneDeBusController"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point"));
   app.use("/mission", require("./controllers/mission"));
   app.use("/plan-de-transport/import", require("./controllers/planDeTransport/import").default);
@@ -40,6 +40,8 @@ export function injectRoutes(app) {
   app.use("/SNUpport", require("./controllers/SNUpport"));
   app.use("/cle", require("./cle").default);
   app.use("/preinscription", require("./preinscription/preinscriptionController"));
+  app.use("/filter-label", require("./filterLabel/filterLabelController"));
+  app.use("/email-preview", require("./controllers/emailPreview").default);
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));
