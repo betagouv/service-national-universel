@@ -38,5 +38,6 @@ export type { PreinscriptionRoutes } from "./preinscription";
 export type { AffectationRoutes } from "./phase1/affectation";
 export type { ReferentielRoutes } from "./referentiel";
 export type { ReferentRoutes } from "./iam/referent";
+export type { FilterLabelRoutes } from "./filterLabel";
 
 export * from "./phase1";
