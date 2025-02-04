@@ -45,7 +45,7 @@ describe("BasculeController", () => {
             email: "email",
         };
 
-        const requestMock = { user: { id: "test" } } as CustomRequest;
+        const requestMock = { user: userMock } as CustomRequest;
 
         it("should call basculeCLEtoCLE.execute when both sources are CLE", async () => {
             jeuneGateway.findById.mockResolvedValue(jeuneMock);
@@ -59,7 +59,7 @@ describe("BasculeController", () => {
             await controller.changeCohort("1", clePayload, requestMock);
 
             expect(jeuneGateway.findById).toHaveBeenCalledWith("1");
-            expect(basculeCLEtoCLE.execute).toHaveBeenCalledWith("1", clePayload);
+            expect(basculeCLEtoCLE.execute).toHaveBeenCalledWith("1", clePayload, userMock);
         });
 
         it("should call basculeHTStoCLE.execute when jeune source is VOLONTAIRE and payload source is CLE", async () => {
@@ -74,17 +74,18 @@ describe("BasculeController", () => {
             await controller.changeCohort("1", clePayload, requestMock);
 
             expect(jeuneGateway.findById).toHaveBeenCalledWith("1");
-            expect(basculeHTStoCLE.execute).toHaveBeenCalledWith("1", clePayload);
+            expect(basculeHTStoCLE.execute).toHaveBeenCalledWith("1", clePayload, userMock);
         });
 
         it("should return the jeune object if no conditions are met", async () => {
             jeuneGateway.findById.mockResolvedValue({ ...jeuneMock, source: YOUNG_SOURCE.VOLONTAIRE });
             const otherPayload = { source: "ANOTHER_SOURCE" } as any;
 
-            const result = await controller.changeCohort("1", otherPayload, requestMock);
+            await expect(controller.changeCohort("1", otherPayload, requestMock)).rejects.toThrow(
+                "Unhandled source combination",
+            );
 
             expect(jeuneGateway.findById).toHaveBeenCalledWith("1");
-            expect(result).toEqual({ ...jeuneMock, source: "OTHER_SOURCE" });
             expect(basculeCLEtoCLE.execute).not.toHaveBeenCalled();
             expect(basculeHTStoCLE.execute).not.toHaveBeenCalled();
         });

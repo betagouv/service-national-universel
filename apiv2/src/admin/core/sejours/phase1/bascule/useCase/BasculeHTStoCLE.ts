@@ -150,51 +150,57 @@ export class BasculeHTStoCLE implements UseCase<YoungDto> {
         correctionRequestsFiltered,
         newNote,
     ) {
-        jeune.originalSessionNom = jeune.sessionNom;
-        jeune.originalSessionId = jeune.sessionId;
-        jeune.statut = BasculeHTStoCLE.getStatutJeuneForBasculeHTStoCLE(jeune.statut);
-        jeune.statutPhase1 = statutPhase1;
-        jeune.sessionNom = classe.sessionNom;
-        jeune.sessionId = classe.sessionId;
-        jeune.centreId = classe.centreCohesionId;
-        jeune.sejourId = classe.sessionId;
-        jeune.etablissementId = etablissement.id;
-        jeune.pointDeRassemblementId = classe.pointDeRassemblementId;
-        jeune.ligneDeBusId = classe.ligneId;
-        jeune.deplacementPhase1Autonomous = undefined;
-        jeune.transportInfoGivenByLocal = undefined;
-        jeune.cohesionStayPresence = undefined;
-        jeune.presenceJDM = undefined;
-        jeune.departInform = undefined;
-        jeune.departSejourAt = undefined;
-        jeune.departSejourMotif = undefined;
-        jeune.departSejourMotifComment = undefined;
-        jeune.youngPhase1Agreement = "false";
-        jeune.hasMeetingInformation = hasMeetingInformation;
-        jeune.cohesionStayMedicalFileReceived = undefined;
-        jeune.cohesionStayPresence = undefined;
-        jeune.source = YOUNG_SOURCE.CLE;
-        jeune.cniFiles = [];
-        jeune.fichiers = jeune.fichiers || {};
-        jeune.fichiers.cniFiles = [];
-        jeune.etapeInscription2023 = inscriptionStep;
-        jeune.etapeReinscription2023 = reinscriptionStep;
-        jeune.dateExpirationDernierFichierCNI = undefined;
-        jeune.categorieDernierFichierCNI = undefined;
-        jeune.correctionRequests = correctionRequestsFiltered;
-        jeune.scolarise = "true";
-        jeune.nomEtablissement = etablissement.nom;
-        jeune.typeEtablissement = etablissement.type[0];
-        jeune.adresseEtablissement = etablissement.adresse;
-        jeune.codePostalEtablissement = etablissement.codePostal;
-        jeune.villeEtablissement = etablissement.commune;
-        jeune.departementEtablissement = etablissement.departement;
-        jeune.regionEtablissement = etablissement.region;
-        jeune.paysEtablissement = etablissement.pays;
-        jeune.ecoleRamsesId = undefined;
-        jeune.hasMeetingInformation = hasMeetingInformation;
-        jeune.notes = [...(jeune.notes ?? []), newNote];
-        jeune.hasNotes = "true";
-        return jeune;
+        const newStatus = BasculeHTStoCLE.getStatutJeuneForBasculeHTStoCLE(jeune.statut);
+        const newJeune = {
+            ...jeune,
+            originalSessionNom: jeune.sessionNom,
+            originalSessionId: jeune.sessionId,
+            statut: newStatus,
+            statutPhase1: statutPhase1,
+            sessionNom: classe.sessionNom,
+            sessionId: classe.sessionId,
+            centreId: classe.centreCohesionId,
+            sejourId: classe.sessionId,
+            etablissementId: etablissement.id,
+            pointDeRassemblementId: classe.pointDeRassemblementId,
+            ligneDeBusId: classe.ligneId,
+            deplacementPhase1Autonomous: undefined,
+            transportInfoGivenByLocal: undefined,
+            cohesionStayPresence: undefined,
+            presenceJDM: undefined,
+            departInform: undefined,
+            departSejourAt: undefined,
+            departSejourMotif: undefined,
+            departSejourMotifComment: undefined,
+            youngPhase1Agreement: "false",
+            hasMeetingInformation: hasMeetingInformation,
+            cohesionStayMedicalFileReceived: undefined,
+            source: YOUNG_SOURCE.CLE,
+            cniFiles: [],
+            fichiers: {
+                ...(jeune.fichiers || {}),
+                cniFiles: [],
+            },
+            etapeInscription2023: inscriptionStep,
+            etapeReinscription2023: reinscriptionStep,
+            dateExpirationDernierFichierCNI: undefined,
+            categorieDernierFichierCNI: undefined,
+            correctionRequests: correctionRequestsFiltered,
+            scolarise: "true",
+            nomEtablissement: etablissement.nom,
+            typeEtablissement: etablissement.type.length ? etablissement.type[0] : "",
+            adresseEtablissement: etablissement.adresse,
+            codePostalEtablissement: etablissement.codePostal,
+            villeEtablissement: etablissement.commune,
+            departementEtablissement: etablissement.departement,
+            regionEtablissement: etablissement.region,
+            paysEtablissement: etablissement.pays,
+            ecoleRamsesId: undefined,
+            situation: BasculeService.getYoungSituationIfCLE(classe.filiere || ""),
+            notes: [...(jeune.notes ?? []), newNote],
+            hasNotes: "true",
+        };
+
+        return newJeune;
     }
 }

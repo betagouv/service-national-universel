@@ -32,7 +32,7 @@ interface generateNotificationForBasculeProsp {
     session: SessionModel;
     sessionChangeReason: string;
     message: string;
-    classe: ClasseModel;
+    classe: ClasseModel | null;
 }
 
 @Injectable()
@@ -55,17 +55,13 @@ export class BasculeService {
             note: `
         Changement de cohorte de ${jeune.sessionNom} (${jeune.source || YOUNG_SOURCE.VOLONTAIRE}) à ${
             session.nom
-        } (${newSource})${sessionChangeReason && ` pour la raison suivante : ${sessionChangeReason}`}.\n${
+        } (${newSource})${sessionChangeReason ? ` pour la raison suivante : ${sessionChangeReason}` : ""}.\n${
             previousEtablissement ? `Etablissement précédent : ${previousEtablissement.nom}.` : ""
         }\n${previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.nom}.` : ""}\n${
             jeune.centreId ? `Centre précédent : ${jeune.centreId}.` : ""
         }\n${jeune.sejourId ? `Session précédente : ${jeune.sejourId}.` : ""}\n${
             jeune.pointDeRassemblementId ? `Point de rendez-vous précédent : ${jeune.pointDeRassemblementId}.` : ""
-        }\n${
-            Object.prototype.hasOwnProperty.call(jeune, "presenceJDM")
-                ? `Présence JDM précédente : ${jeune.presenceJDM}.`
-                : ""
-        }
+        }\n${jeune.presenceJDM ? `Présence JDM précédente : ${jeune.presenceJDM}.` : ""}\n
         `.trim(),
             phase: "PHASE_1",
             createdAt: date,
@@ -90,33 +86,35 @@ export class BasculeService {
     }: generateNotificationForBasculeProsp) {
         const config = configuration();
 
-        if (jeune.source === YOUNG_SOURCE.CLE || originaleSource === YOUNG_SOURCE.CLE) {
-            const referentsClasse = await this.referentGateway.findByIds(classe.referentClasseIds);
-            const emailTo = referentsClasse.map((r) => ({ name: `${r.prenom} ${r.nom}`, email: r.email }));
+        if (classe) {
+            if (jeune.source === YOUNG_SOURCE.CLE || originaleSource === YOUNG_SOURCE.CLE) {
+                const referentsClasse = await this.referentGateway.findByIds(classe.referentClasseIds);
+                const emailTo = referentsClasse.map((r) => ({ name: `${r.prenom} ${r.nom}`, email: r.email }));
 
-            const params = {
-                to: emailTo,
-                firstname: jeune.prenom || "",
-                name: jeune.nom || "",
-                class_name: classe.nom || "",
-                class_code: classe.uniqueKeyAndId,
-                cta: `${config.urls.admin}/classes/${classe.id?.toString()}`,
-            };
+                const params = {
+                    to: emailTo,
+                    firstname: jeune.prenom || "",
+                    name: jeune.nom || "",
+                    class_name: classe.nom || "",
+                    class_code: classe.uniqueKeyAndId,
+                    cta: `${config.urls.admin}/classes/${classe.id?.toString()}`,
+                };
 
-            // Bascule vers CLE
-            if (jeune.source === YOUNG_SOURCE.CLE) {
-                await this.notificationGateway.sendEmail<jeuneBasculeCLEParams>(
-                    params,
-                    EmailTemplate.JEUNE_CHANGE_SESSION_TO_CLE,
-                );
-            }
+                // Bascule vers CLE
+                if (jeune.source === YOUNG_SOURCE.CLE) {
+                    await this.notificationGateway.sendEmail<jeuneBasculeCLEParams>(
+                        params,
+                        EmailTemplate.JEUNE_CHANGE_SESSION_TO_CLE,
+                    );
+                }
 
-            // Bascule CLE > HTS
-            if (jeune.source === YOUNG_SOURCE.VOLONTAIRE && originaleSource === YOUNG_SOURCE.CLE) {
-                await this.notificationGateway.sendEmail<jeuneBasculeCLEParams>(
-                    params,
-                    EmailTemplate.JEUNE_CHANGE_SESSION_CLE_TO_HTS,
-                );
+                // Bascule CLE > HTS
+                if (jeune.source === YOUNG_SOURCE.VOLONTAIRE && originaleSource === YOUNG_SOURCE.CLE) {
+                    await this.notificationGateway.sendEmail<jeuneBasculeCLEParams>(
+                        params,
+                        EmailTemplate.JEUNE_CHANGE_SESSION_CLE_TO_HTS,
+                    );
+                }
             }
         }
 

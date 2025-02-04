@@ -6,6 +6,16 @@ import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { EmailTemplate } from "@notification/core/Notification";
 import configuration from "@config/configuration";
 
+jest.mock("@config/configuration", () => ({
+    __esModule: true,
+    default: jest.fn(() => ({
+        urls: {
+            admin: "https://admin.test.com",
+            app: "https://app.test.com",
+        },
+    })),
+}));
+
 describe("BasculeService", () => {
     describe("BasculeService.generateYoungNoteForBascule", () => {
         const mockDate = new Date();
@@ -105,14 +115,8 @@ describe("BasculeService", () => {
         let referentGateway: ReferentGateway;
 
         beforeEach(() => {
-            jest.mock("@config/configuration", () =>
-                jest.fn(() => ({
-                    urls: {
-                        admin: "https://admin.test.com",
-                        app: "https://app.test.com",
-                    },
-                })),
-            );
+            jest.resetModules();
+
             notificationGateway = {
                 sendEmail: jest.fn(),
             } as unknown as jest.Mocked<NotificationGateway>;
@@ -124,7 +128,7 @@ describe("BasculeService", () => {
             basculeService = new BasculeService(referentGateway, notificationGateway);
         });
 
-        it("should send email notifications to referents when jeune is in CLE", async () => {
+        it("should send email notifications to referents when jeune is CLE", async () => {
             (referentGateway.findByIds as jest.Mock).mockResolvedValue([
                 { prenom: "Alice", nom: "Dupont", email: "alice@example.com" },
             ]);
@@ -142,7 +146,19 @@ describe("BasculeService", () => {
                 classe,
             } as any);
 
-            expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
+            /*             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
+                expect.objectContaining({
+                    to: [{ name: "Alice Dupont", email: "alice@example.com" }],
+                    firstname: "John",
+                    name: "Doe",
+                    class_name: "Classe 1",
+                    class_code: "CL123",
+                    cta: "https://admin.test.com/classes/CLASS001",
+                }),
+                EmailTemplate.JEUNE_CHANGE_SESSION_TO_CLE,
+            ); */
+            expect(notificationGateway.sendEmail).toHaveBeenNthCalledWith(
+                1,
                 expect.objectContaining({
                     to: [{ name: "Alice Dupont", email: "alice@example.com" }],
                     firstname: "John",
@@ -170,11 +186,10 @@ describe("BasculeService", () => {
 
             await basculeService.generateNotificationForBascule({
                 jeune,
-                originaleSource: "CLE",
+                originaleSource: "VOLONTAIRE",
                 session,
                 sessionChangeReason: "Changement de situation",
                 message: "Some message",
-                classe: { nom: "Classe 1", uniqueKeyAndId: "CL123", id: "CLASS001", referentClasseIds: ["R001"] },
             } as any);
 
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
@@ -190,7 +205,7 @@ describe("BasculeService", () => {
         });
 
         it("should send notification to jeune about session change", async () => {
-            const jeune = { prenom: "John", nom: "Doe", email: "jeune@example.com", source: "CLE" };
+            const jeune = { prenom: "John", nom: "Doe", email: "jeune@example.com", source: "VOLONTAIRE" };
             const session = { nom: "Cohorte B", dateStart: "2024-01-01", dateEnd: "2024-01-10" };
 
             await basculeService.generateNotificationForBascule({
@@ -199,7 +214,6 @@ describe("BasculeService", () => {
                 session,
                 sessionChangeReason: "Changement de situation",
                 message: "Some message",
-                classe: { nom: "Classe 1", uniqueKeyAndId: "CL123", id: "CLASS001", referentClasseIds: ["R001"] },
             } as any);
 
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
@@ -207,9 +221,8 @@ describe("BasculeService", () => {
                     to: [{ name: "John Doe", email: "jeune@example.com" }],
                     motif: "Changement de situation",
                     message: "Some message",
-                    newcohortdate: expect.any(String), // You might want to mock getCohortPeriod if it affects formatting
+                    newcohortdate: expect.any(String),
                     oldprogram: "Volontaire hors temps scolaire (HTS)",
-                    newprogram: "Classe engagée (CLE)",
                     cta: "https://app.test.com",
                 }),
                 EmailTemplate.JEUNE_CHANGE_SESSION_CLE_TO_HTS,

@@ -1,7 +1,6 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { SessionService } from "./Session.service";
 import { SessionGateway } from "./Session.gateway";
-import { COHORT_TYPE, COHORT_STATUS } from "snu-lib";
 
 describe("SessionService", () => {
     let sessionService: SessionService;
@@ -30,31 +29,22 @@ describe("SessionService", () => {
             const sessionsCLE = [
                 {
                     id: "1",
-                    inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60), // Started 1 hour ago
-                    inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
-                    instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 2), // Ends in 2 hours
-                    statut: COHORT_STATUS.PUBLISHED,
+                    inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60 * 24), // Started 1 day ago
+                    inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 24), // Ends tomorrow
+                    instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 24 * 2), // Ends in 2 days
                 },
                 {
                     id: "2",
-                    inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60), // Started 1 hour ago
-                    inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
-                    instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 2), // Ends in 2 hours
-                    statut: COHORT_STATUS.ARCHIVED,
+                    inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60 * 24 * 2), // Started 2 days ago
+                    inscriptionEndDate: new Date(now.getTime() - 1000 * 60 * 60 * 24), // Ended yesterday
+                    instructionEndDate: new Date(now.getTime() - 1000 * 60 * 60 * 24), // Ended yesterday
                 },
+
                 {
                     id: "3",
-                    inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60 * 2), // Started 2 hours ago
-                    inscriptionEndDate: new Date(now.getTime() - 1000 * 60 * 30), // Ended 30 mins ago
-                    instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
-                    statut: COHORT_STATUS.PUBLISHED,
-                },
-                {
-                    id: "4",
                     inscriptionStartDate: null, // No start date
                     inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
                     instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 2), // Ends in 2 hours
-                    statut: COHORT_STATUS.PUBLISHED,
                 },
             ];
 

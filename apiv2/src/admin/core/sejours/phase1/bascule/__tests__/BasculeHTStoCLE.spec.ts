@@ -13,8 +13,8 @@ import { ChangerLaSessionDuJeunePayloadDto } from "@admin/infra/sejours/phase1/b
 import { YOUNG_SOURCE, YOUNG_STATUS, STEPS2023, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 
-describe("BasculeCLEtoCLE", () => {
-    describe("BasculeCLEtoCLE.execute", () => {
+describe("BasculeHTStoCLE", () => {
+    describe("BasculeHTStoCLE.execute", () => {
         let basculeHTStoCLE: BasculeHTStoCLE;
         let jeuneGateway: JeuneGateway;
         let classeGateway: ClasseGateway;
@@ -128,7 +128,10 @@ describe("BasculeCLEtoCLE", () => {
 
         it("should successfully update jeune and call necessary services", async () => {
             const jeune = {
+                id: "jeune-id",
                 source: YOUNG_SOURCE.VOLONTAIRE,
+                classeId: "old-classe-id",
+                etablissementId: "old-etab-id",
                 statut: YOUNG_STATUS.IN_PROGRESS,
                 etapeInscription2023: STEPS2023.DOCUMENTS,
                 etapeReinscription2023: null,
@@ -136,15 +139,21 @@ describe("BasculeCLEtoCLE", () => {
                 ligneDeBusId: "old-bus-id",
             } as any;
             (jeuneGateway.findById as jest.Mock).mockResolvedValue(jeune);
-            (classeGateway.findById as jest.Mock).mockResolvedValueOnce({
-                id: "classe-id",
-                sessionId: "session-id",
-                placesPrises: 5,
-                placesTotal: 10,
-            } as any);
-            (sessionGateway.findById as jest.Mock).mockResolvedValue({ nom: "Session A" } as any);
+            (classeGateway.findById as jest.Mock)
+                .mockResolvedValueOnce({
+                    id: "classe-id",
+                    sessionId: "session-id",
+                    placesPrises: 5,
+                    placesTotal: 10,
+                } as any)
+                .mockResolvedValueOnce({ id: "old-classe-id" } as any);
+            (etablissementGateway.findById as jest.Mock)
+                .mockResolvedValueOnce({ id: "etab-id", type: ["typeEtab"] } as any)
+                .mockResolvedValueOnce({ id: "old-etab-id", type: ["typeOldEtab"] } as any);
+
+            (sessionGateway.findById as jest.Mock).mockResolvedValue({ id: "session-id", nom: "Session A" } as any);
             (sessionService.getFilteredSessionsForCLE as jest.Mock).mockResolvedValue([{ nom: "Session A" }]);
-            (etablissementGateway.findById as jest.Mock).mockResolvedValue({} as any);
+            jest.spyOn(BasculeService, "generateYoungNoteForBascule").mockReturnValue({ note: "New note" });
 
             await basculeHTStoCLE.execute(
                 "jeune-id",
@@ -222,7 +231,7 @@ describe("BasculeCLEtoCLE", () => {
             const correctionRequestsFiltered = [];
             const newNote = { note: "New note" };
 
-            BasculeHTStoCLE.updateYoungForBasculeHTStoCLE(
+            const newJeune = BasculeHTStoCLE.updateYoungForBasculeHTStoCLE(
                 jeune,
                 statutPhase1,
                 classe,
@@ -234,48 +243,48 @@ describe("BasculeCLEtoCLE", () => {
                 newNote,
             );
 
-            expect(jeune.originalSessionNom).toBe("Original Session Name");
-            expect(jeune.originalSessionId).toBe(0o0);
-            expect(jeune.statut).toBe(BasculeHTStoCLE.getStatutJeuneForBasculeHTStoCLE(jeune.statut));
-            expect(jeune.statutPhase1).toBe(statutPhase1);
-            expect(jeune.sessionNom).toBe(classe.sessionNom);
-            expect(jeune.sessionId).toBe(classe.sessionId);
-            expect(jeune.centreId).toBe(classe.centreCohesionId);
-            expect(jeune.sejourId).toBe(classe.sessionId);
-            expect(jeune.etablissementId).toBe(etablissement.id);
-            expect(jeune.pointDeRassemblementId).toBe(classe.pointDeRassemblementId);
-            expect(jeune.ligneDeBusId).toBe(classe.ligneId);
-            expect(jeune.deplacementPhase1Autonomous).toBeUndefined();
-            expect(jeune.transportInfoGivenByLocal).toBeUndefined();
-            expect(jeune.cohesionStayPresence).toBeUndefined();
-            expect(jeune.presenceJDM).toBeUndefined();
-            expect(jeune.departInform).toBeUndefined();
-            expect(jeune.departSejourAt).toBeUndefined();
-            expect(jeune.departSejourMotif).toBeUndefined();
-            expect(jeune.departSejourMotifComment).toBeUndefined();
-            expect(jeune.youngPhase1Agreement).toBe("false");
-            expect(jeune.hasMeetingInformation).toBe(hasMeetingInformation);
-            expect(jeune.cohesionStayMedicalFileReceived).toBeUndefined();
-            expect(jeune.source).toBe(YOUNG_SOURCE.CLE);
-            expect(jeune.cniFiles).toEqual([]);
-            expect(jeune.fichiers).toHaveProperty("cniFiles");
-            expect(jeune.etapeInscription2023).toBe(inscriptionStep);
-            expect(jeune.etapeReinscription2023).toBe(reinscriptionStep);
-            expect(jeune.dateExpirationDernierFichierCNI).toBeUndefined();
-            expect(jeune.categorieDernierFichierCNI).toBeUndefined();
-            expect(jeune.correctionRequests).toEqual(correctionRequestsFiltered);
-            expect(jeune.scolarise).toBe("true");
-            expect(jeune.nomEtablissement).toBe(etablissement.nom);
-            expect(jeune.typeEtablissement).toBe(etablissement.type[0]);
-            expect(jeune.adresseEtablissement).toBe(etablissement.adresse);
-            expect(jeune.codePostalEtablissement).toBe(etablissement.codePostal);
-            expect(jeune.villeEtablissement).toBe(etablissement.commune);
-            expect(jeune.departementEtablissement).toBe(etablissement.departement);
-            expect(jeune.regionEtablissement).toBe(etablissement.region);
-            expect(jeune.paysEtablissement).toBe(etablissement.pays);
-            expect(jeune.ecoleRamsesId).toBeUndefined();
-            expect(jeune.notes).toContainEqual(newNote);
-            expect(jeune.hasNotes).toBe("true");
+            expect(newJeune.originalSessionNom).toBe(jeune.sessionNom);
+            expect(newJeune.originalSessionId).toBe(jeune.sessionId);
+            expect(newJeune.statut).toBe("VALIDATED");
+            expect(newJeune.statutPhase1).toBe(statutPhase1);
+            expect(newJeune.sessionNom).toBe(classe.sessionNom);
+            expect(newJeune.sessionId).toBe(classe.sessionId);
+            expect(newJeune.centreId).toBe(classe.centreCohesionId);
+            expect(newJeune.sejourId).toBe(classe.sessionId);
+            expect(newJeune.etablissementId).toBe(etablissement.id);
+            expect(newJeune.pointDeRassemblementId).toBe(classe.pointDeRassemblementId);
+            expect(newJeune.ligneDeBusId).toBe(classe.ligneId);
+            expect(newJeune.deplacementPhase1Autonomous).toBeUndefined();
+            expect(newJeune.transportInfoGivenByLocal).toBeUndefined();
+            expect(newJeune.cohesionStayPresence).toBeUndefined();
+            expect(newJeune.presenceJDM).toBeUndefined();
+            expect(newJeune.departInform).toBeUndefined();
+            expect(newJeune.departSejourAt).toBeUndefined();
+            expect(newJeune.departSejourMotif).toBeUndefined();
+            expect(newJeune.departSejourMotifComment).toBeUndefined();
+            expect(newJeune.youngPhase1Agreement).toBe("false");
+            expect(newJeune.hasMeetingInformation).toBe(hasMeetingInformation);
+            expect(newJeune.cohesionStayMedicalFileReceived).toBeUndefined();
+            expect(newJeune.source).toBe(YOUNG_SOURCE.CLE);
+            expect(newJeune.cniFiles).toEqual([]);
+            expect(newJeune.fichiers).toHaveProperty("cniFiles");
+            expect(newJeune.etapeInscription2023).toBe(inscriptionStep);
+            expect(newJeune.etapeReinscription2023).toBe(reinscriptionStep);
+            expect(newJeune.dateExpirationDernierFichierCNI).toBeUndefined();
+            expect(newJeune.categorieDernierFichierCNI).toBeUndefined();
+            expect(newJeune.correctionRequests).toEqual(correctionRequestsFiltered);
+            expect(newJeune.scolarise).toBe("true");
+            expect(newJeune.nomEtablissement).toBe(etablissement.nom);
+            expect(newJeune.typeEtablissement).toBe(etablissement.type[0]);
+            expect(newJeune.adresseEtablissement).toBe(etablissement.adresse);
+            expect(newJeune.codePostalEtablissement).toBe(etablissement.codePostal);
+            expect(newJeune.villeEtablissement).toBe(etablissement.commune);
+            expect(newJeune.departementEtablissement).toBe(etablissement.departement);
+            expect(newJeune.regionEtablissement).toBe(etablissement.region);
+            expect(newJeune.paysEtablissement).toBe(etablissement.pays);
+            expect(newJeune.ecoleRamsesId).toBeUndefined();
+            expect(newJeune.notes).toContainEqual(newNote);
+            expect(newJeune.hasNotes).toBe("true");
         });
     });
 });

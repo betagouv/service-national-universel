@@ -22,7 +22,7 @@ describe("SejourService", () => {
                 {
                     provide: JeuneGateway,
                     useValue: {
-                        findBySessionId: jest.fn(),
+                        findBySejourId: jest.fn(),
                     },
                 },
             ],
