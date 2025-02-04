@@ -1,7 +1,7 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { Logger } from "@nestjs/common";
 
-import { department2region, departmentList, RegionsHorsMetropoleWithoutCorse } from "snu-lib";
+import { department2region, departmentList, RegionsDromComEtCorse } from "snu-lib";
 
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
@@ -12,7 +12,6 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
-import { SimulationAffectationCLE } from "./SimulationAffectationCLE";
 import { SimulationAffectationCLEService } from "./SimulationAffectationCLE.service";
 
 import { CentreGateway } from "../centre/Centre.gateway";
@@ -28,18 +27,19 @@ import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gatew
 import { ClasseGateway } from "../../cle/classe/Classe.gateway";
 import { EtablissementGateway } from "../../cle/etablissement/Etablissement.gateway";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { SimulationAffectationCLEDromCom } from "./SimulationAffectationCLEDromCom";
 
 const sessionName = "2025 CLE 03 Fevrier";
 
-describe("SimulationAffectationCLE", () => {
-    let simulationAffectationCLE: SimulationAffectationCLE;
+describe("SimulationAffectationCLEDromCom", () => {
+    let simulationAffectationCLEDromCom: SimulationAffectationCLEDromCom;
 
     beforeEach(async () => {
         const mockSession = { id: "mockedSessionId", name: "mockedSessionName" };
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                SimulationAffectationCLE,
+                SimulationAffectationCLEDromCom,
                 SimulationAffectationCLEService,
                 Logger,
                 {
@@ -171,12 +171,12 @@ describe("SimulationAffectationCLE", () => {
             ],
         }).compile();
 
-        simulationAffectationCLE = module.get<SimulationAffectationCLE>(SimulationAffectationCLE);
+        simulationAffectationCLEDromCom = module.get<SimulationAffectationCLEDromCom>(SimulationAffectationCLEDromCom);
     });
 
     it("should not simulate for departement not in metropole", async () => {
         await expect(
-            simulationAffectationCLE.execute({
+            simulationAffectationCLEDromCom.execute({
                 sessionId: sessionName,
                 departements: departmentList,
             }),
@@ -184,10 +184,10 @@ describe("SimulationAffectationCLE", () => {
     });
 
     it("should simulate young affectation", async () => {
-        const result = await simulationAffectationCLE.execute({
+        const result = await simulationAffectationCLEDromCom.execute({
             sessionId: sessionName,
-            departements: departmentList.filter(
-                (departement) => !RegionsHorsMetropoleWithoutCorse.includes(department2region[departement]),
+            departements: departmentList.filter((departement) =>
+                RegionsDromComEtCorse.includes(department2region[departement]),
             ),
             etranger: true,
         });
@@ -197,7 +197,7 @@ describe("SimulationAffectationCLE", () => {
         expect(result.analytics.erreurs).toEqual(result.rapportData.erreurList.length);
         expect(result.rapportData.jeunesNouvellementAffectedList.length).toEqual(60);
         expect(result.analytics.jeunesAffected).toEqual(result.rapportData.jeunesNouvellementAffectedList.length);
-        expect(result.rapportData.ligneDeBusList.length).toEqual(1);
+        expect(result.rapportData.ligneDeBusList.length).toEqual(0);
         expect(result.rapportData.centreList.length).toEqual(1);
     });
 });

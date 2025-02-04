@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { FileGateway } from "@shared/core/File.gateway";
 
@@ -8,9 +8,15 @@ import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { ClasseModel } from "../../cle/classe/Classe.model";
-import { YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { EtablissementModel } from "../../cle/etablissement/Etablissement.model";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { JeuneGateway } from "../../jeune/Jeune.gateway";
+import { SejourGateway } from "../sejour/Sejour.gateway";
+import { ClasseGateway } from "../../cle/classe/Classe.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { EtablissementGateway } from "../../cle/etablissement/Etablissement.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 
 type JeuneRapport = {
     "id du volontaire": string;
@@ -93,7 +99,116 @@ export const RAPPORT_SHEETS = {
 
 @Injectable()
 export class SimulationAffectationCLEService {
-    constructor(@Inject(FileGateway) private readonly fileService: FileGateway) {}
+    constructor(
+        @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
+        @Inject(EtablissementGateway) private readonly etablissementGateway: EtablissementGateway,
+        @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,
+        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
+        @Inject(FileGateway) private readonly fileService: FileGateway,
+        private readonly logger: Logger,
+    ) {}
+
+    async loadAffectationData(sessionId: string, departements: string[]) {
+        const classeList = await this.classeGateway.findBySessionIdAndDepartmentNotWithdrawn(sessionId, departements);
+        if (classeList.length === 0) {
+            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucune classes !");
+        }
+
+        const etablissementIds = [...new Set(classeList.map((classe) => classe.etablissementId))];
+        const etablissementList = await this.etablissementGateway.findByIds(etablissementIds);
+
+        const referentIds = [...new Set(classeList.flatMap((classe) => classe.referentClasseIds))];
+        const referentsList = await this.referentGateway.findByIds(referentIds);
+
+        return { classeList, etablissementList, referentsList };
+    }
+
+    async loadClasseData(sessionId: string, classe: ClasseModel, etranger: boolean) {
+        const jeunesClasseList = await this.jeuneGateway.findBySessionIdClasseIdAndStatus(
+            sessionId,
+            classe.id,
+            YOUNG_STATUS.VALIDATED,
+        );
+
+        let jeunesList = jeunesClasseList.filter((jeune) => jeune.statutPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED);
+        if (!etranger) {
+            jeunesList = jeunesList.filter((jeune) => jeune.paysScolarite === "FRANCE");
+        }
+
+        const jeunesDejaAffectedList = jeunesClasseList.filter(
+            (jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED,
+        );
+        if (jeunesDejaAffectedList.length > 0) {
+            this.logger.log(`Classes ${classe.id}: jeunes déjà affecté ${jeunesDejaAffectedList.length}`);
+        }
+
+        const sejour = await this.sejourGateway.findById(classe.sejourId!);
+
+        return { jeunesList, jeunesDejaAffectedList, sejour };
+    }
+
+    checkPlacesRestantesLigneBus(
+        resultats,
+        jeunesList: JeuneModel[],
+        classe: ClasseModel,
+        sejour: SejourModel,
+        ligneBus: LigneDeBusModel,
+        pointDeRassemblement: PointDeRassemblementModel,
+    ) {
+        const resultatLigneBus = resultats.ligneDeBusList.find((r) => r.ligneDeBus.id === ligneBus.id);
+        let placesRestantes =
+            resultatLigneBus?.placeRestantes || ligneBus.capaciteJeunes - ligneBus.placesOccupeesJeunes || 0;
+        if (placesRestantes < jeunesList.length) {
+            resultats.classeErreurList.push({
+                message: "La capacité du bus est trop faible",
+                classe,
+                ligneBus,
+                jeunesNombre: jeunesList.length,
+            });
+            return false;
+        }
+        if (!resultatLigneBus) {
+            resultats.ligneDeBusList.push({
+                ligneDeBus: ligneBus,
+                classeId: classe.id,
+                sejourId: sejour.id,
+                pdr: pointDeRassemblement,
+                placeOccupees: ligneBus.placesOccupeesJeunes + jeunesList.length,
+                placeRestantes: ligneBus.capaciteJeunes - ligneBus.placesOccupeesJeunes - jeunesList.length,
+            });
+        } else {
+            resultatLigneBus.placeOccupees += jeunesList.length;
+            resultatLigneBus.placeRestantes -= jeunesList.length;
+        }
+        return true;
+    }
+
+    checkPlacesRestantesCentre(resultats, jeunesList: JeuneModel[], classe: ClasseModel, sejour: SejourModel) {
+        const resultatCentre = resultats.sejourList.find((r) => r.sejour.id === sejour.id);
+        const placesRestantes = resultatCentre?.placeRestantes || sejour.placesRestantes || 0;
+        if (placesRestantes < jeunesList.length) {
+            resultats.classeErreurList.push({
+                message: "La capacité de la session est trop faible",
+                classe,
+                ligneBus: undefined,
+                sejour,
+                jeunesNombre: jeunesList.length,
+            });
+            return false;
+        }
+        if (!resultatCentre) {
+            resultats.sejourList.push({
+                sejour: sejour,
+                placeOccupees: (sejour.placesTotal || 0) - (sejour.placesRestantes || 0) + jeunesList.length,
+                placeRestantes: (sejour.placesRestantes || 0) - jeunesList.length,
+            });
+        } else {
+            resultatCentre.placeOccupees += jeunesList.length;
+            resultatCentre.placeRestantes -= jeunesList.length;
+        }
+        return true;
+    }
 
     calculRapportAffectation(
         jeunesList: JeuneModel[],
@@ -124,9 +239,9 @@ export class SimulationAffectationCLEService {
         const jeunesNouvellementAffectedList = jeunesList
             .filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED)
             .map((jeune) => {
-                const ligneBus = ligneDeBusList.find(
-                    (ligneBus) => ligneBus.ligneDeBus.id === jeune.ligneDeBusId,
-                )!.ligneDeBus;
+                // ligneDeBus uniquement pour les metropole
+                const ligneBus = ligneDeBusList.find((ligneBus) => ligneBus.ligneDeBus.id === jeune.ligneDeBusId)
+                    ?.ligneDeBus;
                 const sejour = sejourList.find((centre) => centre.sejour.id === jeune.sejourId)?.sejour;
                 const classe = classeList.find((classe) => classe.id === jeune.classeId)!;
                 const etablissement = etablissementList.find(
@@ -143,8 +258,12 @@ export class SimulationAffectationCLEService {
                     Cohort: jeune.sessionNom!,
                     Statut: jeune.statut,
                     "Statut de phase 1": jeune.statutPhase1,
-                    "id du bus": ligneBus.id,
-                    "Nom du bus": ligneBus.numeroLigne,
+                    ...(ligneBus
+                        ? {
+                              "id du bus": ligneBus?.id,
+                              "Nom du bus": ligneBus?.numeroLigne,
+                          }
+                        : {}),
                     "id du centre": jeune.centreId!,
                     // "matricule du centre": centre?.,
                     "Nom du centre": sejour?.centreNom!,
@@ -159,8 +278,12 @@ export class SimulationAffectationCLEService {
                     "Référent de classe Email": referentClasse?.email,
                     sejourId: jeune.sejourId!,
                     classeCenterId: classe.centreCohesionId!,
-                    pointDeRassemblementId: jeune.pointDeRassemblementId!,
-                    jeuneLigneId: jeune.ligneDeBusId!,
+                    ...(ligneBus
+                        ? {
+                              pointDeRassemblementId: jeune.pointDeRassemblementId!,
+                              jeuneLigneId: jeune.ligneDeBusId!,
+                          }
+                        : {}),
                 } as JeuneRapport;
             });
 
@@ -248,12 +371,16 @@ export class SimulationAffectationCLEService {
         };
     }
 
-    async generateRapportExcel(rapportData: RapportData): Promise<Buffer> {
+    async generateRapportExcel(rapportData: RapportData, type: "CLE" | "CLE_DROMCOM"): Promise<Buffer> {
         return this.fileService.generateExcel({
             [RAPPORT_SHEETS.RESUME]: rapportData.summary,
             [RAPPORT_SHEETS.VOLONTAIRES]: rapportData.jeunesNouvellementAffectedList,
             [RAPPORT_SHEETS.CENTRES]: rapportData.centreList,
-            [RAPPORT_SHEETS.BUS]: rapportData.ligneDeBusList,
+            ...(type === "CLE"
+                ? {
+                      [RAPPORT_SHEETS.BUS]: rapportData.ligneDeBusList,
+                  }
+                : {}),
             [RAPPORT_SHEETS.ERREURS]: rapportData.erreurList,
         });
     }
