@@ -22,7 +22,10 @@ export class PlanDeTransportService {
             const planTransport = await this.planDeTransportGateway.findById(busId);
             planTransport.placesOccupeesJeunes = placesPrises;
             planTransport.lineFillingRate =
-                planTransport.placesOccupeesJeunes && Math.floor((placesPrises / planTransport.capaciteJeunes) * 100);
+                planTransport.capaciteJeunes !== 0
+                    ? planTransport.placesOccupeesJeunes &&
+                      Math.floor((placesPrises / planTransport.capaciteJeunes) * 100)
+                    : 0;
             await this.planDeTransportGateway.update(planTransport);
         }
     }

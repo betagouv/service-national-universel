@@ -95,9 +95,11 @@ describe("ClasseStateManager", () => {
             inscriptionStartDate: new Date("2024-01-01"),
             inscriptionEndDate: new Date("2024-12-31"),
         };
+        const mockJeunes = new Array(5).fill({ statut: YOUNG_STATUS.VALIDATED });
 
         (classeGateway.findById as jest.Mock).mockResolvedValue(mockClasse);
         (sessionGateway.findById as jest.Mock).mockResolvedValue(mockSession);
+        (jeuneGateway.findByClasseId as jest.Mock).mockResolvedValue(mockJeunes);
         jest.spyOn(SessionService, "isCohortInscriptionOpen").mockReturnValue(true);
 
         const result = await classeStateManager.compute("classeId");
@@ -112,9 +114,11 @@ describe("ClasseStateManager", () => {
             inscriptionStartDate: new Date("2024-01-01"),
             inscriptionEndDate: new Date("2024-02-01"),
         };
+        const mockJeunes = new Array(5).fill({ statut: YOUNG_STATUS.VALIDATED });
 
         (classeGateway.findById as jest.Mock).mockResolvedValue(mockClasse);
         (sessionGateway.findById as jest.Mock).mockResolvedValue(mockSession);
+        (jeuneGateway.findByClasseId as jest.Mock).mockResolvedValue(mockJeunes);
         jest.spyOn(SessionService, "isCohortInscriptionOpen").mockReturnValue(false);
 
         const result = await classeStateManager.compute("classeId");

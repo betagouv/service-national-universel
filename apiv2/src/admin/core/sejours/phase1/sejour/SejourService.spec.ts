@@ -34,7 +34,7 @@ describe("SejourService", () => {
     });
 
     it("should correctly calculate placesRestantes and update if changed", async () => {
-        const mockSejour = { id: "1", placesTotal: 10, placesRestantes: 5 };
+        const mockSejour = { id: "sejourId", placesTotal: 10, placesRestantes: 5 };
         const mockJeunes = [
             { statutPhase1: "AFFECTED", cohesionStayPresence: "true", statut: "VALIDATED" },
             { statutPhase1: "DONE", cohesionStayPresence: "true", statut: "VALIDATED" },
@@ -51,7 +51,7 @@ describe("SejourService", () => {
     });
 
     it("should not update sejour if placesRestantes remains the same", async () => {
-        const mockSejour = { id: "1", placesTotal: 10, placesRestantes: 8 };
+        const mockSejour = { id: "sejourId", placesTotal: 10, placesRestantes: 8 };
         const mockJeunes = [
             { statutPhase1: "AFFECTED", cohesionStayPresence: "true", statut: "VALIDATED" },
             { statutPhase1: "DONE", cohesionStayPresence: "true", statut: "VALIDATED" },
@@ -66,7 +66,7 @@ describe("SejourService", () => {
     });
 
     it("should set placesRestantes to 0 if all seats are taken", async () => {
-        const mockSejour = { id: "1", placesTotal: 2, placesRestantes: 1 };
+        const mockSejour = { id: "sejourId", placesTotal: 2, placesRestantes: 1 };
         const mockJeunes = [
             { statutPhase1: "AFFECTED", cohesionStayPresence: "true", statut: "VALIDATED" },
             { statutPhase1: "DONE", cohesionStayPresence: "true", statut: "VALIDATED" },
@@ -81,7 +81,7 @@ describe("SejourService", () => {
     });
 
     it("should not have negative placesRestantes", async () => {
-        const mockSejour = { id: "1", placesTotal: 1, placesRestantes: 1 };
+        const mockSejour = { id: "sejourId", placesTotal: 1, placesRestantes: 1 };
         const mockJeunes = [
             { statutPhase1: "AFFECTED", cohesionStayPresence: "true", statut: "VALIDATED" },
             { statutPhase1: "DONE", cohesionStayPresence: "true", statut: "VALIDATED" },

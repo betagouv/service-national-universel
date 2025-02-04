@@ -234,8 +234,8 @@ describe("BasculeCLEtoCLE", () => {
                 newNote,
             );
 
-            expect(jeune.originalSessionNom).toBe(jeune.sessionNom);
-            expect(jeune.originalSessionId).toBe(jeune.sessionId);
+            expect(jeune.originalSessionNom).toBe("Original Session Name");
+            expect(jeune.originalSessionId).toBe(0o0);
             expect(jeune.statut).toBe(BasculeHTStoCLE.getStatutJeuneForBasculeHTStoCLE(jeune.statut));
             expect(jeune.statutPhase1).toBe(statutPhase1);
             expect(jeune.sessionNom).toBe(classe.sessionNom);

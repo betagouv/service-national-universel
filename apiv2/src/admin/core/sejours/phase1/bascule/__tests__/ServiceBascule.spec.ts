@@ -6,15 +6,6 @@ import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { EmailTemplate } from "@notification/core/Notification";
 import configuration from "@config/configuration";
 
-jest.mock("@config/configuration", () =>
-    jest.fn(() => ({
-        urls: {
-            admin: "https://admin.test.com",
-            app: "https://app.test.com",
-        },
-    })),
-);
-
 describe("BasculeService", () => {
     describe("BasculeService.generateYoungNoteForBascule", () => {
         const mockDate = new Date();
@@ -51,7 +42,7 @@ describe("BasculeService", () => {
         it("should generate a note with full details", () => {
             const result: NoteType = BasculeService.generateYoungNoteForBascule(baseProps as any);
 
-            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (AUTO)");
+            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (CLE)");
             expect(result.note).toContain("pour la raison suivante : Changement de situation");
             expect(result.note).toContain("Etablissement précédent : Établissement X.");
             expect(result.note).toContain("Classe précédente : CL123 Classe 1.");
@@ -86,7 +77,7 @@ describe("BasculeService", () => {
 
             const result: NoteType = BasculeService.generateYoungNoteForBascule(propsWithMissingFields as any);
 
-            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (AUTO)");
+            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (CLE)");
             expect(result.note).not.toContain("pour la raison suivante"); // No reason should be present
             expect(result.note).not.toContain("Etablissement précédent"); // No établissement
             expect(result.note).not.toContain("Classe précédente"); // No classe
@@ -104,7 +95,7 @@ describe("BasculeService", () => {
 
             const result: NoteType = BasculeService.generateYoungNoteForBascule(propsWithMissingSource as any);
 
-            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (AUTO)");
+            expect(result.note).toContain("Changement de cohorte de Cohorte A (VOLONTAIRE) à Cohorte B (CLE)");
         });
     });
 
@@ -114,6 +105,14 @@ describe("BasculeService", () => {
         let referentGateway: ReferentGateway;
 
         beforeEach(() => {
+            jest.mock("@config/configuration", () =>
+                jest.fn(() => ({
+                    urls: {
+                        admin: "https://admin.test.com",
+                        app: "https://app.test.com",
+                    },
+                })),
+            );
             notificationGateway = {
                 sendEmail: jest.fn(),
             } as unknown as jest.Mocked<NotificationGateway>;

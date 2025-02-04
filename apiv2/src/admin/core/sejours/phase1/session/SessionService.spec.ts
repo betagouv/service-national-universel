@@ -33,6 +33,7 @@ describe("SessionService", () => {
                     inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60), // Started 1 hour ago
                     inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
                     instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 2), // Ends in 2 hours
+                    statut: COHORT_STATUS.PUBLISHED,
                 },
                 {
                     id: "2",
@@ -46,12 +47,14 @@ describe("SessionService", () => {
                     inscriptionStartDate: new Date(now.getTime() - 1000 * 60 * 60 * 2), // Started 2 hours ago
                     inscriptionEndDate: new Date(now.getTime() - 1000 * 60 * 30), // Ended 30 mins ago
                     instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
+                    statut: COHORT_STATUS.PUBLISHED,
                 },
                 {
                     id: "4",
                     inscriptionStartDate: null, // No start date
                     inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60), // Ends in 1 hour
                     instructionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 2), // Ends in 2 hours
+                    statut: COHORT_STATUS.PUBLISHED,
                 },
             ];
 

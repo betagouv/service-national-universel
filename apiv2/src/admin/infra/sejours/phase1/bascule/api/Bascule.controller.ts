@@ -3,9 +3,7 @@ import { YOUNG_SOURCE, Phase1Routes } from "snu-lib";
 
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 import { BasculeCLEtoCLE } from "@admin/core/sejours/phase1/bascule/useCase/BasculeCLEtoCLE";
-import { BasculeCLEtoHTS } from "@admin/core/sejours/phase1/bascule/useCase/BasculeCLEtoHTS";
 import { BasculeHTStoCLE } from "@admin/core/sejours/phase1/bascule/useCase/BasculeHTStoCLE";
-import { BasculeHTStoHTS } from "@admin/core/sejours/phase1/bascule/useCase/BasculeHTStoHTS";
 
 import { JeuneReferentGuard } from "../../../jeune/guard/JeuneReferent.guard";
 import { ChangerLaSessionDuJeunePayloadDto } from "./Bascule.validation";
@@ -15,9 +13,7 @@ import { CustomRequest } from "@shared/infra/CustomRequest";
 export class BasculeController {
     constructor(
         private readonly basculeCLEtoCLE: BasculeCLEtoCLE,
-        private readonly basculeCLEtoHTS: BasculeCLEtoHTS,
         private readonly basculeHTStoCLE: BasculeHTStoCLE,
-        private readonly basculeHTStoHTS: BasculeHTStoHTS,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
     ) {}
 
@@ -33,15 +29,8 @@ export class BasculeController {
 
         if (jeune.source === YOUNG_SOURCE.CLE && changerLaSessionDuJeune.source === YOUNG_SOURCE.CLE) {
             return this.basculeCLEtoCLE.execute(id, changerLaSessionDuJeune, user);
-        } else if (jeune.source === YOUNG_SOURCE.CLE && changerLaSessionDuJeune.source === YOUNG_SOURCE.VOLONTAIRE) {
-            return this.basculeCLEtoHTS.execute(id, changerLaSessionDuJeune, user);
         } else if (jeune.source === YOUNG_SOURCE.VOLONTAIRE && changerLaSessionDuJeune.source === YOUNG_SOURCE.CLE) {
             return this.basculeHTStoCLE.execute(id, changerLaSessionDuJeune, user);
-        } else if (
-            jeune.source === YOUNG_SOURCE.VOLONTAIRE &&
-            changerLaSessionDuJeune.source === YOUNG_SOURCE.VOLONTAIRE
-        ) {
-            return this.basculeHTStoHTS.execute(id, changerLaSessionDuJeune, user);
         } else {
             throw new Error("Unhandled source combination");
         }

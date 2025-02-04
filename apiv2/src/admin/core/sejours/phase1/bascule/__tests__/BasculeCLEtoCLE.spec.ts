@@ -144,16 +144,20 @@ describe("BasculeCLEtoCLE", () => {
                 ligneDeBusId: "old-bus-id",
             } as any;
             (jeuneGateway.findById as jest.Mock).mockResolvedValue(jeune);
-            (classeGateway.findById as jest.Mock).mockResolvedValueOnce({ id: "old-classe-id" } as any);
             (classeGateway.findById as jest.Mock).mockResolvedValueOnce({
                 id: "classe-id",
                 sessionId: "session-id",
                 placesPrises: 5,
                 placesTotal: 10,
             } as any);
-            (sessionGateway.findById as jest.Mock).mockResolvedValue({ nom: "Session A" } as any);
+            (etablissementGateway.findById as jest.Mock).mockResolvedValue({
+                id: "etab-id",
+                type: ["typeEtab"],
+            } as any);
+            (sessionGateway.findById as jest.Mock).mockResolvedValue({ id: "session-id", nom: "Session A" } as any);
             (sessionService.getFilteredSessionsForCLE as jest.Mock).mockResolvedValue([{ nom: "Session A" }]);
-            (etablissementGateway.findById as jest.Mock).mockResolvedValue({} as any);
+            (classeGateway.findById as jest.Mock).mockResolvedValueOnce({ id: "old-classe-id" } as any);
+            (etablissementGateway.findById as jest.Mock).mockResolvedValue({ id: "old-etab-id" } as any);
 
             await basculeCLEtoCLE.execute(
                 "jeune-id",
@@ -234,8 +238,8 @@ describe("BasculeCLEtoCLE", () => {
                     newNote,
                 );
 
-                expect(jeune.originalSessionNom).toBe(jeune.sessionNom);
-                expect(jeune.originalSessionId).toBe(jeune.sessionId);
+                expect(jeune.originalSessionNom).toBe("Original Session Name");
+                expect(jeune.originalSessionId).toBe(0o0);
                 expect(jeune.statut).toBe(BasculeCLEtoCLE.getStatutJeuneForBasculeCLEtoCLE(jeune.statut));
                 expect(jeune.statutPhase1).toBe(statutPhase1);
                 expect(jeune.sessionNom).toBe(classe.sessionNom);
