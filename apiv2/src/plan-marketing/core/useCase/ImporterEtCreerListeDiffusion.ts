@@ -1,29 +1,35 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
-import { PlanMarketingCreateTaskModel, PlanMarketingTaskModel } from "../PlanMarketing.model";
-import { TaskName, TaskStatus } from "snu-lib";
-import { UseCase } from "@shared/core/UseCase";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ConfigService } from "@nestjs/config";
+import { UseCase } from "@shared/core/UseCase";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { TaskName, TaskStatus } from "snu-lib";
+import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
+import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 
 // TODO: finir usecase
 @Injectable()
 export class ImporterEtCreerListeDiffusion implements UseCase<void> {
+    private readonly logger: Logger = new Logger(ImporterEtCreerListeDiffusion.name);
+
     constructor(
-        private readonly listeDiffusionGateway: PlanMarketingGateway,
+        @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly config: ConfigService,
     ) {}
 
-    async execute(nomListe: string, campagneId: string): Promise<void> {
+    async execute(nomListe: string, campagneId: string, folderId: number, pathFile: string): Promise<void> {
+        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
         // Récupérer la liste des contacts : S3 ou fichier binaire dans payload
 
         // Mapper les champs
+        const contacts = `NOM;PRENOM;EMAIL
+mon nom;mon prenom;monemail@test.com`;
 
         // Importer les contacts via
-        const processId = await this.listeDiffusionGateway.importerContacts(
+        const processId = await this.planMarketingGateway.importerContacts(
             nomListe,
-            [],
+            contacts,
+            folderId,
             `${this.config.get("urls.apiv2")}/plan-marketing/import/webhook`,
         );
 

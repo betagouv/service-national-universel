@@ -1,5 +1,5 @@
 export interface PlanMarketingGateway {
-    importerContacts(nomListe: string, contacts: any, notifyUrl: string): Promise<number>;
+    importerContacts(nomListe: string, contacts: any, folderId: number, notifyUrl: string): Promise<number>;
     updateCampagne(nomListe: string, campagneId: string): Promise<void>;
 }
 

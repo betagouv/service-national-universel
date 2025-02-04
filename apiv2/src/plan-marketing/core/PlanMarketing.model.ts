@@ -6,7 +6,9 @@ export interface PlanMarketingTaskParameters {
     campagneId: string;
 }
 
-export interface PlanMarketingTaskResults {}
+export interface PlanMarketingTaskResults {
+    description: string;
+}
 
 export interface PlanMarketingTaskModel extends TaskModel<PlanMarketingTaskParameters, PlanMarketingTaskResults> {}
 

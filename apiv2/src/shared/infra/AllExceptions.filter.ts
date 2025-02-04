@@ -62,7 +62,7 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const description =
             exception instanceof FunctionalException || exception instanceof TechnicalException
                 ? // @ts-expect-error TODO: typer exception la récupération de la description pour les erreurs
-                  exception.options.description
+                  exception.options?.description
                 : undefined;
         const responseBody: HttpError = {
             message: message,

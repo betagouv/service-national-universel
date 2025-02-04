@@ -3,7 +3,7 @@ import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 
 @Injectable()
 export class PlanMarketingMockProvider implements PlanMarketingGateway {
-    importerContacts(nomListe: string, contacts: any, notifyUrl: string): Promise<number> {
+    importerContacts(nomListe: string, contacts: any, folderId: number, notifyUrl: string): Promise<number> {
         Logger.log(`[MOCK] Importing contacts to liste diffusion: ${nomListe}`, "PlanMarketingMockProvider");
 
         return new Promise((resolve, reject) => {
