@@ -1,5 +1,5 @@
 import React, { useState, useEffect, Fragment } from "react";
-import { HiHome, HiOutlineClipboardCheck } from "react-icons/hi";
+import { HiOutlineClipboardCheck } from "react-icons/hi";
 import { Link, useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import { useAsync } from "react-use";
@@ -23,17 +23,15 @@ import ButtonActionGroupConsent from "./consent/ButtonActionGroupConsent";
 import ButtonActionGroupValidation from "./validation/ButtonActionGroupValidation";
 import ButtonActionGroupImageRight from "./imageRight/ButtonActionGroupImageRight";
 import YoungListHeader from "./components/YoungListHeader";
-
-const pageId = "youngCle-list";
+import useFilterLabels from "../volontaires/useFilterLabels";
 
 interface YoungDtoWithClasse extends YoungDto {
   classe: ClasseDto;
 }
 
 export default function List() {
-  const [sessionsPhase1, setSessionsPhase1] = useState(null);
-  const [bus, setBus] = useState(null);
-  const [classes, setClasses] = useState(null);
+  const pageId = "youngCle-list";
+  const { data: labels, isPending } = useFilterLabels(pageId);
   const [youngList, setYoungList] = useState([]);
   const [students, setStudents] = useState(false);
   const [selectedFilters, setSelectedFilters] = useState<any>({});
@@ -47,7 +45,7 @@ export default function List() {
 
   const { tabId } = useParams<{ tabId?: "general" | "consent" | "validation" | "image" }>();
   const currentTab = tabId || "general";
-  const filterArray = getFilterArray(sessionsPhase1, bus, classes);
+  const filterArray = getFilterArray(labels);
 
   const { value: studentsCount } = useAsync(async () => {
     try {
@@ -84,27 +82,11 @@ export default function List() {
 
   const getDataForExport = async () => {
     try {
-      const { data: sessions } = await api.post(`/elasticsearch/sessionphase1/export`, {
-        filters: {},
-        exportFields: ["codeCentre", "cohesionCenterId"],
-      });
-      const { data: bus } = await api.post(`/elasticsearch/lignebus/export`, {
-        filters: {},
-        exportFields: ["busId"],
-      });
-      const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
-        filters: {},
-        exportFields: ["name", "uniqueKeyAndId", "totalSeats", "seatsTaken", "status"],
-      });
-
       const res = await api.post(`/elasticsearch/cle/young/search`, {
         filters: {},
       });
 
       setStudents(res.responses[0].hits.total.value > 0);
-      setSessionsPhase1(sessions);
-      setBus(bus);
-      setClasses(classes);
     } catch (e) {
       toastr.error("Erreur", "Oups, une erreur est survenue lors de la récupération des données");
     }
@@ -156,7 +138,7 @@ export default function List() {
     initFilters();
   }, [currentTab]);
 
-  if (!sessionsPhase1 || !bus || !classes) return <Loader />;
+  if (isPending) return <Loader />;
 
   return (
     <Page>
