@@ -5,8 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 
-import { ClasseType } from "snu-lib";
-import { ClasseService } from "@/services/classeService";
+import useClass from "../utils/useClass";
 import Loader from "@/components/Loader";
 import api from "@/services/api";
 
@@ -18,12 +17,7 @@ export default function Index() {
   const { id } = useParams<{ id: string }>();
   useDocumentTitle("Classes");
 
-  const { data: classe, refetch } = useQuery<ClasseType>({
-    queryKey: ["classe", id],
-    queryFn: async () => await ClasseService.getOne(id),
-    enabled: !!id,
-    refetchOnWindowFocus: false,
-  });
+  const { data: classe, refetch } = useClass(id);
 
   const { data: studentStatus } = useQuery<{ [key: string]: number }>({
     queryKey: ["young", classe?._id],
