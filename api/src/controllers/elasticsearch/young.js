@@ -126,7 +126,6 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
       });
     }
   }
-
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
