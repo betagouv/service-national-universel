@@ -46,6 +46,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             if (!list?.id) {
                 throw new TechnicalException(TechnicalExceptionType.GENERIC, `List ${nomListe} not found`);
             }
+            const retrievedCampagne = await this.campaignsApi.getEmailCampaign(parseInt(campagneId));
 
             // Update the campaign with the new list ID
             const updateEmailCampaign = new brevo.UpdateEmailCampaign();
@@ -53,6 +54,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
 
             await this.campaignsApi.updateEmailCampaign(parseInt(campagneId), updateEmailCampaign);
         } catch (error: any) {
+            this.logger.error(`Failed to update campaign:${JSON.stringify(error.body)}`);
             throw new TechnicalException(TechnicalExceptionType.GENERIC, `Failed to update campaign: ${error.message}`);
         }
     }

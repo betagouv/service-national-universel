@@ -20,7 +20,8 @@ export class AssocierListeDiffusionToCampagne implements UseCase<void> {
             );
         }
 
+        // TODO : besoin d'appeler cet endpoint ?
         // Ajouter listeId à la campagne
-        return await this.planMarketingGateway.updateCampagne(nomListe, campagneId);
+        // return await this.planMarketingGateway.updateCampagne(nomListe, campagneId);
     }
 }

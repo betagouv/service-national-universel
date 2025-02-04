@@ -38,7 +38,7 @@ export class PlanMarketingController {
 
     @Post("import/webhook")
     @UseGuards(BrevoIpGuard)
-    async webhook(@Body("id") processId: number) {
-        await this.planMarketingActionSelectorService.selectAction(processId);
+    async webhook(@Body("proc_success") processId: string) {
+        await this.planMarketingActionSelectorService.selectAction(Number(processId));
     }
 }

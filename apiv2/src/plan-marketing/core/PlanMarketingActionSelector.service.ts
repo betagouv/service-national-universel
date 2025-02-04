@@ -16,6 +16,9 @@ export class PlanMarketingActionSelectorService {
 
     async selectAction(processId: number) {
         this.logger.log(`Selecting action for processId ${processId}`);
+        if (!processId) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, `ProcessId: ${processId} is required`);
+        }
         const task = (
             await this.taskGateway.findByMetadata<PlanMarketingTaskParameters, PlanMarketingTaskResults>({
                 "metadata.parameters.processId": processId,
@@ -47,7 +50,7 @@ export class PlanMarketingActionSelectorService {
         } catch (e) {
             const error = e as FunctionalException;
             this.taskGateway.toFailed(task.id, error.message, error.description);
-            throw new Error(error.message);
+            throw error;
         }
     }
 }

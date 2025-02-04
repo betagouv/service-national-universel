@@ -9,14 +9,25 @@ export class BrevoIpGuard implements CanActivate {
     async canActivate(context: ExecutionContext): Promise<boolean> {
         const request = context.switchToHttp().getRequest<CustomRequest>();
 
-        if (isSuperAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
+        if (request.user?.role && isSuperAdmin({ role: request.user.role, subRole: request.user.sousRole })) {
             return true;
         }
 
-        const clientIp = request.ip;
+        const clientIp = this.getClientIp(request);
         if (!clientIp) {
             return false;
         }
         return this.IP_PATTERN.test(clientIp);
+    }
+
+    private getClientIp(request: CustomRequest): string | undefined {
+        const forwardedFor = request.headers["x-forwarded-for"];
+        if (forwardedFor) {
+            const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor.split(",")[0].trim();
+            console.log(forwardedFor);
+
+            return ips;
+        }
+        return request.ip;
     }
 }

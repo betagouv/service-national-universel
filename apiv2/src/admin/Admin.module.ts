@@ -137,6 +137,7 @@ export class AdminModule {
             .apply(AddUserToRequestMiddleware)
             .exclude({ path: "/referent/signin", method: RequestMethod.POST })
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
+            .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .forRoutes("*");
     }
 }
