@@ -40,6 +40,7 @@ export function injectRoutes(app) {
   app.use("/SNUpport", require("./controllers/SNUpport"));
   app.use("/cle", require("./cle").default);
   app.use("/preinscription", require("./preinscription/preinscriptionController"));
+  app.use("/email-preview", require("./controllers/emailPreview").default);
 
   //services
   app.use("/jeveuxaider", require("./services/jeveuxaider"));
