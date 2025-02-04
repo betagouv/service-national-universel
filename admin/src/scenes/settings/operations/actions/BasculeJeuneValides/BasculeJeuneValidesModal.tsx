@@ -107,7 +107,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
               <h2 className="text-lg leading-7 font-bold m-0">Statuts de phase</h2>
               <CollapsableSelectSwitcher
                 title="Phase 0"
-                options={Object.values([YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED]).map((statut) => ({ label: translate(statut), value: statut }))}
+                options={Object.values([YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED]).map((statut) => ({ label: translate(statut), value: statut }))}
                 values={state.status as string[]}
                 onChange={(values) => setState({ status: values as string[] })}
                 isOpen={false}
