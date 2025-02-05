@@ -6,7 +6,16 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import cx from "classnames";
 import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
-import { formatDepartement, InscriptionRoutes, region2department, RegionsMetropole, SimulationBasculerJeunesValidesTaskDto, TaskStatus, translate, YOUNG_STATUS } from "snu-lib";
+import {
+  formatDepartement,
+  InscriptionRoutes,
+  region2department,
+  RegionsMetropole,
+  SENDINBLUE_TEMPLATES,
+  SimulationBasculerJeunesValidesTaskDto,
+  TaskStatus,
+  translate,
+} from "snu-lib";
 import { Button, Modal } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
@@ -49,10 +58,8 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
     [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.traitement.status as TaskStatus) ||
     (!!affectationStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationBascule.createdAt), new Date(affectationStatus.traitement.lastCompletedAt)));
 
-  const isDisabled = simulationBascule.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
-
   const totalJeunes = (simulationBascule.metadata?.results?.jeunesProchainSejour || 0) + (simulationBascule.metadata?.results?.jeunesAvenir || 0);
-  const totalJeunesAcceptes = (simulationBascule.metadata?.results?.jeunesProchainSejour || 0) + (simulationBascule.metadata?.results?.jeunesAvenir || 0);
+  const isDisabled = totalJeunes <= 0 || simulationBascule.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
@@ -157,19 +164,23 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
                 <Checkbox className="mt-1" checked={sendEmail} onChange={toggleSentEmail} />
                 <div>
                   <b>Envoyer une campagne d'emailing aux volontaires ({totalJeunes}) et à leurs représentants légaux.</b>
-                  <div>
-                    {translate(YOUNG_STATUS.VALIDATED)} :{" "}
-                    {totalJeunesAcceptes > 0 && (
-                      <Link to={`/email-preview/1633`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                        Visualiser l'aperçu du template 1633
+                  <div className="flex gap-4">
+                    {(simulationBascule.metadata?.results?.jeunesProchainSejour || 0) > 0 && (
+                      <Link
+                        to={`/email-preview/${SENDINBLUE_TEMPLATES.BASCULE_SEJOUR_ELIGIBLE}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                        Visualiser l'aperçu du template {SENDINBLUE_TEMPLATES.BASCULE_SEJOUR_ELIGIBLE}
                       </Link>
                     )}
-                  </div>
-                  <div>
-                    {translate(YOUNG_STATUS.WAITING_LIST)} :{" "}
-                    {totalJeunesAcceptes > 0 && (
-                      <Link to={`/email-preview/1265`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                        Visualiser l'aperçu du template 1265
+                    {(simulationBascule.metadata?.results?.jeunesAvenir || 0) > 0 && (
+                      <Link
+                        to={`/email-preview/${SENDINBLUE_TEMPLATES.BASCULE_SEJOUR_AVENIR}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                        Visualiser l'aperçu du template {SENDINBLUE_TEMPLATES.BASCULE_SEJOUR_AVENIR}
                       </Link>
                     )}
                   </div>

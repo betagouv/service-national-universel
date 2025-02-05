@@ -40,7 +40,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     etranger: boolean;
     avenir: boolean;
   }>({
-    status: [YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.VALIDATED],
+    status: [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.NOT_DONE],
     statusPhase1Motif: [],
     cohesionStayPresence: false,

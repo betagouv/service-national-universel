@@ -63,6 +63,7 @@ export class BasculeJeuneValidesController {
                     statusPhase1Motif: payload.statusPhase1Motif,
                     departements: payload.departements,
                     niveauScolaires: payload.niveauScolaires,
+                    etranger: payload.etranger,
                     avenir: payload.avenir,
                     auteur: {
                         id: request.user.id,

@@ -78,7 +78,7 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "Aucun jeune !");
         }
 
-        this.logger.log(`Jeunes a basculer : ${jeuneList.length}`);
+        this.logger.log(`Jeunes a basculer (simulation) : ${jeuneList.length}`);
 
         const rapportData: RapportData = {
             jeunesAvenir: [],
@@ -137,6 +137,14 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             acc[jeune.nouvelleSession!] += 1;
             return acc;
         }, {});
+
+        this.logger.log(
+            `Fin simulation bascule: a venir ${rapportData.jeunesAvenir.length} / elligible ${JSON.stringify(
+                countBySession,
+                null,
+                2,
+            )}`,
+        );
 
         // Calcul des données pour le rapport excel
         const fileBuffer = await this.fileGateway.generateExcel({
