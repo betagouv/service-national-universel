@@ -1,2 +1,2 @@
-export type * from "./SimulationBasculerJeunesValidesTaskDto";
-export type * from "./ValiderBasculerJeunesValidesTaskDto";
+export type * from "./SimulationBasculeJeunesValidesTaskDto";
+export type * from "./ValiderBasculeJeunesValidesTaskDto";

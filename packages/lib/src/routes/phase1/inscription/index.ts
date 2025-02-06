@@ -1,9 +1,9 @@
-import { GetBasculerJeunesValidesRoute } from "./getBasculerJeunesValidesRoute";
-import { PostBasculerJeunesValidesRoute } from "./postBasculerJeunesValidesRoute";
-import { PostValiderBasculerJeunesValidesRoute } from "./postValiderBasculerJeunesValidesRoute";
+import { GetBasculeJeunesValidesRoute } from "./getBasculeJeunesValidesRoute";
+import { PostBasculeJeunesValidesRoute } from "./postBasculeJeunesValidesRoute";
+import { PostValiderBasculeJeunesValidesRoute } from "./postValiderBasculeJeunesValidesRoute";
 
 export type InscriptionRoutes = {
-  GetBasculerJeunesValides: GetBasculerJeunesValidesRoute;
-  PostBasculerJeunesValides: PostBasculerJeunesValidesRoute;
-  PostValiderBasculerJeunesValides: PostValiderBasculerJeunesValidesRoute;
+  GetBasculeJeunesValides: GetBasculeJeunesValidesRoute;
+  PostBasculeJeunesValides: PostBasculeJeunesValidesRoute;
+  PostValiderBasculeJeunesValides: PostValiderBasculeJeunesValidesRoute;
 };

@@ -10,4 +10,4 @@ export type ValiderBasculeJeunesValidesTaskResult = {
   errors: number;
 };
 
-export interface ValiderBasculerJeunesValidesTaskDto extends TaskDto<ValiderBasculeJeunesValidesTaskParameters, ValiderBasculeJeunesValidesTaskResult> {}
+export interface ValiderBasculeJeunesValidesTaskDto extends TaskDto<ValiderBasculeJeunesValidesTaskParameters, ValiderBasculeJeunesValidesTaskResult> {}

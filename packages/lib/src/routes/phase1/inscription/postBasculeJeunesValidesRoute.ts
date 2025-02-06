@@ -2,11 +2,11 @@ import { GRADES } from "../../../constants/constants";
 import { YoungDto } from "../../../dto";
 import { BasicRoute, RouteResponseBodyV2 } from "../..";
 
-import { SimulationBasculerJeunesValidesTaskDto } from "../../../dto/phase1";
+import { SimulationBasculeJeunesValidesTaskDto } from "../../../dto/phase1";
 
-export interface PostBasculerJeunesValidesRoute extends BasicRoute {
+export interface PostBasculeJeunesValidesRoute extends BasicRoute {
   method: "POST";
-  path: "/inscription/{sessionId}/bacule-jeunes-valides/simulation";
+  path: "/inscription/{sessionId}/bascule-jeunes-valides/simulation";
   params: { sessionId: string };
   payload: {
     status: YoungDto["status"][];
@@ -18,5 +18,5 @@ export interface PostBasculerJeunesValidesRoute extends BasicRoute {
     etranger: boolean;
     avenir: boolean;
   };
-  response: RouteResponseBodyV2<SimulationBasculerJeunesValidesTaskDto>;
+  response: RouteResponseBodyV2<SimulationBasculeJeunesValidesTaskDto>;
 }

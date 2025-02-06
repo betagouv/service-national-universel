@@ -63,7 +63,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await InscriptionService.postBasculerJeunesValides(session._id!, {
+      return await InscriptionService.postBasculeJeunesValides(session._id!, {
         status: state.status,
         statusPhase1: state.statusPhase1,
         statusPhase1Motif: state.statusPhase1Motif,
@@ -76,7 +76,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     },
     onSuccess: (task) => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      const queryKey = ["inscription", "bacule-jeunes-valides", session._id];
+      const queryKey = ["inscription", "bascule-jeunes-valides", session._id];
       const oldStatus = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(queryKey) || [];
       queryClient.setQueryData(queryKey, { ...oldStatus, simulation: { status: task.status } });
       onClose();

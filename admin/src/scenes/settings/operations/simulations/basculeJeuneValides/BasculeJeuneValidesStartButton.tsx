@@ -12,7 +12,7 @@ import {
   region2department,
   RegionsMetropole,
   SENDINBLUE_TEMPLATES,
-  SimulationBasculerJeunesValidesTaskDto,
+  SimulationBasculeJeunesValidesTaskDto,
   TaskStatus,
   translate,
 } from "snu-lib";
@@ -29,7 +29,7 @@ interface BasculeJeuneValidesStartButtonProps {
 }
 
 export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJeuneValidesStartButtonProps) {
-  const simulationBascule = simulation as SimulationBasculerJeunesValidesTaskDto;
+  const simulationBascule = simulation as SimulationBasculeJeunesValidesTaskDto;
   const queryClient = useQueryClient();
 
   const [sendEmail, toggleSentEmail] = useToggle(true);
@@ -44,14 +44,14 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
     [simulationBascule],
   );
 
-  const affectationKey = ["inscription", "bacule-jeunes-valides", simulationBascule.metadata!.parameters!.sessionId]; // check BasculeJeuneValidesModal.tsx queryKey
+  const affectationKey = ["inscription", "bascule-jeunes-valides", simulationBascule.metadata!.parameters!.sessionId]; // check BasculeJeuneValidesModal.tsx queryKey
   const {
     isPending: isLoading,
     isError,
     data: affectationStatus,
-  } = useQuery<InscriptionRoutes["GetBasculerJeunesValides"]["response"]>({
+  } = useQuery<InscriptionRoutes["GetBasculeJeunesValides"]["response"]>({
     queryKey: affectationKey,
-    queryFn: async () => InscriptionService.getBasculerJeunesValides(simulationBascule.metadata!.parameters!.sessionId),
+    queryFn: async () => InscriptionService.getBasculeJeunesValides(simulationBascule.metadata!.parameters!.sessionId),
   });
 
   const isOutdated =
@@ -63,7 +63,7 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await InscriptionService.postValiderBasculerJeunesValides(simulationBascule.metadata!.parameters!.sessionId!, simulationBascule.id, { sendEmail });
+      return await InscriptionService.postValiderBasculeJeunesValides(simulationBascule.metadata!.parameters!.sessionId!, simulationBascule.id, { sendEmail });
     },
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });

@@ -1,8 +1,8 @@
 import { BasicRoute, RouteResponseBodyV2, TaskStatus } from "../../..";
 
-export interface GetBasculerJeunesValidesRoute extends BasicRoute {
+export interface GetBasculeJeunesValidesRoute extends BasicRoute {
   method: "GET";
-  path: "/inscription/{sessionId}/bacule-jeunes-valides/status";
+  path: "/inscription/{sessionId}/bascule-jeunes-valides/status";
   params: { sessionId: string };
   response: RouteResponseBodyV2<{
     simulation: {

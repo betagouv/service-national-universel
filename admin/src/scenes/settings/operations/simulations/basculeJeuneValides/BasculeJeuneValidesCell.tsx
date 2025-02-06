@@ -1,13 +1,13 @@
 import React from "react";
 
-import { SimulationBasculerJeunesValidesTaskDto } from "snu-lib";
+import { SimulationBasculeJeunesValidesTaskDto } from "snu-lib";
 
 interface BasculeJeuneValidesCellProps {
   simulation: unknown;
 }
 
 export default function BasculeJeuneValidesCell({ simulation }: BasculeJeuneValidesCellProps) {
-  const simulationHts = simulation as SimulationBasculerJeunesValidesTaskDto;
+  const simulationHts = simulation as SimulationBasculeJeunesValidesTaskDto;
 
   return (
     <div className="text-xs leading-4 font-normal">

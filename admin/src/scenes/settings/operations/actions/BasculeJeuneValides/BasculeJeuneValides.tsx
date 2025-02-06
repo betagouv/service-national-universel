@@ -23,9 +23,9 @@ export default function BasculeJeuneValides({ session }: BasculeJeuneValidesProp
     isPending: isLoading,
     isError,
     data: inscriptionStatus,
-  } = useQuery<InscriptionRoutes["GetBasculerJeunesValides"]["response"]>({
-    queryKey: ["inscription", "bacule-jeunes-valides", session._id], // check SimulationHtsResultStartButton.tsx and AffectationSimulationMetropoleModal.tsx queryKey
-    queryFn: async () => InscriptionService.getBasculerJeunesValides(session._id!),
+  } = useQuery<InscriptionRoutes["GetBasculeJeunesValides"]["response"]>({
+    queryKey: ["inscription", "bascule-jeunes-valides", session._id], // check SimulationHtsResultStartButton.tsx and AffectationSimulationMetropoleModal.tsx queryKey
+    queryFn: async () => InscriptionService.getBasculeJeunesValides(session._id!),
   });
 
   const isValidSession = session.type === "VOLONTAIRE"; // HTS

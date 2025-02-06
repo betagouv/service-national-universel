@@ -54,6 +54,8 @@ import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejour
 import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
 import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academie.provider";
 import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
+import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
+import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -84,13 +86,15 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         ],
         controllers: [
             ClasseController,
-             AffectationController,
-              Phase1Controller,
-               AuthController,
-            ],
+            AffectationController,
+            BasculeJeuneValidesController,
+            Phase1Controller,
+            AuthController,
+        ],
         providers: [
             ClasseService,
             AffectationService,
+            InscriptionService,
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
             ...cleGatewayProviders,
