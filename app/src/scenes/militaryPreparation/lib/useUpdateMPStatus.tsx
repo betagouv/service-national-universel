@@ -7,8 +7,8 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { YoungType } from "snu-lib";
 
-async function updateMPStatus({ young, status }: { young: YoungType; status: string }): Promise<YoungType> {
-  const url = `/young/${young._id}/phase2/militaryPreparation/status`;
+async function updateMPStatus({ youngId, status }: { youngId: string; status: string }): Promise<YoungType> {
+  const url = `/young/${youngId}/phase2/militaryPreparation/status`;
   const body = { statusMilitaryPreparationFiles: status };
   const { ok, code, data } = await API.put(url, body);
   if (!ok) throw new Error(code);
@@ -19,7 +19,7 @@ export default function useUpdateMPStatus() {
   const { young } = useAuth();
   const dispatch = useDispatch();
   return useMutation({
-    mutationFn: (status: string): Promise<YoungType> => updateMPStatus({ young, status }),
+    mutationFn: (status: string): Promise<YoungType> => updateMPStatus({ youngId: young._id, status }),
     onError: (error) => {
       toastr.error("Oups", "Une erreur est survenue lors de la modification de votre dossier.");
       capture(error);

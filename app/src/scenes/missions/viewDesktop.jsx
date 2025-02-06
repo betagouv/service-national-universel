@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -33,6 +33,7 @@ import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
 import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
+import useUpdateMPStatus from "../militaryPreparation/lib/useUpdateMPStatus";
 
 export default function ViewDesktop() {
   const [mission, setMission] = useState();
@@ -47,7 +48,7 @@ export default function ViewDesktop() {
 
   const history = useHistory();
 
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -457,10 +458,11 @@ export default function ViewDesktop() {
 }
 
 const ApplicationStatus = ({ mission, updateApplication, loading }) => {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
   const application = mission?.application;
   const tutor = mission?.tutor;
+  const MPMutation = useUpdateMPStatus();
 
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
@@ -577,10 +579,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
                 try {
                   if (mission.isMilitaryPreparation === "true") {
                     if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-                        statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
-                      });
-                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+                      MPMutation.mutate("WAITING_VERIFICATION");
                     }
                     if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
                       updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);

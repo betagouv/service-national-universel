@@ -4,7 +4,7 @@ import { BsChevronDown } from "react-icons/bs";
 import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
@@ -32,6 +32,7 @@ import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
 import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
+import useUpdateMPStatus from "../militaryPreparation/lib/useUpdateMPStatus";
 
 export default function ViewMobile() {
   const [mission, setMission] = useState();
@@ -46,7 +47,7 @@ export default function ViewMobile() {
 
   const history = useHistory();
 
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -465,9 +466,10 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
 );
 
 const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation }) => {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const tutor = mission?.tutor;
   const application = mission?.application;
+  const MPMutation = useUpdateMPStatus();
 
   const refContractButton = React.useRef();
 
@@ -496,10 +498,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
     try {
       if (mission.isMilitaryPreparation === "true") {
         if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-            statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
-          });
-          if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
+          MPMutation.mutate("WAITING_VERIFICATION");
         }
         if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
           updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
