@@ -5,29 +5,10 @@ import { YOUNG_STATUS_PHASE1, department2region, MIME_TYPES, RegionsDromComEtCor
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
-import { RapportData, SimulationAffectationCLEService } from "./SimulationAffectationCLE.service";
+import { RapportData, SimulationAffectationCLEService, SimulationResultats } from "./SimulationAffectationCLE.service";
 
-import { SejourModel } from "../sejour/Sejour.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationCLEDromComTaskParameters } from "./SimulationAffectationCLEDromComTask.model";
-import { ClasseModel } from "../../cle/classe/Classe.model";
-import { JeuneModel } from "../../jeune/Jeune.model";
-
-type Resultats = {
-    jeunesList: JeuneModel[];
-    jeunesDejaAffectedList: JeuneModel[];
-    sejourList: {
-        sejour: SejourModel;
-        placeOccupees: number;
-        placeRestantes: number;
-    }[];
-    classeErreurList: {
-        classe: ClasseModel;
-        sejour?: SejourModel;
-        jeunesNombre?: number;
-        message: string;
-    }[];
-};
 
 export type SimulationAffectationCLEDromComResult = {
     rapportData: RapportData;
@@ -65,7 +46,7 @@ export class SimulationAffectationCLEDromCom implements UseCase<SimulationAffect
 
         this.logger.log(`Classes à affecter: ${classeList.length} (etablissements: ${etablissementList.length})`);
 
-        const resultats: Resultats = {
+        const resultats: SimulationResultats = {
             jeunesList: [],
             jeunesDejaAffectedList: [],
             sejourList: [],

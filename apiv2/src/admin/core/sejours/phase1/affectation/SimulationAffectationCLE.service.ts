@@ -81,6 +81,34 @@ type ErreurRapport = {
     "Lien du bus"?: string;
 };
 
+export type SimulationResultats = {
+    jeunesList: JeuneModel[];
+    jeunesDejaAffectedList: JeuneModel[];
+    sejourList: {
+        sejour: SejourModel;
+        placeOccupees: number;
+        placeRestantes: number;
+    }[];
+    ligneDeBusList?: {
+        ligneDeBus: LigneDeBusModel;
+        classeId: string;
+        sejourId: string;
+        pdr: PointDeRassemblementModel;
+        placeOccupees: number;
+        placeRestantes: number;
+    }[];
+    classeErreurList: ClasseErreur[];
+};
+
+export type ClasseErreur = {
+    classe: ClasseModel;
+    ligneBus?: LigneDeBusModel;
+    sejour?: SejourModel;
+    jeunesNombre?: number;
+    message: string;
+    placesRestantes?: number;
+};
+
 export type RapportData = {
     summary: { [key: string]: string }[];
     jeunesNouvellementAffectedList: Array<JeuneRapport>;
@@ -149,14 +177,14 @@ export class SimulationAffectationCLEService {
     }
 
     checkPlacesRestantesLigneBus(
-        resultats,
+        resultats: SimulationResultats,
         jeunesList: JeuneModel[],
         classe: ClasseModel,
         sejour: SejourModel,
         ligneBus: LigneDeBusModel,
         pointDeRassemblement: PointDeRassemblementModel,
     ) {
-        const resultatLigneBus = resultats.ligneDeBusList.find((r) => r.ligneDeBus.id === ligneBus.id);
+        const resultatLigneBus = resultats.ligneDeBusList?.find((r) => r.ligneDeBus.id === ligneBus.id);
         let placesRestantes =
             resultatLigneBus?.placeRestantes || ligneBus.capaciteJeunes - ligneBus.placesOccupeesJeunes || 0;
         if (placesRestantes < jeunesList.length) {
@@ -165,11 +193,12 @@ export class SimulationAffectationCLEService {
                 classe,
                 ligneBus,
                 jeunesNombre: jeunesList.length,
+                placesRestantes,
             });
             return false;
         }
         if (!resultatLigneBus) {
-            resultats.ligneDeBusList.push({
+            resultats.ligneDeBusList?.push({
                 ligneDeBus: ligneBus,
                 classeId: classe.id,
                 sejourId: sejour.id,
@@ -184,7 +213,12 @@ export class SimulationAffectationCLEService {
         return true;
     }
 
-    checkPlacesRestantesCentre(resultats, jeunesList: JeuneModel[], classe: ClasseModel, sejour: SejourModel) {
+    checkPlacesRestantesCentre(
+        resultats: SimulationResultats,
+        jeunesList: JeuneModel[],
+        classe: ClasseModel,
+        sejour: SejourModel,
+    ) {
         const resultatCentre = resultats.sejourList.find((r) => r.sejour.id === sejour.id);
         const placesRestantes = resultatCentre?.placeRestantes || sejour.placesRestantes || 0;
         if (placesRestantes < jeunesList.length) {
@@ -194,6 +228,7 @@ export class SimulationAffectationCLEService {
                 ligneBus: undefined,
                 sejour,
                 jeunesNombre: jeunesList.length,
+                placesRestantes,
             });
             return false;
         }
@@ -225,13 +260,7 @@ export class SimulationAffectationCLEService {
             placeOccupees: number;
             placeRestantes: number;
         }[],
-        classeErreurList: {
-            classe: ClasseModel;
-            ligneBus?: LigneDeBusModel;
-            sejour?: SejourModel;
-            jeunesNombre?: number;
-            message: string;
-        }[],
+        classeErreurList: ClasseErreur[],
         classeList: ClasseModel[],
         etablissementList: EtablissementModel[],
         referentsList: ReferentModel[],
@@ -290,7 +319,7 @@ export class SimulationAffectationCLEService {
         const centreListRapport = sejourList.map((info) => {
             const sejour = info.sejour;
             return {
-                id: sejour.id,
+                id: sejour.centreId,
                 "Nom du centre": sejour.centreNom,
                 "Département du centre": sejour.departement,
                 "Région du centre": sejour.region,
@@ -325,15 +354,8 @@ export class SimulationAffectationCLEService {
             const etablissement = etablissementList.find(
                 (etablissement) => etablissement.id === classe.etablissementId,
             );
-            let placesRestantes;
             const ligneBus = erreur.ligneBus;
-            if (ligneBus) {
-                placesRestantes = ligneBus.capaciteJeunes - ligneBus.placesOccupeesJeunes;
-            }
             const sejour = erreur.sejour;
-            if (sejour) {
-                placesRestantes = sejour.placesRestantes;
-            }
             return {
                 "id classe": classe.id,
                 "Nom de la classe": classe.nom,
@@ -341,11 +363,12 @@ export class SimulationAffectationCLEService {
                 "Département de l'établissement": etablissement?.departement,
                 "Région de l'établissement": etablissement?.region,
                 "id du centre": classe.centreCohesionId,
+                "Nom du centre": sejour?.centreNom,
                 "id du bus": ligneBus?.id,
                 "Nom du bus": ligneBus?.numeroLigne,
                 Erreur: erreur.message,
                 "Nombre de volontaires": erreur.jeunesNombre,
-                "Capacité du bus ou de la session": placesRestantes,
+                "Capacité du bus ou de la session": erreur.placesRestantes,
                 "Lien de la classe": `https://admin.snu.gouv.fr/classes/${classe.id}`,
                 "Lien du centre": classe.centreCohesionId
                     ? `https://admin.snu.gouv.fr/centre/${classe.centreCohesionId}`

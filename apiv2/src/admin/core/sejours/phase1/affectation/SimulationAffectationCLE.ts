@@ -5,42 +5,13 @@ import { RegionsHorsMetropoleWithoutCorse, YOUNG_STATUS_PHASE1, department2regio
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
-import { RapportData, SimulationAffectationCLEService } from "./SimulationAffectationCLE.service";
+import { RapportData, SimulationAffectationCLEService, SimulationResultats } from "./SimulationAffectationCLE.service";
 
-import { SejourModel } from "../sejour/Sejour.model";
-import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationCLETaskParameters } from "./SimulationAffectationCLETask.model";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
-import { ClasseModel } from "../../cle/classe/Classe.model";
-import { JeuneModel } from "../../jeune/Jeune.model";
-
-type Resultats = {
-    jeunesList: JeuneModel[];
-    jeunesDejaAffectedList: JeuneModel[];
-    sejourList: {
-        sejour: SejourModel;
-        placeOccupees: number;
-        placeRestantes: number;
-    }[];
-    ligneDeBusList: {
-        ligneDeBus: LigneDeBusModel;
-        classeId: string;
-        sejourId: string;
-        pdr: PointDeRassemblementModel;
-        placeOccupees: number;
-        placeRestantes: number;
-    }[];
-    classeErreurList: {
-        classe: ClasseModel;
-        ligneBus?: LigneDeBusModel;
-        sejour?: SejourModel;
-        jeunesNombre?: number;
-        message: string;
-    }[];
-};
 
 export type SimulationAffectationCLEResult = {
     rapportData: RapportData;
@@ -84,7 +55,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
 
         this.logger.log(`Classes à affecter: ${classeList.length} (etablissements: ${etablissementList.length})`);
 
-        const resultats: Resultats = {
+        const resultats: SimulationResultats = {
             jeunesList: [],
             jeunesDejaAffectedList: [],
             sejourList: [],
@@ -182,7 +153,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
 
         const rapportData = this.simulationAffectationCLEService.calculRapportAffectation(
             resultats.jeunesList,
-            resultats.ligneDeBusList,
+            resultats.ligneDeBusList!,
             resultats.sejourList,
             resultats.classeErreurList,
             classeList,

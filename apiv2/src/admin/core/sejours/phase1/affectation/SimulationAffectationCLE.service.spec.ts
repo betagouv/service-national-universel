@@ -5,7 +5,7 @@ import { FileGateway } from "@shared/core/File.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
-import { SimulationAffectationCLEService } from "./SimulationAffectationCLE.service";
+import { SimulationAffectationCLEService, SimulationResultats } from "./SimulationAffectationCLE.service";
 
 import { ClasseGateway } from "../../cle/classe/Classe.gateway";
 import { EtablissementGateway } from "../../cle/etablissement/Etablissement.gateway";
@@ -57,7 +57,9 @@ describe("SimulationAffectationCLEService", () => {
             const resultats = {
                 sejourList: [],
                 classeErreurList: [],
-            };
+                jeunesList: [],
+                jeunesDejaAffectedList: [],
+            } as SimulationResultats;
             const jeunesList = [{ id: "1" }, { id: "2" }, { id: "3" }] as JeuneModel[];
             const classe = { id: "1", nom: "Classe A" } as ClasseModel;
             const sejour = { id: "1", placesRestantes: 2, placesTotal: 10 } as SejourModel;
@@ -73,6 +75,7 @@ describe("SimulationAffectationCLEService", () => {
             expect(resultats.classeErreurList).toHaveLength(1);
             expect(resultats.classeErreurList[0]).toEqual({
                 message: "La capacité de la session est trop faible",
+                placesRestantes: 2,
                 classe,
                 ligneBus: undefined,
                 sejour,
@@ -84,7 +87,9 @@ describe("SimulationAffectationCLEService", () => {
             const resultats = {
                 sejourList: [],
                 classeErreurList: [],
-            };
+                jeunesList: [],
+                jeunesDejaAffectedList: [],
+            } as SimulationResultats;
             const jeunesList = [{ id: "1" }, { id: "2" }] as JeuneModel[];
             const classe = { id: "1", nom: "Classe A" } as ClasseModel;
             const sejour = { id: "1", placesRestantes: 5, placesTotal: 10 } as SejourModel;
@@ -110,7 +115,9 @@ describe("SimulationAffectationCLEService", () => {
             const resultats = {
                 sejourList: [{ sejour, placeOccupees: 2, placeRestantes: 5 }],
                 classeErreurList: [],
-            };
+                jeunesList: [],
+                jeunesDejaAffectedList: [],
+            } as SimulationResultats;
             const jeunesList = [{ id: "1" }, { id: "2" }] as JeuneModel[];
             const classe = { id: "1", nom: "Classe A" } as ClasseModel;
 
