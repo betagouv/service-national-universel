@@ -1,11 +1,12 @@
 import React from "react";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsChevronDown } from "react-icons/bs";
-import { useSelector } from "react-redux";
 import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
+import useAuth from "@/services/useAuth";
+import useUpdateMPStatus from "../lib/useUpdateMPStatus";
 
 export const theme = {
   background: {
@@ -23,18 +24,12 @@ export const theme = {
 };
 
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
-  const [open, setOpen] = React.useState();
-  const [showFolder, setShowFolder] = React.useState(false);
-
-  React.useEffect(() => {
-    if (showHelp === true) {
-      setShowFolder(["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles));
-      setOpen(!["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles));
-    } else setOpen(true);
-  }, [young]);
+  const [open, setOpen] = React.useState(showHelp ? !["VALIDATED", "REFUSED"].includes(young.statusMilitaryPreparationFiles) : true);
+  const showFolder = showHelp && ["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
+  const { mutate, isPending } = useUpdateMPStatus();
 
   return (
     <>
@@ -119,81 +114,100 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
           </>
         ) : null}
         {open ? (
-          <div className="my-4 flex w-full flex-row justify-between gap-4 overflow-x-auto ">
-            <FileCard
-              name="Pièce d’identité"
-              icon="reglement"
-              filled={young.files?.militaryPreparationFilesIdentity?.length}
-              color={young.files?.militaryPreparationFilesIdentity?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesIdentity?.length ? "Modifier" : "À renseigner"}
-              onClick={() =>
-                setModalDocument({
-                  isOpen: true,
-                  title: "Pièce d'identité",
-                  subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI recto/verso, passeport) .",
-                  name: "militaryPreparationFilesIdentity",
-                })
-              }
-            />
-            <FileCard
-              name="Autorisation parentale"
-              icon="image"
-              filled={young.files?.militaryPreparationFilesAuthorization?.length}
-              color={young.files?.militaryPreparationFilesAuthorization?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesAuthorization?.length ? "Modifier" : "À renseigner"}
-              onClick={() =>
-                setModalDocument({
-                  isOpen: true,
-                  title: "Autorisation parentale pour effectuer une préparation militaire",
-                  subTitle: "Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire.",
-                  name: "militaryPreparationFilesAuthorization",
-                  template: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Modele_d_autorisation_parentale.pdf",
-                })
-              }
-            />
-            <FileCard
-              name="Certificat médical de non contre-indication..."
-              icon="autotest"
-              filled={young.files?.militaryPreparationFilesCertificate?.length}
-              color={young.files?.militaryPreparationFilesCertificate?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesCertificate?.length ? "Modifier" : "À renseigner"}
-              onClick={() =>
-                setModalDocument({
-                  isOpen: true,
-                  title: "Certificat médical de non contre indication à la pratique sportive",
-                  subTitle: "Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive.",
-                  name: "militaryPreparationFilesCertificate",
-                  template: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf",
-                })
-              }
-            />
-            <FileCard
-              name="Attestation de recensement"
-              icon="sanitaire"
-              filled={young.files?.militaryPreparationFilesCensus?.length}
-              color={young.files?.militaryPreparationFilesCensus?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
-              status={young.files?.militaryPreparationFilesCensus?.length ? "Modifier" : "À renseigner"}
-              description="Facultatif"
-              onClick={() =>
-                setModalDocument({
-                  isOpen: true,
-                  title: "Attestation de recensement",
-                  subTitle: "Déposez ici la copie de votre attestation de recensement.",
-                  subsubTitle: "À défaut, à téléverser dès réception du document ou à apporter pour le 1er jour de la préparation militaire.",
-                  name: "militaryPreparationFilesCensus",
-                })
-              }
-            />
-            <ModalDocument
-              isOpen={modalDocument?.isOpen}
-              title={modalDocument?.title}
-              subTitle={modalDocument?.subTitle}
-              subsubTitle={modalDocument?.subsubTitle}
-              name={modalDocument?.name}
-              young={young}
-              template={modalDocument?.template}
-              onCancel={() => setModalDocument({ isOpen: false })}
-            />
+          <div>
+            {young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
+              <div className="mt-4 mx-2 md:flex items-center gap-6 justify-between rounded-lg bg-gray-50 p-3">
+                <div>
+                  <p className="font-bold">Corrections demandées</p>
+                  <p className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</p>
+                </div>
+
+                <div className="flex-none">
+                  <button
+                    onClick={() => mutate("WAITING_VERIFICATION")}
+                    disabled={isPending}
+                    className="w-full mt-[1rem] md:mt-[0rem] rounded-lg border-[1px] border-blue-700 px-4 py-2 text-blue-700 hover:bg-blue-700 hover:text-white">
+                    Envoyer ma correction
+                  </button>
+                </div>
+              </div>
+            ) : null}
+            <div className="my-4 flex w-full flex-row justify-between gap-4 overflow-x-auto ">
+              <FileCard
+                name="Pièce d’identité"
+                icon="reglement"
+                filled={young.files?.militaryPreparationFilesIdentity?.length}
+                color={young.files?.militaryPreparationFilesIdentity?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+                status={young.files?.militaryPreparationFilesIdentity?.length ? "Modifier" : "À renseigner"}
+                onClick={() =>
+                  setModalDocument({
+                    isOpen: true,
+                    title: "Pièce d'identité",
+                    subTitle: "Déposez ici la copie d’une pièce d’identité en cours de validité (CNI recto/verso, passeport) .",
+                    name: "militaryPreparationFilesIdentity",
+                  })
+                }
+              />
+              <FileCard
+                name="Autorisation parentale"
+                icon="image"
+                filled={young.files?.militaryPreparationFilesAuthorization?.length}
+                color={young.files?.militaryPreparationFilesAuthorization?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+                status={young.files?.militaryPreparationFilesAuthorization?.length ? "Modifier" : "À renseigner"}
+                onClick={() =>
+                  setModalDocument({
+                    isOpen: true,
+                    title: "Autorisation parentale pour effectuer une préparation militaire",
+                    subTitle: "Téléchargez puis téléversez le formulaire rempli par votre représentant légal consentant à votre participation à une préparation militaire.",
+                    name: "militaryPreparationFilesAuthorization",
+                    template: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/Modele_d_autorisation_parentale.pdf",
+                  })
+                }
+              />
+              <FileCard
+                name="Certificat médical de non contre-indication..."
+                icon="autotest"
+                filled={young.files?.militaryPreparationFilesCertificate?.length}
+                color={young.files?.militaryPreparationFilesCertificate?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+                status={young.files?.militaryPreparationFilesCertificate?.length ? "Modifier" : "À renseigner"}
+                onClick={() =>
+                  setModalDocument({
+                    isOpen: true,
+                    title: "Certificat médical de non contre indication à la pratique sportive",
+                    subTitle: "Téléchargez puis téléversez le formulaire rempli par votre médecin traitant certifiant l’absence de contre-indication à la pratique sportive.",
+                    name: "militaryPreparationFilesCertificate",
+                    template: "https://cni-bucket-prod.cellar-c2.services.clever-cloud.com/file/certificat_medical.pdf",
+                  })
+                }
+              />
+              <FileCard
+                name="Attestation de recensement"
+                icon="sanitaire"
+                filled={young.files?.militaryPreparationFilesCensus?.length}
+                color={young.files?.militaryPreparationFilesCensus?.length ? "text-blue-600 bg-white" : "bg-blue-600 text-white"}
+                status={young.files?.militaryPreparationFilesCensus?.length ? "Modifier" : "À renseigner"}
+                description="Facultatif"
+                onClick={() =>
+                  setModalDocument({
+                    isOpen: true,
+                    title: "Attestation de recensement",
+                    subTitle: "Déposez ici la copie de votre attestation de recensement.",
+                    subsubTitle: "À défaut, à téléverser dès réception du document ou à apporter pour le 1er jour de la préparation militaire.",
+                    name: "militaryPreparationFilesCensus",
+                  })
+                }
+              />
+              <ModalDocument
+                isOpen={modalDocument?.isOpen}
+                title={modalDocument?.title}
+                subTitle={modalDocument?.subTitle}
+                subsubTitle={modalDocument?.subsubTitle}
+                name={modalDocument?.name}
+                young={young}
+                template={modalDocument?.template}
+                onCancel={() => setModalDocument({ isOpen: false })}
+              />
+            </div>
           </div>
         ) : null}
         <ModalInform isOpen={modalInform?.isOpen} onCancel={() => setModalInform({ isOpen: false })} />

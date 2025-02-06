@@ -1,15 +1,15 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { BsChevronDown, BsSearch } from "react-icons/bs";
+import { BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
+import { useToggle } from "react-use";
 
-import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, LigneBusType, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, isSuperAdmin, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
 import Pencil from "@/assets/icons/Pencil";
-import ExternalLink from "@/assets/icons/ExternalLink";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
 
@@ -17,6 +17,10 @@ import Select from "../../components/Select";
 import Field from "../../components/Field";
 import PDRIcon from "../../components/Icons/PDR";
 import { Button } from "@snu/ds/admin";
+import { checkTime } from "snu-lib";
+
+import PointDeRassemblementLabel from "./PointDeRassemblementLabel";
+import ConfirmChangesModal from "./ConfirmChangesModal";
 
 const options = [
   { label: "Bus", value: "bus" },
@@ -33,9 +37,9 @@ interface FormErrors {
   returnHour?: string;
 }
 
-type FormValue = Partial<
+export type PointDeRassemblementFormValueChanges = Partial<
   PointDeRassemblementType &
-    LigneBusType & {
+    LigneBusDto & {
       transportType?: string;
       meetingHour?: string;
       busArrivalHour?: string;
@@ -46,10 +50,10 @@ type FormValue = Partial<
 >;
 
 interface PointDeRassemblementProps {
-  bus: LigneBusType;
-  onBusChange: React.Dispatch<React.SetStateAction<LigneBusType>>;
+  bus: LigneBusDto;
+  onBusChange: React.Dispatch<React.SetStateAction<LigneBusDto>>;
   index: number;
-  pdr: FormValue;
+  pdr: PointDeRassemblementFormValueChanges;
   volume?: { youngsCount: number; meetingPointId: string }[];
   getVolume?: () => void;
   cohort?: CohortType | null;
@@ -62,27 +66,28 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   const [isLoading, setIsLoading] = React.useState(false);
   const [errors, setErrors] = React.useState<FormErrors>({});
   const [open, setOpen] = React.useState(false);
-  const [listPDR, setListPDR] = React.useState<FormValue[]>([]);
-  const [filteredPDR, setFilteredPDR] = React.useState<FormValue[]>([]);
+  const [listPDR, setListPDR] = React.useState<PointDeRassemblementFormValueChanges[]>([]);
+  const [filteredPDR, setFilteredPDR] = React.useState<PointDeRassemblementFormValueChanges[]>([]);
   const [search, setSearch] = React.useState("");
-  const [selectedPDR, setSelectedPDR] = React.useState<FormValue>(pdr);
-  const [data, setData] = React.useState<FormValue>({
+  const [selectedPDR, setSelectedPDR] = React.useState<PointDeRassemblementFormValueChanges>(pdr);
+  const [data, setData] = React.useState<PointDeRassemblementFormValueChanges>({
     transportType: pdr.transportType || "bus",
     meetingHour: pdr.meetingHour || "",
     busArrivalHour: pdr.busArrivalHour || "",
     departureHour: pdr.departureHour || "",
     returnHour: pdr.returnHour || "",
   });
+  const [showConfirmChangesModal, toggleConfirmChangesModal] = useToggle(false);
 
   const refSelect = React.useRef<HTMLDivElement>(null);
   const refInput = React.useRef<HTMLInputElement>(null);
-  const refContainer = React.useRef<HTMLDivElement>(null);
+  const refButtonChangesPDR = React.useRef<HTMLButtonElement>(null);
 
-  const youngsCount = volume?.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0;
+  const youngsCount = volume?.find((v) => v.meetingPointId === selectedPDR._id)?.youngsCount || 0;
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
-      if (refContainer.current && refContainer.current.contains(event.target)) {
+      if (refButtonChangesPDR.current && refButtonChangesPDR.current.contains(event.target)) {
         setOpen((open) => !open);
       } else if (refSelect.current && !refSelect.current.contains(event.target)) {
         setOpen(false);
@@ -97,7 +102,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   React.useEffect(() => {
     const fetchData = async () => {
       try {
-        const { ok, data } = await api.get(`/ligne-de-bus/${bus._id}/availablePDR`);
+        const { ok, data } = await api.get(`/ligne-de-bus/${bus._id}/availablePDRByRegion`);
         if (!ok) {
           return;
         }
@@ -124,22 +129,24 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
 
   React.useEffect(() => {
     if (listPDR.length === 0) return;
+    const searchFields = ["name", "address", "particularitesAcces", "region", "department", "code", "city", "zip", "matricule"];
+
     const filteredPDR = listPDR
       .filter((item) => {
         if (search === "") return true;
-        for (const key of keys) {
-          if (item[key].toLowerCase().includes(search?.toLowerCase())) {
-            return true;
-          }
-        }
-        return false;
+        return searchFields.some((field) => item[field]?.toString().toLowerCase().includes(search.toLowerCase()));
       })
       .filter((item) => !bus.meetingPointsIds.includes(item._id?.toString() || ""));
 
     setFilteredPDR(filteredPDR);
   }, [search, listPDR, bus]);
 
-  const handleSubmitInfo = async () => {
+  const handleCancelChanges = useCallback(() => {
+    toggleConfirmChangesModal(false);
+    setEditPdr(false);
+  }, [toggleConfirmChangesModal]);
+
+  const handleSubmitInfo = async (sendEmailCampaign: boolean = false) => {
     try {
       setIsLoading(true);
       setErrors({});
@@ -157,6 +164,8 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
       if (checkTime(data.departureHour, data.busArrivalHour)) errors.busArrivalHour = "L'heure d'arrivée du bus doit être avant l'heure de départ";
 
       if (Object.keys(errors).length > 0) {
+        toggleConfirmChangesModal(false);
+        toastr.error("Oups, une erreur est survenue lors de la modification des informations du point de rassemblement", "Veuillez vérifier les champs en rouge du formulaire");
         setErrors(errors);
         setIsLoading(false);
         return;
@@ -167,7 +176,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
         ok,
         code,
         data: ligneInfo,
-      } = await api.put(`/ligne-de-bus/${bus._id}/pointDeRassemblement`, { ...data, meetingPointId: pdr.meetingPointId, newMeetingPointId: selectedPDR._id });
+      } = await api.put(`/ligne-de-bus/${bus._id}/updatePDRForLine`, { ...data, meetingPointId: pdr.meetingPointId, newMeetingPointId: selectedPDR._id, sendEmailCampaign });
 
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification des informations du point de rassemblement", translate(code));
@@ -177,6 +186,8 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
       await getVolume?.();
       setEditPdr(false);
       setIsLoading(false);
+      toggleConfirmChangesModal(false);
+      toastr.success("Les informations du point de rassemblement ont été modifiées avec succès", "");
       setSearch("");
     } catch (e) {
       capture(e);
@@ -184,6 +195,10 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
       setIsLoading(false);
     }
   };
+
+  const handleConfirmChangesPDR = useCallback(async () => {
+    toggleConfirmChangesModal(true);
+  }, [toggleConfirmChangesModal]);
 
   if (!volume) {
     return (
@@ -194,210 +209,177 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   }
 
   return (
-    <div className="w-full rounded-xl bg-white p-8">
-      <div className="relative flex items-start justify-between">
-        <div className="flex items-center gap-4">
-          <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
-          <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
-        </div>
-        {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
-          <>
-            {!editPdr ? (
+    <>
+      <div className="w-full rounded-xl bg-white p-8">
+        <div className="relative flex items-start justify-between flex-wrap-reverse gap-y-4">
+          <div className="flex items-center gap-4">
+            <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
+            <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
+          </div>
+          {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
+            !editPdr ? (
               <button
-                className="absolute top-0 right-0 flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
                 onClick={() => setEditPdr(true)}
                 disabled={isLoading}>
                 <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
                 Modifier
               </button>
             ) : (
-              <div className="absolute top-0 right-0 flex flex-col items-end justify-end gap-2">
+              <div className="flex flex-rows items-end justify-end gap-2 flex-row-reverse ml-auto">
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={handleSubmitInfo}
+                  onClick={handleConfirmChangesPDR}
                   disabled={isLoading}>
                   <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                   Enregistrer les changements
                 </button>
                 <button
                   className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => setEditPdr(false)}
+                  onClick={handleCancelChanges}
                   disabled={isLoading}>
                   Annuler
                 </button>
               </div>
-            )}
-          </>
-        ) : null}
-      </div>
-      <div className="mt-8 flex flex-col">
-        <div className="flex flex-col">
-          <div className="flex items-center gap-2">
-            <p className="text-[15px] font-medium leading-6 text-[#242526]">
-              {pdr.department} • {pdr.region}
-            </p>
-            {user.role !== ROLES.TRANSPORTER && (
-              <Link
-                to={`/point-de-rassemblement/${pdr._id}`}
-                onClick={(e) => {
-                  e.stopPropagation();
-                }}>
-                <ExternalLink className="text-[#9CA3AF]" />
-              </Link>
-            )}
-          </div>
-          <p className="text-xs font-light leading-4 text-[#738297]">{pdr.name}</p>
-          <p className="text-xs font-light leading-4 text-[#738297]">
-            {pdr.address}, {pdr.zip}, {pdr.city}
-          </p>
+            )
+          ) : null}
         </div>
-        <div className="mt-8 flex flex-col gap-4">
-          {user.role === ROLES.ADMIN && editPdr && !youngsCount && (
-            <div className="relative">
-              <div
-                ref={refContainer}
-                className={`mt-2 flex h-[63px] w-full items-center justify-between rounded-lg bg-white py-2 px-2.5 ${
-                  open ? "border-2 border-blue-500" : "border-[1px] border-gray-300"
-                }`}>
-                <div className="flex w-[90%] flex-col justify-center">
-                  <div className="text-xs font-normal leading-6 text-gray-500">Choisir un point de rassemblement</div>
-                  <div className="w-full flex-1 truncate text-sm leading-6 text-gray-800">
-                    {selectedPDR.name}, {selectedPDR.address}, {selectedPDR.zip}, {selectedPDR.city} ({selectedPDR.department} • {selectedPDR.region})
-                  </div>
+        <div className="mt-8 flex flex-col">
+          <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
+            <div className="flex justify-between flex-row items-center">
+              <PointDeRassemblementLabel pdr={selectedPDR} showLink={user.role !== ROLES.TRANSPORTER} />
+              {isSuperAdmin(user) && editPdr && (
+                <button ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
+                  Changer de lieu
+                </button>
+              )}
+            </div>
+          </div>
+          {/* List PDR Dropdown */}
+          <div className="relative">
+            <div
+              ref={refSelect}
+              className={`${!open ? "hidden" : ""} ${
+                filteredPDR.length > 5 ? "h-[300px] overflow-y-auto" : ""
+              } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
+              <div className="sticky top-0 z-10 bg-white pt-3">
+                <div className="flex flex-row items-center gap-2">
+                  <BsSearch className="text-gray-400" />
+                  <input
+                    ref={refInput}
+                    type="text"
+                    placeholder="Rechercher un point de rassemblement"
+                    onChange={(e) => setSearch(e.target.value)}
+                    className="w-full text-[13px] leading-3 text-gray-800"
+                  />
                 </div>
-                <div className="pointer-events-none flex items-center pr-2">
-                  <BsChevronDown className={` h-4 w-4 text-gray-400  ${open ? "rotate-180 transform" : ""}`} />
-                </div>
+                <hr className="my-2" />
               </div>
-              <div
-                ref={refSelect}
-                className={`${!open ? "hidden" : ""} ${
-                  filteredPDR.length > 5 ? "h-[300px] overflow-y-auto" : ""
-                } absolute left-0 z-50 w-full rounded-lg border border-gray-300 bg-white px-3 shadow-lg`}>
-                <div className="sticky top-0 z-10 bg-white pt-3">
-                  <div className="flex flex-row items-center gap-2">
-                    <BsSearch className="text-gray-400" />
-                    <input
-                      ref={refInput}
-                      type="text"
-                      placeholder="Rechercher un point de rassemblement"
-                      onChange={(e) => setSearch(e.target.value)}
-                      className="w-full text-[13px] leading-3 text-gray-800"
-                    />
+              {filteredPDR.map((p) => (
+                <div key={p._id}>
+                  <div
+                    onClick={() => {
+                      setSelectedPDR(p);
+                      setOpen(false);
+                    }}
+                    className="flex cursor-pointer items-center gap-4 rounded-lg py-1 px-2 hover:bg-gray-50 ">
+                    <PointDeRassemblementLabel pdr={p} showLink={false} />
                   </div>
                   <hr className="my-2" />
                 </div>
-                {filteredPDR.map((p) => (
-                  <div key={p._id}>
-                    <div
-                      onClick={() => {
-                        setSelectedPDR(p);
-                        setOpen(false);
-                      }}
-                      className="flex cursor-pointer items-center gap-4 rounded-lg py-1 px-2 hover:bg-gray-50 ">
-                      <div className="text-sm leading-5 text-gray-900">{p.name}</div>
-                      <div className="flex-1 truncate text-sm leading-5 text-gray-500">
-                        {p.department} • {p.region}
-                      </div>
-                    </div>
-                    <hr className="my-2" />
-                  </div>
-                ))}
-                {filteredPDR.length === 0 && (
-                  <div className="flex items-center justify-center gap-2 pt-2 pb-4">
-                    <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
-                  </div>
-                )}
-              </div>
+              ))}
+              {filteredPDR.length === 0 && (
+                <div className="flex items-center justify-center gap-2 pt-2 pb-4">
+                  <div className="text-xs leading-4 text-gray-900">Aucun point de rassemblement trouvé</div>
+                </div>
+              )}
             </div>
-          )}
-          <Select
-            label="Type de transport"
-            options={options}
-            selected={options.find((e) => e.value === data.transportType)}
-            setSelected={(e) => setData({ ...data, transportType: e.value })}
-            readOnly={!editPdr}
-          />
-          <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
-          <div className="flex items-center gap-4">
-            <Field
-              label="Heure d’arrivée du transport"
-              onChange={(e) => setData({ ...data, busArrivalHour: e.target.value })}
-              placeholder="hh:mm"
-              value={data?.busArrivalHour}
-              error={errors?.busArrivalHour}
-              readOnly={!editPdr}
-              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
-            />
-            <Field
-              label="Heure de convocation"
-              onChange={(e) => setData({ ...data, meetingHour: e.target.value })}
-              placeholder="hh:mm"
-              value={data.meetingHour}
-              error={errors?.meetingHour}
-              readOnly={!editPdr}
-            />
           </div>
-          <div className="flex items-center gap-4">
-            <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Aller</div>
-            <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Retour</div>
-          </div>
-          <div className="flex items-center gap-4">
-            <Field
-              label="Heure de départ"
-              onChange={(e) => setData({ ...data, departureHour: e.target.value })}
-              placeholder="hh:mm"
-              value={data?.departureHour}
-              error={errors?.departureHour}
+          {/* End List PDR Dropdown */}
+
+          <div className="mt-8 flex flex-col gap-4">
+            <Select
+              label="Type de transport"
+              options={options}
+              selected={options.find((e) => e.value === data.transportType)}
+              setSelected={(e) => setData({ ...data, transportType: e.value })}
               readOnly={!editPdr}
-              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
             />
-            <Field
-              label="Heure d’arrivée"
-              onChange={(e) => setData({ ...data, returnHour: e.target.value })}
-              placeholder="hh:mm"
-              value={data.returnHour}
-              error={errors?.returnHour}
-              readOnly={!editPdr}
-              disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
-            />
+            <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
+            <div className="flex items-center gap-4">
+              <Field
+                label="Heure d’arrivée du transport"
+                onChange={(e) => setData({ ...data, busArrivalHour: e.target.value })}
+                placeholder="hh:mm"
+                value={data?.busArrivalHour}
+                error={errors?.busArrivalHour}
+                readOnly={!editPdr}
+                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+              />
+              <Field
+                label="Heure de convocation"
+                onChange={(e) => setData({ ...data, meetingHour: e.target.value })}
+                placeholder="hh:mm"
+                value={data.meetingHour}
+                error={errors?.meetingHour}
+                readOnly={!editPdr}
+              />
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Aller</div>
+              <div className="w-1/2 text-xs font-medium leading-4 text-gray-900">Retour</div>
+            </div>
+            <div className="flex items-center gap-4">
+              <Field
+                label="Heure de départ"
+                onChange={(e) => setData({ ...data, departureHour: e.target.value })}
+                placeholder="hh:mm"
+                value={data?.departureHour}
+                error={errors?.departureHour}
+                readOnly={!editPdr}
+                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+              />
+              <Field
+                label="Heure d’arrivée"
+                onChange={(e) => setData({ ...data, returnHour: e.target.value })}
+                placeholder="hh:mm"
+                value={data.returnHour}
+                error={errors?.returnHour}
+                readOnly={!editPdr}
+                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+              />
+            </div>
           </div>
-        </div>
-        <div className="mt-3 flex items-center gap-2">
-          <div className="pb-1 text-lg font-medium leading-5 text-gray-900"> </div>
-          <Link
-            target="_blank"
-            to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}&ligneId=${bus._id.toString()}`}
-            className="w-full">
-            <Button type="tertiary" title={`Voir les volontaires (${youngsCount})`} className="w-full max-w-none" />
-          </Link>
-        </div>
-        <div className="mt-8 flex justify-end">
-          <PDRIcon />
+          <div className="mt-3 flex items-center gap-2">
+            <div className="pb-1 text-lg font-medium leading-5 text-gray-900"> </div>
+            <Link
+              target="_blank"
+              to={`/ligne-de-bus/volontaires/point-de-rassemblement/${pdr._id?.toString()}?cohort=${cohort?.name}&ligneId=${bus._id.toString()}`}
+              className="w-full">
+              <Button type="tertiary" title={`Voir les volontaires (${youngsCount})`} className="w-full max-w-none" />
+            </Link>
+          </div>
+          <div className="mt-8 flex justify-end">
+            <PDRIcon />
+          </div>
         </div>
       </div>
-    </div>
+      <ConfirmChangesModal
+        isOpen={showConfirmChangesModal}
+        onCancel={handleCancelChanges}
+        onConfirm={handleSubmitInfo}
+        cohort={cohort || null}
+        beforeChangeFormData={pdr}
+        afterChangeFormData={{
+          ...selectedPDR,
+          transportType: data.transportType || "bus",
+          meetingHour: data.meetingHour || "",
+          busArrivalHour: data.busArrivalHour || "",
+          departureHour: data.departureHour || "",
+          returnHour: data.returnHour || "",
+        }}
+        youngsCount={youngsCount}
+      />
+    </>
   );
-}
-
-function checkTime(time1, time2) {
-  const time1Split = time1.split(":");
-  const time2Split = time2.split(":");
-
-  // Check if the hours are equal
-  if (time1Split[0] === time2Split[0]) {
-    // If the hours are equal, check if the minutes in time2 are greater than time1
-    if (time2Split[1] >= time1Split[1]) {
-      return true;
-    } else {
-      return false;
-    }
-  } else {
-    // If the hours are not equal, check if the hours in time2 are greater than time1
-    if (time2Split[0] > time1Split[0]) {
-      return true;
-    } else {
-      return false;
-    }
-  }
 }

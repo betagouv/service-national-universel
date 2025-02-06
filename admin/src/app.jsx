@@ -77,6 +77,7 @@ import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
+import EmailPreview from "./scenes/email-preview";
 
 initApi();
 
@@ -91,6 +92,7 @@ class App extends React.Component {
               <Suspense fallback={<Loader />}>
                 <Switch>
                   {/* Aucune authentification nécessaire */}
+                  <SentryRoute path="/email-preview/:id" component={EmailPreview} />
                   <SentryRoute path="/validate" component={Validate} />
                   <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                   <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />

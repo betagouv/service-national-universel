@@ -25,7 +25,7 @@ import { orderCohort } from "../../../components/filters-system-v2/components/fi
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 import { youngCheckinField } from "@/utils";
 
-export const getFilterArray = (user, bus, session, classes, etablissements) => {
+export const getFilterArray = (user, labels) => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -181,10 +181,8 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !classes.length) return item;
-        const res = classes.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.uniqueKeyAndId;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     {
@@ -193,10 +191,8 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !etablissements.length) return item;
-        const res = etablissements.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.name;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     {
@@ -205,10 +201,8 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !session.length) return item;
-        const res = session.find((option) => option._id.toString() === item);
-        if (!res) return "N/A - Supprimé";
-        return res?.codeCentre;
+        if (item === "N/A") return item;
+        return labels[item] || "N/A - Supprimé";
       },
     },
     {
@@ -273,8 +267,8 @@ export const getFilterArray = (user, bus, session, classes, etablissements) => {
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
       translate: (item) => {
-        if (item === "N/A" || !bus?.length) return item;
-        return bus.find((option) => option._id.toString() === item)?.busId || item;
+        if (item === "N/A") return item;
+        return labels[item] || item;
       },
     },
     {
@@ -479,6 +473,7 @@ export async function transformVolontaires(data, values) {
       phase1Affectation: {
         "ID centre": center._id || "",
         "Matricule centre": center.matricule || "",
+        "Code centre (2022)": center.code2022 || "",
         "Nom du centre": center.name || "",
         "Ville du centre": center.city || "",
         "Département du centre": center.department || "",

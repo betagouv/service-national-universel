@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { config } = require("../../config");
-const { deleteFilesByList, listFiles, getFile } = require("../../utils/index");
+const { deleteFilesByList, listFiles, getFile, getReferentManagerPhase2 } = require("../../utils/index");
 const { isYoung } = require("../../utils/index");
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
@@ -303,6 +303,22 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
+
+    if (value.statusMilitaryPreparationFiles === "WAITING_VERIFICATION") {
+      const toReferents = await getReferentManagerPhase2(req.user.department);
+      if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
+
+      await sendTemplate(parseInt(template), {
+        emailTo: toReferents.map((referent) => ({
+          name: `${referent.firstName} ${referent.lastName}`,
+          email: referent.email,
+        })),
+        params: { cta: `${config.ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
+      });
+    }
+
     await young.save({ fromUser: req.user });
     res.status(200).send({ ok: true, data: young });
   } catch (error) {

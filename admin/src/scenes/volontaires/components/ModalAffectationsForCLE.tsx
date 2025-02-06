@@ -29,7 +29,7 @@ export default function ModalAffectationsForCLE({ isOpen, onClose, young, setYou
   });
 
   const centerFull = !classe?.session || !classe?.session.placesLeft || classe.session.placesLeft <= 0;
-  const ligneFull = !classe?.ligne || classe.ligne.youngCapacity - classe.ligne.youngSeatsTaken <= 0;
+  const ligneFull = !classe?.ligne ? false : classe.ligne.youngCapacity - classe.ligne.youngSeatsTaken <= 0;
 
   const isFull = centerFull || ligneFull;
 
@@ -108,11 +108,11 @@ export default function ModalAffectationsForCLE({ isOpen, onClose, young, setYou
               </p>
               <p>
                 <span className="text-gray-500">Point de rassemblement : </span>
-                {classe.pointDeRassemblement?.name}
+                {classe.pointDeRassemblement?.name || "Non défini"}
               </p>
               <p>
                 <span className="text-gray-500">Ligne de bus : </span>
-                {classe.ligne?.busId}
+                {classe.ligne?.busId || "Non défini"}
               </p>
             </>
           </div>

@@ -130,7 +130,6 @@ export const transformExistingField = (data) => {
     { key: "false", doc_count: 0 },
   ];
   data.map((d) => {
-    console.log(d);
     if (d.key === "N/A" || d.key === "") {
       newData.find((e) => e.key === "false").doc_count += d.doc_count;
     } else {
