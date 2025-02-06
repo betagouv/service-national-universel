@@ -3,13 +3,14 @@ import { IoRepeat } from "react-icons/io5";
 import { HiUsers, HiCheckCircle, HiExclamationCircle, HiOutlineXCircle, HiOutlineExclamation } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
 
-import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS } from "snu-lib";
+import { translateStatusClasse, translateInscriptionStatus, YOUNG_SOURCE, COHORT_TYPE, YOUNG_STATUS_PHASE1, YOUNG_STATUS, ERRORS, HttpError } from "snu-lib";
 import { ProfilePic } from "@snu/ds";
 import { Badge, ModalConfirmation, Select, InputText, Button } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import downloadPDF from "@/utils/download-pdf";
 import api from "@/services/api";
+import { Phase1Service } from "@/services/phase1Service";
 
 import UploadedFileIcon from "@/assets/icons/UploadedFileIcon";
 import Loader from "@/components/Loader";
@@ -273,8 +274,6 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                     message: emailMessage,
                     cohortChangeReason: motif?.label,
                   });
-                  // if (young.status === YOUNG_STATUS.VALIDATED && fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.WAITING_LIST });
-                  // if (young.status === YOUNG_STATUS.WAITING_LIST && !fillingRateMet) await api.put(`/referent/young/${young._id}`, { status: YOUNG_STATUS.VALIDATED });
                   await onChange();
                   if (!ok) return toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
                   toastr.success("Cohorte modifiée avec succès", "");
@@ -462,21 +461,25 @@ export function ChangeCohortModal({ isOpen, user, young, cohorts, onClose, onCha
                       fileName: `${young.firstName} ${young.lastName} - certificate 1.pdf`,
                     });
                   }
-                  const { ok, code } = await api.put(`/referent/young/${young._id}/change-cohort`, {
+                  const payload = {
                     source: YOUNG_SOURCE.CLE,
                     cohort: classe?.cohort,
                     etablissementId: etablissement?._id,
                     classeId: classe?._id,
-                  });
-                  if (!ok) {
-                    if (code === ERRORS.OPERATION_NOT_ALLOWED) {
-                      setModaleError(true);
-                    }
-                    toastr.error("Une erreur est survenue lors de la modification de la cohorte", "");
-                  } else {
-                    await onChange();
-                    toastr.success("Cohorte modifiée avec succès", "");
-                  }
+                  };
+                  Phase1Service.changeSession(young._id, payload)
+                    .then(() => {
+                      toastr.success("Opération réussie", "Cohorte modifiée avec succès");
+                      onChange();
+                    })
+                    .catch((error: HttpError) => {
+                      if (error?.statusCode === 422) {
+                        toastr.error("Oups, une erreur est survenue lors de la modification de la cohorte", "");
+                      }
+                      if (error?.description === ERRORS.OPERATION_NOT_ALLOWED) {
+                        setModaleError(true);
+                      }
+                    });
                 } catch (error) {
                   capture(error);
                   toastr.error(error.message, "");

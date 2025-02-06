@@ -14,6 +14,7 @@ export const createJeune = async (jeune?: Partial<JeuneModel>) => {
     return await jeuneGateway.create({
         prenom: faker.person.firstName(),
         nom: faker.person.lastName(),
+        source: "VOLONTAIRE",
         // frenchNationality: "true",
         // birthCountry: faker.location.country(),
         // birthCity: faker.location.city(),

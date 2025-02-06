@@ -12,6 +12,8 @@ export interface JeuneGateway {
     ): Promise<JeuneModel[]>;
     findBySessionIdClasseIdAndStatus(sessionId: string, classeId: string, status: string): Promise<JeuneModel[]>;
     findBySessionId(sessionId: string): Promise<JeuneModel[]>;
+    findBySejourId(sejourId: string): Promise<JeuneModel[]>;
+    findInBus(ligneDeBusId: string): Promise<JeuneModel[]>;
     update(jeune: JeuneModel): Promise<JeuneModel>;
     updateSession(
         jeune: Pick<
@@ -23,6 +25,7 @@ export interface JeuneGateway {
     create(jeune: CreateJeuneModel): Promise<JeuneModel>;
     countAffectedByLigneDeBus(ligneDeBusId: string): Promise<number>;
     findByClasseId(classeId: string): Promise<JeuneModel[]>;
+    find(query: any): Promise<JeuneModel[]>;
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");

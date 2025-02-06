@@ -5,6 +5,9 @@ import {
     SupprimerClasseEngageeParams,
     VerifierClasseEmailAdminCleParams,
     VerifierClasseEmailReferentDepRegParams,
+    jeuneBasculeCLEParams,
+    jeuneBasculeParentNotifParams,
+    jeuneBasculeNotifToJeune,
 } from "@notification/core/Notification";
 import { EmailProviderParams } from "./EmailBrevo.provider";
 
@@ -33,6 +36,13 @@ export class EmailBrevoMapper {
             case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
             case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
                 return this.mapSupprimerClasseEngagee(template, emailParams as SupprimerClasseEngageeParams);
+            case EmailTemplate.JEUNE_CHANGE_SESSION_TO_CLE:
+            case EmailTemplate.JEUNE_CHANGE_SESSION_CLE_TO_HTS:
+                return this.mapJeuneBasculeCLE(template, emailParams as jeuneBasculeCLEParams);
+            case EmailTemplate.PARENT_JEUNE_SESSION_CHANGE:
+                return this.mapJeuneBasculeParentNotif(template, emailParams as jeuneBasculeParentNotifParams);
+            case EmailTemplate.CHANGE_SESSION:
+                return this.mapJeuneBasculeNotifToJeune(template, emailParams as jeuneBasculeNotifToJeune);
         }
     }
 
@@ -112,6 +122,57 @@ export class EmailBrevoMapper {
             templateId: Number(template),
         };
     }
+
+    static mapJeuneBasculeCLE(
+        template: EmailTemplate,
+        jeuneBasculeCLEParams: jeuneBasculeCLEParams,
+    ): EmailProviderJeuneBasculeCLE {
+        return {
+            to: jeuneBasculeCLEParams.to,
+            params: {
+                firstname: jeuneBasculeCLEParams.firstname,
+                name: jeuneBasculeCLEParams.name,
+                class_name: jeuneBasculeCLEParams.class_name,
+                class_code: jeuneBasculeCLEParams.class_code,
+                cta: jeuneBasculeCLEParams.cta,
+            },
+            templateId: Number(template),
+        };
+    }
+
+    static mapJeuneBasculeParentNotif(
+        template: EmailTemplate,
+        jeuneBasculeParentNotifParams: jeuneBasculeParentNotifParams,
+    ): EmailProviderJeuneBasculeParentNotif {
+        return {
+            to: jeuneBasculeParentNotifParams.to,
+            params: {
+                cohort: jeuneBasculeParentNotifParams.cohort,
+                youngFirstName: jeuneBasculeParentNotifParams.youngFirstName,
+                youngName: jeuneBasculeParentNotifParams.youngName,
+                cta: jeuneBasculeParentNotifParams.cta,
+            },
+            templateId: Number(template),
+        };
+    }
+
+    static mapJeuneBasculeNotifToJeune(
+        template: EmailTemplate,
+        jeuneBasculeNotifToJeune: jeuneBasculeNotifToJeune,
+    ): EmailProviderJeuneBasculeNotifToJeune {
+        return {
+            to: jeuneBasculeNotifToJeune.to,
+            params: {
+                motif: jeuneBasculeNotifToJeune.motif,
+                message: jeuneBasculeNotifToJeune.message,
+                newcohortdate: jeuneBasculeNotifToJeune.newcohortdate,
+                oldprogram: jeuneBasculeNotifToJeune.oldprogram,
+                newprogram: jeuneBasculeNotifToJeune.newprogram,
+                cta: jeuneBasculeNotifToJeune.cta,
+            },
+            templateId: Number(template),
+        };
+    }
 }
 
 export interface EmailProviderVerifierClasseAdminCle extends EmailProviderParams {
@@ -148,6 +209,36 @@ export interface EmailProviderSupprimerClasseEngagee extends EmailProviderParams
         toName: string;
         class_name?: string;
         class_code: string;
+        cta: string;
+    };
+}
+
+export interface EmailProviderJeuneBasculeCLE extends EmailProviderParams {
+    params: {
+        firstname: string;
+        name: string;
+        class_name: string;
+        class_code: string;
+        cta: string;
+    };
+}
+
+export interface EmailProviderJeuneBasculeParentNotif extends EmailProviderParams {
+    params: {
+        cohort: string;
+        youngFirstName: string;
+        youngName: string;
+        cta: string;
+    };
+}
+
+export interface EmailProviderJeuneBasculeNotifToJeune extends EmailProviderParams {
+    params: {
+        motif: string;
+        message: string;
+        newcohortdate: string;
+        oldprogram: string;
+        newprogram: string;
         cta: string;
     };
 }

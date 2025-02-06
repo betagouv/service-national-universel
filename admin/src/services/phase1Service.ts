@@ -29,6 +29,18 @@ const Phase1Service = {
       target: "API_V2",
     })();
   },
+  changeSession: async (
+    youngId: Phase1Routes["ChangeYoungSessionRoute"]["params"]["youngId"],
+    ChangerLaCohorteDuJeunePayloadDto: Phase1Routes["ChangeYoungSessionRoute"]["payload"],
+  ) => {
+    return await buildRequest<Phase1Routes["ChangeYoungSessionRoute"]>({
+      path: "/phase1/{youngId}/change-session",
+      method: "PUT",
+      params: { youngId },
+      payload: ChangerLaCohorteDuJeunePayloadDto,
+      target: "API_V2",
+    })();
+  },
 };
 
 export { Phase1Service };

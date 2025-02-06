@@ -38,6 +38,8 @@ import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
+import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
@@ -97,6 +99,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
+        { provide: JeuneGateway, useClass: JeuneRepository },
         { provide: ClockGateway, useClass: ClockProvider },
         // add use case here
         AffectationService,

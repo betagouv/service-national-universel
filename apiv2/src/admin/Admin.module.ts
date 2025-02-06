@@ -14,6 +14,12 @@ import { TaskModule } from "@task/Task.module";
 import { ClsMiddleware, ClsModule } from "nestjs-cls";
 import { SigninReferent } from "./core/iam/useCase/SigninReferent";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
+import { ClasseStateManager } from "./core/sejours/cle/classe/stateManager/Classe.stateManager";
+import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { SessionService } from "./core/sejours/phase1/session/Session.service";
+import { SejourService } from "./core/sejours/phase1/sejour/Sejour.service";
+import { PlanDeTransportService } from "./core/sejours/phase1/PlanDeTransport/PlanDeTransport.service";
+import { BasculeService } from "./core/sejours/phase1/bascule/Bascule.service";
 import { AuthController } from "./infra/iam/api/Auth.controller";
 import { AddUserToRequestMiddleware } from "./infra/iam/auth/AddUserToRequest.middleware";
 import { AuthProvider } from "./infra/iam/auth/Auth.provider";
@@ -21,12 +27,14 @@ import { JwtTokenService } from "./infra/iam/auth/JwtToken.service";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
 import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
+import { BasculeController } from "./infra/sejours/phase1/bascule/api/Bascule.controller";
 import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
 import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
-import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
+import { guardProviders as cleGuardProviders } from "./infra/sejours/cle/initProvider/guard";
+import { guardProviders as jeuneGuardProviders } from "./infra/sejours/jeune/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
 import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
@@ -52,7 +60,8 @@ import { serviceProvider } from "./infra/iam/service/serviceProvider";
 import { ReferentController } from "./infra/iam/api/Referent.controller";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
-
+import { PlanDeTransportGateway } from "./core/sejours/phase1/planDeTransport/PlanDeTransport.gateway";
+import { PlanDeTransportRepository } from "./infra/sejours/phase1/planDeTransport/repository/mongo/PlanDeTransportMongo.repository";
 import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
@@ -82,6 +91,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     ],
     controllers: [
         ClasseController,
+        BasculeController,
         AffectationController,
         Phase1Controller,
         ImportReferentielController,
@@ -92,10 +102,16 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     ],
     providers: [
         ClasseService,
+        ClasseStateManager,
+        JeuneService,
+        SessionService,
+        SejourService,
+        BasculeService,
         AffectationService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
         ReferentielRoutesService,
+        PlanDeTransportService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,
@@ -109,7 +125,8 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         ...pointDeRassemblementMongoProviders,
         ...sejourMongoProviders,
         ...sessionMongoProviders,
-        ...guardProviders,
+        ...cleGuardProviders,
+        ...jeuneGuardProviders,
         ...taskMongoProviders,
         ...historyProvider,
         Logger,
@@ -118,10 +135,11 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
+        { provide: PlanDeTransportGateway, useClass: PlanDeTransportRepository },
         ...cleUseCaseProviders,
         ...phase1UseCaseProviders,
-        ...cleGatewayProviders,
         ...phase1GatewayProviders,
+        ...cleGatewayProviders,
         ...jeuneGatewayProviders,
         ...referentielUseCaseProvider,
         ...serviceProvider,

@@ -1,3 +1,5 @@
+import exp from "constants";
+
 export interface EmailParams {
     from?: string;
     to: { email: string; name: string }[];
@@ -40,6 +42,30 @@ export interface SupprimerClasseEngageeParams extends EmailParams {
 
 export interface NouvelleClasseEngageeParams extends SupprimerClasseEngageeParams {}
 
+export interface jeuneBasculeCLEParams extends EmailParams {
+    firstname: string;
+    name: string;
+    class_name: string;
+    class_code: string;
+    cta: string;
+}
+
+export interface jeuneBasculeParentNotifParams extends EmailParams {
+    cohort: string;
+    youngFirstName: string;
+    youngName: string;
+    cta: string;
+}
+
+export interface jeuneBasculeNotifToJeune extends EmailParams {
+    motif: string;
+    message: string;
+    newcohortdate: string;
+    oldprogram: string;
+    newprogram: string;
+    cta: string;
+}
+
 export enum EmailTemplate {
     // CLE
     VERIFIER_CLASSE_EMAIL_ADMIN_CLE = "2084",
@@ -50,4 +76,14 @@ export enum EmailTemplate {
     SUPPRIMER_CLASSE_ENGAGEE = "2331",
     NOUVELLE_CLASSE_ENGAGEE = "2350",
     IMPORT_REFERENTIEL_GENERIQUE = "2324",
+
+    // Referent
+    JEUNE_CHANGE_SESSION_TO_CLE = "1462",
+    JEUNE_CHANGE_SESSION_CLE_TO_HTS = "1463",
+
+    // Jeune
+    CHANGE_SESSION = "1461",
+
+    // Parent
+    PARENT_JEUNE_SESSION_CHANGE = "1307",
 }

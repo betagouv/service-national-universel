@@ -68,7 +68,7 @@ export interface YoungDto {
   statusPhase2UpdatedAt?: Date;
   statusPhase2OpenedAt?: Date;
   statusPhase2ValidatedAt?: Date;
-  statusPhase2Contract?: string;
+  statusPhase2Contract?: string[];
   statusPhase3?: string;
   statusPhase3UpdatedAt?: Date;
   statusPhase3ValidatedAt?: Date;
@@ -104,8 +104,8 @@ export interface YoungDto {
   cohesionCenterZip?: string;
   cohesionCenterCity?: string;
   autoAffectationPhase1ExpiresAt?: Date;
-  phase2ApplicationStatus?: string;
-  phase2ApplicationFilesType?: string;
+  phase2ApplicationStatus?: string[];
+  phase2ApplicationFilesType?: string[];
   phase2NumberHoursDone?: string;
   phase2NumberHoursEstimated?: string;
   phase3StructureName?: string;
@@ -201,6 +201,7 @@ export interface YoungDto {
   parent2AllowImageRights?: string;
   parent2AllowImageRightsReset?: string;
   parent2ContactPreference?: string;
+  cohesionStayMedicalFileReceived?: string;
   hostLastName?: string;
   hostFirstName?: string;
   hostRelationship?: string;
@@ -285,6 +286,7 @@ export interface YoungDto {
   militaryPreparationFilesCertificate?: string[];
   statusMilitaryPreparationFiles?: string;
   militaryPreparationCorrectionMessage?: string;
+  cniFiles?: string[];
   files?: {
     cniFiles?: File[];
     highSkilledActivityProofFiles?: File[];
