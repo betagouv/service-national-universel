@@ -84,6 +84,7 @@ describe("ClasseStateManager", () => {
     });
 
     it("should open the class if session inscription is open", async () => {
+        const now = new Date();
         const mockClasse = {
             id: "1",
             sessionId: "session1",
@@ -93,9 +94,9 @@ describe("ClasseStateManager", () => {
         };
         const mockSession = {
             inscriptionStartDate: new Date("2024-01-01"),
-            inscriptionEndDate: new Date("2024-12-31"),
+            inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 24), // Ends tomorrow
         };
-        const mockJeunes = new Array(5).fill({ statut: YOUNG_STATUS.VALIDATED });
+        const mockJeunes = new Array(4).fill({ statut: YOUNG_STATUS.VALIDATED });
 
         (classeGateway.findById as jest.Mock).mockResolvedValue(mockClasse);
         (sessionGateway.findById as jest.Mock).mockResolvedValue(mockSession);
@@ -128,6 +129,7 @@ describe("ClasseStateManager", () => {
     });
 
     it("should close classe if it is full", async () => {
+        const now = new Date();
         const mockClasse = {
             id: "1",
             sessionId: "session1",
@@ -136,7 +138,7 @@ describe("ClasseStateManager", () => {
         };
         const mockSession = {
             inscriptionStartDate: new Date("2024-01-01"),
-            inscriptionEndDate: new Date("2024-12-31"),
+            inscriptionEndDate: new Date(now.getTime() + 1000 * 60 * 60 * 24), // Ends tomorrow
         };
         const mockJeunes = new Array(5).fill({ statut: YOUNG_STATUS.VALIDATED });
 
