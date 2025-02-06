@@ -18,7 +18,7 @@ import { ClasseStateManager } from "./core/sejours/cle/classe/stateManager/Class
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { SessionService } from "./core/sejours/phase1/session/Session.service";
 import { SejourService } from "./core/sejours/phase1/sejour/Sejour.service";
-import { PlanDeTransportService } from "./core/sejours/phase1/planDeTransport/PlanDeTransport.service";
+import { PlanDeTransportService } from "./core/sejours/phase1/PlanDeTransport/PlanDeTransport.service";
 import { BasculeService } from "./core/sejours/phase1/bascule/Bascule.service";
 import { AuthController } from "./infra/iam/api/Auth.controller";
 import { AddUserToRequestMiddleware } from "./infra/iam/auth/AddUserToRequest.middleware";

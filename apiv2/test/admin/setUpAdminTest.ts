@@ -17,7 +17,7 @@ import { SessionService } from "@admin/core/sejours/phase1/session/Session.servi
 import { SejourService } from "@admin/core/sejours/phase1/sejour/Sejour.service";
 import { BasculeService } from "@admin/core/sejours/phase1/bascule/Bascule.service";
 import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
-import { PlanDeTransportService } from "@admin/core/sejours/phase1/planDeTransport/PlanDeTransport.service";
+import { PlanDeTransportService } from "@admin/core/sejours/phase1/PlanDeTransport/PlanDeTransport.service";
 import { AuthController } from "@admin/infra/iam/api/Auth.controller";
 import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
