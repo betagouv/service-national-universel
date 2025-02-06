@@ -7,7 +7,7 @@ export interface SimulationBasculeJeunesValidesTaskParameters extends Phase1Task
   status: YoungDto["status"][];
   statusPhase1: YoungDto["statusPhase1"][];
   statusPhase1Motif: YoungDto["statusPhase1Motif"][];
-  cohesionStayPresence: boolean;
+  presenceArrivee: Array<boolean | null>;
   niveauScolaires: Array<keyof typeof GRADES>;
   departements: string[];
   etranger: boolean;

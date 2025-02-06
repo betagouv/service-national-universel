@@ -13,8 +13,9 @@ export class PostSimulationsPayloadDto {
     @ArrayMinSize(1)
     statusPhase1: Array<keyof typeof YOUNG_STATUS>;
 
-    @IsBoolean()
-    cohesionStayPresence;
+    @IsArray()
+    @IsIn([true, false, null], { each: true })
+    presenceArrivee: Array<boolean | null>;
 
     @IsArray()
     @IsIn(Object.values(DEPART_SEJOUR_MOTIFS), { each: true })

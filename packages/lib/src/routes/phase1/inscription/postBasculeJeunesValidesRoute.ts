@@ -11,7 +11,7 @@ export interface PostBasculeJeunesValidesRoute extends BasicRoute {
   payload: {
     status: YoungDto["status"][];
     statusPhase1: YoungDto["statusPhase1"][];
-    cohesionStayPresence: boolean;
+    presenceArrivee: Array<boolean | null>;
     statusPhase1Motif: YoungDto["statusPhase1Motif"][];
     niveauScolaires: Array<keyof typeof GRADES>;
     departements: string[];

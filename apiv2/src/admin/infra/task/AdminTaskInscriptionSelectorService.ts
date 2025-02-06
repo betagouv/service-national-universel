@@ -22,7 +22,7 @@ export class AdminTaskInscriptionSelectorService {
         let results = {} as Record<string, any>;
         switch (job.name) {
             case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
-                const simulationBasculeTask = task as SimulationBasculeJeunesValidesTaskModel;
+                const simulationBasculeTask: SimulationBasculeJeunesValidesTaskModel = task;
                 const simulation = await this.simulationBasculeJeunesValides.execute(
                     simulationBasculeTask.metadata!.parameters!,
                 );
@@ -32,7 +32,7 @@ export class AdminTaskInscriptionSelectorService {
                 } as SimulationBasculeJeunesValidesTaskResult;
                 break;
             case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
-                const validationBasculeTask = task as ValiderBasculeJeunesValidesTaskModel;
+                const validationBasculeTask: ValiderBasculeJeunesValidesTaskModel = task;
                 const validationBasculeSimulation = await this.validerBasculeJeunesValides.execute({
                     ...validationBasculeTask.metadata!.parameters!,
                     dateValidation: validationBasculeTask.createdAt,

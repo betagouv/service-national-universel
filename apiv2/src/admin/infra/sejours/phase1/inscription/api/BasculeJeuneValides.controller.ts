@@ -56,7 +56,7 @@ export class BasculeJeuneValidesController {
             sessionId,
             status: payload.status,
             statusPhase1: payload.statusPhase1,
-            cohesionStayPresence: payload.cohesionStayPresence,
+            presenceArrivee: payload.presenceArrivee,
             statusPhase1Motif: payload.statusPhase1Motif,
             departements: payload.departements,
             niveauScolaires: payload.niveauScolaires,

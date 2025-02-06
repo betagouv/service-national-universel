@@ -75,7 +75,7 @@ describe("BasculeJeuneValidesController", () => {
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    cohesionStayPresence: false,
+                    presenceArrivee: [false],
                     statusPhase1Motif: [],
                     niveauScolaires: [],
                     departements: departmentList,
@@ -94,7 +94,7 @@ describe("BasculeJeuneValidesController", () => {
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    cohesionStayPresence: false,
+                    presenceArrivee: [false],
                     statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: [],
@@ -113,7 +113,7 @@ describe("BasculeJeuneValidesController", () => {
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    cohesionStayPresence: false,
+                    presenceArrivee: [false],
                     statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: ["nonInexistant"],
@@ -132,7 +132,7 @@ describe("BasculeJeuneValidesController", () => {
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    cohesionStayPresence: false,
+                    presenceArrivee: [false],
                     statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: departmentList,

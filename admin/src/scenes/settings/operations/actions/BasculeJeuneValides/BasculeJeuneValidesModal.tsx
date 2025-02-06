@@ -27,6 +27,19 @@ interface BasculeJeuneValidesMetropoleProps {
   onClose: () => void;
 }
 
+type TrileanOption = "true" | "false" | "";
+const MAP_TRILEAN_OPTIONS = {
+  true: true,
+  false: false,
+  "": null,
+};
+
+const COHESION_STAY_PRESENCE_OPTIONS = [
+  { label: "Oui", value: "true" },
+  { label: "Non", value: "false" },
+  { label: "Non renseigné", value: "" },
+];
+
 export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: BasculeJeuneValidesMetropoleProps) {
   const queryClient = useQueryClient();
 
@@ -34,7 +47,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     status: YoungDto["status"][];
     statusPhase1: YoungDto["statusPhase1"][];
     statusPhase1Motif: YoungDto["statusPhase1Motif"][];
-    cohesionStayPresence: boolean;
+    presenceArrivee: Array<TrileanOption>;
     niveauScolaires: string[];
     departements: Record<string, string[]>;
     etranger: boolean;
@@ -43,7 +56,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     status: [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED],
     statusPhase1: [YOUNG_STATUS_PHASE1.NOT_DONE],
     statusPhase1Motif: [],
-    cohesionStayPresence: false,
+    presenceArrivee: ["false", ""],
     niveauScolaires: session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
     departements: regionList.reduce((acc, region) => {
       acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
@@ -53,11 +66,11 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     avenir: false,
   });
 
-  const isReady = state.niveauScolaires.length > 0 && Object.values(state.departements).some((departements) => departements.length > 0);
+  const isReady = state.niveauScolaires.length > 0 && state.presenceArrivee.length > 0 && Object.values(state.departements).some((departements) => departements.length > 0);
 
   useUpdateEffect(() => {
     if (!state.status.includes(YOUNG_STATUS.VALIDATED)) {
-      setState({ statusPhase1: [], statusPhase1Motif: [], cohesionStayPresence: false });
+      setState({ statusPhase1: [], statusPhase1Motif: [], presenceArrivee: ["false", ""] });
     }
   }, [state.status]);
 
@@ -67,7 +80,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
         status: state.status,
         statusPhase1: state.statusPhase1,
         statusPhase1Motif: state.statusPhase1Motif,
-        cohesionStayPresence: state.cohesionStayPresence,
+        presenceArrivee: state.presenceArrivee.map((option) => MAP_TRILEAN_OPTIONS[option]),
         departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         niveauScolaires: state.niveauScolaires as any,
         etranger: state.etranger,
@@ -130,11 +143,12 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
               <>
                 <div className="flex flex-col w-full gap-2.5">
                   <h2 className="text-lg leading-7 font-bold m-0">Arrivées et départs</h2>
-                  <SectionSwitcher
+                  <CollapsableSelectSwitcher
+                    isOpen={false}
                     title="Présence à l'arrivée"
-                    value={state.cohesionStayPresence}
-                    onChange={(cohesionStayPresence) => setState({ cohesionStayPresence })}
-                    className="py-2.5"
+                    options={COHESION_STAY_PRESENCE_OPTIONS}
+                    values={state.presenceArrivee}
+                    onChange={(presenceArrivee: TrileanOption[]) => setState({ presenceArrivee })}
                   />
                   <CollapsableSelectSwitcher
                     title="Motif de départ"

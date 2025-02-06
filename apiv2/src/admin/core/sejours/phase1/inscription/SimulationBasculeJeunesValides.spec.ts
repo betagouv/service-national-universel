@@ -1,21 +1,19 @@
 import { Test, TestingModule } from "@nestjs/testing";
 import { Logger } from "@nestjs/common";
-
-import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { addDays, isAfter, isWithinInterval } from "date-fns";
 
 import { FileGateway } from "@shared/core/File.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { SessionGateway } from "../session/Session.gateway";
+import { JeuneGateway } from "../../jeune/Jeune.gateway";
+import { JeuneModel } from "../../jeune/Jeune.model";
 
 import { SimulationBasculeJeunesValides } from "./SimulationBasculeJeunesValides";
 import { InscriptionService } from "./Inscription.service";
 
 import * as mockJeunes from "../affectation/__tests__/youngs.json";
-import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { ClockGateway } from "@shared/core/Clock.gateway";
-import { departmentList } from "snu-lib";
-import { addDays, isAfter, isWithinInterval } from "date-fns";
 
 const sessionName = "2025 CLE 03 Fevrier";
 const mockSession = { id: "mockedSessionId", name: "mockedSessionName", cohortGroupId: "cohortGroupId" };
@@ -90,7 +88,7 @@ describe("SimulationBasculeJeunesValides", () => {
             sessionId: sessionName,
             status: [],
             statusPhase1: [],
-            presenceArrivee: false,
+            presenceArrivee: [false, null],
             statusPhase1Motif: [],
             niveauScolaires: [],
             departements: [],
@@ -133,7 +131,7 @@ describe("SimulationBasculeJeunesValides", () => {
             sessionId: sessionName,
             status: [],
             statusPhase1: [],
-            presenceArrivee: false,
+            presenceArrivee: [false, null],
             statusPhase1Motif: [],
             niveauScolaires: [],
             departements: [],
@@ -144,5 +142,43 @@ describe("SimulationBasculeJeunesValides", () => {
         expect(result.analytics.jeunesProchainSejour).toEqual(result.rapportData.jeunesProchainSejour.length);
         expect(result.rapportData.jeunesProchainSejour.length).toEqual(1);
         expect(result.rapportData.jeunesAvenir.length).toEqual(19);
+    });
+
+    describe("filterPresenceJeune", () => {
+        it('should return true if jeune.presenceArrivee is "true" and presenceArrivee includes true', () => {
+            const jeune = { presenceArrivee: "true" } as JeuneModel;
+            const presenceArrivee = [true, false, null];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(true);
+        });
+
+        it('should return true if jeune.presenceArrivee is "false" and presenceArrivee includes false', () => {
+            const jeune = { presenceArrivee: "false" } as JeuneModel;
+            const presenceArrivee = [false, true, null];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(true);
+        });
+
+        it("should return true if jeune.presenceArrivee is undefined and presenceArrivee includes null", () => {
+            const jeune = { presenceArrivee: undefined } as JeuneModel;
+            const presenceArrivee = [null, true, false];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(true);
+        });
+
+        it('should return false if jeune.presenceArrivee is "true" and presenceArrivee does not include true', () => {
+            const jeune = { presenceArrivee: "true" } as JeuneModel;
+            const presenceArrivee = [false, null];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(false);
+        });
+
+        it('should return false if jeune.presenceArrivee is "false" and presenceArrivee does not include false', () => {
+            const jeune = { presenceArrivee: "false" } as JeuneModel;
+            const presenceArrivee = [true, null];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(false);
+        });
+
+        it("should return false if jeune.presenceArrivee is undefined and presenceArrivee does not include null", () => {
+            const jeune = { presenceArrivee: undefined } as JeuneModel;
+            const presenceArrivee = [true, false];
+            expect(simulationBasculeJeunesValides.filterPresenceJeune(jeune, presenceArrivee)).toBe(false);
+        });
     });
 });

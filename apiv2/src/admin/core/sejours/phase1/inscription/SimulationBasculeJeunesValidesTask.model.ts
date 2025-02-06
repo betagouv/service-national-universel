@@ -5,7 +5,7 @@ export interface SimulationBasculeJeunesValidesTaskParameters {
     sessionId: string;
     status: string[];
     statusPhase1: string[];
-    presenceArrivee: boolean;
+    presenceArrivee: Array<boolean | null>;
     statusPhase1Motif: string[];
     niveauScolaires: string[];
     departements: string[];

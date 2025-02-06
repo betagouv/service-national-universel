@@ -61,12 +61,13 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             niveauScolaires,
             departements,
         );
+        this.logger.log(`Jeunes a basculer (avant filtre simulation) : ${jeuneList.length}`);
         if (!etranger) {
             jeuneList = jeuneList.filter((jeune) => jeune.paysScolarite === "FRANCE");
         }
         if (status.includes(YOUNG_STATUS.VALIDATED)) {
-            if (presenceArrivee) {
-                jeuneList = jeuneList.filter((jeune) => jeune.presenceArrivee === "true");
+            if (presenceArrivee.length) {
+                jeuneList = jeuneList.filter((jeune) => this.filterPresenceJeune(jeune, presenceArrivee));
             }
             if (statusPhase1Motif.length) {
                 jeuneList = jeuneList.filter(
@@ -197,5 +198,16 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             departSejourMotif: jeune.departSejourMotif,
             ...complement,
         };
+    }
+
+    filterPresenceJeune(jeune: JeuneModel, presenceArrivee: Array<boolean | null>): boolean {
+        if (jeune.presenceArrivee === "true" && presenceArrivee.includes(true)) {
+            return true;
+        } else if (jeune.presenceArrivee === "false" && presenceArrivee.includes(false)) {
+            return true;
+        } else if (jeune.presenceArrivee === undefined && presenceArrivee.includes(null)) {
+            return true;
+        }
+        return false;
     }
 }

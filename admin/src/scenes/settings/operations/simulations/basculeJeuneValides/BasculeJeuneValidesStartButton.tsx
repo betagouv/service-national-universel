@@ -120,7 +120,14 @@ export default function BasculeJeuneValidesStartButton({ simulation }: BasculeJe
                 <h2 className="text-lg leading-7 font-bold m-0">Arrivées et départs</h2>
                 <div className="flex gap-2">
                   <div className="text-gray-400">Présence à l'arrivée&nbsp;:</div>
-                  <div className="text-sm leading-5 font-normal">{simulationBascule.metadata?.parameters?.cohesionStayPresence ? "oui" : "non"}</div>
+                  <div className="text-sm leading-5 font-normal">
+                    {simulationBascule.metadata?.parameters?.presenceArrivee
+                      ?.map((presence) => {
+                        if (presence === null) return "Non renseigné";
+                        return presence ? "Oui" : "Non";
+                      })
+                      ?.join(", ")}
+                  </div>
                 </div>
                 <div className="flex gap-2">
                   <div className="text-gray-400">Motif de départ&nbsp;:</div>

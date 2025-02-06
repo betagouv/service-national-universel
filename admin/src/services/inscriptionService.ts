@@ -14,13 +14,13 @@ const InscriptionService = {
 
   postBasculeJeunesValides: async (
     sessionId: string,
-    { status, statusPhase1, cohesionStayPresence, statusPhase1Motif, niveauScolaires, departements, etranger, avenir }: InscriptionRoutes["PostBasculeJeunesValides"]["payload"],
+    { status, statusPhase1, presenceArrivee, statusPhase1Motif, niveauScolaires, departements, etranger, avenir }: InscriptionRoutes["PostBasculeJeunesValides"]["payload"],
   ) => {
     return await buildRequest<InscriptionRoutes["PostBasculeJeunesValides"]>({
       path: "/inscription/{sessionId}/bascule-jeunes-valides/simulation",
       method: "POST",
       params: { sessionId },
-      payload: { status, statusPhase1, cohesionStayPresence, statusPhase1Motif, niveauScolaires, departements, etranger, avenir },
+      payload: { status, statusPhase1, presenceArrivee, statusPhase1Motif, niveauScolaires, departements, etranger, avenir },
       target: "API_V2",
     })();
   },
