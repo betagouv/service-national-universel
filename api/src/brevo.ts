@@ -167,6 +167,14 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
   }
 }
 
+export async function deleteDiffusionList() {
+  try {
+    return await api("/contacts/lists", { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
 export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
@@ -224,7 +232,7 @@ async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachme
  * @returns
  */
 export async function getPreviewTemplate(id: string) {
-  if (!config.SENDINBLUEKEY){
+  if (!config.SENDINBLUEKEY) {
     captureMessage("NO SENDINBLUE KEY");
   }
   const template: BrevoEmailTemplate | BrevoApiError = await api(`/smtp/templates/${id}`, undefined, true);
