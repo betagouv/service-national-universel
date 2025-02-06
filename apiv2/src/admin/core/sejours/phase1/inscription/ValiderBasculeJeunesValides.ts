@@ -242,6 +242,8 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
             statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
             sessionId: nouvelleSession.id,
             sessionNom: nouvelleSession.nom,
+            originalSessionId: jeune.sessionId,
+            originalSessionNom: jeune.sessionNom,
             centreId: undefined,
             sejourId: undefined,
             pointDeRassemblementId: undefined,
