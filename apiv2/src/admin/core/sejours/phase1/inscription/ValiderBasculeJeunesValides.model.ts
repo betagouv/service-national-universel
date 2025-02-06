@@ -1,6 +1,5 @@
 import { TaskModel } from "@task/core/Task.model";
-
-import { ValiderBasculeJeunesValidesResult } from "./ValiderBasculeJeunesValides";
+import { ValiderBasculeJeunesResult } from "./ValiderBasculeJeunes.service";
 
 export interface ValiderBasculeJeunesValidesTaskParameters {
     sessionId: string;
@@ -9,7 +8,7 @@ export interface ValiderBasculeJeunesValidesTaskParameters {
     sendEmail: boolean;
 }
 
-export type ValiderBasculeJeunesValidesTaskResult = Pick<ValiderBasculeJeunesValidesResult, "analytics"> & {
+export type ValiderBasculeJeunesValidesTaskResult = Pick<ValiderBasculeJeunesResult, "analytics"> & {
     rapportKey: string;
 };
 

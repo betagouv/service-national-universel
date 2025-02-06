@@ -1,16 +1,16 @@
 import { Inject, Logger } from "@nestjs/common";
-import { MIME_TYPES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+
+import { MIME_TYPES } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FileGateway } from "@shared/core/File.gateway";
 
-import { ValiderBasculeJeunesValidesTaskParameters } from "./ValiderBasculeJeunesValides.model";
+import { ValiderBasculeJeunesNonValidesTaskParameters } from "./ValiderBasculeJeunesNonValides.model";
 
 import { SessionGateway } from "../session/Session.gateway";
-
 import { ValiderBasculeJeunesResult, ValiderBasculeJeunesService } from "./ValiderBasculeJeunes.service";
 
-export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunesResult> {
+export class ValiderBasculeJeunesNonValides implements UseCase<ValiderBasculeJeunesResult> {
     constructor(
         private readonly validerBasculeJeunesService: ValiderBasculeJeunesService,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
@@ -23,7 +23,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
         simulationTaskId,
         dateValidation,
         sendEmail,
-    }: ValiderBasculeJeunesValidesTaskParameters): Promise<ValiderBasculeJeunesResult> {
+    }: ValiderBasculeJeunesNonValidesTaskParameters): Promise<ValiderBasculeJeunesResult> {
         // Récuperation des données de l'affectation pour la session
         const session = await this.sessionGateway.findById(sessionId);
 
@@ -42,15 +42,11 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
             simulationData,
             jeunesProchainSejour,
             jeunesAvenir,
-            champsSpecifiqueBascule: {
-                statut: YOUNG_STATUS.WAITING_VALIDATION,
-                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-            },
         });
 
         // send emails when transaction is commited
         if (sendEmail) {
-            await this.validerBasculeJeunesService.notifierJeunes(rapportData);
+            this.validerBasculeJeunesService.notifierJeunes(rapportData);
         }
 
         // création du fichier excel de rapport
@@ -58,7 +54,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
 
         // upload du rapport du s3
         const timestamp = `${dateValidation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
-        const fileName = `valider-bascule-jeunes-valides/bascule-jeunes-valides_${sessionId}_${timestamp}.xlsx`;
+        const fileName = `valider-bascule-jeunes-non-valides/bascule-jeunes-non-valides_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/inscription/${sessionId}/${fileName}`,
             {

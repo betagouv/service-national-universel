@@ -34,6 +34,38 @@ const InscriptionService = {
       payload,
     })();
   },
+
+  getBasculeJeunesNonValides: async (sessionId: string) => {
+    return await buildRequest<InscriptionRoutes["GetBasculeJeunesNonValides"]>({
+      path: "/inscription/{sessionId}/bascule-jeunes-non-valides/status",
+      method: "GET",
+      params: { sessionId },
+      target: "API_V2",
+    })();
+  },
+
+  postBasculeJeunesNonValides: async (
+    sessionId: string,
+    { status, niveauScolaires, departements, etranger, avenir }: InscriptionRoutes["PostBasculeJeunesNonValides"]["payload"],
+  ) => {
+    return await buildRequest<InscriptionRoutes["PostBasculeJeunesNonValides"]>({
+      path: "/inscription/{sessionId}/bascule-jeunes-non-valides/simulation",
+      method: "POST",
+      params: { sessionId },
+      payload: { status, niveauScolaires, departements, etranger, avenir },
+      target: "API_V2",
+    })();
+  },
+
+  postValiderBasculeJeunesNonValides: async (sessionId: string, simulationId: string, payload: InscriptionRoutes["PostValiderBasculeJeunesNonValides"]["payload"]) => {
+    return await buildRequest<InscriptionRoutes["PostValiderBasculeJeunesNonValides"]>({
+      path: "/inscription/{sessionId}/simulation/{simulationId}/bascule-jeunes-non-valides/valider",
+      method: "POST",
+      params: { sessionId, simulationId },
+      target: "API_V2",
+      payload,
+    })();
+  },
 };
 
 export { InscriptionService };

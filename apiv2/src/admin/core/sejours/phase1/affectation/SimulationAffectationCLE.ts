@@ -166,7 +166,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
         const fileName = `simulation-affectation-cle/affectation_simulation_cle_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,

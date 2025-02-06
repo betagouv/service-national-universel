@@ -2,11 +2,11 @@ import React from "react";
 
 import { SimulationBasculeJeunesValidesTaskDto } from "snu-lib";
 
-interface BasculeJeuneValidesCellProps {
+interface BasculeJeuneCellProps {
   simulation: unknown;
 }
 
-export default function BasculeJeuneValidesCell({ simulation }: BasculeJeuneValidesCellProps) {
+export default function BasculeJeuneCell({ simulation }: BasculeJeuneCellProps) {
   const simulationHts = simulation as SimulationBasculeJeunesValidesTaskDto;
 
   return (

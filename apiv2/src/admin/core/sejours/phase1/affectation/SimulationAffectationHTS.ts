@@ -234,7 +234,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
         const fileName = `simulation-affectation-hts/affectation_simulation_hts_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,
