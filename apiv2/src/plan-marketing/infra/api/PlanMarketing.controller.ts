@@ -14,10 +14,6 @@ class ImporterContactsEtCreerListeDiffusionDto {
     @IsNotEmpty()
     campagneId: string;
 
-    @IsNotEmpty()
-    @IsNumber()
-    folderId: number;
-
     @IsString()
     @IsNotEmpty()
     pathFile: string;
@@ -33,7 +29,7 @@ export class PlanMarketingController {
     @UseGuards(AdminGuard)
     @Post("liste-diffusion")
     async creer(@Body() dto: ImporterContactsEtCreerListeDiffusionDto) {
-        await this.importerEtCreerListeDiffusion.execute(dto.nom, dto.campagneId, dto.folderId, dto.pathFile);
+        await this.importerEtCreerListeDiffusion.execute(dto.nom, dto.campagneId, dto.pathFile);
     }
 
     @Post("import/webhook")

@@ -33,29 +33,28 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             return result.body.processId;
         } catch (error: any) {
             this.logger.error(`Failed to import contacts:${JSON.stringify(error.body)}`);
-            throw new TechnicalException(TechnicalExceptionType.GENERIC, `Failed to import contacts: ${error.message}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to import contacts: ${error.message}`);
         }
     }
 
     async updateCampagne(nomListe: string, campagneId: string): Promise<void> {
         this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
         try {
-            // Get the list ID by name
             const lists = await this.contactsApi.getLists();
             const list = lists.body.lists?.find((liste) => liste.name === nomListe);
             if (!list?.id) {
-                throw new TechnicalException(TechnicalExceptionType.GENERIC, `List ${nomListe} not found`);
+                throw new TechnicalException(TechnicalExceptionType.BREVO, `List ${nomListe} not found`);
             }
-            const retrievedCampagne = await this.campaignsApi.getEmailCampaign(parseInt(campagneId));
 
-            // Update the campaign with the new list ID
-            const updateEmailCampaign = new brevo.UpdateEmailCampaign();
-            updateEmailCampaign.recipients = { listIds: [list.id] };
+            const updateEmailCampaign: brevo.UpdateEmailCampaign = {
+                sender: { name: "Service National Universel", email: "no_reply@snu.gouv.fr" },
+                recipients: { listIds: [list.id] },
+            };
 
             await this.campaignsApi.updateEmailCampaign(parseInt(campagneId), updateEmailCampaign);
         } catch (error: any) {
             this.logger.error(`Failed to update campaign:${JSON.stringify(error.body)}`);
-            throw new TechnicalException(TechnicalExceptionType.GENERIC, `Failed to update campaign: ${error.message}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to update campaign: ${error.message}`);
         }
     }
 

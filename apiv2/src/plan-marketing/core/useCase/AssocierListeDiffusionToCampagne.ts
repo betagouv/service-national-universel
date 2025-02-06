@@ -1,16 +1,14 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
-import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { TaskGateway } from "@task/core/Task.gateway";
 
 Injectable();
 export class AssocierListeDiffusionToCampagne implements UseCase<void> {
     private readonly logger: Logger = new Logger(AssocierListeDiffusionToCampagne.name);
-    constructor(
-        @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-    ) {}
+
+    constructor(@Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway) {}
+
     async execute(nomListe?: string, campagneId?: string): Promise<void> {
         this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
         if (!nomListe || !campagneId) {
@@ -20,8 +18,6 @@ export class AssocierListeDiffusionToCampagne implements UseCase<void> {
             );
         }
 
-        // TODO : besoin d'appeler cet endpoint ?
-        // Ajouter listeId à la campagne
-        // return await this.planMarketingGateway.updateCampagne(nomListe, campagneId);
+        return await this.planMarketingGateway.updateCampagne(nomListe, campagneId);
     }
 }

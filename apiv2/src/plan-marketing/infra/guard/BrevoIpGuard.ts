@@ -24,7 +24,6 @@ export class BrevoIpGuard implements CanActivate {
         const forwardedFor = request.headers["x-forwarded-for"];
         if (forwardedFor) {
             const ips = Array.isArray(forwardedFor) ? forwardedFor[0] : forwardedFor.split(",")[0].trim();
-            console.log(forwardedFor);
 
             return ips;
         }

@@ -10,6 +10,8 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskRepository } from "@task/infra/TaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { DatabaseModule } from "@infra/Database.module";
+import { FileGateway } from "@shared/core/File.gateway";
+import { FileProvider } from "@shared/infra/File.provider";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule],
@@ -23,6 +25,10 @@ import { DatabaseModule } from "@infra/Database.module";
         {
             provide: TaskGateway,
             useClass: TaskRepository,
+        },
+        {
+            provide: FileGateway,
+            useClass: FileProvider,
         },
         ...taskMongoProviders,
     ],
