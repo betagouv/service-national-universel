@@ -17,9 +17,11 @@ const ApplyButton = ({ mission, onClick }: propTypes) => {
 
   return (
     <div className="flex flex-col gap-2 items-center">
-      <ReactTooltip id="candidater" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-        <p className="text-gray-800">{mission.message}</p>
-      </ReactTooltip>
+      {mission.message ? (
+        <ReactTooltip id="candidater" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+          <p className="text-gray-800">{mission.message}</p>
+        </ReactTooltip>
+      ) : null}
       <button
         data-tip
         data-for="candidater"
