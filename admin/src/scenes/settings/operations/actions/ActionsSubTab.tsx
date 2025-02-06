@@ -13,8 +13,8 @@ interface ActionsSubTabProps {
 export default function ActionsSubTab({ session }: ActionsSubTabProps) {
   return (
     <div className="flex flex-col gap-8">
-      <InscriptionsSection sessionId={session._id!} />
-      <AffectationsSection session={session} />
+      <InscriptionsSection session={session} />
+      {/* <AffectationsSection session={session} /> */}
       <ApreSejourSection sessionId={session._id!} />
     </div>
   );

@@ -1,10 +1,19 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
 
-export default function InscriptionsSection({ sessionId }) {
+import { CohortDto } from "snu-lib";
+
+import ContactSimulation from "./ContactSimulation/contactSimulation";
+
+interface InscriptionSectionProps {
+  session: CohortDto;
+}
+
+export default function InscriptionsSection({ session }: InscriptionSectionProps) {
+  console.log(session);
   return (
-    <Collapsable open={false} title="Inscriptions">
-      à compléter
+    <Collapsable open={true} title="Inscriptions">
+      <ContactSimulation session={session} />
     </Collapsable>
   );
 }
