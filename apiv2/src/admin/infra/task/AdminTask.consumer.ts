@@ -11,7 +11,7 @@ import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
 import { AdminTaskAffectationSelectorService } from "./AdminTaskAffectationSelector.service";
-import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelectorService";
+import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelector.service";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {

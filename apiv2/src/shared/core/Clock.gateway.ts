@@ -8,6 +8,7 @@ export interface ClockGateway {
     isBefore(dateA: Date, dateB: Date);
     isWithinInterval(date: Date, params: { start: Date; end: Date });
     computeAge(dateNaissance: Date);
+    addHours(date: Date, hours: number): Date;
 }
 
 export const ClockGateway = Symbol("ClockGateway");

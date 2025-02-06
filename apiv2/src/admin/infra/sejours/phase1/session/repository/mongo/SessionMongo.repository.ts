@@ -1,4 +1,3 @@
-import { addHours } from "date-fns";
 import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 
@@ -6,14 +5,16 @@ import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { CreateSessionModel, SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
-import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/SessionMongo.provider";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
+import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/SessionMongo.provider";
 import { SessionMapper } from "../Session.mapper";
 
 @Injectable()
 export class SessionRepository implements SessionGateway {
     constructor(
         @Inject(SESSION_MONGOOSE_ENTITY) private sesssionMongooseEntity: Model<SessionDocument>,
+        @Inject(ClockGateway) private clockGateway: ClockGateway,
         private readonly cls: ClsService,
     ) {}
     async findBySnuId(snuId: string): Promise<SessionModel | null> {
@@ -60,7 +61,7 @@ export class SessionRepository implements SessionGateway {
             "eligibility.zones": departement,
             "eligibility.schoolLevels": niveauScolaire,
             "eligibility.bornAfter": { $lte: dateNaissance },
-            "eligibility.bornBefore": { $gte: addHours(dateNaissance, -11) },
+            "eligibility.bornBefore": { $gte: this.clockGateway.addHours(dateNaissance, -11) },
         });
         return SessionMapper.toModels(sessions);
     }

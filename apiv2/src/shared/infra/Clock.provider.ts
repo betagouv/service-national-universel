@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import {
     add,
+    addHours,
     differenceInYears,
     format,
     isAfter as isAfterFns,
@@ -37,5 +38,8 @@ export class ClockProvider implements ClockGateway {
     }
     computeAge(dateNaissance: Date) {
         return differenceInYears(this.now(), dateNaissance);
+    }
+    addHours(date: Date, hours: number): Date {
+        return addHours(date, hours);
     }
 }
