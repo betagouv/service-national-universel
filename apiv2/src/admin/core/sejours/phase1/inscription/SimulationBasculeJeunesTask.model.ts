@@ -1,7 +1,7 @@
 import { TaskModel } from "@task/core/Task.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 
-export interface SimulationBasculeJeunesValidesTaskParameters {
+export interface SimulationBasculeJeunesTaskParameters {
     sessionId: string;
     status: string[];
     statusPhase1: string[];
@@ -13,29 +13,30 @@ export interface SimulationBasculeJeunesValidesTaskParameters {
     avenir: boolean;
 }
 
-export type SimulationBasculeJeunesValidesTaskResult = {
+export type SimulationBasculeJeunesTaskResult = {
     jeunesAvenir: number;
     jeunesProchainSejour: number;
     rapportKey: string;
 };
 
-export type SimulationBasculeJeunesValidesTaskModel = TaskModel<
-    SimulationBasculeJeunesValidesTaskParameters,
-    SimulationBasculeJeunesValidesTaskResult
+export type SimulationBasculeJeunesTaskModel = TaskModel<
+    SimulationBasculeJeunesTaskParameters,
+    SimulationBasculeJeunesTaskResult
 >;
 
 export type RapportData = {
-    jeunesProchainSejour: JeuneRapport[];
-    jeunesAvenir: JeuneRapport[];
+    jeunesProchainSejour: JeuneRapportSimulation[];
+    jeunesAvenir: JeuneRapportSimulation[];
 };
 
-export type JeuneRapport = Pick<
+export type JeuneRapportSimulation = Pick<
     JeuneModel,
     | "id"
     | "nom"
     | "prenom"
     | "statut"
     | "statutPhase1"
+    | "classeId"
     | "niveauScolaire"
     | "regionScolarite"
     | "departementScolarite"

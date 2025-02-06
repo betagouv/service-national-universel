@@ -54,12 +54,14 @@ import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
 import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffectationSelector.service";
 import { AdminTaskInscriptionSelectorService } from "./infra/task/AdminTaskInscriptionSelector.service";
-import { SimulationBasculeJeunesValides } from "./core/sejours/phase1/inscription/SimulationBasculeJeunesValides";
+import { SimulationBasculeJeunes } from "./core/sejours/phase1/inscription/SimulationBasculeJeunes";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesValides";
 import { SimulationAffectationCLEDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
 import { ValiderAffectationCLEDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
 import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/ValiderAffectationCLE.service";
+import { ValiderBasculeJeunesService } from "./core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
+import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
 
 @Module({
     imports: [
@@ -122,8 +124,11 @@ import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/
         ...referentielUseCaseProviders,
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,
-        SimulationBasculeJeunesValides,
+        SimulationBasculeJeunes,
+        ValiderBasculeJeunesService,
         ValiderBasculeJeunesValides,
+        ValiderBasculeJeunesNonValides,
+        ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
     ],

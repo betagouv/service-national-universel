@@ -1200,6 +1200,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_CLE_DROMCOM_SIMULATION":
     case "AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER":
       return "Affectation CLE (DROM COM et Corse)";
+    case "BACULE_JEUNES_NONVALIDES_SIMULATION":
+    case "BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER":
+      return "Bascule des jeunes non validés";
     default:
       return name;
   }

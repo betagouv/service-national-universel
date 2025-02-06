@@ -9,17 +9,19 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
 import { FileGateway } from "@shared/core/File.gateway";
 import {
-    SimulationBasculeJeunesValidesTaskParameters,
-    JeuneRapport,
+    SimulationBasculeJeunesTaskParameters,
     RAPPORT_SHEETS,
     RapportData,
-} from "./SimulationBasculeJeunesValidesTask.model";
+    JeuneRapportSimulation,
+} from "./SimulationBasculeJeunesTask.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { SessionGateway } from "../session/Session.gateway";
 import { InscriptionService } from "./Inscription.service";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 
-export type SimulationBasculeJeunesValidesResult = {
+type TypeBascule = "bascule-jeunes-valides" | "bascule-jeunes-non-valides";
+
+export type SimulationBasculeJeunesResult = {
     analytics: {
         jeunesAvenir: number;
         jeunesProchainSejour: number;
@@ -33,7 +35,7 @@ export type SimulationBasculeJeunesValidesResult = {
     };
 };
 
-export class SimulationBasculeJeunesValides implements UseCase<SimulationBasculeJeunesValidesResult> {
+export class SimulationBasculeJeunes implements UseCase<SimulationBasculeJeunesResult> {
     constructor(
         @Inject(InscriptionService)
         private readonly inscriptionService: InscriptionService,
@@ -43,17 +45,20 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         private readonly logger: Logger,
     ) {}
-    async execute({
-        sessionId,
-        status,
-        statusPhase1,
-        presenceArrivee,
-        statusPhase1Motif,
-        niveauScolaires,
-        departements,
-        etranger,
-        avenir,
-    }: SimulationBasculeJeunesValidesTaskParameters): Promise<SimulationBasculeJeunesValidesResult> {
+    async execute(
+        {
+            sessionId,
+            status,
+            statusPhase1,
+            presenceArrivee,
+            statusPhase1Motif,
+            niveauScolaires,
+            departements,
+            etranger,
+            avenir,
+        }: SimulationBasculeJeunesTaskParameters,
+        type: TypeBascule,
+    ): Promise<SimulationBasculeJeunesResult> {
         let jeuneList = await this.jeuneGateway.findBySessionIdStatutsStatutsPhase1NiveauScolairesAndDepartements(
             sessionId,
             status,
@@ -79,7 +84,7 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "Aucun jeune !");
         }
 
-        this.logger.log(`Jeunes a basculer (simulation) : ${jeuneList.length}`);
+        this.logger.log(`Jeunes a basculer (simulation ${type}) : ${jeuneList.length}`);
 
         const rapportData: RapportData = {
             jeunesAvenir: [],
@@ -95,12 +100,16 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         if (avenir) {
             for (const jeune of jeuneList) {
                 rapportData.jeunesAvenir.push(
-                    this.mapJeuneRapport(jeune, {
-                        ancienneSession: jeune.sessionNom,
-                        nouvelleSession: sessionAVenir.nom,
-                        ancienneSessionId: jeune.sessionId,
-                        nouvelleSessionId: sessionAVenir.id,
-                    }),
+                    this.mapJeuneRapport(
+                        jeune,
+                        {
+                            ancienneSession: jeune.sessionNom,
+                            nouvelleSession: sessionAVenir.nom,
+                            ancienneSessionId: jeune.sessionId,
+                            nouvelleSessionId: sessionAVenir.id,
+                        },
+                        type,
+                    ),
                 );
             }
         } else {
@@ -110,22 +119,30 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
                 if (sessions.length > 0) {
                     // au moins une session est disponible
                     rapportData.jeunesProchainSejour.push(
-                        this.mapJeuneRapport(jeune, {
-                            ancienneSession: jeune.sessionNom,
-                            nouvelleSession: sessions[0].nom,
-                            ancienneSessionId: jeune.sessionId,
-                            nouvelleSessionId: sessions[0].id,
-                        }),
+                        this.mapJeuneRapport(
+                            jeune,
+                            {
+                                ancienneSession: jeune.sessionNom,
+                                nouvelleSession: sessions[0].nom,
+                                ancienneSessionId: jeune.sessionId,
+                                nouvelleSessionId: sessions[0].id,
+                            },
+                            type,
+                        ),
                     );
                 } else {
                     // aucune session n'est disponible pour ce jeune (=> avenir)
                     rapportData.jeunesAvenir.push(
-                        this.mapJeuneRapport(jeune, {
-                            ancienneSession: jeune.sessionNom,
-                            nouvelleSession: sessionAVenir.nom,
-                            ancienneSessionId: jeune.sessionId,
-                            nouvelleSessionId: sessionAVenir.id,
-                        }),
+                        this.mapJeuneRapport(
+                            jeune,
+                            {
+                                ancienneSession: jeune.sessionNom,
+                                nouvelleSession: sessionAVenir.nom,
+                                ancienneSessionId: jeune.sessionId,
+                                nouvelleSessionId: sessionAVenir.id,
+                            },
+                            type,
+                        ),
                     );
                 }
             }
@@ -140,7 +157,7 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         }, {});
 
         this.logger.log(
-            `Fin simulation bascule: a venir ${rapportData.jeunesAvenir.length} / elligible ${JSON.stringify(
+            `Fin simulation bascule (${type}): a venir ${rapportData.jeunesAvenir.length} / elligible ${JSON.stringify(
                 countBySession,
                 null,
                 2,
@@ -160,9 +177,9 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         });
 
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
-        const fileName = `simulation-bascule-jeunes-valides/bascule-jeunes-valides_simulation_${sessionId}_${timestamp}.xlsx`;
+        const fileName = `simulation-${type}/${type}_simulation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/inscription/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/inscription/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,
@@ -179,7 +196,11 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
         };
     }
 
-    mapJeuneRapport(jeune: JeuneModel, complement: Partial<JeuneRapport> = {}): JeuneRapport {
+    mapJeuneRapport(
+        jeune: JeuneModel,
+        complement: Partial<JeuneRapportSimulation> = {},
+        type: TypeBascule,
+    ): JeuneRapportSimulation {
         return {
             id: jeune.id,
             prenom: jeune.prenom,
@@ -194,8 +215,14 @@ export class SimulationBasculeJeunesValides implements UseCase<SimulationBascule
             paysScolarite: jeune.paysScolarite,
             statut: jeune.statut,
             statutPhase1: jeune.statutPhase1,
-            presenceArrivee: jeune.presenceArrivee,
-            departSejourMotif: jeune.departSejourMotif,
+            ...(type === "bascule-jeunes-valides"
+                ? {
+                      presenceArrivee: jeune.presenceArrivee,
+                      departSejourMotif: jeune.departSejourMotif,
+                  }
+                : {
+                      classeId: jeune.classeId,
+                  }),
             ...complement,
         };
     }
