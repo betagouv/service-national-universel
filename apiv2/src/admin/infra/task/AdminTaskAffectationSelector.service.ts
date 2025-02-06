@@ -39,7 +39,7 @@ export class AdminTaskAffectationSelectorService {
         switch (job.name) {
             //  HTS METROPOLE
             case TaskName.AFFECTATION_HTS_SIMULATION:
-                const simulationHtsTask = task as SimulationAffectationHTSTaskModel; // pour l'onglet historique (patches)
+                const simulationHtsTask: SimulationAffectationHTSTaskModel = task; // pour l'onglet historique (patches)
                 const simulationhts = await this.simulationAffectationHts.execute(
                     simulationHtsTask.metadata!.parameters!,
                 );
@@ -53,7 +53,7 @@ export class AdminTaskAffectationSelectorService {
                 break;
 
             case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
-                const validationHtsTask = task as ValiderAffectationHTSTaskModel;
+                const validationHtsTask: ValiderAffectationHTSTaskModel = task;
                 const validationResult = await this.validerAffectationHts.execute({
                     ...validationHtsTask.metadata!.parameters!,
                     dateAffectation: validationHtsTask.createdAt,
@@ -78,7 +78,7 @@ export class AdminTaskAffectationSelectorService {
 
             //  CLE METROPOLE
             case TaskName.AFFECTATION_CLE_SIMULATION:
-                const simulationCleTask = task as SimulationAffectationCLETaskModel; // pour l'onglet historique (patches)
+                const simulationCleTask: SimulationAffectationCLETaskModel = task; // pour l'onglet historique (patches)
                 const simulationCle = await this.simulationAffectationCle.execute(
                     simulationCleTask.metadata!.parameters!,
                 );
@@ -91,7 +91,7 @@ export class AdminTaskAffectationSelectorService {
                 break;
 
             case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
-                const validationCleTask = task as ValiderAffectationCLETaskModel;
+                const validationCleTask: ValiderAffectationCLETaskModel = task;
                 const validationCleResult = await this.validerAffectationCle.execute({
                     ...validationCleTask.metadata!.parameters!,
                     dateAffectation: validationCleTask.createdAt,
@@ -116,7 +116,7 @@ export class AdminTaskAffectationSelectorService {
 
             //  CLE DROM COM et Corse
             case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
-                const simulationCleDromComTask = task as SimulationAffectationCLEDromComTaskModel;
+                const simulationCleDromComTask: SimulationAffectationCLEDromComTaskModel = task;
                 const simulationCleDromComResult = await this.simulationAffectationCLEDromCom.execute(
                     simulationCleDromComTask.metadata!.parameters!,
                 );
@@ -129,7 +129,7 @@ export class AdminTaskAffectationSelectorService {
                 break;
 
             case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
-                const validationCleDromComTask = task as ValiderAffectationCLETaskModel;
+                const validationCleDromComTask: ValiderAffectationCLETaskModel = task;
                 const validationCleDromComResult = await this.validerAffectationCLEDromCom.execute({
                     ...validationCleDromComTask.metadata!.parameters!,
                     dateAffectation: validationCleDromComTask.createdAt,

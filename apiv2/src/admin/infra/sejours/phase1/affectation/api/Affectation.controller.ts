@@ -105,26 +105,27 @@ export class AffectationController {
                 "Fichier associé à l'import des routes introuvable",
             );
         }
+        const parameters: SimulationAffectationHTSTaskParameters = {
+            sessionId,
+            departements: payload.departements,
+            niveauScolaires: payload.niveauScolaires,
+            sdrImportId: payload.sdrImportId,
+            sdrFileName: importTask.metadata.parameters.fileName,
+            etranger: payload.etranger,
+            affecterPDR: payload.affecterPDR,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    departements: payload.departements,
-                    niveauScolaires: payload.niveauScolaires,
-                    sdrImportId: payload.sdrImportId,
-                    sdrFileName: importTask.metadata.parameters.fileName,
-                    etranger: payload.etranger,
-                    affecterPDR: payload.affecterPDR,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as SimulationAffectationHTSTaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);
@@ -137,22 +138,23 @@ export class AffectationController {
         @Param("sessionId") sessionId: string,
         @Body() payload: PostSimulationsClePayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsCLERoute"]["response"]> {
+        const parameters: SimulationAffectationCLETaskParameters = {
+            sessionId,
+            departements: payload.departements,
+            etranger: payload.etranger,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_CLE_SIMULATION,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    departements: payload.departements,
-                    etranger: payload.etranger,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as SimulationAffectationCLETaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);
@@ -165,22 +167,23 @@ export class AffectationController {
         @Param("sessionId") sessionId: string,
         @Body() payload: PostSimulationsCleDromcomPayloadDto,
     ): Promise<AffectationRoutes["PostSimulationsCLEDromComRoute"]["response"]> {
+        const parameters: SimulationAffectationCLETaskParameters = {
+            sessionId,
+            departements: payload.departements,
+            etranger: payload.etranger,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    departements: payload.departements,
-                    etranger: payload.etranger,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as SimulationAffectationCLETaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);
@@ -209,22 +212,23 @@ export class AffectationController {
             throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
+        const parameters: ValiderAffectationHTSTaskParameters = {
+            sessionId,
+            simulationTaskId: taskId,
+            affecterPDR: payload.affecterPDR,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    simulationTaskId: taskId,
-                    affecterPDR: payload.affecterPDR,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as ValiderAffectationHTSTaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);
@@ -252,21 +256,22 @@ export class AffectationController {
             throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
+        const parameters: ValiderAffectationCLETaskParameters = {
+            sessionId,
+            simulationTaskId: taskId,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    simulationTaskId: taskId,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as ValiderAffectationCLETaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);
@@ -291,24 +296,25 @@ export class AffectationController {
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status as TaskStatus) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
         ) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
+        const parameters: ValiderAffectationCLETaskParameters = {
+            sessionId,
+            simulationTaskId: taskId,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
         const task = await this.taskGateway.create({
             name: TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
             status: TaskStatus.PENDING,
             metadata: {
-                parameters: {
-                    sessionId,
-                    simulationTaskId: taskId,
-                    auteur: {
-                        id: request.user.id,
-                        prenom: request.user.prenom,
-                        nom: request.user.nom,
-                        role: request.user.role,
-                        sousRole: request.user.sousRole,
-                    },
-                } as ValiderAffectationCLETaskParameters,
+                parameters,
             },
         });
         return TaskMapper.toDto(task);

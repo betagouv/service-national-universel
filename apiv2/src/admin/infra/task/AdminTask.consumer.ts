@@ -51,7 +51,7 @@ export class AdminTaskConsumer extends WorkerHost {
                         results = await this.adminTaskInscriptionSelectorService.handleInscription(job, task);
                         break;
                     case TaskName.REFERENTIEL_IMPORT:
-                        const importTask = task as ReferentielImportTaskModel;
+                        const importTask: ReferentielImportTaskModel = task;
                         this.logger.log(
                             `Processing import task "${importTask.metadata?.parameters?.type}"`,
                             AdminTaskConsumer.name,

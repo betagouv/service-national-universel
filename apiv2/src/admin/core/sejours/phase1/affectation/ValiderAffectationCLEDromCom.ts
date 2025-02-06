@@ -145,7 +145,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
 
                 //Clean le reste
                 deplacementPhase1Autonomous: undefined,
-                cohesionStayPresence: undefined,
+                presenceArrivee: undefined,
                 presenceJDM: undefined,
                 departInform: undefined,
                 departSejourAt: undefined,
