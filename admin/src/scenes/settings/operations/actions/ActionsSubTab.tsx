@@ -14,7 +14,7 @@ export default function ActionsSubTab({ session }: ActionsSubTabProps) {
   return (
     <div className="flex flex-col gap-8">
       <InscriptionsSection session={session} />
-      {/* <AffectationsSection session={session} /> */}
+      <AffectationsSection session={session} />
       <ApreSejourSection sessionId={session._id!} />
     </div>
   );
