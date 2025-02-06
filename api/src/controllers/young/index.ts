@@ -14,7 +14,18 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, CohortModel, ApplicationDocument, ReferentDocument } from "../../models";
+import {
+  ReferentModel,
+  YoungModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  LigneBusModel,
+  ClasseModel,
+  EtablissementModel,
+  CohortModel,
+  ApplicationDocument,
+  ReferentDocument,
+} from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -277,6 +288,18 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       const classe = await ClasseModel.findById(obj.classeId);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       obj.etablissementId = classe.etablissementId;
+      const etablissement = await EtablissementModel.findById(classe.etablissementId);
+      if (etablissement) {
+        obj.schoolName = etablissement.name;
+        obj.schoolType = etablissement.type[0];
+        obj.schoolAddress = etablissement.address;
+        obj.schoolZip = etablissement.zip;
+        obj.schoolCity = etablissement.city;
+        obj.schoolDepartment = etablissement.department;
+        obj.schoolRegion = etablissement.region;
+        obj.schoolCountry = etablissement.country;
+        obj.schoolId = etablissement.schoolId;
+      }
     }
 
     if (obj.source !== YOUNG_SOURCE.CLE && value.status === YOUNG_STATUS.VALIDATED) {

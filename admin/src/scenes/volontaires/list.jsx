@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 
@@ -13,7 +13,7 @@ import Breadcrumbs from "../../components/Breadcrumbs";
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { appURL } from "../../config";
-import api from "../../services/api";
+import useFilterLabels from "./useFilterLabels";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
@@ -24,59 +24,28 @@ import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 
 export default function VolontaireList() {
+  const pageId = "young-list";
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
+  const { data: labels, isPending, isError } = useFilterLabels(pageId);
   if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
-  const [sessionsPhase1, setSessionsPhase1] = useState(null);
-  const [bus, setBus] = useState(null);
-  const [classes, setClasses] = useState(null);
-  const [etablissements, setEtablissements] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [size, setSize] = useState(10);
 
   //List state
   const [data, setData] = useState([]);
-  const pageId = "young-list";
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const filterArray = getFilterArray(user, bus, sessionsPhase1, classes, etablissements);
+  if (isPending) return <Loader />;
+  if (isError) return <div>Erreur lors de la récupération des filtres</div>;
 
-  useEffect(() => {
-    (async () => {
-      try {
-        const { data: sessions } = await api.post(`/elasticsearch/sessionphase1/export`, {
-          filters: {},
-          exportFields: ["codeCentre", "cohesionCenterId"],
-        });
-        const { data: bus } = await api.post(`/elasticsearch/lignebus/export`, {
-          filters: {},
-          exportFields: ["busId"],
-        });
-        const { data: classes } = await api.post(`/elasticsearch/cle/classe/export`, {
-          filters: {},
-          exportFields: ["name", "uniqueKeyAndId"],
-        });
-        const { data: etablissements } = await api.post(`/elasticsearch/cle/etablissement/export`, {
-          filters: {},
-          exportFields: ["name", "uai"],
-        });
-        setSessionsPhase1(sessions);
-        setBus(bus);
-        setClasses(classes);
-        setEtablissements(etablissements);
-      } catch (e) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
-      }
-    })();
-  }, []);
-
-  if (!sessionsPhase1 || !bus || !classes || !etablissements) return <Loader />;
+  const filterArray = getFilterArray(user, labels);
 
   return (
     <>

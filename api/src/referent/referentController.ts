@@ -995,8 +995,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const date = new Date();
     const newNote = {
       note: `
-        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source})${
-          cohortChangeReason && ` pour la raison suivante : ${cohortChangeReason}`
+        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source}) ${
+          cohortChangeReason ? ` pour la raison suivante : ${cohortChangeReason}` : ""
         }.\n${previousEtablissement ? `Etablissement précédent : ${previousEtablissement.name}.` : ""}\n${
           previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.name}.` : ""
         }\n${previousYoung.cohesionCenterId ? `Centre précédent : ${previousYoung.cohesionCenterId}.` : ""}\n${
