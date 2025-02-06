@@ -6,7 +6,7 @@ import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etab
 import { SessionGateway } from "../../session/Session.gateway";
 import { SessionService } from "../../session/Session.service";
 import { BasculeService } from "../Bascule.service";
-import { SejourService } from "../../sejour/Sejour.Service";
+import { SejourService } from "../../sejour/Sejour.service";
 import { PlanDeTransportService } from "../../PlanDeTransport/PlanDeTransport.service";
 import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
 import { ChangerLaSessionDuJeunePayloadDto } from "@admin/infra/sejours/phase1/bascule/api/Bascule.validation";

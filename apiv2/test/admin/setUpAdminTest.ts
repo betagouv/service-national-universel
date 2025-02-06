@@ -12,17 +12,25 @@ import { NotificationModule } from "@notification/Notification.module";
 import { QueueModule } from "@infra/Queue.module";
 import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { SessionService } from "@admin/core/sejours/phase1/session/Session.service";
+import { SejourService } from "@admin/core/sejours/phase1/sejour/Sejour.service";
+import { BasculeService } from "@admin/core/sejours/phase1/bascule/Bascule.service";
+import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
+import { PlanDeTransportService } from "@admin/core/sejours/phase1/planDeTransport/PlanDeTransport.service";
 import { AuthController } from "@admin/infra/iam/api/Auth.controller";
 import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
 import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.provider";
 import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
+import { BasculeController } from "@admin/infra/sejours/phase1/bascule/api/Bascule.controller";
 import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders as cleGatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
 import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "@admin/infra/sejours/jeune/initProvider/gateway";
-import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
+import { guardProviders as cleGuardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
+import { guardProviders as jeuneGuardProviders } from "@admin/infra/sejours/jeune/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
 import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { testDatabaseProviders } from "../testDatabaseProvider";
@@ -77,9 +85,15 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
+        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController, BasculeController],
         providers: [
             ClasseService,
+            ClasseStateManager,
+            JeuneService,
+            SessionService,
+            SejourService,
+            PlanDeTransportService,
+            BasculeService,
             AffectationService,
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
@@ -103,7 +117,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...historyProvider,
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
-            ...guardProviders,
+            ...cleGuardProviders,
+            ...jeuneGuardProviders,
             SigninReferent,
             { provide: FileGateway, useClass: FileProvider },
             { provide: AuthProvider, useClass: JwtTokenService },

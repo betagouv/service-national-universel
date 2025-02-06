@@ -10,10 +10,9 @@ import { YoungDto, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, STEPS2023 } 
 import { SessionService } from "../../session/Session.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { BasculeService } from "../Bascule.service";
-import { SejourService } from "../../sejour/Sejour.Service";
+import { SejourService } from "../../sejour/Sejour.service";
 import { PlanDeTransportService } from "../../PlanDeTransport/PlanDeTransport.service";
 import { ClasseStateManager } from "@admin/core/sejours/cle/classe/stateManager/Classe.stateManager";
-import e from "express";
 
 @Injectable()
 export class BasculeCLEtoCLE implements UseCase<YoungDto> {
@@ -24,9 +23,9 @@ export class BasculeCLEtoCLE implements UseCase<YoungDto> {
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         private readonly sessionService: SessionService,
         private readonly basculeService: BasculeService,
+        private readonly classeStateManager: ClasseStateManager,
         private readonly sejourService: SejourService,
         private readonly planDeTransportService: PlanDeTransportService,
-        private readonly classeStateManager: ClasseStateManager,
     ) {}
     async execute(
         jeuneId: string,

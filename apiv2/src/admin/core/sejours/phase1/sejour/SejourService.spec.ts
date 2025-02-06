@@ -1,5 +1,5 @@
 import { Test, TestingModule } from "@nestjs/testing";
-import { SejourService } from "./Sejour.Service";
+import { SejourService } from "./Sejour.service";
 import { SejourGateway } from "./Sejour.gateway";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 

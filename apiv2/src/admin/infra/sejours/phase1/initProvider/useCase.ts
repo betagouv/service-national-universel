@@ -8,6 +8,6 @@ export const useCaseProvider = [
     SimulationAffectationHTS,
     SimulationAffectationCLE,
     SupprimerPlanDeTransport,
-    BasculeCLEtoCLE,
     BasculeHTStoCLE,
+    BasculeCLEtoCLE,
 ];
