@@ -19,7 +19,6 @@ import { CentreGateway } from "../centre/Centre.gateway";
 import { SessionGateway } from "../session/Session.gateway";
 
 import * as mockJeunes from "./__tests__/youngs.json";
-import * as mockLignesBus from "./__tests__/lignebuses.json";
 import * as mockPdr from "./__tests__/pdr.json";
 import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
@@ -79,18 +78,11 @@ describe("SimulationAffectationCLEDromCom", () => {
                 },
                 {
                     provide: LigneDeBusGateway,
-                    useValue: {
-                        findBySessionIdAndClasseId: jest.fn().mockResolvedValue({
-                            ...mockLignesBus[0],
-                            pointDeRassemblementIds: [mockPdr[0].id],
-                        }),
-                    },
+                    useValue: {},
                 },
                 {
                     provide: PointDeRassemblementGateway,
-                    useValue: {
-                        findById: jest.fn().mockResolvedValue(mockPdr[0]),
-                    },
+                    useValue: {},
                 },
                 {
                     provide: SejourGateway,
