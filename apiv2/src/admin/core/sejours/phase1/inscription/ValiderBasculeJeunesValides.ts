@@ -99,27 +99,10 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
         if (sendEmail) {
             for (const jeuneRapport of rapportData) {
                 if (jeuneRapport.emailTemplateId) {
+                    // jeune
                     await this.notificationGateway.sendEmail<BasculeJeuneParams>(
                         {
-                            to: [
-                                { email: jeuneRapport.email, name: `${jeuneRapport.prenom} ${jeuneRapport.nom}` },
-                                ...(jeuneRapport.parent1Email
-                                    ? [
-                                          {
-                                              email: jeuneRapport.parent1Email,
-                                              name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
-                                          },
-                                      ]
-                                    : []),
-                                ...(jeuneRapport.parent2Email
-                                    ? [
-                                          {
-                                              email: jeuneRapport.parent2Email,
-                                              name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
-                                          },
-                                      ]
-                                    : []),
-                            ],
+                            to: [{ email: jeuneRapport.email, name: `${jeuneRapport.prenom} ${jeuneRapport.nom}` }],
                             prenom: jeuneRapport.prenom!,
                             nom: jeuneRapport.nom!,
                             ancienneSessionNom: jeuneRapport.ancienneSession!,
@@ -127,6 +110,42 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
                         },
                         jeuneRapport.emailTemplateId,
                     );
+                    // RL 1
+                    if (jeuneRapport.parent1Email) {
+                        await this.notificationGateway.sendEmail<BasculeJeuneParams>(
+                            {
+                                to: [
+                                    {
+                                        email: jeuneRapport.parent1Email,
+                                        name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
+                                    },
+                                ],
+                                prenom: jeuneRapport.prenom!,
+                                nom: jeuneRapport.nom!,
+                                ancienneSessionNom: jeuneRapport.ancienneSession!,
+                                nouvelleSessionNom: jeuneRapport.nouvelleSession,
+                            },
+                            jeuneRapport.emailTemplateId,
+                        );
+                    }
+                    // RL 2
+                    if (jeuneRapport.parent2Email) {
+                        await this.notificationGateway.sendEmail<BasculeJeuneParams>(
+                            {
+                                to: [
+                                    {
+                                        email: jeuneRapport.parent2Email,
+                                        name: `${jeuneRapport.prenom} ${jeuneRapport.nom}`,
+                                    },
+                                ],
+                                prenom: jeuneRapport.prenom!,
+                                nom: jeuneRapport.nom!,
+                                ancienneSessionNom: jeuneRapport.ancienneSession!,
+                                nouvelleSessionNom: jeuneRapport.nouvelleSession,
+                            },
+                            jeuneRapport.emailTemplateId,
+                        );
+                    }
                 }
             }
         }
