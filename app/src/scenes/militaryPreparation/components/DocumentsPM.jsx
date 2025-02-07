@@ -7,6 +7,7 @@ import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 import useUpdateMPStatus from "../lib/useUpdateMPStatus";
+import plausibleEvent from "@/services/plausible";
 
 export const theme = {
   background: {
@@ -30,6 +31,11 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
   const [open, setOpen] = React.useState(showHelp ? !["VALIDATED", "REFUSED"].includes(young.statusMilitaryPreparationFiles) : true);
   const showFolder = showHelp && ["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
   const { mutate, isPending } = useUpdateMPStatus();
+
+  function handleCorrection() {
+    plausibleEvent("Phase2/CTA - PM - Corriger mon dossier");
+    mutate("WAITING_VERIFICATION");
+  }
 
   return (
     <>
@@ -124,7 +130,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
               <div className="flex-none">
                 <button
-                  onClick={() => mutate("WAITING_VERIFICATION")}
+                  onClick={handleCorrection}
                   disabled={isPending}
                   className="w-full mt-[1rem] md:mt-[0rem] rounded-lg border-[1px] border-blue-700 px-4 py-2 text-blue-700 hover:bg-blue-700 hover:text-white">
                   Envoyer ma correction
