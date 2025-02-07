@@ -1,10 +1,16 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
+import { CohortDto } from "snu-lib";
+import BasculeJeuneValides from "./BasculeJeuneValides/BasculeJeuneValides";
 
-export default function InscriptionsSection({ sessionId }) {
+interface InscriptionsSectionProps {
+  session: CohortDto;
+}
+
+export default function InscriptionsSection({ session }: InscriptionsSectionProps) {
   return (
-    <Collapsable open={false} title="Inscriptions">
-      à compléter
+    <Collapsable title="Inscriptions">
+      <BasculeJeuneValides session={session} />
     </Collapsable>
   );
 }

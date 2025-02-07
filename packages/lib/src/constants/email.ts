@@ -214,6 +214,9 @@ const SENDINBLUE_TEMPLATES = {
   },
   // Imports
   IMPORT_AUTO: "2324",
+  // Opérations
+  BASCULE_SEJOUR_ELIGIBLE: "2407",
+  BASCULE_SEJOUR_AVENIR: "2408",
 };
 
 export { SENDINBLUE_TEMPLATES };

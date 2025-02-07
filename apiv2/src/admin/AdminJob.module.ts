@@ -53,6 +53,10 @@ import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
 import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffectationSelector.service";
+import { AdminTaskInscriptionSelectorService } from "./infra/task/AdminTaskInscriptionSelector.service";
+import { SimulationBasculeJeunesValides } from "./core/sejours/phase1/inscription/SimulationBasculeJeunesValides";
+import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
+import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesValides";
 
 @Module({
     imports: [
@@ -102,6 +106,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         { provide: ClockGateway, useClass: ClockProvider },
         // add use case here
         AffectationService,
+        InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
         SimulationAffectationCLEService,
@@ -111,6 +116,11 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         ...referentielUseCaseProviders,
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,
+        SimulationBasculeJeunesValides,
+        ValiderBasculeJeunesValides,
+        ...referentielUseCaseProvider,
+        ...referentielServiceProvider,
+        AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
     ],
 })

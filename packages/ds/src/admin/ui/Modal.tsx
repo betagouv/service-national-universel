@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 import { Dialog, Transition } from "@headlessui/react";
 
 type OwnProps = {
@@ -6,6 +7,7 @@ type OwnProps = {
   onClose: () => void;
   className?: string;
   classNameContent?: string;
+  noBodyScroll?: boolean;
   header?: React.ReactNode;
   content?: React.ReactNode;
   footer?: React.ReactNode;
@@ -19,6 +21,7 @@ export default function Modal({
   header,
   content,
   footer,
+  noBodyScroll,
 }: OwnProps) {
   return (
     <Transition.Root show={isOpen}>
@@ -33,7 +36,11 @@ export default function Modal({
         >
           <div className="fixed inset-0 bg-gray-500 bg-opacity-60 transition-opacity" />
         </Transition.Child>
-        <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div
+          className={cx("fixed inset-0 z-10", {
+            "overflow-y-auto": !noBodyScroll,
+          })}
+        >
           <div className="flex min-h-full items-end justify-center p-4 sm:items-center sm:p-0">
             <Transition.Child
               enter="ease-out duration-300"

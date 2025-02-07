@@ -19,10 +19,20 @@ const DotSeparator = () => (
 export default function ActionCell({ session, simulation }: ActionCellProps) {
   let simulationLink: string | null = null;
   if (simulation.metadata?.parameters?.simulationTaskId) {
+    let actionName = "";
     switch (simulation.name) {
       case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
-        simulationLink = `?tab=simulations&cohort=${session.name}&action=${TaskName.AFFECTATION_HTS_SIMULATION}&id=${simulation.metadata.parameters.simulationTaskId}`;
+        actionName = TaskName.AFFECTATION_HTS_SIMULATION;
         break;
+      case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
+        actionName = TaskName.AFFECTATION_CLE_SIMULATION;
+        break;
+      case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
+        actionName = TaskName.BACULE_JEUNES_VALIDES_SIMULATION;
+        break;
+    }
+    if (actionName) {
+      simulationLink = `?tab=simulations&cohort=${session.name}&action=${actionName}&id=${simulation.metadata.parameters.simulationTaskId}`;
     }
   }
   return (

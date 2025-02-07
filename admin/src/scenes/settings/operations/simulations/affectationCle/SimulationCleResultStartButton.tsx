@@ -70,6 +70,7 @@ export default function SimulationCleResultStartButton({ simulation }: Simulatio
       </button>
       <Modal
         isOpen={showModal}
+        noBodyScroll
         onClose={toggleModal}
         className="md:max-w-[800px]"
         content={

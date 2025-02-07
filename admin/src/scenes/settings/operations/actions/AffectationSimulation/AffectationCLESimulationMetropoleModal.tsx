@@ -54,6 +54,7 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
   return (
     <Modal
       isOpen
+      noBodyScroll
       onClose={onClose}
       className="md:max-w-[800px]"
       content={
