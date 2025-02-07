@@ -2,7 +2,7 @@ import { Inject, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { Transactional } from "@nestjs-cls/transactional";
 
-import { MIME_TYPES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { MIME_TYPES, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -13,15 +13,12 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
 import { SejourGateway } from "../sejour/Sejour.gateway";
 
-import { SimulationAffectationCLETaskModel } from "./SimulationAffectationCLETask.model";
 import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationCLE.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
-import { SejourModel } from "../sejour/Sejour.model";
-import { ValiderAffectationCLETaskParameters } from "./ValiderAffectationCLETask.model";
-import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
-import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
+import { ValiderAffectationCLEDromComTaskParameters } from "./ValiderAffectationCLEDromComTask.model";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
+import { SimulationAffectationCLEDromComTaskModel } from "./SimulationAffectationCLEDromComTask.model";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -54,8 +51,6 @@ export type ValiderAffectationRapportData = Array<
         | "centreId"
         | "classeId"
     > & {
-        ligneDeBusNumeroLigne?: string;
-        pointDeRassemblementMatricule?: string;
         centreNom: string;
         "places restantes après l'inscription (centre)": string | number;
         "places totale (centre)": string | number;
@@ -63,7 +58,7 @@ export type ValiderAffectationRapportData = Array<
     }
 >;
 
-export type ValiderAffectationCLEResult = {
+export type ValiderAffectationCLEDromComResult = {
     rapportData: ValiderAffectationRapportData;
     rapportFile: {
         Location: string;
@@ -77,7 +72,7 @@ export type ValiderAffectationCLEResult = {
     };
 };
 
-export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResult> {
+export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationCLEDromComResult> {
     constructor(
         @Inject(AffectationService) private readonly affectationService: AffectationService,
         @Inject(ValiderAffectationCLEService) private validerAffectationCLEService: ValiderAffectationCLEService,
@@ -93,17 +88,14 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         sessionId,
         simulationTaskId,
         dateAffectation,
-    }: ValiderAffectationCLETaskParameters): Promise<ValiderAffectationCLEResult> {
+    }: ValiderAffectationCLEDromComTaskParameters): Promise<ValiderAffectationCLEDromComResult> {
         // Récuperation des données de l'affectation pour la session
-        const { session, ligneDeBusList, sejoursList, pdrList } =
-            await this.affectationService.loadAffectationData(sessionId);
+        const { session, sejoursList } = await this.affectationService.loadAffectationData(sessionId);
         // Récupération des données du rapport de simulation
         const simulationJeunesAAffecterList = await this.getSimulationData(simulationTaskId);
 
-        this.logger.debug("Sessions found: " + sejoursList.length);
-        this.logger.debug("Meeting points found: " + pdrList.length);
-        this.logger.debug("Bus lines found: " + ligneDeBusList.length);
-        this.logger.debug("Young to affect: " + simulationJeunesAAffecterList.length);
+        this.logger.debug("Sejours trouvés: " + sejoursList.length);
+        this.logger.debug("Jeunes à affecter: " + simulationJeunesAAffecterList.length);
 
         const jeuneAAffecterList = await this.jeuneGateway.findByIds(
             simulationJeunesAAffecterList.map((jeune) => jeune["id du volontaire"]),
@@ -127,36 +119,15 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         for (const jeuneRapport of simulationJeunesAAffecterList) {
             const jeune = jeuneAAffecterList.find((jeune) => jeune.id === jeuneRapport["id du volontaire"])!;
 
-            const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === jeuneRapport.jeuneLigneId);
-            const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport.sejourId);
-            const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport.pointDeRassemblementId); // TODO: utiliser le matricule
+            const sejour = sejoursList.find((sejour) => sejour.id === jeuneRapport?.sejourId);
 
             // Controle de coherence
             const erreur = this.validerAffectationCLEService.checkValiderAffectation(jeuneRapport, jeune, sejour);
             if (erreur) {
                 rapportData.push(
-                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, erreur),
+                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, undefined, undefined, erreur),
                 );
                 continue;
-            }
-
-            if (!ligneDeBus) {
-                this.logger.error(
-                    `🚩 Ligne de bus introuvable (${jeuneRapport.jeuneLigneId}) => jeune ${jeune.id} ignored.`,
-                );
-                throw new FunctionalException(
-                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `ligne de bus non trouvée ${jeuneRapport.jeuneLigneId} (jeune: ${jeune.id})`,
-                );
-            }
-            if (!pdr) {
-                this.logger.error(
-                    `🚩 Point de rassemblement introuvable (${jeuneRapport.pointDeRassemblementId}) => jeune ${jeune.id} ignored.`,
-                );
-                throw new FunctionalException(
-                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `point de rassemblement non trouvé ${jeuneRapport.pointDeRassemblementId} (jeune: ${jeune.id})`,
-                );
             }
 
             // Affectation du jeune
@@ -168,11 +139,9 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
                 sejourId: jeuneRapport.sejourId,
                 statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
 
-                // specifique Metropole
-                pointDeRassemblementId: jeuneRapport.pointDeRassemblementId,
-                ligneDeBusId: jeuneRapport.jeuneLigneId,
+                // specifique DROMCOM
+                transportInfoGivenByLocal: "true",
                 hasPDR: "true",
-                transportInfoGivenByLocal: undefined,
 
                 //Clean le reste
                 deplacementPhase1Autonomous: undefined,
@@ -195,7 +164,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
             jeunesUpdatedList.push(jeuneUpdated);
             rapportData.push(
-                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr),
+                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, undefined, undefined),
             );
             analytics.jeunesAffected += 1;
         }
@@ -207,10 +176,6 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         // mise à jour des placesRestantes dans les centres
         this.logger.log(`Mise à jour des places dans les séjours`);
         await this.sejoursGateway.bulkUpdate(sejoursList);
-
-        // mise à jour des placesOccupeesJeunes dans les bus
-        this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
-        await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
 
         this.cls.set("user", null);
 
@@ -236,7 +201,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
     }
 
     async getSimulationData(taskId: string) {
-        const simulationTask: SimulationAffectationCLETaskModel = await this.taskGateway.findById(taskId);
+        const simulationTask: SimulationAffectationCLEDromComTaskModel = await this.taskGateway.findById(taskId);
         const rapportKey = simulationTask.metadata?.results?.rapportKey;
         if (!rapportKey) {
             throw new FunctionalException(

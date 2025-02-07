@@ -2,7 +2,7 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { CohortDto, formatDepartement, Phase1Routes, region2department, RegionsMetropole, translate } from "snu-lib";
+import { CohortDto, formatDepartement, Phase1Routes, region2department, RegionsDromComEtCorse, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -10,19 +10,19 @@ import { AffectationService } from "@/services/affectationService";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 
-interface AffectationHTSSimulationMetropoleProps {
+interface AffectationCLESimulationDromComModalProps {
   session: CohortDto;
   onClose: () => void;
 }
 
-export default function AffectationCLESimulationMetropoleModal({ session, onClose }: AffectationHTSSimulationMetropoleProps) {
+export default function AffectationCLESimulationDromComModal({ session, onClose }: AffectationCLESimulationDromComModalProps) {
   const queryClient = useQueryClient();
 
   const [state, setState] = useSetState<{
     departements: Record<string, string[]>;
     etranger: boolean;
   }>({
-    departements: RegionsMetropole.reduce((acc, region) => {
+    departements: RegionsDromComEtCorse.reduce((acc, region) => {
       acc[region] = region2department[region];
       return acc;
     }, {}),
@@ -33,14 +33,14 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await AffectationService.postSimulationAffectationCLEMetropole(session._id!, {
+      return await AffectationService.postSimulationAffectationCLEDromCom(session._id!, {
         departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         etranger: state.etranger,
       });
     },
     onSuccess: (task) => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      const queryKey = ["affectation", "cle", session._id];
+      const queryKey = ["affectation", "cle-dromcom", session._id];
       const oldStatus = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(queryKey) || [];
       queryClient.setQueryData(queryKey, { ...oldStatus, simulation: { status: task.status } });
       onClose();
@@ -54,7 +54,6 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
   return (
     <Modal
       isOpen
-      noBodyScroll
       onClose={onClose}
       className="md:max-w-[800px]"
       content={
@@ -65,17 +64,17 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
                 <HiOutlineLightningBolt className="w-6 h-6" />
               </div>
             </div>
-            <h1 className="font-bold text-xl m-0">Affectation CLE (Metropole, hors Corse)</h1>
+            <h1 className="font-bold text-xl m-0">Affectation CLE (DROM COM et Corse)</h1>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
             <div className="flex flex-col w-full gap-2.5">
               <h2 className="text-lg leading-7 font-bold m-0">Découpage territorial</h2>
               <div className="flex flex-col w-full">
-                {RegionsMetropole.map((region) => (
+                {RegionsDromComEtCorse.map((region) => (
                   <CollapsableSelectSwitcher
                     key={region}
                     title={region}
-                    options={region2department[region].map((department) => ({ label: formatDepartement(department), value: department }))}
+                    options={region2department[region]?.map((department) => ({ label: formatDepartement(department), value: department }))}
                     values={state.departements[region]}
                     onChange={(values) => setState({ departements: { ...state.departements, [region]: values } })}
                     isOpen={false}

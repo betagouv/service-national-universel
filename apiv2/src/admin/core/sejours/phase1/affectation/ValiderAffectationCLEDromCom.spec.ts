@@ -23,6 +23,7 @@ import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { YOUNG_STATUS } from "snu-lib";
+import { ValiderAffectationCLEDromCom } from "./ValiderAffectationCLEDromCom";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
 
 const sessionNom = "2025 CLE 03 Fevrier";
@@ -31,8 +32,8 @@ jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
 }));
 
-describe("ValiderAffectationCLE", () => {
-    let validerAffectationCLE: ValiderAffectationCLE;
+describe("ValiderAffectationCLEDromcom", () => {
+    let validerAffectationCLEDromCom: ValiderAffectationCLEDromCom;
     let cls: ClsService;
 
     beforeEach(async () => {
@@ -41,9 +42,9 @@ describe("ValiderAffectationCLE", () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [ClsModule],
             providers: [
-                ValiderAffectationCLE,
-                ValiderAffectationCLEService,
                 AffectationService,
+                ValiderAffectationCLEService,
+                ValiderAffectationCLEDromCom,
                 Logger,
                 {
                     provide: FileGateway,
@@ -54,10 +55,8 @@ describe("ValiderAffectationCLE", () => {
                         parseXLS: jest.fn().mockResolvedValue([
                             {
                                 "id du volontaire": "jeune1",
-                                jeuneLigneId: "65f9c8bb735e0e12a4213c18",
                                 sejourId: "6597e6acb86afb08146e8f86",
                                 classeCenterId: "609bebb00c1cc9a888ae8fa8",
-                                pointDeRassemblementId: "6398797d3bc18708cc3981f6",
                             },
                         ]),
                     },
@@ -138,7 +137,7 @@ describe("ValiderAffectationCLE", () => {
             ],
         }).compile();
         cls = module.get<ClsService>(ClsService);
-        validerAffectationCLE = module.get<ValiderAffectationCLE>(ValiderAffectationCLE);
+        validerAffectationCLEDromCom = module.get<ValiderAffectationCLEDromCom>(ValiderAffectationCLEDromCom);
     });
 
     it("should simulate young affectation", async () => {
@@ -146,7 +145,7 @@ describe("ValiderAffectationCLE", () => {
             // @ts-ignore
             { user: null },
             () =>
-                validerAffectationCLE.execute({
+                validerAffectationCLEDromCom.execute({
                     sessionId: sessionNom,
                     simulationTaskId: "simulationTaskId",
                     dateAffectation: new Date(),
@@ -165,8 +164,6 @@ describe("ValiderAffectationCLE", () => {
             erreur: "",
             genre: "garçon",
             id: "jeune1",
-            ligneDeBusId: "65f9c8bb735e0e12a4213c18",
-            ligneDeBusNumeroLigne: "IDF078036",
             nom: undefined,
             parent1Email: undefined,
             parent1Nom: undefined,
@@ -178,8 +175,6 @@ describe("ValiderAffectationCLE", () => {
             parent2Telephone: undefined,
             "places restantes après l'inscription (centre)": 99,
             "places totale (centre)": 126,
-            pointDeRassemblementId: "6398797d3bc18708cc3981f6",
-            pointDeRassemblementMatricule: "",
             prenom: undefined,
             psh: "non",
             qpv: "non",

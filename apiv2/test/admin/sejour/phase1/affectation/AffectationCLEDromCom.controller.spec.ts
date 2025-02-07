@@ -4,7 +4,7 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { departmentList, region2department, RegionsMetropoleAndCorse, TaskName, TaskStatus } from "snu-lib";
+import { departmentList, region2department, RegionsDromComEtCorse, TaskName, TaskStatus } from "snu-lib";
 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -15,7 +15,7 @@ import { setupAdminTest } from "../../../setUpAdminTest";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { createSession } from "../helper/SessionHelper";
 
-describe("AffectationController - CLE", () => {
+describe("AffectationController - CLE DROMCOM", () => {
     let app: INestApplication;
     let affectationController: AffectationController;
     let affectationService: AffectationService;
@@ -48,11 +48,13 @@ describe("AffectationController - CLE", () => {
         expect(affectationController).toBeDefined();
     });
 
-    describe("POST /affectation/:id/simulation/cle", () => {
+    describe("POST /affectation/:id/simulation/cle-dromcom", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`);
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulation/cle-dromcom`,
+            );
 
             expect(response.status).toBe(400);
         });
@@ -60,10 +62,12 @@ describe("AffectationController - CLE", () => {
         it("should return 400 for invalid departement (empty)", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
-                departements: [],
-                etranger: true,
-            });
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .send({
+                    departements: [],
+                    etranger: true,
+                });
 
             expect(response.status).toBe(400);
         });
@@ -72,7 +76,7 @@ describe("AffectationController - CLE", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle`)
+                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
                 .send({
                     departements: ["nonInexistant"],
                     etranger: true,
@@ -84,26 +88,28 @@ describe("AffectationController - CLE", () => {
         it("should return 400 for departement hors metropole", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(`/affectation/${session.id}/simulation/cle`).send({
-                departements: departmentList,
-                etranger: true,
-            });
+            const response = await request(app.getHttpServer())
+                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .send({
+                    departements: departmentList,
+                    etranger: true,
+                });
 
             expect(response.status).toBe(400);
         });
 
-        it("should return 201", async () => {
+        it("should return 201 (valid with corse)", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle`)
+                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
                 .send({
-                    departements: RegionsMetropoleAndCorse.flatMap((region) => region2department[region]),
+                    departements: RegionsDromComEtCorse.flatMap((region) => region2department[region]),
                     etranger: true,
                 });
 
             expect(response.status).toBe(201);
-            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_SIMULATION);
+            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
         });

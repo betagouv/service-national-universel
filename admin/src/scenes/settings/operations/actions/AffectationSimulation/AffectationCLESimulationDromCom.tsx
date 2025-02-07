@@ -8,13 +8,13 @@ import { AffectationRoutes, CohortDto, TaskName, TaskStatus } from "snu-lib";
 import { Button, Tooltip } from "@snu/ds/admin";
 
 import { AffectationService } from "@/services/affectationService";
-import AffectationCLESimulationMetropoleModal from "./AffectationCLESimulationMetropoleModal";
+import AffectationCLESimulationDromComModal from "./AffectationCLESimulationDromComModal";
 
-interface AffectationCLESimulationMetropoleProps {
+interface AffectationCLESimulationDromComProps {
   session: CohortDto;
 }
 
-export default function AffectationCLESimulationMetropole({ session }: AffectationCLESimulationMetropoleProps) {
+export default function AffectationCLESimulationDromCom({ session }: AffectationCLESimulationDromComProps) {
   const history = useHistory();
 
   const [showModal, toggleModal] = useToggle(false);
@@ -24,8 +24,8 @@ export default function AffectationCLESimulationMetropole({ session }: Affectati
     isError,
     data: affectationStatus,
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
-    queryKey: ["affectation", "cle", session._id], // check SimulationCleResultStartButton.tsx and AffectationCLESimulationMetropoleModal.tsx queryKey
-    queryFn: async () => AffectationService.getAffectation(session._id!, "CLE"),
+    queryKey: ["affectation", "cle-dromcom", session._id], // check SimulationCleResultStartButton.tsx and AffectationCLESimulationDromComModal.tsx queryKey
+    queryFn: async () => AffectationService.getAffectation(session._id!, "CLE_DROMCOM"),
   });
 
   const isValidSession = session.type === "CLE";
@@ -34,17 +34,21 @@ export default function AffectationCLESimulationMetropole({ session }: Affectati
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <div className="text-sm leading-5 font-bold">Affectation CLE (Metropole, hors Corse)</div>
-        <Tooltip id="affectation-cle-metropole" title="Affectation CLE (Metropole, hors Corse)">
+        <div className="text-sm leading-5 font-bold">Affectation CLE (DROM COM et Corse)</div>
+        <Tooltip id="affectation-cle-dromcom" title="Affectation CLE (DROM COM et Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}
       </div>
       <div className="flex gap-2">
-        <Button title="Voir les simulations" type="wired" onClick={() => history.push(`?tab=simulations&cohort=${session.name}&action=${TaskName.AFFECTATION_CLE_SIMULATION}`)} />
+        <Button
+          title="Voir les simulations"
+          type="wired"
+          onClick={() => history.push(`?tab=simulations&cohort=${session.name}&action=${TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION}`)}
+        />
         <Button title="Lancer une simulation" onClick={toggleModal} loading={isInProgress || isLoading} disabled={!isValidSession || isLoading || isInProgress || isError} />
       </div>
-      {showModal && <AffectationCLESimulationMetropoleModal session={session} onClose={toggleModal} />}
+      {showModal && <AffectationCLESimulationDromComModal session={session} onClose={toggleModal} />}
     </div>
   );
 }
