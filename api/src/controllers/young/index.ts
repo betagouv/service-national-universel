@@ -730,12 +730,13 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     }
 
     const query: any = { youngId: id };
-    if (isMilitaryPreparation !== undefined) {
-      query.isMilitaryPreparation = isMilitaryPreparation;
-    }
 
     type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
     let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
+
+    if (isMilitaryPreparation) {
+      data = data.filter((a) => a.mission?.isMilitaryPreparation);
+    }
 
     for (let application of data) {
       if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;

@@ -233,7 +233,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
 
     // Update MP status if needed
     const hasSubmittedMilitaryPreparationFiles =
-      value.isMilitaryPreparation === "true" && !["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
+      mission.isMilitaryPreparation === "true" && !["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
 
     if (hasSubmittedMilitaryPreparationFiles) {
       young.set({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
@@ -361,6 +361,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    const mission = await MissionModel.findById(application.missionId);
+    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     // A young can only update his own application.
     if (isYoung(req.user) && application.youngId.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -411,7 +414,7 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
 
-    if (application.isMilitaryPreparation === "true" && youngHasAcceptedAProposedMission && young.statusMilitaryPreparationFiles !== "VALIDATED") {
+    if (mission.isMilitaryPreparation === "true" && youngHasAcceptedAProposedMission && young.statusMilitaryPreparationFiles !== "VALIDATED") {
       await notifyReferentMilitaryPreparationFilesSubmitted(young);
     }
 
