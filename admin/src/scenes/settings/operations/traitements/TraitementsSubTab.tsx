@@ -9,8 +9,7 @@ import { Phase1Service } from "@/services/phase1Service";
 import ActionCell from "../components/ActionCell";
 import StatusCell from "../components/StatusCell";
 import RapportCell from "../components/RapportCell";
-import AffectationHtsResultCell from "./affectationHts/AffectationHtsResultCell";
-import { tr } from "date-fns/locale";
+import AffectationResultCell from "./affectation/AffectationResultCell";
 import BasculeJeuneValidesResultCell from "./basculeJeuneValides/BasculeJeuneValidesResultCell";
 
 interface TraitementsSubTabProps {
@@ -83,7 +82,8 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
               switch (traitement.name) {
                 case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
                 case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
-                  return <AffectationHtsResultCell simulation={traitement} />;
+                case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
+                  return <AffectationResultCell simulation={traitement} />;
                 case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
                   return <BasculeJeuneValidesResultCell simulation={traitement} />;
               }
