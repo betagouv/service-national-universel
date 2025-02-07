@@ -34,6 +34,7 @@ const {
   SUB_ROLES,
   EQUIVALENCE_STATUS,
   ERRORS: LIB_ERRORS,
+  DEPART_SEJOUR_MOTIFS_NOT_DONE,
 } = require("snu-lib");
 const { capture, captureMessage } = require("../sentry");
 const { getCohortDateInfo } = require("./cohort");
@@ -780,6 +781,10 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
           young.set({ statusPhase1: "NOT_DONE" });
         } else {
           young.set({ statusPhase1: "DONE", statusPhase2OpenedAt: now });
+        }
+      } else if (!isDepartureDateValid) {
+        if (DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young?.departSejourMotif)) {
+          young.set({ statusPhase1: "NOT_DONE" });
         }
       } else {
         // Sinon on ne valide pas sa phase 1.

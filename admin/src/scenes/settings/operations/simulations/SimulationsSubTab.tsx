@@ -15,6 +15,8 @@ import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
 import SimulationCleResultStartButton from "./affectationCle/SimulationCleResultStartButton";
+import BasculeJeuneValidesCell from "./basculeJeuneValides/BasculeJeuneValidesCell";
+import BasculeJeuneValidesStartButton from "./basculeJeuneValides/BasculeJeuneValidesStartButton";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -90,6 +92,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
                 return <SimulationHtsResultCell simulation={simulation} />;
               } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
                 return <SimulationCleResultCell simulation={simulation} />;
+              } else if (simulation.name === TaskName.BACULE_JEUNES_VALIDES_SIMULATION) {
+                return <BasculeJeuneValidesCell simulation={simulation} />;
               }
               return null;
             },
@@ -113,6 +117,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
                 return <SimulationHtsResultStartButton simulation={simulation} />;
               } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
                 return <SimulationCleResultStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.BACULE_JEUNES_VALIDES_SIMULATION) {
+                return <BasculeJeuneValidesStartButton simulation={simulation} />;
               }
               return <HiPlay className="text-gray-400" size={50} />;
             },

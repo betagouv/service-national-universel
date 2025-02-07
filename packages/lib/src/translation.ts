@@ -377,6 +377,8 @@ const translate = (value) => {
       return "L'objectif d'inscription de la région a été atteint !";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED:
       return "Aucun objectif d'inscription défini pour le département !";
+    case "NOT_ENOUGH_DATA":
+      return "Données insuffisantes";
     case "AFFECTATION_NOT_ENOUGH_DATA":
       return "Données insuffisantes pour l'affectation";
     case "IMPORT_EMPTY_FILE":
@@ -1192,6 +1194,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_CLE_SIMULATION":
     case "AFFECTATION_CLE_SIMULATION_VALIDER":
       return "Affectation CLE (Metropole)";
+    case "BACULE_JEUNES_VALIDES_SIMULATION":
+    case "BACULE_JEUNES_VALIDES_SIMULATION_VALIDER":
+      return "Bascule des jeunes validés";
     default:
       return name;
   }
