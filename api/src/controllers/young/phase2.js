@@ -3,7 +3,7 @@ const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 const { config } = require("../../config");
-const { deleteFilesByList, listFiles, getFile, getReferentManagerPhase2 } = require("../../utils/index");
+const { deleteFilesByList, listFiles, getFile } = require("../../utils/index");
 const { isYoung } = require("../../utils/index");
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
@@ -15,6 +15,7 @@ const { decrypt } = require("../../cryptoUtils");
 const { getMimeFromBuffer } = require("../../utils/file");
 const { PHASE2_TOTAL_HOURS } = require("snu-lib");
 const mime = require("mime-types");
+const { notifyReferentMilitaryPreparationFilesSubmitted } = require("../../services/application");
 
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -305,18 +306,7 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
 
     if (value.statusMilitaryPreparationFiles === "WAITING_VERIFICATION") {
-      const toReferents = await getReferentManagerPhase2(req.user.department);
-      if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      const template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
-
-      await sendTemplate(parseInt(template), {
-        emailTo: toReferents.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        })),
-        params: { cta: `${config.ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-      });
+      await notifyReferentMilitaryPreparationFilesSubmitted(young);
     }
 
     await young.save({ fromUser: req.user });

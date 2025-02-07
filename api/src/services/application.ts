@@ -1,11 +1,22 @@
-import { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge, YoungType, MissionType, CohortType } from "snu-lib";
+import {
+  SENDINBLUE_TEMPLATES,
+  MISSION_STATUS,
+  APPLICATION_STATUS,
+  isCohortTooOld,
+  canApplyToPhase2,
+  calculateAge,
+  YoungType,
+  MissionType,
+  CohortType,
+  ApplicationType,
+} from "snu-lib";
 import { deletePatches } from "../controllers/patches";
 import { ApplicationModel } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { getCcOfYoung } from "../utils";
+import { getCcOfYoung, getReferentManagerPhase2 } from "../utils";
 import { getTutorName } from "./mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -189,3 +200,30 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
 
   return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
 };
+
+export async function notifyReferentMilitaryPreparationFilesSubmitted(user: YoungType) {
+  const toReferents = await getReferentManagerPhase2(user.department);
+  if (!toReferents) return;
+  const emailTo = toReferents.map((referent) => ({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }));
+  const template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
+  const params = { cta: `${config.ADMIN_URL}/volontaire/${user._id}/phase2`, youngFirstName: user.firstName, youngLastName: user.lastName };
+  await sendTemplate(template, { emailTo, params });
+}
+
+export async function notifyReferentNewApplication(application: ApplicationType) {
+  const referent = await ReferentModel.findById(application.tutorId);
+  if (!referent) return;
+  const emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+  const template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
+  const params = { cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+  return await sendTemplate(template, { emailTo, params });
+}
+
+export async function notifySupervisorMilitaryPreparationFilesValidated(application: ApplicationType) {
+  const superviseur = await ReferentModel.findById(application.tutorId);
+  if (!superviseur) return;
+  const emailTo = [{ name: `${superviseur.firstName} ${superviseur.lastName}`, email: superviseur.email }];
+  const template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
+  const params = { cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+  await sendTemplate(template, { emailTo, params });
+}

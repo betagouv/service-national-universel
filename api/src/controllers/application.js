@@ -40,7 +40,12 @@ const {
 } = require("../utils");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
-const { getAuthorizationToApply } = require("../services/application");
+const {
+  getAuthorizationToApply,
+  notifyReferentMilitaryPreparationFilesSubmitted,
+  notifyReferentNewApplication,
+  notifySupervisorMilitaryPreparationFilesValidated,
+} = require("../services/application");
 const { apiEngagement } = require("../services/gouv.fr/api-engagement");
 const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
 const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
@@ -226,6 +231,25 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     await updateMission(data, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
 
+    // Update MP status if needed
+    const hasSubmittedMilitaryPreparationFiles =
+      value.isMilitaryPreparation === "true" && !["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
+
+    if (hasSubmittedMilitaryPreparationFiles) {
+      young.set({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
+      await young.save({ fromUser: req.user });
+      await notifyReferentMilitaryPreparationFilesSubmitted(young);
+    }
+
+    // Send notifications
+    if (mission.isMilitaryPreparation === "true" && young.statusMilitaryPreparationFiles === "VALIDATED") {
+      await notifySupervisorMilitaryPreparationFilesValidated(data);
+    }
+
+    if (mission.isMilitaryPreparation !== "true") {
+      await notifyReferentNewApplication(data);
+    }
+
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
   } catch (error) {
     capture(error);
@@ -368,9 +392,11 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     application.set(value);
 
+    const youngHasAcceptedAProposedMission = originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION;
+
     if (application.isJvaMission === "true") {
       // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
-      if (originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION) {
+      if (youngHasAcceptedAProposedMission) {
         const mission = await MissionModel.findById(application.missionId);
         const data = await apiEngagement.create(application, mission.apiEngagementId, null);
         application.set({ apiEngagementId: data._id });
@@ -384,6 +410,10 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateYoungPhase2StatusAndHours(young, req.user);
     await updateYoungStatusPhase2Contract(young, req.user);
     await updateMission(application, req.user);
+
+    if (application.isMilitaryPreparation === "true" && youngHasAcceptedAProposedMission && young.statusMilitaryPreparationFiles !== "VALIDATED") {
+      await notifyReferentMilitaryPreparationFilesSubmitted(young);
+    }
 
     res.status(200).send({ ok: true, data: serializeApplication(application) });
   } catch (error) {
@@ -584,27 +614,6 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, message, cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
-    } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
-      // when it is a new application, there are 2 possibilities
-      if (mission.isMilitaryPreparation === "true") {
-        if (young.statusMilitaryPreparationFiles === "VALIDATED") {
-          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
-          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
-        } else {
-          const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
-          emailTo = referentManagerPhase2.map((referent) => ({
-            name: `${referent.firstName} ${referent.lastName}`,
-            email: referent.email,
-          }));
-          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
-          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
-        }
-      } else {
-        emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-        template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-        params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
-      }
     } else if (template === SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
