@@ -9,7 +9,6 @@ import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 import { capture, captureMessage } from "./sentry";
 import { rateLimiterContactSIB } from "./rateLimiters";
 import { sendMailCatcher } from "./mailcatcher";
-import { list } from "pdfkit";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
