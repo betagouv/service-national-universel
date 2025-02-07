@@ -44,6 +44,9 @@ import { initDB } from "../mongo";
     case "missions-jva":
       await require("./missionsJVA/JeVeuxAiderDaily").handler();
       break;
+    case "deleteBrevo":
+      await require("./PMR/deleteListeDiffusionBrevo").handler();
+      break;
     default:
       console.log("No cron found for " + process.argv[2]);
   }

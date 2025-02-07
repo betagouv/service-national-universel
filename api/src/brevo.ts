@@ -9,6 +9,7 @@ import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 import { capture, captureMessage } from "./sentry";
 import { rateLimiterContactSIB } from "./rateLimiters";
 import { sendMailCatcher } from "./mailcatcher";
+import { list } from "pdfkit";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -167,9 +168,49 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
   }
 }
 
-export async function deleteDiffusionList() {
+export async function deleteDiffusionList(folderId: number) {
   try {
-    return await api("/contacts/lists", { method: "GET" });
+    const folder = await api(`/contacts/folders/${folderId.toString()}`, { method: "GET" });
+    const folderName = "DEV - Ne Pas Supprimer - WARNING";
+    if (!folder || folder?.name !== folderName) throw new Error("ERROR FOLDER NOT FOUND");
+
+    const lists: any[] = [];
+    let offset = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+      const response = await api(`/contacts/lists?limit=50&offset=${offset}`, { method: "GET" });
+
+      const currentLists = response?.lists ?? [];
+
+      if (currentLists.length === 0) {
+        hasMore = false;
+      } else {
+        lists.push(...currentLists);
+        offset += 50;
+      }
+    }
+
+    const listsToDelete: any[] = [];
+
+    const now = new Date();
+    const sixMonthsAgo = new Date();
+    sixMonthsAgo.setMonth(now.getMonth() - 6);
+
+    for (const list of lists) {
+      const response = await api(`/contacts/lists/${list.id}`, { method: "GET" });
+
+      if (!response?.folderId || !response?.createdAt) continue;
+      if (response.folderId === folderId) continue;
+
+      const createdAt = new Date(response.createdAt);
+      if (createdAt < sixMonthsAgo) {
+        listsToDelete.push(list);
+        await api(`/contacts/lists/${list.id}`, { method: "DELETE" });
+      }
+    }
+
+    return listsToDelete;
   } catch (e) {
     capture(e);
   }

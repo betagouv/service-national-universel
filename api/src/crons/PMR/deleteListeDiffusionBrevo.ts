@@ -1,33 +1,15 @@
-/* import { capture } from "../../sentry";
-import slack from "../../slack"; */
-//import { deleteDiffusionList } from "../../brevo";
+import { capture } from "../../sentry";
+import slack from "../../slack";
+import { deleteDiffusionList } from "../../brevo";
 
-//script
-process.env.NODE_CONFIG_DIR = "../../config";
-const { initDB } = require("../../mongo");
-const { deleteDiffusionList } = require("../../brevo");
-
-(async () => {
-  await initDB();
-
+export const handler = async (): Promise<void> => {
   try {
-    const list = await deleteDiffusionList();
-    console.log(list);
-  } catch (error) {
-    console.error("Error occurred:", error);
-  }
-
-  console.log("---------------------------------------------------------");
-  process.exit(0);
-})();
-
-/* export const handler = async (): Promise<void> => {
-  try {
-    const list = await deleteDiffusionList();
-    console.log(list);
+    const folderId = 589; // Créer une variable d'env ???
+    const listToDelete = await deleteDiffusionList(folderId);
+    slack.info({ title: "DeleteListeDiffusionBrevo", text: `Suppression de ${listToDelete?.length} listes de diffusion Brevo` });
   } catch (e) {
     capture(e);
-    //slack.error({ title: "DeleteListeDiffusionBrevo", text: JSON.stringify(e) });
+    slack.error({ title: "DeleteListeDiffusionBrevo", text: JSON.stringify(e) });
     throw e;
   }
-}; */
+};
