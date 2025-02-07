@@ -34,8 +34,8 @@ export default function AffectationCLESimulationMetropole({ session }: Affectati
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <div className="text-sm leading-5 font-bold">Affectation CLE (Metropole)</div>
-        <Tooltip id="affectation-cle-metropole" title="Affectation CLE (Metropole)">
+        <div className="text-sm leading-5 font-bold">Affectation CLE (Metropole, hors Corse)</div>
+        <Tooltip id="affectation-cle-metropole" title="Affectation CLE (Metropole, hors Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}
