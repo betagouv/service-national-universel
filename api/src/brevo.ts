@@ -200,54 +200,6 @@ export async function deleteListById(listId: number) {
   }
 }
 
-export async function deleteDiffusionList(folderId: number) {
-  try {
-    const folder = await getFolderById(folderId);
-    const folderName = "DEV - Ne Pas Supprimer - WARNING";
-    if (!folder || folder?.name !== folderName) throw new Error("ERROR FOLDER NOT FOUND");
-
-    const lists: any[] = [];
-    let offset = 0;
-    let hasMore = true;
-
-    while (hasMore) {
-      const response = await getAllList(50, offset);
-
-      const currentLists = response?.lists ?? [];
-
-      if (currentLists.length === 0) {
-        hasMore = false;
-      } else {
-        lists.push(...currentLists);
-        offset += 50;
-      }
-    }
-
-    const listsToDelete: any[] = [];
-
-    const now = new Date();
-    const sixMonthsAgo = new Date();
-    sixMonthsAgo.setMonth(now.getMonth() - 6);
-
-    for (const list of lists) {
-      if (list.folderId === folderId) continue;
-      const response = await getListDetailById(list.id);
-
-      if (!response?.createdAt) continue;
-
-      const createdAt = new Date(response.createdAt);
-      if (createdAt < sixMonthsAgo) {
-        listsToDelete.push(list);
-        await deleteListById(list.id);
-      }
-    }
-
-    return listsToDelete;
-  } catch (e) {
-    capture(e);
-  }
-}
-
 export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
