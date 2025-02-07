@@ -14,4 +14,8 @@ export class ClockProvider implements ClockGateway {
     now() {
         return new Date();
     }
+
+    isValidDate(date:Date): boolean {
+        return !isNaN(new Date(date).getTime());
+    }
 }

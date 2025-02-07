@@ -17,7 +17,7 @@ import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import {
     ClasseImportModel,
     ClasseImportRapport,
-    ClasseImportXslx,
+    ClasseImportXlsx,
     ClasseRapport,
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
@@ -39,7 +39,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseRapport[]> {
         const report: ClasseImportRapport[] = [];
         const fileContent = await this.fileGateway.downloadFile(parameters.fileKey);
-        const classesFromXslx = await this.fileGateway.parseXLS<ClasseImportXslx>(fileContent.Body, {
+        const classesFromXslx = await this.fileGateway.parseXLS<ClasseImportXlsx>(fileContent.Body, {
             sheetName: ImportClasseFileValidation.sheetName,
         });
         const mappedClasses = ReferentielClasseMapper.mapImporterClassesFromFile(classesFromXslx);
