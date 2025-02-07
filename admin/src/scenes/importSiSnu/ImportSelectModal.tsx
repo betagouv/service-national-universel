@@ -40,10 +40,6 @@ export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectMo
       value: ReferentielTaskType.IMPORT_CLASSES,
       label: "Classes",
     },
-    {
-      value: ReferentielTaskType.IMPORT_ROUTES,
-      label: "Routes HTS",
-    },
   ];
 
   const { isPending, mutate, error, reset } = useMutation<ReferentielRoutes["Import"]["response"], HttpError>({
