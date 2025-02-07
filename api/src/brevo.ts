@@ -9,6 +9,7 @@ import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 import { capture, captureMessage } from "./sentry";
 import { rateLimiterContactSIB } from "./rateLimiters";
 import { sendMailCatcher } from "./mailcatcher";
+import { get } from "http";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -167,9 +168,41 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
   }
 }
 
+export async function getFolderById(folderId: number) {
+  try {
+    return await api(`/contacts/folders/${folderId.toString()}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function getAllList(limit: number = 10, offset: number = 0) {
+  try {
+    return await api(`/contacts/lists?limit=${limit}&offset=${offset}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function getListDetailById(listId: number) {
+  try {
+    return await api(`/contacts/lists/${listId.toString()}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function deleteListById(listId: number) {
+  try {
+    return await api(`/contacts/lists/${listId.toString()}`, { method: "DELETE" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
 export async function deleteDiffusionList(folderId: number) {
   try {
-    const folder = await api(`/contacts/folders/${folderId.toString()}`, { method: "GET" });
+    const folder = await getFolderById(folderId);
     const folderName = "DEV - Ne Pas Supprimer - WARNING";
     if (!folder || folder?.name !== folderName) throw new Error("ERROR FOLDER NOT FOUND");
 
@@ -178,7 +211,7 @@ export async function deleteDiffusionList(folderId: number) {
     let hasMore = true;
 
     while (hasMore) {
-      const response = await api(`/contacts/lists?limit=50&offset=${offset}`, { method: "GET" });
+      const response = await getAllList(50, offset);
 
       const currentLists = response?.lists ?? [];
 
@@ -198,14 +231,14 @@ export async function deleteDiffusionList(folderId: number) {
 
     for (const list of lists) {
       if (list.folderId === folderId) continue;
-      const response = await api(`/contacts/lists/${list.id}`, { method: "GET" });
+      const response = await getListDetailById(list.id);
 
       if (!response?.createdAt) continue;
 
       const createdAt = new Date(response.createdAt);
       if (createdAt < sixMonthsAgo) {
         listsToDelete.push(list);
-        await api(`/contacts/lists/${list.id}`, { method: "DELETE" });
+        await deleteListById(list.id);
       }
     }
 
