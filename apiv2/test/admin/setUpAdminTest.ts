@@ -40,15 +40,20 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
-import { ReferentielRoutesService } from "@admin/core/referentiel/routes/ReferentielRoutes.service";
 import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { historyProvider } from "@admin/infra/history/historyProvider";
+import { referentielGatewayProviders } from "@admin/infra/referentiel/initProvider/gateway";
+import { ImportReferentielController } from "@admin/infra/referentiel/api/ImportReferentiel.controller";
+import { regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
+import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
 import { segmentDeLigneMongoProviders } from "@admin/infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
+import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academie.provider";
+import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -77,13 +82,17 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             }),
             QueueModule,
         ],
-        controllers: [ClasseController, AffectationController, Phase1Controller, AuthController],
+        controllers: [
+            ClasseController,
+             AffectationController,
+              Phase1Controller,
+               AuthController,
+            ],
         providers: [
             ClasseService,
             AffectationService,
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
-            ReferentielRoutesService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
@@ -110,7 +119,11 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             { provide: TaskGateway, useClass: AdminTaskRepository },
             ...phase1UseCaseProviders,
             ...cleUseCaseProviders,
+            ...referentielGatewayProviders,
+            ...regionAcademiqueMongoProviders,
             ...serviceProvider,
+            ...academieMongoProviders,
+            ...departementMongoProviders,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
