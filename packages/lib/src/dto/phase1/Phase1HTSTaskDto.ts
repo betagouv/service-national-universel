@@ -2,11 +2,11 @@ import { TaskDto } from "../taskDto";
 
 export interface Phase1TaskParameters {
   auteur: {
-    id: string;
-    prenom: string;
-    nom: string;
-    role: string;
-    sousRole: string;
+    id?: string;
+    prenom?: string;
+    nom?: string;
+    role?: string;
+    sousRole?: string;
   };
   sessionId: string;
   simulationTaskId?: string; // traitement

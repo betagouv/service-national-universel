@@ -377,6 +377,8 @@ const translate = (value) => {
       return "L'objectif d'inscription de la région a été atteint !";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED:
       return "Aucun objectif d'inscription défini pour le département !";
+    case "NOT_ENOUGH_DATA":
+      return "Données insuffisantes";
     case "AFFECTATION_NOT_ENOUGH_DATA":
       return "Données insuffisantes pour l'affectation";
     case "IMPORT_EMPTY_FILE":
@@ -1192,6 +1194,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_CLE_SIMULATION":
     case "AFFECTATION_CLE_SIMULATION_VALIDER":
       return "Affectation CLE (Metropole)";
+    case "BACULE_JEUNES_VALIDES_SIMULATION":
+    case "BACULE_JEUNES_VALIDES_SIMULATION_VALIDER":
+      return "Bascule des jeunes validés";
     default:
       return name;
   }
@@ -1201,6 +1206,19 @@ export const translateModifierClasse = (name: string) => {
   switch (name) {
     case "ROLE_NOT_REFERENT_CLASSE":
       return "L'utilisateur n'est pas référent de classe.";
+    default:
+      return name;
+  }
+};
+
+export const translateImportReferentiel = (name: string) => {
+  switch (name) {
+    case "IMPORT_MISSING_COLUMN":
+      return "Le fichier doit contenir les colonnes suivantes";
+    case "IMPORT_EMPTY_FILE":
+      return "Le fichier ne contient pas les bons onglets ou est vide";
+    case "IMPORT_NOT_VALID":
+      return "Cet import est invalide";
     default:
       return name;
   }
