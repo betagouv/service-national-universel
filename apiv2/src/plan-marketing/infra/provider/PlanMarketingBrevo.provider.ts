@@ -19,8 +19,19 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         this.setApiKey(this.campaignsApi, apiKey);
     }
 
+    // TODO : add type when model of campagne is available
+    async findCampagneById(campagneId: string): Promise<any> {
+        this.logger.log(`findCampagneById() - campagneId: ${campagneId}`);
+        try {
+            const result = await this.campaignsApi.getEmailCampaign(parseInt(campagneId));
+            return result.body;
+        } catch (error: any) {
+            this.logger.error(`Failed to find campaign:${JSON.stringify(error.body)}`);
+        }
+    }
+
     async importerContacts(nomListe: string, contacts: any, folderId: number, notifyUrl: string): Promise<number> {
-        this.logger.log(`nomListe: ${nomListe}, notifyUrl: ${notifyUrl}`);
+        this.logger.log(`importerContacts() - nomListe: ${nomListe}, notifyUrl: ${notifyUrl}`);
         const requestContactImport = new brevo.RequestContactImport();
         requestContactImport.fileBody = contacts;
         requestContactImport.newList = { listName: nomListe, folderId: folderId };
@@ -38,7 +49,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     }
 
     async updateCampagne(nomListe: string, campagneId: string): Promise<void> {
-        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
+        this.logger.log(`updateCampagne() - nomListe: ${nomListe}, campagneId: ${campagneId}`);
         try {
             const lists = await this.contactsApi.getLists();
             const list = lists.body.lists?.find((liste) => liste.name === nomListe);

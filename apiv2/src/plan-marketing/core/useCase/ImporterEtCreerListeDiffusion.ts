@@ -6,6 +6,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskName, TaskStatus } from "snu-lib";
 import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 // TODO: finir usecase
 @Injectable()
@@ -21,6 +22,10 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
 
     async execute(nomListe: string, campagneId: string, pathFile: string): Promise<void> {
         this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}, pathFile: ${pathFile}`);
+        const campagne = await this.planMarketingGateway.findCampagneById(campagneId);
+        if (!campagne) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+        }
         // TODO : Veiller à récupérer le bon filePath => Eric
         const file = await this.fileGateway.downloadFile(pathFile);
         const contacts = file.Body.toString();

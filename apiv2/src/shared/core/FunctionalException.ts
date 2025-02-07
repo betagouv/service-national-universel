@@ -18,6 +18,7 @@ export enum FunctionalExceptionCode {
     CANNOT_ASSOCIATE_LIST_TO_CAMPAIGN = "CANNOT_ASSOCIATE_LIST_TO_CAMPAIGN",
     IMPORT_NOT_VALID = "IMPORT_NOT_VALID",
     SIMULATION_OUTDATED = "SIMULATION_OUTDATED",
+    CAMPAIGN_NOT_FOUND = "CAMPAIGN_NOT_FOUND",
 }
 
 export class FunctionalException extends HttpException {

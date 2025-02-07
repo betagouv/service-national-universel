@@ -5,6 +5,7 @@ import { TaskName, TaskStatus } from "snu-lib";
 import { ImporterEtCreerListeDiffusion } from "./ImporterEtCreerListeDiffusion";
 import { PlanMarketingGateway } from "./../gateway/PlanMarketing.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
+import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 describe("ImporterEtCreerListeDiffusion", () => {
     let useCase: ImporterEtCreerListeDiffusion;
@@ -17,6 +18,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
         const mocks = {
             planMarketingGateway: {
                 importerContacts: jest.fn(),
+                findCampagneById: jest.fn(),
             },
             taskGateway: {
                 create: jest.fn(),
@@ -61,6 +63,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
 
         fileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from(fileContent) } as any);
         planMarketingGateway.importerContacts.mockResolvedValue(processId);
+        planMarketingGateway.findCampagneById.mockResolvedValue({ id: campagneId });
 
         await useCase.execute(nomListe, campagneId, pathFile);
 
@@ -82,5 +85,21 @@ describe("ImporterEtCreerListeDiffusion", () => {
                 },
             },
         });
+    });
+
+    it("should throw FunctionalException when campaign is not found", async () => {
+        const nomListe = "testList";
+        const campagneId = "123";
+        const pathFile = "path/to/file";
+
+        planMarketingGateway.findCampagneById.mockResolvedValue(null);
+
+        await expect(useCase.execute(nomListe, campagneId, pathFile)).rejects.toThrow(
+            FunctionalExceptionCode.CAMPAIGN_NOT_FOUND,
+        );
+        expect(planMarketingGateway.findCampagneById).toHaveBeenCalledWith(campagneId);
+        expect(fileGateway.downloadFile).not.toHaveBeenCalled();
+        expect(planMarketingGateway.importerContacts).not.toHaveBeenCalled();
+        expect(taskGateway.create).not.toHaveBeenCalled();
     });
 });
