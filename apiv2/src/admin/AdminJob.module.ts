@@ -118,7 +118,6 @@ import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/V
         AdminTaskAffectationSelectorService,
         SimulationBasculeJeunesValides,
         ValiderBasculeJeunesValides,
-        ...referentielUseCaseProvider,
         ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
