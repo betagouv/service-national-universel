@@ -197,10 +197,10 @@ export async function deleteDiffusionList(folderId: number) {
     sixMonthsAgo.setMonth(now.getMonth() - 6);
 
     for (const list of lists) {
+      if (list.folderId === folderId) continue;
       const response = await api(`/contacts/lists/${list.id}`, { method: "GET" });
 
-      if (!response?.folderId || !response?.createdAt) continue;
-      if (response.folderId === folderId) continue;
+      if (!response?.createdAt) continue;
 
       const createdAt = new Date(response.createdAt);
       if (createdAt < sixMonthsAgo) {
