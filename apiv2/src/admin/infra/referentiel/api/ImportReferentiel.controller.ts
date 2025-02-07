@@ -79,7 +79,7 @@ export class ImportReferentielController {
                 });
                 return TaskMapper.toDto(importTask);          
             default:
-                throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+                throw new FunctionalException(FunctionalExceptionCode.IMPORT_NOT_VALID);
         }
     }
 
