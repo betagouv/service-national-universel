@@ -6,7 +6,7 @@ import InputNumber from "./form/InputNumber";
 import InputPhone from "./form/InputPhone";
 export { default as InputFile } from "./form/InputFile";
 import Label from "./form/Label";
-import Select from "./form/Select/Select";
+import Select, { SelectOption } from "./form/Select/Select";
 export { default as CollapsableSelectSwitcher } from "./form/CollapsableSelectSwitcher";
 export { default as SectionSwitcher } from "./form/SectionSwitcher";
 
@@ -55,3 +55,4 @@ export {
   ModalConfirmation,
   Select,
 };
+export type { SelectOption };

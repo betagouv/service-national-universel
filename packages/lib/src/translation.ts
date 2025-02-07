@@ -1211,6 +1211,19 @@ export const translateModifierClasse = (name: string) => {
   }
 };
 
+export const translateImportReferentiel = (name: string) => {
+  switch (name) {
+    case "IMPORT_MISSING_COLUMN":
+      return "Le fichier doit contenir les colonnes suivantes";
+    case "IMPORT_EMPTY_FILE":
+      return "Le fichier ne contient pas les bons onglets ou est vide";
+    case "IMPORT_NOT_VALID":
+      return "Cet import est invalide";
+    default:
+      return name;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé formater les noms et adresses des centres du SI
 
