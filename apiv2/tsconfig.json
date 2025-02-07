@@ -26,7 +26,8 @@
             "@infra/*": ["src/infra/*"],
             "@shared/*": ["src/shared/*"],
             "@notification/*": ["src/notification/*"],
-            "@task/*": ["src/task/*"]
+            "@task/*": ["src/task/*"],
+            "@plan-marketing/*": ["src/plan-marketing/*"]
         }
     }
     // "references": [{ "path": "../packages/lib" }]

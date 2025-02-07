@@ -4,6 +4,7 @@ export enum TechnicalExceptionType {
     UNAUTORIZED = "Unauthorized",
     CANNOT_SEND_EMAIL = "CANNOT_SEND_EMAIL",
     NOT_IMPLEMENTED_YET = "NOT_IMPLEMENTED_YET",
+    BREVO = "BREVO",
     DATABASE_ERROR = "DATABASE_ERROR",
 }
 
