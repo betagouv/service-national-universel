@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Inject, Param, ParseArrayPipe, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Inject, Param, Query, UseGuards } from "@nestjs/common";
 
 import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
 
@@ -8,10 +8,15 @@ import { TaskMapper } from "@task/infra/Task.mapper";
 import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 
-const PHASE1_SIMULATIONS_TASK_NAMES = [TaskName.AFFECTATION_HTS_SIMULATION, TaskName.AFFECTATION_CLE_SIMULATION];
+const PHASE1_SIMULATIONS_TASK_NAMES = [
+    TaskName.AFFECTATION_HTS_SIMULATION,
+    TaskName.AFFECTATION_CLE_SIMULATION,
+    TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+];
 const PHASE1_TRAITEMENTS_TASK_NAMES = [
     TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
     TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+    TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
 ];
 
 @Controller("phase1")

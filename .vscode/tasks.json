@@ -118,7 +118,7 @@
     },
     {
       "label": "Start Api-v1 API",
-      "command": "npm run dev:api",
+      "command": "source ~/.zshrc && nvm use && npm run dev:api",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -127,7 +127,7 @@
     },
     {
       "label": "Start Api-v1 TASKS",
-      "command": "npm run dev:tasks",
+      "command": "source ~/.zshrc && nvm use && npm run dev:tasks",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -150,7 +150,16 @@
     },
     {
       "label": "Start Api-v2 TASKS",
-      "command": "npm run dev:tasks",
+      "command": "source ~/.zshrc && nvm use && npm run dev:tasks",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./apiv2"
+      }
+    },
+    {
+      "label": "Start Apiv2",
+      "command": "npm run dev:app apiv2",
       "type": "shell",
       "problemMatcher": [],
       "options": {

@@ -140,7 +140,7 @@ export class AffectationController {
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
         ) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
         const task = await this.taskGateway.create({
@@ -183,7 +183,7 @@ export class AffectationController {
             [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status) ||
             (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
         ) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_SIMULATION_OUTDATED);
+            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
         const task = await this.taskGateway.create({
