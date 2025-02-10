@@ -15,8 +15,9 @@ import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
 import SimulationCleResultStartButton from "./affectationCle/SimulationCleResultStartButton";
-import BasculeJeuneValidesCell from "./basculeJeuneValides/BasculeJeuneValidesCell";
-import BasculeJeuneValidesStartButton from "./basculeJeuneValides/BasculeJeuneValidesStartButton";
+import BasculeJeuneValidesStartButton from "./basculeJeune/BasculeJeuneValidesStartButton";
+import BasculeJeuneNonValidesStartButton from "./basculeJeune/BasculeJeuneNonValidesStartButton";
+import BasculeJeuneCell from "./basculeJeune/BasculeJeuneCell";
 import SimulationCleDromComResultStartButton from "./affectationCle/SimulationCleDromComResultStartButton";
 
 interface SimulationsSubTabProps {
@@ -89,12 +90,15 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             key: "metadata",
             title: "Resultats",
             renderCell: (simulation) => {
-              if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
-                return <SimulationHtsResultCell simulation={simulation} />;
-              } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION || simulation.name === TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION) {
-                return <SimulationCleResultCell simulation={simulation} />;
-              } else if (simulation.name === TaskName.BACULE_JEUNES_VALIDES_SIMULATION) {
-                return <BasculeJeuneValidesCell simulation={simulation} />;
+              switch (simulation.name) {
+                case TaskName.AFFECTATION_HTS_SIMULATION:
+                  return <SimulationHtsResultCell simulation={simulation} />;
+                case TaskName.AFFECTATION_CLE_SIMULATION:
+                case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
+                  return <SimulationCleResultCell simulation={simulation} />;
+                case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
+                case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
+                  return <BasculeJeuneCell simulation={simulation} />;
               }
               return null;
             },
@@ -122,6 +126,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
                 return <SimulationCleDromComResultStartButton simulation={simulation} />;
               } else if (simulation.name === TaskName.BACULE_JEUNES_VALIDES_SIMULATION) {
                 return <BasculeJeuneValidesStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION) {
+                return <BasculeJeuneNonValidesStartButton simulation={simulation} />;
               }
               return <HiPlay className="text-gray-400" size={50} />;
             },

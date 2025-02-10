@@ -61,6 +61,7 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
 import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
+import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 
 @Module({
     imports: [
@@ -87,6 +88,7 @@ import { InscriptionService } from "./core/sejours/phase1/inscription/Inscriptio
         ClasseController,
         AffectationController,
         BasculeJeuneValidesController,
+        BasculeJeuneNonValidesController,
         Phase1Controller,
         AuthController,
         AdminTaskController,

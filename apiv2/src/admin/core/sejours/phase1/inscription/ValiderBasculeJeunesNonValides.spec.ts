@@ -11,7 +11,7 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { SessionGateway } from "../session/Session.gateway";
-import { ValiderBasculeJeunesValides } from "./ValiderBasculeJeunesValides";
+import { ValiderBasculeJeunesNonValides } from "./ValiderBasculeJeunesNonValides";
 import { ValiderBasculeJeunesService } from "./ValiderBasculeJeunes.service";
 
 jest.mock("@nestjs-cls/transactional", () => ({
@@ -20,15 +20,15 @@ jest.mock("@nestjs-cls/transactional", () => ({
 
 const mockSession = { id: "mockedSessionId", nom: "mockedSessionName" };
 
-describe("ValiderBasculeJeunesValides", () => {
-    let validerBasculeJeunesValides: ValiderBasculeJeunesValides;
+describe("ValiderBasculeJeunesNonValides", () => {
+    let validerBasculeJeunesNonValides: ValiderBasculeJeunesNonValides;
     let cls: ClsService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             imports: [ClsModule],
             providers: [
-                ValiderBasculeJeunesValides,
+                ValiderBasculeJeunesNonValides,
                 ValiderBasculeJeunesService,
                 Logger,
                 {
@@ -55,7 +55,7 @@ describe("ValiderBasculeJeunesValides", () => {
                         findByIds: jest.fn().mockResolvedValue([
                             {
                                 id: "jeune1",
-                                statut: YOUNG_STATUS.VALIDATED,
+                                statut: YOUNG_STATUS.WAITING_VALIDATION,
                                 sessionId: mockSession.id,
                                 sessionNom: mockSession.nom,
                             },
@@ -98,7 +98,7 @@ describe("ValiderBasculeJeunesValides", () => {
             ],
         }).compile();
         cls = module.get<ClsService>(ClsService);
-        validerBasculeJeunesValides = module.get<ValiderBasculeJeunesValides>(ValiderBasculeJeunesValides);
+        validerBasculeJeunesNonValides = module.get<ValiderBasculeJeunesNonValides>(ValiderBasculeJeunesNonValides);
     });
 
     it("should bacule young", async () => {
@@ -106,7 +106,7 @@ describe("ValiderBasculeJeunesValides", () => {
             // @ts-ignore
             { user: null },
             () =>
-                validerBasculeJeunesValides.execute({
+                validerBasculeJeunesNonValides.execute({
                     sessionId: mockSession.id,
                     simulationTaskId: "simulationTaskId",
                     dateValidation: new Date(),
@@ -145,7 +145,7 @@ describe("ValiderBasculeJeunesValides", () => {
             regionResidence: undefined,
             regionScolarite: undefined,
             statut: "WAITING_VALIDATION",
-            statutPhase1: "WAITING_AFFECTATION",
+            statutPhase1: undefined,
             telephone: undefined,
         });
     });

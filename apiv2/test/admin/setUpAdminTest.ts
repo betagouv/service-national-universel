@@ -56,6 +56,8 @@ import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academ
 import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
+import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
+import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -88,6 +90,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ClasseController,
             AffectationController,
             BasculeJeuneValidesController,
+            BasculeJeuneNonValidesController,
             Phase1Controller,
             AuthController,
         ],
@@ -97,6 +100,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             InscriptionService,
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
+            ValiderBasculeJeunesService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,

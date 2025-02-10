@@ -83,13 +83,16 @@ export class JeuneRepository implements JeuneGateway {
         niveauScolaires: string[],
         departements: string[],
     ): Promise<JeuneModel[]> {
-        const jeunes = await this.jeuneMongooseEntity.find({
+        const query = {
             cohortId: sessionId,
             status: { $in: status },
-            statusPhase1: { $in: statusPhase1 },
             grade: { $in: niveauScolaires },
             department: { $in: departements },
-        });
+        };
+        if (statusPhase1.length > 0) {
+            query["statusPhase1"] = { $in: statusPhase1 };
+        }
+        const jeunes = await this.jeuneMongooseEntity.find(query);
         return JeuneMapper.toModels(jeunes);
     }
 
