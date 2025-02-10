@@ -2,9 +2,9 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const Joi = require("joi");
-const { canCreateOrUpdateDepartmentService, canViewDepartmentService } = require("snu-lib");
+const { canCreateOrUpdateDepartmentService, canViewDepartmentService, department2region, ROLES } = require("snu-lib");
 const { capture } = require("../sentry");
-const { DepartmentServiceModel } = require("../models");
+const { DepartmentServiceModel, ReferentModel, CohortModel } = require("../models");
 const { ERRORS, isYoung, isReferent } = require("../utils");
 const { validateDepartmentService } = require("../utils/validator");
 const { serializeDepartmentService, serializeArray } = require("../utils/serializer");
@@ -142,6 +142,64 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { error, value } = Joi.object({ cohortId: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const cohortDocument = await CohortModel.findById(value.cohortId);
+    if (!cohortDocument) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND, error: "Cohorte introuvable" });
+
+    const cohortName = cohortDocument.name;
+    const services = await DepartmentServiceModel.find({ department: { $in: cohortDocument.eligibility.zones } }).lean();
+
+    const twoWeeksAgo = new Date();
+    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+
+    const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).lean();
+    const referentsDep = await ReferentModel.find({
+      role: ROLES.REFERENT_DEPARTMENT,
+      lastLoginAt: { $gte: twoWeeksAgo },
+      subRole: { $nin: "manager_phase2" },
+    })
+      .sort({ lastLoginAt: -1 })
+      .lean();
+
+    const resultSansContact = {};
+    const resultAvecContact = {};
+
+    for (const service of services) {
+      const refsRegion = referentsRegion.filter((r) => r.region === department2region[service.department ?? ""]).slice(0, 2);
+      const refsDep = referentsDep.filter((r) => service.department.includes(r.department)).slice(0, 4);
+      const contacts = service?.contacts;
+      const contact = contacts?.find((c) => c.cohort === cohortName);
+
+      const row = {
+        Département: service.department,
+        Région: department2region[service.department ?? ""] || "N/A",
+        "Email des Référents Départementaux": refsDep.map((r) => r.email).join("; "),
+        "Email des Référents Régionaux": refsRegion.map((r) => r.email).join("; "),
+        "Contact convoquation renseigné": contact ? "OUI" : "NON",
+      };
+
+      if (!contact) {
+        resultSansContact.push(row);
+      } else {
+        resultAvecContact.push(row);
+      }
+    }
+
+    // Trier les résultats par région
+    resultSansContact.sort((a, b) => a.Région.localeCompare(b.Région));
+    resultAvecContact.sort((a, b) => a.Région.localeCompare(b.Région));
+
+    return res.json({ resultSansContact, resultAvecContact, cohortName });
+  } catch (error) {
+    capture(error);
+    return res.status(500).json({ error: "Erreur serveur" });
   }
 });
 
