@@ -32,6 +32,7 @@ const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
 const autoValidatePhase1 = require("./autoValidatePhase1");
 const checkMissingInProgressWhenValidated = require("./checkMissingInProgress");
+const deleteListeDiffusionBrevo = require("./deleteListeDiffusionBrevo");
 
 // doubt ? -> https://crontab.guru/
 
@@ -78,6 +79,7 @@ const everyHours = (x) => `0 */${x} * * *`;
 // mongoMonitoring.handler() : toutes les 5 minutes
 // classesStatusUpdate.handler() : toutes les heures à la 2ème minute
 // monitorCertificats.handler() : 1er jour de chaque mois à 3h00
+// deleteListeDiffusionBrevo.handler() : tous les jours à 2h00
 
 function cron(name, crontab, handlers) {
   return { name, crontab, handlers: handlers instanceof Array ? handlers : [handlers] };
@@ -118,6 +120,7 @@ const CRONS = [
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),
   cron("checkMissingInProgressWhenValidated", "42 1 * * *", checkMissingInProgressWhenValidated.handler),
   cron("autoValidatePhase1", "20 1 * * *", autoValidatePhase1.handler),
+  cron("deleteListeDiffusionBrevo", "0 2 * * *", deleteListeDiffusionBrevo.handler),
 ];
 
 module.exports = CRONS;

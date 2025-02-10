@@ -9,6 +9,7 @@ import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 import { capture, captureMessage } from "./sentry";
 import { rateLimiterContactSIB } from "./rateLimiters";
 import { sendMailCatcher } from "./mailcatcher";
+import { get } from "http";
 
 const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
@@ -167,6 +168,38 @@ export async function getEmailsList({ email, templateId, messageId, startDate, e
   }
 }
 
+export async function getFolderById(folderId: number) {
+  try {
+    return await api(`/contacts/folders/${folderId.toString()}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function getAllList(limit: number = 10, offset: number = 0) {
+  try {
+    return await api(`/contacts/lists?limit=${limit}&offset=${offset}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function getListDetailById(listId: number) {
+  try {
+    return await api(`/contacts/lists/${listId.toString()}`, { method: "GET" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
+export async function deleteListById(listId: number) {
+  try {
+    return await api(`/contacts/lists/${listId.toString()}`, { method: "DELETE" });
+  } catch (e) {
+    capture(e);
+  }
+}
+
 export async function getEmailContent(uuid) {
   try {
     return await api(`/smtp/emails/${uuid}`, { method: "GET" });
@@ -224,7 +257,7 @@ async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachme
  * @returns
  */
 export async function getPreviewTemplate(id: string) {
-  if (!config.SENDINBLUEKEY){
+  if (!config.SENDINBLUEKEY) {
     captureMessage("NO SENDINBLUE KEY");
   }
   const template: BrevoEmailTemplate | BrevoApiError = await api(`/smtp/templates/${id}`, undefined, true);
