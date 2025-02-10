@@ -12,6 +12,11 @@ import Input from "./inputs/Input";
 import { Address } from "./forms/AddressForm";
 export { default as Checkbox } from "./inputs/Checkbox";
 
+// Graph
+export { Plot } from "./graph/Plot";
+export { Pie } from "./graph/Pie";
+export { Sunburst } from "./graph/Sunburst";
+
 export { Hint, PHONE_ZONES, ProfilePic, AddressForm, Input, CityForm };
 
 export type { Address };

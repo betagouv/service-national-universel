@@ -1,0 +1,63 @@
+import { Sunburst } from "@snu/ds";
+import React from "react";
+import { AffectationRoutes } from "snu-lib";
+
+const COLORS = {
+  green: "#7bc043",
+  red: "#ee4035",
+  // red2: "#fc8c62",
+  // green2: "#66c2a5",
+  red3: "rgb(246, 181, 174)",
+  green3: "rgb(250, 218, 164)",
+};
+
+type valueof<T> = T[keyof T];
+type Centre = valueof<AffectationRoutes["GetSimulationAnalytics"]["response"]["regions"]>[0];
+
+export default function DetailLigneDeBus({ centre }: { centre: Centre }) {
+  if (centre.lignesDeBus.length === 0) {
+    return "Le centre n'a pas de ligne de bus associée.";
+  }
+  return (
+    <div>
+      <h2 className="text-lg mb-6">Détail remplissage de(s) ligne(s) :</h2>
+      <div className="flex gap-2">
+        {centre.lignesDeBus.map((ligne) => (
+          <div key={ligne.numeroLigne} className="flex flex-col items-center">
+            <label>{ligne.numeroLigne}</label>
+            <Sunburst
+              width={250}
+              height={200}
+              data={{
+                name: ligne.numeroLigne,
+                children: [
+                  {
+                    color: ligne.placesOccupees === 0 ? "red" : COLORS.red,
+                    textColor: "white",
+                    label: String(ligne.placesRestances),
+                    name: "Restantes",
+                    children: [
+                      {
+                        label: String(ligne.nonAffectesMemeDepartement),
+                        name: String(ligne.nonAffectesMemeDepartement),
+                        value: ligne.placesRestances || 0,
+                        color: ligne.nonAffectesMemeDepartement > 0 ? COLORS.red3 : COLORS.green3,
+                        textColor: ligne.nonAffectesMemeDepartement > 0 ? COLORS.red : "black",
+                      },
+                    ],
+                  },
+                  {
+                    color: COLORS.green,
+                    name: "Prises",
+                    label: String(ligne.placesOccupees),
+                    value: ligne.placesOccupees || 0,
+                  },
+                ],
+              }}
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}

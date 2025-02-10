@@ -15,6 +15,7 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { CentreModel } from "../centre/Centre.model";
 import { AffectationService } from "./Affectation.service";
+import { SimulationAffectationHTSTaskModel } from "./SimulationAffectationHTSTask.model";
 
 type JeuneRapport = Pick<
     JeuneModel,
@@ -70,6 +71,7 @@ export type RapportData = {
     ligneDeBusList: Array<
         Partial<LigneDeBusModel> & {
             pointDeRassemblementIds: string;
+            pointDeRassemblementDepartements: string;
             centreNom: string;
             tauxRemplissageCentre: string;
             tauxRemplissageLigne: string;
@@ -95,11 +97,11 @@ export type RapportData = {
 
 export type Analytics = {
     selectedCost: number;
+    iterationCostList: number[];
     tauxRepartitionCentreList: RatioRepartition[];
     centreIdList: string[];
     tauxRemplissageCentreList: number[];
     tauxOccupationLignesParCentreList: number[][];
-    iterationCostList: number[];
     jeunesNouvellementAffected: number;
     jeuneAttenteAffectation: number;
     jeunesDejaAffected: number;
@@ -141,7 +143,7 @@ export class SimulationAffectationHTSService {
     constructor(
         private readonly affectationService: AffectationService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-        @Inject(FileGateway) private readonly fileService: FileGateway,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
         private readonly logger: Logger,
     ) {}
 
@@ -158,8 +160,8 @@ export class SimulationAffectationHTSService {
                 "Fichier associé à l'import des routes introuvable",
             );
         }
-        const importedFile = await this.fileService.downloadFile(importTask.metadata.parameters.fileKey);
-        const parsedFile = await this.fileService.parseXLS<RouteXlsx>(importedFile.Body);
+        const importedFile = await this.fileGateway.downloadFile(importTask.metadata.parameters.fileKey);
+        const parsedFile = await this.fileGateway.parseXLS<RouteXlsx>(importedFile.Body);
 
         const changementDepartementPdrs = parsedFile.reduce(
             (acc, line, index) => {
@@ -1111,6 +1113,9 @@ export class SimulationAffectationHTSService {
                 id: ligne.id,
                 numeroLigne: ligne.numeroLigne,
                 pointDeRassemblementIds: ligne.pointDeRassemblementIds.join(", "),
+                pointDeRassemblementDepartements: ligne.pointDeRassemblementIds
+                    .map((pdrId) => pdrList.find((pdr) => pdr.id === pdrId)?.departement)
+                    .join(", "),
                 placesOccupeesJeunes: ligne.placesOccupeesJeunes,
                 capaciteJeunes: ligne.capaciteJeunes,
                 tauxRemplissageLigne: this.affectationService.formatPourcent(
@@ -1179,7 +1184,7 @@ export class SimulationAffectationHTSService {
     }
 
     async generateRapportExcel(rapportData: RapportData): Promise<Buffer> {
-        return this.fileService.generateExcel({
+        return this.fileGateway.generateExcel({
             [RAPPORT_SHEETS.RESUME]: rapportData.summary,
             [RAPPORT_SHEETS.AFFECTES]: rapportData.jeunesNouvellementAffectedList,
             [RAPPORT_SHEETS.NON_AFFECTES]: rapportData.jeuneAttenteAffectationList,
@@ -1192,8 +1197,103 @@ export class SimulationAffectationHTSService {
         });
     }
 
-    async savePdfFile(reportData: any, fileName: string): Promise<void> {
-        // TODO: récupération de la logique de génération du PDF
+    async extractPdfAnalyticsFromRapport(simulationTask: SimulationAffectationHTSTaskModel) {
+        const rapportKey = simulationTask.metadata?.results?.rapportKey;
+        if (!rapportKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à la simulation introuvable",
+            );
+        }
+        const importedFile = await this.fileGateway.downloadFile(rapportKey);
+        const centres = await this.fileGateway.parseXLS<RapportData["centreList"][0]>(importedFile.Body, {
+            sheetName: RAPPORT_SHEETS.CENTRES,
+        });
+        const ligneDeBusList = await this.fileGateway.parseXLS<RapportData["ligneDeBusList"][0]>(importedFile.Body, {
+            sheetName: RAPPORT_SHEETS.LIGNES_DE_BUS,
+        });
+        const summary = await this.fileGateway.parseXLS<RapportData["summary"][0]>(importedFile.Body, {
+            sheetName: RAPPORT_SHEETS.RESUME,
+        });
+        const jeuneAttenteAffectationList = await this.fileGateway.parseXLS<
+            RapportData["jeuneAttenteAffectationList"][0] & {
+                "Problème de places ligne": string;
+                "Problème de places centre": string;
+                Résumé: string;
+            }
+        >(importedFile.Body, {
+            sheetName: RAPPORT_SHEETS.NON_AFFECTES,
+        });
+
+        const regions = centres.reduce(
+            (acc, centre) => {
+                if (!acc[centre.region!]) {
+                    acc[centre.region!] = [];
+                }
+                let i = 0;
+                const lignesDeBus: any[] = [];
+                while (centre[`bus_numero-ligne_${i}`]) {
+                    const departementsPdr =
+                        ligneDeBusList
+                            .find((ligne) => ligne.numeroLigne === centre[`bus_numero-ligne_${i}`])
+                            ?.pointDeRassemblementDepartements?.split(",") || [];
+                    lignesDeBus.push({
+                        numeroLigne: centre[`bus_numero-ligne_${i}`],
+                        placesOccupees: Number(centre[`bus_places-occupées_${i}`]),
+                        placesRestances: Number(centre[`bus_places-restantes_${i}`]),
+                        nonAffectesMemeDepartement: jeuneAttenteAffectationList.filter(
+                            (jeune) => departementsPdr?.includes(jeune.departementResidence!),
+                        ).length,
+                    });
+                    i++;
+                }
+                acc[centre.region!].push({
+                    id: centre.id,
+                    nom: centre.nom,
+                    departement: centre.departement,
+                    codePostal: centre.codePostal,
+                    ville: centre.ville,
+                    placesTotal:
+                        Number(centre["sejour_places-occupées_1"]) + Number(centre["sejour_places-restantes_1"]) || 0,
+                    placesOccupees: Number(centre["sejour_places-occupées_1"]) || 0,
+                    placesRestantes: Number(centre["sejour_places-restantes_1"]) || 0,
+                    tauxRemplissage: this.affectationService.parsePourcent(centre.tauxRemplissage),
+                    tauxFille: this.affectationService.parsePourcent(centre.tauxFille),
+                    tauxGarcon: this.affectationService.parsePourcent(centre.tauxGarcon),
+                    tauxPSH: this.affectationService.parsePourcent(centre.tauxPSH),
+                    tauxQVP: this.affectationService.parsePourcent(centre.tauxQVP),
+                    sejourId: centre.sejour_id_1,
+                    lignesDeBus,
+                });
+                return acc;
+            },
+            {} as Record<string, any[]>,
+        );
+
+        return {
+            createdAt: simulationTask.createdAt.toISOString(),
+            sessionId: simulationTask.metadata?.parameters?.sessionId!,
+            selectedCost: simulationTask.metadata?.results?.selectedCost!,
+            iterationCostList: simulationTask.metadata?.results?.iterationCostList!,
+            jeuneAttenteAffectation: simulationTask.metadata?.results?.jeuneAttenteAffectation!,
+            jeunesDejaAffected: simulationTask.metadata?.results?.jeunesDejaAffected!,
+            jeunesNouvellementAffected: simulationTask.metadata?.results?.jeunesNouvellementAffected!,
+            summary: summary.map((line) => line[""]),
+            regions,
+            jeunesProblemeDePlaces: jeuneAttenteAffectationList.reduce((acc, jeune) => {
+                if (jeune["Problème de places centre"] !== "oui" && jeune["Problème de places ligne"] !== "oui") {
+                    return acc;
+                }
+                return [
+                    ...acc,
+                    {
+                        id: jeune.id,
+                        departement: jeune.departementResidence,
+                        detail: jeune.Résumé,
+                    },
+                ];
+            }, [] as any[]),
+        };
     }
 
     mapJeuneRapport(
