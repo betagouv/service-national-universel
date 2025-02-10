@@ -9,7 +9,7 @@ import { canApplyToPhase2, SENDINBLUE_TEMPLATES, canEditYoung, UNSS_TYPE, ENGAGE
 import { validateId, validatePhase2Preference } from "../../utils/validator";
 import { decrypt } from "../../cryptoUtils";
 import { getMimeFromBuffer } from "../../utils/file";
-import { PHASE2_TOTAL_HOURS } from "snu-lib";
+import { PHASE2_TOTAL_HOURS, MILITARY_PREPARATION_FILES_STATUS } from "snu-lib";
 import mime from "mime-types";
 import { UserRequest } from "../request";
 import {
@@ -18,7 +18,6 @@ import {
   notifyYoungChangementStatutEquivalence,
   notifyYoungEquivalenceSubmitted,
 } from "../../application/applicationNotificationService";
-import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib/src";
 
 const router = express.Router({ mergeParams: true });
 

@@ -20,6 +20,7 @@ import {
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
+  MILITARY_PREPARATION_FILES_STATUS,
 } from "snu-lib";
 import { serializeApplication, serializeYoung, serializeContract } from "../utils/serializer";
 import {
@@ -47,7 +48,6 @@ import {
   notifyReferentNewApplication,
 } from "../application/applicationNotificationService";
 import { UserRequest } from "../controllers/request";
-import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib/src";
 import patches from "../controllers/patches";
 
 const { ObjectId } = require("mongoose").Types;
