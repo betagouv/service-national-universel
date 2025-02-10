@@ -578,7 +578,9 @@ function canGetReferentByEmail(actor) {
 }
 
 function canViewMeetingPoints(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
+    actor.role,
+  );
 }
 
 function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
