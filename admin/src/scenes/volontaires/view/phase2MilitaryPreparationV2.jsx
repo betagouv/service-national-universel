@@ -1,7 +1,5 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
-import { useHistory } from "react-router-dom";
-
 import { BsCheck2, BsChevronDown, BsCircleFill } from "react-icons/bs";
 import Bell from "../../../assets/icons/Bell";
 import CheckCircle from "../../../assets/icons/CheckCircle";
@@ -9,23 +7,25 @@ import ChevronDown from "../../../assets/icons/ChevronDown";
 import ExclamationCircle from "../../../assets/icons/ExclamationCircle";
 import XCircle from "../../../assets/icons/XCircle";
 import FileCard from "../../../components/FileCard";
-import Loader from "../../../components/Loader";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
 import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
 import ModalFilesPM from "../components/ModalFilesPM";
-import { capture } from "../../../sentry";
+import { queryClient } from "@/services/react-query";
 
-export default function Phase2militaryPrepartionV2({ young }) {
+export default function Phase2militaryPrepartionV2({ young, applications }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
-  const [applicationsToMilitaryPreparation, setApplicationsToMilitaryPreparation] = useState(null);
   const [modal, setModal] = useState({ isOpen: false, template: null, data: null });
   const [modalFiles, setModalFiles] = useState({ isOpen: false });
   const [cardOpen, setCardOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = React.useRef(null);
-  const history = useHistory();
+
+  function refetch() {
+    queryClient.invalidateQueries({ queryKey: ["young", young._id] });
+    queryClient.invalidateQueries({ queryKey: ["application", young._id] });
+  }
 
   const theme = {
     WAITING_VERIFICATION: "text-sky-400 h-4 w-4",
@@ -49,22 +49,6 @@ export default function Phase2militaryPrepartionV2({ young }) {
     },
   };
 
-  useEffect(() => {
-    getApplications();
-  }, []);
-
-  const getApplications = async () => {
-    if (!young) return;
-    const { ok, data, code } = await api.get(`/young/${young._id}/application?isMilitaryPreparation=true`);
-    if (!ok) {
-      capture(new Error(code));
-      return toastr.error("Oups, une erreur est survenue", code);
-    }
-    return setApplicationsToMilitaryPreparation(data?.filter((a) => a?.mission?.isMilitaryPreparation === "true"));
-  };
-
-  if (!applicationsToMilitaryPreparation) return <Loader />;
-
   if (!["WAITING_VERIFICATION", "VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
     // display nothing if the young has not validated the files at least one time
     return null;
@@ -81,8 +65,8 @@ export default function Phase2militaryPrepartionV2({ young }) {
       await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_VALIDATED}`);
 
       // change status of applications
-      for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-        const app = applicationsToMilitaryPreparation[i];
+      for (let i = 0; i < applications.length; i++) {
+        const app = applications[i];
         if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
           const responseApplication = await api.put("/application", { _id: app._id, status: "WAITING_VALIDATION" });
           if (!responseApplication.ok)
@@ -98,8 +82,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
       console.error(e);
       toastr.error("Une erreur est survenue", translate(e.code));
     }
-    //Refresh
-    history.go(0);
+    refetch();
   };
 
   const handleCorrection = () => {
@@ -113,8 +96,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION}`, { message });
     toastr.success("Email envoyé !");
     setModal({ isOpen: false, template: null, data: null });
-    // Refresh
-    history.go(0);
+    refetch();
   };
 
   const handleRefused = () => {
@@ -127,8 +109,8 @@ export default function Phase2militaryPrepartionV2({ young }) {
     if (!responseYoung.ok) return toastr.error(translate(responseYoung.code), "Une erreur s'est produite lors de la validation des documents");
 
     // change status of applications if its not already correct
-    for (let i = 0; i < applicationsToMilitaryPreparation.length; i++) {
-      const app = applicationsToMilitaryPreparation[i];
+    for (let i = 0; i < applications.length; i++) {
+      const app = applications[i];
       if (app.status === APPLICATION_STATUS.WAITING_VERIFICATION) {
         const responseApplication = await api.put("/application", { _id: app._id, status: "REFUSED" });
         if (!responseApplication.ok)
@@ -141,8 +123,7 @@ export default function Phase2militaryPrepartionV2({ young }) {
     await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_REFUSED}`, { message });
     toastr.success("Email envoyé !");
     setModal({ isOpen: false, template: null, data: null });
-    // Refresh
-    history.go(0);
+    refetch();
   };
 
   return (

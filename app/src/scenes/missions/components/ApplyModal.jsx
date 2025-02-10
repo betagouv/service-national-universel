@@ -2,12 +2,11 @@ import Img2 from "../../../assets/close.svg";
 import React, { useState } from "react";
 import { Modal } from "reactstrap";
 import styled from "styled-components";
-import { useSelector, useDispatch } from "react-redux";
+import useAuth from "@/services/useAuth";
 import Loader from "../../../components/Loader";
-import { setYoung } from "../../../redux/auth/actions";
 
 import api from "../../../services/api";
-import { APPLICATION_STATUS, ENABLE_PM, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
+import { APPLICATION_STATUS } from "../../../utils";
 
 import { toastr } from "react-redux-toastr";
 import plausibleEvent from "../../../services/plausible";
@@ -15,8 +14,8 @@ import { capture } from "../../../sentry";
 
 export default function ApplyModal({ value, onChange, onSend, onCancel }) {
   const [sending, setSending] = useState(false);
-  const young = useSelector((state) => state.Auth.young);
-  const dispatch = useDispatch();
+  const { young } = useAuth();
+
   if (!value) return <div />;
 
   const send = async () => {
@@ -40,7 +39,7 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
       tutorName: value.tutorName,
     };
 
-    if (ENABLE_PM && value.isMilitaryPreparation === "true") {
+    if (value.isMilitaryPreparation === "true") {
       if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
         application.status = APPLICATION_STATUS.WAITING_VALIDATION;
       } else {
@@ -51,17 +50,8 @@ export default function ApplyModal({ value, onChange, onSend, onCancel }) {
     const clickId = localStorage.getItem("jva_mission_click_id");
 
     try {
-      const { ok, data, code } = await api.post(`/application${clickId ? `?clickId=${clickId}` : ""}`, application);
+      const { ok, code } = await api.post(`/application${clickId ? `?clickId=${clickId}` : ""}`, application);
       if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-      const responseNotification = await api.post(`/application/${data._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`);
-      if (!responseNotification?.ok) return toastr.error(translate(responseNotification?.code), "Une erreur s'est produite avec le service de notification.");
-      if (ENABLE_PM && value.isMilitaryPreparation === "true") {
-        if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, { statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
-          if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-          else dispatch(setYoung(responseChangeStatsPM.data));
-        }
-      }
     } catch (e) {
       capture(e);
       onCancel?.();

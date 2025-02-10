@@ -1,12 +1,25 @@
-import { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, isCohortTooOld, canApplyToPhase2, calculateAge, YoungType, MissionType, CohortType } from "snu-lib";
+import {
+  SENDINBLUE_TEMPLATES,
+  MISSION_STATUS,
+  APPLICATION_STATUS,
+  isCohortTooOld,
+  canApplyToPhase2,
+  calculateAge,
+  YoungType,
+  MissionType,
+  CohortType,
+  SUB_ROLES,
+  ROLES,
+  canCreateYoungApplication,
+} from "snu-lib";
 import { deletePatches } from "../controllers/patches";
-import { ApplicationModel } from "../models";
+import { ApplicationModel, MissionModel, ReferentDocument } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { getCcOfYoung } from "../utils";
-import { getTutorName } from "./mission";
+import { getCcOfYoung, isReferent, isYoung } from "../utils";
+import { getTutorName } from "../services/mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
 
@@ -189,3 +202,81 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
 
   return { canApply: refusalMessages.length === 0, message: refusalMessages.join("\n") };
 };
+
+export async function getReferentsPhase2(department: string): Promise<ReferentDocument[]> {
+  // get the manager_phase2
+  const managersPhase2 = await ReferentModel.find({
+    subRole: SUB_ROLES.manager_phase2,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department: department,
+  });
+  if (managersPhase2.length > 0) {
+    return managersPhase2;
+  }
+  // if not found, get the manager_department
+  const referentDepartemental = await ReferentModel.findOne({
+    subRole: SUB_ROLES.manager_department,
+    role: ROLES.REFERENT_DEPARTMENT,
+    department: department,
+  });
+  if (!referentDepartemental) {
+    throw new Error(`notifyReferentsEquivalenceSubmitted: no referent found for department ${department}`);
+  }
+  return [referentDepartemental];
+}
+
+export const canUpdateApplication = async (user, application, young, structures) => {
+  // - admin can update all applications
+  // - referent can update applications of their department/region
+  // - responsible and supervisor can update applications of their structures
+  if (user.role === ROLES.ADMIN) return true;
+  if (isYoung(user) && application.youngId.toString() !== user._id.toString()) return false;
+  if (isReferent(user)) {
+    if (!canCreateYoungApplication(user, young)) return false;
+    if (user.role === ROLES.RESPONSIBLE && (!user.structureId || application.structureId.toString() !== user.structureId.toString())) return false;
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return false;
+      if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) return false;
+    }
+  }
+  return true;
+};
+
+export async function updateMission(app, fromUser) {
+  try {
+    const mission = await MissionModel.findById(app.missionId);
+    if (!mission) return;
+
+    // Get all applications for the mission
+    const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+    if (mission.placesLeft !== placesLeft) {
+      mission.set({ placesLeft });
+    }
+
+    if (placesLeft === 0) {
+      mission.set({ placesStatus: "FULL" });
+    } else if (placesLeft === mission.placesTotal) {
+      mission.set({ placesStatus: "EMPTY" });
+    } else {
+      mission.set({ placesStatus: "ONE_OR_MORE" });
+    }
+
+    // On met à jour le nb de candidatures en attente.
+    const pendingApplications = await ApplicationModel.countDocuments({
+      missionId: mission._id,
+      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
+    });
+
+    if (mission.pendingApplications !== pendingApplications) {
+      mission.set({ pendingApplications });
+    }
+
+    const allApplications = await ApplicationModel.find({ missionId: mission._id });
+    mission.set({ applicationStatus: allApplications.map((e) => e.status) });
+
+    await mission.save({ fromUser });
+  } catch (e) {
+    capture(e);
+  }
+}

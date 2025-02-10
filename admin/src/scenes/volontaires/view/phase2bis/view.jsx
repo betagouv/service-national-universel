@@ -18,6 +18,8 @@ import Phase2MilitaryPreparation from "../phase2MilitaryPreparationV2";
 import ApplicationList2 from "./applicationList2";
 import Preferences from "./preferences";
 import EquivalenceList from "./EquivalenceList";
+import useApplications from "./lib/useApplications";
+import Loader from "@/components/Loader";
 
 export default function Phase2({ young, onChange }) {
   const [blocOpened, setBlocOpened] = useState("missions");
@@ -26,6 +28,8 @@ export default function Phase2({ young, onChange }) {
   const [errorMessage, setErrorMessage] = useState({});
   const [openDesiredLocation, setOpenDesiredLocation] = React.useState(false);
   const [isExportOpen, setIsExportOpen] = useState(false);
+  const { data: applications, isLoading } = useApplications(young._id);
+  const applicationsToMilitaryPreparation = applications?.filter((e) => e.mission?.isMilitaryPreparation);
 
   const user = useSelector((state) => state.Auth.user);
 
@@ -49,6 +53,8 @@ export default function Phase2({ young, onChange }) {
     mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
     periodRanking: young?.periodRanking ? [...young.periodRanking] : [],
   });
+
+  if (isLoading) return <Loader />;
 
   const onSubmit = async () => {
     try {
@@ -312,7 +318,7 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
-        <Phase2MilitaryPreparation young={young} />
+        <Phase2MilitaryPreparation young={young} applications={applicationsToMilitaryPreparation} />
         <EquivalenceList young={young} />
 
         <Toolbox young={young} />
@@ -381,7 +387,7 @@ export default function Phase2({ young, onChange }) {
               </div>
             ) : null}
           </div>
-          {blocOpened === "missions" && <ApplicationList2 young={young} onChangeApplication={onChange} />}
+          {blocOpened === "missions" && <ApplicationList2 young={young} applications={applications} />}
           {blocOpened === "preferences" && (
             <Preferences
               young={young}

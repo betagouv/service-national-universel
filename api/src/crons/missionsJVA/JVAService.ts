@@ -3,7 +3,7 @@ import { addHours, addYears } from "date-fns";
 import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
 import { getTutorName } from "../../services/mission";
 import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
-import { updateApplicationStatus, updateApplicationTutor } from "../../services/application";
+import { updateApplicationStatus, updateApplicationTutor } from "../../application/applicationService";
 import { sendTemplate } from "../../brevo";
 import { fetchMissions, fetchStructureById, JeVeuxAiderMission } from "./JVARepository";
 import { logger } from "../../logger";

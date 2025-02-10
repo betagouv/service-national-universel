@@ -1,11 +1,13 @@
 import React from "react";
 import { AiOutlineInfoCircle } from "react-icons/ai";
 import { BsChevronDown } from "react-icons/bs";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { translateStatusMilitaryPreparationFiles } from "../../../utils";
 import FileCard from "./FileCard";
 import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
+import useUpdateMPStatus from "../lib/useUpdateMPStatus";
+import plausibleEvent from "@/services/plausible";
 
 export const theme = {
   background: {
@@ -23,18 +25,17 @@ export const theme = {
 };
 
 export default function DocumentsPM({ docRef = null, showHelp = true }) {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
-  const [open, setOpen] = React.useState();
-  const [showFolder, setShowFolder] = React.useState(false);
+  const [open, setOpen] = React.useState(showHelp ? !["VALIDATED", "REFUSED"].includes(young.statusMilitaryPreparationFiles) : true);
+  const showFolder = showHelp && ["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles);
+  const { mutate, isPending } = useUpdateMPStatus();
 
-  React.useEffect(() => {
-    if (showHelp === true) {
-      setShowFolder(["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles));
-      setOpen(!["VALIDATED", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles));
-    } else setOpen(true);
-  }, [young]);
+  function handleCorrection() {
+    plausibleEvent("Phase2/CTA - PM - Corriger mon dossier");
+    mutate("WAITING_VERIFICATION");
+  }
 
   return (
     <>
@@ -118,6 +119,27 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
             </div>
           </>
         ) : null}
+
+        {open && young.statusMilitaryPreparationFiles === "WAITING_CORRECTION" ? (
+          <div>
+            <div className="mt-4 mx-2 md:flex items-center gap-6 justify-between rounded-lg bg-gray-50 p-3">
+              <div>
+                <p className="font-bold">Corrections demandées</p>
+                <p className="text-sm text-gray-500">{young.militaryPreparationCorrectionMessage}</p>
+              </div>
+
+              <div className="flex-none">
+                <button
+                  onClick={handleCorrection}
+                  disabled={isPending}
+                  className="w-full mt-[1rem] md:mt-[0rem] rounded-lg border-[1px] border-blue-700 px-4 py-2 text-blue-700 hover:bg-blue-700 hover:text-white">
+                  Envoyer ma correction
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : null}
+
         {open ? (
           <div className="my-4 flex w-full flex-row justify-between gap-4 overflow-x-auto ">
             <FileCard
