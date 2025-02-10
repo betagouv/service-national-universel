@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format } from "date-fns";
