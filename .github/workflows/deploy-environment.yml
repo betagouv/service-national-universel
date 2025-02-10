@@ -12,7 +12,7 @@ concurrency:
 jobs:
   prepare:
     if: |
-      (github.event_name=='pull_request' && github.event.label.name == 'deploy')) ||
+      (github.event_name=='pull_request' && github.event.label.name == 'deploy') ||
       (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
     runs-on: ubuntu-latest
     outputs:
