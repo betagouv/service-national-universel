@@ -1,15 +1,20 @@
 name: Destroy environment
 
 on:
+  workflow_dispatch:
   delete:
+  pull_request:
+    types: [ unlabeled ]
 
 defaults:
   run:
     working-directory: devops/scripts
 
 jobs:
-  test:
-    if: github.event.ref != 'main' && github.event.ref != 'production'
+  destroy:
+    if: |
+      (github.event_name=='pull_request' && github.event.label.name == 'deploy')) ||
+      ((github.event_name=='delete' || github.event_name=='workflow_dispatch') && github.event.ref != 'production' && github.event.ref != 'main')
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -20,9 +25,11 @@ jobs:
           node-version: "20.17"
 
       - name: Get environment name
+        env:
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
         id: env_name
         run: |
-          env_name=$(node get-environment-name.js ${{ github.event.ref }})
+          env_name=$(node get-environment-name.js ${{ env.BRANCH_NAME }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
 
