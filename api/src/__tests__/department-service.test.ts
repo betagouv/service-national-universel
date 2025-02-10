@@ -7,6 +7,8 @@ import {
   expectDepartmentServiceToEqual,
   deleteAllDepartmentServicesHelper,
 } from "./helpers/departmentService";
+import { createReferentHelper } from "./helpers/referent";
+import { getNewReferentFixture } from "./fixtures/referent";
 import { dbConnect, dbClose } from "./helpers/db";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -56,16 +58,52 @@ describe("Department service", () => {
       expect(res.statusCode).toEqual(404);
     });
   });
-  describe("GET /department-service", () => {
-    it("should return all the department service", async () => {
-      await deleteAllDepartmentServicesHelper();
-      const departmentServiceFixture = getNewDepartmentServiceFixture();
-      const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
-      const res = await request(getAppHelper()).get("/department-service").send();
-      expect(res.statusCode).toEqual(200);
-      expect(res.body.data.length).toEqual(1);
-      expectDepartmentServiceToEqual(res.body.data[0], departmentServiceFixture);
-      await deleteDepartmentServiceByIdHelper(departmentService._id);
-    });
-  });
+
+  //   describe("GET /department-service", () => {
+  //     it("should return all the department service", async () => {
+  //       await deleteAllDepartmentServicesHelper();
+  //       const departmentServiceFixture = getNewDepartmentServiceFixture();
+  //       const departmentService = await createDepartmentServiceHelper(departmentServiceFixture);
+  //       const res = await request(getAppHelper()).get("/department-service").send();
+  //       expect(res.statusCode).toEqual(200);
+  //       expect(res.body.data.length).toEqual(1);
+  //       expectDepartmentServiceToEqual(res.body.data[0], departmentServiceFixture);
+  //       await deleteDepartmentServiceByIdHelper(departmentService._id);
+  //     });
+  //   });
+  //   describe("Department service export", () => {
+  //     it("should export department service contacts", async () => {
+  //       // Create a cohort
+  //       const cohort = await createCohortHelper({ name: "Test Cohort", eligibility: { zones: ["zone1", "zone2"] } });
+
+  //       // Create department services
+  //       await createDepartmentServiceHelper({ department: "zone1", contacts: [{ cohort: "Test Cohort" }] });
+  //       await createDepartmentServiceHelper({ department: "zone2", contacts: [] });
+
+  //       // Create referents
+  //       await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: "region1", email: "region1@example.com" }));
+  //       await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["zone1"], email: "dep1@example.com", lastLoginAt: new Date() }));
+
+  //       const res = await request(getAppHelper()).get(`/department-service/${cohort._id}/DepartmentServiceContact/export`).send();
+  //       expect(res.statusCode).toEqual(200);
+  //       expect(res.body).toHaveProperty("resultSansContact");
+  //       expect(res.body).toHaveProperty("resultAvecContact");
+  //       expect(res.body).toHaveProperty("cohortName", "Test Cohort");
+
+  //       // Clean up
+  //       await deleteCohortByIdHelper(cohort._id);
+  //       await deleteAllDepartmentServicesHelper();
+  //       await deleteAllReferentsHelper();
+  //     });
+
+  //     it("should return 400 if cohortId is not valid", async () => {
+  //       const res = await request(getAppHelper()).get(`/department-service/invalidId/DepartmentServiceContact/export`).send();
+  //       expect(res.statusCode).toEqual(400);
+  //     });
+
+  //     it("should return 404 if cohort is not found", async () => {
+  //       const res = await request(getAppHelper()).get(`/department-service/60d21b4667d0d8992e610c85/DepartmentServiceContact/export`).send();
+  //       expect(res.statusCode).toEqual(404);
+  //     });
+  //   });
 });

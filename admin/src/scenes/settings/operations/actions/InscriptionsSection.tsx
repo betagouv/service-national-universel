@@ -8,7 +8,7 @@ interface InscriptionSectionProps {
   session: CohortDto;
 }
 
-export default function InscriptionsSection({ session }: InscriptionsSectionProps) {
+export default function InscriptionsSection({ session }: InscriptionSectionProps) {
   return (
     <Collapsable title="Inscriptions">
       <BasculeJeuneValides session={session} />

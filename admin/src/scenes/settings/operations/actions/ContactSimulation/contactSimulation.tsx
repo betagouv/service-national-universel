@@ -16,7 +16,7 @@ export default function ContactSimulation({ session }: ContactSimulationProps) {
   const handleExport = async () => {
     setIsInProgress(true);
     try {
-      const data = await API.get(`/inscription-goal/${session._id}/export`);
+      const data = await API.get(`/department-service-goal/${session._id}/DepartmentServiceContact/export`);
 
       const { resultSansContact, resultAvecContact, cohortName } = data;
 
