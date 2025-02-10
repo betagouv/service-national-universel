@@ -19,10 +19,9 @@ async function main() {
 
   const project = await scaleway.findProject("snu-ci");
 
-  let namespaces = await scaleway.findAll(RESOURCE.ContainerNamespace, {
+  const namespaces = await scaleway.findAll(RESOURCE.ContainerNamespace, {
     project_id: project.id,
   });
-  namespaces = namespaces.filter(n => n.name != "snu-ci");
 
   await Promise.all(namespaces.map(n => {
     console.log(`Deleting environment ${n.name}`);
