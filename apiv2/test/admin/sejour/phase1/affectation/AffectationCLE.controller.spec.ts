@@ -92,7 +92,7 @@ describe("AffectationController - CLE", () => {
             expect(response.status).toBe(400);
         });
 
-        it("should return 201 (valid with corse)", async () => {
+        it("should return 201", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())

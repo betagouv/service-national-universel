@@ -1,4 +1,5 @@
 import {
+    BasculeJeuneParams,
     EmailParams,
     EmailTemplate,
     InviterReferentClasseParams,
@@ -33,6 +34,10 @@ export class EmailBrevoMapper {
             case EmailTemplate.SUPPRIMER_CLASSE_ENGAGEE:
             case EmailTemplate.NOUVELLE_CLASSE_ENGAGEE:
                 return this.mapSupprimerClasseEngagee(template, emailParams as SupprimerClasseEngageeParams);
+
+            case EmailTemplate.BASCULE_SEJOUR_AVENIR:
+            case EmailTemplate.BASCULE_SEJOUR_ELIGIBLE:
+                return this.mapBasculeJeune(template, emailParams as BasculeJeuneParams);
         }
     }
 
@@ -112,6 +117,19 @@ export class EmailBrevoMapper {
             templateId: Number(template),
         };
     }
+
+    static mapBasculeJeune(template: EmailTemplate, params: BasculeJeuneParams): BasculeJeune {
+        return {
+            to: params.to,
+            params: {
+                firstName: params.prenom,
+                lastName: params.nom,
+                oldcohortdate: params.ancienneSessionNom,
+                newcohortdate: params.nouvelleSessionNom,
+            },
+            templateId: Number(template),
+        };
+    }
 }
 
 export interface EmailProviderVerifierClasseAdminCle extends EmailProviderParams {
@@ -149,5 +167,14 @@ export interface EmailProviderSupprimerClasseEngagee extends EmailProviderParams
         class_name?: string;
         class_code: string;
         cta: string;
+    };
+}
+
+export interface BasculeJeune extends EmailProviderParams {
+    params: {
+        firstName: string;
+        lastName: string;
+        oldcohortdate: string;
+        newcohortdate?: string;
     };
 }

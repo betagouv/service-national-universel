@@ -23,6 +23,7 @@ import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { YOUNG_STATUS } from "snu-lib";
+import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
 
 const sessionNom = "2025 CLE 03 Fevrier";
 
@@ -41,6 +42,7 @@ describe("ValiderAffectationCLE", () => {
             imports: [ClsModule],
             providers: [
                 ValiderAffectationCLE,
+                ValiderAffectationCLEService,
                 AffectationService,
                 Logger,
                 {

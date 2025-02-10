@@ -3,7 +3,7 @@ import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
 import { QueueModule } from "@infra/Queue.module";
-import { Logger, MiddlewareConsumer, Module, ParseEnumPipe, RequestMethod } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
@@ -43,9 +43,7 @@ import { sejourMongoProviders } from "./infra/sejours/phase1/sejour/provider/Sej
 import { sessionMongoProviders } from "./infra/sejours/phase1/session/provider/SessionMongo.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FileProvider } from "@shared/infra/File.provider";
-import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
-import { ImportReferentielController } from "./infra/referentiel/api/ImportReferentiel.controller";
-import { ReferentielRoutesService } from "./core/referentiel/routes/ReferentielRoutes.service";
+import { referentielUseCaseProviders } from "./infra/referentiel/initProvider/useCase";
 import { HistoryController } from "./infra/history/api/History.controller";
 import { historyProvider } from "./infra/history/historyProvider";
 import { serviceProvider } from "./infra/iam/service/serviceProvider";
@@ -57,9 +55,12 @@ import { ClsPluginTransactional } from "@nestjs-cls/transactional";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoose";
-import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
+import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
+import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 
 @Module({
     imports: [
@@ -79,12 +80,14 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         NotificationModule,
         QueueModule,
         TaskModule,
+        PlanMarketingModule,
+        ReferentielModule,
     ],
     controllers: [
         ClasseController,
         AffectationController,
+        BasculeJeuneValidesController,
         Phase1Controller,
-        ImportReferentielController,
         AuthController,
         AdminTaskController,
         HistoryController,
@@ -93,9 +96,9 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
     providers: [
         ClasseService,
         AffectationService,
+        InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
-        ReferentielRoutesService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,
@@ -123,9 +126,8 @@ import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/pha
         ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
-        ...referentielUseCaseProvider,
+        ...referentielUseCaseProviders,
         ...serviceProvider,
-        ...referentielServiceProvider,
     ],
 })
 export class AdminModule {
@@ -135,6 +137,7 @@ export class AdminModule {
             .apply(AddUserToRequestMiddleware)
             .exclude({ path: "/referent/signin", method: RequestMethod.POST })
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
+            .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .forRoutes("*");
     }
 }

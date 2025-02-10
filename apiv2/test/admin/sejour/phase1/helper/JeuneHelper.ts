@@ -45,7 +45,7 @@ export const createJeune = async (jeune?: Partial<JeuneModel>) => {
         // historic: [],
         // password: faker.internet.password(),
         // cniFiles: [],
-        cohesionStayPresence: "true",
+        presenceArrivee: "true",
         presenceJDM: "true",
         departSejourAt: faker.date.past().toISOString(),
         departSejourMotif: "blabla",

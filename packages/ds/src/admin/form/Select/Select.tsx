@@ -12,8 +12,8 @@ import { CSSObject } from "@emotion/react";
 
 import useReactSelectTheme from "./theme";
 
-export type SelectOption = {
-  value: string | number;
+export type SelectOption<T = string | number> = {
+  value: T;
   label: string | ReactElement;
 };
 

@@ -21,6 +21,7 @@ import { SejourModel } from "../sejour/Sejour.model";
 import { ValiderAffectationCLETaskParameters } from "./ValiderAffectationCLETask.model";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
+import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -53,8 +54,8 @@ export type ValiderAffectationRapportData = Array<
         | "centreId"
         | "classeId"
     > & {
-        ligneDeBusNumeroLigne: string;
-        pointDeRassemblementMatricule: string;
+        ligneDeBusNumeroLigne?: string;
+        pointDeRassemblementMatricule?: string;
         centreNom: string;
         "places restantes après l'inscription (centre)": string | number;
         "places totale (centre)": string | number;
@@ -79,6 +80,7 @@ export type ValiderAffectationCLEResult = {
 export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResult> {
     constructor(
         @Inject(AffectationService) private readonly affectationService: AffectationService,
+        @Inject(ValiderAffectationCLEService) private validerAffectationCLEService: ValiderAffectationCLEService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
@@ -119,7 +121,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             errors: 0,
         };
         const jeunesUpdatedList: JeuneModel[] = [];
-        const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
+        const rapportData: Array<ReturnType<typeof this.validerAffectationCLEService.formatJeuneRapport>> = [];
 
         // Traitement des jeunes
         for (const jeuneRapport of simulationJeunesAAffecterList) {
@@ -130,48 +132,14 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport.pointDeRassemblementId); // TODO: utiliser le matricule
 
             // Controle de coherence
-            if (jeune.statut !== YOUNG_STATUS.VALIDATED) {
-                // WITHDRAW ? (prevenir avant communication)
-                this.logger.warn(`🚩 young ${jeune.id} status is not VALIDATED ${jeune.statut}`);
+            const erreur = this.validerAffectationCLEService.checkValiderAffectation(jeuneRapport, jeune, sejour);
+            if (erreur) {
                 rapportData.push(
-                    this.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, "jeune n'ayant pas le statut validé"),
+                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, erreur),
                 );
-                analytics.errors += 1;
                 continue;
             }
 
-            if (!sejour) {
-                this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
-                throw new FunctionalException(
-                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `sejour non trouvé ${jeuneRapport.sejourId} (jeune: ${jeune.id})`,
-                );
-            }
-            if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
-                this.logger.warn(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
-                rapportData.push(
-                    this.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, "plus de place pour ce sejour"),
-                );
-                analytics.errors += 1;
-                continue;
-            }
-            // session
-            if (jeune?.sessionNom !== sejour?.sessionNom) {
-                this.logger.warn(
-                    `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionNom}, jeune: ${jeune?.sessionNom})`,
-                );
-                rapportData.push(
-                    this.formatJeuneRapport(
-                        jeune,
-                        sejour,
-                        ligneDeBus,
-                        pdr,
-                        "jeune ayant changé de cohorte depuis la simulation",
-                    ),
-                );
-                analytics.errors += 1;
-                continue;
-            }
             if (!ligneDeBus) {
                 this.logger.error(
                     `🚩 Ligne de bus introuvable (${jeuneRapport.jeuneLigneId}) => jeune ${jeune.id} ignored.`,
@@ -192,7 +160,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             }
 
             // Affectation du jeune
-            sejour.placesRestantes = sejour.placesRestantes - 1;
+            sejour!.placesRestantes = (sejour!.placesRestantes || 0) - 1;
 
             const jeuneUpdated: JeuneModel = {
                 ...jeune,
@@ -200,6 +168,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
                 sejourId: jeuneRapport.sejourId,
                 statutPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
 
+                // specifique Metropole
                 pointDeRassemblementId: jeuneRapport.pointDeRassemblementId,
                 ligneDeBusId: jeuneRapport.jeuneLigneId,
                 hasPDR: "true",
@@ -207,7 +176,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
                 //Clean le reste
                 deplacementPhase1Autonomous: undefined,
-                cohesionStayPresence: undefined,
+                presenceArrivee: undefined,
                 presenceJDM: undefined,
                 departInform: undefined,
                 departSejourAt: undefined,
@@ -225,7 +194,9 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             );
 
             jeunesUpdatedList.push(jeuneUpdated);
-            rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr));
+            rapportData.push(
+                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr),
+            );
             analytics.jeunesAffected += 1;
         }
 
@@ -261,55 +232,6 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             rapportData,
             rapportFile,
             analytics,
-        };
-    }
-
-    formatJeuneRapport(
-        jeune: JeuneModel,
-        sejour?: SejourModel,
-        ligneDeBus?: LigneDeBusModel,
-        pdr?: PointDeRassemblementModel,
-        erreur = "",
-    ): ValiderAffectationRapportData[0] {
-        return {
-            id: jeune.id,
-            statut: jeune.statut,
-            statutPhase1: jeune.statutPhase1,
-            genre: jeune.genre === "female" ? "fille" : "garçon",
-            qpv: ["true", "oui"].includes(jeune.qpv!) ? "oui" : "non",
-            psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
-            email: jeune.email,
-            region: jeune.region,
-            departement: jeune.departement,
-            sessionId: sejour?.id || "",
-            sessionNom: jeune.sessionNom,
-            classeId: jeune.classeId,
-            ligneDeBusId: jeune.ligneDeBusId || "",
-            ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne || "",
-            pointDeRassemblementId: jeune.pointDeRassemblementId || "",
-            pointDeRassemblementMatricule: pdr?.matricule || "",
-            centreId: sejour?.centreId || "",
-            centreNom: sejour?.centreNom || "",
-            "places restantes après l'inscription (centre)": sejour?.placesRestantes || "",
-            "places totale (centre)": sejour?.placesTotal || "",
-            erreur,
-            ...(!erreur
-                ? {
-                      prenom: jeune.prenom,
-                      nom: jeune.nom,
-                      email: jeune.email,
-                      telephone: jeune.telephone,
-                      dateNaissance: jeune.dateNaissance,
-                      parent1Prenom: jeune.parent1Prenom,
-                      parent1Nom: jeune.parent1Nom,
-                      parent1Email: jeune.parent1Email,
-                      parent1Telephone: jeune.parent1Telephone,
-                      parent2Prenom: jeune.parent2Prenom,
-                      parent2Nom: jeune.parent2Nom,
-                      parent2Email: jeune.parent2Email,
-                      parent2Telephone: jeune.parent2Telephone,
-                  }
-                : {}),
         };
     }
 
