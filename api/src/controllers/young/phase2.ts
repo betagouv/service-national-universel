@@ -22,30 +22,31 @@ import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib/src";
 
 const router = express.Router({ mergeParams: true });
 
+const createEquivalenceValidator = Joi.object({
+  id: Joi.string().required(),
+  type: Joi.string()
+    .trim()
+    .valid(...ENGAGEMENT_TYPES)
+    .required(),
+  sousType: Joi.string()
+    .trim()
+    .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
+  desc: Joi.string().trim().when("type", { is: "Autre", then: Joi.required() }),
+  structureName: Joi.string().trim().required(),
+  address: Joi.string().trim().required(),
+  zip: Joi.string().trim().required(),
+  city: Joi.string().trim().required(),
+  startDate: Joi.string().trim().required(),
+  endDate: Joi.string().trim().required(),
+  missionDuration: Joi.number().allow(null),
+  contactFullName: Joi.string().trim().required(),
+  contactEmail: Joi.string().trim().required(),
+  files: Joi.array().items(Joi.string().required()).required().min(1),
+});
+
 router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      type: Joi.string()
-        .trim()
-        .valid(...ENGAGEMENT_TYPES)
-        .required(),
-      sousType: Joi.string()
-        .trim()
-        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
-      desc: Joi.string().trim().when("type", { is: "Autre", then: Joi.required() }),
-      structureName: Joi.string().trim().required(),
-      address: Joi.string().trim().required(),
-      zip: Joi.string().trim().required(),
-      city: Joi.string().trim().required(),
-      startDate: Joi.string().trim().required(),
-      endDate: Joi.string().trim().required(),
-      missionDuration: Joi.number().allow(null),
-      contactFullName: Joi.string().trim().required(),
-      contactEmail: Joi.string().trim().required(),
-      files: Joi.array().items(Joi.string().required()).required().min(1),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
+    const { error, value } = createEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -55,7 +56,9 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const isYoung = isYoungFn(req.user);
+
     const cohort = await CohortModel.findById(young.cohortId);
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.COHORT_NOT_FOUND });
 
     if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 

@@ -1,10 +1,8 @@
-import fetch from "node-fetch";
 import { listFiles, deleteFilesByList } from "../utils";
 import request from "supertest";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import { ROLES, SUB_ROLES } from "snu-lib";
+import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
-import { sendTemplate } from "../brevo";
 import getNewCohortFixture from "./fixtures/cohort";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewYoungFixture from "./fixtures/young";
@@ -12,6 +10,7 @@ import { createYoungHelper, notExistingYoungId } from "./helpers/young";
 import { createMissionEquivalenceHelpers, notExistingMissionEquivalenceId } from "./helpers/equivalence";
 import { createFixtureMissionEquivalence } from "./fixtures/equivalence";
 import { MissionEquivalenceModel, YoungModel } from "../models";
+import { createReferentHelper } from "./helpers/referent";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -33,6 +32,7 @@ describe("Equivalence Routes", () => {
       const young = await createYoungHelper(
         getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023", statusPhase2OpenedAt: new Date("2023-08-01"), statusPhase1: "DONE" }),
       );
+      await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, subRole: SUB_ROLES.manager_department, department: young.department, email: "test@test.com" });
       const body = createFixtureMissionEquivalence({
         youngId: young._id.toString(),
         type: "BAFA",
