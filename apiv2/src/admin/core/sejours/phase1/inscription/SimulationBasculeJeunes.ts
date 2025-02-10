@@ -68,7 +68,7 @@ export class SimulationBasculeJeunes implements UseCase<SimulationBasculeJeunesR
         );
         this.logger.log(`Jeunes a basculer (avant filtre simulation) : ${jeuneList.length}`);
         if (!etranger) {
-            jeuneList = jeuneList.filter((jeune) => jeune.paysScolarite === "FRANCE");
+            jeuneList = jeuneList.filter((jeune) => jeune.paysScolarite?.toUpperCase() === "FRANCE");
         }
         if (status.includes(YOUNG_STATUS.VALIDATED)) {
             if (presenceArrivee.length) {

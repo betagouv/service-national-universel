@@ -72,7 +72,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             departements,
         );
         if (!etranger) {
-            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite === "FRANCE");
+            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite?.toUpperCase() === "FRANCE");
         }
         if (allJeunes.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");

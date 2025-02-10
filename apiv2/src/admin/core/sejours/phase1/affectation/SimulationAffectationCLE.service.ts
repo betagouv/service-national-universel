@@ -161,7 +161,7 @@ export class SimulationAffectationCLEService {
 
         let jeunesList = jeunesClasseList.filter((jeune) => jeune.statutPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED);
         if (!etranger) {
-            jeunesList = jeunesList.filter((jeune) => jeune.paysScolarite === "FRANCE");
+            jeunesList = jeunesList.filter((jeune) => jeune.paysScolarite?.toUpperCase() === "FRANCE");
         }
 
         const jeunesDejaAffectedList = jeunesClasseList.filter(
