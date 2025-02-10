@@ -140,12 +140,11 @@ function hasAccessToReinscription(young: YoungType) {
   return young.cohort === "à venir";
 }
 
-//@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
-function canApplyToPhase2(young, cohort) {
-  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
-  const now = new Date();
-  const dateEnd = getCohortEndDate(cohort);
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
+function canApplyToPhase2(young: YoungType, cohort: CohortType) {
+  const hasStartedPhase2 = young.statusPhase2OpenedAt && new Date() > new Date(young.statusPhase2OpenedAt);
+  const cohortHasStarted = new Date() < getCohortStartDate(cohort);
+  const cohortHasEnded = new Date() > getCohortEndDate(cohort);
+  return hasStartedPhase2 && !cohortHasStarted && cohortHasEnded;
 }
 
 export {

@@ -301,14 +301,15 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
       const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
       const cohort = await CohortModel.findById(req.user.cohortId);
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = {
+        ...serializeMission(mission),
+        tutor: missionTutor,
+        application: application ? serializeApplication(application) : null,
+        ...(await getAuthorizationToApply(mission, req.user, cohort)),
+      };
       return res.status(200).send({
         ok: true,
-        data: {
-          ...serializeMission(mission),
-          tutor: missionTutor,
-          application: application ? serializeApplication(application) : null,
-          ...(await getAuthorizationToApply(mission, req.user, cohort)),
-        },
+        data,
       });
     }
     return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
