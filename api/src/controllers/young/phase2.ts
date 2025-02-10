@@ -1,23 +1,28 @@
-const express = require("express");
-const passport = require("passport");
-const router = express.Router({ mergeParams: true });
-const Joi = require("joi");
-const { config } = require("../../config");
-const { deleteFilesByList, listFiles, getFile } = require("../../utils/index");
-const { isYoung } = require("../../utils/index");
-const { capture } = require("../../sentry");
-const { YoungModel, CohortModel, ReferentModel, MissionEquivalenceModel } = require("../../models");
-const { ERRORS, getCcOfYoung, updateYoungPhase2StatusAndHours } = require("../../utils");
-const { canApplyToPhase2, SENDINBLUE_TEMPLATES, ROLES, SUB_ROLES, canEditYoung, UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES } = require("snu-lib");
-const { sendTemplate } = require("../../brevo");
-const { validateId, validatePhase2Preference } = require("../../utils/validator");
-const { decrypt } = require("../../cryptoUtils");
-const { getMimeFromBuffer } = require("../../utils/file");
-const { PHASE2_TOTAL_HOURS } = require("snu-lib");
-const mime = require("mime-types");
-const { notifyReferentMilitaryPreparationFilesSubmitted } = require("../../services/application");
+import express from "express";
+import passport from "passport";
+import Joi from "joi";
+import { deleteFilesByList, listFiles, getFile, isYoung as isYoungFn } from "../../utils/index";
+import { capture } from "../../sentry";
+import { YoungModel, CohortModel, MissionEquivalenceModel } from "../../models";
+import { ERRORS, updateYoungPhase2StatusAndHours } from "../../utils";
+import { canApplyToPhase2, SENDINBLUE_TEMPLATES, canEditYoung, UNSS_TYPE, ENGAGEMENT_TYPES, ENGAGEMENT_LYCEEN_TYPES, EQUIVALENCE_STATUS } from "snu-lib";
+import { validateId, validatePhase2Preference } from "../../utils/validator";
+import { decrypt } from "../../cryptoUtils";
+import { getMimeFromBuffer } from "../../utils/file";
+import { PHASE2_TOTAL_HOURS } from "snu-lib";
+import mime from "mime-types";
+import { UserRequest } from "../request";
+import {
+  notifyReferentMilitaryPreparationFilesSubmitted,
+  notifyReferentsEquivalenceSubmitted,
+  notifyYoungChangementStatutEquivalence,
+  notifyYoungEquivalenceSubmitted,
+} from "../../application/applicationNotificationService";
+import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib/src";
 
-router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router({ mergeParams: true });
+
+router.post("/equivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -49,7 +54,7 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const isYoung = req.user.constructor.modelName === "young";
+    const isYoung = isYoungFn(req.user);
     const cohort = await CohortModel.findById(young.cohortId);
 
     if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -72,45 +77,10 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
 
     await young.save({ fromUser: req.user });
 
-    let template = SENDINBLUE_TEMPLATES.young.EQUIVALENCE_WAITING_VERIFICATION;
-    let cc = getCcOfYoung({ template, young });
-    await sendTemplate(template, {
-      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      cc,
-    });
+    await notifyYoungEquivalenceSubmitted(young);
 
     if (isYoung) {
-      // get the manager_phase2
-      let data = await ReferentModel.find({
-        subRole: SUB_ROLES.manager_phase2,
-        role: ROLES.REFERENT_DEPARTMENT,
-        department: young.department,
-      });
-
-      // if not found, get the manager_department
-      if (!data) {
-        data = [];
-        data.push(
-          await ReferentModel.findOne({
-            subRole: SUB_ROLES.manager_department,
-            role: ROLES.REFERENT_DEPARTMENT,
-            department: young.department,
-          }),
-        );
-      }
-
-      template = SENDINBLUE_TEMPLATES.referent.EQUIVALENCE_WAITING_VERIFICATION;
-      await sendTemplate(template, {
-        emailTo: data.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        })),
-        params: {
-          cta: `${config.ADMIN_URL}/volontaire/${young._id}/phase2`,
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-      });
+      await notifyReferentsEquivalenceSubmitted(young);
     }
 
     res.status(200).send({ ok: true, data });
@@ -120,31 +90,33 @@ router.post("/equivalence", passport.authenticate(["referent", "young"], { sessi
   }
 });
 
-router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+const updateEquivalenceValidator = Joi.object({
+  id: Joi.string().required(),
+  idEquivalence: Joi.string().required(),
+  status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
+  type: Joi.string()
+    .trim()
+    .valid(...ENGAGEMENT_TYPES),
+  sousType: Joi.string()
+    .trim()
+    .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
+  desc: Joi.string().trim(),
+  structureName: Joi.string().trim(),
+  address: Joi.string().trim(),
+  zip: Joi.string().trim(),
+  city: Joi.string().trim(),
+  startDate: Joi.string().trim(),
+  endDate: Joi.string().trim(),
+  contactFullName: Joi.string().trim(),
+  missionDuration: Joi.number().allow(null),
+  contactEmail: Joi.string().trim(),
+  files: Joi.array().items(Joi.string()),
+  message: Joi.string().trim(),
+});
+
+router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      idEquivalence: Joi.string().required(),
-      status: Joi.string().valid("WAITING_VERIFICATION", "WAITING_CORRECTION", "VALIDATED", "REFUSED"),
-      type: Joi.string()
-        .trim()
-        .valid(...ENGAGEMENT_TYPES),
-      sousType: Joi.string()
-        .trim()
-        .valid(...UNSS_TYPE, ...ENGAGEMENT_LYCEEN_TYPES),
-      desc: Joi.string().trim(),
-      structureName: Joi.string().trim(),
-      address: Joi.string().trim(),
-      zip: Joi.string().trim(),
-      city: Joi.string().trim(),
-      startDate: Joi.string().trim(),
-      endDate: Joi.string().trim(),
-      contactFullName: Joi.string().trim(),
-      missionDuration: Joi.number().allow(null),
-      contactEmail: Joi.string().trim(),
-      files: Joi.array().items(Joi.string()),
-      message: Joi.string().trim(),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    const { error, value } = updateEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
       value.sousType = undefined;
     }
@@ -162,7 +134,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    let missionDuration;
+    let missionDuration: string | number;
     if (value?.type === "Autre" || equivalence.type === "Autre") {
       // Priorité à la durée de mission dans `value` si elle existe, sinon utiliser celle de `equivalence`
       missionDuration = value?.missionDuration || equivalence.missionDuration;
@@ -179,7 +151,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     });
     const data = await equivalence.save({ fromUser: req.user });
 
-    if (["WAITING_CORRECTION", "VALIDATED", "REFUSED", "WAITING_VERIFICATION"].includes(value.status)) {
+    if ([EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.VALIDATED, EQUIVALENCE_STATUS.REFUSED, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(value.status)) {
       await updateYoungPhase2StatusAndHours(young, req.user);
     }
 
@@ -188,17 +160,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
     await young.save({ fromUser: req.user });
 
     if (SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`]) {
-      let template = SENDINBLUE_TEMPLATES.young[`EQUIVALENCE_${value.status}`];
-      if (!template) {
-        capture(`Template not found for EQUIVALENCE_${value.status}`);
-        return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-      }
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: { message: value?.message ? value.message : "" },
-        cc,
-      });
+      await notifyYoungChangementStatutEquivalence(young, value.status, value.message);
     }
 
     res.status(200).send({ ok: true, data });
@@ -208,7 +170,7 @@ router.put("/equivalence/:idEquivalence", passport.authenticate(["referent", "yo
   }
 });
 
-router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/equivalences", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) {
@@ -247,7 +209,7 @@ router.get("/equivalence/:idEquivalence", passport.authenticate("young", { sessi
   }
 });
 
-router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
 
@@ -261,7 +223,7 @@ router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { se
       return res.status(404).send({ ok: false, code: ERRORS.EQUIVALENCE_NOT_FOUND, message: "Equivalence not found" });
     }
 
-    if (!isYoung(req.user) || equivalence.youngId.toString() !== req.user._id.toString() || equivalence.status !== "WAITING_VERIFICATION") {
+    if (!isYoungFn(req.user) || equivalence.youngId!.toString() !== req.user._id.toString() || equivalence.status !== EQUIVALENCE_STATUS.WAITING_VERIFICATION) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Unauthorized to delete this equivalence" });
     }
     const files = await listFiles(`app/young/${req.user._id}/equivalenceFiles/`);
@@ -283,11 +245,11 @@ router.delete("/equivalence/:idEquivalence", passport.authenticate("young", { se
   }
 });
 
-router.put("/militaryPreparation/status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/militaryPreparation/status", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      statusMilitaryPreparationFiles: Joi.string().required().valid("VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"),
+      statusMilitaryPreparationFiles: Joi.string().required().valid(Object.values(MILITARY_PREPARATION_FILES_STATUS)),
     }).validate(
       {
         ...req.params,
@@ -305,7 +267,7 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
 
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
 
-    if (value.statusMilitaryPreparationFiles === "WAITING_VERIFICATION") {
+    if (value.statusMilitaryPreparationFiles === MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION) {
       await notifyReferentMilitaryPreparationFilesSubmitted(young);
     }
 
@@ -317,7 +279,7 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
   }
 });
 
-router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/preference", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorBody, value: checkedBody } = validatePhase2Preference(req.body);
@@ -339,7 +301,7 @@ router.put("/preference", passport.authenticate("referent", { session: false, fa
   }
 });
 
-router.get("/equivalence-file/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/equivalence-file/:name", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({ name: Joi.string().required() })
       .unknown()

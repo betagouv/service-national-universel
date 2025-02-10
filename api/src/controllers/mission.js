@@ -8,7 +8,7 @@ const { logger } = require("../logger");
 const { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } = require("../models");
 // eslint-disable-next-line no-unused-vars
 const { ERRORS, isYoung } = require("../utils/index");
-const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../services/application");
+const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../application/application");
 const { getTutorName } = require("../services/mission");
 const { validateId, validateMission, idSchema } = require("../utils/validator");
 const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");

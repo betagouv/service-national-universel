@@ -40,17 +40,17 @@ const {
 } = require("../utils");
 const patches = require("./patches");
 const scanFile = require("../utils/virusScanner");
-const {
-  getAuthorizationToApply,
-  notifyReferentMilitaryPreparationFilesSubmitted,
-  notifyReferentNewApplication,
-  notifySupervisorMilitaryPreparationFilesValidated,
-} = require("../services/application");
+const { getAuthorizationToApply } = require("../application/application");
 const { apiEngagement } = require("../services/gouv.fr/api-engagement");
 const { getMimeFromBuffer, getMimeFromFile } = require("../utils/file");
 const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
 const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
+const {
+  notifyReferentMilitaryPreparationFilesSubmitted,
+  notifySupervisorMilitaryPreparationFilesValidated,
+  notifyReferentNewApplication,
+} = require("../application/applicationNotificationService");
 
 const canUpdateApplication = async (user, application, young, structures) => {
   // - admin can update all applications
