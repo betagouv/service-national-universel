@@ -85,6 +85,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
                 case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
                   return <AffectationResultCell simulation={traitement} />;
                 case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
+                case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER:
                   return <BasculeJeuneValidesResultCell simulation={traitement} />;
               }
               return null;

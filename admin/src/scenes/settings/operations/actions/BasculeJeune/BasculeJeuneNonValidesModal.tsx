@@ -28,9 +28,10 @@ export default function BasculeJeuneNonValidesMetropoleModal({ session, onClose 
     avenir: boolean;
   }>({
     status: ALL_STATUS,
-    niveauScolaires: session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
+    niveauScolaires:
+      session.type === "CLE" ? Object.values(GRADES) : session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
     departements: regionList.reduce((acc, region) => {
-      acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
+      acc[region] = region2department[region].filter((departement) => session.type === "CLE" || !session.eligibility?.zones || session.eligibility.zones.includes(departement));
       return acc;
     }, {}),
     etranger: true,
