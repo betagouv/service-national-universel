@@ -10,14 +10,15 @@ import {
   CohortType,
   SUB_ROLES,
   ROLES,
+  canCreateYoungApplication,
 } from "snu-lib";
 import { deletePatches } from "../controllers/patches";
-import { ApplicationModel, ReferentDocument } from "../models";
+import { ApplicationModel, MissionModel, ReferentDocument } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { getCcOfYoung } from "../utils";
+import { getCcOfYoung, isReferent, isYoung } from "../utils";
 import { getTutorName } from "../services/mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -222,4 +223,60 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
     throw new Error(`notifyReferentsEquivalenceSubmitted: no referent found for department ${department}`);
   }
   return [referentDepartemental];
+}
+
+export const canUpdateApplication = async (user, application, young, structures) => {
+  // - admin can update all applications
+  // - referent can update applications of their department/region
+  // - responsible and supervisor can update applications of their structures
+  if (user.role === ROLES.ADMIN) return true;
+  if (isYoung(user) && application.youngId.toString() !== user._id.toString()) return false;
+  if (isReferent(user)) {
+    if (!canCreateYoungApplication(user, young)) return false;
+    if (user.role === ROLES.RESPONSIBLE && (!user.structureId || application.structureId.toString() !== user.structureId.toString())) return false;
+    if (user.role === ROLES.SUPERVISOR) {
+      if (!user.structureId) return false;
+      if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) return false;
+    }
+  }
+  return true;
+};
+
+export async function updateMission(app, fromUser) {
+  try {
+    const mission = await MissionModel.findById(app.missionId);
+    if (!mission) return;
+
+    // Get all applications for the mission
+    const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+    if (mission.placesLeft !== placesLeft) {
+      mission.set({ placesLeft });
+    }
+
+    if (placesLeft === 0) {
+      mission.set({ placesStatus: "FULL" });
+    } else if (placesLeft === mission.placesTotal) {
+      mission.set({ placesStatus: "EMPTY" });
+    } else {
+      mission.set({ placesStatus: "ONE_OR_MORE" });
+    }
+
+    // On met à jour le nb de candidatures en attente.
+    const pendingApplications = await ApplicationModel.countDocuments({
+      missionId: mission._id,
+      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
+    });
+
+    if (mission.pendingApplications !== pendingApplications) {
+      mission.set({ pendingApplications });
+    }
+
+    const allApplications = await ApplicationModel.find({ missionId: mission._id });
+    mission.set({ applicationStatus: allApplications.map((e) => e.status) });
+
+    await mission.save({ fromUser });
+  } catch (e) {
+    capture(e);
+  }
 }

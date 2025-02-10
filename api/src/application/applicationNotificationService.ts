@@ -3,7 +3,7 @@ import { ApplicationType, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
 import { getCcOfYoung, getReferentManagerPhase2 } from "../utils";
 import { sendTemplate } from "../brevo";
 import { ReferentModel, YoungDocument } from "../models";
-import { getReferentsPhase2 } from "./application";
+import { getReferentsPhase2 } from "./applicationService";
 
 export async function notifyReferentMilitaryPreparationFilesSubmitted(user: YoungType) {
   const toReferents = await getReferentManagerPhase2(user.department);
