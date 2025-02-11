@@ -23,7 +23,6 @@ import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
 import { config } from "../config";
 import { sendTemplate } from "../brevo";
-import { get } from "node:http";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -195,28 +194,25 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
   const center = await CohesionCenterModel.findById(young.cohesionCenterId);
   if (!center) throw new Error(ERRORS.NOT_FOUND);
 
-  // on envoie au chef de projet departemental (ou assistant)
-  // sinon on envoie au secretariat du departement ou au manager de phase2
-  // si toujours rien on envoie a son contact Convocation
+  // On envoit au chef de projet departemental (ou assistant). Sinon, on envoit au secretariat du departement ou au manager de phase 2.
+  // Si toujours rien on envoit a son contact convocation.
   const managers = referentsDep.filter(
     (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
   );
   const secretariat = referentsDep.filter(
     (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
   );
-  const contactsConv = await getContactsConvocation(young.department, young.cohort!);
-  const contacts = managers.length > 0 ? managers : secretariat.length > 0 ? secretariat : contactsConv;
+  const contactsConvocation = await getContactsConvocation(young.department, young.cohort!);
+  const contacts = managers.length > 0 ? managers : secretariat.length > 0 ? secretariat : contactsConvocation;
 
-  // Si CLE on envoie aussi aux contacts CLE
+  // Si CLE on envoit aussi aux contacts CLE
   const contactCLE = young.source === YOUNG_SOURCE.CLE ? await getContactsCLE(young.classeId!) : [];
 
   const template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-
   const emailTo = [...contacts, ...contactCLE].map((referent) => ({
     name: `${referent.firstName} ${referent.lastName}`,
     email: referent.email || "",
   }));
-
   const params = {
     youngFirstName: young.firstName,
     youngLastName: young.lastName,
@@ -226,7 +222,6 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
     departureNote: departSejourMotifComment,
     cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
   };
-
   return await sendTemplate(template, { emailTo, params });
 }
 
