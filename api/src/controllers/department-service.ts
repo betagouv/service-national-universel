@@ -1,15 +1,17 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
-const { canCreateOrUpdateDepartmentService, canViewDepartmentService, department2region, ROLES } = require("snu-lib");
-const { capture } = require("../sentry");
-const { DepartmentServiceModel, ReferentModel, CohortModel } = require("../models");
-const { ERRORS, isYoung, isReferent } = require("../utils");
-const { validateDepartmentService } = require("../utils/validator");
-const { serializeDepartmentService, serializeArray } = require("../utils/serializer");
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
+import { canCreateOrUpdateDepartmentService, canViewDepartmentService, department2region, ROLES } from "snu-lib";
+import { capture } from "../sentry";
+import { DepartmentServiceModel, ReferentModel, CohortModel } from "../models";
+import { ERRORS, isYoung, isReferent } from "../utils";
+import { validateDepartmentService } from "../utils/validator";
+import { serializeDepartmentService, serializeArray } from "../utils/serializer";
+import { UserRequest } from "./request";
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router();
+
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedDepartementService } = validateDepartmentService(req.body);
     if (error) {
@@ -27,14 +29,14 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       service = await DepartmentServiceModel.create(checkedDepartementService);
     }
 
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(service, req.user) });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(service) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -77,14 +79,14 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       contacts[contactIndex] = newContact;
     }
     const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -108,14 +110,14 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
     contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);
 
     const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { contacts }, { new: true, upsert: true, useFindAndModify: false });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.get("/:department", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:department", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: department } = Joi.string().required().validate(req.params.department);
     if (error) {
@@ -127,14 +129,14 @@ router.get("/:department", passport.authenticate(["referent", "young"], { sessio
     if (isReferent(req.user) && !canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await DepartmentServiceModel.findOne({ department });
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(data, req.user) });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const data = await DepartmentServiceModel.find({});
     if (!canViewDepartmentService(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -145,7 +147,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   }
 });
 
-router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ cohortId: Joi.string().required() }).validate(req.params, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -215,7 +217,7 @@ router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("
   }
 });
 
-router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -242,7 +244,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
     };
 
     const updatedData = await DepartmentServiceModel.findByIdAndUpdate(value.id, { representantEtat: newRepresentant }, { new: true, upsert: true, useFindAndModify: false });
-    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData, req.user) });
+    return res.status(200).send({ ok: true, data: serializeDepartmentService(updatedData) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
