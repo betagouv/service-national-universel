@@ -9,7 +9,7 @@ import Trash from "../../../../assets/icons/Trash";
 export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
   const [departSejourMotif, setDepartSejourMotif] = React.useState(young?.departSejourMotif || "");
-  const [departSejourAt, setDepartSejourAt] = React.useState(young?.departSejourAt || "");
+  const [departSejourAt, setDepartSejourAt] = React.useState(young?.departSejourAt?.substring(0, 10) || "");
   const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState(young?.departSejourMotifComment || "");
   const depart = !!young?.departInform || false;
   const motifArray = ["Exclusion", "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)", "Autre"];
