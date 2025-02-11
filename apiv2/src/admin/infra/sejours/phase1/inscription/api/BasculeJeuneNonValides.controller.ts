@@ -4,8 +4,8 @@ import {
     InscriptionRoutes,
     TaskName,
     TaskStatus,
-    SimulationBasculeJeunesValidesTaskParameters,
-    ValiderBasculeJeunesValidesTaskParameters,
+    ValiderBasculeJeunesNonValidesTaskParameters,
+    SimulationBasculeJeunesNonValidesTaskParameters,
 } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -13,30 +13,30 @@ import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./BasculeJeuneValides.validation";
+import { PostSimulationsPayloadDto, PostSimulationValiderPayloadDto } from "./BasculeJeuneNonValides.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
 
 @Controller("inscription")
-export class BasculeJeuneValidesController {
+export class BasculeJeuneNonValidesController {
     constructor(
         private readonly inscriptionService: InscriptionService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
     @UseGuards(AdminGuard)
-    @Get("/:sessionId/bascule-jeunes-valides/status")
-    async getBaculeJeunesValidesStatus(
+    @Get("/:sessionId/bascule-jeunes-non-valides/status")
+    async getBaculeJeunesNonValidesStatus(
         @Param("sessionId") sessionId: string,
-    ): Promise<InscriptionRoutes["GetBasculeJeunesValides"]["response"]> {
+    ): Promise<InscriptionRoutes["GetBasculeJeunesNonValides"]["response"]> {
         const traitement = await this.inscriptionService.getStatusValidation(
             sessionId,
-            TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+            TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
         );
         return {
             simulation: await this.inscriptionService.getStatusSimulation(
                 sessionId,
-                TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+                TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
             ),
             traitement: {
                 ...traitement,
@@ -46,13 +46,13 @@ export class BasculeJeuneValidesController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId/bascule-jeunes-valides/simulation")
-    async basuleJeunesValidesSimulation(
+    @Post("/:sessionId/bascule-jeunes-non-valides/simulation")
+    async basuleJeunesNonValidesSimulation(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
         @Body() payload: PostSimulationsPayloadDto,
-    ): Promise<InscriptionRoutes["PostBasculeJeunesValides"]["response"]> {
-        const parameters: SimulationBasculeJeunesValidesTaskParameters = {
+    ): Promise<InscriptionRoutes["PostBasculeJeunesNonValides"]["response"]> {
+        const parameters: SimulationBasculeJeunesNonValidesTaskParameters = {
             sessionId,
             ...payload,
             auteur: {
@@ -64,7 +64,7 @@ export class BasculeJeuneValidesController {
             },
         };
         const task = await this.taskGateway.create({
-            name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+            name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters,
@@ -74,19 +74,19 @@ export class BasculeJeuneValidesController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("/:sessionId/simulation/:taskId/bascule-jeunes-valides/valider")
-    async basuleJeunesValidesValider(
+    @Post("/:sessionId/simulation/:taskId/bascule-jeunes-non-valides/valider")
+    async basuleJeunesNonValidesValider(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
         @Param("taskId") taskId: string,
         @Body() payload: PostSimulationValiderPayloadDto,
-    ): Promise<InscriptionRoutes["PostValiderBasculeJeunesValides"]["response"]> {
+    ): Promise<InscriptionRoutes["PostValiderBasculeJeunesNonValides"]["response"]> {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
         const { status, lastCompletedAt } = await this.inscriptionService.getStatusValidation(
             sessionId,
-            TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+            TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
         );
 
         if (
@@ -96,7 +96,7 @@ export class BasculeJeuneValidesController {
             throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
-        const parameters: ValiderBasculeJeunesValidesTaskParameters = {
+        const parameters: ValiderBasculeJeunesNonValidesTaskParameters = {
             sessionId,
             simulationTaskId: taskId,
             ...payload,
@@ -108,8 +108,9 @@ export class BasculeJeuneValidesController {
                 sousRole: request.user.sousRole,
             },
         };
+
         const task = await this.taskGateway.create({
-            name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+            name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters,

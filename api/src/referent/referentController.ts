@@ -944,12 +944,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         schoolId: undefined,
         situation: getYoungSituationIfCLE(classe.filiere),
       });
-      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
-        young.set({
-          hasMeetingInformation: "true",
-          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
-        });
-      }
     } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
       const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
       const step2023Value =
