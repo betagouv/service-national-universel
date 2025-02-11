@@ -16,7 +16,7 @@ export interface JeuneGateway {
         status: string[],
         statusPhase1: string[],
         niveauScolaires: string[],
-        departements: string[],
+        departements: Array<string | null>,
     ): Promise<JeuneModel[]>;
     findBySessionId(sessionId: string): Promise<JeuneModel[]>;
     update(jeune: JeuneModel): Promise<JeuneModel>;
