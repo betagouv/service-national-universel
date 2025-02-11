@@ -3,11 +3,8 @@ import { GRADES } from "../../../constants/constants";
 import { TaskDto } from "../../taskDto";
 import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
-export interface SimulationBasculeJeunesValidesTaskParameters extends Phase1TaskParameters {
+export interface SimulationBasculeJeunesNonValidesTaskParameters extends Phase1TaskParameters {
   status: YoungDto["status"][];
-  statusPhase1: YoungDto["statusPhase1"][];
-  statusPhase1Motif: YoungDto["statusPhase1Motif"][];
-  presenceArrivee: Array<boolean | null>;
   niveauScolaires: Array<keyof typeof GRADES>;
   departements: string[];
   etranger: boolean;
@@ -15,10 +12,10 @@ export interface SimulationBasculeJeunesValidesTaskParameters extends Phase1Task
   avenir: boolean;
 }
 
-export type SimulationBasculeJeunesValidesTaskResult = {
+export type SimulationBasculeJeunesNonValidesTaskResult = {
   rapportKey: string;
   jeunesAvenir: number;
   jeunesProchainSejour: number;
 };
 
-export interface SimulationBasculeJeunesValidesTaskDto extends TaskDto<SimulationBasculeJeunesValidesTaskParameters, SimulationBasculeJeunesValidesTaskResult> {}
+export interface SimulationBasculeJeunesNonValidesTaskDto extends TaskDto<SimulationBasculeJeunesNonValidesTaskParameters, SimulationBasculeJeunesNonValidesTaskResult> {}

@@ -78,7 +78,9 @@ export class InscriptionService {
     getDepartementEligibilite(jeune: JeuneModel) {
         let departement;
         const schoolDepartment =
-            !jeune.paysScolarite || jeune.paysScolarite === "FRANCE" || jeune.departementScolarite === "France"
+            !jeune.paysScolarite ||
+            jeune.paysScolarite?.toUpperCase() === "FRANCE" ||
+            jeune.departementScolarite === "France"
                 ? jeune.departementScolarite
                 : null;
         if (jeune.id && jeune.scolarise === "true") departement = schoolDepartment;

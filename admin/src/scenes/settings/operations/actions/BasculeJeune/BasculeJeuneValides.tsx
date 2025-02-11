@@ -32,7 +32,7 @@ export default function BasculeJeuneValides({ session }: BasculeJeuneValidesProp
   const isInProgress = inscriptionStatus && [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(inscriptionStatus?.simulation?.status as TaskStatus);
 
   return (
-    <div className="flex items-center justify-between p-4">
+    <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Bascule des jeunes validés</div>
         <Tooltip id="basule-jeunes-valides" title="Bascule des jeunes validés">

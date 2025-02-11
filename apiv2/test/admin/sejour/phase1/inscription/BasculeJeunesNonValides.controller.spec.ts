@@ -4,28 +4,19 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import {
-    departmentList,
-    GRADES,
-    region2department,
-    RegionsMetropole,
-    TaskName,
-    TaskStatus,
-    YOUNG_STATUS,
-    YOUNG_STATUS_PHASE1,
-} from "snu-lib";
+import { departmentList, GRADES, region2department, TaskName, TaskStatus, YOUNG_STATUS } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
-import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
+import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
 
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
 import { createSession } from "../helper/SessionHelper";
 
-describe("BasculeJeuneValidesController", () => {
+describe("BasculeJeuneNonValidesController", () => {
     let app: INestApplication;
-    let bacsuleController: BasculeJeuneValidesController;
+    let bacsuleController: BasculeJeuneNonValidesController;
     let inscriptionService: InscriptionService;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
@@ -35,7 +26,7 @@ describe("BasculeJeuneValidesController", () => {
         app = appSetup.app;
 
         module = appSetup.adminTestModule;
-        bacsuleController = module.get<BasculeJeuneValidesController>(BasculeJeuneValidesController);
+        bacsuleController = module.get<BasculeJeuneNonValidesController>(BasculeJeuneNonValidesController);
         mockedAddUserToRequestMiddleware = jest.fn((req, res, next) => {
             req.user = {
                 role: "admin",
@@ -56,12 +47,12 @@ describe("BasculeJeuneValidesController", () => {
         expect(bacsuleController).toBeDefined();
     });
 
-    describe("POST /inscription/:id/bascule-jeunes-valides/simulation", () => {
+    describe("POST /inscription/:id/bascule-jeunes-non-valides/simulation", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer()).post(
-                `/inscription/${session.id}/bascule-jeunes-valides/simulation`,
+                `/inscription/${session.id}/bascule-jeunes-non-valides/simulation`,
             );
 
             expect(response.status).toBe(400);
@@ -71,12 +62,9 @@ describe("BasculeJeuneValidesController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/bascule-jeunes-valides/simulation`)
+                .post(`/inscription/${session.id}/bascule-jeunes-non-valides/simulation`)
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
-                    statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    presenceArrivee: [false],
-                    statusPhase1Motif: [],
                     niveauScolaires: [],
                     departements: departmentList,
                     etranger: false,
@@ -91,12 +79,9 @@ describe("BasculeJeuneValidesController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/bascule-jeunes-valides/simulation`)
+                .post(`/inscription/${session.id}/bascule-jeunes-non-valides/simulation`)
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
-                    statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    presenceArrivee: [false],
-                    statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: [],
                     etranger: false,
@@ -111,16 +96,13 @@ describe("BasculeJeuneValidesController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/bascule-jeunes-valides/simulation`)
+                .post(`/inscription/${session.id}/bascule-jeunes-non-valides/simulation`)
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
-                    statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    presenceArrivee: [false],
-                    statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: ["nonInexistant"],
-                    etranger: false,
                     sansDepartement: false,
+                    etranger: false,
                     avenir: false,
                 });
 
@@ -131,33 +113,30 @@ describe("BasculeJeuneValidesController", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/bascule-jeunes-valides/simulation`)
+                .post(`/inscription/${session.id}/bascule-jeunes-non-valides/simulation`)
                 .send({
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
-                    statusPhase1: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION],
-                    presenceArrivee: [false],
-                    statusPhase1Motif: [],
                     niveauScolaires: Object.values(GRADES),
                     departements: departmentList,
-                    etranger: false,
                     sansDepartement: false,
+                    etranger: false,
                     avenir: false,
                 });
 
             expect(response.status).toBe(201);
-            expect(response.body.name).toBe(TaskName.BACULE_JEUNES_VALIDES_SIMULATION);
+            expect(response.body.name).toBe(TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
         });
     });
 
-    describe("POST /inscription/:id/simulation/:taskId/bascule-jeunes-valides/valider", () => {
+    describe("POST /inscription/:id/simulation/:taskId/bascule-jeunes-non-valides/valider", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
-            const task = await createTask({ name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION });
+            const task = await createTask({ name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION });
 
             const response = await request(app.getHttpServer()).post(
-                `/inscription/${session.id}/simulation/${task.id}/bascule-jeunes-valides/valider`,
+                `/inscription/${session.id}/simulation/${task.id}/bascule-jeunes-non-valides/valider`,
             );
 
             expect(response.status).toBe(400);
@@ -166,7 +145,7 @@ describe("BasculeJeuneValidesController", () => {
         it("should return 422 for invalid task (pending)", async () => {
             const session = await createSession();
             const task = await createTask({
-                name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+                name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
                 status: TaskStatus.PENDING,
                 metadata: {
                     parameters: {
@@ -176,7 +155,7 @@ describe("BasculeJeuneValidesController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/simulation/${task.id}/bascule-jeunes-valides/valider`)
+                .post(`/inscription/${session.id}/simulation/${task.id}/bascule-jeunes-non-valides/valider`)
                 .send({ sendEmail: true });
 
             expect(response.status).toBe(422);
@@ -185,7 +164,7 @@ describe("BasculeJeuneValidesController", () => {
         it("should return 422 for invalid task (outdated)", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+                name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -202,7 +181,7 @@ describe("BasculeJeuneValidesController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/simulation/${simuTask.id}/bascule-jeunes-valides/valider`)
+                .post(`/inscription/${session.id}/simulation/${simuTask.id}/bascule-jeunes-non-valides/valider`)
                 .send({ sendEmail: true });
 
             expect(response.status).toBe(422);
@@ -211,7 +190,7 @@ describe("BasculeJeuneValidesController", () => {
         it("should return 201 for valid task", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+                name: TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -228,7 +207,7 @@ describe("BasculeJeuneValidesController", () => {
             });
 
             const response = await request(app.getHttpServer())
-                .post(`/inscription/${session.id}/simulation/${simuTask.id}/bascule-jeunes-valides/valider`)
+                .post(`/inscription/${session.id}/simulation/${simuTask.id}/bascule-jeunes-non-valides/valider`)
                 .send({ sendEmail: true });
 
             expect(response.status).toBe(201);
