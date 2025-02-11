@@ -192,46 +192,31 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
   const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
   if (!referentsDep) throw new Error(ERRORS.NOT_FOUND);
 
+  const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+  if (!center) throw new Error(ERRORS.NOT_FOUND);
+
   // on envoie au chef de projet departemental (ou assistant)
+  // sinon on envoie au secretariat du departement ou au manager de phase2
+  // si toujours rien on envoie a son contact Convocation
   const managers = referentsDep.filter(
     (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
   );
-
-  // sinon on envoie au secretariat du departement ou au manager de phase2
   const secretariat = referentsDep.filter(
     (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
   );
-
-  // si toujours rien on envoie a son contact Convocation
   const contactsConv = await getContactsConvocation(young.department, young.cohort!);
-
   const contacts = managers.length > 0 ? managers : secretariat.length > 0 ? secretariat : contactsConv;
 
   // Si CLE on envoie aussi aux contacts CLE
   const contactCLE = young.source === YOUNG_SOURCE.CLE ? await getContactsCLE(young.classeId!) : [];
 
-  const sendContact = [...contacts, ...contactCLE];
-
-  type ResultType = {
-    email: string;
-    firstName: string;
-    lastName: string;
-  };
-
-  const result: ResultType[] = sendContact.map((referent) => ({
-    email: referent.email || "",
-    firstName: referent.firstName || "",
-    lastName: referent.lastName || "",
-  }));
-
-  const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-  if (!center) throw new Error(ERRORS.NOT_FOUND);
-
   const template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-  const emailTo = result.map((referent) => ({
+
+  const emailTo = [...contacts, ...contactCLE].map((referent) => ({
     name: `${referent.firstName} ${referent.lastName}`,
-    email: referent.email,
+    email: referent.email || "",
   }));
+
   const params = {
     youngFirstName: young.firstName,
     youngLastName: young.lastName,
@@ -241,7 +226,8 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
     departureNote: departSejourMotifComment,
     cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
   };
-  await sendTemplate(template, { emailTo, params });
+
+  return await sendTemplate(template, { emailTo, params });
 }
 
 async function getContactsConvocation(department: string, cohortName: string) {
