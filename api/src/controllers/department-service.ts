@@ -63,7 +63,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       contactMail: value.contactMail,
     };
 
-    let contacts = [...departmentService.contacts];
+    let contacts: any[] = [...departmentService.contacts];
 
     const contactIndex = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
     const alreadyExist = contactIndex !== -1;
@@ -102,9 +102,9 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // checking if the contact for this cohort already exists...
-    let contacts = [...departmentService.contacts];
+    let contacts: any[] = [...departmentService.contacts];
 
-    const exist = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
+    const exist = departmentService.contacts.findIndex((contact) => contact._id.toString() === value.contactId);
     if (exist === -1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);
@@ -171,15 +171,15 @@ router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("
       .lean();
 
     const resultSansContact: Array<{
-      Département: string;
-      Région: string;
+      Département: any;
+      Région: any;
       "Email des Référents Départementaux": string;
       "Email des Référents Régionaux": string;
       "Contact convoquation renseigné": string;
     }> = [];
     const resultAvecContact: Array<{
-      Département: string;
-      Région: string;
+      Département: any;
+      Région: any;
       "Email des Référents Départementaux": string;
       "Email des Référents Régionaux": string;
       "Contact convoquation renseigné": string;
@@ -187,7 +187,7 @@ router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("
 
     for (const service of services) {
       const refsRegion = referentsRegion.filter((r) => r.region === department2region[service.department ?? ""]).slice(0, 2);
-      const refsDep = referentsDep.filter((r) => service.department.includes(r.department)).slice(0, 4);
+      const refsDep = referentsDep.filter((r) => service.department!.some((dep) => dep === r.department)).slice(0, 4);
       const contacts = service?.contacts;
       const contact = contacts?.find((c) => c.cohort === cohortName);
 
