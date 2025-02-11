@@ -80,6 +80,7 @@ describe("BasculeJeuneValidesController", () => {
                     niveauScolaires: [],
                     departements: departmentList,
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 
@@ -99,6 +100,7 @@ describe("BasculeJeuneValidesController", () => {
                     niveauScolaires: Object.values(GRADES),
                     departements: [],
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 
@@ -118,6 +120,7 @@ describe("BasculeJeuneValidesController", () => {
                     niveauScolaires: Object.values(GRADES),
                     departements: ["nonInexistant"],
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 
@@ -137,6 +140,7 @@ describe("BasculeJeuneValidesController", () => {
                     niveauScolaires: Object.values(GRADES),
                     departements: departmentList,
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 

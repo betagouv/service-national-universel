@@ -68,6 +68,7 @@ describe("BasculeJeuneNonValidesController", () => {
                     niveauScolaires: [],
                     departements: departmentList,
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 
@@ -84,6 +85,7 @@ describe("BasculeJeuneNonValidesController", () => {
                     niveauScolaires: Object.values(GRADES),
                     departements: [],
                     etranger: false,
+                    sansDepartement: false,
                     avenir: false,
                 });
 
@@ -99,6 +101,7 @@ describe("BasculeJeuneNonValidesController", () => {
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     niveauScolaires: Object.values(GRADES),
                     departements: ["nonInexistant"],
+                    sansDepartement: false,
                     etranger: false,
                     avenir: false,
                 });
@@ -115,6 +118,7 @@ describe("BasculeJeuneNonValidesController", () => {
                     status: [YOUNG_STATUS.WAITING_VALIDATION],
                     niveauScolaires: Object.values(GRADES),
                     departements: departmentList,
+                    sansDepartement: false,
                     etranger: false,
                     avenir: false,
                 });
