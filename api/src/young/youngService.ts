@@ -13,10 +13,9 @@ import {
   ROLES,
   REFERENT_DEPARTMENT_SUBROLE,
   SENDINBLUE_TEMPLATES,
-  getDepartmentByZip,
 } from "snu-lib";
 
-import { YoungDocument, YoungModel, ReferentModel, ReferentDocument, ClasseModel, CohesionCenterModel, DepartmentServiceModel, EtablissementModel } from "../models";
+import { YoungDocument, YoungModel, ReferentModel, ClasseModel, CohesionCenterModel, DepartmentServiceModel, EtablissementModel } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
@@ -24,6 +23,7 @@ import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
 import { config } from "../config";
 import { sendTemplate } from "../brevo";
+import { get } from "node:http";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -187,8 +187,9 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
 };
 
 export async function handleNotificationForDeparture(young: YoungType, departSejourMotif: string, departSejourMotifComment: string) {
-  const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+  if (!young.department) throw new Error(ERRORS.BAD_REQUEST);
 
+  const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
   if (!referentsDep) throw new Error(ERRORS.NOT_FOUND);
 
   // on envoie au chef de projet departemental (ou assistant)
@@ -202,70 +203,71 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
   );
 
   // si toujours rien on envoie a son contact Convocation
+  const contactsConv = await getContactsConvocation(young.department, young.cohort!);
 
-  let contactsConv = [] as any;
-  if (!managers.length && !secretariat.length) {
-    const serviceDep = await DepartmentServiceModel.find({ department: young.department });
-    if (!serviceDep) throw new Error(ERRORS.NOT_FOUND);
+  const contacts = managers.length > 0 ? managers : secretariat.length > 0 ? secretariat : contactsConv;
 
-    contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
-    contactsConv = contactsConv.map((contact) => {
-      const [firstName, lastName] = contact.contactName!.split(" ");
-      const email = contact.contactMail;
+  // Si CLE on envoie aussi aux contacts CLE
+  const contactCLE = young.source === YOUNG_SOURCE.CLE ? await getContactsCLE(young.classeId!) : [];
 
-      return {
-        ...contact,
-        firstName,
-        lastName,
-        email,
-      };
-    });
-  }
-
-  // Si CLE on envoie aussi au contact CLE
-  let contactCLE: ReferentDocument[] = [];
-  if (young.source === YOUNG_SOURCE.CLE) {
-    let contactCLEId: string[] = [];
-    const classe = await ClasseModel.findById(young.classeId);
-    if (!classe) throw new Error(ERRORS.NOT_FOUND);
-    contactCLEId.push(classe.referentClasseIds[0]);
-    const etablissement = await EtablissementModel.findById(classe.etablissementId);
-    if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
-    contactCLEId.push(etablissement.referentEtablissementIds[0]);
-    contactCLEId.push(...etablissement.coordinateurIds);
-
-    contactCLE = await ReferentModel.find({ _id: { $in: contactCLEId } });
-  }
-
-  const sendContact = [...(managers.length ? managers : secretariat.length ? secretariat : contactsConv), ...contactCLE];
+  const sendContact = [...contacts, ...contactCLE];
 
   type ResultType = {
     email: string;
     firstName: string;
     lastName: string;
   };
+
   const result: ResultType[] = sendContact.map((referent) => ({
-    email: referent.email,
-    firstName: referent.firstName,
-    lastName: referent.lastName,
+    email: referent.email || "",
+    firstName: referent.firstName || "",
+    lastName: referent.lastName || "",
   }));
 
   const center = await CohesionCenterModel.findById(young.cohesionCenterId);
+  if (!center) throw new Error(ERRORS.NOT_FOUND);
 
-  let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-  await sendTemplate(template, {
-    emailTo: result.map((referent) => ({
-      name: `${referent.firstName} ${referent.lastName}`,
-      email: referent.email,
-    })),
-    params: {
-      youngFirstName: young.firstName,
-      youngLastName: young.lastName,
-      centreName: center?.name || young.cohesionCenterName,
-      centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
-      departureReason: departSejourMotif,
-      departureNote: departSejourMotifComment,
-      cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-    },
-  });
+  const template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
+  const emailTo = result.map((referent) => ({
+    name: `${referent.firstName} ${referent.lastName}`,
+    email: referent.email,
+  }));
+  const params = {
+    youngFirstName: young.firstName,
+    youngLastName: young.lastName,
+    centreName: center.name,
+    centreDepartement: center.department,
+    departureReason: departSejourMotif,
+    departureNote: departSejourMotifComment,
+    cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
+  };
+  await sendTemplate(template, { emailTo, params });
+}
+
+async function getContactsConvocation(department: string, cohortName: string) {
+  const departmentService = await DepartmentServiceModel.findOne({ department });
+  if (!departmentService) throw new Error(ERRORS.NOT_FOUND);
+
+  return departmentService.contacts
+    .filter((contact) => contact.cohort === cohortName)
+    .map((contact) => {
+      const [firstName, lastName] = contact.contactName!.split(" ");
+      const email = contact.contactMail;
+      return { ...contact, firstName, lastName, email };
+    });
+}
+
+async function getContactsCLE(classeId: string) {
+  let contactCLEId: string[] = [];
+
+  const classe = await ClasseModel.findById(classeId);
+  if (!classe) throw new Error(ERRORS.NOT_FOUND);
+  contactCLEId.push(classe.referentClasseIds[0]);
+
+  const etablissement = await EtablissementModel.findById(classe.etablissementId);
+  if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+  contactCLEId.push(etablissement.referentEtablissementIds[0]);
+  contactCLEId.push(...etablissement.coordinateurIds);
+
+  return await ReferentModel.find({ _id: { $in: contactCLEId } });
 }

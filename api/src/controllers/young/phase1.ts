@@ -15,17 +15,13 @@ import {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
-  REFERENT_DEPARTMENT_SUBROLE,
-  getDepartmentByZip,
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
-  DepartmentServiceType,
   LigneBusType,
 } from "snu-lib";
-import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
-import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassemblementModel, LigneBusModel, CohortModel, ReferentModel, DepartmentServiceModel } from "../../models";
+import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
 import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
