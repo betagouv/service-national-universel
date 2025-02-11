@@ -15,6 +15,15 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { PlanDeTransportModel } from "../PlanDeTransport/PlanDeTransport.model";
 
+export type StatusSimulation = {
+    status: TaskStatus | "NONE";
+};
+
+export type StatusValidation = {
+    status: TaskStatus | "NONE";
+    lastCompletedAt: Date;
+};
+
 @Injectable()
 export class AffectationService {
     constructor(
@@ -28,7 +37,7 @@ export class AffectationService {
         private readonly logger: Logger,
     ) {}
 
-    async getStatusSimulation(sessionId: string, taskName: TaskName) {
+    async getStatusSimulation(sessionId: string, taskName: TaskName): Promise<StatusSimulation> {
         const simulations = await this.taskGateway.findByNames(
             [taskName],
             {
@@ -42,7 +51,7 @@ export class AffectationService {
         };
     }
 
-    async getStatusValidation(sessionId: string, taskName: TaskName) {
+    async getStatusValidation(sessionId: string, taskName: TaskName): Promise<StatusValidation> {
         const lastTraitement = (
             await this.taskGateway.findByNames(
                 [taskName],

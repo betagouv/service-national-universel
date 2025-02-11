@@ -42,6 +42,8 @@ export class AdminTaskConsumer extends WorkerHost {
                     case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
                     case TaskName.AFFECTATION_CLE_SIMULATION:
                     case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
+                    case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
+                    case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
                         results = await this.adminTaskAffectationSelectorService.handleAffectation(job, task);
                         break;
                     case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
@@ -49,7 +51,7 @@ export class AdminTaskConsumer extends WorkerHost {
                         results = await this.adminTaskInscriptionSelectorService.handleInscription(job, task);
                         break;
                     case TaskName.REFERENTIEL_IMPORT:
-                        const importTask = task as ReferentielImportTaskModel;
+                        const importTask: ReferentielImportTaskModel = task;
                         this.logger.log(
                             `Processing import task "${importTask.metadata?.parameters?.type}"`,
                             AdminTaskConsumer.name,

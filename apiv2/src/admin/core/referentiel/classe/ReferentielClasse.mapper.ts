@@ -8,7 +8,7 @@ import {
 export class ReferentielClasseMapper {
     static mapImporterClassesFromFile(classes: ClasseImportXlsx[]): ClasseImportModel[] {
         return classes.map((classe) => ({
-            classeId: classe["Identifiant de la classe engagée"],
+            classeId: classe["Identifiant de la classe engagée"]?.toLowerCase(),
             cohortCode: classe["Session formule"],
             classeTotalSeats: classe["Effectif de jeunes concernés"],
             centerCode: classe["Désignation du centre"],

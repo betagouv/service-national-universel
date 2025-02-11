@@ -6,6 +6,7 @@ import {
     TaskName,
     ValiderAffectationCLETaskResult,
     ValiderAffectationHTSTaskResult,
+    ValiderAffectationCLEDromComTaskResult,
 } from "snu-lib";
 import { Job } from "bullmq";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
@@ -18,6 +19,9 @@ import { SimulationAffectationHTS } from "@admin/core/sejours/phase1/affectation
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { SimulationAffectationCLE } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE";
 import { ValiderAffectationCLE } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLE";
+import { SimulationAffectationCLEDromComTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromComTask.model";
+import { SimulationAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
+import { ValiderAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
 
 @Injectable()
 export class AdminTaskAffectationSelectorService {
@@ -27,12 +31,15 @@ export class AdminTaskAffectationSelectorService {
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly simulationAffectationCle: SimulationAffectationCLE,
         private readonly validerAffectationCle: ValiderAffectationCLE,
+        private readonly simulationAffectationCLEDromCom: SimulationAffectationCLEDromCom,
+        private readonly validerAffectationCLEDromCom: ValiderAffectationCLEDromCom,
     ) {}
     async handleAffectation(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
         let results = {} as Record<string, any>;
         switch (job.name) {
+            //  HTS METROPOLE
             case TaskName.AFFECTATION_HTS_SIMULATION:
-                const simulationHtsTask = task as SimulationAffectationHTSTaskModel; // pour l'onglet historique (patches)
+                const simulationHtsTask: SimulationAffectationHTSTaskModel = task; // pour l'onglet historique (patches)
                 const simulationhts = await this.simulationAffectationHts.execute(
                     simulationHtsTask.metadata!.parameters!,
                 );
@@ -46,7 +53,7 @@ export class AdminTaskAffectationSelectorService {
                 break;
 
             case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
-                const validationHtsTask = task as ValiderAffectationHTSTaskModel;
+                const validationHtsTask: ValiderAffectationHTSTaskModel = task;
                 const validationResult = await this.validerAffectationHts.execute({
                     ...validationHtsTask.metadata!.parameters!,
                     dateAffectation: validationHtsTask.createdAt,
@@ -69,8 +76,9 @@ export class AdminTaskAffectationSelectorService {
                 }
                 break;
 
+            //  CLE METROPOLE
             case TaskName.AFFECTATION_CLE_SIMULATION:
-                const simulationCleTask = task as SimulationAffectationCLETaskModel; // pour l'onglet historique (patches)
+                const simulationCleTask: SimulationAffectationCLETaskModel = task; // pour l'onglet historique (patches)
                 const simulationCle = await this.simulationAffectationCle.execute(
                     simulationCleTask.metadata!.parameters!,
                 );
@@ -83,7 +91,7 @@ export class AdminTaskAffectationSelectorService {
                 break;
 
             case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
-                const validationCleTask = task as ValiderAffectationCLETaskModel;
+                const validationCleTask: ValiderAffectationCLETaskModel = task;
                 const validationCleResult = await this.validerAffectationCle.execute({
                     ...validationCleTask.metadata!.parameters!,
                     dateAffectation: validationCleTask.createdAt,
@@ -105,6 +113,45 @@ export class AdminTaskAffectationSelectorService {
                     throw new Error("Aucun jeune n'a été affecté");
                 }
                 break;
+
+            //  CLE DROM COM et Corse
+            case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
+                const simulationCleDromComTask: SimulationAffectationCLEDromComTaskModel = task;
+                const simulationCleDromComResult = await this.simulationAffectationCLEDromCom.execute(
+                    simulationCleDromComTask.metadata!.parameters!,
+                );
+                results = {
+                    rapportKey: simulationCleDromComResult.rapportFile.Key,
+                    jeunesAffected: simulationCleDromComResult.analytics.jeunesAffected,
+                    erreurs: simulationCleDromComResult.analytics.erreurs,
+                    classes: simulationCleDromComResult.analytics.classes,
+                } as SimulationAffectationCLETaskResult;
+                break;
+
+            case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
+                const validationCleDromComTask: ValiderAffectationCLETaskModel = task;
+                const validationCleDromComResult = await this.validerAffectationCLEDromCom.execute({
+                    ...validationCleDromComTask.metadata!.parameters!,
+                    dateAffectation: validationCleDromComTask.createdAt,
+                });
+                results = {
+                    rapportKey: validationCleDromComResult.rapportFile.Key,
+                    jeunesAffected: validationCleDromComResult.analytics.jeunesAffected,
+                    errors: validationCleDromComResult.analytics.errors,
+                } as ValiderAffectationCLEDromComTaskResult;
+                // TODO: handle errors with partial results for all tasks
+                if (validationCleDromComResult.analytics.jeunesAffected === 0) {
+                    await this.adminTaskRepository.update(task.id, {
+                        ...task,
+                        metadata: {
+                            ...task.metadata,
+                            results,
+                        },
+                    });
+                    throw new Error("Aucun jeune n'a été affecté");
+                }
+                break;
+
             default:
                 throw new Error(`Task of type ${job.name} not handle yet for affectation`);
         }

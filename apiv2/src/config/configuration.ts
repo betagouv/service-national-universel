@@ -51,4 +51,7 @@ export default () => ({
         accessKeyId: _env(envStr, "CELLAR_KEYID", "CELLAR_KEYID"),
         secretAccessKey: _env(envStr, "CELLAR_KEYSECRET", "CELLAR_KEYSECRET"),
     },
+    marketing: {
+        folderId: _env(envInt, "MARKETING_FOLDER_ID", 1886),
+    },
 });

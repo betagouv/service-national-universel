@@ -58,6 +58,7 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 
@@ -79,6 +80,7 @@ import { InscriptionService } from "./core/sejours/phase1/inscription/Inscriptio
         NotificationModule,
         QueueModule,
         TaskModule,
+        PlanMarketingModule,
         ReferentielModule,
     ],
     controllers: [
@@ -135,6 +137,7 @@ export class AdminModule {
             .apply(AddUserToRequestMiddleware)
             .exclude({ path: "/referent/signin", method: RequestMethod.POST })
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
+            .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .forRoutes("*");
     }
 }

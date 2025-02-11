@@ -4,7 +4,7 @@ import { TaskDocument } from "./TaskMongo.provider";
 import { TaskQueue } from "../../shared/infra/Queue";
 
 export class TaskMapper {
-    static toModel(taskType: TaskDocument): TaskModel {
+    static toModel<T, U>(taskType: TaskDocument): TaskModel {
         return {
             id: taskType._id.toString(),
             name: taskType.name,

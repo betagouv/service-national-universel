@@ -36,7 +36,7 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
 
   const { isPending: isLoadingImports, data: routesImports } = useQuery<ReferentielRoutes["GetImports"]["response"]>({
     queryKey: ["last-task", TaskName.REFERENTIEL_IMPORT, ReferentielTaskType.IMPORT_ROUTES],
-    queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, type: ReferentielTaskType.IMPORT_ROUTES, limit: 1, order: "DESC" }),
+    queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, type: ReferentielTaskType.IMPORT_ROUTES, limit: 1, sort: "DESC" }),
   });
 
   const sdrImport = routesImports?.[0];

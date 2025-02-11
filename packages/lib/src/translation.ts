@@ -1193,10 +1193,13 @@ export const translateSimulationName = (name: string) => {
       return "Affectation HTS (Metropole, hors Corse)";
     case "AFFECTATION_CLE_SIMULATION":
     case "AFFECTATION_CLE_SIMULATION_VALIDER":
-      return "Affectation CLE (Metropole)";
+      return "Affectation CLE (Metropole, hors Corse)";
     case "BACULE_JEUNES_VALIDES_SIMULATION":
     case "BACULE_JEUNES_VALIDES_SIMULATION_VALIDER":
       return "Bascule des jeunes validés";
+    case "AFFECTATION_CLE_DROMCOM_SIMULATION":
+    case "AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER":
+      return "Affectation CLE (DROM COM et Corse)";
     default:
       return name;
   }
@@ -1206,6 +1209,19 @@ export const translateModifierClasse = (name: string) => {
   switch (name) {
     case "ROLE_NOT_REFERENT_CLASSE":
       return "L'utilisateur n'est pas référent de classe.";
+    default:
+      return name;
+  }
+};
+
+export const translateImportReferentiel = (name: string) => {
+  switch (name) {
+    case "IMPORT_MISSING_COLUMN":
+      return "Le fichier doit contenir les colonnes suivantes";
+    case "IMPORT_EMPTY_FILE":
+      return "Le fichier ne contient pas les bons onglets ou est vide";
+    case "IMPORT_NOT_VALID":
+      return "Cet import est invalide";
     default:
       return name;
   }

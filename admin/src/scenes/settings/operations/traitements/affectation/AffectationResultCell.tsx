@@ -2,11 +2,11 @@ import React from "react";
 
 import { ValiderAffectationHTSTaskDto } from "snu-lib";
 
-interface AffectationHtsResultCellProps {
+interface AffectationResultCellProps {
   simulation: unknown;
 }
 
-export default function AffectationHtsResultCell({ simulation }: AffectationHtsResultCellProps) {
+export default function AffectationResultCell({ simulation }: AffectationResultCellProps) {
   const simulationHts = simulation as ValiderAffectationHTSTaskDto;
 
   return (
