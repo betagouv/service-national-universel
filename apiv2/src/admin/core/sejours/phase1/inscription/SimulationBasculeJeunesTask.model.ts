@@ -10,6 +10,7 @@ export interface SimulationBasculeJeunesTaskParameters {
     niveauScolaires: string[];
     departements: string[];
     etranger: boolean;
+    sansDepartement: boolean;
     avenir: boolean;
 }
 

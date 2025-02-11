@@ -55,6 +55,7 @@ export class SimulationBasculeJeunes implements UseCase<SimulationBasculeJeunesR
             niveauScolaires,
             departements,
             etranger,
+            sansDepartement,
             avenir,
         }: SimulationBasculeJeunesTaskParameters,
         type: TypeBascule,
@@ -64,7 +65,7 @@ export class SimulationBasculeJeunes implements UseCase<SimulationBasculeJeunesR
             status,
             status.includes(YOUNG_STATUS.VALIDATED) ? statusPhase1 : [],
             niveauScolaires,
-            departements,
+            sansDepartement ? [...departements, null] : departements,
         );
         this.logger.log(`Jeunes a basculer (avant filtre simulation) : ${jeuneList.length}`);
         if (!etranger) {

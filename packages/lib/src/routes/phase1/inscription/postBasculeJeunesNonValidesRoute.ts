@@ -13,6 +13,7 @@ export interface PostBasculeJeunesNonValidesRoute extends BasicRoute {
     niveauScolaires: Array<keyof typeof GRADES>;
     departements: string[];
     etranger: boolean;
+    sansDepartement: boolean;
     avenir: boolean;
   };
   response: RouteResponseBodyV2<SimulationBasculeJeunesNonValidesTaskDto>;

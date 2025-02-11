@@ -14,13 +14,23 @@ const InscriptionService = {
 
   postBasculeJeunesValides: async (
     sessionId: string,
-    { status, statusPhase1, presenceArrivee, statusPhase1Motif, niveauScolaires, departements, etranger, avenir }: InscriptionRoutes["PostBasculeJeunesValides"]["payload"],
+    {
+      status,
+      statusPhase1,
+      presenceArrivee,
+      statusPhase1Motif,
+      niveauScolaires,
+      departements,
+      etranger,
+      sansDepartement,
+      avenir,
+    }: InscriptionRoutes["PostBasculeJeunesValides"]["payload"],
   ) => {
     return await buildRequest<InscriptionRoutes["PostBasculeJeunesValides"]>({
       path: "/inscription/{sessionId}/bascule-jeunes-valides/simulation",
       method: "POST",
       params: { sessionId },
-      payload: { status, statusPhase1, presenceArrivee, statusPhase1Motif, niveauScolaires, departements, etranger, avenir },
+      payload: { status, statusPhase1, presenceArrivee, statusPhase1Motif, niveauScolaires, departements, etranger, sansDepartement, avenir },
       target: "API_V2",
     })();
   },
@@ -46,13 +56,13 @@ const InscriptionService = {
 
   postBasculeJeunesNonValides: async (
     sessionId: string,
-    { status, niveauScolaires, departements, etranger, avenir }: InscriptionRoutes["PostBasculeJeunesNonValides"]["payload"],
+    { status, niveauScolaires, departements, etranger, sansDepartement, avenir }: InscriptionRoutes["PostBasculeJeunesNonValides"]["payload"],
   ) => {
     return await buildRequest<InscriptionRoutes["PostBasculeJeunesNonValides"]>({
       path: "/inscription/{sessionId}/bascule-jeunes-non-valides/simulation",
       method: "POST",
       params: { sessionId },
-      payload: { status, niveauScolaires, departements, etranger, avenir },
+      payload: { status, niveauScolaires, departements, etranger, sansDepartement, avenir },
       target: "API_V2",
     })();
   },

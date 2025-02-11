@@ -35,6 +35,9 @@ export class PostSimulationsPayloadDto {
     etranger: boolean;
 
     @IsBoolean()
+    sansDepartement: boolean;
+
+    @IsBoolean()
     avenir: boolean;
 }
 

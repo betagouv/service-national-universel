@@ -81,7 +81,7 @@ export class JeuneRepository implements JeuneGateway {
         status: string[],
         statusPhase1: string[],
         niveauScolaires: string[],
-        departements: string[],
+        departements: Array<string | null>,
     ): Promise<JeuneModel[]> {
         const query = {
             cohortId: sessionId,

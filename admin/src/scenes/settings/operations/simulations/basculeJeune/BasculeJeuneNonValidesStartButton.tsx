@@ -4,10 +4,10 @@ import { toastr } from "react-redux-toastr";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import cx from "classnames";
-import { HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
+import { HiOutlineInformationCircle, HiOutlineLightningBolt, HiPlay } from "react-icons/hi";
 
 import { formatDepartement, InscriptionRoutes, region2department, regionList, SENDINBLUE_TEMPLATES, SimulationBasculeJeunesValidesTaskDto, TaskStatus, translate } from "snu-lib";
-import { Button, Modal } from "@snu/ds/admin";
+import { Button, Modal, Tooltip } from "@snu/ds/admin";
 
 import { capture } from "@/sentry";
 import { isBefore } from "date-fns";
@@ -85,7 +85,12 @@ export default function BasculeJeuneNonValidesStartButton({ simulation }: Bascul
                   <HiOutlineLightningBolt className="w-6 h-6" />
                 </div>
               </div>
-              <h1 className="font-bold text-xl m-0">Bascule des jeunes non validés</h1>
+              <h1 className="font-bold text-xl m-0">
+                Bascule des jeunes non validés{" "}
+                <Tooltip id="bascule-jeune-non-valides" title="Les jeunes basculés garderont leur statut actuel" className="inline-flex">
+                  <HiOutlineInformationCircle className="text-gray-400" size={16} />
+                </Tooltip>
+              </h1>
               <p className="text-lg">Vérifier les paramètres avant de lancer ce traitement.</p>
             </div>
             <div className="flex items-start flex-col w-full gap-8">
@@ -124,6 +129,10 @@ export default function BasculeJeuneNonValidesStartButton({ simulation }: Bascul
                 <div className="flex gap-2">
                   <div className="text-gray-400">Etranger&nbsp;:</div>
                   <div className="text-sm leading-5 font-normal">{simulationBascule.metadata?.parameters?.etranger ? "Oui" : "Non"}</div>
+                </div>
+                <div className="flex gap-2">
+                  <div className="text-gray-400">Inclure les départements non renseignés&nbsp;:</div>
+                  <div className="text-sm leading-5 font-normal">{simulationBascule.metadata?.parameters?.sansDepartement ? "Oui" : "Non"}</div>
                 </div>
               </div>
               <div className="flex flex-col w-full gap-2.5">

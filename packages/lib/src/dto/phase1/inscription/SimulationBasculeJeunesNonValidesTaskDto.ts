@@ -8,6 +8,7 @@ export interface SimulationBasculeJeunesNonValidesTaskParameters extends Phase1T
   niveauScolaires: Array<keyof typeof GRADES>;
   departements: string[];
   etranger: boolean;
+  sansDepartement: boolean;
   avenir: boolean;
 }
 
