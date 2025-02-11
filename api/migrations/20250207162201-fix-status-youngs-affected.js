@@ -7,7 +7,7 @@ const youngsInCohortCle2025WithAffectedStatusRegex = /^2025\s+CLE\s+(?!0[1-6]\b)
 module.exports = {
   async up() {
     const youngsInCohortCle2025WithAffectedStatusUpdated = await YoungModel.updateMany(
-      { status: YOUNG_STATUS.AFFECTED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED, cohort: { $regex: youngsInCohortCle2025WithAffectedStatusRegex } },
+      { status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED, cohort: { $regex: youngsInCohortCle2025WithAffectedStatusRegex } },
       { $set: { statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION } },
     );
 
@@ -17,7 +17,7 @@ module.exports = {
   },
   async down() {
     const youngsInCohortCle2025WithAffectedStatusUpdated = await YoungModel.updateMany(
-      { status: YOUNG_STATUS.AFFECTED, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort: { $regex: youngsInCohortCle2025WithAffectedStatusRegex } },
+      { status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, cohort: { $regex: youngsInCohortCle2025WithAffectedStatusRegex } },
       { $set: { statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED } },
     );
 
