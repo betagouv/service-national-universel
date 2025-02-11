@@ -32,6 +32,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
         setIsLoading(false);
         return;
       }
+      toastr.success("Succès", "Départ anticipé renseigné");
       await onSubmit(data);
     } catch (error) {
       toastr.error("Oups, une erreur s'est produite", translate(error.code));
