@@ -51,6 +51,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
     niveauScolaires: string[];
     departements: Record<string, string[]>;
     etranger: boolean;
+    sansDepartement: boolean;
     avenir: boolean;
   }>({
     status: [YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.VALIDATED],
@@ -63,6 +64,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
       return acc;
     }, {}),
     etranger: true,
+    sansDepartement: true,
     avenir: false,
   });
 
@@ -84,6 +86,7 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
         departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         niveauScolaires: state.niveauScolaires as any,
         etranger: state.etranger,
+        sansDepartement: state.sansDepartement,
         avenir: state.avenir,
       });
     },
@@ -115,6 +118,9 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
               </div>
             </div>
             <h1 className="font-bold text-xl m-0">Bascule des jeunes validés</h1>
+            <p className="flex flex-col gap-4 p-4 text-sm leading-5 font-medium bg-amber-50 text-amber-600">
+              Les jeunes basculés seront passés au statut "{translate(YOUNG_STATUS.WAITING_VALIDATION)}"
+            </p>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
             <div className="flex flex-col w-full gap-2.5">
@@ -184,6 +190,12 @@ export default function BasculeJeuneValidesMetropoleModal({ session, onClose }: 
                   />
                 ))}
                 <SectionSwitcher title="Etranger" value={state.etranger} onChange={(etranger) => setState({ etranger })} className="py-2.5" />
+                <SectionSwitcher
+                  title="Inclure les départements non renseignés"
+                  value={state.sansDepartement}
+                  onChange={(sansDepartement) => setState({ sansDepartement })}
+                  className="py-2.5"
+                />
               </div>
             </div>
             <div className="flex flex-col w-full gap-2.5">
