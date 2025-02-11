@@ -107,7 +107,6 @@ import {
   getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
-  isReferentDep,
   canValidateYoungToLP,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
@@ -120,9 +119,9 @@ import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
-import { isAfter } from "date-fns/isAfter";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
+import { handleNotifForYoungWithdrawn } from "../young/youngService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -673,6 +672,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
       }
+    }
+
+    if (newYoung.status === YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.WITHDRAWN) {
+      const { withdrawnReason } = newYoung;
+      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason);
+      newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
     }
 
     young.set(newYoung);
