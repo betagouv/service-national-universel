@@ -9,7 +9,7 @@ import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
-import { RouteXLS } from "@admin/core/referentiel/routes/ReferentielRoutesModel";
+import { RouteXlsx } from "@admin/core/referentiel/routes/ReferentielRoutesModel";
 
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -159,7 +159,7 @@ export class SimulationAffectationHTSService {
             );
         }
         const importedFile = await this.fileService.downloadFile(importTask.metadata.parameters.fileKey);
-        const parsedFile = await this.fileService.parseXLS<RouteXLS>(importedFile.Body);
+        const parsedFile = await this.fileService.parseXLS<RouteXlsx>(importedFile.Body);
 
         const changementDepartementPdrs = parsedFile.reduce(
             (acc, line, index) => {

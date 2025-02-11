@@ -24,7 +24,6 @@ import * as mockLignesBus from "./__tests__/lignebuses.json";
 import * as mockPdr from "./__tests__/pdr.json";
 import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
-import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { ClasseGateway } from "../../cle/classe/Classe.gateway";
 import { EtablissementGateway } from "../../cle/etablissement/Etablissement.gateway";
@@ -40,7 +39,6 @@ describe("SimulationAffectationCLE", () => {
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
-                AffectationService,
                 SimulationAffectationCLE,
                 SimulationAffectationCLEService,
                 Logger,

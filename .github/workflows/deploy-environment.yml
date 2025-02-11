@@ -12,8 +12,8 @@ concurrency:
 jobs:
   prepare:
     if: |
-      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
-      (github.event_name=='workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
+      (github.event_name=='pull_request' && github.event.label.name == 'deploy') ||
+      (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.config.outputs.env_name }}
@@ -30,7 +30,7 @@ jobs:
 
       - name: Get environment configuration
         env:
-          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.ref_name }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
         id: config
         run: |
           # ENV_NAME
@@ -86,7 +86,7 @@ jobs:
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
       - name: Add comment to PR
-        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy') && contains(fromJSON('["labeled"]'), github.event.action)
+        if: github.event_name == 'pull_request' && github.event.label.name == 'deploy'
         working-directory: devops/scripts
         env:
           URL: ${{ github.event.pull_request.comments_url }}

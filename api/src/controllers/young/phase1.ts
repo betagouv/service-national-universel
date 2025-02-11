@@ -61,11 +61,17 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
 
     if (young.status === YOUNG_STATUS.WITHDRAWN) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    // verification nombre de place ?
     const session = await SessionPhase1Model.findById(sessionId);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const isFull = !session.placesLeft || session.placesLeft <= 0;
-    if (isFull) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // verification nombre de place ?
+    const youngIsChangingSession = sessionId && young.sessionPhase1Id !== sessionId;
+    const youngIsChangingCenter = centerId && young.cohesionCenterId !== centerId;
+
+    if (youngIsChangingSession || youngIsChangingCenter) {
+      const isFull = !session.placesLeft || session.placesLeft <= 0;
+      if (isFull) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // mail only if isAssignmentAnnouncementsOpenForYoung
     const cohort = await CohortModel.findOne({ name: session.cohort });

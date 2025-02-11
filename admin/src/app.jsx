@@ -48,6 +48,7 @@ const Classe = lazy(() => import("./scenes/classe"));
 const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
 const Contact = lazy(() => import("./scenes/contact"));
 const Signup = lazy(() => import("./scenes/signup"));
+const ImportSiSnu = lazy(() => import("./scenes/importSiSnu"));
 
 //DashboardV2
 const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
@@ -77,6 +78,7 @@ import ApplicationError from "./components/layout/ApplicationError";
 import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
+import EmailPreview from "./scenes/email-preview";
 
 initApi();
 
@@ -91,6 +93,7 @@ class App extends React.Component {
               <Suspense fallback={<Loader />}>
                 <Switch>
                   {/* Aucune authentification nécessaire */}
+                  <SentryRoute path="/email-preview/:id" component={EmailPreview} />
                   <SentryRoute path="/validate" component={Validate} />
                   <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                   <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
@@ -243,6 +246,7 @@ const Home = () => {
                   <RestrictedRoute path="/equipe" component={Team} />
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
                   <RestrictedRoute path="/injep-export" component={INJEPExport} />
+                  <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
                   {/* Plan de transport */}
                   {user?.role === "admin" && user?.subRole === SUB_ROLE_GOD ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
                   {/* Table de répartition */}

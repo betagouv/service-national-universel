@@ -13,6 +13,7 @@ export type JeuneModel = {
     psh?: string;
     departement?: string;
     region?: string;
+    codePostal?: string;
     departementScolarite?: string;
     regionScolarite?: string;
     paysScolarite?: string;
@@ -31,7 +32,7 @@ export type JeuneModel = {
     prenom?: string;
     nom?: string;
     deplacementPhase1Autonomous?: string;
-    cohesionStayPresence?: string;
+    presenceArrivee?: string;
     presenceJDM?: string;
     departInform?: string;
     departSejourAt?: string;
@@ -51,6 +52,8 @@ export type JeuneModel = {
     youngPhase1Agreement: string;
     sessionChangeReason?: string;
     classeId?: string;
+    niveauScolaire?: string;
+    scolarise?: string;
 };
 
 export type CreateJeuneModel = Omit<JeuneModel, "id" | "createdAt" | "updatedAt">;
