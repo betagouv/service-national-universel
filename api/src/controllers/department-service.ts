@@ -168,8 +168,20 @@ router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("
       .sort({ lastLoginAt: -1 })
       .lean();
 
-    const resultSansContact = {};
-    const resultAvecContact = {};
+    const resultSansContact: Array<{
+      Département: string;
+      Région: string;
+      "Email des Référents Départementaux": string;
+      "Email des Référents Régionaux": string;
+      "Contact convoquation renseigné": string;
+    }> = [];
+    const resultAvecContact: Array<{
+      Département: string;
+      Région: string;
+      "Email des Référents Départementaux": string;
+      "Email des Référents Régionaux": string;
+      "Contact convoquation renseigné": string;
+    }> = [];
 
     for (const service of services) {
       const refsRegion = referentsRegion.filter((r) => r.region === department2region[service.department ?? ""]).slice(0, 2);
