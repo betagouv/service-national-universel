@@ -1,13 +1,29 @@
 import { format } from "date-fns";
 
-import { ERRORS, FUNCTIONAL_ERRORS, UserDto, YOUNG_PHASE, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto, YoungType } from "snu-lib";
-
-import { YoungDocument, YoungModel } from "../models";
+import {
+  ERRORS,
+  FUNCTIONAL_ERRORS,
+  UserDto,
+  YOUNG_PHASE,
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YoungDto,
+  YoungType,
+  SUB_ROLES,
+  WITHRAWN_REASONS,
+  formatDateFRTimezoneUTC,
+  YOUNG_SOURCE,
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+} from "snu-lib";
+import { sendTemplate } from "../brevo";
+import { YoungDocument, YoungModel, ReferentDocument, ReferentModel, ClasseModel, SessionPhase1Model } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
+import { capture } from "../sentry";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -169,3 +185,61 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
     logger.info(`YoungService - mightAddInProgressStatus(), Status set to IN_PROGRESS for YoungId:${young.id}`);
   }
 };
+
+export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReason) {
+  const oldStatusPhase1 = young.statusPhase1;
+
+  // We notify the ref dep and the young
+  try {
+    const youngFullName = young.firstName + " " + young.lastName;
+    const referents: ReferentDocument[] = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.secretariat, SUB_ROLES.manager_phase2];
+    let selectedReferent: ReferentDocument | undefined = referents.find((referent) => referent.subRole && SUB_ROLES_PRIORITY.includes(referent.subRole));
+    if (!selectedReferent && referents.length > 0) {
+      selectedReferent = referents[0];
+    }
+    if (selectedReferent) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_NOTIFICATION, {
+        emailTo: [{ name: `${selectedReferent.firstName} ${selectedReferent.lastName}`, email: selectedReferent.email }],
+        params: { student_name: youngFullName, message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+      });
+    }
+    // If they are CLE, we notify the class referent.
+    if (cohort?.type === YOUNG_SOURCE.CLE) {
+      const classe = await ClasseModel.findById(young.classeId);
+      const referent = await ReferentModel.findById(classe?.referentClasseIds[0]);
+      const datecohorte = `du ${formatDateFRTimezoneUTC(cohort.dateStart)} au ${formatDateFRTimezoneUTC(cohort.dateEnd)}`;
+      if (referent) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            datecohorte,
+            raisondesistement: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
+          },
+        });
+      }
+    }
+
+    // If young affected, we notify the head center
+    if (oldStatusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.sessionPhase1Id != null) {
+      const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      const headCenter = await ReferentModel.findById(session?.headCenterId);
+
+      if (headCenter) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.YOUNG_WITHDRAWN, {
+          emailTo: [{ name: `${headCenter.firstName} ${headCenter.lastName}`, email: headCenter.email }],
+          params: { contact_name: youngFullName, message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+        });
+      }
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+    });
+  } catch (e) {
+    capture(e);
+  }
+}

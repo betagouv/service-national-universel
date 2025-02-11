@@ -54,6 +54,7 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
   return (
     <Modal
       isOpen
+      noBodyScroll
       onClose={onClose}
       className="md:max-w-[800px]"
       content={
@@ -64,7 +65,7 @@ export default function AffectationCLESimulationMetropoleModal({ session, onClos
                 <HiOutlineLightningBolt className="w-6 h-6" />
               </div>
             </div>
-            <h1 className="font-bold text-xl m-0">Affectation CLE (Metropole)</h1>
+            <h1 className="font-bold text-xl m-0">Affectation CLE (Metropole, hors Corse)</h1>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
             <div className="flex flex-col w-full gap-2.5">

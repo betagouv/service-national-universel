@@ -689,6 +689,7 @@ const TEMPLATE_DESCRIPTIONS = {
 const MIME_TYPES = {
   EXCEL: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
   CSV: "text/csv",
+  PLAIN: "text/plain",
 } as const;
 
 const STRUCTURE_LEGAL_STATUS = {

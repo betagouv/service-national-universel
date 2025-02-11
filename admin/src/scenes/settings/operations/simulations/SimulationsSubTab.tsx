@@ -15,6 +15,10 @@ import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
 import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
 import SimulationCleResultStartButton from "./affectationCle/SimulationCleResultStartButton";
+import BasculeJeuneValidesStartButton from "./basculeJeune/BasculeJeuneValidesStartButton";
+import BasculeJeuneNonValidesStartButton from "./basculeJeune/BasculeJeuneNonValidesStartButton";
+import BasculeJeuneCell from "./basculeJeune/BasculeJeuneCell";
+import SimulationCleDromComResultStartButton from "./affectationCle/SimulationCleDromComResultStartButton";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -86,10 +90,15 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             key: "metadata",
             title: "Resultats",
             renderCell: (simulation) => {
-              if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
-                return <SimulationHtsResultCell simulation={simulation} />;
-              } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
-                return <SimulationCleResultCell simulation={simulation} />;
+              switch (simulation.name) {
+                case TaskName.AFFECTATION_HTS_SIMULATION:
+                  return <SimulationHtsResultCell simulation={simulation} />;
+                case TaskName.AFFECTATION_CLE_SIMULATION:
+                case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
+                  return <SimulationCleResultCell simulation={simulation} />;
+                case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
+                case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
+                  return <BasculeJeuneCell simulation={simulation} />;
               }
               return null;
             },
@@ -113,6 +122,12 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
                 return <SimulationHtsResultStartButton simulation={simulation} />;
               } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
                 return <SimulationCleResultStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION) {
+                return <SimulationCleDromComResultStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.BACULE_JEUNES_VALIDES_SIMULATION) {
+                return <BasculeJeuneValidesStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION) {
+                return <BasculeJeuneNonValidesStartButton simulation={simulation} />;
               }
               return <HiPlay className="text-gray-400" size={50} />;
             },

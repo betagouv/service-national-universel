@@ -40,6 +40,13 @@ export interface SupprimerClasseEngageeParams extends EmailParams {
 
 export interface NouvelleClasseEngageeParams extends SupprimerClasseEngageeParams {}
 
+export interface BasculeJeuneParams extends EmailParams {
+    prenom: string;
+    nom: string;
+    ancienneSessionNom: string;
+    nouvelleSessionNom?: string;
+}
+
 export enum EmailTemplate {
     // CLE
     VERIFIER_CLASSE_EMAIL_ADMIN_CLE = "2084",
@@ -50,4 +57,7 @@ export enum EmailTemplate {
     SUPPRIMER_CLASSE_ENGAGEE = "2331",
     NOUVELLE_CLASSE_ENGAGEE = "2350",
     IMPORT_REFERENTIEL_GENERIQUE = "2324",
+    // BASCULE
+    BASCULE_SEJOUR_ELIGIBLE = "2407",
+    BASCULE_SEJOUR_AVENIR = "2408",
 }

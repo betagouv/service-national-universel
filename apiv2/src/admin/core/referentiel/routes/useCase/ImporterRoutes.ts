@@ -1,9 +1,9 @@
 import { Inject, Injectable } from "@nestjs/common";
 
 import { UseCase } from "@shared/core/UseCase";
-import { ReferentielImportTaskParameters } from "../ReferentielImportTask.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { ReferentielImportTaskParameters } from "../../ReferentielImportTask.model";
 
 @Injectable()
 export class ImporterRoutes implements UseCase<void> {

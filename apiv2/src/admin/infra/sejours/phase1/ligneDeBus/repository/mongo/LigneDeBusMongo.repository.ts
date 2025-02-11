@@ -70,10 +70,10 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         return LigneDeBusMapper.toModels(lignesDeBus);
     }
 
-    async findBySessionIdAndClasseId(sessionId: string, classeId: string): Promise<LigneDeBusModel> {
+    async findBySessionIdAndClasseId(sessionId: string, classeId: string): Promise<LigneDeBusModel | null> {
         const ligneDeBus = await this.ligneDeBusMongooseEntity.findOne({ cohortId: sessionId, classeId });
         if (!ligneDeBus) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            return null;
         }
         return LigneDeBusMapper.toModel(ligneDeBus);
     }

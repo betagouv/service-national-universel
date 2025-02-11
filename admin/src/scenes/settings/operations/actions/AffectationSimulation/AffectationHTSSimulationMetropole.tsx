@@ -28,7 +28,7 @@ export default function AffectationHTSSimulationMetropole({ session }: Affectati
     queryFn: async () => AffectationService.getAffectation(session._id!, "HTS"),
   });
 
-  const isValidSession = session.type === "VOLONTAIRE";
+  const isValidSession = session.type === "VOLONTAIRE"; // HTS
   const isInProgress = affectationStatus && [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(affectationStatus?.simulation?.status as TaskStatus);
 
   return (

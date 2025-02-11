@@ -4,15 +4,23 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "33 20 * * *" # Every day at 20:33
-  
-defaults:
-  run:
-    working-directory: devops/scripts
 
 jobs:
-  test:
+  destroy:
     runs-on: ubuntu-latest
     steps:
+      - name: Unlabel open PRs with deploy label
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/search/issues?q=is:open+is:pr+label:deploy+repo:betagouv/service-national-universel" | jq -r '.items[].labels_url' | sed 's#{/name}#/deploy#g' > prs.txt
+          
+          cat prs.txt | xargs -n 1 curl -X DELETE -H "Authorization: token $GITHUB_TOKEN"
+
+
       - uses: actions/checkout@v4
 
       - name: Use Node.js
@@ -24,4 +32,4 @@ jobs:
         env:
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-        run: node destroy-all-environment.js --apply-changes
+        run: node devops/scripts/destroy-all-environments.js --apply-changes

@@ -15,10 +15,10 @@ import {
     ReferentielImportTaskParameters,
 } from "../routes/ReferentielImportTask.model";
 import {
-    ClasseDesisterXslx,
-    ClasseImportXslx,
+    ClasseDesisterXlsx,
+    ClasseImportXlsx,
     ClasseRapport,
-    DesiterClasseFileValidation,
+    DesisterClasseFileValidation,
     ImportClasseFileValidation,
 } from "./ReferentielClasse.model";
 
@@ -43,14 +43,14 @@ export class ReferentielClasseService {
         mimetype: string;
         auteur: ReferentielImportTaskAuthor;
     }): Promise<TaskModel> {
-        const classesToImport = await this.fileGateway.parseXLS<ClasseImportXslx>(buffer, {
+        const classesToImport = await this.fileGateway.parseXLS<ClasseImportXlsx>(buffer, {
             defval: "",
             sheetName: ImportClasseFileValidation.sheetName,
         });
 
-        const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXslx>(buffer, {
+        const classesToDesister = await this.fileGateway.parseXLS<ClasseDesisterXlsx>(buffer, {
             defval: "",
-            sheetName: DesiterClasseFileValidation.sheetName,
+            sheetName: DesisterClasseFileValidation.sheetName,
         });
 
         let taskType: ReferentielTaskType | null = null;
@@ -64,7 +64,7 @@ export class ReferentielClasseService {
         } else if (classesToImport.length === 0 && classesToDesister.length > 0) {
             taskType = ReferentielTaskType.IMPORT_DESISTER_CLASSES;
             missingColumns = this.referentielService.getMissingColumns(
-                DesiterClasseFileValidation.requiredColumns,
+                DesisterClasseFileValidation.requiredColumns,
                 classesToDesister[0],
             );
         } else if (classesToImport.length > 0 && classesToDesister.length > 0) {
@@ -76,7 +76,7 @@ export class ReferentielClasseService {
             missingColumns = [
                 ...missingColumnsImport,
                 ...this.referentielService.getMissingColumns(
-                    DesiterClasseFileValidation.requiredColumns,
+                    DesisterClasseFileValidation.requiredColumns,
                     classesToDesister[0],
                 ),
             ];
@@ -93,7 +93,7 @@ export class ReferentielClasseService {
         }
 
         const timestamp = this.clockGateway.getNowSafeIsoDate();
-        const folderPath = `${FilePath.CLASSES}/export-${timestamp}`;
+        const folderPath = `${FilePath[ReferentielTaskType.IMPORT_CLASSES]}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,
             mimetype,

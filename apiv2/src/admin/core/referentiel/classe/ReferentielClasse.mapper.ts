@@ -1,14 +1,14 @@
 import {
-    ClasseImportXslx,
+    ClasseImportXlsx,
     ClasseImportModel,
-    ClasseDesisterXslx,
+    ClasseDesisterXlsx,
     ClasseDesisterModel,
 } from "./ReferentielClasse.model";
 
 export class ReferentielClasseMapper {
-    static mapImporterClassesFromFile(classes: ClasseImportXslx[]): ClasseImportModel[] {
+    static mapImporterClassesFromFile(classes: ClasseImportXlsx[]): ClasseImportModel[] {
         return classes.map((classe) => ({
-            classeId: classe["Identifiant de la classe engagée"],
+            classeId: classe["Identifiant de la classe engagée"]?.toLowerCase(),
             cohortCode: classe["Session formule"],
             classeTotalSeats: classe["Effectif de jeunes concernés"],
             centerCode: classe["Désignation du centre"],
@@ -17,7 +17,7 @@ export class ReferentielClasseMapper {
         }));
     }
 
-    static mapDesisterClassesFromFile(classes: ClasseDesisterXslx[]): ClasseDesisterModel[] {
+    static mapDesisterClassesFromFile(classes: ClasseDesisterXlsx[]): ClasseDesisterModel[] {
         return classes.map((classe) => {
             return { classeId: classe["Identifiant de la classe engagée"]?.toLowerCase() };
         });

@@ -1,6 +1,6 @@
 import { ArrayMinSize, IsArray, IsBoolean, IsIn, IsMongoId } from "class-validator";
 
-import { GRADES, region2department, RegionsMetropole, RegionsMetropoleAndCorse } from "snu-lib";
+import { GRADES, region2department, RegionsDromComEtCorse, RegionsMetropole, RegionsMetropoleAndCorse } from "snu-lib";
 
 export class PostSimulationsHtsPayloadDto {
     @IsArray()
@@ -26,6 +26,16 @@ export class PostSimulationsHtsPayloadDto {
 export class PostSimulationsClePayloadDto {
     @IsArray()
     @IsIn(RegionsMetropoleAndCorse.flatMap((region) => region2department[region]), { each: true })
+    @ArrayMinSize(1)
+    departements: string[];
+
+    @IsBoolean()
+    etranger: boolean;
+}
+
+export class PostSimulationsCleDromcomPayloadDto {
+    @IsArray()
+    @IsIn(RegionsDromComEtCorse.flatMap((region) => region2department[region]), { each: true })
     @ArrayMinSize(1)
     departements: string[];
 

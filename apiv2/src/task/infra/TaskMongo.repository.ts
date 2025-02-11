@@ -10,6 +10,11 @@ import { TASK_MONGOOSE_ENTITY, TaskDocument } from "./TaskMongo.provider";
 @Injectable()
 export class TaskRepository implements TaskGateway {
     constructor(@Inject(TASK_MONGOOSE_ENTITY) protected taskMongooseEntity: Model<TaskDocument>) {}
+    // TODO : improve this method
+    async findByMetadata<T, U>(metadata: object): Promise<TaskModel<T, U>[] | []> {
+        const tasks = await this.taskMongooseEntity.find(metadata);
+        return tasks.map((task) => TaskMapper.toModel(task));
+    }
 
     async create(task: CreateTaskModel): Promise<TaskModel> {
         const createdTask = await this.taskMongooseEntity.create(TaskMapper.toEntityCreate(task));

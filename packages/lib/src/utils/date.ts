@@ -163,6 +163,28 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+function checkTime(time1, time2) {
+  const time1Split = time1.split(":");
+  const time2Split = time2.split(":");
+
+  // Check if the hours are equal
+  if (time1Split[0] === time2Split[0]) {
+    // If the hours are equal, check if the minutes in time2 are greater than time1
+    if (time2Split[1] >= time1Split[1]) {
+      return true;
+    } else {
+      return false;
+    }
+  } else {
+    // If the hours are not equal, check if the hours in time2 are greater than time1
+    if (time2Split[0] > time1Split[0]) {
+      return true;
+    } else {
+      return false;
+    }
+  }
+}
+
 export {
   MONTHS,
   formatDay,
@@ -184,4 +206,5 @@ export {
   formatDateForPostGre,
   isNowBetweenDates,
   formatDateTimeZone,
+  checkTime,
 };

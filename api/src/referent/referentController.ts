@@ -107,7 +107,6 @@ import {
   getDepartmentForInscriptionGoal,
   isAdmin,
   isReferentReg,
-  isReferentDep,
   canValidateYoungToLP,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
@@ -120,9 +119,9 @@ import { getCompletionObjectifs } from "../services/inscription-goal";
 import SNUpport from "../SNUpport";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
-import { isAfter } from "date-fns/isAfter";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
+import { handleNotifForYoungWithdrawn } from "../young/youngService";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -675,6 +674,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
+    if (newYoung.status === YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.WITHDRAWN) {
+      const { withdrawnReason } = newYoung;
+      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason);
+      newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
+    }
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
@@ -944,12 +949,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         schoolId: undefined,
         situation: getYoungSituationIfCLE(classe.filiere),
       });
-      if (young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION && classe.cohesionCenterId && classe.sessionId && classe.pointDeRassemblementId) {
-        young.set({
-          hasMeetingInformation: "true",
-          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
-        });
-      }
     } else if (payload.source === YOUNG_SOURCE.VOLONTAIRE) {
       const step2023 = young.hasStartedReinscription ? "reinscriptionStep2023" : "inscriptionStep2023";
       const step2023Value =
@@ -990,8 +989,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     const date = new Date();
     const newNote = {
       note: `
-        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source})${
-          cohortChangeReason && ` pour la raison suivante : ${cohortChangeReason}`
+        Changement de cohorte de ${previousYoung.cohort} (${previousYoung.source || YOUNG_SOURCE.VOLONTAIRE}) à ${young.cohort} (${young.source}) ${
+          cohortChangeReason ? ` pour la raison suivante : ${cohortChangeReason}` : ""
         }.\n${previousEtablissement ? `Etablissement précédent : ${previousEtablissement.name}.` : ""}\n${
           previousClasse ? `Classe précédente : ${previousClasse.uniqueKeyAndId} ${previousClasse.name}.` : ""
         }\n${previousYoung.cohesionCenterId ? `Centre précédent : ${previousYoung.cohesionCenterId}.` : ""}\n${
