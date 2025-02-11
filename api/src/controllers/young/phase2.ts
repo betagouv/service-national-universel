@@ -251,7 +251,14 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
-      statusMilitaryPreparationFiles: Joi.string().required().valid(Object.values(MILITARY_PREPARATION_FILES_STATUS)),
+      statusMilitaryPreparationFiles: Joi.string()
+        .required()
+        .valid(
+          MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION,
+          MILITARY_PREPARATION_FILES_STATUS.WAITING_CORRECTION,
+          MILITARY_PREPARATION_FILES_STATUS.VALIDATED,
+          MILITARY_PREPARATION_FILES_STATUS.REFUSED,
+        ),
     }).validate(
       {
         ...req.params,
