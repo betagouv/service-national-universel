@@ -245,7 +245,7 @@ describe("Referent", () => {
       );
       expect(response.statusCode).toEqual(200);
       expect(young?.status).toEqual("WITHDRAWN");
-      expect(young?.statusPhase1).toEqual("AFFECTED");
+      expect(young?.statusPhase1).toEqual("WAITING_AFFECTATION");
       expect(young?.statusPhase2).toEqual("WAITING_REALISATION");
       expect(young?.statusPhase3).toEqual("WAITING_REALISATION");
     });

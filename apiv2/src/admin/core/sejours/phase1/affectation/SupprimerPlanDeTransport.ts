@@ -96,7 +96,7 @@ export class SupprimerPlanDeTransport {
                 if (!sejour) {
                     this.logger.warn(`🚩 sejour introuvable: ${jeune.sejourId} (jeune: ${jeune.id})`);
                     throw new FunctionalException(
-                        FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                        FunctionalExceptionCode.NOT_ENOUGH_DATA,
                         `sejour non trouvé ${jeune.sejourId} (jeune: ${jeune.id})`,
                     );
                 }
@@ -109,7 +109,7 @@ export class SupprimerPlanDeTransport {
                 jeune.sejourId = undefined;
                 jeune.transportInfoGivenByLocal = undefined;
                 jeune.deplacementPhase1Autonomous = undefined;
-                jeune.cohesionStayPresence = undefined;
+                jeune.presenceArrivee = undefined;
                 jeune.presenceJDM = undefined;
                 jeune.departInform = undefined;
                 jeune.departSejourAt = undefined;

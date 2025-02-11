@@ -221,7 +221,9 @@ export const RegionsHorsMetropoleWithoutCorse = [
   "Martinique",
 ];
 
-export const RegionsHorsMetropole = [...RegionsHorsMetropoleWithoutCorse, "Corse", "Haute-Corse", "Corse-du-Sud"];
+export const RegionsHorsMetropole = [...RegionsHorsMetropoleWithoutCorse, "Corse"];
+
+export const RegionsDromComEtCorse = [...RegionsHorsMetropoleWithoutCorse, "Corse"].filter((region) => !["Saint-Martin", "Wallis-et-Futuna"].includes(region));
 
 export const RegionsCorse = ["Corse", "Haute-Corse", "Corse-du-Sud"];
 

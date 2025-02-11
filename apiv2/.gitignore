@@ -6,3 +6,4 @@ dist/**/*
 **.js
 .env
 **.xlsx*
+!test/**/**/fixtures/*.xlsx

@@ -17,8 +17,8 @@ export default function SimulationHtsResultCell({ simulation }: SimulationHtsRes
 
   return (
     <div className="text-xs leading-4 font-normal">
-      <div>Affectés : {simulationHts.metadata?.results?.jeunesNouvellementAffected ?? "--"}</div>
-      <div>En attente : {simulationHts.metadata?.results?.jeuneAttenteAffectation ?? "--"}</div>
+      <div className="whitespace-nowrap">Affectés : {simulationHts.metadata?.results?.jeunesNouvellementAffected ?? "--"}</div>
+      <div className="whitespace-nowrap">En attente : {simulationHts.metadata?.results?.jeuneAttenteAffectation ?? "--"}</div>
       <div className="flex gap-1 items-center">
         <div>Performance : {simulationHts.metadata?.results?.selectedCost ? formatPourcentage(1 - simulationHts.metadata.results.selectedCost) : "--"}</div>
         <Tooltip id={`selectedCost-${simulationHts.id}`} title="Indicateur de performance de la répartition des jeunes dans les centres." className="flex items-center">

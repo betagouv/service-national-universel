@@ -1,17 +1,20 @@
-import { Inject, Injectable } from "@nestjs/common";
-import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
-import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/SessionMongo.provider";
 
-import { SessionMapper } from "../Session.mapper";
+import { Inject, Injectable } from "@nestjs/common";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { CreateSessionModel, SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+
+import { SESSION_MONGOOSE_ENTITY, SessionDocument } from "../../provider/SessionMongo.provider";
+import { SessionMapper } from "../Session.mapper";
 
 @Injectable()
 export class SessionRepository implements SessionGateway {
     constructor(
         @Inject(SESSION_MONGOOSE_ENTITY) private sesssionMongooseEntity: Model<SessionDocument>,
+        @Inject(ClockGateway) private clockGateway: ClockGateway,
         private readonly cls: ClsService,
     ) {}
     async findBySnuId(snuId: string): Promise<SessionModel | null> {
@@ -31,9 +34,36 @@ export class SessionRepository implements SessionGateway {
     async findById(id: string): Promise<SessionModel> {
         const session = await this.sesssionMongooseEntity.findById(id);
         if (!session) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, `session ${id}`);
+        }
+        return SessionMapper.toModel(session);
+    }
+    async findByName(name: string): Promise<SessionModel> {
+        const session = await this.sesssionMongooseEntity.findOne({ name });
+        if (!session) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         return SessionMapper.toModel(session);
+    }
+
+    async findByGroupIdStatusAndEligibility(
+        status: string,
+        cohortGroupId: string,
+        {
+            dateNaissance,
+            niveauScolaire,
+            departement,
+        }: { dateNaissance: Date; niveauScolaire: string; departement: string },
+    ): Promise<SessionModel[]> {
+        const sessions = await this.sesssionMongooseEntity.find({
+            status,
+            cohortGroupId,
+            "eligibility.zones": departement,
+            "eligibility.schoolLevels": niveauScolaire,
+            "eligibility.bornAfter": { $lte: dateNaissance },
+            "eligibility.bornBefore": { $gte: this.clockGateway.addHours(dateNaissance, -11) },
+        });
+        return SessionMapper.toModels(sessions);
     }
     async update(session: SessionModel): Promise<SessionModel> {
         const sessionEntity = SessionMapper.toEntity(session);

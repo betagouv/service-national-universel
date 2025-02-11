@@ -21,7 +21,7 @@ import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune
 import { FileProvider } from "@shared/infra/File.provider";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { useCaseProvider as referentielUseCaseProvider } from "./infra/referentiel/initProvider/useCase";
+import { referentielUseCaseProviders } from "./infra/referentiel/initProvider/useCase";
 import { AffectationService } from "./core/sejours/phase1/affectation/Affectation.service";
 import { ValiderAffectationHTS } from "./core/sejours/phase1/affectation/ValiderAffectationHTS";
 import { planDeTransportMongoProviders } from "./infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
@@ -38,6 +38,7 @@ import { ClockProvider } from "@shared/infra/Clock.provider";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { referentielServiceProvider } from "./infra/referentiel/initProvider/service";
+import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
 import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
@@ -52,6 +53,15 @@ import { ContactGateway } from "./infra/iam/Contact.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { ValiderAffectationCLE } from "./core/sejours/phase1/affectation/ValiderAffectationCLE";
 import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffectationSelector.service";
+import { AdminTaskInscriptionSelectorService } from "./infra/task/AdminTaskInscriptionSelector.service";
+import { SimulationBasculeJeunes } from "./core/sejours/phase1/inscription/SimulationBasculeJeunes";
+import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
+import { ValiderBasculeJeunesValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesValides";
+import { SimulationAffectationCLEDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
+import { ValiderAffectationCLEDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
+import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/ValiderAffectationCLE.service";
+import { ValiderBasculeJeunesService } from "./core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
+import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
 
 @Module({
     imports: [
@@ -68,6 +78,7 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         ConfigModule,
         TaskModule,
         DatabaseModule,
+        ReferentielModule,
     ],
     providers: [
         Logger,
@@ -100,15 +111,25 @@ import { AdminTaskAffectationSelectorService } from "./infra/task/AdminTaskAffec
         { provide: ClockGateway, useClass: ClockProvider },
         // add use case here
         AffectationService,
+        InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
         SimulationAffectationCLEService,
         SimulationAffectationCLE,
+        SimulationAffectationCLEDromCom,
+        ValiderAffectationCLEService,
         ValiderAffectationHTS,
         ValiderAffectationCLE,
-        ...referentielUseCaseProvider,
+        ValiderAffectationCLEDromCom,
+        ...referentielUseCaseProviders,
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,
+        SimulationBasculeJeunes,
+        ValiderBasculeJeunesService,
+        ValiderBasculeJeunesValides,
+        ValiderBasculeJeunesNonValides,
+        ...referentielServiceProvider,
+        AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
     ],
 })

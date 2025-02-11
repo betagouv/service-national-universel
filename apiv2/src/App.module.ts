@@ -8,6 +8,7 @@ import { AdminModule } from "./admin/Admin.module";
 import { CorrelationIdMiddleware } from "./shared/infra/CorrelationId.middleware.js";
 import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 import { HealthCheckController } from "@infra/HealthCheck.controller";
+import { PlanMarketingModule } from './plan-marketing/plan-marketing.module';
 
 @Module({
     imports: [
@@ -17,6 +18,7 @@ import { HealthCheckController } from "@infra/HealthCheck.controller";
         SentryModule.forRoot(),
         AdminModule,
         QueueModule,
+        PlanMarketingModule,
     ],
     controllers: [HealthCheckController],
     providers: [Logger],

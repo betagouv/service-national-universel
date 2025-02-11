@@ -7,7 +7,7 @@ export interface GetImportsReferentiel extends BasicRoute {
     type?: string;
     name?: string;
     limit?: number;
-    order?: "ASC" | "DESC";
+    sort?: "ASC" | "DESC";
   };
   response: RouteResponseBodyV2<ReferentielImportTaskDto[]>;
 }
