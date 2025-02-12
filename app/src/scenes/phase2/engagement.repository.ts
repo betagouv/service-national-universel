@@ -1,7 +1,9 @@
 import { apiURL } from "@/config";
 import API from "@/services/api";
 import * as FileSaver from "file-saver";
-import { ProgramType } from "snu-lib";
+import { ApplicationType, ContractType, MissionType, ProgramType, StructureType } from "snu-lib";
+
+export type MissionAndApplicationType = MissionType & { application?: ApplicationType; canApply: boolean; message?: string };
 
 export async function fetchPrograms() {
   const res = await fetch(`${apiURL}/program/public/engagements`);
@@ -24,6 +26,12 @@ export async function fetchApplications(youngId) {
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
   return data.map((e) => ({ ...e, engagementType: "mig" }));
+}
+
+export async function updateApplication(payload): Promise<ApplicationType> {
+  const { ok, code, data } = await API.put(`/application`, payload);
+  if (!ok) throw new Error(code);
+  return data;
 }
 
 export async function fetchEquivalences(youngId) {
@@ -80,5 +88,26 @@ export async function fetchMissionsFromApiEngagement(filters, page, size, sort) 
   });
   const { ok, data, error } = await res.json();
   if (!ok) throw error;
+  return data;
+}
+
+export async function fetchMission(id: string): Promise<MissionAndApplicationType> {
+  const { ok, data, code } = await API.get(`/mission/${id}`);
+  if (!ok) throw new Error(code);
+  if (!data) throw new Error("Mission not found");
+  return data;
+}
+
+export async function fetchContract(id: string): Promise<ContractType> {
+  const { ok, data, code } = await API.get(`/contract/${id}`);
+  if (!ok) throw new Error(code);
+  if (!data) throw new Error("Contract not found");
+  return data;
+}
+
+export async function fetchStructure(id: string): Promise<StructureType> {
+  const { ok, data, code } = await API.get(`/structure/${id}`);
+  if (!ok) throw new Error(code);
+  if (!data) throw new Error("Structure not found");
   return data;
 }

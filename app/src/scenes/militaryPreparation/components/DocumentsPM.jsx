@@ -8,6 +8,7 @@ import ModalDocument from "./ModalDocument";
 import ModalInform from "./ModalInfom";
 import useUpdateMPStatus from "../lib/useUpdateMPStatus";
 import plausibleEvent from "@/services/plausible";
+import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib";
 
 export const theme = {
   background: {
@@ -24,7 +25,7 @@ export const theme = {
   },
 };
 
-export default function DocumentsPM({ docRef = null, showHelp = true }) {
+export default function DocumentsPM({ docRef, showHelp = true }) {
   const { young } = useAuth();
   const [modalDocument, setModalDocument] = React.useState({ isOpen: false });
   const [modalInform, setModalInform] = React.useState({ isOpen: false });
@@ -34,7 +35,7 @@ export default function DocumentsPM({ docRef = null, showHelp = true }) {
 
   function handleCorrection() {
     plausibleEvent("Phase2/CTA - PM - Corriger mon dossier");
-    mutate("WAITING_VERIFICATION");
+    mutate(MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION);
   }
 
   return (
