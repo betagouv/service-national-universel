@@ -171,15 +171,15 @@ router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("
       .lean();
 
     const resultSansContact: Array<{
-      Département: any;
-      Région: any;
+      Département: string;
+      Région: string;
       "Email des Référents Départementaux": string;
       "Email des Référents Régionaux": string;
       "Contact convoquation renseigné": string;
     }> = [];
     const resultAvecContact: Array<{
-      Département: any;
-      Région: any;
+      Département: string;
+      Région: string;
       "Email des Référents Départementaux": string;
       "Email des Référents Régionaux": string;
       "Contact convoquation renseigné": string;

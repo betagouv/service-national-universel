@@ -1,9 +1,9 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
-import ContactSimulation from "./ContactSimulation/contactSimulation";
-import BasculeJeuneValides from "./BasculeJeune/BasculeJeuneValides";
-import BasculeJeuneNonValides from "./BasculeJeune/BasculeJeuneNonValides";
+import ContactSimulation from "./Inscription/ExportContactSimulation/ExportContactConvocation";
+import BasculeJeuneValides from "./Inscription/BasculeJeune/BasculeJeuneValides";
+import BasculeJeuneNonValides from "./Inscription/BasculeJeune/BasculeJeuneNonValides";
 
 interface InscriptionSectionProps {
   session: CohortDto;

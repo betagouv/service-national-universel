@@ -10,7 +10,7 @@ interface ContactSimulationProps {
   session: CohortDto;
 }
 
-export default function ContactSimulation({ session }: ContactSimulationProps) {
+export default function ExportContactConvocation({ session }: ContactSimulationProps) {
   const [isInProgress, setIsInProgress] = useState(false);
 
   const handleExport = async () => {
@@ -40,8 +40,8 @@ export default function ContactSimulation({ session }: ContactSimulationProps) {
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <div className="text-sm leading-5 font-bold">Exporter les contacts manquants</div>
-        <Tooltip id="affectation-hts-metropole" title="Récupérer la liste des emails de contacts manquants">
+        <div className="text-sm leading-5 font-bold">Export des contacts de convocation</div>
+        <Tooltip id="export-contact-convocation" title="Récupérer la liste des emails de contacts manquants">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
