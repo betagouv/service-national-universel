@@ -194,8 +194,13 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       await notifyReferentMilitaryPreparationFilesSubmitted(young);
     }
 
-    // Send notifications
-    if (mission.isMilitaryPreparation === "true" && young.statusMilitaryPreparationFiles === "VALIDATED") {
+    // Si c'est une préparation militaire et que le dossier PM est déjà validé, on notifie le superviseur de la structure.
+    // Mais pas si c'est une proposition de mission par un référent, seulement si c'est une candidature spontanée.
+    if (
+      mission.isMilitaryPreparation === "true" &&
+      young.statusMilitaryPreparationFiles === MILITARY_PREPARATION_FILES_STATUS.VALIDATED &&
+      data.status === APPLICATION_STATUS.WAITING_VALIDATION
+    ) {
       await notifySupervisorMilitaryPreparationFilesValidated(data);
     }
 
@@ -209,6 +214,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 router.post("/multiaction/change-status/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const allowedKeys = ["WAITING_VALIDATION", "WAITING_ACCEPTATION", "VALIDATED", "REFUSED", "CANCEL", "IN_PROGRESS", "DONE", "ABANDON", "WAITING_VERIFICATION"];
@@ -302,6 +308,7 @@ router.post("/multiaction/change-status/:key", passport.authenticate("referent",
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
 router.put("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { value, error } = validateUpdateApplication(req.body, req.user);
@@ -351,6 +358,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     application.set(value);
 
     const youngHasAcceptedAProposedMission = originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION;
+    console.log("🚀 ~ router.put ~ originalStatus:", originalStatus);
+    console.log("🚀 ~ router.put ~ application.status:", application.status);
+    console.log("🚀 ~ router.put ~ youngHasAcceptedAProposedMission:", youngHasAcceptedAProposedMission);
 
     if (application.isJvaMission === "true") {
       // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
@@ -587,6 +597,27 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
       emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       params = { ...params, message, cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
+    } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
+      // when it is a new application, there are 2 possibilities
+      if (mission.isMilitaryPreparation === "true") {
+        if (young.statusMilitaryPreparationFiles === "VALIDATED") {
+          emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
+          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        } else {
+          const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
+          emailTo = referentManagerPhase2.map((referent) => ({
+            name: `${referent.firstName} ${referent.lastName}`,
+            email: referent.email,
+          }));
+          template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED;
+          params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+        }
+      } else {
+        emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+        template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
+        params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+      }
     } else if (template === SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION) {
       // when it is a new application, there are 2 possibilities
       if (mission.isMilitaryPreparation === "true") {
