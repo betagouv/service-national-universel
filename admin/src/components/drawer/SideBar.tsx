@@ -9,6 +9,7 @@ import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled } from "snu-lib";
 
 import api from "@/services/api";
 import useDevice from "@/hooks/useDevice";
+import useEnvironment from "@/hooks/useEnvironment";
 import ticketsAction from "@/redux/tickets/actions";
 import { AuthState } from "@/redux/auth/reducer";
 import { TicketsState } from "@/redux/tickets/reducer";
@@ -51,6 +52,7 @@ const SideBar = ({ sessionsList }) => {
   const exactPath = location.pathname;
   const path = location.pathname.split("/")[1];
   const device = useDevice();
+  const { isDevelopment, isCustom, isCi, isPrepoduction, isProduction } = useEnvironment();
 
   //State
   const [open, setOpen] = React.useState(false);
@@ -282,11 +284,16 @@ const SideBar = ({ sessionsList }) => {
   return (
     <div
       className={cx(
-        "sticky flex flex-col inset-y-0 bg-[#25294F] z-40 print:hidden",
+        "sticky flex flex-col inset-y-0  z-40 print:hidden",
         { "w-[250px]": open },
         { "w-[88px]": !open },
         { "top-[5vh] max-h-[95vh]": test },
         { "h-screen max-h-screen": !test },
+        { "bg-[#25294F]": isProduction },
+        { "bg-blue-800": isDevelopment },
+        { "bg-teal-900": isCustom },
+        { "bg-yellow-900": isCi },
+        { "bg-black": isPrepoduction },
       )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} />
