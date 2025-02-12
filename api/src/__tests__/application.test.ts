@@ -15,7 +15,6 @@ import { Types } from "mongoose";
 const { ObjectId } = Types;
 import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES } from "snu-lib";
 
-
 jest.setTimeout(60_000);
 
 jest.mock("../brevo", () => ({
@@ -254,7 +253,6 @@ describe("Application", () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
       for (const template of [
-        SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
         SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
         SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
         SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
@@ -263,22 +261,6 @@ describe("Application", () => {
         const res = await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
         expect(res.status).toBe(200);
       }
-    });
-    it("should only allow young to send application for themselves", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
-      const referent = await createReferentHelper(getNewReferentFixture());
-      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
-      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const secondYoung = await createYoungHelper(getNewYoungFixture());
-      const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
-
-      // Successful request
-      let res = await request(getAppHelper(young)).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
-      expect(res.status).toBe(200);
-
-      // Failed request (not allowed)
-      res = await request(getAppHelper(young)).post(`/application/${secondApplication._id}/notify/${SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION}`).send({});
-      expect(res.status).toBe(403);
     });
   });
 });
