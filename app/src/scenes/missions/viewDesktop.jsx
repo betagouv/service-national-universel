@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -14,8 +14,8 @@ import ApplyButton from "./components/ApplyButton";
 import IconDomain from "./components/IconDomain";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
-import CheckCircle from "../../assets/icons/CheckCircle";
-import XCircle from "../../assets/icons/XCircle";
+import AcceptButton from "./components/AcceptButton";
+import DeclineButton from "./components/DeclineButton";
 import { AiOutlineClockCircle, AiFillClockCircle } from "react-icons/ai";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
@@ -47,7 +47,7 @@ export default function ViewDesktop() {
 
   const history = useHistory();
 
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -457,7 +457,6 @@ export default function ViewDesktop() {
 }
 
 const ApplicationStatus = ({ mission, updateApplication, loading }) => {
-  const young = useSelector((state) => state.Auth.young);
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
   const application = mission?.application;
   const tutor = mission?.tutor;
@@ -561,52 +560,9 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
         <div className="text-center text-xs font-normal leading-none text-gray-500">
           Cette mission vous a été proposée <br /> par votre référent
         </div>
-        <div className="flex items-center gap-3">
-          {!mission.canApply ? (
-            <WithTooltip tooltipText={mission.message}>
-              <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
-                <CheckCircle className="mr-2 h-5 w-5 text-blue-400" />
-                <span className="text-sm font-medium leading-5 text-white">Accepter</span>
-              </button>
-            </WithTooltip>
-          ) : (
-            <button
-              className="group flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
-              disabled={loading}
-              onClick={async () => {
-                try {
-                  if (mission.isMilitaryPreparation === "true") {
-                    if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-                      const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-                        statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
-                      });
-                      if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-                    }
-                    if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
-                      updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-                    } else {
-                      updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
-                    }
-                  } else {
-                    updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-                  }
-                } catch (e) {
-                  console.log(e);
-                  toastr.error("Oups, une erreur est survenue lors de la candidature.");
-                }
-              }}>
-              <CheckCircle className="mr-2 h-5 w-5 text-blue-600 hover:text-blue-500 group-disabled:text-blue-400" />
-              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
-            </button>
-          )}
-
-          <button
-            className="group flex items-center justify-center rounded-lg border-[1px] border-[#fff] px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:border-gray-200 disabled:border-gray-200 disabled:shadow-none"
-            disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
-            <XCircle className="mr-2 h-5 w-5 text-red-500" />
-            <span className="text-sm font-medium leading-5 text-black">Décliner</span>
-          </button>
+        <div className="flex items-center gap-2">
+          <AcceptButton mission={mission} loading={loading} updateApplication={updateApplication} />
+          <DeclineButton loading={loading} updateApplication={updateApplication} />
         </div>
         <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
       </div>
