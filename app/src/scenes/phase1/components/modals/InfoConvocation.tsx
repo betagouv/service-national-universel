@@ -1,27 +1,24 @@
 import React from "react";
 import { FiMail } from "react-icons/fi";
-import { useSelector } from "react-redux";
 import { Modal } from "reactstrap";
 import dayjs from "dayjs";
 import { toastr } from "react-redux-toastr";
-
-import { getParticularitesAcces, getReturnDate, getReturnHour, translate } from "snu-lib";
-
+import { getParticularitesAcces, getReturnHour, translate } from "snu-lib";
+import Loader from "@/components/Loader";
 import api from "@/services/api";
 import { capture } from "@/sentry";
-import { AuthState } from "@/redux/auth/reducer";
+import useAuth from "@/services/useAuth";
 import downloadPDF from "@/utils/download-pdf";
-
+import useAffectationInfo from "../../scenes/affected/utils/useAffectationInfo";
 import Calendar from "@/assets/calendar";
 import ChevronDown from "@/assets/icons/ChevronDown";
 import Download from "@/assets/icons/Download";
 
-export default function InfoConvocation({ isOpen, onCancel, title = "", meetingPoint, session, center, cohort = "" }) {
-  const young = useSelector((state: AuthState) => state.Auth.young) || {};
-
+export default function InfoConvocation({ isOpen, onCancel, title = "" }) {
+  const { young } = useAuth();
+  const { center, meetingPoint, returnDate, isError, isPending } = useAffectationInfo();
   const [selectOpen, setSelectOpen] = React.useState(false);
   const refSelect = React.useRef<HTMLDivElement>(null);
-  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
   const returnHour = getReturnHour(meetingPoint);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
 
@@ -89,6 +86,28 @@ export default function InfoConvocation({ isOpen, onCancel, title = "", meetingP
       return address.join(", ");
     }
   };
+
+  if (isPending) {
+    return (
+      <Modal centered isOpen={isOpen} onCancel={onCancel}>
+        <Loader />
+      </Modal>
+    );
+  }
+
+  if (isError) {
+    return (
+      <Modal centered isOpen={isOpen} onCancel={onCancel}>
+        <div className="flex flex-col items-center justify-center p-4">
+          <div className="text-center text-xl font-medium leading-7 text-gray-900">Une erreur est survenue</div>
+          <p className="text-center mt-4">Impossible de récupérer vos informations de retour de séjour.</p>
+          <button className="mt-10 w-full rounded-lg border-[1px] py-2 text-center text-gray-700" onClick={onCancel}>
+            Fermer
+          </button>
+        </div>
+      </Modal>
+    );
+  }
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
