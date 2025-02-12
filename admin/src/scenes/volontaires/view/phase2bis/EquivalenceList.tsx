@@ -13,7 +13,7 @@ export default function EquivalenceList({ young }: { young: YoungType }) {
   async function getEquivalences() {
     setLoading(true);
     try {
-      const { ok, data } = await API.get(`/young/${young._id.toString()}/phase2/equivalences`);
+      const { ok, data } = await API.get(`/young/${young._id.toString()}/phase2/equivalence`);
       if (ok) setEquivalences(data);
     } catch (e) {
       capture(e);
