@@ -237,7 +237,7 @@ describe("Equivalence Routes", () => {
     });
   });
 
-  describe("GET /equivalences", () => {
+  describe("GET /equivalence", () => {
     it("should return 200 to get all equivalences for a young", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const equivalence = await createMissionEquivalenceHelpers(
@@ -255,7 +255,7 @@ describe("Equivalence Routes", () => {
           files: ["file1.pdf"],
         }),
       );
-      const res = await request(getAppHelper(young)).get(`/young/${young._id}/phase2/equivalences`).query({ id: young._id.toString() });
+      const res = await request(getAppHelper(young)).get(`/young/${young._id}/phase2/equivalence`).query({ id: young._id.toString() });
 
       expect(res.status).toEqual(200);
     });
