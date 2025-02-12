@@ -59,7 +59,7 @@ export function mapTransportType(transportType?: string) {
 }
 
 export const getLinePdrCount = (line) => {
-  return Object.keys(line).filter((e) => e.startsWith("ID PDR")).length;
+  return Object.keys(line).filter((columnName) => columnName.trim().toUpperCase().startsWith("ID PDR")).length;
 };
 
 export const getLinePdrIds = (line) => {
@@ -138,4 +138,26 @@ export const computeMergedBusIds = (lines: Partial<ImportPlanTransportLine>[], e
   });
 
   return mergedBusIds;
+};
+
+export const mapLines = (lines: Array<Record<string, string>>, exceptedColumns: string[]) => {
+  return lines.map((line) => {
+    const mappedLine: { [key: string]: string } = {};
+    for (const exceptedColumnName of exceptedColumns) {
+      const name = Object.keys(line).find((rawColumnName) => normalizeColumnName(rawColumnName) === normalizeColumnName(exceptedColumnName));
+      if (!name) {
+        continue;
+      }
+      mappedLine[exceptedColumnName] = line[name];
+    }
+    return mappedLine;
+  });
+};
+
+const normalizeColumnName = (name) => {
+  return name
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .trim()
+    .toLowerCase();
 };

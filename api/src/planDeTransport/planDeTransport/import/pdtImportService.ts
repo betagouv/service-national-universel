@@ -7,7 +7,7 @@ import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { getLinePdrCount, getLinePdrIds, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime } from "./pdtImportUtils";
+import { getLinePdrCount, getLinePdrIds, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime, mapLines } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -29,16 +29,16 @@ export const validatePdtFile = async (
 }> => {
   // PARSING DU FICHIER
   const workbook = XLSX.readFile(filePath);
-  const worksheet = workbook.Sheets["ALLER-RETOUR"];
-  const lines = XLSX.utils.sheet_to_json<{ [key: string]: string }>(worksheet, { raw: false, defval: null });
+  const worksheetName = Object.keys(workbook.Sheets).find((key) => key.replaceAll(" ", "").includes("ALLER-RETOUR")) || "ALLER-RETOUR";
+  const rawLines = XLSX.utils.sheet_to_json<{ [key: string]: string }>(workbook.Sheets[worksheetName], { raw: false, defval: null });
 
-  if (lines.length < 1) {
+  if (rawLines.length < 1) {
     logger.debug("workbook Sheets 'ALLER-RETOUR' is missing or empty");
-    return { ok: false, code: ERRORS.INVALID_BODY };
+    return { ok: false, code: ERRORS.INVALID_BODY, errors: { "Format fichier": [{ line: -1, error: "L'onglet ALLER-RETOUR est vide ou manquant" }] } };
   }
 
   // Count columns that start with "MATRICULE DU PDR" to know how many PDRs there are.
-  const countPdr = lines.reduce((acc, line) => {
+  const countPdr = rawLines.reduce((acc, line) => {
     const count = getLinePdrCount(line);
     return count > acc ? count : acc;
   }, 0);
@@ -80,6 +80,8 @@ export const validatePdtFile = async (
   const OPTIONAL_COLUMNS = ["LIGNE MIROIR"];
 
   const FIRST_LINE_NUMBER_IN_EXCEL = 2;
+
+  const lines = mapLines(rawLines, [...Object.keys(errors), ...OPTIONAL_COLUMNS]);
 
   //Check columns names
   const columns = Object.keys(lines[0]).filter((col) => !col.includes("__EMPTY"));
@@ -384,8 +386,6 @@ export const validatePdtFile = async (
           const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`]?.toLowerCase(), deletedAt: { $exists: false } });
           if (!pdr) {
             errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
-          } else if ((pdr?.department || "").toLowerCase() !== departmentLookUp[line[`N° DE DEPARTEMENT PDR ${pdrNumber}`]]?.toLowerCase()) {
-            errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_DEPARTEMENT, extra: line[`ID PDR ${pdrNumber}`] });
           }
         } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
           errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
