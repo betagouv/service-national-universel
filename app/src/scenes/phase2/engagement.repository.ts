@@ -27,7 +27,7 @@ export async function fetchApplications(youngId) {
 }
 
 export async function fetchEquivalences(youngId) {
-  const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalences`, {
+  const res = await fetch(`${apiURL}/young/${youngId}/phase2/equivalence`, {
     credentials: "include",
   });
   const { ok, data, error } = await res.json();
@@ -55,7 +55,7 @@ export async function deleteEquivalence(youngId, id) {
 }
 
 export async function fetchEquivalenceFile(youngId, fileName) {
-  const f = await API.get(`/young/${youngId}/phase2/equivalence-file/${fileName}`);
+  const f = await API.get(`/young/${youngId}/phase2/equivalence/file/${fileName}`);
   FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
 }
 

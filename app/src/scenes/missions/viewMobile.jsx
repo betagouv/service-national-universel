@@ -4,13 +4,13 @@ import { BsChevronDown } from "react-icons/bs";
 import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
-import CheckCircle from "../../assets/icons/CheckCircle";
+import AcceptButton from "./components/AcceptButton";
+import DeclineButton from "./components/DeclineButton";
 import ChevronDown from "../../assets/icons/ChevronDown";
 import Download from "../../assets/icons/Download";
-import XCircle from "../../assets/icons/XCircle";
 import rubberStampNotValided from "../../assets/rubberStampNotValided.svg";
 import rubberStampValided from "../../assets/rubberStampValided.svg";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -32,6 +32,7 @@ import { htmlCleaner } from "snu-lib";
 import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
 import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
+import useUpdateMPStatus from "../militaryPreparation/lib/useUpdateMPStatus";
 
 export default function ViewMobile() {
   const [mission, setMission] = useState();
@@ -46,7 +47,7 @@ export default function ViewMobile() {
 
   const history = useHistory();
 
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -465,9 +466,10 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
 );
 
 const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation }) => {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const tutor = mission?.tutor;
   const application = mission?.application;
+  const MPMutation = useUpdateMPStatus();
 
   const refContractButton = React.useRef();
 
@@ -491,29 +493,6 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
-
-  const handleClick = async () => {
-    try {
-      if (mission.isMilitaryPreparation === "true") {
-        if (!["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION", "REFUSED"].includes(young.statusMilitaryPreparationFiles)) {
-          const responseChangeStatsPM = await api.put(`/young/${young._id}/phase2/militaryPreparation/status`, {
-            statusMilitaryPreparationFiles: "WAITING_VERIFICATION",
-          });
-          if (!responseChangeStatsPM.ok) return toastr.error(translate(responseChangeStatsPM?.code), "Oups, une erreur est survenue lors de la candidature.");
-        }
-        if (["VALIDATED"].includes(young.statusMilitaryPreparationFiles)) {
-          updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-        } else {
-          updateApplication(APPLICATION_STATUS.WAITING_VERIFICATION);
-        }
-      } else {
-        updateApplication(APPLICATION_STATUS.WAITING_VALIDATION);
-      }
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oups, une erreur est survenue lors de la candidature.");
-    }
-  };
 
   if (["WAITING_VALIDATION", "WAITING_VERIFICATION", "REFUSED", "CANCEL"].includes(application.status)) {
     return (
@@ -591,28 +570,9 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
         <div className="text-center text-xs font-normal leading-none text-gray-500">
           Cette mission vous a été proposée <br /> par votre référent
         </div>
-        <div className="flex items-center gap-3">
-          {!mission.canApply ? (
-            <button disabled className="group flex items-center justify-center rounded-lg bg-blue-400 px-4 py-2">
-              <CheckCircle className="mr-2 h-5 w-5 text-blue-400 " />
-              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
-            </button>
-          ) : (
-            <button
-              className="group flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
-              disabled={loading}
-              onClick={handleClick}>
-              <CheckCircle className="mr-2 h-5 w-5 text-blue-600 hover:text-blue-500 group-disabled:text-blue-400" />
-              <span className="text-sm font-medium leading-5 text-white">Accepter</span>
-            </button>
-          )}
-          <button
-            className="group flex items-center justify-center rounded-lg border-[1px] border-[#fff] px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:border-gray-200 disabled:border-gray-200 disabled:shadow-none"
-            disabled={loading}
-            onClick={() => updateApplication(APPLICATION_STATUS.CANCEL)}>
-            <XCircle className="mr-2 h-5 w-5 text-red-500" />
-            <span className="text-sm font-medium leading-5 text-black">Décliner</span>
-          </button>
+        <div className="flex items-center gap-2">
+          <AcceptButton mission={mission} updateApplication={updateApplication} loading={loading} />
+          <DeclineButton updateApplication={updateApplication} loading={loading} />
         </div>
         {!mission.canApply ? <div className="text-center text-xs text-red-500">{mission.message}</div> : null}
 
