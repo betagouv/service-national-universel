@@ -10,7 +10,7 @@ import {
 import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createCohortHelper } from "./helpers/cohort";
-import { getNewCohortFixture } from "./fixtures/cohort";
+import getNewCohortFixture from "./fixtures/cohort";
 import { dbConnect, dbClose } from "./helpers/db";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
@@ -77,7 +77,7 @@ describe("Department service", () => {
   describe("Department service export", () => {
     it("should export department service contacts", async () => {
       // Create a cohort
-      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort", eligibility: { zones: ["zone1", "zone2"] } }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test Cohort" }));
 
       await createDepartmentServiceHelper({ department: "zone1", contacts: [{ cohort: "Test Cohort" }] });
       await createDepartmentServiceHelper({ department: "zone2", contacts: [] });
