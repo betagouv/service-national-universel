@@ -30,6 +30,7 @@ export class SejourMapper {
             departement: sejourDocument.department,
             centreCode: sejourDocument.codeCentre,
             centreNom: sejourDocument.nameCentre,
+            sejourSnuIds: sejourDocument.sejourSnuIds,
         };
     }
 
@@ -47,6 +48,7 @@ export class SejourMapper {
             hasPedagoProject: sejourModel.hasPedagoProject,
             cohort: sejourModel.sessionNom,
             cohortId: sejourModel.sessionId,
+            sejourSnuIds: sejourModel.sejourSnuIds,
         };
     }
 }

@@ -15,6 +15,7 @@ export const createSejour = async (sejour?: Partial<SejourModel>) => {
         placesTotal: 15,
         placesRestantes: 15,
         status: "VALIDATED",
+        sejourSnuIds: [],
         ...sejour,
     });
 };
