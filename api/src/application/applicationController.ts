@@ -357,10 +357,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
 
     application.set(value);
 
-    const youngHasAcceptedAProposedMission = originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION && application.status === APPLICATION_STATUS.WAITING_VALIDATION;
-    console.log("🚀 ~ router.put ~ originalStatus:", originalStatus);
-    console.log("🚀 ~ router.put ~ application.status:", application.status);
-    console.log("🚀 ~ router.put ~ youngHasAcceptedAProposedMission:", youngHasAcceptedAProposedMission);
+    const youngHasAcceptedAProposedMission =
+      originalStatus === APPLICATION_STATUS.WAITING_ACCEPTATION &&
+      (application.status === APPLICATION_STATUS.WAITING_VALIDATION || application.status === APPLICATION_STATUS.WAITING_VERIFICATION);
 
     if (application.isJvaMission === "true") {
       // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
@@ -381,6 +380,9 @@ router.put("/", passport.authenticate(["referent", "young"], { session: false, f
     await updateMission(application, req.user);
 
     if (mission.isMilitaryPreparation === "true" && youngHasAcceptedAProposedMission && young.statusMilitaryPreparationFiles !== "VALIDATED") {
+      if (!young.statusMilitaryPreparationFiles) {
+        young.set({ statusMilitaryPreparationFiles: MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION });
+      }
       await notifyReferentMilitaryPreparationFilesSubmitted(young);
     }
 
