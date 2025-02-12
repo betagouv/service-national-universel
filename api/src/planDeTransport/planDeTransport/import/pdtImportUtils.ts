@@ -58,11 +58,19 @@ export function mapTransportType(transportType?: string) {
   return result;
 }
 
-export const getLinePdrCount = (line) => {
+export const getMaxLinePdrCount = (lines: Array<Record<string, string>>) => {
+  const countPdr = lines.reduce((acc, line) => {
+    const count = getLinePdrCount(line);
+    return count > acc ? count : acc;
+  }, 0);
+  return countPdr;
+};
+
+export const getLinePdrCount = (line: Record<string, string>) => {
   return Object.keys(line).filter((columnName) => columnName.trim().toUpperCase().startsWith("ID PDR")).length;
 };
 
-export const getLinePdrIds = (line) => {
+export const getLinePdrIds = (line: Record<string, string>) => {
   const countPdr = getLinePdrCount(line);
   const pdrIds: string[] = [];
   for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {

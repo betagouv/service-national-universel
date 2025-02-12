@@ -2,12 +2,12 @@ import XLSX from "xlsx";
 import mongoose from "mongoose";
 import { logger } from "../../../logger";
 
-import { PDT_IMPORT_ERRORS, departmentLookUp } from "snu-lib";
+import { PDT_IMPORT_ERRORS } from "snu-lib";
 
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { getLinePdrCount, getLinePdrIds, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime, mapLines } from "./pdtImportUtils";
+import { getLinePdrCount, getLinePdrIds, getMaxLinePdrCount, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime, mapLines } from "./pdtImportUtils";
 
 export interface PdtErrors {
   [key: string]: { line: number; error: string; extra?: string }[];
@@ -38,10 +38,7 @@ export const validatePdtFile = async (
   }
 
   // Count columns that start with "MATRICULE DU PDR" to know how many PDRs there are.
-  const countPdr = rawLines.reduce((acc, line) => {
-    const count = getLinePdrCount(line);
-    return count > acc ? count : acc;
-  }, 0);
+  const countPdr = getMaxLinePdrCount(rawLines);
   let maxPdrOnLine = 0;
 
   const errors: PdtErrors = {
@@ -415,7 +412,7 @@ export const validatePdtFile = async (
 export const computeImportSummary = (lines: PdtLine[]) => {
   const countPdr = getLinePdrCount(lines[0]);
   let maxPdrOnLine = 0;
-  for (const line of lines.entries()) {
+  for (const [index, line] of lines.entries()) {
     const currentLinePDRCount = getLinePdrIds(line).length;
     if (currentLinePDRCount > maxPdrOnLine) {
       maxPdrOnLine = currentLinePDRCount;
