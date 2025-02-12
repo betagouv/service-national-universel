@@ -16,7 +16,7 @@ import Calendar from "@/assets/calendar";
 import ChevronDown from "@/assets/icons/ChevronDown";
 import Download from "@/assets/icons/Download";
 
-export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint, session, center, cohort }) {
+export default function InfoConvocation({ isOpen, onCancel, title = "", meetingPoint, session, center, cohort = "" }) {
   const young = useSelector((state: AuthState) => state.Auth.young) || {};
 
   const [selectOpen, setSelectOpen] = React.useState(false);

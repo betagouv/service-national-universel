@@ -20,10 +20,12 @@ import JDMNotDone from "./components/JDMNotDone";
 import NextStep from "./components/NextStep";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
+import Notice from "@/components/ui/alerts/Notice";
+import dayjs from "dayjs";
 
 export default function Done() {
   const { young } = useAuth();
-  const { isCohortNeedJdm } = useCohort();
+  const { cohort, isCohortNeedJdm } = useCohort();
   const [openAttestationButton, setOpenAttestationButton] = React.useState(false);
   const [modalOpen, setModalOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -31,6 +33,8 @@ export default function Done() {
   const [meetingPoint, setMeetingPoint] = React.useState(null);
   const [session, setSession] = React.useState(null);
   const showJDM = young.frenchNationality === "true";
+  const cohortEndDate = dayjs(cohort.dateEnd);
+  const cohortEndDatePlusFifteenDays = cohortEndDate.add(15, "day").format("DD/MM/YYYY");
 
   async function handleClickModal() {
     try {
@@ -48,11 +52,11 @@ export default function Done() {
       setModalOpen(true);
     } catch (e) {
       capture(e);
-      toastr.error(e.message);
+      toastr.error("Erreur", e.message);
     }
   }
 
-  const refAttestationButton = React.useRef();
+  const refAttestationButton = React.useRef<HTMLDivElement>(null);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -83,7 +87,7 @@ export default function Done() {
       });
       setLoading(false);
       if (!ok) throw new Error(translate(code));
-      toastr.success(`Document envoyé à ${young.email}`);
+      toastr.success("Succès", `Document envoyé à ${young.email}`);
     } catch (e) {
       capture(e);
       setLoading(false);
@@ -102,7 +106,7 @@ export default function Done() {
         </div>
 
         <div className="mt-4 flex items-center gap-5">
-          {!isCohortDone(young.cohort, 3) && (
+          {!isCohortDone(cohort, 3) && (
             <>
               <button className="rounded-full border-[1px] border-gray-300 px-3 py-2 text-xs font-medium leading-4 hover:border-gray-500" onClick={handleClickModal}>
                 Mes informations de retour de séjour
@@ -111,45 +115,49 @@ export default function Done() {
             </>
           )}
 
-          <div className="relative" ref={refAttestationButton}>
-            <button
-              disabled={loading}
-              className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:border-blue-500 hover:bg-blue-500 disabled:cursor-wait disabled:opacity-50"
-              onClick={() => setOpenAttestationButton((e) => !e)}>
-              <div className="flex items-center gap-2">
-                <span className="text-xs font-medium leading-4 text-white">Attestation de réalisation phase 1</span>
+          {isCohortDone(cohort, 15) ? (
+            <div className="relative" ref={refAttestationButton}>
+              <button
+                disabled={loading}
+                className="flex w-full items-center justify-between gap-3 rounded-full border-[1px] border-blue-600 bg-blue-600 px-3 py-2 hover:border-blue-500 hover:bg-blue-500 disabled:cursor-wait disabled:opacity-50"
+                onClick={() => setOpenAttestationButton((e) => !e)}>
+                <div className="flex items-center gap-2">
+                  <span className="text-xs font-medium leading-4 text-white">Attestation de réalisation phase 1</span>
+                </div>
+                <ChevronDown className="font-medium text-white" />
+              </button>
+              {/* display options */}
+              <div
+                className={`${
+                  openAttestationButton ? "block" : "hidden"
+                }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
+                <button
+                  key="download"
+                  onClick={() => {
+                    viewAttestation({ uri: "1" });
+                    setOpenAttestationButton(false);
+                  }}>
+                  <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                    <Download className="h-4 w-4 text-gray-400" />
+                    <div>Télécharger</div>
+                  </div>
+                </button>
+                <button
+                  key="email"
+                  onClick={() => {
+                    sendAttestation({ type: "1", template: "certificate" });
+                    setOpenAttestationButton(false);
+                  }}>
+                  <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                    <FiMail className="h-4 w-4 text-gray-400" />
+                    <div>Envoyer par mail</div>
+                  </div>
+                </button>
               </div>
-              <ChevronDown className="font-medium text-white" />
-            </button>
-            {/* display options */}
-            <div
-              className={`${
-                openAttestationButton ? "block" : "hidden"
-              }  absolute right-0 top-[40px] z-50 !min-w-full overflow-hidden rounded-lg bg-white shadow transition lg:!min-w-3/4`}>
-              <button
-                key="download"
-                onClick={() => {
-                  viewAttestation({ uri: "1" });
-                  setOpenAttestationButton(false);
-                }}>
-                <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                  <Download className="h-4 w-4 text-gray-400" />
-                  <div>Télécharger</div>
-                </div>
-              </button>
-              <button
-                key="email"
-                onClick={() => {
-                  sendAttestation({ type: "1", template: "certificate" });
-                  setOpenAttestationButton(false);
-                }}>
-                <div className="group flex cursor-pointer items-center gap-3 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                  <FiMail className="h-4 w-4 text-gray-400" />
-                  <div>Envoyer par mail</div>
-                </div>
-              </button>
             </div>
-          </div>
+          ) : (
+            <Notice>Votre attestation de réalisation de la phase 1 sera disponible le {cohortEndDatePlusFifteenDays}.</Notice>
+          )}
         </div>
       </HomeHeader>
 
