@@ -200,23 +200,23 @@ export default function StepEligibilite() {
       <ProgressBar isReinscription={isLoggedIn} />
       {!isLoggedIn && (
         <Container className="py-[12px] px-[20px] md:pl-[40px] md:pr-[80px] md:py-[30px] flex md:flex-row-reverse gap-5 md:gap-8 border-b md:border-none">
-          <div>
-            <p className="m-0 text-xl font-bold">Classes engagées</p>
+          <div className="pl-12">
+            <p className="m-0 text-xl font-bold">Message Important</p>
             <p className="m-0 text-sm sm:mr-4 md:mr-0">
-              Si vous envisagez une participation au SNU dans le cadre des classes engagées, vous ne pouvez pas vous inscrire ici. Veuillez attendre que votre référent classe vous
-              indique la procédure à suivre.
+              Les inscriptions sont ouvertes pour les volontaires résidant en Corse et dans une région ou un département d’Outremer, les sessions organisées pour les volontaires
+              des autres régions sont complètes.
             </p>
-            <a
+            {/* <a
               className="text-sm text-[#000091]"
               rel="noreferrer noopener"
               target="blank"
               href={`${knowledgebaseURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
               En savoir plus →
-            </a>
+            </a> */}
           </div>
-          <div className="flex-none w-16 md:w-auto">
+          {/* <div className="flex-none w-16 md:w-auto">
             <img src={School} alt="" className="md:w-20" />
-          </div>
+          </div> */}
         </Container>
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${knowledgebaseURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
