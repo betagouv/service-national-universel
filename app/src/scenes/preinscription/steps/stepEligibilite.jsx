@@ -12,7 +12,6 @@ import { PREINSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "../../../utils/naviga
 import { Container } from "@snu/ds/dsfr";
 
 import IconFrance from "../../../assets/IconFrance";
-import School from "../../../assets/school.png";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
@@ -206,17 +205,7 @@ export default function StepEligibilite() {
               Les inscriptions sont ouvertes pour les volontaires résidant en Corse et dans une région ou un département d’Outremer, les sessions organisées pour les volontaires
               des autres régions sont complètes.
             </p>
-            {/* <a
-              className="text-sm text-[#000091]"
-              rel="noreferrer noopener"
-              target="blank"
-              href={`${knowledgebaseURL}/base-de-connaissance/je-suis-volontaire-classes-engagees-comment-minscrire`}>
-              En savoir plus →
-            </a> */}
           </div>
-          {/* <div className="flex-none w-16 md:w-auto">
-            <img src={School} alt="" className="md:w-20" />
-          </div> */}
         </Container>
       )}
       <DSFRContainer title="Vérifiez votre éligibilité au SNU" supportLink={`${knowledgebaseURL}/base-de-connaissance/${bdcUri}`} supportEvent={`Phase0/aide ${uri} - eligibilite`}>
