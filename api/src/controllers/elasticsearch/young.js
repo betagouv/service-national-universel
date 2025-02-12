@@ -10,7 +10,7 @@ const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
 
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
-const { StructureModel, ApplicationModel, SessionPhase1Model, YoungModel, CohesionCenterModel, MissionModel } = require("../../models");
+const { StructureModel, ApplicationModel, SessionPhase1Model, EtablissementModel, CohesionCenterModel, MissionModel } = require("../../models");
 const { getCohortNamesEndAfter } = require("../../utils/cohort");
 const { populateYoungExport } = require("./populate/populateYoung");
 const { addMonths } = require("date-fns");
@@ -126,49 +126,59 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
       });
     }
   }
-  const isCLE = await YoungModel.exists({
-    source: "CLE",
-    classeId: { $exists: true, $ne: null },
-  });
 
-  if (!isCLE) {
-    if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
-      contextFilters.push({ terms: { "department.keyword": user.department } });
-    }
-    if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
-      const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
-      if (sessionPhase1.length === 0) {
-        contextFilters.push({ terms: { "department.keyword": user.department } });
-      } else {
-        contextFilters.push({
-          bool: {
-            should: [
-              { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-              { terms: { "department.keyword": user.department } },
-            ],
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+    const etablissementsInDepartment = await EtablissementModel.find({ department: user.department }, { _id: 1 });
+    const etablissementIds = etablissementsInDepartment.map((e) => e._id.toString());
+
+    const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
+
+    contextFilters.push({
+      bool: {
+        should: [
+          {
+            bool: {
+              must: [{ terms: { "source.keyword": ["VOLONTAIRE"] } }, { terms: { "department.keyword": [user.department] } }],
+            },
           },
-        });
-      }
+          {
+            bool: {
+              must: [{ terms: { "source.keyword": ["CLE"] } }, { terms: { "etablissementId.keyword": etablissementIds } }],
+            },
+          },
+          sessionPhase1.length === 0
+            ? { terms: { "department.keyword": [user.department] } }
+            : {
+                bool: {
+                  should: [
+                    { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
+                    { terms: { "department.keyword": [user.department] } },
+                  ],
+                },
+              },
+        ],
+      },
+    });
+  }
+
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+    contextFilters.push({ terms: { "department.keyword": user.department } });
+  }
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
+    const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
+    if (sessionPhase1.length === 0) {
+      contextFilters.push({ terms: { "department.keyword": user.department } });
+    } else {
+      contextFilters.push({
+        bool: {
+          should: [
+            { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
+            { terms: { "department.keyword": user.department } },
+          ],
+        },
+      });
     }
   }
-  // if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
-  //   contextFilters.push({ terms: { "department.keyword": user.department } });
-  // }
-  // if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
-  //   const sessionPhase1 = await SessionPhase1Model.find({ department: { $in: user.department } });
-  //   if (sessionPhase1.length === 0) {
-  //     contextFilters.push({ terms: { "department.keyword": user.department } });
-  //   } else {
-  //     contextFilters.push({
-  //       bool: {
-  //         should: [
-  //           { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-  //           { terms: { "department.keyword": user.department } },
-  //         ],
-  //       },
-  //     });
-  //   }
-  // }
 
   // Visitors are limited to their region.
   if (user.role === ROLES.VISITOR) {
@@ -516,6 +526,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
   } catch (error) {
     capture(error);
+    console.log(error)
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
