@@ -14,6 +14,7 @@ const { validateId } = require("../utils/validator");
 const { getReferentManagerPhase2 } = require("../utils");
 const { getTransporter } = require("../utils");
 const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
+const { getCentersByIds } = require("./cohesionCenterService");
 
 /**
  * @deprecated center is now imported from SI-SNU
@@ -335,7 +336,7 @@ router.get("/young/:youngId", passport.authenticate(["young"], { session: false,
 
 /**
  * @deprecated center is now imported from SI-SNU
- */import { getCentersByIds } from './cohesionCenterService';
+ */
 
 //TODO: remove this route
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
