@@ -335,7 +335,8 @@ router.get("/young/:youngId", passport.authenticate(["young"], { session: false,
 
 /**
  * @deprecated center is now imported from SI-SNU
- */
+ */import { getCentersByIds } from './cohesionCenterService';
+
 //TODO: remove this route
 router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -459,6 +460,25 @@ router.post("/export-presence", passport.authenticate("referent", { session: fal
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.post("/getMany", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+  try {
+    const { ids } = req.body;
+
+    const centers = await getCentersByIds(ids);
+    return res.status(200).send({ ok: true, data: centers });
+  } catch (error) {
+    if (error.message.includes("Centers not found")) {
+      return res.status(404).send({
+        ok: false,
+        code: ERRORS.NOT_FOUND,
+        message: error.message,
+      });
+    }
+    capture(error);
+    res.status(500).send({ ok: false, code: error.message });
   }
 });
 

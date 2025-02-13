@@ -33,11 +33,14 @@ export class FunctionalException implements HttpError {
 export type { CohortsRoutes } from "./cohort";
 export type { CohortGroupRoutes } from "./cohortGroup";
 export type { ClassesRoutes } from "./cle/classe";
+export type { CohesionCenterRoutes } from "./cohesionCenter";
+export type { EtablissementsRoutes } from "./cle/etablissement";
 export type { InscriptionGoalsRoutes } from "./inscriptiongoal";
 export type { PreinscriptionRoutes } from "./preinscription";
 export type { AffectationRoutes } from "./phase1/affectation";
 export type { ReferentielRoutes } from "./referentiel";
 export type { ReferentRoutes } from "./iam/referent";
+export type { ReferentsRoutes } from "./cle/referent";
 export type { FilterLabelRoutes } from "./filterLabel";
 
 export * from "./phase1";

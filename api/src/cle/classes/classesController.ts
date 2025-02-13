@@ -1,14 +1,15 @@
 import express from "express";
 import passport from "passport";
-import { UserRequest } from "../../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import { UpdateReferentClasse } from "../classe/classeService";
 import { capture } from "../../sentry";
 import { isSuperAdmin } from "snu-lib";
 import { ERRORS } from "../../utils";
-import { updateReferentsForMultipleClasses } from "./classesService";
+import { getClassesByIds, updateReferentsForMultipleClasses } from "./classesService";
 import { readCSVBuffer } from "../../services/fileService";
 import fileUpload from "express-fileupload";
-import { updateReferentsClassesSchema } from "./classesValidator";
+import { GetClassesByIdsSchema, updateReferentsClassesSchema } from "./classesValidator";
+import { ClassesRoutes } from "snu-lib/src";
 
 const router = express.Router();
 
@@ -65,4 +66,35 @@ router.put(
     }
   },
 );
+
+router.post(
+  "/",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req: RouteRequest<ClassesRoutes["GetMany"]>, res: RouteResponse<ClassesRoutes["GetMany"]>) => {
+    try {
+      const { error, value: payload } = GetClassesByIdsSchema.payload.validate(req.body, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const ids = payload.ids;
+      const classes = await getClassesByIds(ids);
+
+      return res.status(200).send({ ok: true, data: classes });
+    } catch (error) {
+      if (error.message.includes("Classes not found")) {
+        return res.status(404).send({
+          ok: false,
+          code: ERRORS.NOT_FOUND,
+          message: error.message,
+        });
+      }
+
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
+
 export default router;

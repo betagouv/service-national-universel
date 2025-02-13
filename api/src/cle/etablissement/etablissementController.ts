@@ -23,13 +23,16 @@ import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { startSession, withTransaction, endSession } from "../../mongo";
-import { UserRequest } from "../../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import { idSchema } from "../../utils/validator";
 import { sendTemplate } from "../../brevo";
 import { buildUniqueClasseKey } from "../classe/classeService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { mapEtablissementFromAnnuaireToEtablissement } from "./etablissementMapper";
+import { getEtablissementsByIds } from "./etablissementService";
+import { EtablissementsRoutes } from "snu-lib/src";
+import { GetEtablissementsByIdsSchema } from "./etablissementValidator";
 
 const router = express.Router();
 
@@ -291,6 +294,35 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.post(
+  "/getMany",
+  passport.authenticate("referent", { session: false, failWithError: true }),
+  async (req: RouteRequest<EtablissementsRoutes["GetMany"]>, res: RouteResponse<EtablissementsRoutes["GetMany"]>) => {
+    try {
+      const { error, value: payload } = GetEtablissementsByIdsSchema.payload.validate(req.body, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const ids = payload.ids;
+      const etablissements = await getEtablissementsByIds(ids);
+
+      return res.status(200).send({ ok: true, data: etablissements });
+    } catch (error) {
+      if (error.message.includes("Etablissements not found")) {
+        return res.status(404).send({
+          ok: false,
+          code: ERRORS.NOT_FOUND,
+          message: error.message,
+        });
+      }
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 function toReferentDto(referent: any): ReferentDto {
   return {

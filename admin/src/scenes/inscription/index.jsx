@@ -7,8 +7,8 @@ import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
-import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
-import { canInviteYoung, getDepartmentNumber, translateCniExpired, translateYoungSource } from "snu-lib";
+import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
+import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -27,6 +27,7 @@ import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 import useClass from "../classe/utils/useClass";
 import useFilterLabels from "../volontaires/useFilterLabels";
+import { Button } from "@snu/ds/admin";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -234,6 +235,7 @@ export default function Inscription() {
                 <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
               </Link>
             ) : null}
+            {isSuperAdmin(user) ? <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" /> : null}
             <ExportComponent
               title="Exporter les inscriptions"
               exportTitle="Volontaires"

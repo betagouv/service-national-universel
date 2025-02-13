@@ -6,6 +6,8 @@ export function accessControlMiddleware(allowedRoles: (typeof ROLES)[keyof typeo
   return (req: UserRequest, res: Response, next: NextFunction) => {
     const user = req.user;
 
+    console.log("user", user);
+
     if (!(allowedRoles?.includes(user?.role) || isSuperAdmin(user))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
