@@ -87,27 +87,7 @@ export default function InfoConvocation({ isOpen, onCancel, title = "" }) {
     }
   };
 
-  if (isPending) {
-    return (
-      <Modal centered isOpen={isOpen} onCancel={onCancel}>
-        <Loader />
-      </Modal>
-    );
-  }
-
-  if (isError) {
-    return (
-      <Modal centered isOpen={isOpen} onCancel={onCancel}>
-        <div className="flex flex-col items-center justify-center p-4">
-          <div className="text-center text-xl font-medium leading-7 text-gray-900">Une erreur est survenue</div>
-          <p className="text-center mt-4">Impossible de récupérer vos informations de retour de séjour.</p>
-          <button className="mt-10 w-full rounded-lg border-[1px] py-2 text-center text-gray-700" onClick={onCancel}>
-            Fermer
-          </button>
-        </div>
-      </Modal>
-    );
-  }
+  if (isPending || isError) return <Loader />;
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
