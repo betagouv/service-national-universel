@@ -3,6 +3,7 @@ import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
 import Unlock from "../../../../assets/icons/Unlock";
 import AttestationButton from "./components/AttestationButton";
+import AttestationNotice from "./components/AttestationNotice";
 import InfoConvocation from "../../components/modals/InfoConvocation";
 import { isCohortDone } from "../../../../utils/cohorts";
 import hero from "../../../../assets/hero/phase1.png";
@@ -13,16 +14,12 @@ import JDMNotDone from "./components/JDMNotDone";
 import NextStep from "./components/NextStep";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import Notice from "@/components/ui/alerts/Notice";
-import dayjs from "dayjs";
 
 export default function Done() {
   const { young } = useAuth();
   const { cohort, isCohortNeedJdm } = useCohort();
   const [modalOpen, setModalOpen] = React.useState(false);
   const showJDM = young.frenchNationality === "true";
-  const cohortEndDate = dayjs(cohort.dateEnd);
-  const cohortEndDatePlusFifteenDays = cohortEndDate.add(15, "day").format("DD/MM/YYYY");
 
   async function handleClickModal() {
     setModalOpen(true);
@@ -35,7 +32,7 @@ export default function Done() {
       <HomeHeader title={title} img={hero}>
         <div className="mt-3 ">
           <p className="text-sm leading-relaxed text-gray-500">Vous avez réalisé votre séjour de cohésion.</p>
-          <p className="text-sm  leading-relaxed text-gray-500">Bravo pour votre participation à cette aventure unique !</p>
+          <p className="text-sm leading-relaxed text-gray-500">Bravo pour votre participation à cette aventure unique !</p>
         </div>
 
         <div className="mt-4 flex items-center gap-5">
@@ -48,7 +45,7 @@ export default function Done() {
             </>
           )}
 
-          {isCohortDone(cohort, 15) ? <AttestationButton /> : <Notice>Votre attestation de réalisation de la phase 1 sera disponible le {cohortEndDatePlusFifteenDays}.</Notice>}
+          {isCohortDone(cohort, 15) ? <AttestationButton /> : <AttestationNotice />}
         </div>
       </HomeHeader>
 
