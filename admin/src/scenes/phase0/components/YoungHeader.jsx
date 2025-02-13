@@ -60,6 +60,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const history = useHistory();
   const statusOptions = getStatusOptions();
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
+  const { mutate } = useMutation({ mutationFn: (payload) => updateYoung(young._id, payload) });
 
   function getStatusOptions() {
     if (young) {
@@ -93,15 +94,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       return [];
     }
   }
-
-  const { mutate } = useMutation({
-    mutationFn: (payload) => updateYoung(young._id, payload),
-    onSuccess: async (data) => {
-      await notifyYoungStatusChanged(data, young.status);
-      onChange && onChange();
-      toastr.success("Succès", "Mis à jour!");
-    },
-  });
 
   const setViewedNoteParPhase = (phase) => () => {
     setVieweNotes(getNotesByPhase(phase));
@@ -172,7 +164,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       historic: [...young.historic, { phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note }],
     };
 
-    mutate(payload);
+    mutate(payload, {
+      onSuccess: async (data) => {
+        await notifyYoungStatusChanged(data, young.status);
+        onChange && onChange();
+        toastr.success("Mis à jour!", "");
+      },
+    });
   }
 
   const getNotesByPhase = (phase) => {

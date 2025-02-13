@@ -19,7 +19,7 @@ import {
 import { sendTemplate } from "../brevo";
 import { YoungDocument, YoungModel, ReferentDocument, ReferentModel, ClasseModel, SessionPhase1Model } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
-
+import { getCcOfYoung } from "../utils";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
@@ -238,6 +238,7 @@ export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReaso
     await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+      cc: getCcOfYoung(young),
     });
   } catch (e) {
     capture(e);
