@@ -19,7 +19,7 @@ import {
 import { sendTemplate } from "../brevo";
 import { YoungDocument, YoungModel, ReferentDocument, ReferentModel, ClasseModel, SessionPhase1Model } from "../models";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
-import { getCcOfYoung } from "../utils";
+import { getCcOfYoung, isReferent } from "../utils";
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
@@ -186,7 +186,7 @@ export const mightAddInProgressStatus = async (young: YoungDocument, user: UserD
   }
 };
 
-export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReason) {
+export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, actor) {
   const oldStatusPhase1 = young.statusPhase1;
 
   // We notify the ref dep and the young
@@ -235,7 +235,9 @@ export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReaso
       }
     }
 
-    await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
+    const template = isReferent(actor) ? SENDINBLUE_TEMPLATES.young.WITHDRAWN_BY_REFERENT : SENDINBLUE_TEMPLATES.young.WITHDRAWN;
+
+    await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
       cc: getCcOfYoung(young),
