@@ -82,7 +82,7 @@ export const updatePDRForLine = async (
     { fromUser: user },
   );
 
-  if (shouldSendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
+  if (shouldSendEmailCampaign) {
     await sendEmailCampaign(ligneBusId, newMeetingPointId, cohort);
   }
 
