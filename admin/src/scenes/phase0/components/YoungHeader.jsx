@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
@@ -7,9 +7,7 @@ import {
   canValidateYoungToLP,
   canViewEmailHistory,
   canViewNotes,
-  isCle,
   ROLES,
-  SENDINBLUE_TEMPLATES,
   translate,
   translateInscriptionStatus,
   WITHRAWN_REASONS,
@@ -46,6 +44,8 @@ import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
+import { useMutation } from "@tanstack/react-query";
+import { notifyYoungStatusChanged, updateYoung } from "../utils/service";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -58,10 +58,10 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const [confirmModal, setConfirmModal] = useState(null);
   const [viewedNotes, setVieweNotes] = useState([]);
   const history = useHistory();
-  const [statusOptions, setStatusOptions] = useState([]);
+  const statusOptions = getStatusOptions();
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
 
-  useEffect(() => {
+  function getStatusOptions() {
     if (young) {
       let options = [];
       if (user.role === ROLES.ADMIN) {
@@ -88,11 +88,20 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       //referent can withdraw a young from every status except withdrawn
       if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && young.status !== "WITHDRAWN") options.push(YOUNG_STATUS.WITHDRAWN);
       options = [...new Set(options)];
-      setStatusOptions(options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) })));
+      return options.map((opt) => ({ value: opt, label: translateInscriptionStatus(opt) }));
     } else {
-      setStatusOptions([]);
+      return [];
     }
-  }, [young]);
+  }
+
+  const { mutate } = useMutation({
+    mutationFn: (payload) => updateYoung(young._id, payload),
+    onSuccess: async (data) => {
+      await notifyYoungStatusChanged(data, young.status);
+      onChange && onChange();
+      toastr.success("Succès", "Mis à jour!");
+    },
+  });
 
   const setViewedNoteParPhase = (phase) => () => {
     setVieweNotes(getNotesByPhase(phase));
@@ -145,74 +154,25 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       } else {
         setWithdrawn({ ...withdrawn, error: null });
       }
-      await changeStatus(confirmModal.type, { withdrawnReason: withdrawn.reason, withdrawnMessage: withdrawn.message });
+      await changeStatus(confirmModal.type, withdrawn.reason, withdrawn.message);
     } else {
       await changeStatus(confirmModal.type);
     }
   };
 
-  // ! Fonction à revoir ! Si le call API échoue le statut est qd mm changé en front et il faut un F5 pour voir le vrai statut
-  async function changeStatus(status, values = {}) {
-    const prevStatus = young.status;
-    if (status === "WITHDRAWN") {
-      young.historic.push({
-        phase,
-        userName: `${user.firstName} ${user.lastName}`,
-        userId: user._id,
-        status,
-        note: WITHRAWN_REASONS.find((r) => r.value === values?.withdrawnReason)?.label + " " + values?.withdrawnMessage,
-      });
-    } else {
-      young.historic.push({ phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note: values?.note });
-    }
-    young.status = status; // FIXME: immutable
-    const now = new Date();
-    young.lastStatusAt = now.toISOString();
-    if (status === "WITHDRAWN" && (values?.withdrawnReason || values?.withdrawnMessage)) {
-      young.withdrawnReason = values?.withdrawnReason;
-      young.withdrawnMessage = values?.withdrawnMessage || "";
-    }
-    if (status === "WAITING_CORRECTION" && values?.note) young.inscriptionCorrectionMessage = values?.note;
-    if (status === "REFUSED" && values?.note) young.inscriptionRefusedMessage = values?.note;
-    if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION) young.phase = YOUNG_PHASE.CONTINUE;
-    try {
-      // we decided to let the validated youngs in the INSCRIPTION phase
-      // referents use the export and need ALL the youngs of the current year
-      // we'll pass every youngs currently in INSCRIPTION in COHESION_STAY once the campaign is done (~20 april 2021)
+  async function changeStatus(status, withdrawnReason, withdrawnMessage) {
+    const note = status === YOUNG_STATUS.WITHDRAWN ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : undefined;
 
-      // if (status === YOUNG_STATUS.VALIDATED && young.phase === YOUNG_PHASE.INSCRIPTION) {
-      //   young.phase = YOUNG_PHASE.COHESION_STAY;
-      // }
+    const payload = {
+      status,
+      lastStatusAt: new Date().toISOString(),
+      withdrawnReason: status === YOUNG_STATUS.WITHDRAWN ? withdrawnReason : undefined,
+      withdrawnMessage: status === YOUNG_STATUS.WITHDRAWN ? withdrawnMessage : undefined,
+      phase: status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION ? YOUNG_PHASE.CONTINUE : undefined,
+      historic: [...young.historic, { phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note }],
+    };
 
-      const { lastStatusAt, withdrawnMessage, phase, inscriptionCorrectionMessage, inscriptionRefusedMessage, withdrawnReason } = young;
-
-      const { ok, code } = await api.put(`/referent/young/${young._id}`, {
-        status: young.status,
-        lastStatusAt,
-        withdrawnMessage,
-        phase,
-        inscriptionCorrectionMessage,
-        inscriptionRefusedMessage,
-        withdrawnReason,
-      });
-      if (!ok) return toastr.error("Une erreur s'est produite :", translate(code));
-
-      const validationTemplate = isCle(young) ? SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE : SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED;
-
-      if (status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INSCRIPTION) {
-        if (prevStatus === "WITHDRAWN") await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED}`);
-        else await api.post(`/young/${young._id}/email/${validationTemplate}`);
-      }
-      if (status === YOUNG_STATUS.WAITING_LIST) {
-        await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_LIST}`);
-      }
-
-      onChange && onChange();
-      toastr.success("Mis à jour!");
-    } catch (e) {
-      console.log(e);
-      toastr.error("Oups, une erreur est survenue :", translate(e.code));
-    }
+    mutate(payload);
   }
 
   const getNotesByPhase = (phase) => {
