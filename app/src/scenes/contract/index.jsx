@@ -9,7 +9,7 @@ import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
 import Badge from "../../components/Badge";
-import { APPLICATION_STATUS_COLORS, formatDateFR, htmlCleaner } from "../../utils";
+import { APPLICATION_STATUS_COLORS, formatDateFRTimezoneUTC, htmlCleaner } from "../../utils";
 
 export default function Index() {
   const [context, setContext] = useState(null);
@@ -983,7 +983,7 @@ const ContractContainer = styled.div`
 `;
 
 const ContractField = ({ name, context, type }) => {
-  if (type === "date" && context[name]) return <SuperSpan> {formatDateFR(context[name]) || "…"} </SuperSpan>;
+  if (type === "date" && context[name]) return <SuperSpan> {formatDateFRTimezoneUTC(context[name]) || "…"} </SuperSpan>;
   return (
     <span>
       {" "}
