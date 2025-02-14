@@ -15,11 +15,12 @@ RUN --mount=type=bind,src=api,target=/tmp/api \
     --mount=type=bind,src=apiv2,target=/tmp/apiv2 \
     --mount=type=bind,src=admin,target=/tmp/admin \
     --mount=type=bind,src=app,target=/tmp/app \
+    --mount=type=bind,src=patches,target=/tmp/patches \
     --mount=type=bind,src=packages,target=/tmp/packages \
     --mount=type=bind,src=package.json,target=/tmp/package.json \
     --mount=type=bind,src=package-lock.json,target=/tmp/package-lock.json \
     --mount=type=bind,src=turbo.json,target=/tmp/turbo.json \
-    turbo prune --docker --cwd /tmp --out-dir /build app admin api apiv2
+    turbo prune --docker --cwd /tmp --out-dir /build app admin api apiv2 && cp -fr /tmp/patches /build/full/
 
 
 FROM base AS builder
@@ -75,6 +76,7 @@ COPY --from=builder /build/api/node_modules/ api/node_modules/
 COPY --from=builder /build/api/package.json api/
 
 COPY --from=builder /build/package.json ./
+COPY --from=builder /build/patches/ patches/
 COPY --from=builder /build/node_modules/ node_modules/
 
 
