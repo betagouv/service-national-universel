@@ -21,6 +21,7 @@ import {
     ClasseRapport,
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
+import { Transactional } from "@nestjs-cls/transactional";
 
 @Injectable()
 export class ImporterClasses implements UseCase<ClasseRapport[]> {
@@ -66,6 +67,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         return report;
     }
 
+    @Transactional()
     private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {
         let classe = await this.classeGateway.findById(classeImport.classeId);
         if (!classe) {
