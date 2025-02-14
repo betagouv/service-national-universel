@@ -944,12 +944,18 @@ export class SimulationAffectationHTSService {
         return {
             jeunes,
             stats: [
-                "jeunes probablement hors zones : " + probHorsZone,
-                "          -> Liste des départements hors zones : " +
+                "          dont jeunes probablement hors zones : " + probHorsZone,
+                "             -> Liste des départements hors zones : " +
                     departmentHortZone.map(formatDepartement).join(", "),
-                "jeunes pas de ligne disponible pour centre(s) " + centresNames.join(", ") + " : " + pasDeligne,
-                "jeunes pas de centre disponible pour ligne(s) " + lignesNames.join(", ") + " : " + pasDecentre,
-                "jeunes non affectés pour problèmes de places : " + limite,
+                "          dont jeunes pas de ligne disponible pour centre(s) " +
+                    centresNames.join(", ") +
+                    " : " +
+                    pasDeligne,
+                "          dont jeunes pas de centre disponible pour ligne(s) " +
+                    lignesNames.join(", ") +
+                    " : " +
+                    pasDecentre,
+                "          dont jeunes non affectés pour problèmes de places : " + limite,
             ],
         };
     }
@@ -1153,21 +1159,28 @@ export class SimulationAffectationHTSService {
         }));
 
         const summary = [
+            "Nombre de jeunes à affecter : " + jeunesList.length,
             "Nombre de jeunes affectés : " + jeunesNouvellementAffectedList.length,
-            "En attente d'affectation : " + jeuneAttenteAffectationList.length,
-            "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
+            "          dont affectés en amont : " + jeunesDejaAffectedList.length,
+            "En attente d'affectation : " + jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length,
+            "          dont intradep : " + jeuneIntraDepartementList.length,
             ...infoNonAffecetes.stats,
-            "Changement de département : " +
-                changementDepartements
-                    .map(
-                        ({ origine, destination }) =>
-                            `${formatDepartement(origine)} -> ${[
-                                ...new Set(destination.map((dest) => dest.departement)),
-                            ]
-                                .map(formatDepartement)
-                                .join("-")}`,
-                    )
-                    .join("; \n"),
+            "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
+            ...(changementDepartements.length > 0
+                ? [
+                      "Changement de département : " +
+                          changementDepartements
+                              .map(
+                                  ({ origine, destination }) =>
+                                      `${formatDepartement(origine)} -> ${[
+                                          ...new Set(destination.map((dest) => dest.departement)),
+                                      ]
+                                          .map(formatDepartement)
+                                          .join("-")}`,
+                              )
+                              .join("; \n"),
+                  ]
+                : []),
             ...(changementDepartementsErreur.length > 0
                 ? ["Erreurs changement de département : " + changementDepartementsErreur.join(".\n")]
                 : []),
