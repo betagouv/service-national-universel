@@ -52,7 +52,7 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModel(jeune);
     }
 
-    async findBySessionIdStatusNiveauScolairesAndDepartements(
+    async findBySessionIdStatusNiveauScolairesAndDepartementsCible(
         sessionId: string,
         status: string,
         niveauScolaires: string[],
@@ -62,7 +62,12 @@ export class JeuneRepository implements JeuneGateway {
             cohortId: sessionId,
             status,
             grade: { $in: niveauScolaires },
-            department: { $in: departements },
+            $or: [
+                { department: { $in: departements }, schoolDepartment: { $in: departements } }, // scolarisé dans sa zone de résidence
+                { department: { $in: departements }, schoolDepartment: { $exists: false } }, // non scolarisé
+                { department: { $nin: departements }, schoolDepartment: { $in: departements } }, // HZR
+                { department: { $in: departements }, schoolCountry: { $not: /^FRANCE$i/ } }, // etranger
+            ],
         });
         return JeuneMapper.toModels(jeunes);
     }

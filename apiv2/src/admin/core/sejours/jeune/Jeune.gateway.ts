@@ -4,7 +4,7 @@ export interface JeuneGateway {
     findAll(): Promise<JeuneModel[]>;
     findById(id: string): Promise<JeuneModel>;
     findByIds(ids: string[]): Promise<JeuneModel[]>;
-    findBySessionIdStatusNiveauScolairesAndDepartements(
+    findBySessionIdStatusNiveauScolairesAndDepartementsCible(
         sessionId: string,
         status: string,
         niveauScolaires: string[],
