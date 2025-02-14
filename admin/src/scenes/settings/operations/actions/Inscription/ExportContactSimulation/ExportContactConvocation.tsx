@@ -5,7 +5,7 @@ import { CohortDto } from "snu-lib";
 import API from "@/services/api";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-
+import { DepartmentService } from "@/services/departmentService";
 interface ContactSimulationProps {
   session: CohortDto;
 }
@@ -16,7 +16,7 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
   const handleExport = async () => {
     setIsInProgress(true);
     try {
-      const data = await API.get(`/department-service-goal/${session._id}/DepartmentServiceContact/export`);
+      const data = await DepartmentService.exportContacts(session._id);
 
       const { resultSansContact, resultAvecContact, cohortName } = data;
 
