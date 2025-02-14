@@ -16,7 +16,7 @@ exports.handler = async () => {
     const sevenDaysBefore = subDays(today, 7);
 
     try {
-      const cohorts = await CohortModel.find({ name: /2024/ });
+      const cohorts = await CohortModel.find({ name: new RegExp(`${new Date().getFullYear()}`) });
       const cursor = await YoungModel.find({
         $or: [
           {
