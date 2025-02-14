@@ -20,7 +20,7 @@ RUN --mount=type=bind,src=api,target=/tmp/api \
     --mount=type=bind,src=package.json,target=/tmp/package.json \
     --mount=type=bind,src=package-lock.json,target=/tmp/package-lock.json \
     --mount=type=bind,src=turbo.json,target=/tmp/turbo.json \
-    turbo prune --docker --cwd /tmp --out-dir /build app admin api apiv2 && cp -fr /tmp/patches /build/full/
+    turbo prune --docker --cwd /tmp --out-dir /build app admin api apiv2 && cp -fr /tmp/patches /build/json/
 
 
 FROM base AS builder
