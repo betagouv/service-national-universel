@@ -10,7 +10,3 @@ export interface ExportContactsRoute extends BasicRoute {
     cohortName: string;
   }>;
 }
-
-export type DepartmentServiceRoutes = {
-  ExportContacts: ExportContactsRoute;
-};

@@ -2,10 +2,13 @@ import React, { useState } from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import { Button, Tooltip } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
-import API from "@/services/api";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import { DepartmentService } from "@/services/departmentService";
+import { DepartmentServiceRoutes } from "snu-lib";
+import { useMutation } from "@tanstack/react-query";
+import { toastr } from "react-redux-toastr";
+
 interface ContactSimulationProps {
   session: CohortDto;
 }
@@ -13,11 +16,14 @@ interface ContactSimulationProps {
 export default function ExportContactConvocation({ session }: ContactSimulationProps) {
   const [isInProgress, setIsInProgress] = useState(false);
 
-  const handleExport = async () => {
-    setIsInProgress(true);
-    try {
-      const data = await DepartmentService.exportContacts(session._id);
-
+  const mutation = useMutation<DepartmentServiceRoutes["ExportContacts"]["params"]>({
+    mutationFn: async () => {
+      return await DepartmentService.exportContacts({ sessionId: session._id });
+    },
+    onMutate: () => {
+      setIsInProgress(true);
+    },
+    onSuccess: (data) => {
       const { resultSansContact, resultAvecContact, cohortName } = data;
 
       const workbook = XLSX.utils.book_new();
@@ -30,12 +36,17 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
       const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
       const blob = new Blob([excelBuffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8" });
       FileSaver.saveAs(blob, `${cohortName}_export_MissingContact.xlsx`);
-    } catch (error) {
+
+      toastr.success("Export réussi", "Le fichier a été téléchargé avec succès", { timeOut: 5000 });
+    },
+    onError: (error) => {
       console.error("Erreur lors du téléchargement :", error);
-    } finally {
+      toastr.error("Erreur", "Une erreur est survenue lors du téléchargement", { timeOut: 5000 });
+    },
+    onSettled: () => {
       setIsInProgress(false);
-    }
-  };
+    },
+  });
 
   return (
     <div className="flex items-center justify-between px-4">
@@ -47,7 +58,7 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
       </div>
       <div className="flex gap-2">
-        <Button title="Exporter les contacts" onClick={handleExport} loading={isInProgress} disabled={isInProgress} />
+        <Button title="Exporter les contacts" onClick={() => mutation.mutate()} loading={isInProgress} disabled={isInProgress} />
       </div>
     </div>
   );

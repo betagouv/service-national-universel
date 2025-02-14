@@ -4,10 +4,13 @@ import Joi from "joi";
 import { canCreateOrUpdateDepartmentService, canViewDepartmentService, department2region, ROLES } from "snu-lib";
 import { capture } from "../sentry";
 import { DepartmentServiceModel, ReferentModel, CohortModel } from "../models";
+import { DepartementServiceRoutes } from "snu-lib";
 import { ERRORS, isYoung, isReferent } from "../utils";
 import { validateDepartmentService } from "../utils/validator";
 import { serializeDepartmentService, serializeArray } from "../utils/serializer";
-import { UserRequest } from "./request";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { UserRequest, RouteRequest, RouteResponse } from "./request";
 
 const router = express.Router();
 
@@ -147,75 +150,80 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   }
 });
 
-router.get("/:cohortId/DepartmentServiceContact/export", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({ cohortId: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+router.get(
+  "/:cohortId/DepartmentServiceContact/export",
+  accessControlMiddleware([ROLES.ADMIN]),
+  requestValidatorMiddleware({ params: Joi.object({ cohortId: Joi.string().required() }) }),
+  async (req: RouteRequest<DepartementServiceRoutes["Export"]>, res: RouteResponse<DepartementServiceRoutes["Export"]>) => {
+    try {
+      const { error, value } = Joi.object({ cohortId: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const cohortDocument = await CohortModel.findById(value.cohortId);
-    if (!cohortDocument) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND, error: "Cohorte introuvable" });
+      const cohortDocument = await CohortModel.findById(value.cohortId);
+      if (!cohortDocument) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND, error: "Cohorte introuvable" });
 
-    const cohortName = cohortDocument.name;
-    const services = await DepartmentServiceModel.find({ department: { $in: cohortDocument.eligibility.zones } }).lean();
+      const cohortName = cohortDocument.name;
+      const services = await DepartmentServiceModel.find({ department: { $in: cohortDocument.eligibility.zones } }).lean();
 
-    const twoWeeksAgo = new Date();
-    twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
+      const twoWeeksAgo = new Date();
+      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
 
-    const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).lean();
-    const referentsDep = await ReferentModel.find({
-      role: ROLES.REFERENT_DEPARTMENT,
-      lastLoginAt: { $gte: twoWeeksAgo },
-      subRole: { $nin: "manager_phase2" },
-    })
-      .sort({ lastLoginAt: -1 })
-      .lean();
+      const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).lean();
+      const referentsDep = await ReferentModel.find({
+        role: ROLES.REFERENT_DEPARTMENT,
+        lastLoginAt: { $gte: twoWeeksAgo },
+        subRole: { $nin: "manager_phase2" },
+      })
+        .sort({ lastLoginAt: -1 })
+        .lean();
 
-    const resultSansContact: Array<{
-      Département: string;
-      Région: string;
-      "Email des Référents Départementaux": string;
-      "Email des Référents Régionaux": string;
-      "Contact convoquation renseigné": string;
-    }> = [];
-    const resultAvecContact: Array<{
-      Département: string;
-      Région: string;
-      "Email des Référents Départementaux": string;
-      "Email des Référents Régionaux": string;
-      "Contact convoquation renseigné": string;
-    }> = [];
+      const resultSansContact: Array<{
+        Département: string;
+        Région: string;
+        "Email des Référents Départementaux": string;
+        "Email des Référents Régionaux": string;
+        "Contact convoquation renseigné": string;
+      }> = [];
+      const resultAvecContact: Array<{
+        Département: string;
+        Région: string;
+        "Email des Référents Départementaux": string;
+        "Email des Référents Régionaux": string;
+        "Contact convoquation renseigné": string;
+      }> = [];
 
-    for (const service of services) {
-      const refsRegion = referentsRegion.filter((r) => r.region === department2region[service.department ?? ""]).slice(0, 2);
-      const refsDep = referentsDep.filter((r) => service.department!.some((dep) => dep === r.department)).slice(0, 4);
-      const contacts = service?.contacts;
-      const contact = contacts?.find((c) => c.cohort === cohortName);
+      for (const service of services) {
+        const refsRegion = referentsRegion.filter((r) => r.region === department2region[service.department ?? ""]).slice(0, 2);
+        const refsDep = referentsDep.filter((r) => service.department!.some((dep) => dep === r.department)).slice(0, 4);
+        const contacts = service?.contacts;
+        const contact = contacts?.find((c) => c.cohort === cohortName);
 
-      const row = {
-        Département: service.department,
-        Région: department2region[service.department ?? ""] || "N/A",
-        "Email des Référents Départementaux": refsDep.map((r) => r.email).join("; "),
-        "Email des Référents Régionaux": refsRegion.map((r) => r.email).join("; "),
-        "Contact convoquation renseigné": contact ? "OUI" : "NON",
-      };
+        const row = {
+          Département: service.department,
+          Région: department2region[service.department ?? ""] || "N/A",
+          "Email des Référents Départementaux": refsDep.map((r) => r.email).join("; "),
+          "Email des Référents Régionaux": refsRegion.map((r) => r.email).join("; "),
+          "Contact convoquation renseigné": contact ? "OUI" : "NON",
+        };
 
-      if (!contact) {
-        resultSansContact.push(row);
-      } else {
-        resultAvecContact.push(row);
+        if (!contact) {
+          resultSansContact.push(row);
+        } else {
+          resultAvecContact.push(row);
+        }
       }
+
+      // Trier les résultats par région
+      resultSansContact.sort((a, b) => a.Région.localeCompare(b.Région));
+      resultAvecContact.sort((a, b) => a.Région.localeCompare(b.Région));
+
+      return res.json({ resultSansContact, resultAvecContact, cohortName });
+    } catch (error) {
+      capture(error);
+      return res.status(500).json({ error: "Erreur serveur" });
     }
-
-    // Trier les résultats par région
-    resultSansContact.sort((a, b) => a.Région.localeCompare(b.Région));
-    resultAvecContact.sort((a, b) => a.Région.localeCompare(b.Région));
-
-    return res.json({ resultSansContact, resultAvecContact, cohortName });
-  } catch (error) {
-    capture(error);
-    return res.status(500).json({ error: "Erreur serveur" });
-  }
-});
+  },
+);
 
 router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {

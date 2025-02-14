@@ -1,5 +1,6 @@
-import { buildRequest } from "@/utils/buildRequest";
 import { DepartmentServiceRoutes } from "snu-lib";
+
+import { buildRequest } from "@/utils/buildRequest";
 
 const DepartmentService = {
   exportContacts: async ({ sessionId }: DepartmentServiceRoutes["ExportContacts"]["params"]) => {
