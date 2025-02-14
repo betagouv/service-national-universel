@@ -14,6 +14,7 @@ import {
     ClasseRapport,
     DesisterClasseFileValidation,
 } from "../ReferentielClasse.model";
+import { Transactional } from "@nestjs-cls/transactional";
 Injectable();
 export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
     constructor(
@@ -45,6 +46,8 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
 
         return report;
     }
+
+    @Transactional()
     private async processClasse(classeToDesister: ClasseDesisterModel): Promise<ClasseDesisterRapport> {
         if (!classeToDesister.classeId) {
             return {
