@@ -520,6 +520,10 @@ function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
+function isHeadCenter(user: UserRoles) {
+  return user?.role === ROLES.HEAD_CENTER;
+}
+
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
 
 const FORCE_DISABLED_ASSIGN_COHESION_CENTER = false;
@@ -1236,6 +1240,7 @@ export {
   isChefEtablissement,
   isCoordinateurEtablissement,
   isReferentClasse,
+  isHeadCenter,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,

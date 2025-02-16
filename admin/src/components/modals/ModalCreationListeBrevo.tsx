@@ -2,22 +2,24 @@ import React, { useCallback } from "react";
 import { Button, Modal } from "@snu/ds/admin";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useForm, Controller } from "react-hook-form";
+import { RecipientType } from "@/hooks/useBrevoRecipients";
 
 interface ModalCreationListeBrevoProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (data: BrevoListData) => void;
+  isLoadingProcess: boolean;
   youngCountFiltered: number;
 }
 
 export interface BrevoListData {
   name: string;
   campaignId: string;
-  recipients: string[];
+  recipients: RecipientType[];
 }
 
 interface Recipient {
-  id: string;
+  id: RecipientType;
   label: string;
   column: "left" | "right";
 }
@@ -33,7 +35,7 @@ const RECIPIENTS: Recipient[] = [
 
 const DEFAULT_SELECTED_RECIPIENTS = ["jeunes", "representants"] as const;
 
-export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, youngCountFiltered }: ModalCreationListeBrevoProps) => {
+export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingProcess = false, youngCountFiltered }: ModalCreationListeBrevoProps) => {
   const {
     control,
     handleSubmit,
@@ -51,7 +53,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, youngCount
   const recipients = watch("recipients");
 
   const toggleRecipient = useCallback(
-    (recipientId: string) => {
+    (recipientId: RecipientType) => {
       const currentRecipients = recipients;
       const newRecipients = currentRecipients.includes(recipientId) ? currentRecipients.filter((id) => id !== recipientId) : [...currentRecipients, recipientId];
       setValue("recipients", newRecipients);
@@ -154,8 +156,8 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, youngCount
       }
       footer={
         <div className="flex items-center justify-between gap-6">
-          <Button title="Fermer" type="secondary" className="flex-1 justify-center" onClick={onClose} />
-          <Button title="Envoyer la liste de diffusion" onClick={onSubmitForm} className="flex-1" />
+          <Button title="Fermer" type="secondary" className="flex-1 justify-center" onClick={onClose} disabled={isLoadingProcess} />
+          <Button title="Envoyer la liste de diffusion" onClick={onSubmitForm} className="flex-1" loading={isLoadingProcess} />
         </div>
       }
     />

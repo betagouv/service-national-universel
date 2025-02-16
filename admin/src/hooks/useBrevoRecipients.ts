@@ -1,230 +1,260 @@
 import { useMemo, useState } from "react";
-import { QueryObserverResult, useQuery } from "@tanstack/react-query";
-import { ClasseType, EtablissementType, ROLES, RouteResponseBody, SessionPhase1Type, YoungType } from "snu-lib";
-import { BrevoRecipientsService } from "@/services/brevoRecipientsService";
+import { useQuery } from "@tanstack/react-query";
+import {
+  YoungType,
+  isChefEtablissement,
+  isCoordinateurEtablissement,
+  isReferentClasse,
+  isHeadCenter,
+  ClasseType,
+  EtablissementType,
+  CohesionCenterType,
+  SessionPhase1Type,
+  PointDeRassemblementType,
+  LigneBusType,
+  formatDateFR,
+  LigneToPointType,
+} from "snu-lib";
+import { BrevoRecipientsService, FiltersYoungsForExport } from "@/services/brevoRecipientsService";
 
-type RecipientType = "jeunes" | "referents" | "chefs-etablissement" | "representants" | "chefs-centres" | "administrateurs";
+export type RecipientType = "jeunes" | "referents" | "chefs-etablissement" | "representants" | "chefs-centres" | "administrateurs";
 
-interface Recipient {
-  firstName: string;
-  lastName: string;
-  email: string;
-  cohort?: string;
+export interface BrevoRecipient {
   type: RecipientType;
+  PRENOM: string;
+  NOM: string;
+  PRENOMVOLONTAIRE: string;
+  NOMVOLONTAIRE: string;
+  EMAIL: string;
+  COHORT?: string;
+  CENTRE?: string;
+  VILLECENTRE?: string;
+  PDR_ALLER?: string;
+  PDR_ALLER_ADRESSE?: string;
+  PDR_ALLER_VILLE?: string;
+  DATE_ALLER?: string;
+  HEURE_ALLER?: string;
+  PDR_RETOUR?: string;
+  PDR_RETOUR_VILLE?: string;
+  PDR_RETOUR_ADRESSE?: string;
+  DATE_RETOUR?: string;
+  HEURE_RETOUR?: string;
 }
 
-type QueryResult = Promise<
-  | QueryObserverResult<RouteResponseBody<ClasseType[]>, Error>
-  | QueryObserverResult<RouteResponseBody<SessionPhase1Type[]>, Error>
-  | QueryObserverResult<RouteResponseBody<EtablissementType[]>, Error>
->;
+type YoungCustomType = YoungType & {
+  classe: ClasseType;
+  etablissement: EtablissementType;
+  center: CohesionCenterType;
+  sessionPhase1: SessionPhase1Type;
+  meetingPoint: PointDeRassemblementType;
+  ligneToPoint: LigneToPointType;
+  bus: LigneBusType;
+};
 
-export const useBrevoRecipients = (youngs: YoungType[]) => {
+const fillCommonFields = (young: YoungCustomType): Omit<BrevoRecipient, "type" | "PRENOM" | "NOM" | "EMAIL"> => {
+  return {
+    COHORT: young.cohort,
+    CENTRE: young.center.name,
+    VILLECENTRE: young.center.city,
+    PRENOMVOLONTAIRE: young.firstName!,
+    NOMVOLONTAIRE: young.lastName!,
+    PDR_ALLER: young.meetingPoint.name,
+    PDR_ALLER_ADRESSE: young.meetingPoint.address,
+    PDR_ALLER_VILLE: young.meetingPoint.city,
+    DATE_ALLER: formatDateFR(young.bus.departuredDate),
+    HEURE_ALLER: young.ligneToPoint.departureHour,
+    PDR_RETOUR: young.meetingPoint.name,
+    PDR_RETOUR_VILLE: young.meetingPoint.address,
+    PDR_RETOUR_ADRESSE: young.meetingPoint.city,
+    DATE_RETOUR: formatDateFR(young.bus.returnDate),
+    HEURE_RETOUR: young.ligneToPoint.returnHour,
+  };
+};
+
+export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
   const [isProcessing, setIsProcessing] = useState(false);
-  const [selectedRecipientTypes, setSelectedRecipientTypes] = useState<RecipientType[]>([]);
-
-  // --- Préparation des IDs ---
-  const uniqueIds = useMemo(() => {
-    const ids = {
-      classIds: new Set<string>(),
-      sessionIds: new Set<string>(),
-      establishmentIds: new Set<string>(),
-    };
-
-    youngs.forEach((young) => {
-      if (young.classeId) ids.classIds.add(young.classeId);
-      if (young.sessionPhase1Id) ids.sessionIds.add(young.sessionPhase1Id);
-      if (young.etablissementId) ids.establishmentIds.add(young.etablissementId);
-    });
-
-    return ids;
-  }, [youngs]);
-
-  // --- Requêtes ---
-  // Classes
-  const classesQuery = useQuery({
-    queryKey: ["classes", Array.from(uniqueIds.classIds)],
-    queryFn: () => BrevoRecipientsService.getClassesByIds([...uniqueIds.classIds]),
-    enabled: isProcessing && selectedRecipientTypes.includes("referents") && uniqueIds.classIds.size > 0,
-  });
-
-  // Sessions pour les chefs de centre
-  const sessionsQuery = useQuery({
-    queryKey: ["sessions", Array.from(uniqueIds.sessionIds)],
-    queryFn: () => BrevoRecipientsService.getSessionsPhase1ByIds([...uniqueIds.sessionIds]),
-    enabled: isProcessing && selectedRecipientTypes.includes("chefs-centres") && uniqueIds.sessionIds.size > 0,
-  });
-
-  // Établissements pour les chefs d'établissement et coordinateurs
-  const establishmentsQuery = useQuery({
-    queryKey: ["establishments", Array.from(uniqueIds.establishmentIds)],
-    queryFn: () => BrevoRecipientsService.getEtablissementsByIds([...uniqueIds.establishmentIds]),
-    enabled: isProcessing && (selectedRecipientTypes.includes("chefs-etablissement") || selectedRecipientTypes.includes("administrateurs")) && uniqueIds.establishmentIds.size > 0,
-  });
+  const [youngs, setYoungs] = useState<YoungCustomType[]>([]);
 
   // Collecter tous les IDs de référents nécessaires
   const referentIds = useMemo(() => {
     const ids = new Set<string>();
 
-    // Référents de classe
-    classesQuery.data?.data?.forEach((c) => c.referentClasseIds?.forEach((id) => ids.add(id)));
-
-    // Chefs de centre
-    sessionsQuery.data?.data?.forEach((s) => {
-      if (s.headCenterId) ids.add(s.headCenterId);
-    });
-
-    // Chefs d'établissement et coordinateurs
-    establishmentsQuery.data?.data?.forEach((e) => {
-      e.referentEtablissementIds?.forEach((id) => ids.add(id));
-      e.coordinateurIds?.forEach((id) => ids.add(id));
+    youngs.forEach((young) => {
+      // Référents de classe
+      young.classe?.referentClasseIds?.forEach((id) => ids.add(id));
+      // Chefs d'établissement
+      young.etablissement?.referentEtablissementIds?.forEach((id) => ids.add(id));
+      // Coordinateurs CLE
+      young.etablissement?.coordinateurIds?.forEach((id) => ids.add(id));
+      // Chefs de centre
+      if (young.sessionPhase1?.headCenterId) {
+        ids.add(young.sessionPhase1.headCenterId);
+      }
     });
 
     return ids;
-  }, [classesQuery.data, sessionsQuery.data, establishmentsQuery.data]);
+  }, [youngs]);
 
-  // Récupération de tous les référents
-  const referentsQuery = useQuery({
+  // Récupération des référents
+  const { data: referents, isLoading: isLoadingReferents } = useQuery({
     queryKey: ["referents", Array.from(referentIds)],
     queryFn: () => BrevoRecipientsService.getReferentsByIds([...referentIds]),
-    enabled: isProcessing && referentIds.size > 0,
+    enabled: referentIds.size > 0,
+    refetchOnWindowFocus: false,
   });
 
-  const processRecipients = async (selectedTypes: RecipientType[]): Promise<Recipient[]> => {
-    setSelectedRecipientTypes(selectedTypes);
+  const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[]) => {
+    const missingData = youngs.some((young) => {
+      if (selectedTypes.includes("referents") && (!young.classe?.referentClasseIds || young.classe.referentClasseIds.length === 0)) {
+        console.error(`Referents manquants pour la classe ${young.classe?.name || "inconnue"}`);
+        return `Referents manquants pour la classe ${young.classe?.name || "inconnue"}`;
+      }
+
+      if (selectedTypes.includes("chefs-etablissement") && (!young.etablissement?.referentEtablissementIds || young.etablissement.referentEtablissementIds.length === 0)) {
+        console.error(`Chef d'établissement manquant pour l'établissement ${young.etablissement?.name || "inconnu"}`);
+        return `Chef d'établissement manquant pour l'établissement ${young.etablissement?.name || "inconnu"}`;
+      }
+
+      if (selectedTypes.includes("administrateurs") && (!young.etablissement?.coordinateurIds || young.etablissement.coordinateurIds.length === 0)) {
+        console.error(`Coordinateurs manquants pour l'établissement ${young.etablissement?.name || "inconnu"}`);
+        return `Coordinateurs manquants pour l'établissement ${young.etablissement?.name || "inconnu"}`;
+      }
+
+      if (selectedTypes.includes("chefs-centres") && !young.sessionPhase1Id) {
+        console.error(`Session manquante pour le jeune ${young.firstName} ${young.lastName}`);
+        return `Session manquante pour le jeune ${young.firstName} ${young.lastName}`;
+      }
+
+      return false;
+    });
+
+    if (missingData) {
+      throw new Error("Données manquantes pour certains destinataires sélectionnés");
+    }
+  };
+
+  const processRecipients = async (selectedTypes: RecipientType[], filters: FiltersYoungsForExport): Promise<BrevoRecipient[]> => {
     setIsProcessing(true);
 
-    // Refetch des données nécessaires
-    const queries: QueryResult[] = [];
-    if (selectedTypes.includes("referents")) queries.push(classesQuery.refetch());
-    if (selectedTypes.includes("chefs-centres")) queries.push(sessionsQuery.refetch());
-    if (selectedTypes.includes("chefs-etablissement") || selectedTypes.includes("administrateurs")) {
-      queries.push(establishmentsQuery.refetch());
-    }
+    try {
+      const youngs = await BrevoRecipientsService.getFilteredYoungsForExport(filters, tab);
 
-    if (queries.length > 0) {
-      await Promise.all(queries);
-      if (referentIds.size > 0) await referentsQuery.refetch();
-    }
+      // Validation des données selon les types sélectionnés
+      validateData(youngs, selectedTypes);
 
-    const recipientsMap = new Map<string, Recipient>();
+      setYoungs(youngs);
+      const recipientsMap = new Map<string, BrevoRecipient>();
+      const referentsMap = new Map(referents?.data?.map((r) => [r._id, r]));
 
-    // Création des Maps pour accès rapide
-    const classesMap = new Map(classesQuery.data?.data?.map((c) => [c._id, c]));
-    const sessionsMap = new Map(sessionsQuery.data?.data?.map((s) => [s._id, s]));
-    const establishmentsMap = new Map(establishmentsQuery.data?.data?.map((e) => [e._id, e]));
-    const referentsMap = new Map(referentsQuery.data?.data?.map((r) => [r._id, r]));
-
-    // Traitement des destinataires
-    youngs.forEach((young) => {
-      // Jeunes
-      if (selectedTypes.includes("jeunes")) {
-        recipientsMap.set(young.email, {
-          firstName: young.firstName!,
-          lastName: young.lastName!,
-          email: young.email,
-          cohort: young.cohort,
-          type: "jeunes",
-        });
-      }
-
-      // Représentants légaux
-      if (selectedTypes.includes("representants")) {
-        if (young.parent1Email) {
-          recipientsMap.set(young.parent1Email, {
-            firstName: young.parent1FirstName || "",
-            lastName: young.parent1LastName || "",
-            email: young.parent1Email,
-            type: "representants",
+      // Une seule boucle pour traiter tous les types
+      youngs.forEach((young: YoungCustomType) => {
+        // Jeunes
+        if (selectedTypes.includes("jeunes")) {
+          recipientsMap.set(young.email, {
+            type: "jeunes",
+            PRENOM: young.firstName!,
+            NOM: young.lastName!,
+            EMAIL: young.email,
+            ...fillCommonFields(young),
           });
         }
-        if (young.parent2Email) {
-          recipientsMap.set(young.parent2Email, {
-            firstName: young.parent2FirstName || "",
-            lastName: young.parent2LastName || "",
-            email: young.parent2Email,
-            type: "representants",
-          });
-        }
-      }
 
-      // Référents de classe
-      if (selectedTypes.includes("referents") && young.classeId) {
-        const classData = classesMap.get(young.classeId);
-        if (classData) {
-          classData.referentClasseIds.forEach((refId) => {
-            const referent = referentsMap.get(refId);
-            if (referent?.role === ROLES.REFERENT_CLASSE) {
-              recipientsMap.set(referent.email, {
-                firstName: referent.firstName!,
-                lastName: referent.lastName!,
-                email: referent.email,
-                type: "referents",
-              });
-            }
-          });
-        }
-      }
-
-      // Chefs de centre
-      if (selectedTypes.includes("chefs-centres") && young.sessionPhase1Id) {
-        const session = sessionsMap.get(young.sessionPhase1Id);
-        if (session?.headCenterId) {
-          const headCenter = referentsMap.get(session.headCenterId);
-          if (headCenter?.role === ROLES.HEAD_CENTER) {
-            recipientsMap.set(headCenter.email, {
-              firstName: headCenter.firstName!,
-              lastName: headCenter.lastName!,
-              email: headCenter.email,
-              type: "chefs-centres",
+        // Représentants légaux
+        if (selectedTypes.includes("representants")) {
+          if (young.parent1Email) {
+            recipientsMap.set(young.parent1Email, {
+              PRENOM: young.parent1FirstName || "",
+              NOM: young.parent1LastName || "",
+              EMAIL: young.parent1Email,
+              type: "representants",
+              ...fillCommonFields(young),
+            });
+          }
+          if (young.parent2Email) {
+            recipientsMap.set(young.parent2Email, {
+              PRENOM: young.parent2FirstName || "",
+              NOM: young.parent2LastName || "",
+              EMAIL: young.parent2Email,
+              type: "representants",
+              ...fillCommonFields(young),
             });
           }
         }
-      }
 
-      // Chefs d'établissement
-      if (selectedTypes.includes("chefs-etablissement") && young.etablissementId) {
-        const establishment = establishmentsMap.get(young.etablissementId);
-        if (establishment) {
-          establishment.referentEtablissementIds.forEach((refId) => {
+        // Référents de classe
+        if (selectedTypes.includes("referents") && young.classe?.referentClasseIds) {
+          young.classe.referentClasseIds.forEach((refId) => {
             const referent = referentsMap.get(refId);
-            if (referent?.subRole === "referent_etablissement") {
-              recipientsMap.set(referent.email, {
-                firstName: referent.firstName!,
-                lastName: referent.lastName!,
-                email: referent.email,
+            if (referent && isReferentClasse(referent)) {
+              recipientsMap.set(referent._id, {
+                PRENOM: referent.firstName!,
+                NOM: referent.lastName!,
+                EMAIL: referent.email,
+                type: "referents",
+                ...fillCommonFields(young),
+              });
+            }
+          });
+        }
+
+        // Chefs d'établissement
+        if (selectedTypes.includes("chefs-etablissement") && young.etablissement?.referentEtablissementIds) {
+          young.etablissement.referentEtablissementIds.forEach((refId) => {
+            const referent = referentsMap.get(refId);
+            if (referent && isChefEtablissement(referent)) {
+              recipientsMap.set(referent._id, {
+                PRENOM: referent.firstName!,
+                NOM: referent.lastName!,
+                EMAIL: referent.email,
                 type: "chefs-etablissement",
+                ...fillCommonFields(young),
               });
             }
           });
         }
-      }
 
-      // Coordinateurs CLE
-      if (selectedTypes.includes("administrateurs") && young.etablissementId) {
-        const establishment = establishmentsMap.get(young.etablissementId);
-        if (establishment) {
-          establishment.coordinateurIds?.forEach((coordId) => {
+        // Coordinateurs CLE
+        if (selectedTypes.includes("administrateurs") && young.etablissement?.coordinateurIds) {
+          young.etablissement.coordinateurIds.forEach((coordId) => {
             const coordinator = referentsMap.get(coordId);
-            if (coordinator) {
-              recipientsMap.set(coordinator.email, {
-                firstName: coordinator.firstName!,
-                lastName: coordinator.lastName!,
-                email: coordinator.email,
+            if (coordinator && isCoordinateurEtablissement(coordinator)) {
+              recipientsMap.set(coordinator._id, {
+                PRENOM: coordinator.firstName!,
+                NOM: coordinator.lastName!,
+                EMAIL: coordinator.email,
                 type: "administrateurs",
+                ...fillCommonFields(young),
               });
             }
           });
         }
-      }
-    });
 
-    setIsProcessing(false);
-    return Array.from(recipientsMap.values());
+        // Chefs de centre
+        if (selectedTypes.includes("chefs-centres") && young.sessionPhase1.headCenterId) {
+          const headCenter = referentsMap.get(young.sessionPhase1.headCenterId!);
+          if (headCenter && isHeadCenter(headCenter)) {
+            recipientsMap.set(headCenter._id, {
+              PRENOM: headCenter.firstName!,
+              NOM: headCenter.lastName!,
+              EMAIL: headCenter.email,
+              type: "chefs-centres",
+              ...fillCommonFields(young),
+            });
+          }
+        }
+      });
+
+      return Array.from(recipientsMap.values());
+    } catch (error) {
+      console.error("Erreur lors du traitement des destinataires:", error);
+      throw error;
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   return {
     processRecipients,
-    isLoading: classesQuery.isLoading || sessionsQuery.isLoading || establishmentsQuery.isLoading || referentsQuery.isLoading,
+    isLoading: isProcessing || isLoadingReferents,
   };
 };

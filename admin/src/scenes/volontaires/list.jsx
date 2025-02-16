@@ -25,7 +25,7 @@ import { getCohortGroups } from "@/services/cohort.service";
 import { Button } from "@snu/ds/admin";
 import { useToggle } from "react-use";
 import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
-import { useBrevoRecipients } from "@/hooks/useBrevoRecipients";
+import { useBrevoExport } from "@/hooks/useBrevoExport";
 
 export default function VolontaireList() {
   const pageId = "young-list";
@@ -46,7 +46,8 @@ export default function VolontaireList() {
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
-  const { processRecipients } = useBrevoRecipients(data);
+  const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("volontaire");
+
 
   if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
@@ -56,10 +57,7 @@ export default function VolontaireList() {
   const filterArray = getFilterArray(user, labels);
 
   const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
-    const recipientsToExport = await processRecipients(formValues.recipients);
-    console.log("recipientsToExport: ", recipientsToExport);
-    // If success
-    // setIsCreationListeBrevo(false);
+    await exportToCsv(formValues, selectedFilters);
   };
 
   return (
@@ -200,6 +198,7 @@ export default function VolontaireList() {
         onClose={() => setIsCreationListeBrevo(false)}
         onConfirm={handleBrevoContactCreationList}
         youngCountFiltered={paramData?.count}
+        isLoadingProcess={isLoadingExportRecipients}
       />
     </>
   );
