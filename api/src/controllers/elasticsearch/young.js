@@ -131,32 +131,22 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
     const etablissementsInDepartment = await EtablissementModel.find({ department: user.department }, { _id: 1 });
     const etablissementIds = etablissementsInDepartment.map((e) => e._id.toString());
 
-    const sessionPhase1 = await SessionPhase1Model.find({ department: user.department });
+    let shouldFilters = [
+      {
+        bool: {
+          must: [{ terms: { "source.keyword": ["VOLONTAIRE"] } }, { terms: { "department.keyword": user.department } }],
+        },
+      },
+      {
+        bool: {
+          must: [{ terms: { "source.keyword": ["CLE"] } }, { terms: { "etablissementId.keyword": etablissementIds } }],
+        },
+      },
+    ];
 
     contextFilters.push({
       bool: {
-        should: [
-          {
-            bool: {
-              must: [{ terms: { "source.keyword": ["VOLONTAIRE"] } }, { terms: { "department.keyword": user.department } }],
-            },
-          },
-          {
-            bool: {
-              must: [{ terms: { "source.keyword": ["CLE"] } }, { terms: { "etablissementId.keyword": etablissementIds } }],
-            },
-          },
-          sessionPhase1.length === 0
-            ? { terms: { "department.keyword": user.department } }
-            : {
-                bool: {
-                  should: [
-                    { terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } },
-                    { terms: { "department.keyword": user.department } },
-                  ],
-                },
-              },
-        ],
+        should: shouldFilters,
       },
     });
   }
@@ -507,7 +497,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     }
   } catch (error) {
     capture(error);
-    console.log(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
