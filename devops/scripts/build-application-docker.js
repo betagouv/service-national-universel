@@ -2,7 +2,7 @@ const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { GetSecrets } = require("./get-secrets");
-const { AppConfig } = require("./lib/config");
+const { AppConfig, getRegistryName } = require("./lib/config");
 const {
   childProcess,
   childProcessStdin,
@@ -36,12 +36,12 @@ async function main() {
     secretName: config.buildSecretName(),
   }).execute();
 
-  const namespace = await scaleway.find(RESOURCE.ContainerNamespace, {
-    project_id: project.id,
-    name: config.containerNamespace(),
-  });
+  const registry = config.dockerRegistry();
 
-  const registry = namespace ? namespace.registry_endpoint : input.environment;
+  const namespace = await scaleway.find(RESOURCE.RegistryNamespace, {
+    project_id: project.id,
+    name: getRegistryName(registry),
+  });
 
   const imageEndpoint = registryEndpoint(
     registry,
@@ -51,7 +51,7 @@ async function main() {
 
   if (namespace) {
     const image = await scaleway.find(RESOURCE.Image, {
-      namespace_id: namespace.registry_namespace_id,
+      namespace_id: namespace.id,
       name: config.imageName(),
     });
     if (image) {
