@@ -34,8 +34,8 @@ export default function Details(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
-  const currentReferent = classe?.referents[0] ? { nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email } : undefined;
-  const setCurrentReferent = (referent: ReferentModifier) => {
+  const referent = classe?.referents[0] ? { nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email } : undefined;
+  const handleModiferReferent = (referent: ReferentModifier) => {
     setClasse({ ...classe, referents: [{ firstName: referent.prenom, lastName: referent.nom, email: referent.email }] });
   };
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -134,7 +134,7 @@ export default function Details(props) {
         return setIsLoading(false);
       }
       setClasse(data);
-      setCurrentReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
+      handleModiferReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
       handleCancel();
       toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
@@ -174,9 +174,7 @@ export default function Details(props) {
         validatedYoung={validatedYoung}
       />
 
-      {classe.referents?.length && (
-        <ReferentInfos classe={classe} currentReferent={currentReferent} rights={rights} isLoading={isLoading} onModifierReferent={setCurrentReferent} />
-      )}
+      {classe.referents?.length && <ReferentInfos classe={classe} currentReferent={referent} rights={rights} isLoading={isLoading} onModifierReferent={handleModiferReferent} />}
 
       {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (
         <SejourInfos
