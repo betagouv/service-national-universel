@@ -62,6 +62,8 @@ import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
+import { DesistementController } from "./infra/sejours/phase1/desistement/api/Desistement.controller";
+import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 
 @Module({
     imports: [
@@ -94,6 +96,7 @@ import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscrip
         AdminTaskController,
         HistoryController,
         ReferentController,
+        DesistementController,
     ],
     providers: [
         ClasseService,
@@ -101,6 +104,7 @@ import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscrip
         InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
+        DesistementService,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,

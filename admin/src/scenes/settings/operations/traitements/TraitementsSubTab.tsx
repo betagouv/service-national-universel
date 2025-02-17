@@ -1,11 +1,10 @@
 import React, { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import useTraitements from "../shared/useTraitements";
 import { useLocation } from "react-router-dom";
 
 import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { DataTable } from "@snu/ds/admin";
 
-import { Phase1Service } from "@/services/phase1Service";
 import ActionCell from "../components/ActionCell";
 import StatusCell from "../components/StatusCell";
 import RapportCell from "../components/RapportCell";
@@ -28,14 +27,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
     statut: "",
   });
 
-  const {
-    isFetching: isLoading,
-    error,
-    data: traitements,
-  } = useQuery<Phase1Routes["GetTraitementsRoute"]["response"]>({
-    queryKey: ["phase-traitements", filters.action, sort],
-    queryFn: async () => Phase1Service.getTraitements(session._id!, { name: filters.action, sort }),
-  });
+  const { isFetching: isLoading, error, data: traitements } = useTraitements({ sessionId: session._id!, action: currentAction, sort });
 
   const traitementRows = useMemo(() => {
     return (
