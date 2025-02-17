@@ -1,7 +1,7 @@
 import { CreateSejourModel, SejourModel } from "./Sejour.model";
 
 export interface SejourGateway {
-    findById(id: string): Promise<SejourModel>;
+    findById(id: string): Promise<SejourModel | null>;
     findByIds(id: string[]): Promise<SejourModel[]>;
     findBySessionId(sessionId: string): Promise<SejourModel[]>;
     update(sejour: SejourModel): Promise<SejourModel>;
