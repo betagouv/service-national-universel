@@ -104,7 +104,7 @@ const createSession = async (
     // on met à jour les places disponibles si la session existe déjà
     logger.warn(`Session already exists for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
     foundSession.placesTotal = sessionCenter.sessionPlaces;
-    if (!foundSession.sejourSnuIds.includes(sessionCenter.sejourSnuId)) {
+    if (sessionCenter.sejourSnuId && !foundSession.sejourSnuIds.includes(sessionCenter.sejourSnuId)) {
       logger.warn(`Add missing sejourSnuId ${sessionCenter.sejourSnuId}`);
       foundSession.sejourSnuIds.push(sessionCenter.sejourSnuId);
     }

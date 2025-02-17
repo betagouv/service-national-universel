@@ -23,7 +23,7 @@ export class SejourRepository implements SejourGateway {
         private readonly cls: ClsService,
     ) {}
     async findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null> {
-        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuId });
+        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuIds: sejourSnuId });
         if (!sejour) {
             return null;
         }
