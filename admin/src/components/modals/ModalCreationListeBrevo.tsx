@@ -1,5 +1,5 @@
 import React, { useCallback } from "react";
-import { Button, Modal } from "@snu/ds/admin";
+import { Button, Modal, Label } from "@snu/ds/admin";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useForm, Controller } from "react-hook-form";
 import { RecipientType } from "@/hooks/useBrevoRecipients";
@@ -30,7 +30,7 @@ const RECIPIENTS: Recipient[] = [
   { id: "chefs-etablissement", label: "Chefs d'établissement", column: "left" },
   { id: "representants", label: "Représentants légaux", column: "right" },
   { id: "chefs-centres", label: "Chefs de centres", column: "right" },
-  { id: "administrateurs", label: "Administrateurs CLE", column: "right" },
+  { id: "administrateurs", label: "Coordinateurs CLE", column: "right" },
 ] as const;
 
 const DEFAULT_SELECTED_RECIPIENTS = ["jeunes", "representants"] as const;
@@ -42,6 +42,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
     formState: { errors },
     watch,
     setValue,
+    reset,
   } = useForm<BrevoListData>({
     defaultValues: {
       name: "",
@@ -75,14 +76,20 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
     [recipients, toggleRecipient],
   );
 
-  const onSubmitForm = handleSubmit((data) => {
-    onConfirm(data);
+  const onSubmitForm = handleSubmit(async (data) => {
+    await onConfirm(data);
+    handleOnClose();
   });
+
+  const handleOnClose = () => {
+    reset();
+    onClose();
+  };
 
   return (
     <Modal
       isOpen={isOpen}
-      onClose={onClose}
+      onClose={handleOnClose}
       className="md:max-w-[600px]"
       content={
         <form onSubmit={onSubmitForm} className="scroll-y-auto overflow-y-auto max-h-[80vh]">
@@ -93,10 +100,8 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
           <div className="space-y-6">
             <div>
-              <label className="text-gray-700 mb-2 flex items-center">
-                Dénomination de la liste de diffusion
-                <IoMdInformationCircleOutline className="ml-2 w-5 h-5 text-gray-400" />
-              </label>
+              <Label title="Dénomination de la liste de diffusion" tooltip="Dénomination de la liste de diffusion" name="name" className="text-gray-700 mb-2 flex items-center" />
+
               <Controller
                 name="name"
                 control={control}
@@ -113,7 +118,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <label className="text-gray-700 mb-2 flex items-center">Identifiant de la campagne</label>
+              <Label title="Identifiant de la campagne" tooltip="Identifiant de la campagne" name="campaignId" className="text-gray-700 mb-2 flex items-center" />
               <Controller
                 name="campaignId"
                 control={control}
@@ -130,10 +135,8 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <label className="text-gray-700 mb-2 flex items-center">
-                Destinataires
-                <IoMdInformationCircleOutline className="ml-2 w-5 h-5 text-gray-400" />
-              </label>
+              <Label title="Destinataires" tooltip="Destinataires" name="recipients" className="text-gray-700 mb-2 flex items-center" />
+
               <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                 <Controller
                   name="recipients"
@@ -156,7 +159,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
       }
       footer={
         <div className="flex items-center justify-between gap-6">
-          <Button title="Fermer" type="secondary" className="flex-1 justify-center" onClick={onClose} disabled={isLoadingProcess} />
+          <Button title="Fermer" type="secondary" className="flex-1 justify-center" onClick={handleOnClose} disabled={isLoadingProcess} />
           <Button title="Envoyer la liste de diffusion" onClick={onSubmitForm} className="flex-1" loading={isLoadingProcess} />
         </div>
       }
