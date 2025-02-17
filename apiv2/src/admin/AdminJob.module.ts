@@ -62,6 +62,9 @@ import { ValiderAffectationCLEDromCom } from "./core/sejours/phase1/affectation/
 import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/ValiderAffectationCLE.service";
 import { ValiderBasculeJeunesService } from "./core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
 import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
+import { SimulationAffectationHTSDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationHTSDromCom";
+import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/ValiderAffectationHTS.service";
+import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 
 @Module({
     imports: [
@@ -114,11 +117,14 @@ import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscriptio
         InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        SimulationAffectationHTSDromCom,
         SimulationAffectationCLEService,
         SimulationAffectationCLE,
         SimulationAffectationCLEDromCom,
+        ValiderAffectationHTSService,
         ValiderAffectationCLEService,
         ValiderAffectationHTS,
+        ValiderAffectationHTSDromCom,
         ValiderAffectationCLE,
         ValiderAffectationCLEDromCom,
         ...referentielUseCaseProviders,

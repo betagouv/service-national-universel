@@ -8,6 +8,9 @@ export interface SejourGateway {
     bulkUpdate(sejours: SejourModel[]): Promise<number>;
     findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null>;
     create(session: CreateSejourModel): Promise<SejourModel>;
+    countPlaceOccupeesBySejourIds(
+        sejourIds: string[],
+    ): Promise<Array<Pick<SejourModel, "id"> & { placesOccupeesJeunes: number }>>;
 }
 
 export const SejourGateway = Symbol("SejourGateway");

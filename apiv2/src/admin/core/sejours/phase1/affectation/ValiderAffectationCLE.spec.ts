@@ -123,6 +123,12 @@ describe("ValiderAffectationCLE", () => {
                         findBySessionId: jest
                             .fn()
                             .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom: sessionNom }))),
+                        countPlaceOccupeesBySejourIds: jest.fn().mockResolvedValue(
+                            mockSejours.map((sejour) => ({
+                                id: sejour.id,
+                                placesOccupeesJeunes: 50,
+                            })),
+                        ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -136,7 +142,11 @@ describe("ValiderAffectationCLE", () => {
                     provide: PlanDeTransportGateway,
                     useValue: {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
-                        findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
+                        findByIds: jest
+                            .fn()
+                            .mockResolvedValue(
+                                mockLignesBus.map((ligne) => ({ id: ligne.id, capaciteJeunes: ligne.capaciteJeunes })),
+                            ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },

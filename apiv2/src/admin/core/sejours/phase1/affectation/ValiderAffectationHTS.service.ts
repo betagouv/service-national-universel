@@ -1,4 +1,4 @@
-import { Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 
 import { YOUNG_STATUS } from "snu-lib";
 
@@ -6,15 +6,22 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 
 import { SejourModel } from "../sejour/Sejour.model";
 import { JeuneModel } from "../../jeune/Jeune.model";
+import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationHTS.service";
+import { SimulationAffectationHTSDromComTaskModel } from "./SimulationAffectationHTSDromComTask.model";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { FileGateway } from "@shared/core/File.gateway";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
-import { RapportData } from "./SimulationAffectationCLE.service";
 
 type JeuneRapportData = RapportData["jeunesNouvellementAffectedList"][0];
 
 @Injectable()
-export class ValiderAffectationCLEService {
-    constructor(private readonly logger: Logger) {}
+export class ValiderAffectationHTSService {
+    constructor(
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        private readonly logger: Logger,
+    ) {}
 
     checkValiderAffectation(jeuneRapport: JeuneRapportData, jeune: JeuneModel, sejour?: SejourModel) {
         // Controle de coherence
@@ -70,7 +77,6 @@ export class ValiderAffectationCLEService {
             departement: jeune.departement,
             sessionId: sejour?.id || "",
             sessionNom: jeune.sessionNom,
-            classeId: jeune.classeId,
             ...(jeune.ligneDeBusId
                 ? {
                       ligneDeBusId: jeune.ligneDeBusId,
@@ -106,5 +112,24 @@ export class ValiderAffectationCLEService {
                   }
                 : {}),
         };
+    }
+
+    async getSimulationData(taskId: string) {
+        const simulationTask: SimulationAffectationHTSDromComTaskModel = await this.taskGateway.findById(taskId);
+        const rapportKey = simulationTask.metadata?.results?.rapportKey;
+        if (!rapportKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à la simulation introuvable",
+            );
+        }
+        const importedFile = await this.fileGateway.downloadFile(rapportKey);
+        const parsedFile = await this.fileGateway.parseXLS<RapportData["jeunesNouvellementAffectedList"][0]>(
+            importedFile.Body,
+            {
+                sheetName: RAPPORT_SHEETS.AFFECTES,
+            },
+        );
+        return parsedFile;
     }
 }

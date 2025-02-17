@@ -19,6 +19,8 @@ import BasculeJeuneValidesStartButton from "./basculeJeune/BasculeJeuneValidesSt
 import BasculeJeuneNonValidesStartButton from "./basculeJeune/BasculeJeuneNonValidesStartButton";
 import BasculeJeuneCell from "./basculeJeune/BasculeJeuneCell";
 import SimulationCleDromComResultStartButton from "./affectationCle/SimulationCleDromComResultStartButton";
+import SimulationHtsDromComResultCell from "./affectationHts/SimulationHtsDromComResultCell";
+import SimulationHtsDromComResultStartButton from "./affectationHts/SimulationHtsDromComResultStartButton";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -93,6 +95,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
               switch (simulation.name) {
                 case TaskName.AFFECTATION_HTS_SIMULATION:
                   return <SimulationHtsResultCell simulation={simulation} />;
+                case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION:
+                  return <SimulationHtsDromComResultCell simulation={simulation} />;
                 case TaskName.AFFECTATION_CLE_SIMULATION:
                 case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
                   return <SimulationCleResultCell simulation={simulation} />;
@@ -120,6 +124,8 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             renderCell: (simulation) => {
               if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
                 return <SimulationHtsResultStartButton simulation={simulation} />;
+              } else if (simulation.name === TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION) {
+                return <SimulationHtsDromComResultStartButton simulation={simulation} />;
               } else if (simulation.name === TaskName.AFFECTATION_CLE_SIMULATION) {
                 return <SimulationCleResultStartButton simulation={simulation} />;
               } else if (simulation.name === TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION) {
