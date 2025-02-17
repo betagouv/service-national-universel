@@ -1162,7 +1162,7 @@ export class SimulationAffectationHTSService {
             "Nombre de jeunes à affecter : " + jeunesList.length,
             "Nombre de jeunes affectés : " + jeunesNouvellementAffectedList.length,
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
-            "En attente d'affectation : " + jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length,
+            "En attente d'affectation : " + (jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length),
             "          dont intradep : " + jeuneIntraDepartementList.length,
             ...infoNonAffecetes.stats,
             "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
