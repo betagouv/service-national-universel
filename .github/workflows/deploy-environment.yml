@@ -104,7 +104,7 @@ jobs:
             --data "{ \"body\": \"Application endpoints :\n\n- $(jq < endpoints.json -r '.admin')\n- $(jq < endpoints.json -r '.app')\n- $(jq < endpoints.json -r '.api')\n- $(jq < endpoints.json -r '.apiv2')\" }"
 
   build:
-    needs: [prepare, create_environment]
+    needs: [prepare]
     runs-on: ubuntu-latest
     strategy:
       matrix:

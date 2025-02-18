@@ -102,7 +102,7 @@ jobs:
       - name: Post Changelog on slack
         uses: slackapi/slack-github-action@v1.25.0
         with:
-          channel-id: "#dev-release,#nouveauté-produit"
+          channel-id: "#dev-release,#nouveautés-produit"
           slack-message: "${{ steps.changelog.outputs.changelog }}"
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
