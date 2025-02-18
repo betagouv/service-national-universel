@@ -1,5 +1,6 @@
-import { YOUNG_STATUS } from "snu-lib";
-import { CohesionCenterModel, SessionPhase1Model, YoungModel, CohortModel } from "../../../models";
+const { YOUNG_STATUS } = require("snu-lib");
+const { SessionPhase1Model, CohortModel, CohesionCenterModel, YoungModel } = require("../src/models");
+const { logger } = require("../src/logger");
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -46,12 +47,12 @@ module.exports = {
     for await (const session of data) {
       const cohort = await CohortModel.findOne({ name: session.cohortName });
       if (!cohort) {
-        console.log(`❌ Cohort not found: ${session.cohortName}`);
+        logger.error(`❌ Cohort not found: ${session.cohortName}`);
         continue;
       }
       const center = await CohesionCenterModel.findById(session.centerId);
       if (!center) {
-        console.log(`❌ Cohesion center not found: ${session.centerId}`);
+        logger.error(`❌ Cohesion center not found: ${session.centerId}`);
         continue;
       }
       const placesTaken = await YoungModel.countDocuments({ sessionPhase1Id: session.sessionId, status: YOUNG_STATUS.VALIDATED });
@@ -63,15 +64,15 @@ module.exports = {
       });
 
       const res = await sessionToCreate.save();
-      console.log(`✅ Session created: ${res._id}`);
+      logger.info(`✅ Session created: ${res._id}`);
 
-      console.log(`✅ Updating youngs for session ${session.sessionId}`);
+      logger.info(`✅ Updating youngs for session ${session.sessionId}`);
       await YoungModel.updateMany({ sessionPhase1Id: session.sessionId }, { cohesionCenterId: center.id });
     }
   },
 
   async down() {
-    for await (const session of data) {
+    for (const session of data) {
       await SessionPhase1Model.deleteOne({ _id: session.sessionId });
       await YoungModel.updateMany({ sessionPhase1Id: session.sessionId }, { $unset: { cohesionCenterId: "" } });
     }

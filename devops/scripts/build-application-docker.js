@@ -2,7 +2,8 @@ const process = require("node:process");
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { GetSecrets } = require("./get-secrets");
-const { AppConfig, getRegistryName } = require("./lib/config");
+const { GetRegistry, getRegistryName } = require("./get-docker-registry");
+const { AppConfig } = require("./lib/config");
 const {
   childProcess,
   childProcessStdin,
@@ -36,7 +37,17 @@ async function main() {
     secretName: config.buildSecretName(),
   }).execute();
 
-  const registry = config.dockerRegistry();
+  const containerNamespace = await scaleway.find(RESOURCE.ContainerNamespace, {
+    project_id: project.id,
+    name: config.containerNamespace(),
+  });
+
+  const registry = await new GetRegistry(scaleway, {
+    environment: input.environment,
+    config,
+    project,
+    namespace: containerNamespace,
+  }).execute();
 
   const registryNamespace = await scaleway.findOrThrow(RESOURCE.RegistryNamespace, {
     project_id: project.id,
@@ -64,11 +75,6 @@ async function main() {
       return;
     }
   }
-
-  const containerNamespace = await scaleway.find(RESOURCE.ContainerNamespace, {
-    project_id: project.id,
-    name: config.containerNamespace(),
-  });
 
   const containerNamespaceRegistry = containerNamespace ? containerNamespace.registry_endpoint : input.environment;
 
