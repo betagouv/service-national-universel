@@ -16,9 +16,15 @@ import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 import { ROLES } from "snu-lib";
+import { CohortModel, DepartmentServiceModel, ReferentModel } from "../models";
 beforeAll(dbConnect);
 afterAll(dbClose);
 afterEach(resetAppAuth);
+beforeEach(async () => {
+  await CohortModel.deleteMany({});
+  await DepartmentServiceModel.deleteMany({});
+  await ReferentModel.deleteMany({});
+});
 
 describe("Department service", () => {
   describe("POST /department-service", () => {

@@ -958,6 +958,7 @@ function canCreateTags(actor) {
 }
 
 function isSuperAdmin(actor) {
+  if (!actor) return false;
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 

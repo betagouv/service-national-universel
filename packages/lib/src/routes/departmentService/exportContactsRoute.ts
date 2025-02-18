@@ -2,11 +2,11 @@ import { BasicRoute, RouteResponseBody } from "..";
 
 export interface ExportContactsRoute extends BasicRoute {
   method: "GET";
-  path: "/department-service-goal/{sessionId}/DepartmentServiceContact/export";
+  path: "/department-service/{sessionId}/DepartmentServiceContact/export";
   params: { sessionId: string };
   response: RouteResponseBody<{
-    resultSansContact: any[];
-    resultAvecContact: any[];
-    cohortName: string;
+    base64: string;
+    mimeType: string;
+    fileName: string;
   }>;
 }
