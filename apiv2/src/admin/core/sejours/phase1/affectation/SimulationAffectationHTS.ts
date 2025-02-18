@@ -65,7 +65,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         if (centreList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun centres !");
         }
-        let allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
+        let allJeunes = await this.jeuneGateway.findBySessionIdStatutNiveauScolairesAndDepartementsCible(
             sessionId,
             YOUNG_STATUS.VALIDATED,
             niveauScolaires,
