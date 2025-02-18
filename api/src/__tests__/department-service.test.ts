@@ -17,6 +17,7 @@ import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 import { ROLES } from "snu-lib";
 import { CohortModel, DepartmentServiceModel, ReferentModel } from "../models";
+
 beforeAll(dbConnect);
 afterAll(dbClose);
 afterEach(resetAppAuth);
@@ -92,13 +93,14 @@ describe("Department service", () => {
 
       const res = await request(getAppHelper()).get(`/department-service/${cohort._id}/DepartmentServiceContact/export`).send();
       expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("resultSansContact");
-      expect(res.body).toHaveProperty("resultAvecContact");
-      expect(res.body).toHaveProperty("cohortName", "Test Cohort");
+      expect(res.body).toHaveProperty("ok", true);
+      expect(res.body.data).toHaveProperty("base64");
+      expect(res.body.data).toHaveProperty("mimeType", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      expect(res.body.data).toHaveProperty("fileName", `${cohort.name}_export_MissingContact.xlsx`);
     });
 
     it("should return 400 if cohortId is not valid", async () => {
-      const res = await request(getAppHelper()).get(`/department-service/invalidId/DepartmentServiceContact/export`).send();
+      const res = await request(getAppHelper()).get(`/department-service/invalid-id/DepartmentServiceContact/export`).send();
       expect(res.statusCode).toEqual(400);
     });
 

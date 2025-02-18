@@ -13,7 +13,7 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { UserRequest, RouteRequest, RouteResponse } from "./request";
 import XLSX from "xlsx";
-
+import { idSchema } from "../utils/validator";
 const router = express.Router();
 
 router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
@@ -68,7 +68,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       contactMail: value.contactMail,
     };
 
-    let contacts: any[] = [...departmentService.contacts];
+    let contacts = [...departmentService.contacts];
 
     const contactIndex = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
     const alreadyExist = contactIndex !== -1;
@@ -107,9 +107,9 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // checking if the contact for this cohort already exists...
-    let contacts: any[] = [...departmentService.contacts];
+    let contacts = [...departmentService.contacts];
 
-    const exist = departmentService.contacts.findIndex((contact: any) => contact._id.toString() === value.contactId);
+    const exist = departmentService.contacts.findIndex((contact) => contact._id.toString() === value.contactId);
     if (exist === -1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);
@@ -156,13 +156,12 @@ router.use(authMiddleware("referent"));
 router.get(
   "/:cohortId/DepartmentServiceContact/export",
   accessControlMiddleware([ROLES.ADMIN]),
-  requestValidatorMiddleware({ params: Joi.object({ cohortId: Joi.string().required() }) }),
+  requestValidatorMiddleware({
+    params: Joi.object<DepartmentServiceRoutes["ExportContacts"]["params"]>({ sessionId: idSchema().required() }),
+  }),
   async (req: RouteRequest<DepartmentServiceRoutes["ExportContacts"]>, res: RouteResponse<DepartmentServiceRoutes["ExportContacts"]>) => {
     try {
-      const { error, value } = Joi.object({ cohortId: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-      const cohortDocument = await CohortModel.findById(value.cohortId);
+      const cohortDocument = await CohortModel.findById(req.validatedParams.sessionId);
       if (!cohortDocument) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND, message: "Cohorte introuvable" });
 
       const cohortName = cohortDocument.name;

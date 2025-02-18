@@ -1,7 +1,7 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from ".";
 
-export const ContactSchema = {
+export const DepartmentServiceContactSchema = {
   cohort: {
     type: String,
     documentation: "cohorte concerné par le service",
@@ -34,7 +34,7 @@ export const ContactSchema = {
 
 export const DepartmentServiceSchema = {
   contacts: {
-    type: [ContactSchema],
+    type: [DepartmentServiceContactSchema],
   },
   department: {
     type: String,
@@ -154,5 +154,5 @@ export const DepartmentServiceSchema = {
   updatedAt: { type: Date, default: Date.now },
 };
 
-const schema = new Schema(DepartmentServiceSchema);
+const schema = new Schema({ ...DepartmentServiceSchema, contacts: [new Schema(DepartmentServiceContactSchema)] });
 export type DepartmentServiceType = InterfaceExtended<InferSchemaType<typeof schema>>;
