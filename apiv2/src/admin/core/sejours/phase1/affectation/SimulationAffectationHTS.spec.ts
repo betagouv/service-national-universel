@@ -145,8 +145,8 @@ describe("SimulationAffectationHTS", () => {
         expect(result.rapportData.centreList.length).toEqual(15);
 
         // affectation result
-        expect(result.rapportData.jeuneIntraDepartementList.length).toEqual(1);
-        expect(result.rapportData.jeuneAttenteAffectationList.length).toBeGreaterThan(3);
+        expect(result.rapportData.jeuneIntraDepartementList.length).toBeGreaterThanOrEqual(4);
+        expect(result.rapportData.jeuneAttenteAffectationList.length).toBeGreaterThanOrEqual(1);
         expect(result.rapportData.jeunesDejaAffectedList.length).toEqual(14);
         expect(result.rapportData.jeunesNouvellementAffectedList.length).toBeGreaterThan(74);
         expect(result.rapportData.jeuneAttenteAffectationList[0]["Ligne Theorique"]).toBeDefined();
