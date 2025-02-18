@@ -15,7 +15,11 @@ export interface SimulationAffectationHTSTaskParameters {
 
 export type SimulationAffectationHTSTaskResult = Pick<
     SimulationAffectationHTSResult["analytics"],
-    "selectedCost" | "jeunesNouvellementAffected" | "jeuneAttenteAffectation" | "jeunesDejaAffected"
+    | "selectedCost"
+    | "iterationCostList"
+    | "jeunesNouvellementAffected"
+    | "jeuneAttenteAffectation"
+    | "jeunesDejaAffected"
 > & {
     rapportKey: string;
 };

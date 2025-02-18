@@ -34,6 +34,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
 
   useEffect(() => {
     (async () => {
+      if (!open) return;
       try {
         let { data } = await api.get("/cohesion-center");
 
@@ -46,7 +47,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
         console.log(e);
       }
     })();
-  }, []);
+  }, [open]);
 
   const getSubRoleOptions = (subRoles) => {
     return Object.keys(subRoles).map((e) => ({ value: e, label: translate(subRoles[e]) }));
