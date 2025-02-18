@@ -95,6 +95,13 @@ export type RapportData = {
     jeuneIntraDepartementList: Partial<JeuneModel>[];
 };
 
+const COL_SEJOUR_ID_ = "sejour_id_";
+const COL_SEJOUR_PLACES_OCCUPEES = "sejour_places-occupées_";
+const COL_SEJOUR_PLACES_RESTANTES = "sejour_places-restantes_";
+const COL_BUS_NUMERO_LIGNE = "bus_numero-ligne_";
+const COL_BUS_PLACES_OCCUPEES = "bus_places-occupées_";
+const COL_BUS_PLACES_RESTANTES = "bus_places-restantes_";
+
 export type Analytics = {
     selectedCost: number;
     iterationCostList: number[];
@@ -1088,16 +1095,16 @@ export class SimulationAffectationHTSService {
                     tauxQVP: this.affectationService.formatPourcent(stats.tauxQVP),
                     tauxPSH: this.affectationService.formatPourcent(stats.tauxPSH),
                     ...centreSejourList.reduce((acc, sejour, index) => {
-                        acc[`sejour_id_${index + 1}`] = sejour.id;
-                        acc[`sejour_places-occupées_${index + 1}`] =
+                        acc[`${COL_SEJOUR_ID_}${index + 1}`] = sejour.id;
+                        acc[`${COL_SEJOUR_PLACES_OCCUPEES}${index + 1}`] =
                             (sejour.placesTotal || 0) - (sejour.placesRestantes || 0);
-                        acc[`sejour_places-restantes_${index + 1}`] = sejour.placesRestantes;
+                        acc[`${COL_SEJOUR_PLACES_RESTANTES}${index + 1}`] = sejour.placesRestantes;
                         return acc;
                     }, {}),
                     ...ligneSejourList.reduce((acc, ligne, index) => {
-                        acc[`bus_numero-ligne_${index}`] = ligne.numeroLigne;
-                        acc[`bus_places-occupées_${index}`] = ligne.placesOccupeesJeunes;
-                        acc[`bus_places-restantes_${index}`] = ligne.capaciteJeunes - ligne.placesOccupeesJeunes;
+                        acc[`${COL_BUS_NUMERO_LIGNE}${index}`] = ligne.numeroLigne;
+                        acc[`${COL_BUS_PLACES_OCCUPEES}${index}`] = ligne.placesOccupeesJeunes;
+                        acc[`${COL_BUS_PLACES_RESTANTES}${index}`] = ligne.capaciteJeunes - ligne.placesOccupeesJeunes;
                         return acc;
                     }, {}),
                 } as RapportData["centreList"][0];
@@ -1232,15 +1239,15 @@ export class SimulationAffectationHTSService {
                 }
                 let i = 0;
                 const lignesDeBus: any[] = [];
-                while (centre[`bus_numero-ligne_${i}`]) {
+                while (centre[`${COL_BUS_NUMERO_LIGNE}${i}`]) {
                     const departementsPdr =
                         ligneDeBusList
-                            .find((ligne) => ligne.numeroLigne === centre[`bus_numero-ligne_${i}`])
+                            .find((ligne) => ligne.numeroLigne === centre[`${COL_BUS_NUMERO_LIGNE}${i}`])
                             ?.pointDeRassemblementDepartements?.split(",") || [];
                     lignesDeBus.push({
-                        numeroLigne: centre[`bus_numero-ligne_${i}`],
-                        placesOccupees: Number(centre[`bus_places-occupées_${i}`]),
-                        placesRestances: Number(centre[`bus_places-restantes_${i}`]),
+                        numeroLigne: centre[`${COL_BUS_NUMERO_LIGNE}${i}`],
+                        placesOccupees: Number(centre[`${COL_BUS_PLACES_OCCUPEES}${i}`]),
+                        placesRestances: Number(centre[`${COL_BUS_PLACES_RESTANTES}${i}`]),
                         nonAffectesMemeDepartement: jeuneAttenteAffectationList.filter(
                             (jeune) => departementsPdr?.includes(jeune.departementResidence!),
                         ).length,
