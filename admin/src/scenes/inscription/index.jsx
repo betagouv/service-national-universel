@@ -28,6 +28,9 @@ import { getCohortGroups } from "@/services/cohort.service";
 import useClass from "../classe/utils/useClass";
 import useFilterLabels from "../volontaires/useFilterLabels";
 import { Button } from "@snu/ds/admin";
+import { useBrevoExport } from "@/hooks/useBrevoExport";
+import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
+import { useToggle } from "react-use";
 
 export default function Inscription() {
   useDocumentTitle("Inscriptions");
@@ -35,6 +38,7 @@ export default function Inscription() {
   const user = useSelector((state) => state.Auth.user);
   const [young, setYoung] = useState(null);
   const { data: labels, isPending: isLabelsPending } = useFilterLabels(pageId);
+  const [isCreationListeBrevo, setIsCreationListeBrevo] = useToggle(false);
 
   //List state
   const [data, setData] = useState([]);
@@ -43,6 +47,7 @@ export default function Inscription() {
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
+  const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("inscription");
   const [size, setSize] = useState(10);
 
   const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
@@ -57,6 +62,10 @@ export default function Inscription() {
 
   const handleClickInscription = () => {
     plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+  };
+
+  const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
+    await exportToCsv(formValues, selectedFilters);
   };
 
   const filterArray = [
@@ -235,7 +244,9 @@ export default function Inscription() {
                 <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
               </Link>
             ) : null}
-            {isSuperAdmin(user) ? <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" /> : null}
+            {isSuperAdmin(user) ? (
+              <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
+            ) : null}
             <ExportComponent
               title="Exporter les inscriptions"
               exportTitle="Volontaires"
@@ -348,6 +359,13 @@ export default function Inscription() {
       ) : (
         <Panel value={young} onChange={() => setYoung(null)} />
       )}
+      <ModalCreationListeBrevo
+        isOpen={isCreationListeBrevo}
+        onClose={() => setIsCreationListeBrevo(false)}
+        onConfirm={handleBrevoContactCreationList}
+        youngCountFiltered={paramData?.count}
+        isLoadingProcess={isLoadingExportRecipients}
+      />
     </>
   );
 }

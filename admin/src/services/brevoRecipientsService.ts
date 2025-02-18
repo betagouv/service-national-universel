@@ -7,7 +7,7 @@ export type FiltersYoungsForExport = Record<string, string[]>;
 
 const BrevoRecipientsService = {
   getFilteredYoungsForExport: async (filtersSelected: FiltersYoungsForExport, tab: "volontaire" | "inscription"): Promise<any> => {
-    const route = `/elasticsearch/young/export?tab=${tab}`;
+    const route = `/elasticsearch/young/export${tab === "volontaire" ? "?tab=volontaire" : ""}`;
     const fieldsToExport = [
       "firstName",
       "lastName",

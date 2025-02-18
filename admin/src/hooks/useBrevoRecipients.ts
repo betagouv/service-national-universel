@@ -52,26 +52,6 @@ type YoungCustomType = YoungType & {
   bus: LigneBusType;
 };
 
-const fillCommonFields = (young: YoungCustomType): Omit<BrevoRecipient, "type" | "PRENOM" | "NOM" | "EMAIL"> => {
-  return {
-    COHORT: young.cohort,
-    CENTRE: young.center.name,
-    VILLECENTRE: young.center.city,
-    PRENOMVOLONTAIRE: young.firstName!,
-    NOMVOLONTAIRE: young.lastName!,
-    PDR_ALLER: young.meetingPoint.name,
-    PDR_ALLER_ADRESSE: young.meetingPoint.address,
-    PDR_ALLER_VILLE: young.meetingPoint.city,
-    DATE_ALLER: formatDateFR(young.bus.departuredDate),
-    HEURE_ALLER: young.ligneToPoint.departureHour,
-    PDR_RETOUR: young.meetingPoint.name,
-    PDR_RETOUR_VILLE: young.meetingPoint.address,
-    PDR_RETOUR_ADRESSE: young.meetingPoint.city,
-    DATE_RETOUR: formatDateFR(young.bus.returnDate),
-    HEURE_RETOUR: young.ligneToPoint.returnHour,
-  };
-};
-
 interface RecipientValidationError {
   code: "VALIDATION_ERROR";
   message: string;
@@ -151,7 +131,118 @@ const validateYoungData = (young: YoungCustomType, selectedTypes: RecipientType[
     };
   }
 
+  const isTransportSelected = selectedTypes.includes("jeunes") || selectedTypes.includes("representants");
+  if (isTransportSelected) {
+    if (!young.center) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "centre d'affectation",
+        },
+      };
+    }
+
+    if (!young.meetingPoint) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "point de rassemblement",
+        },
+      };
+    }
+
+    if (!young.bus) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "bus",
+        },
+      };
+    }
+
+    if (!young.ligneToPoint) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "ligne de bus",
+        },
+      };
+    }
+  }
+
   return { isValid: true };
+};
+
+const fillCommonFields = (young: YoungCustomType): Omit<BrevoRecipient, "type" | "PRENOM" | "NOM" | "EMAIL"> => {
+  return {
+    COHORT: young.cohort,
+    CENTRE: young.center?.name || "",
+    VILLECENTRE: young.center?.city || "",
+    PRENOMVOLONTAIRE: young.firstName!,
+    NOMVOLONTAIRE: young.lastName!,
+    PDR_ALLER: young.meetingPoint?.name || "",
+    PDR_ALLER_ADRESSE: young.meetingPoint?.address || "",
+    PDR_ALLER_VILLE: young.meetingPoint?.city || "",
+    DATE_ALLER: young.bus?.departuredDate ? formatDateFR(young.bus.departuredDate) : "",
+    HEURE_ALLER: young.ligneToPoint?.departureHour || "",
+    PDR_RETOUR: young.meetingPoint?.name || "",
+    PDR_RETOUR_VILLE: young.meetingPoint?.address || "",
+    PDR_RETOUR_ADRESSE: young.meetingPoint?.city || "",
+    DATE_RETOUR: young.bus?.returnDate ? formatDateFR(young.bus.returnDate) : "",
+    HEURE_RETOUR: young.ligneToPoint?.returnHour || "",
+  };
+};
+
+const formatValidationErrorMessage = (errors: RecipientValidationError["details"]) => {
+  const groupedErrors = errors.reduce(
+    (acc, error) => {
+      if (!acc[error.type]) {
+        acc[error.type] = [];
+      }
+      acc[error.type].push(error);
+      return acc;
+    },
+    {} as Record<string, typeof errors>,
+  );
+
+  const toastrMessage = Object.entries(groupedErrors)
+    .map(([type, typeErrors]) => {
+      const count = typeErrors.length;
+      const typeName =
+        {
+          referents: "référents de classe",
+          "chefs-etablissement": "chefs d'établissement",
+          administrateurs: "coordinateurs",
+          "chefs-centres": "chefs de centre",
+          transport: "informations de transport",
+        }[type] || type;
+
+      return `${count} volontaire${count > 1 ? "s" : ""} sans ${typeName}`;
+    })
+    .join(", ");
+
+  return {
+    toastr: `Données manquantes : ${toastrMessage}`,
+    details: Object.entries(groupedErrors)
+      .map(([, typeErrors]) => typeErrors.map((error) => `[${error.youngId}] ${error.firstName} ${error.lastName} - ${error.missing} manquant(s)`).join("\n"))
+      .join("\n"),
+  };
 };
 
 export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
@@ -175,42 +266,9 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
     queryFn: () => BrevoRecipientsService.getReferentsByIds([...referentIds]),
     enabled: referentIds.size > 0,
     refetchOnWindowFocus: false,
+    gcTime: Infinity,
+    staleTime: Infinity,
   });
-
-  const formatValidationErrorMessage = (errors: RecipientValidationError["details"]) => {
-    const groupedErrors = errors.reduce(
-      (acc, error) => {
-        if (!acc[error.type]) {
-          acc[error.type] = [];
-        }
-        acc[error.type].push(error);
-        return acc;
-      },
-      {} as Record<string, typeof errors>,
-    );
-
-    const toastrMessage = Object.entries(groupedErrors)
-      .map(([type, typeErrors]) => {
-        const count = typeErrors.length;
-        const typeName =
-          {
-            referents: "référents de classe",
-            "chefs-etablissement": "chefs d'établissement",
-            administrateurs: "coordinateurs",
-            "chefs-centres": "chefs de centre",
-          }[type] || type;
-
-        return `${count} volontaire${count > 1 ? "s" : ""} sans ${typeName}`;
-      })
-      .join(", ");
-
-    return {
-      toastr: `Données manquantes : ${toastrMessage}`,
-      details: Object.entries(groupedErrors)
-        .map(([, typeErrors]) => typeErrors.map((error) => `[${error.youngId}] ${error.firstName} ${error.lastName} - ${error.missing} manquant(s)`).join("\n"))
-        .join("\n"),
-    };
-  };
 
   const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[]): void => {
     const validationErrors: RecipientValidationError["details"] = [];
@@ -224,6 +282,10 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
 
     if (validationErrors.length > 0) {
       const errorMessage = formatValidationErrorMessage(validationErrors);
+      // TODO: voir ce qu'il faut afficher comme erreur sachant qu'en fonction
+      // du nombre de destinataires, le message peut être très long
+      // Peut etre garder tout le détail avec errorMessage.details mais avec un split ?
+      // toastr.error(errorMessage.toastr, errorMessage.details, { timeOut: 10000 });
       toastr.error(errorMessage.toastr, "", { timeOut: 10000 });
 
       throw {
@@ -252,7 +314,7 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
       setYoungs(youngs);
 
       const recipientsMap = new Map<string, BrevoRecipient>();
-      const referentsMap = referents?.data ? new Map(referents?.data?.map((r) => [r._id, r])) : new Map<string, any>();
+      const referentsMap = referents?.data ? new Map(referents.data.map((r) => [r._id, r])) : new Map();
 
       try {
         // Traitement des destinataires avec vérification des erreurs
@@ -377,20 +439,4 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
     error,
     clearError: () => setError(null),
   };
-};
-
-export const formatRecipientError = (error: RecipientNotificationError): string => {
-  switch (error.code) {
-    case "VALIDATION_ERROR":
-      return `${error.message}\n${error.details.map((detail) => `- ${detail.firstName} ${detail.lastName}: ${detail.missing} manquant(s)`).join("\n")}`;
-
-    case "PROCESSING_ERROR":
-      return `Une erreur est survenue lors du traitement des données: ${error.message}`;
-
-    case "FETCH_ERROR":
-      return `Erreur lors de la récupération des données: ${error.message}`;
-
-    default:
-      return "Une erreur inconnue est survenue";
-  }
 };
