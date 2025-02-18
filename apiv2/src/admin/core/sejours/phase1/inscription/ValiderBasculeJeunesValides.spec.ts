@@ -12,6 +12,7 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { SessionGateway } from "../session/Session.gateway";
 import { ValiderBasculeJeunesValides } from "./ValiderBasculeJeunesValides";
+import { ValiderBasculeJeunesService } from "./ValiderBasculeJeunes.service";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -28,6 +29,7 @@ describe("ValiderBasculeJeunesValides", () => {
             imports: [ClsModule],
             providers: [
                 ValiderBasculeJeunesValides,
+                ValiderBasculeJeunesService,
                 Logger,
                 {
                     provide: FileGateway,

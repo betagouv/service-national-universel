@@ -231,7 +231,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
         const fileName = `affectation-hts/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,

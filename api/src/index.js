@@ -7,6 +7,7 @@ const { initSentry } = require("./sentry");
 initSentry();
 
 logger.info(`ENVIRONMENT: ${config["ENVIRONMENT"]}`);
+logger.info(`RELEASE: ${config["RELEASE"]}`);
 
 require("events").EventEmitter.defaultMaxListeners = 35; // Fix warning node (Caused by ElasticMongoose-plugin)
 

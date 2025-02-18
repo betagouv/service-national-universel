@@ -54,14 +54,7 @@ export class BasculeJeuneValidesController {
     ): Promise<InscriptionRoutes["PostBasculeJeunesValides"]["response"]> {
         const parameters: SimulationBasculeJeunesValidesTaskParameters = {
             sessionId,
-            status: payload.status,
-            statusPhase1: payload.statusPhase1,
-            presenceArrivee: payload.presenceArrivee,
-            statusPhase1Motif: payload.statusPhase1Motif,
-            departements: payload.departements,
-            niveauScolaires: payload.niveauScolaires,
-            etranger: payload.etranger,
-            avenir: payload.avenir,
+            ...payload,
             auteur: {
                 id: request.user.id,
                 prenom: request.user.prenom,

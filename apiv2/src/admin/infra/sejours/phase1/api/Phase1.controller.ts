@@ -7,18 +7,21 @@ import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
+import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
 
 const PHASE1_SIMULATIONS_TASK_NAMES = [
     TaskName.AFFECTATION_HTS_SIMULATION,
     TaskName.AFFECTATION_CLE_SIMULATION,
     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
     TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
 ];
 const PHASE1_TRAITEMENTS_TASK_NAMES = [
     TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
     TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
     TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
 ];
 
 @Controller("phase1")
@@ -27,6 +30,16 @@ export class Phase1Controller {
         private readonly supprimerPlanDeTransport: SupprimerPlanDeTransport,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
+
+    @UseGuards(AdminGuard)
+    @Get("/simulations/:id")
+    async getSimulation(
+        @Param("id")
+        id: string,
+    ): Promise<Phase1Routes["GetSimulationRoute"]["response"]> {
+        const simulation = await this.taskGateway.findById(id);
+        return TaskMapper.toDto(simulation);
+    }
 
     @UseGuards(AdminGuard)
     @Get("/:sessionId/simulations")
@@ -51,7 +64,23 @@ export class Phase1Controller {
             filter,
             sort,
         );
-        return simulations.map(TaskMapper.toDto);
+
+        return simulations.map((simulation) => {
+            if (simulation.name === TaskName.AFFECTATION_HTS_SIMULATION) {
+                const simulationHts = simulation as SimulationAffectationHTSTaskModel;
+                return TaskMapper.toDto({
+                    ...simulationHts,
+                    metadata: {
+                        ...simulationHts.metadata,
+                        results: {
+                            ...simulationHts.metadata?.results,
+                            iterationCostList: undefined, // array of 300 elements, too long to display in search result
+                        },
+                    },
+                });
+            }
+            return TaskMapper.toDto(simulation);
+        });
     }
 
     @UseGuards(AdminGuard)

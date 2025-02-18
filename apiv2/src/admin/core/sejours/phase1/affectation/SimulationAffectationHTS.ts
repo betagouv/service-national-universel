@@ -65,14 +65,14 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         if (centreList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun centres !");
         }
-        let allJeunes = await this.jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartements(
+        let allJeunes = await this.jeuneGateway.findBySessionIdStatutNiveauScolairesAndDepartementsCible(
             sessionId,
             YOUNG_STATUS.VALIDATED,
             niveauScolaires,
             departements,
         );
         if (!etranger) {
-            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite === "FRANCE");
+            allJeunes = allJeunes.filter((jeune) => jeune.paysScolarite?.toUpperCase() === "FRANCE");
         }
         if (allJeunes.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
@@ -129,18 +129,17 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             ligneDeBusList: [],
             analytics: {
                 selectedCost: 1e3,
+                iterationCostList: [],
                 tauxRepartitionCentreList: [],
                 centreIdList: [],
                 tauxRemplissageCentreList: [],
                 tauxOccupationLignesParCentreList: [],
-                iterationCostList: [],
                 jeunesNouvellementAffected: 0,
                 jeuneAttenteAffectation: 0,
                 jeunesDejaAffected: 0,
             },
         };
 
-        const coutSimulationList = [1e3]; // infini
         for (let currentIterationNumber = 0; currentIterationNumber < NB_MAX_ITERATION; currentIterationNumber++) {
             this.logger.log(`Iteration : ${currentIterationNumber + 1} sur ${NB_MAX_ITERATION}`);
 
@@ -175,7 +174,6 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 tauxRemplissageCentres,
                 ratioRepartition,
             );
-
             results.analytics.iterationCostList.push(coutSimulation);
 
             const isCoherent = this.simulationAffectationHTSService.isPlacesRestantesCoherentes(
@@ -187,9 +185,8 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 (jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED,
             ).length;
             // si la nouvelle simulation a un meilleur cout que la précedente, on la garde
-            if (isCoherent && coutSimulation < coutSimulationList[coutSimulationList.length - 1]) {
+            if (isCoherent && coutSimulation < results.analytics.selectedCost) {
                 this.logger.log(`Better simulation found ${coutSimulation} (${jeunesAffectedCount} affectés)`);
-                coutSimulationList.push(coutSimulation);
 
                 // résultats de l'affectation
                 results.jeuneList = JSON.parse(JSON.stringify(randomJeuneList));
@@ -234,7 +231,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
         const fileName = `simulation-affectation-hts/affectation_simulation_hts_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,

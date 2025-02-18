@@ -1,16 +1,13 @@
 import API from "@/services/api";
 import { useQuery } from "@tanstack/react-query";
 
-async function fetchTickets() {
+async function queryFn() {
   const { ok, data } = await API.get(`/SNUpport/ticketsInfo`);
   if (!ok) throw new Error("API response not OK");
+  if (!data) throw new Error("No data");
   return data;
 }
 
-export default function useTickets() {
-  return useQuery({
-    queryKey: ["ticketsInfo"],
-    queryFn: fetchTickets,
-    meta: { errorMessage: "Impossible de récupérer les tickets" },
-  });
-}
+const useTickets = () => useQuery({ queryKey: ["ticketsInfo"], queryFn });
+
+export default useTickets;

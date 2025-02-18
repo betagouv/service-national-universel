@@ -13,16 +13,31 @@ import {
   ROLES,
   REFERENT_DEPARTMENT_SUBROLE,
   SENDINBLUE_TEMPLATES,
+  SUB_ROLES,
+  WITHRAWN_REASONS,
+  formatDateFRTimezoneUTC,
 } from "snu-lib";
 
-import { YoungDocument, YoungModel, ReferentModel, ClasseModel, CohesionCenterModel, DepartmentServiceModel, EtablissementModel } from "../models";
+import {
+  YoungDocument,
+  YoungModel,
+  ReferentModel,
+  ClasseModel,
+  CohesionCenterModel,
+  DepartmentServiceModel,
+  EtablissementModel,
+  ReferentDocument,
+  SessionPhase1Model,
+} from "../models";
+
+import { sendTemplate } from "../brevo";
 import { generatePdfIntoBuffer } from "../utils/pdf-renderer";
 
 import { YOUNG_DOCUMENT, YOUNG_DOCUMENT_PHASE_TEMPLATE } from "./youngDocument";
 import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
 import { config } from "../config";
-import { sendTemplate } from "../brevo";
+import { capture } from "../sentry";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -194,8 +209,8 @@ export async function handleNotificationForDeparture(young: YoungType, departSej
   const center = await CohesionCenterModel.findById(young.cohesionCenterId);
   if (!center) throw new Error(ERRORS.NOT_FOUND);
 
-  // On envoit au chef de projet departemental (ou assistant). Sinon, on envoit au secretariat du departement ou au manager de phase 2.
-  // Si toujours rien on envoit a son contact convocation.
+  // On envoie au chef de projet departemental (ou assistant). Sinon, on envoie au secretariat du departement ou au manager de phase 2.
+  // Si toujours rien on envoie a son contact convocation.
   const managers = referentsDep.filter(
     (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
   );
@@ -251,4 +266,62 @@ async function getContactsCLE(classeId: string) {
   contactCLEId.push(...etablissement.coordinateurIds);
 
   return await ReferentModel.find({ _id: { $in: contactCLEId } });
+}
+
+export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReason) {
+  const oldStatusPhase1 = young.statusPhase1;
+
+  // We notify the ref dep and the young
+  try {
+    const youngFullName = young.firstName + " " + young.lastName;
+    const referents: ReferentDocument[] = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.secretariat, SUB_ROLES.manager_phase2];
+    let selectedReferent: ReferentDocument | undefined = referents.find((referent) => referent.subRole && SUB_ROLES_PRIORITY.includes(referent.subRole));
+    if (!selectedReferent && referents.length > 0) {
+      selectedReferent = referents[0];
+    }
+    if (selectedReferent) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_NOTIFICATION, {
+        emailTo: [{ name: `${selectedReferent.firstName} ${selectedReferent.lastName}`, email: selectedReferent.email }],
+        params: { student_name: youngFullName, message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+      });
+    }
+    // If they are CLE, we notify the class referent.
+    if (cohort?.type === YOUNG_SOURCE.CLE) {
+      const classe = await ClasseModel.findById(young.classeId);
+      const referent = await ReferentModel.findById(classe?.referentClasseIds[0]);
+      const datecohorte = `du ${formatDateFRTimezoneUTC(cohort.dateStart)} au ${formatDateFRTimezoneUTC(cohort.dateEnd)}`;
+      if (referent) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_WITHDRAWN_CLE, {
+          emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+          params: {
+            youngFirstName: young.firstName,
+            youngLastName: young.lastName,
+            datecohorte,
+            raisondesistement: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
+          },
+        });
+      }
+    }
+
+    // If young affected, we notify the head center
+    if (oldStatusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.sessionPhase1Id != null) {
+      const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
+      const headCenter = await ReferentModel.findById(session?.headCenterId);
+
+      if (headCenter) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.YOUNG_WITHDRAWN, {
+          emailTo: [{ name: `${headCenter.firstName} ${headCenter.lastName}`, email: headCenter.email }],
+          params: { contact_name: youngFullName, message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+        });
+      }
+    }
+
+    await sendTemplate(SENDINBLUE_TEMPLATES.young.WITHDRAWN, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+    });
+  } catch (e) {
+    capture(e);
+  }
 }

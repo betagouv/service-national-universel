@@ -23,7 +23,7 @@ export class SejourRepository implements SejourGateway {
         private readonly cls: ClsService,
     ) {}
     async findBySejourSnuId(sejourSnuId: string): Promise<SejourModel | null> {
-        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuId });
+        const sejour = await this.sejourMongooseEntity.findOne({ sejourSnuIds: sejourSnuId });
         if (!sejour) {
             return null;
         }
@@ -36,10 +36,10 @@ export class SejourRepository implements SejourGateway {
         return SejourMapper.toModel(createdSejour);
     }
 
-    async findById(id: string): Promise<SejourModel> {
+    async findById(id: string): Promise<SejourModel | null> {
         const sejour = await this.sejourMongooseEntity.findById(id);
         if (!sejour) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            return null;
         }
         return SejourMapper.toModel(sejour);
     }

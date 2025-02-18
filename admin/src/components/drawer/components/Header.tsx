@@ -29,8 +29,8 @@ export default function Header({ open, setOpen }: Props) {
   return (
     <>
       <button className={`group relative flex flex-row h-[116px] !pt-8 !pb-7 !pl-4 hover:bg-[#1B1F42] items-center ${open && "!pr-2"}`} onClick={onChangeOpen}>
-        {!isProduction && <Badge open={open} />}
-        <img className="w-[56px] h-[56px]" src={logo_snu} alt="logo_snu" />
+        {!isProduction && <TestBadge open={open} />}
+        <img className={cx("w-[56px] h-[56px]", { "saturate-50": !isProduction })} src={logo_snu} alt="logo_snu" />
         {open && (
           <p className="ml-3 text-white uppercase text-sm font-medium text-left leading-[17px] w-full">
             Service <br /> National
@@ -44,15 +44,15 @@ export default function Header({ open, setOpen }: Props) {
   );
 }
 
-const Badge = ({ open }) => {
-  const { isStaging, isDevelopment } = useEnvironment();
+const TestBadge = ({ open }) => {
+  const { isDevelopment } = useEnvironment();
 
   return (
     <div
       className={cx("absolute top-[5px] h-[18px] border-[1px] border-white rounded-full flex justify-center items-center px-1", {
         "right-[10px]": open,
         "right-1/2 transform translate-x-1/2": !open,
-        "bg-red-500": isStaging,
+        "bg-red-500": !isDevelopment,
         "bg-blue-500": isDevelopment,
       })}>
       <div className="leading-none uppercase text-[10px] text-white">

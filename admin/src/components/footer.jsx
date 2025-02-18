@@ -19,7 +19,7 @@ export default function FooterComponent() {
   }, [history]);
 
   return (
-    <Footer>
+    <Footer className="print:hidden">
       <Container>
         <ul>
           <li>

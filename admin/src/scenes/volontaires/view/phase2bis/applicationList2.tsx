@@ -1,50 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory, NavLink } from "react-router-dom";
 import Eye from "../../../../assets/icons/Eye";
 import IconDomain from "../../../../components/IconDomain";
-import Loader from "../../../../components/Loader";
-import { capture } from "../../../../sentry";
 import api from "../../../../services/api";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
-import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES, ApplicationType, MissionType, ContractType } from "../../../../utils";
+import { APPLICATION_STATUS, formatStringDateTimezoneUTC, translate, SENDINBLUE_TEMPLATES } from "../../../../utils";
 import { SelectStatusApplicationPhase2 } from "./components/SelectStatusApplicationPhase2";
 import Tag from "../../../../components/Tag";
 import ReactTooltip from "react-tooltip";
+import { queryClient } from "@/services/react-query";
 
-type PopulatedApplicationType = ApplicationType & { mission: MissionType; contract: ContractType };
-
-export default function ApplicationList({ young, onChangeApplication }) {
-  const [loading, setLoading] = useState(false);
-  const [applications, setApplications] = useState<PopulatedApplicationType[]>();
-
-  useEffect(() => {
-    if (!young?._id) return;
-    getApplications();
-  }, [young]);
-
-  async function getApplications() {
-    setLoading(true);
-    try {
-      const { ok, data, code } = await api.get(`/young/${young._id}/application`);
-      if (!ok) {
-        capture(new Error(code));
-        return toastr.error("Oups, une erreur est survenue", code);
-      }
-      setApplications(data);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue", e.message);
-    }
-    setLoading(false);
-  }
-
-  if (loading) return <Loader />;
+export default function ApplicationList({ young, applications }) {
   if (!applications?.length) return <div className="m-8 text-center italic">Aucune candidature n&apos;est liée à ce volontaire.</div>;
   return (
     <div className="space-y-8 px-12 pt-6 pb-12">
       {applications.map((hit) => (
-        <Hit key={hit._id} young={young} hit={hit} onChangeApplication={onChangeApplication} />
+        <Hit key={hit._id} young={young} hit={hit} />
       ))}
     </div>
   );
@@ -52,7 +24,7 @@ export default function ApplicationList({ young, onChangeApplication }) {
 
 type modalType = { isOpen: boolean; onConfirm?: () => void; title: string; message: string };
 
-const Hit = ({ hit, young, onChangeApplication }) => {
+const Hit = ({ hit, young }) => {
   const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
   const history = useHistory();
   const [modal, setModal] = useState<modalType>({ isOpen: false, onConfirm: undefined, title: "", message: "" });
@@ -138,7 +110,7 @@ const Hit = ({ hit, young, onChangeApplication }) => {
                 if (status === "VALIDATED") {
                   history.push(`/volontaire/${young._id}/phase2/application/${hit._id}/contrat`);
                 }
-                onChangeApplication && onChangeApplication();
+                queryClient.invalidateQueries({ queryKey: ["application", young._id] });
               }}
               dropdownClassName="right-3"
             />
