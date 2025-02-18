@@ -1230,6 +1230,15 @@ export const translateImportReferentiel = (name: string) => {
   }
 };
 
+export const translateMarketing = (name: string) => {
+  switch (name) {
+    case "TEMPLATE_NOT_FOUND":
+      return "Le template est introuvable";
+    default:
+      return name;
+  }
+};
+
 // --------------------------------------------------------------
 // Utilisé formater les noms et adresses des centres du SI
 

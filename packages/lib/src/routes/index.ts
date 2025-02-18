@@ -39,5 +39,6 @@ export type { AffectationRoutes } from "./phase1/affectation";
 export type { ReferentielRoutes } from "./referentiel";
 export type { ReferentRoutes } from "./iam/referent";
 export type { FilterLabelRoutes } from "./filterLabel";
+export type { PlanMarketingRoutes } from "./planMarketing";
 
 export * from "./phase1";
