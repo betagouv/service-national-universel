@@ -30,9 +30,11 @@ export default function RapportPdfPage() {
   });
 
   useEffect(() => {
-    document.title = `rapport_${cohorts.find((cohort) => cohort._id === analytics?.sessionId)?.name?.replaceAll(" ", "")}_${analytics?.createdAt
-      ?.replaceAll(":", "-")
-      ?.replace(".", "-")}`;
+    if (analytics?.sessionId) {
+      const cohortName = cohorts.find((cohort) => cohort._id === analytics.sessionId)?.name?.replaceAll(" ", "");
+      const rapportDate = analytics.createdAt?.replaceAll(":", "-")?.replace(".", "-");
+      document.title = `rapport_${cohortName}_${rapportDate}`;
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [analytics?.sessionId]);
 
