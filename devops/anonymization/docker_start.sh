@@ -16,8 +16,11 @@ cd "$(dirname $0)"
 set -o pipefail
 set -e
 
-echo "Start anonymization"
-./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
+if [[ $ANONYMIZE_DB == "true" ]]
+then
+  echo "Start anonymization"
+  ./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
+fi
 
 if [[ $DELETE_ES_INDEXES == "true" ]]
 then

@@ -104,11 +104,15 @@ const createSession = async (
     // on met à jour les places disponibles si la session existe déjà
     logger.warn(`Session already exists for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
     foundSession.placesTotal = sessionCenter.sessionPlaces;
+    if (sessionCenter.sejourSnuId && !foundSession.sejourSnuIds.includes(sessionCenter.sejourSnuId)) {
+      logger.warn(`Add missing sejourSnuId ${sessionCenter.sejourSnuId}`);
+      foundSession.sejourSnuIds.push(sessionCenter.sejourSnuId);
+    }
     await foundSession.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
     return {
       sessionId: foundSession._id,
       sessionFormule: sessionCenter.sessionFormule,
-      sessionSnuId: foundSession.sejourSnuId,
+      sessionSnuId: foundSession.sejourSnuIds.join(","),
       cohesionCenterId: foundCenter._id,
       cohesionCenterMatricule: sessionCenter.cohesionCenterMatricule,
       placesTotal: sessionCenter.sessionPlaces,
@@ -130,7 +134,7 @@ const createSession = async (
     nameCentre: foundCenter.name,
     zipCentre: foundCenter.zip,
     cityCentre: foundCenter.city,
-    sejourSnuId: sessionCenter.sejourSnuId,
+    sejourSnuIds: [sessionCenter.sejourSnuId],
   };
 
   const createdSessionPhase1 = await SessionPhase1Model.create(sessionPhase1);

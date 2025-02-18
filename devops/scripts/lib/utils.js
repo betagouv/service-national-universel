@@ -1,12 +1,6 @@
 const path = require("node:path");
 const { spawn } = require("node:child_process");
 
-const IMAGE_TAG_LENGTH = 9;
-
-function imageTag(commit) {
-  return commit.substring(0, IMAGE_TAG_LENGTH);
-}
-
 function environmentFromBranch(branchName) {
   if (branchName === "main") {
     return "ci";
@@ -154,7 +148,6 @@ async function genericDeleteAll({
 }
 
 module.exports = {
-  imageTag,
   sleep,
   environmentFromContainer,
   environmentFromSecret,

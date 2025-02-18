@@ -22,7 +22,7 @@ export type SejourModel = {
     //     email?: string;
     //     phone?: string;
     // }[];
-    sejourSnuId?: string;
+    sejourSnuIds: string[];
     dateStart?: string;
     dateEnd?: string;
     sanitaryContactEmail?: string;

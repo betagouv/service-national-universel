@@ -30,7 +30,7 @@ async function main() {
   });
 
   const imageUrl = registryEndpoint(
-    namespace.registry_endpoint,
+    config.dockerRegistry(),
     config.imageName(),
     input.release
   );
