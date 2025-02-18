@@ -26,7 +26,6 @@ const dsnjExport = require("./dsnjExport");
 const injepExport = require("./injepExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
-const mongoMonitoring = require("./mongoMonitoring");
 const classesStatusUpdate = require("./classesStatusUpdate");
 const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
@@ -75,7 +74,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // parentConsentementReminder.handler() : tous les jours à 8h27
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
-// mongoMonitoring.handler() : toutes les 5 minutes
 // classesStatusUpdate.handler() : toutes les heures à la 2ème minute
 // monitorCertificats.handler() : 1er jour de chaque mois à 3h00
 
@@ -112,7 +110,6 @@ const CRONS = [
   cron("loginAttempts", "0 1 * * *", loginAttempts.handler),
   cron("syncReferentSupport", "45 2 * * *", syncReferentSupport.handler),
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
-  cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
   cron("monitorCertificats", "0 3 1 * *", monitorCertificats.handler),
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),
