@@ -1167,19 +1167,7 @@ export class SimulationAffectationHTSService {
             ...infoNonAffecetes.stats,
             "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
             ...(changementDepartements.length > 0
-                ? [
-                      "Changement de département : " +
-                          changementDepartements
-                              .map(
-                                  ({ origine, destination }) =>
-                                      `${formatDepartement(origine)} -> ${[
-                                          ...new Set(destination.map((dest) => dest.departement)),
-                                      ]
-                                          .map(formatDepartement)
-                                          .join("-")}`,
-                              )
-                              .join("; \n"),
-                  ]
+                ? ["Changement de département : " + this.formatChangementDepartements(changementDepartements)]
                 : []),
             ...(changementDepartementsErreur.length > 0
                 ? ["Erreurs changement de département : " + changementDepartementsErreur.join(".\n")]
@@ -1386,5 +1374,16 @@ export class SimulationAffectationHTSService {
             [result[currentIndex], result[randomIndex]] = [result[randomIndex], result[currentIndex]];
         }
         return result;
+    }
+
+    formatChangementDepartements(changementDepartements: ChangementDepartement[]) {
+        return changementDepartements
+            .map(
+                ({ origine, destination }) =>
+                    `${formatDepartement(origine)} -> ${[...new Set(destination.map((dest) => dest.departement))]
+                        .map(formatDepartement)
+                        .join("-")}`,
+            )
+            .join("; \n");
     }
 }
