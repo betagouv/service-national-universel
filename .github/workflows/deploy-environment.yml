@@ -82,7 +82,7 @@ jobs:
           node create-environment.js ${{ needs.prepare.outputs.env_name }}
 
           # ENV REGISTRY
-          registry=$(node get-docker-registry.js $env_name)
+          registry=$(node get-docker-registry.js ${{ needs.prepare.outputs.env_name }})
           echo "registry: $registry"
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
