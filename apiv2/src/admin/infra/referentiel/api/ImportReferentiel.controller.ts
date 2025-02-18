@@ -28,7 +28,8 @@ const REFERENTIEL_TASK_NAMES = [TaskName.REFERENTIEL_IMPORT];
 @Controller("referentiel")
 export class ImportReferentielController {
     constructor(
-        @Inject(ReferentielImportTaskService) private readonly referentielImportTaskService: ReferentielImportTaskService,
+        @Inject(ReferentielImportTaskService)
+        private readonly referentielImportTaskService: ReferentielImportTaskService,
         @Inject(ReferentielClasseService) private readonly referentielClasseService: ReferentielClasseService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
@@ -77,7 +78,7 @@ export class ImportReferentielController {
                     mimetype: file.mimetype,
                     auteur,
                 });
-                return TaskMapper.toDto(importTask);          
+                return TaskMapper.toDto(importTask);
             default:
                 throw new FunctionalException(FunctionalExceptionCode.IMPORT_NOT_VALID);
         }
@@ -88,7 +89,7 @@ export class ImportReferentielController {
     async getImports(
         @Query("name")
         name?: TaskName.REFERENTIEL_IMPORT,
-        @Param("type")
+        @Query("type")
         type?: string,
         @Query("status")
         status?: TaskStatus,

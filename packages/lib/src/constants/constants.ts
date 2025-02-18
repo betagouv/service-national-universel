@@ -424,6 +424,13 @@ const FILE_KEYS = [
 
 const MILITARY_FILE_KEYS = ["militaryPreparationFilesIdentity", "militaryPreparationFilesCensus", "militaryPreparationFilesAuthorization", "militaryPreparationFilesCertificate"];
 
+const MILITARY_PREPARATION_FILES_STATUS = {
+  VALIDATED: "VALIDATED",
+  WAITING_VERIFICATION: "WAITING_VERIFICATION",
+  WAITING_CORRECTION: "WAITING_CORRECTION",
+  REFUSED: "REFUSED",
+};
+
 const SESSION_FILE_KEYS = ["time-schedule", "pedago-project"];
 
 const ENGAGEMENT_TYPES = [
@@ -841,6 +848,7 @@ export {
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
+  MILITARY_PREPARATION_FILES_STATUS,
   SESSION_FILE_KEYS,
   ENGAGEMENT_TYPES,
   UNSS_TYPE,
@@ -913,6 +921,7 @@ export default {
   MINISTRES,
   FILE_KEYS,
   MILITARY_FILE_KEYS,
+  MILITARY_PREPARATION_FILES_STATUS,
   SESSION_FILE_KEYS,
   ENGAGEMENT_TYPES,
   UNSS_TYPE,

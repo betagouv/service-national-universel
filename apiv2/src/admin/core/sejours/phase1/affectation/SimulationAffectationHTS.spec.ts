@@ -71,7 +71,9 @@ describe("SimulationAffectationHTS", () => {
                 {
                     provide: JeuneGateway,
                     useValue: {
-                        findBySessionIdStatusNiveauScolairesAndDepartements: jest.fn().mockResolvedValue(mockJeunes),
+                        findBySessionIdStatutNiveauScolairesAndDepartementsCible: jest
+                            .fn()
+                            .mockResolvedValue(mockJeunes),
                     },
                 },
                 {

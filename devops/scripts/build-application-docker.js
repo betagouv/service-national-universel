@@ -38,7 +38,7 @@ async function main() {
 
   const registry = config.dockerRegistry();
 
-  const namespace = await scaleway.find(RESOURCE.RegistryNamespace, {
+  const registryNamespace = await scaleway.findOrThrow(RESOURCE.RegistryNamespace, {
     project_id: project.id,
     name: getRegistryName(registry),
   });
@@ -49,29 +49,33 @@ async function main() {
     input.tag
   );
 
-  if (namespace) {
-    const image = await scaleway.find(RESOURCE.Image, {
-      namespace_id: namespace.id,
-      name: config.imageName(),
+  const image = await scaleway.find(RESOURCE.Image, {
+    namespace_id: registryNamespace.id,
+    name: config.imageName(),
+  });
+  if (image) {
+    const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
+      image_id: image.id,
     });
-    if (image) {
-      const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
-        image_id: image.id,
-        name: input.tag,
-      });
 
-      if (imageTag) {
-        console.log(`Image ${imageEndpoint} already exists`);
-        return;
-      }
+    if (imageTag) {
+      console.log(`Image ${imageEndpoint} already exists`);
+      return;
     }
   }
+
+  const containerNamespace = await scaleway.find(RESOURCE.ContainerNamespace, {
+    project_id: project.id,
+    name: config.containerNamespace(),
+  });
+
+  const containerNamespaceRegistry = containerNamespace ? containerNamespace.registry_endpoint : input.environment;
 
   console.log(`Building image ${imageEndpoint}`);
 
   const values = {
     ...secrets,
-    ...config.buildEnvVariables(registry, input.tag),
+    ...config.buildEnvVariables(containerNamespaceRegistry, input.tag),
   };
 
   const args = [

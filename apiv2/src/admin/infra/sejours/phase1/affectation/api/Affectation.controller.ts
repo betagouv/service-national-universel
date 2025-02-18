@@ -28,11 +28,14 @@ import {
     StatusValidation,
 } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
+import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
 
 @Controller("affectation")
 export class AffectationController {
     constructor(
         private readonly affectationService: AffectationService,
+        private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
@@ -129,6 +132,19 @@ export class AffectationController {
             },
         });
         return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
+    @Get("/simulation/hts/:id/analytics")
+    async getSimulation(
+        @Param("id")
+        id: string,
+    ): Promise<AffectationRoutes["GetSimulationAnalytics"]["response"]> {
+        const simulation = (await this.taskGateway.findById(id)) as SimulationAffectationHTSTaskModel;
+        if (!simulation.metadata?.results?.rapportKey) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return await this.simulationAffectationHTSService.extractPdfAnalyticsFromRapport(simulation);
     }
 
     @UseGuards(AdminGuard)

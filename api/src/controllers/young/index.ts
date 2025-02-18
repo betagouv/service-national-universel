@@ -74,7 +74,7 @@ import {
   ReferentType,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
-import { anonymizeApplicationsFromYoungId } from "../../services/application";
+import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
@@ -85,7 +85,7 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
-import { handleNotifForYoungWithdrawn } from "../../young/youngService";
+import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -728,12 +728,13 @@ router.get("/:id/application", passport.authenticate(["referent", "young"], { se
     }
 
     const query: any = { youngId: id };
-    if (isMilitaryPreparation !== undefined) {
-      query.isMilitaryPreparation = isMilitaryPreparation;
-    }
 
     type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
     let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
+
+    if (isMilitaryPreparation) {
+      data = data.filter((a) => a.mission?.isMilitaryPreparation);
+    }
 
     for (let application of data) {
       if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
@@ -1106,6 +1107,10 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+    }
+
+    for (let young of youngs) {
+      await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
