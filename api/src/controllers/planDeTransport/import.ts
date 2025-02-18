@@ -27,7 +27,7 @@ import { validatePdtFile, computeImportSummary } from "../../planDeTransport/pla
 import {
   computeMergedBusIds,
   formatTime,
-  getLinePdrCount,
+  getMaxLinePdrCount,
   getMergedBusIdsFromLigneBus,
   ImportPlanTransportLine,
   mapTransportType,
@@ -144,10 +144,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
       }
 
       const lines = importData.lines as ImportPlanTransportLine[];
-      const countPdr = lines.reduce((acc, line) => {
-        const count = getLinePdrCount(line);
-        return count > acc ? count : acc;
-      }, 0);
+      const countPdr = getMaxLinePdrCount(lines as Array<Record<string, string>>);
       const linesIds = lines.map((line) => line["NUMERO DE LIGNE"]);
 
       // Vérification des lignes existantes

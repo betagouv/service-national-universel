@@ -90,7 +90,7 @@ export const createJeune = async (jeune?: Partial<JeuneModel>) => {
         // populationDensity: "DENSE",
         qpv: "false",
         // situation: "Etudiant",
-        // grade: "2ndeGT",
+        niveauScolaire: "2ndeGT",
         // schoolCertification: "false",
         // schooled: "true",
         // schoolName: faker.location.city(),
