@@ -154,7 +154,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.use(authMiddleware("referent"));
 router.get(
-  "/:cohortId/DepartmentServiceContact/export",
+  "/:sessionId/DepartmentServiceContact/export",
   accessControlMiddleware([ROLES.ADMIN]),
   requestValidatorMiddleware({
     params: Joi.object<DepartmentServiceRoutes["ExportContacts"]["params"]>({ sessionId: idSchema().required() }),
