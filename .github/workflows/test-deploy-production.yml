@@ -42,11 +42,11 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
-          staging_registry=$(node get-environment-registry.js ${{ env.STAGING_ENV_NAME }})
+          staging_registry=$(node get-docker-registry.js ${{ env.STAGING_ENV_NAME }})
           echo "staging_registry: $staging_registry"
           echo "staging_registry=$staging_registry" >> $GITHUB_OUTPUT
 
-          prod_registry=$(node get-environment-registry.js ${{ env.PROD_ENV_NAME }})
+          prod_registry=$(node get-docker-registry.js ${{ env.PROD_ENV_NAME }})
           echo "prod_registry: $prod_registry"
           echo "prod_registry=$prod_registry" >> $GITHUB_OUTPUT
 

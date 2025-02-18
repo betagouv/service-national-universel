@@ -17,7 +17,6 @@ jobs:
     runs-on: ubuntu-latest
     outputs:
       env_name: ${{ steps.config.outputs.env_name }}
-      ci_registry: ${{ steps.config.outputs.ci_registry }}
       build_matrix: ${{ steps.config.outputs.build }}
       deploy_matrix: ${{ steps.config.outputs.deploy }}
 
@@ -38,11 +37,6 @@ jobs:
           env_name=$(node devops/scripts/get-environment-name.js ${{ env.BRANCH_NAME }})
           echo "env_name: $env_name"
           echo "env_name=$env_name" >> $GITHUB_OUTPUT
-
-          # ENV REGISTRY
-          ci_registry=$(node devops/scripts/get-environment-registry.js $env_name)
-          echo "ci_registry: $ci_registry"
-          echo "ci_registry=$ci_registry" >> $GITHUB_OUTPUT
 
           git fetch --depth=100 origin ${{ env.BRANCH_NAME }}
           git switch ${{ env.BRANCH_NAME }}
@@ -68,6 +62,8 @@ jobs:
   create_environment:
     needs: prepare
     runs-on: ubuntu-latest
+    outputs:
+      registry: ${{ steps.create.outputs.registry }}
     steps:
       - uses: actions/checkout@v4
 
@@ -77,12 +73,18 @@ jobs:
           node-version: "20.17"
 
       - name: Create environment
+        id: create
         working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
         run: |
           node create-environment.js ${{ needs.prepare.outputs.env_name }}
+
+          # ENV REGISTRY
+          registry=$(node get-docker-registry.js ${{ needs.prepare.outputs.env_name }})
+          echo "registry: $registry"
+          echo "registry=$registry" >> $GITHUB_OUTPUT
 
       - name: Add comment to PR
         if: github.event_name == 'pull_request' && github.event.label.name == 'deploy'
@@ -104,7 +106,7 @@ jobs:
             --data "{ \"body\": \"Application endpoints :\n\n- $(jq < endpoints.json -r '.admin')\n- $(jq < endpoints.json -r '.app')\n- $(jq < endpoints.json -r '.api')\n- $(jq < endpoints.json -r '.apiv2')\" }"
 
   build:
-    needs: [prepare]
+    needs: [prepare, create_environment]
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -118,7 +120,7 @@ jobs:
         with:
           username: nologin
           password: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-          registry: ${{ needs.prepare.outputs.ci_registry }}
+          registry: ${{ needs.create_environment.outputs.registry }}
 
       - name: Use Node.js
         uses: actions/setup-node@v4
