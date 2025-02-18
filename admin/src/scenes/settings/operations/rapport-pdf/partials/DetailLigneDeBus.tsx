@@ -1,15 +1,7 @@
-import { Sunburst } from "@snu/ds";
 import React from "react";
-import { AffectationRoutes } from "snu-lib";
 
-const COLORS = {
-  green: "#7bc043",
-  red: "#ee4035",
-  // red2: "#fc8c62",
-  // green2: "#66c2a5",
-  red3: "rgb(246, 181, 174)",
-  green3: "rgb(250, 218, 164)",
-};
+import { AffectationRoutes } from "snu-lib";
+import { GRAPH_COLORS, Sunburst } from "@snu/ds";
 
 type valueof<T> = T[keyof T];
 type Centre = valueof<AffectationRoutes["GetSimulationAnalytics"]["response"]["regions"]>[0];
@@ -32,7 +24,7 @@ export default function DetailLigneDeBus({ centre }: { centre: Centre }) {
                 name: ligne.numeroLigne,
                 children: [
                   {
-                    color: ligne.placesOccupees === 0 ? "red" : COLORS.red,
+                    color: ligne.placesOccupees === 0 ? "red" : GRAPH_COLORS.red,
                     textColor: "white",
                     label: String(ligne.placesRestances),
                     name: "Restantes",
@@ -41,13 +33,13 @@ export default function DetailLigneDeBus({ centre }: { centre: Centre }) {
                         label: String(ligne.nonAffectesMemeDepartement),
                         name: String(ligne.nonAffectesMemeDepartement),
                         value: ligne.placesRestances || 0,
-                        color: ligne.nonAffectesMemeDepartement > 0 ? COLORS.red3 : COLORS.green3,
-                        textColor: ligne.nonAffectesMemeDepartement > 0 ? COLORS.red : "black",
+                        color: ligne.nonAffectesMemeDepartement > 0 ? GRAPH_COLORS.red3 : GRAPH_COLORS.green3,
+                        textColor: ligne.nonAffectesMemeDepartement > 0 ? GRAPH_COLORS.red : "black",
                       },
                     ],
                   },
                   {
-                    color: COLORS.green,
+                    color: GRAPH_COLORS.green,
                     name: "Prises",
                     label: String(ligne.placesOccupees),
                     value: ligne.placesOccupees || 0,

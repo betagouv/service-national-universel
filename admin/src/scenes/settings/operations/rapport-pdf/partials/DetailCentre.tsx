@@ -1,14 +1,7 @@
 import React from "react";
 
 import { AffectationRoutes } from "snu-lib";
-import { Pie, Sunburst } from "@snu/ds";
-
-const COLORS = {
-  red: "#ee4035",
-  green: "#7bc043",
-  red2: "#fc8c62",
-  green2: "#66c2a5",
-};
+import { Pie, Sunburst, GRAPH_COLORS } from "@snu/ds";
 
 type valueof<T> = T[keyof T];
 type Centre = valueof<AffectationRoutes["GetSimulationAnalytics"]["response"]["regions"]>[0];
@@ -30,12 +23,12 @@ export default function DetailCentre({ centre }: { centre: Centre }) {
                 isPourcent
                 data={[
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.red,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.red,
                     label: "Restantes",
                     value: (centre.placesRestantes || 0) / centre.placesTotal,
                   },
                   {
-                    color: COLORS.green,
+                    color: GRAPH_COLORS.green,
                     label: "Prises",
                     value: (centre.placesOccupees || 0) / centre.placesTotal,
                   },
@@ -49,12 +42,12 @@ export default function DetailCentre({ centre }: { centre: Centre }) {
                 isPourcent
                 data={[
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.green2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.green2,
                     label: "Garçon",
                     value: centre.tauxGarcon,
                   },
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.red2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.red2,
                     label: "Filles",
                     value: centre.tauxFille,
                   },
@@ -68,12 +61,12 @@ export default function DetailCentre({ centre }: { centre: Centre }) {
                 isPourcent
                 data={[
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.green2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.green2,
                     label: "QVP+",
                     value: centre.tauxQVP,
                   },
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.red2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.red2,
                     label: "QVP-",
                     value: 1 - centre.tauxQVP,
                   },
@@ -87,12 +80,12 @@ export default function DetailCentre({ centre }: { centre: Centre }) {
                 isPourcent
                 data={[
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.green2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.green2,
                     label: "PSH+",
                     value: centre.tauxPSH,
                   },
                   {
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.red2,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.red2,
                     label: "PSH-",
                     value: 1 - centre.tauxPSH,
                   },
@@ -116,11 +109,11 @@ export default function DetailCentre({ centre }: { centre: Centre }) {
                   {
                     name: "Restantes",
                     value: centre.placesRestantes || 0,
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.red,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.red,
                   },
                   {
                     name: "Prises",
-                    color: centre.placesOccupees === 0 ? "red" : COLORS.green,
+                    color: centre.placesOccupees === 0 ? "red" : GRAPH_COLORS.green,
                     children: centre.lignesDeBus.map((ligne, index) => ({
                       name: ligne.numeroLigne,
                       value: ligne.placesOccupees || 0,

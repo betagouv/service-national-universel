@@ -1,5 +1,6 @@
 // Constants
 import PHONE_ZONES from "./constants/PhoneZones";
+export { GRAPH_COLORS } from "./constants/GraphColors";
 
 // UI
 import ProfilePic from "./ui/ProfilePic";
