@@ -56,6 +56,7 @@ async function main() {
   if (image) {
     const imageTag = await scaleway.find(RESOURCE.Image.Tag, {
       image_id: image.id,
+      name: input.tag,
     });
 
     if (imageTag) {
