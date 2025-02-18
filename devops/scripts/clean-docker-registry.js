@@ -2,13 +2,12 @@ const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { EnvConfig, getRegistryName } = require("./lib/config");
 
-const MINIMUM_IMAGES_TO_KEEP = 10;
-
 class CleanRegistry {
     constructor(scalewayClient, options) {
         this.scaleway = scalewayClient;
         this.environment = options.environment;
         this.applyChanges = options.applyChanges;
+        this.keepCount = options.keepCount;
 
         const lifetimeMs = options.lifetime * 24 * 3600000;
         this.limit = new Date(Date.now() - lifetimeMs).toISOString();
@@ -37,7 +36,7 @@ class CleanRegistry {
         tags.sort((a, b) => a.updated_at.localeCompare(b.updated_at) );
       
         let validCount = tags.reduce((acc, i) => acc + Number(i.updated_at >= this.limit), 0);
-        validCount = Math.max(validCount, MINIMUM_IMAGES_TO_KEEP);
+        validCount = Math.max(validCount, this.keepCount);
         
         const validTags = tags.splice(-validCount);
         console.log(`${tags.length} tags to delete - ${validTags.length} tags to keep`)
@@ -78,13 +77,18 @@ class CleanRegistry {
 }
 
 async function main() {
-  const input = new UserInput("Delete test environment on Scaleway")
+  const input = new UserInput("Delete outdated docker image tags")
     .arg("environment", "Environment (ci, staging, production, development)")
     .optInt(
         "lifetime",
         `Number of days without update after which an image tag will be deleted`,
         { default: 14, shortcut: "l" }
       )
+    .optInt(
+      "keep-count",
+      `Minimum number of most recent image tags to keep`,
+      { default: 10, shortcut: "k" }
+    )
     .optBool("apply-changes", "Disable simulation mode", {shortcut: 'a', default: false})
     .env("SCW_SECRET_KEY", "Scaleway secret key")
     .env("SCW_ORGANIZATION_ID", "Scaleway organization identifier")
