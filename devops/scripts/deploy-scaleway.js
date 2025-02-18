@@ -2,6 +2,7 @@ const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
 const { AppConfig } = require("./lib/config");
 const { registryEndpoint } = require("./lib/utils");
+const { GetRegistry } = require("./get-docker-registry");
 
 async function main() {
   const input = new UserInput(`Deploy application on Scaleway`)
@@ -29,8 +30,15 @@ async function main() {
     name: config.containerName(),
   });
 
+  const registry = await new GetRegistry(this.scaleway, {
+    environment: input.environment,
+    config,
+    project,
+    namespace,
+  }).execute();
+
   const imageUrl = registryEndpoint(
-    config.dockerRegistry(),
+    registry,
     config.imageName(),
     input.release
   );
