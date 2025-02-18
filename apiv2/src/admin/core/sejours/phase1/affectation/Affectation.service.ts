@@ -171,4 +171,12 @@ export class AffectationService {
         }
         return (value * 100).toFixed(2) + "%";
     }
+
+    parsePourcent(value: string): number | null {
+        if (!value) {
+            return null;
+        }
+        const pourcent = parseFloat(value.replaceAll("%", ""));
+        return Math.floor(pourcent * 100) / 10000;
+    }
 }

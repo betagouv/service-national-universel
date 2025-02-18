@@ -3,6 +3,14 @@ import { Phase1Routes } from "snu-lib";
 import { buildRequest } from "@/utils/buildRequest";
 
 const Phase1Service = {
+  getSimulation: async (id: string) => {
+    return await buildRequest<Phase1Routes["GetSimulationRoute"]>({
+      path: "/phase1/simulations/{id}",
+      method: "GET",
+      params: { id },
+      target: "API_V2",
+    })();
+  },
   getSimulations: async (sessionId: string, query: Phase1Routes["GetSimulationsRoute"]["query"]) => {
     return await buildRequest<Phase1Routes["GetSimulationsRoute"]>({
       path: "/phase1/{sessionId}/simulations",
