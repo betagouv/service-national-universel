@@ -1,6 +1,7 @@
 const UserInput = require("./lib/user-input");
 const { ScalewayClient, RESOURCE } = require("./lib/scaleway-client");
-const { EnvConfig, getRegistryName } = require("./lib/config");
+const { EnvConfig } = require("./lib/config");
+const { GetRegistry, getRegistryName } = require("./get-docker-registry");
 
 class CleanRegistry {
     constructor(scalewayClient, options) {
@@ -57,11 +58,16 @@ class CleanRegistry {
 
         const config = new EnvConfig(this.environment);
 
-        const registry = config.dockerRegistry();
-      
         const project = await this.scaleway.findProject(config.projectName());
+
+        const registry = await new GetRegistry(this.scaleway, {
+          environment: this.environment,
+          config: this.config,
+          project,
+        }).execute();
       
-        const namespace = await this.scaleway.find(RESOURCE.RegistryNamespace, {
+      
+        const namespace = await this.scaleway.findOrThrow(RESOURCE.RegistryNamespace, {
           project_id: project.id,
           name: getRegistryName(registry),
         });
