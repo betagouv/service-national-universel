@@ -52,7 +52,7 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModel(jeune);
     }
 
-    async findBySessionIdStatusNiveauScolairesAndDepartementsCible(
+    async findBySessionIdStatutNiveauScolairesAndDepartementsCible(
         sessionId: string,
         status: string,
         niveauScolaires: string[],

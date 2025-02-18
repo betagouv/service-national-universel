@@ -28,7 +28,7 @@ describe("JeuneGateway", () => {
         expect(jeuneGateway).toBeDefined();
     });
 
-    describe("findBySessionIdStatusNiveauScolairesAndDepartementsCible", () => {
+    describe("findBySessionIdStatutNiveauScolairesAndDepartementsCible", () => {
         it("prise en compte des département cible des jeunes", async () => {
             const session = await createSession();
             // scolarisé dans sa zone de résidence
@@ -74,7 +74,7 @@ describe("JeuneGateway", () => {
                 paysScolarite: "FRANCE",
             });
 
-            const result = await jeuneGateway.findBySessionIdStatusNiveauScolairesAndDepartementsCible(
+            const result = await jeuneGateway.findBySessionIdStatutNiveauScolairesAndDepartementsCible(
                 session.id,
                 YOUNG_STATUS.VALIDATED,
                 Object.values(GRADES),
