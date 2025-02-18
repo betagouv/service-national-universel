@@ -68,7 +68,7 @@ router.post("/:id/cohort/:cohort/contact", passport.authenticate("referent", { s
       contactMail: value.contactMail,
     };
 
-    let contacts = [...departmentService.contacts];
+    let contacts: any[] = [...departmentService.contacts];
 
     const contactIndex = contacts.findIndex((contact) => contact._id.toString() === value.contactId);
     const alreadyExist = contactIndex !== -1;
@@ -107,9 +107,9 @@ router.delete("/:id/cohort/:cohort/contact/:contactId", passport.authenticate("r
     if (!departmentService) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // checking if the contact for this cohort already exists...
-    let contacts = [...departmentService.contacts];
+    let contacts: any[] = [...departmentService.contacts];
 
-    const exist = departmentService.contacts.findIndex((contact) => contact._id.toString() === value.contactId);
+    const exist = departmentService.contacts.findIndex((contact: any) => contact._id.toString() === value.contactId);
     if (exist === -1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     contacts = contacts.filter((contact) => contact._id.toString() !== value.contactId);

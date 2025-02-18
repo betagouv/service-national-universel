@@ -1,14 +1,14 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DepartmentServiceContactSchema, DepartmentServiceSchema, InterfaceExtended } from "snu-lib";
+import { DepartmentServiceSchema, InterfaceExtended } from "snu-lib";
 
 import anonymize from "../anonymization/departmentService";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 const MODELNAME = "departmentservice";
 
-const schema = new Schema({ ...DepartmentServiceSchema, contacts: [new Schema(DepartmentServiceContactSchema)] });
+const schema = new Schema(DepartmentServiceSchema);
 
 schema.methods.anonymise = function () {
   return anonymize(this);
