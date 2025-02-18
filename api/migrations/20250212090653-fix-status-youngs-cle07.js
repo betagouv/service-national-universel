@@ -19,4 +19,5 @@ module.exports = {
       `${youngsInCohortCle07Mars2025Updated.modifiedCount} youngs updated statusPhase1 with ${YOUNG_STATUS_PHASE1.WAITING_AFFECTATION} status set to ${YOUNG_STATUS_PHASE1.AFFECTED}`,
     );
   },
+  async down() {},
 };
