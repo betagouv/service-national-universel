@@ -78,7 +78,73 @@ interface RecipientFetchError {
 
 type RecipientNotificationError = RecipientValidationError | RecipientProcessingError | RecipientFetchError;
 
-const validateYoungData = (young: YoungCustomType, selectedTypes: RecipientType[]): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
+// Validation des données des jeunes pour le transport
+const validateYoungDataTransport = (
+  young: YoungCustomType,
+  selectedTypes: RecipientType[],
+): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
+  const isTransportRequired = selectedTypes.includes("jeunes") || selectedTypes.includes("representants");
+
+  if (isTransportRequired) {
+    if (!young.center) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "centre d'affectation",
+        },
+      };
+    }
+
+    if (!young.meetingPoint) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "point de rassemblement",
+        },
+      };
+    }
+
+    if (!young.bus) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "bus",
+        },
+      };
+    }
+
+    if (!young.ligneToPoint) {
+      return {
+        isValid: false,
+        error: {
+          youngId: young._id,
+          firstName: young.firstName,
+          lastName: young.lastName,
+          type: "transport",
+          missing: "ligne de bus",
+        },
+      };
+    }
+  }
+
+  return { isValid: true };
+};
+
+// Validation Stricte pour retrouver les destinaires en fonction du jeune
+// Validation Stricte: génère une erreur si le jeune ne possède pas les informations requises pour retrouver un destinataire
+const validateYoungDataStrict = (young: YoungCustomType, selectedTypes: RecipientType[]): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
   if (selectedTypes.includes("referents") && !young.classe?.referentClasseIds?.length) {
     return {
       isValid: false,
@@ -131,59 +197,9 @@ const validateYoungData = (young: YoungCustomType, selectedTypes: RecipientType[
     };
   }
 
-  const isTransportSelected = selectedTypes.includes("jeunes") || selectedTypes.includes("representants");
-  if (isTransportSelected) {
-    if (!young.center) {
-      return {
-        isValid: false,
-        error: {
-          youngId: young._id,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          type: "transport",
-          missing: "centre d'affectation",
-        },
-      };
-    }
-
-    if (!young.meetingPoint) {
-      return {
-        isValid: false,
-        error: {
-          youngId: young._id,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          type: "transport",
-          missing: "point de rassemblement",
-        },
-      };
-    }
-
-    if (!young.bus) {
-      return {
-        isValid: false,
-        error: {
-          youngId: young._id,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          type: "transport",
-          missing: "bus",
-        },
-      };
-    }
-
-    if (!young.ligneToPoint) {
-      return {
-        isValid: false,
-        error: {
-          youngId: young._id,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          type: "transport",
-          missing: "ligne de bus",
-        },
-      };
-    }
+  const transportValidation = validateYoungDataTransport(young, selectedTypes);
+  if (!transportValidation.isValid) {
+    return transportValidation;
   }
 
   return { isValid: true };
@@ -270,11 +286,12 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
     staleTime: Infinity,
   });
 
-  const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[]): void => {
+  const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[], strict: boolean = false): void => {
     const validationErrors: RecipientValidationError["details"] = [];
+    const validateFn = strict ? validateYoungDataStrict : validateYoungDataTransport;
 
     youngs.forEach((young) => {
-      const validation = validateYoungData(young, selectedTypes);
+      const validation = validateFn(young, selectedTypes);
       if (!validation.isValid) {
         validationErrors.push(validation.error);
       }
@@ -282,10 +299,6 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
 
     if (validationErrors.length > 0) {
       const errorMessage = formatValidationErrorMessage(validationErrors);
-      // TODO: voir ce qu'il faut afficher comme erreur sachant qu'en fonction
-      // du nombre de destinataires, le message peut être très long
-      // Peut etre garder tout le détail avec errorMessage.details mais avec un split ?
-      // toastr.error(errorMessage.toastr, errorMessage.details, { timeOut: 10000 });
       toastr.error(errorMessage.toastr, "", { timeOut: 10000 });
 
       throw {
