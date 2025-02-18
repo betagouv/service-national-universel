@@ -1159,7 +1159,7 @@ export class SimulationAffectationHTSService {
         }));
 
         const summary = [
-            "Nombre de jeunes à affecter : " + jeunesList.length,
+            "Nombre de jeunes à affecter : " + (jeunesList.length + jeuneIntraDepartementList.length),
             "Nombre de jeunes affectés : " + jeunesNouvellementAffectedList.length,
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
             "En attente d'affectation : " + (jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length),
