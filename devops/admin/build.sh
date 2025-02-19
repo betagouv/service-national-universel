@@ -1,6 +1,6 @@
 #!/bin/sh
 
-ls
+pwd
 
 exit 1
 
