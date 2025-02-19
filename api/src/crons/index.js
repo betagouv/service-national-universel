@@ -18,7 +18,6 @@ const youngPatches = require("./patch/young");
 const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
-const parentRevalidateRI = require("./parentRevalidateRI");
 const reminderInscription = require("./reminderInscription");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const reminderWaitingCorrection = require("./reminderWaitingCorrection");
@@ -91,7 +90,6 @@ const CRONS = [
   cron("dsnjExport", "15 04 * * *", dsnjExport.handler),
   cron("injepExport", "40 04 * * *", injepExport.handler),
   cron("parentConsentementReminder", "27 8 * * *", parentConsentementReminder.handler),
-  cron("parentRevalidateRI", "30 7 * * 1", parentRevalidateRI.handler),
   cron("reminderInscription", "0 11 * * *", reminderInscription.handler),
   cron("reminderWaitingCorrection", "2 11 * * *", reminderWaitingCorrection.handler),
   cron("reminderImageRightsParent2", "0 10 * * *", reminderImageRightsParent2.handler),
