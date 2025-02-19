@@ -131,12 +131,10 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     if (listPDR.length === 0) return;
     const searchFields = ["name", "address", "particularitesAcces", "region", "department", "code", "city", "zip", "matricule"];
 
-    const filteredPDR = listPDR
-      .filter((item) => {
-        if (search === "") return true;
-        return searchFields.some((field) => item[field]?.toString().toLowerCase().includes(search.toLowerCase()));
-      })
-      .filter((item) => !bus.meetingPointsIds.includes(item._id?.toString() || ""));
+    const filteredPDR = listPDR.filter((item) => {
+      if (search === "") return true;
+      return searchFields.some((field) => item[field]?.toString().toLowerCase().includes(search.toLowerCase()));
+    });
 
     setFilteredPDR(filteredPDR);
   }, [search, listPDR, bus]);

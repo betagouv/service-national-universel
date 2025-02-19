@@ -33,6 +33,7 @@ const Phase1PresenceFormBlock = ({ young = null, values = null, setValues, setYo
   const handleConfirm = (data) => {
     setIsPresenceJDMModalOpen(false);
     setIsPresenceOnArrivalModalOpen(false);
+    setIsDepartureModalOpen(false);
     setYoung(data);
     setValues(data);
   };

@@ -63,7 +63,7 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     outputs:
-      registry: ${{ steps.registry.outputs.registry }}
+      registry: ${{ steps.create.outputs.registry }}
     steps:
       - uses: actions/checkout@v4
 
@@ -73,7 +73,7 @@ jobs:
           node-version: "20.17"
 
       - name: Create environment
-        id: registry
+        id: create
         working-directory: devops/scripts
         env:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
@@ -81,7 +81,8 @@ jobs:
         run: |
           node create-environment.js ${{ needs.prepare.outputs.env_name }}
 
-          registry=$(node get-environment-registry.js ${{ needs.prepare.outputs.env_name }})
+          # ENV REGISTRY
+          registry=$(node get-docker-registry.js ${{ needs.prepare.outputs.env_name }})
           echo "registry: $registry"
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
@@ -135,7 +136,7 @@ jobs:
           node build-application-docker.js --push ${{ needs.prepare.outputs.env_name }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
   deploy:
-    needs: [prepare, build]
+    needs: [prepare, build, create_environment]
     runs-on: ubuntu-latest
     strategy:
       matrix:

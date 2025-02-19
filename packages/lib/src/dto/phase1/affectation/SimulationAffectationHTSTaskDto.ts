@@ -10,6 +10,7 @@ export interface RatioRepartition {
 
 export type Analytics = {
   selectedCost: number;
+  iterationCostList: number[];
   jeunesNouvellementAffected: number;
   jeuneAttenteAffectation: number;
   jeunesDejaAffected: number;

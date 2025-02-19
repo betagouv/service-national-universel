@@ -36,6 +36,7 @@ const PublicSupport = lazy(() => import("./scenes/public-support-center"));
 const School = lazy(() => import("./scenes/school"));
 const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
 const Settings = lazy(() => import("./scenes/settings"));
+const RapportPdfPage = lazy(() => import("./scenes/settings/operations/rapport-pdf/RapportPdfPage"));
 const Structure = lazy(() => import("./scenes/structure"));
 const SupportCenter = lazy(() => import("./scenes/support-center"));
 const Utilisateur = lazy(() => import("./scenes/utilisateur"));
@@ -153,7 +154,7 @@ const Home = () => {
         }
         if (res.token) api.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
-        const cohorts = await getCohorts();
+        const cohorts = await getCohorts(); // TODO: mise en place d'un cache (redux-persist?)
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
@@ -229,6 +230,7 @@ const Home = () => {
               <Suspense fallback={<Loader />}>
                 <Switch>
                   <RestrictedRoute path="/structure" component={Structure} />
+                  <RestrictedRoute path="/settings/operations/simulation/rapport-pdf/:id" component={RapportPdfPage} />
                   <RestrictedRoute path="/settings/:tab?" component={Settings} />
                   <RestrictedRoute path="/alerte" component={Alerte} />
                   <RestrictedRoute path="/profil" component={Profil} />

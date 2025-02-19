@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { setYoung } from "../../../redux/auth/actions";
 import { Link, useHistory } from "react-router-dom";
-import { PHONE_ZONES, formatDateFR, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
+import { PHONE_ZONES, formatDateFRTimezoneUTC, translate, translateGrade, isFeatureEnabled, FEATURES_NAME, getCohortPeriod } from "snu-lib";
 import EditPen from "../../../assets/icons/EditPen";
 import Error from "../../../components/error";
 import { PreInscriptionContext } from "../../../context/PreInscriptionContextProvider";
@@ -151,7 +151,7 @@ export default function StepConfirm() {
           </div>
           <div className="flex items-center justify-between ">
             <span className="text-gray-500">Date de naissance&nbsp;:</span>
-            <span className="text-right">{formatDateFR(data.birthDate)}</span>
+            <span className="text-right">{formatDateFRTimezoneUTC(data.birthDate)}</span>
           </div>
           {data.school ? (
             <>
