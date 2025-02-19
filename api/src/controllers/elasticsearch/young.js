@@ -111,35 +111,86 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   }
 
   if (user.role === ROLES.REFERENT_REGION && !showAffectedToRegionOrDep) {
-    contextFilters.push({ term: { "region.keyword": user.region } });
-  }
+    const etablissementsInRegion = await EtablissementModel.find({ region: user.region }, { _id: 1 });
+    const etablissementIds = etablissementsInRegion.map((e) => e._id.toString());
 
-  if (user.role === ROLES.REFERENT_REGION && showAffectedToRegionOrDep) {
-    const sessionPhase1 = await SessionPhase1Model.find({ region: user.region });
-    if (sessionPhase1.length === 0) {
-      contextFilters.push({ term: { "region.keyword": user.region } });
-    } else {
-      contextFilters.push({
+    // Condition pour prendre en compte les jeunes avec source 'VOLONTAIRE' et ceux sans source, en filtrant aussi par région
+    let shouldFilters = [
+      {
         bool: {
-          should: [{ terms: { "sessionPhase1Id.keyword": sessionPhase1.map((sessionPhase1) => sessionPhase1._id.toString()) } }, { term: { "region.keyword": user.region } }],
+          must: [
+            { terms: { "source.keyword": ["CLE"] } }, // Les jeunes avec source CLE
+            { terms: { "etablissementId.keyword": etablissementIds } }, // Et l'établissement correspondant
+          ],
         },
-      });
-    }
+      },
+      {
+        bool: {
+          should: [
+            {
+              bool: {
+                must: [
+                  { terms: { "source.keyword": ["VOLONTAIRE"] } }, // Si la source est VOLONTAIRE
+                  { term: { "region.keyword": user.region } }, // Et la région de l'utilisateur
+                ],
+              },
+            },
+            {
+              bool: {
+                must_not: [
+                  { exists: { field: "source" } }, // Et que le champ source n'existe pas
+                ],
+                must: [
+                  { term: { "region.keyword": user.region } }, // Si la région correspond
+                ],
+              },
+            },
+          ],
+        },
+      },
+    ];
+
+    contextFilters.push({
+      bool: {
+        should: shouldFilters,
+      },
+    });
   }
 
   if (user.role === ROLES.REFERENT_DEPARTMENT && !showAffectedToRegionOrDep) {
     const etablissementsInDepartment = await EtablissementModel.find({ department: user.department }, { _id: 1 });
     const etablissementIds = etablissementsInDepartment.map((e) => e._id.toString());
 
+    // Condition pour prendre en compte les jeunes avec source 'VOLONTAIRE' et ceux sans source, en filtrant aussi par department
     let shouldFilters = [
       {
         bool: {
-          must: [{ terms: { "source.keyword": ["VOLONTAIRE"] } }, { terms: { "department.keyword": user.department } }],
+          must: [
+            { terms: { "source.keyword": ["CLE"] } }, // Les jeunes avec source CLE
+            { terms: { "etablissementId.keyword": etablissementIds } }, // Et l'établissement correspondant
+          ],
         },
       },
       {
         bool: {
-          must: [{ terms: { "source.keyword": ["CLE"] } }, { terms: { "etablissementId.keyword": etablissementIds } }],
+          should: [
+            {
+              bool: {
+                must: [
+                  { terms: { "source.keyword": ["VOLONTAIRE"] } }, // Si la source est VOLONTAIRE
+                  { terms: { "department.keyword": user.department } }, // Et le department de l'utilisateur
+                ],
+              },
+            },
+            {
+              bool: {
+                must_not: { exists: { field: "source" } }, // Si la source est absente
+                must: [
+                  { terms: { "department.keyword": user.department } }, // Et le department de l'utilisateur
+                ],
+              },
+            },
+          ],
         },
       },
     ];
