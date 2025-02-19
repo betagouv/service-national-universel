@@ -167,13 +167,9 @@ router.get(
       const cohortName = cohortDocument.name;
       const services = await DepartmentServiceModel.find({ department: { $in: cohortDocument.eligibility.zones } }).lean();
 
-      const twoWeeksAgo = new Date();
-      twoWeeksAgo.setDate(twoWeeksAgo.getDate() - 14);
-
       const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).lean();
       const referentsDep = await ReferentModel.find({
         role: ROLES.REFERENT_DEPARTMENT,
-        lastLoginAt: { $gte: twoWeeksAgo },
         subRole: { $nin: "manager_phase2" },
       })
         .sort({ lastLoginAt: -1 })
