@@ -2,8 +2,7 @@
 
 set -ex
 
-rootdir="$(dirname $0)/../.."
-cd $rootdir
+cd "$(dirname $0)/../.."
 
 echo $VITE_RELEASE
 echo $VITE_ENVIRONMENT
@@ -16,7 +15,7 @@ cp tsconfig.front.json out
 cd out
 npm ci --no-audit --no-fund
 turbo run build
-cd $rootdir
+cd ..
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv out/admin/build .
