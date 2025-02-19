@@ -20,7 +20,7 @@ cd ..
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv out/admin/build .
     mv devops/admin/run.js index.js
-    rm -rf $(ls -la . | grep -v "build|\index.js")
+    rm -rf $(ls -A | grep -v "build|\index.js")
     npm init -y
     npm install serve-static
 fi
