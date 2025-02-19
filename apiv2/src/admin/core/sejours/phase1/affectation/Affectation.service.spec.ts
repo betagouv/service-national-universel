@@ -35,14 +35,13 @@ describe("AffectationService", () => {
                 },
                 {
                     provide: JeuneGateway,
-                    useValue: {
-                        countAffectedByLigneDeBus: jest.fn(),
-                    },
+                    useValue: {},
                 },
                 {
                     provide: LigneDeBusGateway,
                     useValue: {
                         bulkUpdate: jest.fn(),
+                        countPlaceOccupeesByLigneDeBusIds: jest.fn(),
                     },
                 },
                 {
@@ -95,17 +94,20 @@ describe("AffectationService", () => {
         ] as PlanDeTransportModel[];
 
         jest.spyOn(planDeTransportGateway, "findByIds").mockResolvedValue(pdtList);
-        jest.spyOn(jeuneGateway, "countAffectedByLigneDeBus").mockImplementation((id) => {
-            if (id === "1") return Promise.resolve(5);
-            if (id === "2") return Promise.resolve(10);
-            return Promise.resolve(0);
-        });
+        jest.spyOn(ligneDeBusGateway, "countPlaceOccupeesByLigneDeBusIds").mockResolvedValue([
+            {
+                id: "1",
+                placesOccupeesJeunes: 5,
+            },
+            {
+                id: "2",
+                placesOccupeesJeunes: 10,
+            },
+        ]);
 
         await affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
 
-        expect(jeuneGateway.countAffectedByLigneDeBus).toHaveBeenCalledTimes(2);
-        expect(jeuneGateway.countAffectedByLigneDeBus).toHaveBeenCalledWith("1");
-        expect(jeuneGateway.countAffectedByLigneDeBus).toHaveBeenCalledWith("2");
+        expect(ligneDeBusGateway.countPlaceOccupeesByLigneDeBusIds).toHaveBeenCalledTimes(1);
 
         expect(ligneDeBusGateway.bulkUpdate).toHaveBeenCalledWith([
             { id: "1", placesOccupeesJeunes: 5 },

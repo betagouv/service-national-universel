@@ -116,4 +116,54 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         }
         await retrievedLigneDeBus.deleteOne();
     }
+
+    async countPlaceOccupeesByLigneDeBusIds(
+        ligneDeBusIds: string[],
+    ): Promise<Array<Pick<LigneDeBusModel, "id"> & { placesOccupeesJeunes: number }>> {
+        return this.ligneDeBusMongooseEntity.aggregate<Pick<LigneDeBusModel, "id"> & { placesOccupeesJeunes: number }>([
+            {
+                $addFields: {
+                    convertedId: {
+                        $toString: "$_id",
+                    },
+                },
+            },
+            {
+                $match: { convertedId: { $in: ligneDeBusIds } },
+            },
+            {
+                $lookup: {
+                    as: "youngsByLigne",
+                    from: "youngs",
+                    foreignField: "ligneId",
+                    localField: "convertedId",
+                    pipeline: [
+                        {
+                            $match: {
+                                status: "VALIDATED",
+                                statusPhase1: { $in: ["AFFECTED", "DONE"] },
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $addFields: {
+                    placesOccupeesJeunes: { $size: "$youngsByLigne" },
+                    id: "$convertedId",
+                },
+            },
+            {
+                $project: {
+                    id: 1,
+                    placesOccupeesJeunes: 1,
+                },
+            },
+        ]);
+    }
 }
