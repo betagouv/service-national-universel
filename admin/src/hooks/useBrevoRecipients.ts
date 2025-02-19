@@ -78,13 +78,28 @@ interface RecipientFetchError {
 
 type RecipientNotificationError = RecipientValidationError | RecipientProcessingError | RecipientFetchError;
 
-// Validation des données des jeunes pour le transport
-const validateYoungDataTransport = (
-  young: YoungCustomType,
-  selectedTypes: RecipientType[],
-): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
-  const isTransportRequired = selectedTypes.includes("jeunes") || selectedTypes.includes("representants");
+// Validation des données obligatoire des jeunes
+const validateYoungData = (young: YoungCustomType): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
+  if (!young.firstName || !young.lastName || !young.email || !young.cohort) {
+    return {
+      isValid: false,
+      error: {
+        youngId: young._id,
+        firstName: young.firstName,
+        lastName: young.lastName,
+        type: "general",
+        missing: "informations générales",
+      },
+    };
+  }
 
+  return { isValid: true };
+};
+
+// Validation Stricte pour retrouver les destinaires en fonction du jeune + associations
+// Validation Stricte: génère une erreur si le jeune ne possède pas les informations requises pour retrouver un destinataire
+const validateYoungDataStrict = (young: YoungCustomType, selectedTypes: RecipientType[]): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
+  const isTransportRequired = selectedTypes.includes("jeunes") || selectedTypes.includes("representants");
   if (isTransportRequired) {
     if (!young.center) {
       return {
@@ -139,12 +154,6 @@ const validateYoungDataTransport = (
     }
   }
 
-  return { isValid: true };
-};
-
-// Validation Stricte pour retrouver les destinaires en fonction du jeune
-// Validation Stricte: génère une erreur si le jeune ne possède pas les informations requises pour retrouver un destinataire
-const validateYoungDataStrict = (young: YoungCustomType, selectedTypes: RecipientType[]): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
   if (selectedTypes.includes("referents") && !young.classe?.referentClasseIds?.length) {
     return {
       isValid: false,
@@ -197,7 +206,7 @@ const validateYoungDataStrict = (young: YoungCustomType, selectedTypes: Recipien
     };
   }
 
-  const transportValidation = validateYoungDataTransport(young, selectedTypes);
+  const transportValidation = validateYoungData(young);
   if (!transportValidation.isValid) {
     return transportValidation;
   }
@@ -208,10 +217,10 @@ const validateYoungDataStrict = (young: YoungCustomType, selectedTypes: Recipien
 const fillCommonFields = (young: YoungCustomType): Omit<BrevoRecipient, "type" | "PRENOM" | "NOM" | "EMAIL"> => {
   return {
     COHORT: young.cohort,
-    CENTRE: young.center?.name || "",
-    VILLECENTRE: young.center?.city || "",
     PRENOMVOLONTAIRE: young.firstName!,
     NOMVOLONTAIRE: young.lastName!,
+    CENTRE: young.center?.name || "",
+    VILLECENTRE: young.center?.city || "",
     PDR_ALLER: young.meetingPoint?.name || "",
     PDR_ALLER_ADRESSE: young.meetingPoint?.address || "",
     PDR_ALLER_VILLE: young.meetingPoint?.city || "",
@@ -274,6 +283,7 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
       young.etablissement?.coordinateurIds?.forEach((id) => ids.add(id));
       if (young.sessionPhase1?.headCenterId) ids.add(young.sessionPhase1.headCenterId);
     });
+
     return ids;
   }, [youngs]);
 
@@ -286,7 +296,7 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
 
   const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[], strict: boolean = false): void => {
     const validationErrors: RecipientValidationError["details"] = [];
-    const validateFn = strict ? validateYoungDataStrict : validateYoungDataTransport;
+    const validateFn = strict ? validateYoungDataStrict : validateYoungData;
 
     youngs.forEach((young) => {
       const validation = validateFn(young, selectedTypes);
@@ -321,8 +331,8 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
         } as RecipientFetchError;
       });
 
-      validateData(youngs, selectedTypes);
       setYoungs(youngs);
+      validateData(youngs, selectedTypes);
 
       const recipientsMap = new Map<string, BrevoRecipient>();
       const referentsMap = referents?.data ? new Map(referents.data.map((r) => [r._id, r])) : new Map();
