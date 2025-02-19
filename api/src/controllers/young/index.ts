@@ -940,6 +940,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const cohort = await CohortModel.findOne({ name: young.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young.status!);
 
