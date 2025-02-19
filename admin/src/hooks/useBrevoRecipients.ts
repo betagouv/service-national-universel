@@ -421,7 +421,7 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
           }
 
           // Chefs de centre
-          if (selectedTypes.includes("chefs-centres") && young.sessionPhase1.headCenterId) {
+          if (selectedTypes.includes("chefs-centres") && young.sessionPhase1?.headCenterId) {
             const headCenter = referentsMap.get(young.sessionPhase1.headCenterId!);
             if (headCenter && isHeadCenter(headCenter)) {
               recipientsMap.set(headCenter._id, {
