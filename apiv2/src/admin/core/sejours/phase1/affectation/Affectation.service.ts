@@ -144,6 +144,9 @@ export class AffectationService {
             const placesOccupeesJeunes = await this.jeuneGateway.countAffectedByLigneDeBus(ligneDeBus.id);
 
             if (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes) {
+                this.logger.log(
+                    `Updating ligneDeBus ${ligneDeBus.numeroLigne} ${ligneDeBus.id} (${placesOccupeesJeunes} => ${ligneDeBus.placesOccupeesJeunes})`,
+                );
                 ligneDeBus.placesOccupeesJeunes = placesOccupeesJeunes;
                 lignesDeBusUpdatedList.push(ligneDeBus);
 
@@ -152,12 +155,18 @@ export class AffectationService {
                 if (pdt) {
                     pdt.placesOccupeesJeunes = placesOccupeesJeunes;
                     if (pdt.capaciteJeunes) {
-                        pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                        pdt.tauxRemplissageLigne = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                    } else {
+                        this.logger.error(`No capaciteJeunes for pdtId ${pdt.id} ${pdt.capaciteJeunes}`);
                     }
                     pdtUpdatedList.push(pdt);
                 } else {
-                    this.logger.warn(`PDT does not exist for ligneDeBusId ${ligneDeBus.id}`);
+                    this.logger.error(`PDT does not exist for ligneDeBusId ${ligneDeBus.id}`);
                 }
+            } else {
+                this.logger.warn(
+                    `No update needed for ligneDeBus ${ligneDeBus.numeroLigne} ${ligneDeBus.id} (${placesOccupeesJeunes} == ${ligneDeBus.placesOccupeesJeunes})`,
+                );
             }
         }
 
