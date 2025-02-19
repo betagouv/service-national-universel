@@ -1055,19 +1055,13 @@ export class SimulationAffectationHTSService {
                 this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
             ),
             ...jeuneAttenteAffectationList.filter(
-                (jeune) =>
-                    jeune.HZR === "oui" &&
-                    (jeune["Probablement hors zones (département)"] === "oui" || jeune["Hors Zone (région)"]),
+                (jeune) => jeune.HZR === "oui" && jeune["Hors Zone (région)"] === "oui",
             ),
         ];
 
         // on enleve les HZR de l'onglet non affecté
         jeuneAttenteAffectationList = jeuneAttenteAffectationList.filter(
-            (jeune) =>
-                !(
-                    jeune.HZR === "oui" &&
-                    (jeune["Probablement hors zones (département)"] === "oui" || jeune["Hors Zone (région)"])
-                ),
+            (jeune) => !(jeune.HZR === "oui" && jeune["Hors Zone (région)"] === "oui"),
         );
 
         const sejourListUpdated = sejourList.map((sejour) => {
@@ -1179,7 +1173,8 @@ export class SimulationAffectationHTSService {
             "Nombre de jeunes à affecter : " + (jeunesList.length + jeuneIntraDepartementList.length),
             "Nombre de jeunes affectés : " + jeunesNouvellementAffectedList.length,
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
-            "En attente d'affectation : " + (jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length),
+            "En attente d'affectation : " +
+                (jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length),
             "          dont intradep : " + jeuneIntraDepartementList.length,
             ...infoNonAffectes.stats,
             "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
