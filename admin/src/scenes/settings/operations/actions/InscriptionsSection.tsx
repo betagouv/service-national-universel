@@ -1,7 +1,7 @@
 import React from "react";
 import { Collapsable } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
-import ContactSimulation from "./Inscription/ExportContactSimulation/ExportContactConvocation";
+import ExportContactConvocation from "./Inscription/ExportContactSimulation/ExportContactConvocation";
 import BasculeJeuneValides from "./Inscription/BasculeJeune/BasculeJeuneValides";
 import BasculeJeuneNonValides from "./Inscription/BasculeJeune/BasculeJeuneNonValides";
 
@@ -14,7 +14,7 @@ export default function InscriptionsSection({ session }: InscriptionSectionProps
     <Collapsable title="Inscriptions">
       <BasculeJeuneNonValides session={session} />
       <BasculeJeuneValides session={session} />
-      <ContactSimulation session={session} />
+      <ExportContactConvocation session={session} />
     </Collapsable>
   );
 }
