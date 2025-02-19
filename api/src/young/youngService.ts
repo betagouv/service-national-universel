@@ -322,7 +322,7 @@ export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReaso
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
-      cc: getCcOfYoung(young),
+      cc: getCcOfYoung({ template, young }),
     });
   } catch (e) {
     capture(e);
