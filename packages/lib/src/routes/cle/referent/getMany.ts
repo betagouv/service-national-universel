@@ -3,7 +3,7 @@ import { BasicRoute, RouteResponseBody } from "../..";
 
 export interface GetManyReferentsRoute extends BasicRoute {
   method: "POST";
-  path: "/cle/referent";
+  path: "/cle/referent/getMany";
   payload: {
     ids: string[];
   };

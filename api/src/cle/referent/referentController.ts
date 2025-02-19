@@ -164,7 +164,7 @@ router.post("/delete-old-referent-classe", passport.authenticate("referent", { s
 });
 
 router.post(
-  "/",
+  "/getMany",
   passport.authenticate("referent", { session: false, failWithError: true }),
   async (req: RouteRequest<ReferentsRoutes["GetMany"]>, res: RouteResponse<ReferentsRoutes["GetMany"]>) => {
     try {

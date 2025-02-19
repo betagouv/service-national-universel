@@ -62,7 +62,7 @@ const BrevoRecipientsService = {
 
   getReferentsByIds: async (referentIds: string[]) => {
     return await buildRequest<ReferentsRoutes["GetMany"]>({
-      path: "/cle/referent",
+      path: "/cle/referent/getMany",
       method: "POST",
       payload: { ids: referentIds },
       target: "API",
