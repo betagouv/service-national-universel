@@ -29,12 +29,12 @@ export const useBrevoCSVGenerator = () => {
     "HEURE_RETOUR",
   ];
 
-  const generateCsv = async (data: BrevoRecipient[], fileName: string) => {
+  const generateCsv = async (recipients: BrevoRecipient[], fileName: string) => {
     setIsGenerating(true);
     setError(null);
 
     try {
-      const result = await generateCsvBuffer<BrevoRecipient>(data, fileName, BREVO_CSV_FIELDS);
+      const result = await generateCsvBuffer<BrevoRecipient>(recipients, fileName, BREVO_CSV_FIELDS);
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Erreur inconnue";

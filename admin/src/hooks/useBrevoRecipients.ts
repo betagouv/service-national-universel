@@ -282,8 +282,6 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
     queryFn: () => BrevoRecipientsService.getReferentsByIds([...referentIds]),
     enabled: referentIds.size > 0,
     refetchOnWindowFocus: false,
-    gcTime: Infinity,
-    staleTime: Infinity,
   });
 
   const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[], strict: boolean = false): void => {
@@ -330,7 +328,6 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
       const referentsMap = referents?.data ? new Map(referents.data.map((r) => [r._id, r])) : new Map();
 
       try {
-        // Traitement des destinataires avec vérification des erreurs
         youngs.forEach((young: YoungCustomType) => {
           // Jeunes
           if (selectedTypes.includes("jeunes")) {

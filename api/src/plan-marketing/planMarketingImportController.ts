@@ -6,7 +6,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { capture } from "../sentry";
 import { ERRORS, uploadFile } from "../utils";
 import fileUpload, { UploadedFile } from "express-fileupload";
-import { MIME_TYPES, PlanMarketingRoutes } from "snu-lib";
+import { MIME_TYPES, PLAN_MARKETING_FOLDER_PATH_EXPORT, PlanMarketingRoutes, isSuperAdmin } from "snu-lib";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -16,6 +16,10 @@ router.post(
   passport.authenticate("referent", { session: false, failWithError: true }),
   fileUpload({ limits: { fileSize: 8 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: RouteRequest<PlanMarketingRoutes["ImportContacts"]>, res: RouteResponse<PlanMarketingRoutes["ImportContacts"]>) => {
+    if (!isSuperAdmin(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const files = Object.values(req.files || {});
     if (files.length === 0) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -28,7 +32,7 @@ router.post(
     }
     try {
       const data = fs.readFileSync(file.tempFilePath);
-      uploadFile(`plan-marketing/${file.name}`, {
+      uploadFile(`${PLAN_MARKETING_FOLDER_PATH_EXPORT}/${file.name}`, {
         data: data,
         encoding: "",
         mimetype: MIME_TYPES.CSV,

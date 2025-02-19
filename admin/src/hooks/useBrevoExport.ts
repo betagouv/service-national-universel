@@ -5,6 +5,7 @@ import { BrevoRecipientsService, FiltersYoungsForExport } from "@/services/brevo
 import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { BrevoListData } from "@/components/modals/ModalCreationListeBrevo";
+import { PLAN_MARKETING_FOLDER_PATH_EXPORT } from "snu-lib";
 
 interface ImportRecipientsError {
   code: "IMPORT_ERROR";
@@ -21,6 +22,15 @@ interface CreateDistributionListError {
   message: string;
   details?: {
     listName?: string;
+    campaignId?: string;
+  };
+  originalError: unknown;
+}
+
+interface CampaignNotFoundError {
+  code: "CAMPAIGN_NOT_FOUND";
+  message: string;
+  details?: {
     campaignId?: string;
   };
   originalError: unknown;
@@ -53,11 +63,25 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
       });
 
       // 2. Création de la liste de diffusion
-      return BrevoRecipientsService.createDistributionList({
+      await BrevoRecipientsService.createDistributionList({
         nom: listData.name,
         campagneId: listData.campaignId,
-        pathFile: `plan-marketing/${file.name}`,
+        pathFile: `${PLAN_MARKETING_FOLDER_PATH_EXPORT}/${file.name}`,
       }).catch((error) => {
+
+        if (error.code === "CAMPAIGN_NOT_FOUND") {
+          const campaignNotFoundError: CampaignNotFoundError = {
+            code: "CAMPAIGN_NOT_FOUND",
+            message: "Impossible de trouver la campagne",
+            details: {
+              campaignId: listData.campaignId,
+            },
+            originalError: error,
+          };
+          toastr.error(`Impossible de créer la liste de diffusion`, `L'ID campagne ${listData.campaignId} n’existe pas dans Brevo`, { timeOut: 5000 });
+          throw campaignNotFoundError;
+        }
+
         const distributionError: CreateDistributionListError = {
           code: "DISTRIBUTION_LIST_ERROR",
           message: "Impossible de créer la liste de diffusion",
@@ -70,6 +94,8 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
         toastr.error(`Erreur lors de la création de la liste de diffusion`, "", { timeOut: 5000 });
         throw distributionError;
       });
+
+      toastr.success(`La liste de diffusion "${listData.name}" a été créée avec succès`, "", { timeOut: 5000 });
     },
     onMutate: () => {
       setIsExporting(true);
@@ -90,7 +116,7 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
 
       try {
         const recipients = await processRecipients(formDataBrevoList.recipients, filters);
-        const csvFile = await generateCsv(recipients, "export_brevo");
+        const csvFile = await generateCsv(recipients, formDataBrevoList.name);
 
         if (csvFile) {
           const file = new File([csvFile.buffer], csvFile.filename, { type: csvFile.mimetype });

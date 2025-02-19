@@ -7,6 +7,31 @@ export interface CsvFileOutput {
   encoding: string;
 }
 
+/**
+ * Formate un nom de fichier CSV à partir d'un champ de formulaire.
+ *
+ * - Normalise la chaîne et supprime les accents.
+ * - Convertit la chaîne en minuscules.
+ * - Remplace les espaces par des underscores.
+ * - Supprime les caractères non alphanumériques (sauf underscore).
+ * - Ajoute l'extension ".csv".
+ *
+ * @param input - La chaîne issue du champ de formulaire.
+ * @returns Le nom de fichier CSV formaté.
+ */
+export function formatCsvFileName(input: string): string {
+  // Normalisation pour supprimer les accents
+  const normalized = input.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+  // Conversion en minuscules
+  const lowerCased = normalized.toLowerCase();
+  // Remplacement des espaces par des underscores
+  const underscored = lowerCased.replace(/\s+/g, "_");
+  // Suppression des caractères non alphanumériques (sauf underscore)
+  const cleaned = underscored.replace(/[^a-z0-9_]/g, "");
+  return `${cleaned}`;
+}
+
+
 export const generateCsvBuffer = async <T extends Record<string, any>>(
   data: T[],
   fileName: string,
@@ -26,7 +51,7 @@ export const generateCsvBuffer = async <T extends Record<string, any>>(
 
     const csv = await json2csv(data, options);
     const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-    const fullFileName = `${fileName}_${timestamp}.csv`;
+    const fullFileName = `${formatCsvFileName(fileName)}_${timestamp}.csv`;
 
     return {
       buffer: Buffer.from(csv, "utf-8"),
