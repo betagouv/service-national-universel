@@ -19,10 +19,9 @@ cd ..
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv out/admin/build .
-    mv devops/admin/run.js index.js
-    rm -rf $(ls -A | grep -v "build\|index.js")
-    npm init -y
-    npm install serve-static finalhandler
+    mv devops/admin/index.js devops/admin/package.json devops/admin/package-lock.json .
+    rm -rf $(ls -A | grep -v "build\|index.js\|package.json\|package-lock.json")
+    npm ci
 fi
 
 ls -la
