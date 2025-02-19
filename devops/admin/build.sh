@@ -1,13 +1,22 @@
 #!/bin/sh
 
+set -ex
+
+rootdir="$(dirname $0)/../.."
+cd $rootdir
+
 pwd
 ls -la
 
+echo $CC_DEPLOYMENT_ID
+
+if [[ $CC_DEPLOYMENT_ID != "" ]]; then
+    find $rootdir -not -name 'package.json' -delete
+fi
+
+ls -la
+
 exit 1
-
-set -ex
-
-cd "$(dirname $0)/../.."
 
 echo $VITE_RELEASE
 echo $VITE_ENVIRONMENT
