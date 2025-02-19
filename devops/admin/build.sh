@@ -11,7 +11,7 @@ ls -la
 echo $CC_DEPLOYMENT_ID
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
-    find $rootdir -not -name 'package.json' -delete
+    rm -rf $(ls $rootdir | grep -v "package.json")
 fi
 
 ls -la
