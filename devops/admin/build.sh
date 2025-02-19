@@ -5,19 +5,6 @@ set -ex
 rootdir="$(dirname $0)/../.."
 cd $rootdir
 
-pwd
-ls -la
-
-echo $CC_DEPLOYMENT_ID
-
-if [[ $CC_DEPLOYMENT_ID != "" ]]; then
-    rm -rf $(ls $rootdir | grep -v "package.json")
-fi
-
-ls -la
-
-exit 1
-
 echo $VITE_RELEASE
 echo $VITE_ENVIRONMENT
 
@@ -29,3 +16,14 @@ cp tsconfig.front.json out
 cd out
 npm ci --no-audit --no-fund
 turbo run build
+cd $rootdir
+
+if [[ $CC_DEPLOYMENT_ID != "" ]]; then
+    mv out/admin/build .
+    mv devops/admin/run.js index.js
+    rm -rf $(ls -la . | grep -v "build|\index.js")
+    npm init -y
+    npm install serve-static
+fi
+
+ls -la
