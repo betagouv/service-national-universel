@@ -22,7 +22,7 @@ if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv devops/admin/run.js index.js
     rm -rf $(ls -A | grep -v "build\|index.js")
     npm init -y
-    npm install serve-static
+    npm install serve-static finalhandler
 fi
 
 ls -la
