@@ -1,5 +1,9 @@
 #!/bin/sh
 
+ls
+
+exit 1
+
 set -ex
 
 cd "$(dirname $0)/../.."
