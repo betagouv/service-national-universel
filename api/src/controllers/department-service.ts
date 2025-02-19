@@ -167,7 +167,7 @@ router.get(
       const cohortName = cohortDocument.name;
       const services = await DepartmentServiceModel.find({ department: { $in: cohortDocument.eligibility.zones } }).lean();
 
-      const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).lean();
+      const referentsRegion = await ReferentModel.find({ role: ROLES.REFERENT_REGION }).sort({ lastLoginAt: -1 }).lean();
       const referentsDep = await ReferentModel.find({
         role: ROLES.REFERENT_DEPARTMENT,
         subRole: { $nin: "manager_phase2" },
@@ -180,14 +180,14 @@ router.get(
         Région: string;
         "Email des Référents Départementaux": string;
         "Email des Référents Régionaux": string;
-        "Contact convoquation renseigné": string;
+        "Contact convocation renseigné": string;
       }> = [];
       const resultAvecContact: Array<{
         Département: string;
         Région: string;
         "Email des Référents Départementaux": string;
         "Email des Référents Régionaux": string;
-        "Contact convoquation renseigné": string;
+        "Contact convocation renseigné": string;
       }> = [];
 
       for (const service of services) {
@@ -201,7 +201,7 @@ router.get(
           Région: department2region[service.department ?? ""] || "N/A",
           "Email des Référents Départementaux": refsDep.map((r) => r.email).join("; "),
           "Email des Référents Régionaux": refsRegion.map((r) => r.email).join("; "),
-          "Contact convoquation renseigné": contact ? "OUI" : "NON",
+          "Contact convocation renseigné": contact ? "OUI" : "NON",
         };
 
         if (!contact) {

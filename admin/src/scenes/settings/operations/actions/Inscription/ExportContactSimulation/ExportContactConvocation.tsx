@@ -13,6 +13,7 @@ interface ContactSimulationProps {
 }
 
 export default function ExportContactConvocation({ session }: ContactSimulationProps) {
+  const isCLE = session.type === "CLE";
   const { mutate, isPending } = useMutation({
     mutationFn: async () => DepartmentService.exportContacts({ sessionId: session._id! }),
     onSuccess: ({ base64, mimeType, fileName }) => {
@@ -40,7 +41,7 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
         {isPending && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
       </div>
       <div className="flex gap-2">
-        <Button title="Exporter les contacts" onClick={() => mutate()} loading={isPending} disabled={isPending} />
+        <Button title="Exporter les contacts" onClick={() => mutate()} loading={isPending} disabled={isPending || isCLE} />
       </div>
     </div>
   );
