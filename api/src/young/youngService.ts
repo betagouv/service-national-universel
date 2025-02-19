@@ -31,6 +31,7 @@ import {
   EtablissementModel,
   ReferentDocument,
   SessionPhase1Model,
+  LigneBusModel,
 } from "../models";
 
 import { sendTemplate } from "../brevo";
@@ -309,10 +310,12 @@ export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: Coh
 
     // If young affected, we notify the head center and refs region
     if (oldStatusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.sessionPhase1Id != null) {
+      const ligneDeBus = await LigneBusModel.findOne({ _id: young.ligneId });
       const params = {
         contact_name: youngFullName,
         date_cohorte: getCohortPeriod(cohort),
         contact_departement: formatDepartement(young.department!),
+        contact_ligne: ligneDeBus?.busId || "",
         message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
       };
 
