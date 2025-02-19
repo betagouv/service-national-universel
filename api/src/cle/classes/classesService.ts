@@ -1,5 +1,5 @@
 import { updateReferentByClasseId, UpdateReferentClasse } from "../classe/classeService";
-import { ClasseDocument, ClasseModel, ReferentModel } from "../../models";
+import { ClasseModel, ReferentModel } from "../../models";
 import { ERRORS, UserDto } from "snu-lib";
 
 export interface UpdatedReferentReport {
@@ -51,15 +51,3 @@ export async function updateReferentsForMultipleClasses(
   }
   return updatedReferentsReport;
 }
-
-export const getClassesByIds = async (classeIds: string[]): Promise<ClasseDocument[]> => {
-  const classes = await ClasseModel.find({ _id: { $in: classeIds } });
-  console.log(classes);
-  if (classes.length !== classeIds.length) {
-    const foundIds = classes.map((classe) => classe._id.toString());
-    const missingIds = classeIds.filter((id) => !foundIds.includes(id));
-    throw new Error(`Classes not found: ${missingIds.join(", ")}`);
-  }
-
-  return classes;
-};

@@ -1,4 +1,4 @@
-import { updateReferentsForMultipleClasses, getClassesByIds } from "./classesService";
+import { updateReferentsForMultipleClasses } from "./classesService";
 import { ClasseModel, ReferentModel } from "../../models";
 import { ERRORS, UserDto } from "snu-lib";
 import * as classeService from "../classe/classeService";
@@ -43,49 +43,5 @@ describe("updateReferentsForMultipleClasses", () => {
     ]);
 
     expect(ClasseModel.findById).toHaveBeenCalledWith("nonexistent");
-  });
-});
-
-describe("getClassesByIds", () => {
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
-  it("should return classes for given ids when all classes are found", async () => {
-    const mockClasses = [
-      { _id: "1", name: "Class 1" },
-      { _id: "2", name: "Class 2" },
-    ];
-
-    jest.spyOn(ClasseModel, "find").mockResolvedValue(mockClasses);
-
-    const result = await getClassesByIds(["1", "2"]);
-
-    expect(result).toEqual(mockClasses);
-    expect(ClasseModel.find).toHaveBeenCalledWith({ _id: { $in: ["1", "2"] } });
-  });
-
-  it("should throw an error when some classes are not found", async () => {
-    const mockClasses = [{ _id: "1", name: "Class 1" }];
-
-    jest.spyOn(ClasseModel, "find").mockResolvedValue(mockClasses);
-
-    await expect(getClassesByIds(["1", "2"])).rejects.toThrow("Classes not found: 2");
-    expect(ClasseModel.find).toHaveBeenCalledWith({ _id: { $in: ["1", "2"] } });
-  });
-
-  it("should throw an error when no classes are found", async () => {
-    jest.spyOn(ClasseModel, "find").mockResolvedValue([]);
-
-    await expect(getClassesByIds(["1", "2"])).rejects.toThrow("Classes not found: 1, 2");
-    expect(ClasseModel.find).toHaveBeenCalledWith({ _id: { $in: ["1", "2"] } });
-  });
-
-  it("should handle database errors and throw them", async () => {
-    const mockError = new Error("Database error");
-    jest.spyOn(ClasseModel, "find").mockRejectedValue(mockError);
-
-    await expect(getClassesByIds(["1", "2"])).rejects.toThrow("Database error");
-    expect(ClasseModel.find).toHaveBeenCalledWith({ _id: { $in: ["1", "2"] } });
   });
 });
