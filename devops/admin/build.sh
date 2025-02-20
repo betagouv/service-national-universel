@@ -19,7 +19,7 @@ cd ..
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv out/admin/build .
-    mv .htaccess ./build
+    mv devops/admin/.htaccess ./build
     #mv devops/admin/index.js devops/admin/package.json devops/admin/package-lock.json .
     rm -rf $(ls -A | grep -v "build")
     # npm ci
