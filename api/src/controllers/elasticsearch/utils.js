@@ -135,11 +135,11 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
 
         // For the classe we need to handle the filter seatsTaken which is a number
         if (fieldWithoutKeyword === "seatsTaken") {
-          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)).max(200) };
+          return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.number().allow(null)) };
         }
 
         // Default case: filter is a string
-        return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")).max(200) };
+        return { ...acc, [fieldWithoutKeyword]: Joi.array().items(Joi.string().allow("")) };
       }, {}),
     ),
     page: Joi.number()
@@ -157,7 +157,7 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
     })
       .allow(null)
       .default(null),
-    exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
+    exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).allow(null).default(null), Joi.string().valid("*")),
     size: Joi.number().integer().min(10).max(100).default(10),
   });
 
