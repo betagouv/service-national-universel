@@ -63,6 +63,7 @@ import { ValiderAffectationCLEService } from "./core/sejours/phase1/affectation/
 import { ValiderBasculeJeunesService } from "./core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
 import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
 import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/DesisterPostAffectation";
+import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 
 @Module({
     imports: [
@@ -123,6 +124,7 @@ import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/Desis
         ValiderAffectationCLE,
         ValiderAffectationCLEDromCom,
         DesisterPostAffectation,
+        DesistementService,
         ...referentielUseCaseProviders,
         ...referentielServiceProvider,
         AdminTaskAffectationSelectorService,

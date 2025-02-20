@@ -164,9 +164,9 @@ export class AdminTaskAffectationSelectorService {
                 results = {
                     analytics: {
                         jeunesDesistes: desistementPostAffectationResult.analytics.jeunesDesistes,
-                        errors: desistementPostAffectationResult.analytics.errors,
                     },
                 };
+                break;
 
             default:
                 throw new Error(`Task of type ${job.name} not handle yet for affectation`);

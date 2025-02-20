@@ -156,6 +156,21 @@ export class JeuneRepository implements JeuneGateway {
         return JeuneMapper.toModels(jeunes);
     }
 
+    async findByIdsSessionIdStatutPhase1AndConfirmationDeLaParticipation(
+        ids: string[],
+        sessionId: string,
+        statutPhase1: string,
+        confirmationDeLaParticipation: boolean,
+    ): Promise<JeuneModel[]> {
+        const jeunes = await this.jeuneMongooseEntity.find({
+            _id: { $in: ids },
+            cohortId: sessionId,
+            statusPhase1: statutPhase1,
+            youngPhase1Agreement: String(confirmationDeLaParticipation),
+        });
+        return JeuneMapper.toModels(jeunes);
+    }
+
     async countAffectedByLigneDeBus(ligneDeBusId): Promise<number> {
         return this.jeuneMongooseEntity.countDocuments({
             $and: [
