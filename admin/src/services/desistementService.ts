@@ -4,11 +4,12 @@ import { buildRequest } from "@/utils/buildRequest";
 
 const DesistementService = {
   postDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
+    console.log("🚀 ~ postDesistement: ~ taskId:", taskId);
     return await buildRequest<DesistementRoutes["Post"]>({
       path: "/desistement/{sessionId}",
       method: "POST",
       params: { sessionId },
-      body: { affectationTaskId: taskId },
+      payload: { affectationTaskId: taskId },
       target: "API_V2",
     })();
   },

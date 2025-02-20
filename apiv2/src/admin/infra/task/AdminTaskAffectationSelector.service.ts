@@ -22,6 +22,8 @@ import { ValiderAffectationCLE } from "@admin/core/sejours/phase1/affectation/Va
 import { SimulationAffectationCLEDromComTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromComTask.model";
 import { SimulationAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
 import { ValiderAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
+import { DesisterPostAffectationTaskModel } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectationTask.model";
+import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
 
 @Injectable()
 export class AdminTaskAffectationSelectorService {
@@ -33,6 +35,7 @@ export class AdminTaskAffectationSelectorService {
         private readonly validerAffectationCle: ValiderAffectationCLE,
         private readonly simulationAffectationCLEDromCom: SimulationAffectationCLEDromCom,
         private readonly validerAffectationCLEDromCom: ValiderAffectationCLEDromCom,
+        private readonly desisterPostAffectation: DesisterPostAffectation,
     ) {}
     async handleAffectation(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
         let results = {} as Record<string, any>;
@@ -151,6 +154,19 @@ export class AdminTaskAffectationSelectorService {
                     throw new Error("Aucun jeune n'a été affecté");
                 }
                 break;
+
+            case TaskName.DESISTEMENT_POST_AFFECTATION:
+                const desistementPostAffectationTask: DesisterPostAffectationTaskModel = task;
+                const desistementPostAffectationResult = await this.desisterPostAffectation.execute({
+                    sessionId: desistementPostAffectationTask.metadata!.parameters!.sessionId,
+                    affectationTaskId: desistementPostAffectationTask.metadata!.parameters!.affectationTaskId,
+                });
+                results = {
+                    analytics: {
+                        jeunesDesistes: desistementPostAffectationResult.analytics.jeunesDesistes,
+                        errors: desistementPostAffectationResult.analytics.errors,
+                    },
+                };
 
             default:
                 throw new Error(`Task of type ${job.name} not handle yet for affectation`);

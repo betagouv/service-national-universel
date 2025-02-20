@@ -8,6 +8,7 @@ import { translate } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
 export default function DesistementButton({ sessionId, taskId, onClose, disabled }: { sessionId: string; taskId: string; onClose: () => void; disabled: boolean }) {
+  console.log("🚀 ~ DesistementButton ~ taskId:", taskId);
   const { isPending, mutate } = useMutation({
     mutationFn: () => DesistementService.postDesistement({ sessionId, taskId }),
     onSuccess: () => {

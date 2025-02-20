@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { COHORT_TYPE, CohortDto, TaskName } from "snu-lib";
+import { CohortDto, TaskName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../shared/useTraitements";
 import dayjs from "dayjs";
@@ -18,7 +18,8 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
     value: t.id,
     label: `${t.name} - ${dayjs(t.createdAt).format("DD/MM/YYYY")}`,
   }));
-  const selectedTraitement = traitements?.find((t) => t.id === selectedOption);
+  const selectedTraitement = selectedOption ? traitements?.find((t) => t.id === selectedOption) : traitements?.[0];
+  console.log("🚀 ~ DesistementMetropoleModal ~ selectedTraitement:", selectedTraitement);
   const totalAffectes = selectedTraitement?.metadata?.results?.jeunesAffected || 0;
 
   return (
@@ -46,6 +47,8 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
             <p>Erreur</p>
           ) : (
             <Select
+              // @ts-ignore
+              defaultValue={options!.find((o) => o.value === selectedTraitement?.id)}
               options={options}
               value={options!.find((o) => o.value === selectedOption)}
               onChange={(option) => setSelectedOption(option.value)}
@@ -65,7 +68,7 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
       footer={
         <div className="grid grid-cols-2 gap-6">
           <Button title="Annuler" type="secondary" className="w-full" onClick={onClose} />
-          <DesistementButton sessionId={session._id!} taskId={selectedOption!} onClose={onClose} disabled={!selectedOption} />
+          <DesistementButton sessionId={session._id!} taskId={selectedTraitement?.id || ""} onClose={onClose} disabled={!selectedTraitement?.id} />
         </div>
       }
     />

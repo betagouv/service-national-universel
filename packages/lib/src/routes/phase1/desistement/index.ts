@@ -1,10 +1,10 @@
-import { BasicRoute, DesistementTaskDto, RouteResponseBodyV2, TaskStatus } from "../../..";
+import { BasicRoute, DesistementTaskDto, RouteResponseBodyV2 } from "../../..";
 
 interface PostDesistement extends BasicRoute {
   method: "POST";
   path: "/desistement/{sessionId}";
   params: { sessionId: string };
-  body: { affectationTaskId: string };
+  payload: { affectationTaskId: string };
   response: RouteResponseBodyV2<DesistementTaskDto>;
 }
 
