@@ -59,6 +59,7 @@ export type RapportData = {
     >;
     jeunesDejaAffectedList: JeuneRapport[];
     jeuneAttenteAffectationList: JeuneRapport[];
+    jeuneAttenteAffectationCount: number;
     sejourList: Array<
         SejourModel & {
             departement: CentreModel["departement"];
@@ -1193,6 +1194,7 @@ export class SimulationAffectationHTSService {
             jeunesNouvellementAffectedList: jeunesNouvellementAffectedList.sort(this.sortRegionEtDepartement),
             jeunesDejaAffectedList: jeunesDejaAffectedList.sort(this.sortRegionEtDepartement),
             jeuneAttenteAffectationList: jeuneAttenteAffectationList.sort(this.sortRegionEtDepartement),
+            jeuneAttenteAffectationCount: jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length,
             sejourList: sejourListUpdated.sort(this.sortRegionEtDepartement),
             ligneDeBusList: ligneDeBusListUpdated.sort(
                 (busA, busB) => busA.numeroLigne?.localeCompare(busB.numeroLigne!) || -1,
