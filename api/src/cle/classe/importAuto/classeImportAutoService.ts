@@ -84,7 +84,7 @@ export const updateClasse = async (classeToUpdateMapped: ClasseMapped): Promise<
 
   try {
     if (classeToUpdateMapped.sessionCode) {
-      const session = await SessionPhase1Model.findOne({ sejourSnuId: classeToUpdateMapped.sessionCode });
+      const session = await SessionPhase1Model.findOne({ sejourSnuIds: classeToUpdateMapped.sessionCode });
       if (!session) {
         error.push(ERRORS.SESSION_NOT_FOUND);
       } else {

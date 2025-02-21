@@ -30,8 +30,8 @@
     "react-dom": "18.2.0",
     "react-icons": "4.11.0",
     "react-router-dom": "5.3.4",
-    "react-use": "^17.5.0",
-    "react-tooltip": "^4.5.1"
+    "react-tooltip": "^4.5.1",
+    "react-use": "^17.5.0"
   },
   "devDependencies": {
     "@tsconfig/vite-react": "^2.0.1",
@@ -50,5 +50,10 @@
     "postcss": "^8.4.31",
     "tailwindcss": "^3.3.4",
     "typescript": "^5.2.2"
+  },
+  "dependencies": {
+    "@nivo/pie": "^0.88.0",
+    "@nivo/scatterplot": "^0.88.0",
+    "@nivo/sunburst": "^0.88.0"
   }
 }

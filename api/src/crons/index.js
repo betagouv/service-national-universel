@@ -18,7 +18,6 @@ const youngPatches = require("./patch/young");
 const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const parentConsentementReminder = require("./parentConsentementReminder");
-const parentRevalidateRI = require("./parentRevalidateRI");
 const reminderInscription = require("./reminderInscription");
 const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const reminderWaitingCorrection = require("./reminderWaitingCorrection");
@@ -26,7 +25,6 @@ const dsnjExport = require("./dsnjExport");
 const injepExport = require("./injepExport");
 const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
-const mongoMonitoring = require("./mongoMonitoring");
 const classesStatusUpdate = require("./classesStatusUpdate");
 const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
@@ -75,7 +73,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // parentConsentementReminder.handler() : tous les jours à 8h27
 // reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
-// mongoMonitoring.handler() : toutes les 5 minutes
 // classesStatusUpdate.handler() : toutes les heures à la 2ème minute
 // monitorCertificats.handler() : 1er jour de chaque mois à 3h00
 
@@ -93,7 +90,6 @@ const CRONS = [
   cron("dsnjExport", "15 04 * * *", dsnjExport.handler),
   cron("injepExport", "40 04 * * *", injepExport.handler),
   cron("parentConsentementReminder", "27 8 * * *", parentConsentementReminder.handler),
-  cron("parentRevalidateRI", "30 7 * * 1", parentRevalidateRI.handler),
   cron("reminderInscription", "0 11 * * *", reminderInscription.handler),
   cron("reminderWaitingCorrection", "2 11 * * *", reminderWaitingCorrection.handler),
   cron("reminderImageRightsParent2", "0 10 * * *", reminderImageRightsParent2.handler),
@@ -112,7 +108,6 @@ const CRONS = [
   cron("loginAttempts", "0 1 * * *", loginAttempts.handler),
   cron("syncReferentSupport", "45 2 * * *", syncReferentSupport.handler),
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
-  cron("mongoMonitoring", "*/5 * * * *", mongoMonitoring.handler),
   cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
   cron("monitorCertificats", "0 3 1 * *", monitorCertificats.handler),
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),

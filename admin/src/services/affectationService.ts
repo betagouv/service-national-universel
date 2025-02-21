@@ -12,6 +12,15 @@ const AffectationService = {
     })();
   },
 
+  getSimulationAnalytics: async (id: string) => {
+    return await buildRequest<AffectationRoutes["GetSimulationAnalytics"]>({
+      path: "/affectation/simulation/hts/{id}/analytics",
+      method: "GET",
+      params: { id },
+      target: "API_V2",
+    })();
+  },
+
   postSimulationAffectationHTSMetropole: async (
     sessionId: string,
     { niveauScolaires, departements, etranger, affecterPDR, sdrImportId }: AffectationRoutes["PostSimulationsHTSRoute"]["payload"],

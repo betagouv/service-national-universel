@@ -85,7 +85,7 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
-import { handleNotifForYoungWithdrawn } from "../../young/youngService";
+import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -1107,6 +1107,10 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
       await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+    }
+
+    for (let young of youngs) {
+      await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
     }
 
     res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });

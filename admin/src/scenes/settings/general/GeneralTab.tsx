@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import dayjs from "dayjs";
+import dayjs from "@/utils/dayjs.utils";
 
 import { isAfter } from "date-fns";
 import { BiLoaderAlt } from "react-icons/bi";
@@ -67,6 +67,10 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       // @ts-ignore
       delete cohort.snuId;
       // format date to be sure it is UTC in backend
+      // @ts-expect-error toUtcLocally
+      cohort.dateStart = dayjs(cohort.dateStart).toUtcLocally().toDate();
+      // @ts-expect-error toUtcLocally
+      cohort.dateEnd = dayjs(cohort.dateEnd).toUtcLocally().toDate();
       cohort.inscriptionStartDate = dayjs(cohort.inscriptionStartDate).toDate();
       cohort.inscriptionEndDate = dayjs(cohort.inscriptionEndDate).toDate();
       cohort.reInscriptionStartDate = dayjs(cohort.reInscriptionStartDate).toDate();

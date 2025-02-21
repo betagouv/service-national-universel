@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 import { Page } from "@snu/ds/admin";
 import { capture } from "@/sentry";
 import api from "@/services/api";
-import { translate, YOUNG_STATUS, STATUS_CLASSE, COHORT_TYPE, FUNCTIONAL_ERRORS, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
+import { translate, YOUNG_STATUS, STATUS_CLASSE, COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -34,8 +34,10 @@ export default function Details(props) {
   const [isLoading, setIsLoading] = useState(false);
   const [oldClasseCohort, setOldClasseCohort] = useState<string>();
   const [infoBus, setInfoBus] = useState<InfoBus | null>(null);
-  const [currentReferent, setCurrentReferent] = useState<ReferentModifier | undefined>(undefined);
-
+  const referent = classe?.referents[0] ? { nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email } : undefined;
+  const handleModiferReferent = (referent: ReferentModifier) => {
+    setClasse({ ...classe, referents: [{ firstName: referent.prenom, lastName: referent.nom, email: referent.email }] });
+  };
   const user = useSelector((state: AuthState) => state.Auth.user);
   const cohorts = useSelector((state: CohortState) => state.Cohorts).filter(
     (c) => classe?.cohortId === c._id || (c.type === COHORT_TYPE.CLE && getRights(user, classe, c).canEditCohort),
@@ -73,11 +75,6 @@ export default function Details(props) {
   useEffect(() => {
     getClasse();
   }, [id, edit, editStay, editRef]);
-
-  useEffect(() => {
-    const currentReferent = { nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email };
-    setCurrentReferent(currentReferent);
-  }, [classe.referents]);
 
   const checkInfo = () => {
     setErrors({});
@@ -137,7 +134,7 @@ export default function Details(props) {
         return setIsLoading(false);
       }
       setClasse(data);
-      setCurrentReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
+      handleModiferReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
       handleCancel();
       toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
@@ -177,9 +174,7 @@ export default function Details(props) {
         validatedYoung={validatedYoung}
       />
 
-      {classe.referents?.length && (
-        <ReferentInfos classe={classe} currentReferent={currentReferent} rights={rights} isLoading={isLoading} onModifierReferent={setCurrentReferent} />
-      )}
+      {classe.referents?.length && <ReferentInfos classe={classe} currentReferent={referent} rights={rights} isLoading={isLoading} onModifierReferent={handleModiferReferent} />}
 
       {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (
         <SejourInfos

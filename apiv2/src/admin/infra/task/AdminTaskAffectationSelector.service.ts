@@ -49,6 +49,7 @@ export class AdminTaskAffectationSelectorService {
                 results = {
                     rapportKey: simulationhts.rapportFile.Key,
                     selectedCost: simulationhts.analytics.selectedCost,
+                    iterationCostList: simulationhts.analytics.iterationCostList,
                     jeunesNouvellementAffected: simulationhts.analytics.jeunesNouvellementAffected,
                     jeuneAttenteAffectation: simulationhts.analytics.jeuneAttenteAffectation,
                     jeunesDejaAffected: simulationhts.analytics.jeunesDejaAffected,
