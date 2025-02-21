@@ -330,7 +330,7 @@ export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: Coh
       }
 
       const referentsRegion = await ReferentModel.find({
-        role: ROLES.REFERENT_DEPARTMENT,
+        role: ROLES.REFERENT_REGION,
         subRole: SUB_ROLES.coordinator,
         region: young.region,
       });
