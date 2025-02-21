@@ -41,7 +41,7 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         const jeunes = await this.jeuneGateway.findByIds(ids);
         const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
             this.desistementService.groupJeunesByCategories(jeunes, sessionId);
-        // const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes);
+        const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes);
         this.logger.debug(`DesistementService: ${jeunesNonConfirmes.length} jeunes désistés`);
         // TODO: Rapport
         await this.desistementService.notifierJeunes(jeunesNonConfirmes);
@@ -50,7 +50,7 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
             jeunesAutreSession: jeunesAutreSession.length,
             jeunesConfirmes: jeunesConfirmes.length,
             jeunesNonConfirmes: jeunesNonConfirmes.length,
-            // jeunesModifies,
+            jeunesModifies,
             rapportKey: "",
         };
     }

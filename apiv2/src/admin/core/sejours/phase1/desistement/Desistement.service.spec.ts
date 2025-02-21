@@ -8,6 +8,11 @@ import { ClsService } from "nestjs-cls";
 import { Logger } from "@nestjs/common";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { YOUNG_STATUS } from "snu-lib";
+import { EmailTemplate } from "@notification/core/Notification";
+
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
 
 describe("DesistementService", () => {
     let service: DesistementService;
@@ -34,10 +39,6 @@ describe("DesistementService", () => {
         taskGateway = module.get<TaskGateway>(TaskGateway);
         fileGateway = module.get<FileGateway>(FileGateway);
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
-    });
-
-    it("should be defined", () => {
-        expect(service).toBeDefined();
     });
 
     describe("groupJeunesByCategories", () => {
@@ -76,8 +77,16 @@ describe("DesistementService", () => {
 
             expect(result).toBe(2);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalledWith([
-                { ...jeunes[0], statut: YOUNG_STATUS.WITHDRAWN },
-                { ...jeunes[1], statut: YOUNG_STATUS.WITHDRAWN },
+                {
+                    ...jeunes[0],
+                    statut: YOUNG_STATUS.WITHDRAWN,
+                    desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
+                },
+                {
+                    ...jeunes[1],
+                    statut: YOUNG_STATUS.WITHDRAWN,
+                    desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
+                },
             ]);
         });
     });
@@ -97,34 +106,34 @@ describe("DesistementService", () => {
 
             await service.notifierJeunes(jeunes);
 
-            expect(notificationGateway.sendEmail).toHaveBeenCalledTimes(5);
+            expect(notificationGateway.sendEmail).toHaveBeenCalledTimes(4);
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
                 {
                     to: [{ email: "jeune1@example.com", name: "Prenom1 Nom1" }],
                     message: "Vous n’avez pas confirmé votre participation au séjour",
                 },
-                "DESISTEMENT_PAR_TIERS",
+                EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
                 {
                     to: [{ email: "parent1@example.com", name: "Prenom1 Nom1" }],
                     message: "Vous n’avez pas confirmé votre participation au séjour",
                 },
-                "DESISTEMENT_PAR_TIERS",
+                EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
                 {
                     to: [{ email: "parent2@example.com", name: "Prenom1 Nom1" }],
                     message: "Vous n’avez pas confirmé votre participation au séjour",
                 },
-                "DESISTEMENT_PAR_TIERS",
+                EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
                 {
                     to: [{ email: "jeune2@example.com", name: "Prenom2 Nom2" }],
                     message: "Vous n’avez pas confirmé votre participation au séjour",
                 },
-                "DESISTEMENT_PAR_TIERS",
+                EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
         });
     });
