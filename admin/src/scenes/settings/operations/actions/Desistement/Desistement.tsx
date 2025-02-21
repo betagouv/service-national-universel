@@ -5,7 +5,7 @@ import { COHORT_TYPE, CohortDto } from "snu-lib";
 import { Button, Tooltip } from "@snu/ds/admin";
 import DesistementModal from "./DesistementModal";
 
-export default function DesistementMetropole({ session }: { session: CohortDto }) {
+export default function Desistement({ session }: { session: CohortDto }) {
   const [showModal, toggleModal] = useToggle(false);
 
   return (
@@ -15,7 +15,6 @@ export default function DesistementMetropole({ session }: { session: CohortDto }
         <Tooltip id="affectation-hts-metropole" title="Désistement (Metropole, hors Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
-        {/* {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>} */}
       </div>
       <div className="flex gap-2">
         <Button title="Lancer les désistements" onClick={toggleModal} disabled={session.type === COHORT_TYPE.CLE} />

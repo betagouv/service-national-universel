@@ -58,9 +58,6 @@ import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscr
 import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
-import { DesistementController } from "@admin/infra/sejours/phase1/desistement/api/Desistement.controller";
-import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
-import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -96,7 +93,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             BasculeJeuneNonValidesController,
             Phase1Controller,
             AuthController,
-            DesistementController,
         ],
         providers: [
             ClasseService,
@@ -105,8 +101,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
             ValiderBasculeJeunesService,
-            DesistementService,
-            DesisterPostAffectation,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,
