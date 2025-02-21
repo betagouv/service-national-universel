@@ -3,9 +3,9 @@ import { Collapsable } from "@snu/ds/admin";
 
 import { CohortDto } from "snu-lib";
 
-import AffectationHTSSimulationMetropole from "./AffectationSimulation/AffectationHTSSimulationMetropole";
-import AffectationCLESimulationMetropole from "./AffectationSimulation/AffectationCLESimulationMetropole";
-import AffectationCLESimulationDromCom from "./AffectationSimulation/AffectationCLESimulationDromCom";
+import AffectationHTSSimulationMetropole from "./Affectation/AffectationHTSSimulationMetropole";
+import AffectationCLESimulationMetropole from "./Affectation/AffectationCLESimulationMetropole";
+import AffectationCLESimulationDromCom from "./Affectation/AffectationCLESimulationDromCom";
 
 interface AffectationsSectionProps {
   session: CohortDto;

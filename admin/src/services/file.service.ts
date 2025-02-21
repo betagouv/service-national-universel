@@ -38,4 +38,18 @@ export const downloadSecuredFile = async (url) => {
   download(blob, fileName);
 };
 
+export const downloadFileFrombase64 = (base64: string, fileName: string, mimeType: string) => {
+  const binaryData = Uint8Array.from(atob(base64), (c) => c.charCodeAt(0));
+  const blob = new Blob([binaryData], { type: mimeType });
+  const url = window.URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = fileName;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  window.URL.revokeObjectURL(url);
+};
+
 export const getSecuredFileUrl = (key) => `${apiv2URL}/file?key=${encodeURIComponent(key)}`;
