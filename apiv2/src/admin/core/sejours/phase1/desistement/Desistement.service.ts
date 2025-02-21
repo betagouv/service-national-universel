@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskStatus, WITHRAWN_REASONS, YOUNG_STATUS } from "snu-lib";
+import { TaskStatus, YOUNG_STATUS } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -73,7 +73,7 @@ export class DesistementService {
             list.push({
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
-                // TODO: Ajouter le motif de désistement
+                desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
             });
         }
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
@@ -83,9 +83,10 @@ export class DesistementService {
     }
 
     async notifierJeunes(jeunes: JeuneModel[]) {
+        console.log("🚀 ~ DesistementService ~ notifierJeunes ~ jeunes:", jeunes.length);
         const templateId = EmailTemplate.DESISTEMENT_PAR_TIERS;
         const message = "Vous n’avez pas confirmé votre participation au séjour";
-        for (const jeune of jeunes) {
+        for await (const jeune of jeunes) {
             // jeune
             await this.notificationGateway.sendEmail<EmailWithMessage>(
                 {

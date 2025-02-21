@@ -42,7 +42,7 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
             this.desistementService.groupJeunesByCategories(jeunes, sessionId);
         // const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes);
-        // this.logger.debug(`DesistementService: ${jeunesModifies} jeunes désistés`);
+        this.logger.debug(`DesistementService: ${jeunesNonConfirmes.length} jeunes désistés`);
         // TODO: Rapport
         await this.desistementService.notifierJeunes(jeunesNonConfirmes);
         return {
