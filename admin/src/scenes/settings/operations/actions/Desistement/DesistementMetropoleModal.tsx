@@ -5,6 +5,9 @@ import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../shared/useTraitements";
 import dayjs from "dayjs";
 import DesistementButton from "./DesistementButton";
+import { DesistementService } from "@/services/desistementService";
+import { useQuery } from "@tanstack/react-query";
+import Loader from "@/components/Loader";
 
 interface DesistementMetropoleModalProps {
   session: CohortDto;
@@ -19,8 +22,6 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
     label: `${t.name} - ${dayjs(t.createdAt).format("DD/MM/YYYY")}`,
   }));
   const selectedTraitement = selectedOption ? traitements?.find((t) => t.id === selectedOption) : traitements?.[0];
-  console.log("🚀 ~ DesistementMetropoleModal ~ selectedTraitement:", selectedTraitement);
-  const totalAffectes = selectedTraitement?.metadata?.results?.jeunesAffected || 0;
 
   return (
     <Modal
@@ -57,12 +58,7 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
             />
           )}
           <br />
-          {selectedTraitement && (
-            <div className="text-center text-lg">
-              <p>Nombre de volontaires à désister : ? / {totalAffectes} affectés.</p>
-              <p>Confirmez le désistement des volontaires n’ayant pas confirmé le séjour.</p>
-            </div>
-          )}
+          {selectedTraitement && <Preview traitement={selectedTraitement} />}
         </>
       }
       footer={
@@ -72,5 +68,31 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
         </div>
       }
     />
+  );
+}
+
+function Preview({ traitement }) {
+  const { data, isPending, isError } = useQuery({
+    queryKey: ["desistement", traitement.id],
+    queryFn: () => DesistementService.getDesistementPreview(traitement.metadata?.parameters?.sessionId, traitement.id),
+  });
+  const total = traitement?.metadata?.results?.jeunesAffected || 0;
+  const nonConfirmes = data?.jeunesNonConfirmes || 0;
+
+  return (
+    <div className="text-center text-lg">
+      {isError ? (
+        <p>Erreur</p>
+      ) : isPending ? (
+        <Loader />
+      ) : (
+        <>
+          <p>
+            Nombre de volontaires à désister : {nonConfirmes} / {total} affectés.
+          </p>
+          <p>Confirmez le désistement des volontaires n’ayant pas confirmé le séjour.</p>
+        </>
+      )}
+    </div>
   );
 }

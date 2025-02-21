@@ -7,9 +7,12 @@ export interface DesisterTaskParameters extends Phase1TaskParameters {
 }
 
 export type DesisterTaskResult = {
-  rapportKey: string;
   jeunesDesistes: number;
-  errors: number;
+  jeunesAutreSession: number;
+  jeunesConfirmes: number;
+  jeunesNonConfirmes: number;
+  rapportKey?: string;
+  jeunesModifies?: number;
 };
 
 export interface DesistementTaskDto extends TaskDto<DesisterTaskParameters, DesisterTaskResult> {}

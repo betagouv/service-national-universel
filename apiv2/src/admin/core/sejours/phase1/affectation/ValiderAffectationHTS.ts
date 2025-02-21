@@ -18,7 +18,8 @@ import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationHTS.service"
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
 import { SejourModel } from "../sejour/Sejour.model";
-import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model"; import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
+import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model";
+import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 
 export type ValiderAffectationRapportData = Array<

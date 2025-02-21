@@ -161,11 +161,7 @@ export class AdminTaskAffectationSelectorService {
                     sessionId: desistementPostAffectationTask.metadata!.parameters!.sessionId,
                     affectationTaskId: desistementPostAffectationTask.metadata!.parameters!.affectationTaskId,
                 });
-                results = {
-                    analytics: {
-                        jeunesDesistes: desistementPostAffectationResult.analytics.jeunesDesistes,
-                    },
-                };
+                results = desistementPostAffectationResult;
                 break;
 
             default:

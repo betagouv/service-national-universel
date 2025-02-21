@@ -1,21 +1,34 @@
-import { Body, Controller, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
 import { TaskName, TaskStatus, DesisterTaskParameters, DesistementRoutes } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
+import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
 
 @Controller("desistement")
 export class DesistementController {
     constructor(
-        private readonly desistementService: DesistementService,
+        private readonly desisterPostAffectation: DesisterPostAffectation,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
     @UseGuards(AdminGuard)
+    @Get("/:sessionId/preview/:affectationTaskId")
+    async previsualiser(
+        @Param("sessionId") sessionId: string,
+        @Param("affectationTaskId") affectationTaskId: string,
+    ): Promise<DesistementRoutes["GetPreview"]["response"]> {
+        const result = await this.desisterPostAffectation.preview({
+            sessionId,
+            affectationTaskId,
+        });
+        return result;
+    }
+
+    @UseGuards(AdminGuard)
     @Post("/:sessionId")
-    async desisterPostAffectation(
+    async desister(
         @Request() request: CustomRequest,
         @Param("sessionId") sessionId: string,
         @Body() payload: { affectationTaskId: string },

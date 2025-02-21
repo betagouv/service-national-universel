@@ -1,44 +1,57 @@
 import { Inject, Logger } from "@nestjs/common";
-import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
 import { DesistementService } from "./Desistement.service";
+import { JeuneGateway } from "../../jeune/Jeune.gateway";
+import { DesisterTaskResult } from "snu-lib";
 
-export type DesisterPostAffectationResult = {
-    // TODO: Rapport
-    // rapportData: DesisterPostAffectationRapportData;
-    // rapportFile: {
-    //     Location: string;
-    //     ETag: string;
-    //     Bucket: string;
-    //     Key: string;
-    // };
-    analytics: {
-        jeunesDesistes: number;
-    };
-};
-
-export class DesisterPostAffectation implements UseCase<DesisterPostAffectationResult> {
+export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
     constructor(
-        private readonly DesistementService: DesistementService,
-        @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        private readonly DesistementService: DesistementService,
         private readonly logger: Logger,
     ) {}
+
+    async preview({
+        sessionId,
+        affectationTaskId,
+    }: {
+        sessionId: string;
+        affectationTaskId: string;
+    }): Promise<DesisterTaskResult> {
+        const ids = await this.DesistementService.getJeunesIdsFromTask(affectationTaskId);
+        const jeunes = await this.jeuneGateway.findByIds(ids);
+        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
+            this.DesistementService.groupJeunesByCategories(jeunes, sessionId);
+        return {
+            jeunesDesistes: jeunesDesistes.length,
+            jeunesAutreSession: jeunesAutreSession.length,
+            jeunesConfirmes: jeunesConfirmes.length,
+            jeunesNonConfirmes: jeunesNonConfirmes.length,
+        };
+    }
+
     async execute({
         sessionId,
         affectationTaskId,
     }: {
         sessionId: string;
         affectationTaskId: string;
-    }): Promise<DesisterPostAffectationResult> {
-        const ids = await this.DesistementService.getJeunesADesisterIdsFromTask(affectationTaskId);
-        const jeunesADesister = await this.DesistementService.getJeunesADesister(sessionId, ids);
-        const jeunesDesistes = await this.DesistementService.desisterJeunes(jeunesADesister);
+    }): Promise<DesisterTaskResult> {
+        const ids = await this.DesistementService.getJeunesIdsFromTask(affectationTaskId);
+        const jeunes = await this.jeuneGateway.findByIds(ids);
+        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
+            this.DesistementService.groupJeunesByCategories(jeunes, sessionId);
+        const jeunesModifies = await this.DesistementService.desisterJeunes(jeunesNonConfirmes);
+        this.logger.debug(`DesistementService: ${jeunesModifies} jeunes désistés`);
         // TODO: Rapport
-        const analytics = { jeunesDesistes };
-        return { analytics };
+        // TODO: Notification
+        return {
+            jeunesDesistes: jeunesDesistes.length,
+            jeunesAutreSession: jeunesAutreSession.length,
+            jeunesConfirmes: jeunesConfirmes.length,
+            jeunesNonConfirmes: jeunesNonConfirmes.length,
+            jeunesModifies,
+            rapportKey: "",
+        };
     }
 }

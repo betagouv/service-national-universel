@@ -1,6 +1,5 @@
 import { TaskModel } from "@task/core/Task.model";
-
-import { DesisterPostAffectationResult } from "./DesisterPostAffectation";
+import { DesisterTaskResult } from "snu-lib";
 
 export interface DesisterPostAffectationTaskParameters {
     sessionId: string;
@@ -8,11 +7,4 @@ export interface DesisterPostAffectationTaskParameters {
     dateAffectation: Date;
 }
 
-export type DesisterPostAffectationTaskResult = Pick<DesisterPostAffectationResult, "analytics"> & {
-    rapportKey: string;
-};
-
-export type DesisterPostAffectationTaskModel = TaskModel<
-    DesisterPostAffectationTaskParameters,
-    DesisterPostAffectationTaskResult
->;
+export type DesisterPostAffectationTaskModel = TaskModel<DesisterPostAffectationTaskParameters, DesisterTaskResult>;

@@ -1,9 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { SessionGateway } from "../session/Session.gateway";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { SejourGateway } from "../sejour/Sejour.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskStatus, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { TaskStatus, YOUNG_STATUS } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -25,44 +23,59 @@ export class DesistementService {
         private readonly logger: Logger,
     ) {}
 
-    async getJeunesADesisterIdsFromTask(affectationTaskId: string): Promise<string[]> {
-        const affectationTask = await this.taskGateway.findById(affectationTaskId);
-        if (!affectationTask) {
-            throw new Error(`Affectation task not found: ${affectationTaskId}`);
-        }
-        const rapportKey = affectationTask.metadata?.results.rapportKey;
-        if (!rapportKey) {
-            throw new Error("Rapport key not found in task metadata");
-        }
-        const rapportFile = await this.fileGateway.downloadFile(rapportKey);
-        if (!rapportFile) {
-            throw new Error(`Rapport file not found: ${rapportKey}`);
-        }
-        const rapportXLSX = await this.fileGateway.parseXLS<ValiderAffectationRapportData[0]>(rapportFile.Body);
-        return rapportXLSX.map((row) => row.id);
+    async getJeunesIdsFromTask(taskId: string): Promise<string[]> {
+        const task = await this.taskGateway.findById(taskId);
+        if (!task) throw new Error(`Affectation task not found: ${taskId}`);
+
+        const key = task.metadata?.results.rapportKey;
+        if (!key) throw new Error("Rapport key not found in task metadata");
+
+        const file = await this.fileGateway.downloadFile(key);
+        if (!file) throw new Error(`Rapport file not found: ${key}`);
+
+        const parsedFile = await this.fileGateway.parseXLS<ValiderAffectationRapportData[0]>(file.Body);
+        return parsedFile.map((row) => row.id);
     }
 
-    async getJeunesADesister(sessionId: string, arrayOfIds: string[]): Promise<JeuneModel[]> {
-        return this.jeuneGateway.findByIdsSessionIdStatutPhase1AndConfirmationDeLaParticipation(
-            arrayOfIds,
-            sessionId,
-            YOUNG_STATUS_PHASE1.AFFECTED,
-            false,
+    groupJeunesByCategories(jeunes: JeuneModel[], sessionId: string) {
+        return jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.sessionId !== sessionId) {
+                    acc.jeunesAutreSession.push(jeune);
+                } else if (jeune.statut === YOUNG_STATUS.WITHDRAWN) {
+                    acc.jeunesDesistes.push(jeune);
+                } else if (jeune.youngPhase1Agreement === "true") {
+                    acc.jeunesConfirmes.push(jeune);
+                } else if (
+                    jeune.statut === YOUNG_STATUS.VALIDATED &&
+                    (jeune.youngPhase1Agreement === "false" || !jeune.youngPhase1Agreement)
+                ) {
+                    acc.jeunesNonConfirmes.push(jeune);
+                }
+                return acc;
+            },
+            {
+                jeunesAutreSession: [] as JeuneModel[],
+                jeunesDesistes: [] as JeuneModel[],
+                jeunesConfirmes: [] as JeuneModel[],
+                jeunesNonConfirmes: [] as JeuneModel[],
+            },
         );
     }
 
     @Transactional()
-    async desisterJeunes(jeunesADesister: JeuneModel[]): Promise<number> {
-        const jeunesToDesisterList: JeuneModel[] = [];
-        for (const jeune of jeunesADesister) {
-            jeunesToDesisterList.push({
+    async desisterJeunes(jeunes: JeuneModel[]): Promise<number> {
+        const list: JeuneModel[] = [];
+        for (const jeune of jeunes) {
+            list.push({
                 ...jeune,
-                statutPhase1: YOUNG_STATUS_PHASE1.WITHDRAWN,
+                statut: YOUNG_STATUS.WITHDRAWN,
+                // TODO: Ajouter le motif de désistement
             });
         }
         this.cls.set("user", { firstName: "Script de désistement automatique des volontaires" });
-        const jeunesDesistes = await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
+        const res = await this.jeuneGateway.bulkUpdate(list);
         this.cls.set("user", null);
-        return jeunesDesistes;
+        return res;
     }
 }
