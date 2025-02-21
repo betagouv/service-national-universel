@@ -76,6 +76,12 @@ interface RecipientFetchError {
   originalError: unknown;
 }
 
+interface RecipientNotFoundError {
+  code: "RECIPIENT_NOT_FOUND";
+  message: string;
+  originalError: unknown;
+}
+
 type RecipientNotificationError = RecipientValidationError | RecipientProcessingError | RecipientFetchError;
 
 // Validation des données obligatoire des jeunes
@@ -87,7 +93,7 @@ const validateYoungData = (young: YoungCustomType): { isValid: true } | { isVali
         youngId: young._id,
         firstName: young.firstName,
         lastName: young.lastName,
-        type: "general",
+        type: "informations obligatoires",
         missing: "informations générales",
       },
     };
@@ -441,6 +447,15 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
           message: "Erreur lors du traitement des destinataires",
           originalError: error,
         } as RecipientProcessingError;
+      }
+
+      if (recipientsMap.size === 0) {
+        toastr.error("Erreur lors du traitement des destinataires", "Aucun destinataire trouvé", { timeOut: 5000 });
+        throw {
+          code: "RECIPIENT_NOT_FOUND",
+          message: "Aucun destinataire trouvé",
+          originalError: null,
+        } as RecipientNotFoundError;
       }
 
       return Array.from(recipientsMap.values());

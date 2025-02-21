@@ -69,7 +69,7 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
         pathFile: `${PLAN_MARKETING_FOLDER_PATH_EXPORT}/${file.name}`,
       }).catch((error) => {
 
-        if (error.code === "CAMPAIGN_NOT_FOUND") {
+        if (["CAMPAIGN_NOT_FOUND", "NOT_FOUND"].includes(error.message) && error.statusCode === 422) {
           const campaignNotFoundError: CampaignNotFoundError = {
             code: "CAMPAIGN_NOT_FOUND",
             message: "Impossible de trouver la campagne",
@@ -78,7 +78,7 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
             },
             originalError: error,
           };
-          toastr.error(`Impossible de créer la liste de diffusion`, `L'ID campagne ${listData.campaignId} n’existe pas dans Brevo`, { timeOut: 5000 });
+          toastr.error(`Impossible de créer la liste de diffusion`, `L'ID campagne "${listData.campaignId}" n’existe pas dans Brevo`, { timeOut: 5000 });
           throw campaignNotFoundError;
         }
 
