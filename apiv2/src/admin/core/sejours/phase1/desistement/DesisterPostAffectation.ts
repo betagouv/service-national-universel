@@ -7,7 +7,7 @@ import { DesisterTaskResult } from "snu-lib";
 export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
     constructor(
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        private readonly DesistementService: DesistementService,
+        private readonly desistementService: DesistementService,
         private readonly logger: Logger,
     ) {}
 
@@ -18,10 +18,10 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         sessionId: string;
         affectationTaskId: string;
     }): Promise<DesisterTaskResult> {
-        const ids = await this.DesistementService.getJeunesIdsFromTask(affectationTaskId);
+        const ids = await this.desistementService.getJeunesIdsFromTask(affectationTaskId);
         const jeunes = await this.jeuneGateway.findByIds(ids);
         const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
-            this.DesistementService.groupJeunesByCategories(jeunes, sessionId);
+            this.desistementService.groupJeunesByCategories(jeunes, sessionId);
         return {
             jeunesDesistes: jeunesDesistes.length,
             jeunesAutreSession: jeunesAutreSession.length,
@@ -37,20 +37,20 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         sessionId: string;
         affectationTaskId: string;
     }): Promise<DesisterTaskResult> {
-        const ids = await this.DesistementService.getJeunesIdsFromTask(affectationTaskId);
+        const ids = await this.desistementService.getJeunesIdsFromTask(affectationTaskId);
         const jeunes = await this.jeuneGateway.findByIds(ids);
         const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
-            this.DesistementService.groupJeunesByCategories(jeunes, sessionId);
-        const jeunesModifies = await this.DesistementService.desisterJeunes(jeunesNonConfirmes);
-        this.logger.debug(`DesistementService: ${jeunesModifies} jeunes désistés`);
+            this.desistementService.groupJeunesByCategories(jeunes, sessionId);
+        // const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes);
+        // this.logger.debug(`DesistementService: ${jeunesModifies} jeunes désistés`);
         // TODO: Rapport
-        // TODO: Notification
+        await this.desistementService.notifierJeunes(jeunesNonConfirmes);
         return {
             jeunesDesistes: jeunesDesistes.length,
             jeunesAutreSession: jeunesAutreSession.length,
             jeunesConfirmes: jeunesConfirmes.length,
             jeunesNonConfirmes: jeunesNonConfirmes.length,
-            jeunesModifies,
+            // jeunesModifies,
             rapportKey: "",
         };
     }

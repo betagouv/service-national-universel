@@ -12,7 +12,6 @@ const DesistementService = {
     })();
   },
   postDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
-    console.log("🚀 ~ postDesistement: ~ taskId:", taskId);
     return await buildRequest<DesistementRoutes["Post"]>({
       path: "/desistement/{sessionId}",
       method: "POST",

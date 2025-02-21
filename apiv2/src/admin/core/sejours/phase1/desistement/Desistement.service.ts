@@ -1,12 +1,14 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskStatus, YOUNG_STATUS } from "snu-lib";
+import { TaskStatus, WITHRAWN_REASONS, YOUNG_STATUS } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { Transactional } from "@nestjs-cls/transactional";
 import { ClsService } from "nestjs-cls";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -19,6 +21,7 @@ export class DesistementService {
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -73,9 +76,44 @@ export class DesistementService {
                 // TODO: Ajouter le motif de désistement
             });
         }
-        this.cls.set("user", { firstName: "Script de désistement automatique des volontaires" });
+        this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
         const res = await this.jeuneGateway.bulkUpdate(list);
         this.cls.set("user", null);
         return res;
+    }
+
+    async notifierJeunes(jeunes: JeuneModel[]) {
+        const templateId = EmailTemplate.DESISTEMENT_PAR_TIERS;
+        const message = "Vous n’avez pas confirmé votre participation au séjour";
+        for (const jeune of jeunes) {
+            // jeune
+            await this.notificationGateway.sendEmail<EmailWithMessage>(
+                {
+                    to: [{ email: jeune.email, name: `${jeune.prenom} ${jeune.nom}` }],
+                    message,
+                },
+                templateId,
+            );
+            // RL 1
+            if (jeune.parent1Email) {
+                await this.notificationGateway.sendEmail<EmailWithMessage>(
+                    {
+                        to: [{ email: jeune.parent1Email, name: `${jeune.prenom} ${jeune.nom}` }],
+                        message,
+                    },
+                    templateId,
+                );
+            }
+            // RL 2
+            if (jeune.parent2Email) {
+                await this.notificationGateway.sendEmail<EmailWithMessage>(
+                    {
+                        to: [{ email: jeune.parent2Email, name: `${jeune.prenom} ${jeune.nom}` }],
+                        message,
+                    },
+                    templateId,
+                );
+            }
+        }
     }
 }
