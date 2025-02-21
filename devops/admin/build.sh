@@ -38,7 +38,7 @@ if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     # CC_CUSTOM_BUILD_TOOL="VITE_RELEASE=$CC_COMMIT_ID devops/admin/build.sh"
     # CC_RUN_COMMAND="nginx -c $APP_HOME/nginx.conf"
     mv devops/admin/package.json .
-    envsubst < devops/admin/nginx.conf > nginx.conf
+    envsubst '$APP_HOME $PORT' < devops/admin/nginx.conf > nginx.conf
     rm -rf $(ls -A | grep -v "build\|nginx.conf\|package.json")
 fi
 
