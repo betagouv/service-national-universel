@@ -84,6 +84,7 @@ export default function Goal() {
               {departements
                 .filter((departement) => departement !== "Corse")
                 .map((department) => {
+                  const goal = inscriptionGoals.find((ig) => ig.department === department);
                   return (
                     <Departement key={department}>
                       <Row>
@@ -98,7 +99,7 @@ export default function Goal() {
                                   const val = e.target.value && !isNaN(Number(e.target.value)) ? Number(e.target.value) : null;
                                   setInscriptionGoals(inscriptionGoals.map((ig) => (ig.department === department ? { ...ig, max: val } : ig)));
                                 }}
-                                value={inscriptionGoals.find((ig) => ig.department === department)?.max || ""}
+                                value={!!goal?.max || goal?.max === 0 ? goal.max : ""}
                                 className="form-control"
                                 style={{ width: "75px", display: "inline-block", marginRight: "1rem" }}
                               />

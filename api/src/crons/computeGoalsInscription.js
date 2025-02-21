@@ -7,15 +7,16 @@ const arr = departmentList;
 
 const getCount = async ({ department }) => {
   const res = {};
-  const cursor = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort: /2024/ }).cursor();
+  const cursor = await YoungModel.find({ department, status: { $in: ["VALIDATED"] }, cohort: new RegExp(`${new Date().getFullYear()}`) }).cursor();
   await cursor.eachAsync(async function (young) {
     res[young.cohort] = (res[young.cohort] || 0) + 1;
   });
   return res;
 };
+
 const getGoalAndComputeFillingRates = async ({ department, values }) => {
   if (values && Object.keys(values).length > 0) {
-    const cursor = await InscriptionGoalModel.find({ department, cohort: /2024/ }).cursor();
+    const cursor = await InscriptionGoalModel.find({ department, cohort: new RegExp(`${new Date().getFullYear()}`) }).cursor();
     await cursor.eachAsync(async function (inscriptionGoal) {
       if (inscriptionGoal.max) {
         const fillingRate = ((values[inscriptionGoal.cohort] || 0) / (inscriptionGoal.max || 0)) * 100;
