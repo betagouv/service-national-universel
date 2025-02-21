@@ -1,7 +1,9 @@
 import { ImporterClasses } from "./ImporterClasses";
-import { Logger } from "@nestjs/common";
-import { warn } from "console";
-import { MIME_TYPES, ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
 
 describe("ImporterClasses", () => {
     let useCase: ImporterClasses;
