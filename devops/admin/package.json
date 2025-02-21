@@ -6,7 +6,7 @@
     "node": "^20.17"
   },
   "scripts": {
-    "nginx-start": "nginx -g 'daemon off;' -c nginx.conf"
+    "start": "nginx -c $APP_HOME/nginx.conf"
   },
   "author": "",
   "license": "ISC",

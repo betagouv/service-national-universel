@@ -36,10 +36,10 @@ if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     # NODEJS nginx
     # CC_NODE_BUILD_TOOL=custom
     # CC_CUSTOM_BUILD_TOOL="VITE_RELEASE=$CC_COMMIT_ID devops/admin/build.sh"
-    # CC_RUN_COMMAND="nginx -g 'daemon off;' -c nginx.conf"
-    mv devops/admin/nginx.conf devops/admin/index.js devops/admin/package.json .
-    rm -rf $(ls -A | grep -v "build\|nginx.conf\|index.js\|package.json")
-    npm install
+    # CC_RUN_COMMAND="nginx -c $APP_HOME/nginx.conf"
+    mv devops/admin/package.json .
+    envsubst < devops/admin/nginx.conf > nginx.conf
+    rm -rf $(ls -A | grep -v "build\|nginx.conf\|package.json")
 fi
 
 ls -la
