@@ -83,7 +83,6 @@ export class DesistementService {
     }
 
     async notifierJeunes(jeunes: JeuneModel[]) {
-        console.log("🚀 ~ DesistementService ~ notifierJeunes ~ jeunes:", jeunes.length);
         const templateId = EmailTemplate.DESISTEMENT_PAR_TIERS;
         const message = "Vous n’avez pas confirmé votre participation au séjour";
         for await (const jeune of jeunes) {

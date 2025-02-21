@@ -3,7 +3,7 @@ import { useToggle } from "react-use";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import { COHORT_TYPE, CohortDto } from "snu-lib";
 import { Button, Tooltip } from "@snu/ds/admin";
-import DesistementMetropoleModal from "./DesistementMetropoleModal";
+import DesistementModal from "./DesistementModal";
 
 export default function DesistementMetropole({ session }: { session: CohortDto }) {
   const [showModal, toggleModal] = useToggle(false);
@@ -20,7 +20,7 @@ export default function DesistementMetropole({ session }: { session: CohortDto }
       <div className="flex gap-2">
         <Button title="Lancer les désistements" onClick={toggleModal} disabled={session.type === COHORT_TYPE.CLE} />
       </div>
-      {showModal && <DesistementMetropoleModal session={session} onClose={toggleModal} />}
+      {showModal && <DesistementModal session={session} onClose={toggleModal} />}
     </div>
   );
 }

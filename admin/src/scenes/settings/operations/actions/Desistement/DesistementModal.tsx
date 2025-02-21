@@ -9,12 +9,7 @@ import { DesistementService } from "@/services/desistementService";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
 
-interface DesistementMetropoleModalProps {
-  session: CohortDto;
-  onClose: () => void;
-}
-
-export default function DesistementMetropoleModal({ session, onClose }: DesistementMetropoleModalProps) {
+export default function DesistementModal({ session, onClose }: { session: CohortDto; onClose: () => void }) {
   const { data: traitements, isPending, isError } = useTraitements({ sessionId: session._id!, action: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER, sort: "ASC" });
   const [selectedOption, setSelectedOption] = useState<string>();
   const options = traitements?.map((t) => ({
@@ -58,7 +53,7 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
             />
           )}
           <br />
-          {selectedTraitement && <Preview traitement={selectedTraitement} />}
+          {selectedTraitement && <PreviewText traitement={selectedTraitement} />}
         </>
       }
       footer={
@@ -71,7 +66,7 @@ export default function DesistementMetropoleModal({ session, onClose }: Desistem
   );
 }
 
-function Preview({ traitement }) {
+function PreviewText({ traitement }) {
   const { data, isPending, isError } = useQuery({
     queryKey: ["desistement", traitement.id],
     queryFn: () => DesistementService.getDesistementPreview(traitement.metadata?.parameters?.sessionId, traitement.id),
