@@ -1,5 +1,4 @@
-import { useMemo, useState } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import {
   YoungType,
@@ -15,6 +14,7 @@ import {
   LigneBusType,
   formatDateFR,
   LigneToPointType,
+  ReferentType,
 } from "snu-lib";
 import { BrevoRecipientsService, FiltersYoungsForExport } from "@/services/brevoRecipientsService";
 
@@ -52,9 +52,15 @@ type YoungCustomType = YoungType & {
   bus: LigneBusType;
 };
 
-interface RecipientValidationError {
-  code: "VALIDATION_ERROR";
+type RecipientErrorCode = "VALIDATION_ERROR" | "PROCESSING_ERROR" | "FETCH_ERROR" | "RECIPIENT_NOT_FOUND";
+
+interface BaseRecipientError {
+  code: RecipientErrorCode;
   message: string;
+}
+
+interface RecipientValidationError extends BaseRecipientError {
+  code: "VALIDATION_ERROR";
   details: {
     youngId?: string;
     firstName?: string;
@@ -64,25 +70,22 @@ interface RecipientValidationError {
   }[];
 }
 
-interface RecipientProcessingError {
+interface RecipientProcessingError extends BaseRecipientError {
   code: "PROCESSING_ERROR";
-  message: string;
   originalError: unknown;
 }
 
-interface RecipientFetchError {
+interface RecipientFetchError extends BaseRecipientError {
   code: "FETCH_ERROR";
-  message: string;
   originalError: unknown;
 }
 
-interface RecipientNotFoundError {
+interface RecipientNotFoundError extends BaseRecipientError {
   code: "RECIPIENT_NOT_FOUND";
-  message: string;
   originalError: unknown;
 }
 
-type RecipientNotificationError = RecipientValidationError | RecipientProcessingError | RecipientFetchError;
+type RecipientNotificationError = RecipientValidationError | RecipientProcessingError | RecipientFetchError | RecipientNotFoundError;
 
 // Validation des données obligatoire des jeunes
 const validateYoungData = (young: YoungCustomType): { isValid: true } | { isValid: false; error: RecipientValidationError["details"][0] } => {
@@ -276,202 +279,213 @@ const formatValidationErrorMessage = (errors: RecipientValidationError["details"
   };
 };
 
-export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [youngs, setYoungs] = useState<YoungCustomType[]>([]);
-  const [error, setError] = useState<RecipientNotificationError | null>(null);
+const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[], strict: boolean = false): void => {
+  const validationErrors: RecipientValidationError["details"] = [];
+  const validateFn = strict ? validateYoungDataStrict : validateYoungData;
 
-  const referentIds = useMemo(() => {
-    const ids = new Set<string>();
-    youngs.forEach((young) => {
-      young.classe?.referentClasseIds?.forEach((id) => ids.add(id));
-      young.etablissement?.referentEtablissementIds?.forEach((id) => ids.add(id));
-      young.etablissement?.coordinateurIds?.forEach((id) => ids.add(id));
-      if (young.sessionPhase1?.headCenterId) ids.add(young.sessionPhase1.headCenterId);
-    });
-
-    return ids;
-  }, [youngs]);
-
-  const { data: referents, isLoading: isLoadingReferents } = useQuery({
-    queryKey: ["referents", Array.from(referentIds)],
-    queryFn: () => BrevoRecipientsService.getReferentsByIds([...referentIds]),
-    enabled: referentIds.size > 0,
-    refetchOnWindowFocus: false,
+  youngs.forEach((young) => {
+    const validation = validateFn(young, selectedTypes);
+    if (!validation.isValid) {
+      validationErrors.push(validation.error);
+    }
   });
 
-  const validateData = (youngs: YoungCustomType[], selectedTypes: RecipientType[], strict: boolean = false): void => {
-    const validationErrors: RecipientValidationError["details"] = [];
-    const validateFn = strict ? validateYoungDataStrict : validateYoungData;
+  if (validationErrors.length > 0) {
+    const errorMessage = formatValidationErrorMessage(validationErrors);
+    toastr.error(errorMessage.toastr, "", { timeOut: 10000 });
 
-    youngs.forEach((young) => {
-      const validation = validateFn(young, selectedTypes);
-      if (!validation.isValid) {
-        validationErrors.push(validation.error);
-      }
-    });
+    throw {
+      code: "VALIDATION_ERROR",
+      message: errorMessage.details,
+      details: validationErrors,
+    } as RecipientValidationError;
+  }
+};
 
-    if (validationErrors.length > 0) {
-      const errorMessage = formatValidationErrorMessage(validationErrors);
-      toastr.error(errorMessage.toastr, "", { timeOut: 10000 });
-
-      throw {
-        code: "VALIDATION_ERROR",
-        message: errorMessage.details,
-        details: validationErrors,
-      } as RecipientValidationError;
-    }
-  };
-
-  const processRecipients = async (selectedTypes: RecipientType[], filters: FiltersYoungsForExport): Promise<BrevoRecipient[]> => {
-    setIsProcessing(true);
-    setError(null);
-
-    try {
-      const youngs = await BrevoRecipientsService.getFilteredYoungsForExport(filters, tab).catch((error) => {
-        toastr.error("Erreur lors de la récupération des données", "", { timeOut: 5000 });
-        throw {
-          code: "FETCH_ERROR",
-          message: "Erreur lors de la récupération des données",
-          originalError: error,
-        } as RecipientFetchError;
-      });
-
-      setYoungs(youngs);
+export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
+  // Mutation pour récupérer les jeunes
+  const fetchYoungsMutation = useMutation({
+    mutationFn: async ({ filters, selectedTypes }: { filters: FiltersYoungsForExport; selectedTypes: RecipientType[] }) => {
+      const youngs = await BrevoRecipientsService.getFilteredYoungsForExport(filters, tab);
       validateData(youngs, selectedTypes);
+      return youngs;
+    },
+    onError: (error) => {
+      toastr.error("Erreur lors de la récupération des données", "", { timeOut: 5000 });
+      throw {
+        code: "FETCH_ERROR",
+        message: "Erreur lors de la récupération des données",
+        originalError: error,
+      } as RecipientFetchError;
+    },
+  });
 
+  // Mutation pour récupérer les référents
+  const fetchReferentsMutation = useMutation({
+    mutationFn: async (ids: string[]) => {
+      const response = await BrevoRecipientsService.getReferentsByIds(ids);
+      return response.data;
+    },
+    onError: (error) => {
+      toastr.error("Erreur lors de la récupération des référents", "", { timeOut: 5000 });
+      throw {
+        code: "FETCH_ERROR",
+        message: "Erreur lors de la récupération des référents",
+        originalError: error,
+      } as RecipientFetchError;
+    },
+  });
+
+  // Mutation pour traiter les recipients
+  const processRecipientsMutation = useMutation({
+    mutationFn: async ({ youngs, referents, selectedTypes }: { youngs: YoungCustomType[]; referents: any[] | undefined; selectedTypes: RecipientType[] }) => {
       const recipientsMap = new Map<string, BrevoRecipient>();
-      const referentsMap = referents?.data ? new Map(referents.data.map((r) => [r._id, r])) : new Map();
+      const referentsMap = referents ? new Map(referents.map((r) => [r._id, r])) : new Map();
 
-      try {
-        youngs.forEach((young: YoungCustomType) => {
-          // Jeunes
-          if (selectedTypes.includes("jeunes")) {
-            recipientsMap.set(young.email, {
-              type: "jeunes",
-              PRENOM: young.firstName!,
-              NOM: young.lastName!,
-              EMAIL: young.email,
+      youngs.forEach((young: YoungCustomType) => {
+        // Jeunes
+        if (selectedTypes.includes("jeunes")) {
+          recipientsMap.set(young.email, {
+            type: "jeunes",
+            PRENOM: young.firstName!,
+            NOM: young.lastName!,
+            EMAIL: young.email,
+            ...fillCommonFields(young),
+          });
+        }
+
+        // Représentants légaux
+        if (selectedTypes.includes("representants")) {
+          if (young.parent1Email) {
+            recipientsMap.set(young.parent1Email, {
+              PRENOM: young.parent1FirstName || "",
+              NOM: young.parent1LastName || "",
+              EMAIL: young.parent1Email,
+              type: "representants",
               ...fillCommonFields(young),
             });
           }
+          if (young.parent2Email) {
+            recipientsMap.set(young.parent2Email, {
+              PRENOM: young.parent2FirstName || "",
+              NOM: young.parent2LastName || "",
+              EMAIL: young.parent2Email,
+              type: "representants",
+              ...fillCommonFields(young),
+            });
+          }
+        }
 
-          // Représentants légaux
-          if (selectedTypes.includes("representants")) {
-            if (young.parent1Email) {
-              recipientsMap.set(young.parent1Email, {
-                PRENOM: young.parent1FirstName || "",
-                NOM: young.parent1LastName || "",
-                EMAIL: young.parent1Email,
-                type: "representants",
+        // Référents de classe
+        if (selectedTypes.includes("referents") && young.classe?.referentClasseIds) {
+          young.classe.referentClasseIds.forEach((refId) => {
+            const referent = referentsMap.get(refId);
+            if (referent && isReferentClasse(referent)) {
+              recipientsMap.set(referent._id, {
+                PRENOM: referent.firstName!,
+                NOM: referent.lastName!,
+                EMAIL: referent.email,
+                type: "referents",
                 ...fillCommonFields(young),
               });
             }
-            if (young.parent2Email) {
-              recipientsMap.set(young.parent2Email, {
-                PRENOM: young.parent2FirstName || "",
-                NOM: young.parent2LastName || "",
-                EMAIL: young.parent2Email,
-                type: "representants",
+          });
+        }
+
+        // Chefs d'établissement
+        if (selectedTypes.includes("chefs-etablissement") && young.etablissement?.referentEtablissementIds) {
+          young.etablissement.referentEtablissementIds.forEach((refId) => {
+            const referent = referentsMap.get(refId);
+            if (referent && isChefEtablissement(referent)) {
+              recipientsMap.set(referent._id, {
+                PRENOM: referent.firstName!,
+                NOM: referent.lastName!,
+                EMAIL: referent.email,
+                type: "chefs-etablissement",
                 ...fillCommonFields(young),
               });
             }
-          }
+          });
+        }
 
-          // Référents de classe
-          if (selectedTypes.includes("referents") && young.classe?.referentClasseIds) {
-            young.classe.referentClasseIds.forEach((refId) => {
-              const referent = referentsMap.get(refId);
-              if (referent && isReferentClasse(referent)) {
-                recipientsMap.set(referent._id, {
-                  PRENOM: referent.firstName!,
-                  NOM: referent.lastName!,
-                  EMAIL: referent.email,
-                  type: "referents",
-                  ...fillCommonFields(young),
-                });
-              }
-            });
-          }
-
-          // Chefs d'établissement
-          if (selectedTypes.includes("chefs-etablissement") && young.etablissement?.referentEtablissementIds) {
-            young.etablissement.referentEtablissementIds.forEach((refId) => {
-              const referent = referentsMap.get(refId);
-              if (referent && isChefEtablissement(referent)) {
-                recipientsMap.set(referent._id, {
-                  PRENOM: referent.firstName!,
-                  NOM: referent.lastName!,
-                  EMAIL: referent.email,
-                  type: "chefs-etablissement",
-                  ...fillCommonFields(young),
-                });
-              }
-            });
-          }
-
-          // Coordinateurs CLE
-          if (selectedTypes.includes("administrateurs") && young.etablissement?.coordinateurIds) {
-            young.etablissement.coordinateurIds.forEach((coordId) => {
-              const coordinator = referentsMap.get(coordId);
-              if (coordinator && isCoordinateurEtablissement(coordinator)) {
-                recipientsMap.set(coordinator._id, {
-                  PRENOM: coordinator.firstName!,
-                  NOM: coordinator.lastName!,
-                  EMAIL: coordinator.email,
-                  type: "administrateurs",
-                  ...fillCommonFields(young),
-                });
-              }
-            });
-          }
-
-          // Chefs de centre
-          if (selectedTypes.includes("chefs-centres") && young.sessionPhase1?.headCenterId) {
-            const headCenter = referentsMap.get(young.sessionPhase1.headCenterId!);
-            if (headCenter && isHeadCenter(headCenter)) {
-              recipientsMap.set(headCenter._id, {
-                PRENOM: headCenter.firstName!,
-                NOM: headCenter.lastName!,
-                EMAIL: headCenter.email,
-                type: "chefs-centres",
+        // Coordinateurs CLE
+        if (selectedTypes.includes("administrateurs") && young.etablissement?.coordinateurIds) {
+          young.etablissement.coordinateurIds.forEach((coordId) => {
+            const coordinator = referentsMap.get(coordId);
+            if (coordinator && isCoordinateurEtablissement(coordinator)) {
+              recipientsMap.set(coordinator._id, {
+                PRENOM: coordinator.firstName!,
+                NOM: coordinator.lastName!,
+                EMAIL: coordinator.email,
+                type: "administrateurs",
                 ...fillCommonFields(young),
               });
             }
+          });
+        }
+
+        // Chefs de centre
+        if (selectedTypes.includes("chefs-centres") && young.sessionPhase1?.headCenterId) {
+          const headCenter = referentsMap.get(young.sessionPhase1.headCenterId!);
+          if (headCenter && isHeadCenter(headCenter)) {
+            recipientsMap.set(headCenter._id, {
+              PRENOM: headCenter.firstName!,
+              NOM: headCenter.lastName!,
+              EMAIL: headCenter.email,
+              type: "chefs-centres",
+              ...fillCommonFields(young),
+            });
           }
-        });
-      } catch (error) {
-        toastr.error("Erreur lors du traitement des destinataires", "", { timeOut: 5000 });
-        throw {
-          code: "PROCESSING_ERROR",
-          message: "Erreur lors du traitement des destinataires",
-          originalError: error,
-        } as RecipientProcessingError;
-      }
+        }
+      });
 
       if (recipientsMap.size === 0) {
-        toastr.error("Erreur lors du traitement des destinataires", "Aucun destinataire trouvé", { timeOut: 5000 });
-        throw {
+        const error: RecipientNotFoundError = {
           code: "RECIPIENT_NOT_FOUND",
           message: "Aucun destinataire trouvé",
           originalError: null,
-        } as RecipientNotFoundError;
+        };
+        throw error;
       }
 
       return Array.from(recipientsMap.values());
-    } catch (error) {
+    },
+    onError: (error: unknown) => {
       const recipientError = error as RecipientNotificationError;
-      setError(recipientError);
+      if (recipientError.code === "RECIPIENT_NOT_FOUND") {
+        toastr.error("Erreur lors du traitement des destinataires", "Aucun destinataire trouvé", { timeOut: 5000 });
+      } else {
+        toastr.error("Erreur lors du traitement des destinataires", "", { timeOut: 5000 });
+      }
       throw recipientError;
-    } finally {
-      setIsProcessing(false);
+    },
+  });
+
+  const processRecipients = async (selectedTypes: RecipientType[], filters: FiltersYoungsForExport) => {
+    // 1. Récupérer les jeunes
+    const youngs = await fetchYoungsMutation.mutateAsync({ filters, selectedTypes });
+
+    const referentIds = new Set<string>();
+    youngs.forEach((young) => {
+      young.classe?.referentClasseIds?.forEach((id) => referentIds.add(id));
+      young.etablissement?.referentEtablissementIds?.forEach((id) => referentIds.add(id));
+      young.etablissement?.coordinateurIds?.forEach((id) => referentIds.add(id));
+      if (young.sessionPhase1?.headCenterId) referentIds.add(young.sessionPhase1.headCenterId);
+    });
+
+    let referents: ReferentType[] = [];
+    // 2. Récupérer les référents si nécessaire
+    if (referentIds.size > 0) {
+      referents = (await fetchReferentsMutation.mutateAsync([...referentIds])) || [];
     }
+
+    // 3. Traiter les recipients
+    return await processRecipientsMutation.mutateAsync({ youngs, referents, selectedTypes });
   };
 
   return {
     processRecipients,
-    isLoading: isProcessing || isLoadingReferents,
-    error,
-    clearError: () => setError(null),
+    isLoading: fetchYoungsMutation.isPending || fetchReferentsMutation.isPending || processRecipientsMutation.isPending,
+    error: fetchYoungsMutation.error || fetchReferentsMutation.error || processRecipientsMutation.error,
   };
 };

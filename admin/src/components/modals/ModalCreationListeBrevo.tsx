@@ -1,8 +1,8 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { Button, Modal, Label } from "@snu/ds/admin";
-import { IoMdInformationCircleOutline } from "react-icons/io";
 import { useForm, Controller } from "react-hook-form";
 import { RecipientType } from "@/hooks/useBrevoRecipients";
+import { RecipientsSelection } from "../list/RecipientsSelection";
 
 interface ModalCreationListeBrevoProps {
   isOpen: boolean;
@@ -18,21 +18,6 @@ export interface BrevoListData {
   recipients: RecipientType[];
 }
 
-interface Recipient {
-  id: RecipientType;
-  label: string;
-  column: "left" | "right";
-}
-
-const RECIPIENTS: Recipient[] = [
-  { id: "jeunes", label: "Jeunes", column: "left" },
-  { id: "referents", label: "Référents de classes", column: "left" },
-  { id: "chefs-etablissement", label: "Chefs d'établissement", column: "left" },
-  { id: "representants", label: "Représentants légaux", column: "right" },
-  { id: "chefs-centres", label: "Chefs de centres", column: "right" },
-  { id: "administrateurs", label: "Coordinateurs CLE", column: "right" },
-] as const;
-
 const DEFAULT_SELECTED_RECIPIENTS = ["jeunes", "representants"] as const;
 
 export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingProcess = false, youngCountFiltered }: ModalCreationListeBrevoProps) => {
@@ -40,8 +25,6 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
     control,
     handleSubmit,
     formState: { errors },
-    watch,
-    setValue,
     reset,
   } = useForm<BrevoListData>({
     defaultValues: {
@@ -50,31 +33,6 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
       recipients: [...DEFAULT_SELECTED_RECIPIENTS],
     },
   });
-
-  const recipients = watch("recipients");
-
-  const toggleRecipient = useCallback(
-    (recipientId: RecipientType) => {
-      const currentRecipients = recipients;
-      const newRecipients = currentRecipients.includes(recipientId) ? currentRecipients.filter((id) => id !== recipientId) : [...currentRecipients, recipientId];
-      setValue("recipients", newRecipients);
-    },
-    [recipients, setValue],
-  );
-
-  const renderRecipientColumn = useCallback(
-    (column: "left" | "right") => (
-      <div className="space-y-3">
-        {RECIPIENTS.filter((recipient) => recipient.column === column).map((recipient) => (
-          <label key={recipient.id} className="flex items-center space-x-3">
-            <input type="checkbox" checked={recipients.includes(recipient.id)} onChange={() => toggleRecipient(recipient.id)} className="w-4 h-4 text-blue-600" />
-            <span>{recipient.label}</span>
-          </label>
-        ))}
-      </div>
-    ),
-    [recipients, toggleRecipient],
-  );
 
   const onSubmitForm = handleSubmit(async (data) => {
     await onConfirm(data);
@@ -136,22 +94,24 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
             <div>
               <Label title="Destinataires" tooltip="Destinataires" name="recipients" className="text-gray-700 mb-2 flex items-center" />
+              <Controller
+                name="recipients"
+                control={control}
+                rules={{
+                  validate: (value) => value.length > 0 || "Sélectionnez au moins un destinataire",
+                }}
+                render={({ field: { value, onChange } }) => (
+                  <RecipientsSelection
+                    selectedRecipients={value}
+                    onToggleRecipient={(recipientId) => {
+                      const newRecipients = value.includes(recipientId) ? value.filter((id) => id !== recipientId) : [...value, recipientId];
+                      onChange(newRecipients);
+                    }}
+                    error={errors.recipients?.message}
+                  />
+                )}
+              />
 
-              <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-                <Controller
-                  name="recipients"
-                  control={control}
-                  rules={{
-                    validate: (value) => value.length > 0 || "Sélectionnez au moins un destinataire",
-                  }}
-                  render={() => (
-                    <>
-                      {renderRecipientColumn("left")}
-                      {renderRecipientColumn("right")}
-                    </>
-                  )}
-                />
-              </div>
               {errors.recipients && <span className="text-red-500 text-sm mt-1">{errors.recipients.message}</span>}
             </div>
           </div>
