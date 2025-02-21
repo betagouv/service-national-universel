@@ -39,6 +39,7 @@ if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     # CC_RUN_COMMAND="nginx -g 'daemon off;' -c nginx.conf"
     mv devops/admin/nginx.conf devops/admin/package.json .
     rm -rf $(ls -A | grep -v "build\|nginx.conf\|package.json")
+    npm install
 fi
 
 ls -la
