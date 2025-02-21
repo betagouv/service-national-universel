@@ -22,7 +22,7 @@ import {
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
-import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
+import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young, getCcOfYoung } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
@@ -307,6 +307,20 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
           youngFirstName: young.firstName,
           youngLastName: young.lastName,
         },
+      });
+    }
+
+    // uniquement post affectation
+    if (key === "youngPhase1Agreement" && newValue === "true") {
+      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
+        },
+        cc,
       });
     }
 
