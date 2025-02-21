@@ -2,6 +2,12 @@
   "name": "admin",
   "version": "1.0.0",
   "main": "index.js",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "nginx -g 'daemon off;' -c nginx.conf"
+  },
   "author": "",
   "license": "ISC",
   "description": "",

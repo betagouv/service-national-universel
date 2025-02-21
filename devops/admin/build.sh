@@ -37,8 +37,8 @@ if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     # CC_NODE_BUILD_TOOL=custom
     # CC_CUSTOM_BUILD_TOOL="VITE_RELEASE=$CC_COMMIT_ID devops/admin/build.sh"
     # CC_RUN_COMMAND="nginx -g 'daemon off;' -c nginx.conf"
-    mv devops/admin/nginx.conf .
-    rm -rf $(ls -A | grep -v "build\|nginx.conf")
+    mv devops/admin/nginx.conf devops/admin/package.json .
+    rm -rf $(ls -A | grep -v "build\|nginx.conf\|package.json")
 fi
 
 ls -la
