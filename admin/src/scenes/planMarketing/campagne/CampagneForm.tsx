@@ -80,7 +80,7 @@ export default React.memo(
 
               <div className="flex-1">
                 <label className="text-sm font-medium text-gray-900">Type de volontaires *</label>
-                <div className="mt-2">
+                <div className="mt-2 flex items-center">
                   <RadioButton
                     options={[
                       { label: "HTS", value: CampagneJeuneType.VOLONTAIRE },
@@ -111,6 +111,7 @@ export default React.memo(
                   placeholder="Sélectionner une liste de diffusion"
                   options={listeDiffusionOptions}
                   className={`mt-2 ${errors.listeDiffusion ? "border-red-500" : ""}`}
+                  closeMenuOnSelect={true}
                 />
                 <ErrorMessage message={errors.listeDiffusion} />
               </div>
