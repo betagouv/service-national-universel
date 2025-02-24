@@ -74,7 +74,6 @@ describe("ValiderAffectationCLE", () => {
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
-                        countAffectedByLigneDeBus: jest.fn().mockResolvedValue(1),
                     },
                 },
 
@@ -101,6 +100,12 @@ describe("ValiderAffectationCLE", () => {
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockLignesBus),
                         findBySessionNom: jest.fn().mockResolvedValue(mockLignesBus),
+                        countPlaceOccupeesByLigneDeBusIds: jest.fn().mockResolvedValue(
+                            mockLignesBus.map((ligneDeBus) => ({
+                                id: ligneDeBus.id,
+                                placesOccupeesJeunes: 50,
+                            })),
+                        ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },

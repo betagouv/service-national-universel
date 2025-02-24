@@ -10,6 +10,9 @@ export interface LigneDeBusGateway {
     bulkUpdate(ligneDeBusList: LigneDeBusModel[]): Promise<number>;
     delete(ligneDeBus: LigneDeBusModel): Promise<void>;
     create(ligneDeBus: CreateLigneDeBusModel): Promise<LigneDeBusModel>;
+    countPlaceOccupeesByLigneDeBusIds(
+        ligneDeBusIds: string[],
+    ): Promise<Array<Pick<LigneDeBusModel, "id"> & { placesOccupeesJeunes: number }>>;
 }
 
 export const LigneDeBusGateway = Symbol("LigneDeBusGateway");

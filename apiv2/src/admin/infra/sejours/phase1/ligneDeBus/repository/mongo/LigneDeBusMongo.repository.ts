@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { Model } from "mongoose";
+import mongoose, { Model } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import {
@@ -14,6 +14,7 @@ import { HistoryGateway } from "@admin/core/history/History.gateway";
 import { HistoryType } from "@admin/core/history/History";
 import { HistoryMapper } from "@admin/infra/history/repository/HistoryMapper";
 import { getEntityUpdateSetUnset } from "@shared/infra/RepositoryHelper";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 @Injectable()
 export class LigneDeBusRepository implements LigneDeBusGateway {
@@ -115,5 +116,55 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         await retrievedLigneDeBus.deleteOne();
+    }
+
+    async countPlaceOccupeesByLigneDeBusIds(
+        ligneDeBusIds: string[],
+    ): Promise<Array<Pick<LigneDeBusModel, "id"> & { placesOccupeesJeunes: number }>> {
+        return this.ligneDeBusMongooseEntity.aggregate<Pick<LigneDeBusModel, "id"> & { placesOccupeesJeunes: number }>([
+            {
+                $match: { _id: { $in: ligneDeBusIds.map((id) => new mongoose.Types.ObjectId(id)) } },
+            },
+            {
+                $addFields: {
+                    convertedId: {
+                        $toString: "$_id",
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    as: "youngsByLigne",
+                    from: "youngs",
+                    foreignField: "ligneId",
+                    localField: "convertedId",
+                    pipeline: [
+                        {
+                            $match: {
+                                status: YOUNG_STATUS.VALIDATED,
+                                statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] },
+                            },
+                        },
+                        {
+                            $project: {
+                                _id: 1,
+                            },
+                        },
+                    ],
+                },
+            },
+            {
+                $addFields: {
+                    placesOccupeesJeunes: { $size: "$youngsByLigne" },
+                    id: "$convertedId",
+                },
+            },
+            {
+                $project: {
+                    id: 1,
+                    placesOccupeesJeunes: 1,
+                },
+            },
+        ]);
     }
 }

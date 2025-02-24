@@ -73,7 +73,6 @@ describe("ValiderAffectationCLEDromcom", () => {
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
-                        countAffectedByLigneDeBus: jest.fn().mockResolvedValue(1),
                     },
                 },
 
