@@ -8,27 +8,19 @@ import Trash from "../../../../assets/icons/Trash";
 
 export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young }) {
   const [isLoading, setIsLoading] = React.useState(false);
-  const [departSejourMotif, setDepartSejourMotif] = React.useState("");
-  const [departSejourAt, setDepartSejourAt] = React.useState("");
-  const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState("");
-  const [depart, setDepart] = React.useState("");
+  const [departSejourMotif, setDepartSejourMotif] = React.useState(young?.departSejourMotif || "");
+  const [departSejourAt, setDepartSejourAt] = React.useState(young?.departSejourAt?.substring(0, 10) || "");
+  const [departSejourMotifComment, setDepartSejourMotifComment] = React.useState(young?.departSejourMotifComment || "");
+  const depart = !!young?.departInform || false;
   const motifArray = ["Exclusion", "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)", "Autre"];
-
-  React.useEffect(() => {
-    if (!young) return;
-    setDepartSejourMotif(young.departSejourMotif || "");
-    setDepartSejourAt(young.departSejourAt?.substring(0, 10) || "");
-    setDepartSejourMotifComment(young.departSejourMotifComment || "");
-    setDepart(young?.departInform || false);
-  }, [young]);
 
   const getTitle = () => (
     <span>
-      Renseigner le départ anticipé de <span className="font-bold">{young.firstName}</span>
+      Renseigner le départ anticipé de <strong>{young.firstName}</strong>
     </span>
   );
   const getMessage = () =>
-    `Vous êtes sur le point de renseigner le départ anticipé de  ${young.firstName} de votre centre de séjour de cohésion. Merci de renseigner le motif et la date de départ.`;
+    `Vous êtes sur le point de renseigner le départ anticipé de ${young.firstName} de votre centre de séjour de cohésion. Merci de renseigner le motif et la date de départ.`;
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -40,6 +32,7 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
         setIsLoading(false);
         return;
       }
+      toastr.success("Succès", "Départ anticipé renseigné");
       await onSubmit(data);
     } catch (error) {
       toastr.error("Oups, une erreur s'est produite", translate(error.code));
@@ -80,11 +73,11 @@ export default function ModalPointageDepart({ isOpen, onSubmit, onCancel, young 
             <select
               required
               className="w-full cursor-pointer bg-inherit disabled:cursor-not-allowed"
-              value={departSejourMotif}
+              value={departSejourMotif || ""}
               onChange={(e) => setDepartSejourMotif(e.target.value)}
               disabled={isLoading}>
-              <option value="" label="Motif du départ" disabled>
-                Motif du départ
+              <option value="" label="Sélectionner" disabled>
+                Sélectionner
               </option>
               {motifArray.map((d) => (
                 <option key={d} value={d}>

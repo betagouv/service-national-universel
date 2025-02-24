@@ -15,21 +15,18 @@ import {
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
-  REFERENT_DEPARTMENT_SUBROLE,
-  getDepartmentByZip,
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
-  DepartmentServiceType,
   LigneBusType,
 } from "snu-lib";
-import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
-import { YoungModel, SessionPhase1Model, CohesionCenterModel, PointDeRassemblementModel, LigneBusModel, CohortModel, ReferentModel, DepartmentServiceModel } from "../../models";
+import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
 import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
+import { handleNotificationForDeparture } from "../../young/youngService";
 
 const router = express.Router({ mergeParams: true });
 
@@ -220,58 +217,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
     await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
 
-    const referentsDep = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
-    if (!referentsDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // on envoie au chef de projet departemental (ou assistant)
-    const managers = referentsDep.filter(
-      (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_department || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.assistant_manager_department,
-    );
-
-    // sinon on envoie au secretariat du departement ou au manager de phase2
-    const secretariat = referentsDep.filter(
-      (referent) => referent.subRole === REFERENT_DEPARTMENT_SUBROLE.secretariat || referent.subRole === REFERENT_DEPARTMENT_SUBROLE.manager_phase2,
-    );
-
-    // si toujours rien on envoie a son contact Convocation
-
-    let contactsConv: DepartmentServiceType["contacts"] = [];
-    if (!managers.length && !secretariat.length) {
-      const serviceDep = await DepartmentServiceModel.find({ department: young.department });
-      if (!serviceDep) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      contactsConv = serviceDep[0].contacts.filter((contact) => contact.cohort === young.cohort);
-      contactsConv = contactsConv.map((contact) => {
-        const [firstName, lastName] = contact.contactName!.split(" ");
-        const email = contact.contactMail;
-
-        return {
-          ...contact,
-          firstName,
-          lastName,
-          email,
-        };
-      });
-    }
-    const sendContact = managers.length ? managers : secretariat.length ? secretariat : contactsConv;
-
-    const center = await CohesionCenterModel.findById(young.cohesionCenterId);
-
-    let template = SENDINBLUE_TEMPLATES.referent.DEPARTURE_CENTER;
-    await sendTemplate(template, {
-      emailTo: sendContact.map((referent) => ({
-        name: `${referent.firstName} ${referent.lastName}`,
-        email: referent.email,
-      })),
-      params: {
-        youngFirstName: young.firstName,
-        youngLastName: young.lastName,
-        centreName: center?.name || young.cohesionCenterName,
-        centreDepartement: center?.department || getDepartmentByZip(young.cohesionCenterZip),
-        departureReason: departSejourMotif,
-        departureNote: departSejourMotifComment,
-        cta: `${config.ADMIN_URL}/volontaire/${young._id}`,
-      },
-    });
+    await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {

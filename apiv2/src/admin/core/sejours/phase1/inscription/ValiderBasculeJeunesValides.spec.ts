@@ -61,7 +61,6 @@ describe("ValiderBasculeJeunesValides", () => {
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
-                        countAffectedByLigneDeBus: jest.fn().mockResolvedValue(1),
                     },
                 },
 

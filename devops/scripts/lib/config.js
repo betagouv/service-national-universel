@@ -5,8 +5,6 @@ const APPLICATIONS = ["app", "admin", "api", "apiv2", "tasks", "tasksv2"];
 
 const FRONTEND_APPS = ["app", "admin"];
 
-const SCW_REGISTRY_HOST = "rg.fr-par.scw.cloud";
-
 function mountSecretKeys(app) {
   switch (app) {
     case "app":
@@ -26,27 +24,12 @@ function _urlsFromDomain(domain) {
   };
 }
 
-function getRegistryName(registry) {
-  return registry.replace(`${SCW_REGISTRY_HOST}/`, "");
-}
-
 class EnvConfig {
   constructor(environment) {
     this.env = environment;
   }
   containerNamespace() {
     return `snu-${this.env}`;
-  }
-
-  dockerRegistry() {
-    switch (this.env) {
-      case "staging":
-        return `${SCW_REGISTRY_HOST}/snu-staging`;
-      case "production":
-        return `${SCW_REGISTRY_HOST}/snu-production`;
-      default:
-        return `${SCW_REGISTRY_HOST}/snu-ci`;
-    }
   }
 
   projectName() {
@@ -236,5 +219,4 @@ class AppConfig extends EnvConfig {
 module.exports = {
   EnvConfig,
   AppConfig,
-  getRegistryName,
 };
