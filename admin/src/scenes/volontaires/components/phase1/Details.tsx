@@ -46,7 +46,14 @@ export default function Details({ cohesionCenter, meetingPoint, pointDeRassemble
 
   const containerActionList = () => {
     if (isYoungAffected) {
-      return [];
+      return [
+        <Button
+          key="affectation"
+          title={cohort.type === COHORT_TYPE.VOLONTAIRE ? "Affecter dans un centre" : "Affecter comme sa classe"}
+          disabled
+          tooltip="Ce volontaire est déjà affecté."
+        />,
+      ];
     }
     if (isOpenForAffectation) {
       return [
@@ -59,7 +66,14 @@ export default function Details({ cohesionCenter, meetingPoint, pointDeRassemble
         />,
       ];
     }
-    return [];
+    return [
+      <Button
+        key="affectation"
+        title={cohort.type === COHORT_TYPE.VOLONTAIRE ? "Affecter dans un centre" : "Affecter comme sa classe"}
+        disabled
+        tooltip="Les affectations ne sont pas ouvertes pour ce séjour."
+      />,
+    ];
   };
 
   return (
