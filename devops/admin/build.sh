@@ -48,7 +48,7 @@ cp devops/admin/package.json $output_dir
 rm -Rf out
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
-    rm -rf .
+    rm -rf ./*
     mv $output_dir/* .
 
     # NODEJS nginx
