@@ -8,7 +8,7 @@ export type PlanDeTransportModel = {
     dateRetour: string;
     capaciteJeunes: number;
     placesOccupeesJeunes: number;
-    lineFillingRate?: number;
+    tauxRemplissageLigne?: number;
     capaciteTotal: number;
     capaciteAccompagnateurs: number;
     dureeTrajet: string;
