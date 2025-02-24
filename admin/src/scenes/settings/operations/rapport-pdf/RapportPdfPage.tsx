@@ -27,6 +27,7 @@ export default function RapportPdfPage() {
   } = useQuery<AffectationRoutes["GetSimulationAnalytics"]["response"]>({
     queryKey: ["phase-simulations"],
     queryFn: async () => AffectationService.getSimulationAnalytics(id),
+    refetchOnWindowFocus: false,
   });
 
   useEffect(() => {

@@ -59,6 +59,7 @@ export type RapportData = {
     >;
     jeunesDejaAffectedList: JeuneRapport[];
     jeuneAttenteAffectationList: JeuneRapport[];
+    jeuneAttenteAffectationCount: number;
     sejourList: Array<
         SejourModel & {
             departement: CentreModel["departement"];
@@ -142,7 +143,7 @@ export const RAPPORT_SHEETS = {
     LIGNES_DE_BUS: "Lignes de bus",
     PDR: "PDR",
     CENTRES: "Centres",
-    INTRA_DEPARTEMENT: "intradep à affecter",
+    INTRA_DEPARTEMENT: "Intradep et HZR à affecter",
 };
 
 @Injectable()
@@ -1034,7 +1035,7 @@ export class SimulationAffectationHTSService {
             .map((jeune) => this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList));
 
         // On recupere les possibilites theoriques des jeunes non affectes
-        const infoNonAffecetes = this.getInfoNonAffectes(
+        const infoNonAffectes = this.getInfoNonAffectes(
             jeuneAttenteAffectationList,
             ligneDeBusList,
             pdrList,
@@ -1046,11 +1047,22 @@ export class SimulationAffectationHTSService {
 
         jeuneAttenteAffectationList = jeuneAttenteAffectationList.map((jeune, index) => ({
             ...jeune,
-            ...infoNonAffecetes.jeunes[index],
+            ...infoNonAffectes.jeunes[index],
         }));
 
-        const jeuneIntraDepartementListUpdated = jeuneIntraDepartementList.map((jeune) =>
-            this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
+        // on rajoute les HZR dans l'onglet intradep car ils devront être affecté manuellement
+        const jeuneIntraDepartementListUpdated = [
+            ...jeuneIntraDepartementList.map((jeune) =>
+                this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
+            ),
+            ...jeuneAttenteAffectationList.filter(
+                (jeune) => jeune.HZR === "oui" && jeune["Hors Zone (région)"] === "oui",
+            ),
+        ];
+
+        // on enleve les HZR de l'onglet non affecté
+        jeuneAttenteAffectationList = jeuneAttenteAffectationList.filter(
+            (jeune) => !(jeune.HZR === "oui" && jeune["Hors Zone (région)"] === "oui"),
         );
 
         const sejourListUpdated = sejourList.map((sejour) => {
@@ -1162,9 +1174,10 @@ export class SimulationAffectationHTSService {
             "Nombre de jeunes à affecter : " + (jeunesList.length + jeuneIntraDepartementList.length),
             "Nombre de jeunes affectés : " + jeunesNouvellementAffectedList.length,
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
-            "En attente d'affectation : " + (jeuneAttenteAffectationList.length + jeuneIntraDepartementList.length),
+            "En attente d'affectation : " +
+                (jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length),
             "          dont intradep : " + jeuneIntraDepartementList.length,
-            ...infoNonAffecetes.stats,
+            ...infoNonAffectes.stats,
             "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
             ...(changementDepartements.length > 0
                 ? ["Changement de département : " + this.formatChangementDepartements(changementDepartements)]
@@ -1181,6 +1194,7 @@ export class SimulationAffectationHTSService {
             jeunesNouvellementAffectedList: jeunesNouvellementAffectedList.sort(this.sortRegionEtDepartement),
             jeunesDejaAffectedList: jeunesDejaAffectedList.sort(this.sortRegionEtDepartement),
             jeuneAttenteAffectationList: jeuneAttenteAffectationList.sort(this.sortRegionEtDepartement),
+            jeuneAttenteAffectationCount: jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length,
             sejourList: sejourListUpdated.sort(this.sortRegionEtDepartement),
             ligneDeBusList: ligneDeBusListUpdated.sort(
                 (busA, busB) => busA.numeroLigne?.localeCompare(busB.numeroLigne!) || -1,
@@ -1344,9 +1358,25 @@ export class SimulationAffectationHTSService {
     }
 
     sortRegionEtDepartement(
-        itemA: { departement?: string; departementResidence?: string; region?: string; regionResidence?: string },
-        itemB: { departement?: string; departementResidence?: string; region?: string; regionResidence?: string },
+        itemA: {
+            departement?: string;
+            departementResidence?: string;
+            region?: string;
+            regionResidence?: string;
+            handicapMemeDepartement?: string;
+        },
+        itemB: {
+            departement?: string;
+            departementResidence?: string;
+            region?: string;
+            regionResidence?: string;
+            handicapMemeDepartement?: string;
+        },
     ) {
+        if (itemA.handicapMemeDepartement !== itemB.handicapMemeDepartement) {
+            return 1;
+        }
+
         const departementA = itemA.departement || itemA.departementResidence;
         const regionA = itemA.region || itemA.regionResidence;
         const departementB = itemB.departement || itemB.departementResidence;
