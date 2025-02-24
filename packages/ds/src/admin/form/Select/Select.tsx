@@ -19,7 +19,7 @@ export type SelectOption<T = string | number> = {
 
 export type SelectProps = {
   // Fix type to allow only string and string[]
-  value: string | SelectOption | SelectOption[] | null;
+  value?: string | SelectOption | SelectOption[] | null;
   options?: SelectOption[];
   defaultValue?: string | null;
   className?: string;

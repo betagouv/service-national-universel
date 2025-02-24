@@ -39,6 +39,8 @@ export type JeuneModel = {
     departSejourMotif?: string;
     departSejourMotifComment?: string;
     transportInfoGivenByLocal?: string;
+    desistementMotif?: string;
+    desistementMessage?: string;
     // Parent 1 Information
     parent1Prenom?: string;
     parent1Nom?: string;

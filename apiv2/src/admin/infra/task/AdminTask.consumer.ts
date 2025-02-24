@@ -44,6 +44,7 @@ export class AdminTaskConsumer extends WorkerHost {
                     case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
                     case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
                     case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
+                    case TaskName.DESISTEMENT_POST_AFFECTATION:
                         results = await this.adminTaskAffectationSelectorService.handleAffectation(job, task);
                         break;
                     case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:

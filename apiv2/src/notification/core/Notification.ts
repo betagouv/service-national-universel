@@ -5,6 +5,10 @@ export interface EmailParams {
     attachments?: Attachment[];
 }
 
+export interface EmailWithMessage extends EmailParams {
+    message: string;
+}
+
 export interface Attachment {
     fileName: string;
     filePath: string;
@@ -60,4 +64,7 @@ export enum EmailTemplate {
     // BASCULE
     BASCULE_SEJOUR_ELIGIBLE = "2407",
     BASCULE_SEJOUR_AVENIR = "2408",
+    // DESISTEMENT
+    DESISTEMENT_PAR_VOLONTAIRE = "1248",
+    DESISTEMENT_PAR_TIERS = "2518",
 }
