@@ -3,7 +3,7 @@ name: Deploy environment
 on:
   workflow_dispatch:
   pull_request:
-    types: [ labeled ]
+    types: [ labeled, synchronize ]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
@@ -12,7 +12,7 @@ concurrency:
 jobs:
   prepare:
     if: |
-      (github.event_name=='pull_request' && github.event.label.name == 'deploy') ||
+      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy') ||
       (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
     runs-on: ubuntu-latest
     outputs:
@@ -87,7 +87,7 @@ jobs:
           echo "registry=$registry" >> $GITHUB_OUTPUT
 
       - name: Add comment to PR
-        if: github.event_name == 'pull_request' && github.event.label.name == 'deploy'
+        if: github.event_name == 'pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy') && github.event.action == 'labeled'
         working-directory: devops/scripts
         env:
           URL: ${{ github.event.pull_request.comments_url }}
