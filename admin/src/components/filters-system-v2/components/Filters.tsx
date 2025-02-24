@@ -49,7 +49,7 @@ interface FiltersProps {
   size?: any;
   intermediateFilters?: any[];
   disabled?: boolean;
-  isInput?: boolean;
+  showInput?: boolean;
 }
 
 export default function Filters({
@@ -66,7 +66,7 @@ export default function Filters({
   size,
   intermediateFilters = [],
   disabled = false,
-  isInput = true,
+  showInput = true,
 }: FiltersProps) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
@@ -219,7 +219,7 @@ export default function Filters({
     <div>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-start gap-2">
-          {isInput && (
+          {showInput && (
             <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
               <input
                 name={"searchbar"}
