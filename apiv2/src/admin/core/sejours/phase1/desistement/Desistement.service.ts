@@ -9,7 +9,7 @@ import { ClsService } from "nestjs-cls";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification";
 import { JeuneService } from "../../jeune/Jeune.service";
-import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
+import { TaskGateway } from "@task/core/Task.gateway";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -21,14 +21,13 @@ export class DesistementService {
     constructor(
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         private readonly cls: ClsService,
         private readonly jeuneService: JeuneService,
-        private readonly adminTaskRepository: AdminTaskRepository,
     ) {}
 
     async getJeunesIdsFromRapportKey(key: string): Promise<string[]> {
-        console.log("🚀 ~ DesistementService ~ getJeunesIdsFromRapportKey ~ key:", key);
         const affectationFile = await this.fileGateway.downloadFile(key);
         if (!affectationFile) throw new Error(`Rapport file not found: ${key}`);
 
@@ -96,8 +95,7 @@ export class DesistementService {
         sessionId: string;
         affectationTaskId: string;
     }): Promise<DesisterTaskResult> {
-        const affectationTask = await this.adminTaskRepository.findById(affectationTaskId);
-        console.log("🚀 ~ DesistementService ~ affectationTask:", affectationTask);
+        const affectationTask = await this.taskGateway.findById(affectationTaskId);
         if (!affectationTask) {
             throw new Error("Affectation task not found");
         }

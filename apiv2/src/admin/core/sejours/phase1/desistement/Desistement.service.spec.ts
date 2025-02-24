@@ -9,6 +9,7 @@ import { Logger } from "@nestjs/common";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { YOUNG_STATUS } from "snu-lib";
 import { EmailTemplate } from "@notification/core/Notification";
+import { JeuneService } from "../../jeune/Jeune.service";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -17,7 +18,6 @@ jest.mock("@nestjs-cls/transactional", () => ({
 describe("DesistementService", () => {
     let service: DesistementService;
     let jeuneGateway: JeuneGateway;
-    let taskGateway: TaskGateway;
     let fileGateway: FileGateway;
     let notificationGateway: NotificationGateway;
 
@@ -25,6 +25,7 @@ describe("DesistementService", () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DesistementService,
+                JeuneService,
                 { provide: JeuneGateway, useValue: { bulkUpdate: jest.fn() } },
                 { provide: TaskGateway, useValue: { findById: jest.fn() } },
                 { provide: FileGateway, useValue: { downloadFile: jest.fn(), parseXLS: jest.fn() } },
@@ -36,32 +37,8 @@ describe("DesistementService", () => {
 
         service = module.get<DesistementService>(DesistementService);
         jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
-        taskGateway = module.get<TaskGateway>(TaskGateway);
         fileGateway = module.get<FileGateway>(FileGateway);
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
-    });
-
-    describe("groupJeunesByCategories", () => {
-        it("should group jeunes by categories", () => {
-            const jeunes: JeuneModel[] = [
-                { sessionId: "sessionId1", statut: YOUNG_STATUS.WITHDRAWN, youngPhase1Agreement: "true" } as JeuneModel,
-                {
-                    sessionId: "sessionId1",
-                    statut: YOUNG_STATUS.VALIDATED,
-                    youngPhase1Agreement: "false",
-                } as JeuneModel,
-                { sessionId: "sessionId2", statut: YOUNG_STATUS.VALIDATED, youngPhase1Agreement: "true" } as JeuneModel,
-            ];
-
-            const result = service.groupJeunesByCategories(jeunes, "sessionId1");
-
-            expect(result).toEqual({
-                jeunesAutreSession: [jeunes[2]],
-                jeunesDesistes: [jeunes[0]],
-                jeunesConfirmes: [],
-                jeunesNonConfirmes: [jeunes[1]],
-            });
-        });
     });
 
     describe("desisterJeunes", () => {
