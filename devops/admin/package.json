@@ -1,18 +1,13 @@
 {
   "name": "admin",
   "version": "1.0.0",
-  "main": "index.js",
   "engines": {
     "node": "^20.17"
   },
   "scripts": {
     "start": "nginx -c $APP_HOME/nginx.conf"
   },
-  "author": "",
+  "author": "SNU",
   "license": "ISC",
-  "description": "",
-  "dependencies": {
-    "send": "^1.1.0",
-    "serve-static": "^1.16.2"
-  }
+  "description": ""
 }

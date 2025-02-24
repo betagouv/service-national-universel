@@ -19,19 +19,6 @@ cd ..
 
 if [[ $CC_DEPLOYMENT_ID != "" ]]; then
     mv out/admin/build .
-    # STATIC
-    # CC_NODE_VERSION="20.17"
-    # CC_WEBROOT="/build"
-    # CC_PRE_BUILD_HOOK="VITE_RELEASE=$CC_COMMIT_ID devops/admin/build.sh"
-    # mv devops/admin/.htaccess ./build
-    # rm -rf $(ls -A | grep -v "build")
-
-    # NODEJS serve-static
-    # CC_NODE_BUILD_TOOL=custom
-    # CC_CUSTOM_BUILD_TOOL="VITE_RELEASE=$CC_COMMIT_ID devops/admin/build.sh"
-    # mv devops/admin/index.js devops/admin/package.json devops/admin/package-lock.json .
-    # rm -rf $(ls -A | grep -v "build\|index.js\|package.json\|package-lock.json")
-    # npm ci
 
     # NODEJS nginx
     # CC_NODE_BUILD_TOOL=custom
