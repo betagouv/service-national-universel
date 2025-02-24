@@ -243,7 +243,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             analytics: {
                 ...results.analytics,
                 jeunesNouvellementAffected: rapportData.jeunesNouvellementAffectedList.length,
-                jeuneAttenteAffectation: rapportData.jeuneAttenteAffectationList.length,
+                jeuneAttenteAffectation: rapportData.jeuneAttenteAffectationCount,
                 jeunesDejaAffected: rapportData.jeunesDejaAffectedList.length,
             },
             rapportData,
