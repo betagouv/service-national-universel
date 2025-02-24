@@ -45,12 +45,9 @@ export const RecipientsSelection = ({ selectedRecipients, onToggleRecipient, err
   );
 
   return (
-    <div>
-      <div className="grid grid-cols-2 gap-x-8 gap-y-3">
-        {renderColumn("left")}
-        {renderColumn("right")}
-      </div>
-      {error && <span className="text-red-500 text-sm mt-1">{error}</span>}
+    <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+      {renderColumn("left")}
+      {renderColumn("right")}
     </div>
   );
 };
