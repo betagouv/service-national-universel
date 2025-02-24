@@ -22,8 +22,10 @@ import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
+import { YOUNG_STATUS } from "snu-lib";
 
-const cohortName = "Avril 2024 - C";
+const sessionNom = "Avril 2024 - C";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -40,6 +42,7 @@ describe("ValiderAffectationHTS", () => {
             imports: [ClsModule],
             providers: [
                 ValiderAffectationHTS,
+                ValiderAffectationHTSService,
                 AffectationService,
                 Logger,
                 {
@@ -54,7 +57,7 @@ describe("ValiderAffectationHTS", () => {
                                 ligneDeBusId: "65f9c8bb735e0e12a4213c18",
                                 sejourId: "6597e6acb86afb08146e8f86",
                                 centreId: "609bebb00c1cc9a888ae8fa8",
-                                sessionNom: "Avril 2024 - C",
+                                sessionNom: sessionNom,
                                 "Point de rassemblement calculé": "6398797d3bc18708cc3981f6",
                             },
                         ]),
@@ -66,7 +69,8 @@ describe("ValiderAffectationHTS", () => {
                         findByIds: jest.fn().mockResolvedValue([
                             {
                                 id: "jeune1",
-                                sessionNom: "Avril 2024 - C",
+                                statut: YOUNG_STATUS.VALIDATED,
+                                sessionNom: sessionNom,
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
@@ -117,6 +121,12 @@ describe("ValiderAffectationHTS", () => {
                     provide: SejourGateway,
                     useValue: {
                         findBySessionId: jest.fn().mockResolvedValue(mockSejours),
+                        countPlaceOccupeesBySejourIds: jest.fn().mockResolvedValue(
+                            mockSejours.map((sejour) => ({
+                                id: sejour.id,
+                                placesOccupeesJeunes: 50,
+                            })),
+                        ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -130,7 +140,9 @@ describe("ValiderAffectationHTS", () => {
                     provide: PlanDeTransportGateway,
                     useValue: {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
-                        findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
+                        findByIds: jest
+                            .fn()
+                            .mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id, capaciteJeunes: 100 }))),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -146,7 +158,7 @@ describe("ValiderAffectationHTS", () => {
             { user: null },
             () =>
                 validerAffectationHTS.execute({
-                    sessionId: cohortName,
+                    sessionId: sessionNom,
                     simulationTaskId: "simulationTaskId",
                     affecterPDR: true,
                     dateAffectation: new Date(),
@@ -161,7 +173,7 @@ describe("ValiderAffectationHTS", () => {
             dateNaissance: undefined,
             departement: undefined,
             email: undefined,
-            error: "",
+            erreur: "",
             genre: "garçon",
             id: "jeune1",
             ligneDeBusId: "65f9c8bb735e0e12a4213c18",
@@ -184,7 +196,7 @@ describe("ValiderAffectationHTS", () => {
             qpv: "non",
             region: undefined,
             sessionId: "6597e6acb86afb08146e8f86",
-            sessionNom: "Avril 2024 - C",
+            sessionNom: sessionNom,
             statut: "VALIDATED",
             statutPhase1: "AFFECTED",
             telephone: undefined,

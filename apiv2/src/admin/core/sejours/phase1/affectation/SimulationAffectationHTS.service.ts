@@ -53,7 +53,7 @@ export type RapportData = {
     summary: { [key: string]: string }[];
     jeunesNouvellementAffectedList: Array<
         JeuneRapport & {
-            "Point de rassemblement calculé": string;
+            "Point de rassemblement calculé"?: string;
             sejourId: string;
         }
     >;
@@ -214,7 +214,7 @@ export class SimulationAffectationHTSService {
         );
 
         let errors: string[] = [];
-        const changementDepartements: Array<ChangementDepartement> = [];
+        const changementsDepartement: Array<ChangementDepartement> = [];
         for (const departement of Object.keys(changementDepartementPdrs)) {
             const routesList = changementDepartementPdrs[departement].map((route) => {
                 const ligne = ligneDeBusList.find((ligne) => ligne.codeCourtDeRoute === route.codeRoute);
@@ -264,13 +264,13 @@ export class SimulationAffectationHTSService {
             this.logger.log(
                 `Changement de département pour ${departement}, destination: ${JSON.stringify(routesList)}`,
             );
-            changementDepartements.push({
+            changementsDepartement.push({
                 origine: departement,
                 destination: routesList.filter((currRoute) => !currRoute.error) as any,
             });
         }
 
-        return { changementDepartements, changementDepartementsErreurs: errors };
+        return { changementsDepartement, changementsDepartementErreurs: errors };
     }
 
     computeRatioRepartition(jeunesList: JeuneModel[]): RatioRepartition {
@@ -321,7 +321,13 @@ export class SimulationAffectationHTSService {
     }
 
     // on calcule les taux de remplissage de chaque centre et les taux de remplissage des lignes de chaque centre
-    calculTauxRemplissageParCentre(sejourList: SejourModel[], ligneList: LigneDeBusModel[]) {
+    calculTauxRemplissageParCentre({
+        sejourList,
+        ligneList = [],
+    }: {
+        sejourList: SejourModel[];
+        ligneList?: LigneDeBusModel[];
+    }) {
         const centreIdList = [...new Set(sejourList.map((sejour) => sejour.centreId || ""))];
 
         const tauxRemplissageCentres = sejourList.map((sejour) => {
@@ -561,12 +567,17 @@ export class SimulationAffectationHTSService {
 
     // Pour chaque departement, on va stocker les jeunes (id) du departement courant, les pdr qui sont dans le departement courant
     // les lignes correspondantes et les centres desservis.
-    calculDistributionAffectations(
-        jeunesList: JeuneModel[],
-        pdrList: PointDeRassemblementModel[],
-        ligneDeBusList: LigneDeBusModel[],
-        changementDepartements: ChangementDepartement[],
-    ): DistributionJeunesParDepartement {
+    calculDistributionAffectations({
+        jeunesList,
+        pdrList = [],
+        ligneDeBusList = [],
+        changementsDepartement = [],
+    }: {
+        jeunesList: JeuneModel[];
+        pdrList?: PointDeRassemblementModel[];
+        ligneDeBusList?: LigneDeBusModel[];
+        changementsDepartement?: ChangementDepartement[];
+    }): DistributionJeunesParDepartement {
         // on recupere les departements, comme on veut boucler sur les departements, on enleve les doublons
         const departementList = [
             ...new Set([...jeunesList.map((jeune) => jeune.departement!), ...pdrList.map((pdr) => pdr.departement)]),
@@ -594,7 +605,7 @@ export class SimulationAffectationHTSService {
 
             // Changement de dępartement (ex: les jeunes du 93 partent avec des lignes de bus du 75)
             const changementDepartementDestinationList =
-                changementDepartements.find((changement) => changement.origine === departement)?.destination || [];
+                changementsDepartement.find((changement) => changement.origine === departement)?.destination || [];
             for (const destination of changementDepartementDestinationList) {
                 for (const ligneId of destination.ligneIdList) {
                     const ligneDeBus = ligneDeBusList.find((ligne) => ligne.id === ligneId)!;
@@ -606,7 +617,7 @@ export class SimulationAffectationHTSService {
             }
 
             // On exclut les lignes de bus dédiées lors du changement de departement (les lignes du 75 qui prennent des jeunes du 93 ne peuvent pas prendre des jeunes du 75)
-            const changementAExclureLigneIdList = changementDepartements.reduce((acc, changement) => {
+            const changementAExclureLigneIdList = changementsDepartement.reduce((acc, changement) => {
                 changement.destination.forEach((dest) => {
                     if (dest.departement === departement) {
                         // cas particulier, un changement indiquant 75 vers 75.
@@ -834,11 +845,11 @@ export class SimulationAffectationHTSService {
     getInfoNonAffectes(
         jeuneAttenteAffectationList: JeuneRapport[],
         ligneDeBusList: LigneDeBusModel[],
-        pdrList: PointDeRassemblementModel[],
         centreList: CentreModel[],
         sejourList: SejourModel[],
         regionsConcerneeList: string[],
         distributionJeunesDepartement: DistributionJeunesParDepartement,
+        type: "HTS" | "HTS_DROMCOM" = "HTS",
     ): {
         jeunes: {
             "Ligne Theorique": string;
@@ -944,36 +955,53 @@ export class SimulationAffectationHTSService {
 
         return {
             jeunes,
-            stats: [
-                "          dont jeunes probablement hors zones : " + probHorsZone,
-                "             -> Liste des départements hors zones : " +
-                    departmentHortZone.map(formatDepartement).join(", "),
-                "          dont jeunes pas de ligne disponible pour centre(s) " +
-                    centresNames.join(", ") +
-                    " : " +
-                    pasDeligne,
-                "          dont jeunes pas de centre disponible pour ligne(s) " +
-                    lignesNames.join(", ") +
-                    " : " +
-                    pasDecentre,
-                "          dont jeunes non affectés pour problèmes de places : " + limite,
-            ],
+            stats:
+                type === "HTS"
+                    ? [
+                          "          dont jeunes probablement hors zones : " + probHorsZone,
+                          "             -> Liste des départements hors zones : " +
+                              departmentHortZone.map(formatDepartement).join(", "),
+                          "          dont jeunes pas de ligne disponible pour centre(s) " +
+                              centresNames.join(", ") +
+                              " : " +
+                              pasDeligne,
+                          "          dont jeunes pas de centre disponible pour ligne(s) " +
+                              lignesNames.join(", ") +
+                              " : " +
+                              pasDecentre,
+                          "          dont jeunes non affectés pour problèmes de places : " + limite,
+                      ]
+                    : [],
         };
     }
 
-    calculRapportAffectation(
-        jeunesList: JeuneAffectationModel[],
-        sejourList: SejourModel[],
-        ligneDeBusList: LigneDeBusModel[],
-        centreList: CentreModel[],
-        pdrList: PointDeRassemblementModel[],
-        jeunesAvantAffectationList: JeuneModel[],
-        jeuneIntraDepartementList: JeuneAffectationModel[],
-        distributionJeunesDepartement: DistributionJeunesParDepartement,
-        changementDepartements: ChangementDepartement[],
-        changementDepartementsErreur: string[],
-        analytics: Analytics,
-    ): RapportData {
+    calculRapportAffectation({
+        jeunesList,
+        sejourList,
+        ligneDeBusList = [],
+        centreList,
+        pdrList = [],
+        jeunesAvantAffectationList,
+        jeuneIntraDepartementList = [],
+        distributionJeunesDepartement,
+        changementsDepartement = [],
+        changementsDepartementErreurs = [],
+        analytics,
+        type,
+    }: {
+        jeunesList: JeuneAffectationModel[];
+        sejourList: SejourModel[];
+        ligneDeBusList?: LigneDeBusModel[];
+        centreList: CentreModel[];
+        pdrList?: PointDeRassemblementModel[];
+        jeunesAvantAffectationList: JeuneModel[];
+        jeuneIntraDepartementList?: JeuneAffectationModel[];
+        distributionJeunesDepartement: DistributionJeunesParDepartement;
+        changementsDepartement?: ChangementDepartement[];
+        changementsDepartementErreurs?: string[];
+        analytics: Partial<Analytics>;
+        type: "HTS" | "HTS_DROMCOM";
+    }): RapportData {
         const jeunesAffectedList = jeunesList.filter((jeune) => jeune.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED);
         const regionsConcerneeList = [...new Set(pdrList.map((pdr) => pdr.region))];
         const { sejourIdList, sejourCentreIdList } = sejourList.reduce(
@@ -1002,7 +1030,7 @@ export class SimulationAffectationHTSService {
         }
 
         const jeunesAffectedListRapport = jeunesAffectedList.map((jeune) =>
-            this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList),
+            this.mapJeuneRapport(jeune, ligneDeBusList, centreList, pdrList, type),
         );
 
         const jeunesDejaAffectedIdList = jeunesAvantAffectationList.reduce((acc: string[], jeune) => {
@@ -1018,12 +1046,15 @@ export class SimulationAffectationHTSService {
         const jeunesNouvellementAffectedList = jeunesAffectedListRapport.reduce(
             (acc: RapportData["jeunesNouvellementAffectedList"], jeune, index) => {
                 if (!jeunesDejaAffectedIdList.includes(jeune.id)) {
-                    acc.push({
+                    const jeunesNouvellementAffected: RapportData["jeunesNouvellementAffectedList"][0] = {
                         ...jeune,
                         // TODO: utiliser le matricule
-                        "Point de rassemblement calculé": pdrIdJeuneAffectedList[index],
                         sejourId: jeuneSejourIdList[index],
-                    });
+                    };
+                    if (type === "HTS") {
+                        jeunesNouvellementAffected["Point de rassemblement calculé"] = pdrIdJeuneAffectedList[index];
+                    }
+                    acc.push(jeunesNouvellementAffected);
                 }
                 return acc;
             },
@@ -1038,11 +1069,11 @@ export class SimulationAffectationHTSService {
         const infoNonAffectes = this.getInfoNonAffectes(
             jeuneAttenteAffectationList,
             ligneDeBusList,
-            pdrList,
             centreList,
             sejourList,
             regionsConcerneeList,
             distributionJeunesDepartement,
+            type,
         );
 
         jeuneAttenteAffectationList = jeuneAttenteAffectationList.map((jeune, index) => ({
@@ -1094,10 +1125,10 @@ export class SimulationAffectationHTSService {
                 const centreSejourList = sejourListUpdated.filter((sejour) => sejour.centreId === centre.id);
                 const ligneSejourList = ligneDeBusList.filter((ligne) => ligne.centreId === centre.id);
                 const stats = {
-                    tauxRemplissage: analytics.tauxRemplissageCentreList[indexCentre],
-                    tauxGarcon: analytics.tauxRepartitionCentreList[indexCentre]?.male,
-                    tauxQVP: analytics.tauxRepartitionCentreList[indexCentre]?.qvp,
-                    tauxPSH: analytics.tauxRepartitionCentreList[indexCentre]?.psh,
+                    tauxRemplissage: analytics.tauxRemplissageCentreList?.[indexCentre],
+                    tauxGarcon: analytics.tauxRepartitionCentreList?.[indexCentre]?.male,
+                    tauxQVP: analytics.tauxRepartitionCentreList?.[indexCentre]?.qvp,
+                    tauxPSH: analytics.tauxRepartitionCentreList?.[indexCentre]?.psh,
                 };
                 return {
                     id: centre.id,
@@ -1107,11 +1138,13 @@ export class SimulationAffectationHTSService {
                     departement: centre.departement,
                     ville: centre.ville,
                     codePostal: centre.codePostal,
-                    tauxRemplissage: this.affectationService.formatPourcent(stats.tauxRemplissage),
-                    tauxGarcon: this.affectationService.formatPourcent(stats.tauxGarcon),
-                    tauxFille: this.affectationService.formatPourcent(1 - stats.tauxGarcon),
-                    tauxQVP: this.affectationService.formatPourcent(stats.tauxQVP),
-                    tauxPSH: this.affectationService.formatPourcent(stats.tauxPSH),
+                    tauxRemplissage: this.affectationService.formatPourcent(stats.tauxRemplissage || 0),
+                    tauxGarcon: this.affectationService.formatPourcent(stats.tauxGarcon || 0),
+                    tauxFille: this.affectationService.formatPourcent(
+                        stats.tauxGarcon !== undefined ? 1 - stats.tauxGarcon : 0,
+                    ),
+                    tauxQVP: this.affectationService.formatPourcent(stats.tauxQVP || 0),
+                    tauxPSH: this.affectationService.formatPourcent(stats.tauxPSH || 0),
                     ...centreSejourList.reduce((acc, sejour, index) => {
                         acc[`${COL_SEJOUR_ID_}${index + 1}`] = sejour.id;
                         acc[`${COL_SEJOUR_PLACES_OCCUPEES}${index + 1}`] =
@@ -1132,7 +1165,7 @@ export class SimulationAffectationHTSService {
         const ligneDeBusListUpdated = ligneDeBusList.map((ligne) => {
             const indexCentre = sejourCentreIdList.indexOf(ligne.centreId);
             const centreLigne = centreList.find((centre) => centre.id === ligne.centreId);
-            const tauxRemplissageCentre = analytics.tauxRemplissageCentreList[indexCentre];
+            const tauxRemplissageCentre = analytics.tauxRemplissageCentreList?.[indexCentre] || 0;
             return {
                 sessionNom: ligne.sessionNom,
                 id: ligne.id,
@@ -1176,14 +1209,16 @@ export class SimulationAffectationHTSService {
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
             "En attente d'affectation : " +
                 (jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length),
-            "          dont intradep : " + jeuneIntraDepartementList.length,
+            ...(type === "HTS" ? ["          dont intradep : " + jeuneIntraDepartementList.length] : []),
             ...infoNonAffectes.stats,
-            "Taux d'erreur pour l'iteration : " + analytics.selectedCost,
-            ...(changementDepartements.length > 0
-                ? ["Changement de département : " + this.formatChangementDepartements(changementDepartements)]
+            ...(analytics.selectedCost !== undefined
+                ? ["Taux d'erreur pour l'iteration : " + analytics.selectedCost]
                 : []),
-            ...(changementDepartementsErreur.length > 0
-                ? ["Erreurs changement de département : " + changementDepartementsErreur.join(".\n")]
+            ...(changementsDepartement.length > 0
+                ? ["Changement de département : " + this.formatChangementDepartements(changementsDepartement)]
+                : []),
+            ...(changementsDepartementErreurs.length > 0
+                ? ["Erreurs changement de département : " + changementsDepartementErreurs.join(".\n")]
                 : []),
         ].map((ligne) => ({
             "": ligne,
@@ -1205,7 +1240,7 @@ export class SimulationAffectationHTSService {
         };
     }
 
-    async generateRapportExcel(rapportData: RapportData): Promise<Buffer> {
+    async generateRapportExcel(rapportData: RapportData, type: "HTS" | "HTS_DROMCOM"): Promise<Buffer> {
         return this.fileGateway.generateExcel({
             [RAPPORT_SHEETS.RESUME]: rapportData.summary,
             [RAPPORT_SHEETS.AFFECTES]: rapportData.jeunesNouvellementAffectedList,
@@ -1213,9 +1248,9 @@ export class SimulationAffectationHTSService {
             [RAPPORT_SHEETS.INTRA_DEPARTEMENT]: rapportData.jeuneIntraDepartementList,
             [RAPPORT_SHEETS.AFFECTES_EN_AMONT]: rapportData.jeunesDejaAffectedList,
             [RAPPORT_SHEETS.CENTRES]: rapportData.centreList,
-            [RAPPORT_SHEETS.LIGNES_DE_BUS]: rapportData.ligneDeBusList,
+            ...(type === "HTS" ? { [RAPPORT_SHEETS.LIGNES_DE_BUS]: rapportData.ligneDeBusList } : {}),
             [RAPPORT_SHEETS.SEJOURS]: rapportData.sejourList,
-            [RAPPORT_SHEETS.PDR]: rapportData.pdrList,
+            ...(type === "HTS" ? { [RAPPORT_SHEETS.PDR]: rapportData.pdrList } : {}),
         });
     }
 
@@ -1323,6 +1358,7 @@ export class SimulationAffectationHTSService {
         ligneDeBusList: LigneDeBusModel[],
         centreList: CentreModel[],
         pdrList: PointDeRassemblementModel[],
+        type: "HTS" | "HTS_DROMCOM" = "HTS",
     ): JeuneRapport {
         const ligneDeBus = jeune.ligneDeBusId
             ? ligneDeBusList.find((ligneDeBus) => ligneDeBus.id === jeune.ligneDeBusId)
@@ -1348,10 +1384,14 @@ export class SimulationAffectationHTSService {
             departementScolarite: jeune.departementScolarite,
             etranger: jeune.paysScolarite !== "FRANCE" ? "oui" : "non",
             HZR: jeune.departementScolarite !== jeune.departement ? "oui" : "non",
-            pointDeRassemblementId: jeune.pointDeRassemblementId,
-            pointDeRassemblementMatricule: pdr?.matricule,
-            ligneDeBusId: jeune.ligneDeBusId,
-            ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne,
+            ...(type === "HTS"
+                ? {
+                      pointDeRassemblementId: jeune.pointDeRassemblementId,
+                      pointDeRassemblementMatricule: pdr?.matricule,
+                      ligneDeBusId: jeune.ligneDeBusId,
+                      ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne,
+                  }
+                : {}),
             centreId: jeune.centreId,
             centreMatricule: centre?.matricule,
         };

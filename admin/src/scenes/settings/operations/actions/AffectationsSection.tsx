@@ -4,6 +4,7 @@ import { Collapsable } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
 
 import AffectationHTSSimulationMetropole from "./AffectationSimulation/AffectationHTSSimulationMetropole";
+import AffectationHTSSimulationDromCom from "./AffectationSimulation/AffectationHTSSimulationDromCom";
 import AffectationCLESimulationMetropole from "./AffectationSimulation/AffectationCLESimulationMetropole";
 import AffectationCLESimulationDromCom from "./AffectationSimulation/AffectationCLESimulationDromCom";
 
@@ -15,6 +16,7 @@ export default function AffectationsSection({ session }: AffectationsSectionProp
   return (
     <Collapsable title="Affectations">
       <AffectationHTSSimulationMetropole session={session} />
+      <AffectationHTSSimulationDromCom session={session} />
       <AffectationCLESimulationMetropole session={session} />
       <AffectationCLESimulationDromCom session={session} />
     </Collapsable>

@@ -4,7 +4,7 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { departmentList, region2department, RegionsDromComEtCorse, TaskName, TaskStatus } from "snu-lib";
+import { departmentList, GRADES, region2department, RegionsDromComEtCorse, TaskName, TaskStatus } from "snu-lib";
 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -15,7 +15,7 @@ import { setupAdminTest } from "../../../setUpAdminTest";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { createSession } from "../helper/SessionHelper";
 
-describe("AffectationController - CLE DROMCOM", () => {
+describe("AffectationController - HTS DROMCOM", () => {
     let app: INestApplication;
     let affectationController: AffectationController;
     let affectationService: AffectationService;
@@ -48,12 +48,12 @@ describe("AffectationController - CLE DROMCOM", () => {
         expect(affectationController).toBeDefined();
     });
 
-    describe("POST /affectation/:id/simulation/cle-dromcom", () => {
+    describe("POST /affectation/:id/simulation/hts-dromcom", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/cle-dromcom`,
+                `/affectation/${session.id}/simulation/hts-dromcom`,
             );
 
             expect(response.status).toBe(400);
@@ -63,10 +63,11 @@ describe("AffectationController - CLE DROMCOM", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .post(`/affectation/${session.id}/simulation/hts-dromcom`)
                 .send({
                     departements: [],
                     etranger: true,
+                    niveauScolaires: Object.values(GRADES),
                 });
 
             expect(response.status).toBe(400);
@@ -76,10 +77,11 @@ describe("AffectationController - CLE DROMCOM", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .post(`/affectation/${session.id}/simulation/hts-dromcom`)
                 .send({
                     departements: ["nonInexistant"],
                     etranger: true,
+                    niveauScolaires: Object.values(GRADES),
                 });
 
             expect(response.status).toBe(400);
@@ -89,10 +91,11 @@ describe("AffectationController - CLE DROMCOM", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .post(`/affectation/${session.id}/simulation/hts-dromcom`)
                 .send({
                     departements: departmentList,
                     etranger: true,
+                    niveauScolaires: Object.values(GRADES),
                 });
 
             expect(response.status).toBe(400);
@@ -102,24 +105,25 @@ describe("AffectationController - CLE DROMCOM", () => {
             const session = await createSession();
 
             const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
+                .post(`/affectation/${session.id}/simulation/hts-dromcom`)
                 .send({
                     departements: RegionsDromComEtCorse.flatMap((region) => region2department[region]),
                     etranger: true,
+                    niveauScolaires: Object.values(GRADES),
                 });
 
             expect(response.status).toBe(201);
-            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION);
+            expect(response.body.name).toBe(TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
         });
     });
 
-    describe("POST /affectation/:id/simulation/:taskId/valider/cle-dromcom", () => {
+    describe("POST /affectation/:id/simulation/:taskId/valider/hts-dromcom", () => {
         it("should return 422 for invalid task (pending)", async () => {
             const session = await createSession();
             const task = await createTask({
-                name: TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
+                name: TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
                 status: TaskStatus.PENDING,
                 metadata: {
                     parameters: {
@@ -129,7 +133,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${task.id}/valider/cle-dromcom`,
+                `/affectation/${session.id}/simulation/${task.id}/valider/hts-dromcom`,
             );
 
             expect(response.status).toBe(422);
@@ -138,7 +142,7 @@ describe("AffectationController - CLE DROMCOM", () => {
         it("should return 422 for invalid task (outdated)", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.AFFECTATION_CLE_SIMULATION,
+                name: TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -155,7 +159,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+                `/affectation/${session.id}/simulation/${simuTask.id}/valider/hts-dromcom`,
             );
 
             expect(response.status).toBe(422);
@@ -164,7 +168,7 @@ describe("AffectationController - CLE DROMCOM", () => {
         it("should return 201 for valid task", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.AFFECTATION_CLE_SIMULATION,
+                name: TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -181,7 +185,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+                `/affectation/${session.id}/simulation/${simuTask.id}/valider/hts-dromcom`,
             );
 
             expect(response.status).toBe(201);
