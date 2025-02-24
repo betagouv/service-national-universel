@@ -21,3 +21,5 @@ coverage/
 dump
 *.bson.gz
 *.json.gz
+
+.clever.json
