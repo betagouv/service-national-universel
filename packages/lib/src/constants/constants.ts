@@ -287,14 +287,14 @@ const WITHRAWN_REASONS = [
     roles: ["young", "admin"],
   },
   {
+    value: "non-confirmation",
+    label: "Non confirmation de la participation au séjour",
+    roles: ["admin"],
+  },
+  {
     value: "other",
     label: "Autre",
     roles: ["young", "admin"],
-  },
-  {
-    value: "non-confirmation",
-    label: "Vous n’avez pas confirmé votre participation au séjour",
-    roles: ["admin"],
   },
 ];
 
