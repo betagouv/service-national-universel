@@ -3,6 +3,7 @@ export interface PlanMarketingGateway {
     updateCampagne(nomListe: string, campagneId: string): Promise<void>;
     // TODO : add type when model of campagne is available
     findCampagneById(campagneId: string): Promise<any>;
+    findTemplateById(templateId: number): Promise<string | undefined>;
 }
 
 export const PlanMarketingGateway = Symbol("PlanMarketingGateway");

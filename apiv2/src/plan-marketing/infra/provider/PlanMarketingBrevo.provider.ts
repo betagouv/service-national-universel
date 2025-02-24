@@ -8,6 +8,8 @@ import { TechnicalException, TechnicalExceptionType } from "@shared/infra/Techni
 export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     contactsApi: brevo.ContactsApi;
     campaignsApi: brevo.EmailCampaignsApi;
+    emailsApi: brevo.TransactionalEmailsApi;
+
     private readonly logger = new Logger(PlanMarketingBrevoProvider.name);
 
     constructor(private readonly config: ConfigService) {
@@ -15,8 +17,21 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
 
         this.contactsApi = new brevo.ContactsApi();
         this.campaignsApi = new brevo.EmailCampaignsApi();
+        this.emailsApi = new brevo.TransactionalEmailsApi();
+
         this.setApiKey(this.contactsApi, apiKey);
         this.setApiKey(this.campaignsApi, apiKey);
+        this.setApiKey(this.emailsApi, apiKey);
+    }
+
+    async findTemplateById(templateId: number): Promise<string | undefined> {
+        this.logger.log(`findTemplateById() - templateId: ${templateId}`);
+        try {
+            const result = await this.emailsApi.getSmtpTemplate(templateId);
+            return result.body.htmlContent;
+        } catch (error: any) {
+            this.logger.error(`Failed to find template:${JSON.stringify(error.body)}`);
+        }
     }
 
     // TODO : add type when model of campagne is available
@@ -69,7 +84,10 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
-    private setApiKey(apiInstance: brevo.ContactsApi | brevo.EmailCampaignsApi, value: string) {
+    private setApiKey(
+        apiInstance: brevo.ContactsApi | brevo.EmailCampaignsApi | brevo.TransactionalEmailsApi,
+        value: string,
+    ) {
         //@ts-ignore
         let apiKey = apiInstance.authentications["apiKey"];
         apiKey.apiKey = value;

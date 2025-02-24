@@ -1,9 +1,10 @@
-import { Controller, Post, Body, UseGuards } from "@nestjs/common";
+import { Controller, Post, Body, UseGuards, Inject, Param } from "@nestjs/common";
 import { ImporterEtCreerListeDiffusion } from "../../core/useCase/ImporterEtCreerListeDiffusion";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { BrevoIpGuard } from "../guard/BrevoIpGuard";
 import { IsString, IsNotEmpty, IsNumber } from "class-validator";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
+import { PlanMarketingGateway } from "@plan-marketing/core/gateway/PlanMarketing.gateway";
 
 class ImporterContactsEtCreerListeDiffusionDto {
     @IsString()
