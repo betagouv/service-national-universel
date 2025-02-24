@@ -11,4 +11,5 @@ export type ClassesRoutes = {
   Update: UpdateClasseRoute;
   Delete: DeleteClasseRoute;
   ModifierReferentClasse: ModifierReferentClasseRoute;
+
 };

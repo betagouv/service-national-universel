@@ -13,6 +13,14 @@ async function populateYoungExport(data, exportFields) {
     const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
     const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
     data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
+
+  }
+
+  // sessionPhase1
+  if (exportFields.includes("sessionPhase1Id")) {
+    const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
+    const sessionPhase1s = await allRecords("sessionphase1", { terms: { "cohesionCenterId.keyword": centerIds } });
+    data = data.map((item) => ({ ...item, sessionPhase1: sessionPhase1s?.find((e) => e._id.toString() === item.sessionPhase1Id) }));
   }
 
   //full info bus
