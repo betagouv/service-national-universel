@@ -118,8 +118,6 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       data.splice(emptyIndex, 1);
     } else {
       if (emptyIndex !== -1) {
-        console.log("emptyIndex", emptyIndex);
-        console.log("data[emptyIndex]", data[emptyIndex]);
         data[emptyIndex].key = "N/A";
       }
     }

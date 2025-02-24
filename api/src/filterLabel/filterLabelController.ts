@@ -8,7 +8,7 @@ import { getLabels, listTypes } from "./filterLabelService";
 
 const router = express.Router();
 
-const validator = Joi.string().valid(listTypes.INSCRIPTION, listTypes.VOLONTAIRES, listTypes.VOLONTAIRES_CLE).required();
+const validator = Joi.string().valid(listTypes.INSCRIPTION, listTypes.VOLONTAIRES, listTypes.VOLONTAIRES_CLE, listTypes.LISTE_DIFFUSION).required();
 
 router.get("/:list", passport.authenticate("referent", { session: false, failWithError: true }), GetFilterLabels);
 
