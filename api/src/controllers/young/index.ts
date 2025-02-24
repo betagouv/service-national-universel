@@ -949,7 +949,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const { withdrawnMessage, withdrawnReason } = value;
 
-    await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason);
+    await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
 
     young.set({
       status: YOUNG_STATUS.WITHDRAWN,

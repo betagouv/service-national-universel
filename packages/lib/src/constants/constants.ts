@@ -252,36 +252,49 @@ const WITHRAWN_REASONS = [
   {
     value: "unavailable_perso",
     label: "Non disponibilité pour motif familial ou personnel",
+    roles: ["young", "admin"],
   },
   {
     value: "unavailable_pro",
     label: "Non disponibilité pour motif scolaire ou professionnel",
+    roles: ["young", "admin"],
   },
   {
     value: "change_date_july_2023",
     label: "Changements des dates de mon séjour du 5 au 17 juillet 2023",
     cohortOnly: ["Juillet 2023"],
+    roles: ["young", "admin"],
   },
   {
     value: "no_interest",
     label: "Perte d'intérêt pour le SNU",
+    roles: ["young", "admin"],
   },
   {
     value: "bad_affectation",
     label: "L'affectation ne convient pas",
+    roles: ["young", "admin"],
   },
   {
     value: "can_not_go_metting_point",
     label: "Impossibilité de se rendre au point de rassemblement",
+    roles: ["young", "admin"],
   },
   {
     value: "bad_mission",
     label: "L'offre de mission ne convient pas",
     phase2Only: true,
+    roles: ["young", "admin"],
+  },
+  {
+    value: "non-confirmation",
+    label: "Non confirmation de la participation au séjour",
+    roles: ["admin"],
   },
   {
     value: "other",
     label: "Autre",
+    roles: ["young", "admin"],
   },
 ];
 
