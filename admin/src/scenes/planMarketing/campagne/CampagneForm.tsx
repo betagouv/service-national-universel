@@ -80,18 +80,16 @@ export default React.memo(
 
               <div className="flex-1">
                 <label className="text-sm font-medium text-gray-900">Type de volontaires *</label>
-                <div className="mt-2 flex items-center">
-                  <RadioButton
-                    options={[
-                      { label: "HTS", value: CampagneJeuneType.VOLONTAIRE },
-                      { label: "CLE", value: CampagneJeuneType.CLE },
-                      { label: "HTS et CLE", value: CampagneJeuneType.BOTH },
-                    ]}
-                    value={state.type || "HTS"}
-                    onChange={(value) => handleChange("type", value)}
-                  />
-                  <ErrorMessage message={errors.type} />
-                </div>
+                <RadioButton
+                  options={[
+                    { label: "HTS", value: CampagneJeuneType.VOLONTAIRE },
+                    { label: "CLE", value: CampagneJeuneType.CLE },
+                    { label: "HTS et CLE", value: CampagneJeuneType.BOTH },
+                  ]}
+                  value={state.type || "HTS"}
+                  onChange={(value) => handleChange("type", value)}
+                />
+                <ErrorMessage message={errors.type} />
               </div>
             </div>
           }>
