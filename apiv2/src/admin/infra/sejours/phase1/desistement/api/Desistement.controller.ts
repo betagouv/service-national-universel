@@ -4,12 +4,12 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
+import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
 
 @Controller("desistement")
 export class DesistementController {
     constructor(
-        private readonly desisterPostAffectation: DesisterPostAffectation,
+        @Inject(DesistementService) private readonly desistementService: DesistementService,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
     ) {}
 
@@ -19,7 +19,7 @@ export class DesistementController {
         @Param("sessionId") sessionId: string,
         @Param("affectationTaskId") affectationTaskId: string,
     ): Promise<DesistementRoutes["GetPreview"]["response"]> {
-        const result = await this.desisterPostAffectation.preview({
+        const result = await this.desistementService.preview({
             sessionId,
             affectationTaskId,
         });

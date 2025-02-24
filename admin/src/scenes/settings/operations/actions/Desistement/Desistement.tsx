@@ -11,7 +11,7 @@ export default function Desistement({ session }: { session: CohortDto }) {
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <div className="text-sm leading-5 font-bold">Désistement des volontaires n'ayant pas confirmé leur présence (Metropole, hors Corse)</div>
+        <div className="text-sm leading-5 font-bold">Désistement des volontaires n'ayant pas confirmé leur présence</div>
         <Tooltip id="affectation-hts-metropole" title="Désistement (Metropole, hors Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>

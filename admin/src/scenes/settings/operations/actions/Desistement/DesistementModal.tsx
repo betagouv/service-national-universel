@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { CohortDto, TaskName } from "snu-lib";
+import { CohortDto, formatDateFR, TaskName, translate, translateSimulationName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../shared/useTraitements";
 import dayjs from "dayjs";
@@ -14,7 +14,7 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
   const [selectedOption, setSelectedOption] = useState<string>();
   const options = traitements?.map((t) => ({
     value: t.id,
-    label: `${t.name} - ${dayjs(t.createdAt).format("DD/MM/YYYY")}`,
+    label: `${translateSimulationName(t.name)} - ${formatDateFR(dayjs(t.createdAt))}`,
   }));
   const selectedTraitement = selectedOption ? traitements?.find((t) => t.id === selectedOption) : traitements?.[0];
 
@@ -70,6 +70,7 @@ function PreviewText({ traitement }) {
   const { data, isPending, isError } = useQuery({
     queryKey: ["desistement", traitement.id],
     queryFn: () => DesistementService.getDesistementPreview(traitement.metadata?.parameters?.sessionId, traitement.id),
+    refetchOnWindowFocus: false,
   });
   const total = traitement?.metadata?.results?.jeunesAffected || 0;
   const nonConfirmes = data?.jeunesNonConfirmes || 0;

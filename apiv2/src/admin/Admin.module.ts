@@ -65,6 +65,7 @@ import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscrip
 import { DesistementController } from "./infra/sejours/phase1/desistement/api/Desistement.controller";
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/DesisterPostAffectation";
+import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 
 @Module({
     imports: [
@@ -107,6 +108,8 @@ import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/Desis
         SimulationAffectationCLEService,
         DesistementService,
         DesisterPostAffectation,
+        JeuneService,
+        AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
         ...referentMongoProviders,

@@ -1,7 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskStatus, YOUNG_STATUS } from "snu-lib";
+import { DesisterTaskResult, TaskStatus, YOUNG_STATUS } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -9,6 +8,8 @@ import { Transactional } from "@nestjs-cls/transactional";
 import { ClsService } from "nestjs-cls";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification";
+import { JeuneService } from "../../jeune/Jeune.service";
+import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -19,51 +20,22 @@ export type StatusDesistement = {
 export class DesistementService {
     constructor(
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         private readonly cls: ClsService,
-        private readonly logger: Logger,
+        private readonly jeuneService: JeuneService,
+        private readonly adminTaskRepository: AdminTaskRepository,
     ) {}
 
-    async getJeunesIdsFromTask(taskId: string): Promise<string[]> {
-        const task = await this.taskGateway.findById(taskId);
-        if (!task) throw new Error(`Affectation task not found: ${taskId}`);
+    async getJeunesIdsFromRapportKey(key: string): Promise<string[]> {
+        console.log("🚀 ~ DesistementService ~ getJeunesIdsFromRapportKey ~ key:", key);
+        const affectationFile = await this.fileGateway.downloadFile(key);
+        if (!affectationFile) throw new Error(`Rapport file not found: ${key}`);
 
-        const key = task.metadata?.results.rapportKey;
-        if (!key) throw new Error("Rapport key not found in task metadata");
-
-        const file = await this.fileGateway.downloadFile(key);
-        if (!file) throw new Error(`Rapport file not found: ${key}`);
-
-        const parsedFile = await this.fileGateway.parseXLS<ValiderAffectationRapportData[0]>(file.Body);
-        return parsedFile.map((row) => row.id);
-    }
-
-    groupJeunesByCategories(jeunes: JeuneModel[], sessionId: string) {
-        return jeunes.reduce(
-            (acc, jeune) => {
-                if (jeune.sessionId !== sessionId) {
-                    acc.jeunesAutreSession.push(jeune);
-                } else if (jeune.statut === YOUNG_STATUS.WITHDRAWN) {
-                    acc.jeunesDesistes.push(jeune);
-                } else if (jeune.youngPhase1Agreement === "true") {
-                    acc.jeunesConfirmes.push(jeune);
-                } else if (
-                    jeune.statut === YOUNG_STATUS.VALIDATED &&
-                    (jeune.youngPhase1Agreement === "false" || !jeune.youngPhase1Agreement)
-                ) {
-                    acc.jeunesNonConfirmes.push(jeune);
-                }
-                return acc;
-            },
-            {
-                jeunesAutreSession: [] as JeuneModel[],
-                jeunesDesistes: [] as JeuneModel[],
-                jeunesConfirmes: [] as JeuneModel[],
-                jeunesNonConfirmes: [] as JeuneModel[],
-            },
+        const parsedAffectationFile = await this.fileGateway.parseXLS<ValiderAffectationRapportData[0]>(
+            affectationFile.Body,
         );
+        return parsedAffectationFile.map((row) => row.id);
     }
 
     @Transactional()
@@ -115,5 +87,29 @@ export class DesistementService {
                 );
             }
         }
+    }
+
+    async preview({
+        sessionId,
+        affectationTaskId,
+    }: {
+        sessionId: string;
+        affectationTaskId: string;
+    }): Promise<DesisterTaskResult> {
+        const affectationTask = await this.adminTaskRepository.findById(affectationTaskId);
+        console.log("🚀 ~ DesistementService ~ affectationTask:", affectationTask);
+        if (!affectationTask) {
+            throw new Error("Affectation task not found");
+        }
+        const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
+        const jeunes = await this.jeuneGateway.findByIds(ids);
+        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
+            this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        return {
+            jeunesDesistes: jeunesDesistes.length,
+            jeunesAutreSession: jeunesAutreSession.length,
+            jeunesConfirmes: jeunesConfirmes.length,
+            jeunesNonConfirmes: jeunesNonConfirmes.length,
+        };
     }
 }

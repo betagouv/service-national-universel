@@ -158,9 +158,15 @@ export class AdminTaskAffectationSelectorService {
 
             case TaskName.DESISTEMENT_POST_AFFECTATION:
                 const desistementPostAffectationTask: DesisterPostAffectationTaskModel = task;
+                const affectationTask = await this.adminTaskRepository.findById(
+                    desistementPostAffectationTask.metadata!.parameters!.affectationTaskId,
+                );
+                if (!affectationTask) {
+                    throw new Error("Affectation task not found");
+                }
                 const desistementPostAffectationResult = await this.desisterPostAffectation.execute({
                     sessionId: desistementPostAffectationTask.metadata!.parameters!.sessionId,
-                    affectationTaskId: desistementPostAffectationTask.metadata!.parameters!.affectationTaskId,
+                    rapportKey: affectationTask.metadata?.results.rapportKey,
                 });
                 results = desistementPostAffectationResult;
                 break;
