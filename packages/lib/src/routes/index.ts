@@ -41,6 +41,7 @@ export type { ReferentielRoutes } from "./referentiel";
 export type { ReferentRoutes } from "./iam/referent";
 export type { ReferentsRoutes } from "./cle/referent";
 export type { FilterLabelRoutes } from "./filterLabel";
+export type { DepartmentServiceRoutes } from "./departmentService";
 export type { PlanMarketingRoutes } from "./planMarketing";
 
 export * from "./phase1";
