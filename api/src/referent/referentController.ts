@@ -675,6 +675,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
 
     if (newYoung.status === YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.WITHDRAWN) {
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const { withdrawnReason } = newYoung;
       await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
       newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
