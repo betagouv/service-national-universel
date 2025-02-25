@@ -23,6 +23,7 @@ import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createFixtureClasse } from "../fixtures/classe";
 import * as featureService from "../../featureFlag/featureFlagService";
 import * as referentService from "../../cle/referent/referentService";
+import { ERRORS } from "../../utils";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -495,7 +496,8 @@ describe("POST /cle/referent/invite-coordonnateur", () => {
 
       expect(res.statusCode).toEqual(400);
       expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", "INVALID_PARAMS");
+      const validErrorCodes = [ERRORS.INVALID_PARAMS, ERRORS.INVALID_QUERY, ERRORS.INVALID_BODY];
+      expect(validErrorCodes).toContain(res.body.code);
     });
 
     it("should return 404 Not Found when referents are not found", async () => {

@@ -17,8 +17,12 @@ import { generateCSVStream } from "../../services/fileService";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 import { GetReferentsByIdsSchema } from "./referentValidator";
 import { getReferentsByIds } from "./referentService";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
 
 const router = express.Router();
+router.use(authMiddleware("referent"));
 
 router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -165,14 +169,11 @@ router.post("/delete-old-referent-classe", passport.authenticate("referent", { s
 
 router.post(
   "/getMany",
-  passport.authenticate("referent", { session: false, failWithError: true }),
+  accessControlMiddleware([ROLES.ADMIN]),
+  requestValidatorMiddleware({ body: GetReferentsByIdsSchema.payload }),
   async (req: RouteRequest<ReferentsRoutes["GetMany"]>, res: RouteResponse<ReferentsRoutes["GetMany"]>) => {
     try {
-      const { error, value: payload } = GetReferentsByIdsSchema.payload.validate(req.body, { stripUnknown: true });
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
+      const payload = req.validatedBody;
 
       const ids = payload.ids;
       const referents = await getReferentsByIds(ids);
