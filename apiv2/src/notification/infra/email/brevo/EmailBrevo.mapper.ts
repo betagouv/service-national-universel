@@ -1,6 +1,7 @@
 import {
     BasculeJeuneParams,
     EmailParams,
+    EmailWithMessage,
     EmailTemplate,
     InviterReferentClasseParams,
     SupprimerClasseEngageeParams,
@@ -38,6 +39,12 @@ export class EmailBrevoMapper {
             case EmailTemplate.BASCULE_SEJOUR_AVENIR:
             case EmailTemplate.BASCULE_SEJOUR_ELIGIBLE:
                 return this.mapBasculeJeune(template, emailParams as BasculeJeuneParams);
+
+            case EmailTemplate.DESISTEMENT_PAR_TIERS:
+                return this.mapEmailWithMessageToBrevo(template, emailParams as EmailWithMessage);
+
+            default:
+                throw new Error(`Template ${template} not supported`);
         }
     }
 
@@ -46,6 +53,17 @@ export class EmailBrevoMapper {
             to: emailParams.to,
             params: {
                 toName: emailParams.to[0].name,
+            },
+            templateId: Number(template),
+        };
+    }
+
+    static mapEmailWithMessageToBrevo(template: EmailTemplate, emailParams: EmailWithMessage): EmailProviderParams {
+        return {
+            to: emailParams.to,
+            params: {
+                toName: emailParams.to[0].name,
+                message: emailParams.message,
             },
             templateId: Number(template),
         };

@@ -4,19 +4,25 @@ import Joi from "joi";
 import { Response } from "express";
 import { logger } from "../../logger";
 
-import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName } from "snu-lib";
+import { ROLES, SUB_ROLES, isChefEtablissement, isReferentOrAdmin, isSuperAdmin, FeatureFlagName, ReferentsRoutes } from "snu-lib";
 
 import { deleteOldReferentClasse, doInviteMultipleChefsEtablissements, doInviteMultipleReferentClasseVerifiee } from "../../services/cle/referent";
 import { uploadFile } from "../../utils";
-import { UserRequest } from "../../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../../controllers/request";
 import { capture } from "../../sentry";
 import { ERRORS } from "../../utils";
 import { EtablissementModel } from "../../models";
 import { findOrCreateReferent, inviteReferent, inviteReferentClasseAsCoordinator } from "../../services/cle/referent";
 import { generateCSVStream } from "../../services/fileService";
 import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
+import { GetReferentsByIdsSchema } from "./referentValidator";
+import { getReferentsByIds } from "./referentService";
+import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../../middlewares/authMiddleware";
 
 const router = express.Router();
+router.use(authMiddleware("referent"));
 
 router.post("/invite-coordonnateur", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -160,5 +166,32 @@ router.post("/delete-old-referent-classe", passport.authenticate("referent", { s
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+router.post(
+  "/getMany",
+  accessControlMiddleware([ROLES.ADMIN]),
+  requestValidatorMiddleware({ body: GetReferentsByIdsSchema.payload }),
+  async (req: RouteRequest<ReferentsRoutes["GetMany"]>, res: RouteResponse<ReferentsRoutes["GetMany"]>) => {
+    try {
+      const payload = req.validatedBody;
+
+      const ids = payload.ids;
+      const referents = await getReferentsByIds(ids);
+
+      return res.status(200).send({ ok: true, data: referents });
+    } catch (error) {
+      if (error.message.includes("Referents not found")) {
+        return res.status(404).send({
+          ok: false,
+          code: ERRORS.NOT_FOUND,
+          message: error.message,
+        });
+      }
+
+      capture(error);
+      res.status(500).send({ ok: false, code: error.message });
+    }
+  },
+);
 
 export default router;
