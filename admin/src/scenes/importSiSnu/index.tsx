@@ -12,7 +12,8 @@ import StatusCell from "../settings/operations/components/StatusCell";
 import ImportFileTypeCell from "./ImportFileTypeCell";
 import ImportRapportCell from "./ImportRapportCell";
 import ImportSelectModal from "./ImportSelectModal";
-import ListeDiffusionFilter from "./ListeDiffusionFilter";
+import ListeDiffusionFilterWrapper from "./liste-diffusion/ListeDiffusionFilterWrapper";
+import TempComponent from "./liste-diffusion/TempComponent";
 
 interface ImportFileRow {
   id: string;
@@ -82,7 +83,7 @@ export default function ImportSiSnu() {
           </ButtonPrimary>
         </div>
       </div>
-      <ListeDiffusionFilter />
+      <TempComponent type="volontaire" />
       <div className="px-8">
         <Container>
           <div className="flex flex-col gap-8 ">
