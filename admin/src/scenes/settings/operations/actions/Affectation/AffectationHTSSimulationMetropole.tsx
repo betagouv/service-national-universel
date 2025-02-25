@@ -35,7 +35,7 @@ export default function AffectationHTSSimulationMetropole({ session }: Affectati
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Affectation HTS (Metropole, hors Corse)</div>
-        <Tooltip id="affectation-hts-metropole" title="Permet d’effectuer les simulations et les affectation des jeunes HTS pour les cohortes de métropole (hors Corse)">
+        <Tooltip id="affectation-hts-metropole" title="Permet d’effectuer les simulations et les affectations des jeunes HTS pour les cohortes de métropole (hors Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}

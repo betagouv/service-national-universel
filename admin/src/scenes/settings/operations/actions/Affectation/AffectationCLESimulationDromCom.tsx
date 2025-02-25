@@ -35,7 +35,7 @@ export default function AffectationCLESimulationDromCom({ session }: Affectation
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Affectation CLE (DROM COM et Corse)</div>
-        <Tooltip id="affectation-cle-dromcom" title="Permet d’effectuer les simulations et les affectation des jeunes CLE pour les cohortes DROM COM et Corse">
+        <Tooltip id="affectation-cle-dromcom" title="Permet d’effectuer les simulations et les affectations des jeunes CLE pour les cohortes DROM COM et Corse">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}
