@@ -12,8 +12,9 @@ export interface ListeDiffusionFilterProps {
   type: string;
   paramData: any;
   dataFilter: any;
+  id: string;
 }
-export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilter }: ListeDiffusionFilterProps) {
+export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilter, id }: ListeDiffusionFilterProps) {
   // console.log("ListeDiffusionFilterWrapper", dataFilter);
   const pageId = "liste-diffusion-filter";
   const user = useSelector((state) => state.Auth.user);
@@ -49,6 +50,7 @@ export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilte
       <div className="flex">
         <div className="flex text-xl pr-2">Filtres</div>
         <ListeDiffusionFilters
+          key={id}
           pageId={pageId}
           route={route}
           setData={() => {}}

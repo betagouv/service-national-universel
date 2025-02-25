@@ -23,7 +23,7 @@ export function RootDecoupledFilter({ data }: DecoupledFilterProps) {
               leave="transition ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
-              show={true}>
+              show={open}>
               <PopoverPanel className="absolute left-0 z-10 mt-2 w-60 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="flex flex-col gap-1 py-2">
                   {data.map((item) => {
@@ -45,7 +45,12 @@ export interface ItemDecoupledFilterData {
   value: string;
   count: number;
   children?: ItemDecoupledFilterData[];
-  parent?: ItemDecoupledFilterData;
+}
+
+enum ItemState {
+  Checked,
+  Unchecked,
+  Indeterminate,
 }
 
 interface NextLevelDecoupledFilterProps {

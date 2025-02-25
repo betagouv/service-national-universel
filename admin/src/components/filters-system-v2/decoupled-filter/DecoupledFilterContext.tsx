@@ -22,12 +22,29 @@ export function DecoupledFilterProvider({ children, initialData }: { children: R
     return values;
   };
 
-  const getParentLineage = (item: ItemDecoupledFilterData): string[] => {
-    let values: string[] = [];
-    if (item.parent) {
-      values = [item.parent.value, ...getParentLineage(item.parent)];
+  const findParentInTree = (items: ItemDecoupledFilterData[], targetValue: string): ItemDecoupledFilterData | null => {
+    for (const item of items) {
+      if (item.children?.some((child) => child.value === targetValue)) {
+        return item;
+      }
+      if (item.children) {
+        const found = findParentInTree(item.children, targetValue);
+        if (found) return found;
+      }
     }
-    return values;
+    return null;
+  };
+
+  const getAncestors = (items: ItemDecoupledFilterData[], targetValue: string): ItemDecoupledFilterData[] => {
+    const ancestors: ItemDecoupledFilterData[] = [];
+    let currentParent = findParentInTree(items, targetValue);
+
+    while (currentParent) {
+      ancestors.push(currentParent);
+      currentParent = findParentInTree(items, currentParent.value);
+    }
+
+    return ancestors;
   };
 
   const shouldParentBeChecked = (item: ItemDecoupledFilterData): boolean => {
@@ -42,42 +59,28 @@ export function DecoupledFilterProvider({ children, initialData }: { children: R
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
       const allChildrenValues = getAllChildrenValues(item);
-      const parentLineage = getParentLineage(item);
+      const ancestors = getAncestors(initialData, item.value);
 
       if (newSet.has(item.value)) {
         // Uncheck item and all children
         newSet.delete(item.value);
         allChildrenValues.forEach((value) => newSet.delete(value));
-        // Clean up parents if needed
-        parentLineage.forEach((parentValue) => newSet.delete(parentValue));
+        // Clean up ancestors
+        ancestors.forEach((ancestor) => newSet.delete(ancestor.value));
       } else {
         // Check item and all children
         newSet.add(item.value);
         allChildrenValues.forEach((value) => newSet.add(value));
-        // Check parents if all their children are checked
-        if (item.parent) {
-          parentLineage.forEach((parentValue) => {
-            const parent = findItemByValue(initialData, parentValue);
-            if (parent && shouldParentBeChecked(parent)) {
-              newSet.add(parentValue);
-            }
-          });
-        }
+        // Update ancestor selections if needed
+        ancestors.forEach((ancestor) => {
+          if (shouldParentBeChecked(ancestor)) {
+            newSet.add(ancestor.value);
+          }
+        });
       }
 
       return newSet;
     });
-  };
-
-  const findItemByValue = (items: ItemDecoupledFilterData[], value: string): ItemDecoupledFilterData | null => {
-    for (const item of items) {
-      if (item.value === value) return item;
-      if (item.children) {
-        const found = findItemByValue(item.children, value);
-        if (found) return found;
-      }
-    }
-    return null;
   };
 
   const getItemState = (value: string): boolean => {

@@ -36,6 +36,7 @@ export interface Filter {
 }
 
 interface ListeDiffusionFiltersProps {
+  key: string;
   route: string;
   pageId: string;
   filters: Filter[];
@@ -52,6 +53,7 @@ interface ListeDiffusionFiltersProps {
 }
 
 export default function ListeDiffusionFilters({
+  key,
   route,
   pageId,
   filters,
@@ -258,7 +260,7 @@ export default function ListeDiffusionFilters({
                         />
                         <div className="flex flex-col overflow-y-auto">
                           {categories.map((category, index) => (
-                            <div key={category || "default"}>
+                            <div key={"key-" + category || "default"}>
                               {index !== 0 && <hr className="my-2 border-gray-100" />}
                               <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
                               {filtersVisible
@@ -270,6 +272,8 @@ export default function ListeDiffusionFilters({
                                     customItem = {
                                       ...item,
                                       allowEmpty: false,
+                                      //@ts-ignore unknown property
+                                      showCount: false,
                                       customComponent: (setFilter, filter) => (
                                         <IntermediateFilter
                                           // @ts-expect-error
@@ -279,13 +283,14 @@ export default function ListeDiffusionFilters({
                                           intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
+                                          key={key}
                                         />
                                       ),
                                     };
                                   }
                                   return (
                                     <FilterPopOver
-                                      key={item.title}
+                                      key={key + "-" + item.title}
                                       // @ts-expect-error
                                       filter={customItem}
                                       // @ts-expect-error
