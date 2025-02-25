@@ -122,35 +122,25 @@ describe("DesistementService", () => {
                 { email: "jeune2@example.com", prenom: "Prenom2", nom: "Nom2" } as JeuneModel,
             ];
 
+            const message = "Non confirmation de la participation au séjour";
+
             await service.notifierJeunes(jeunes);
 
             expect(notificationGateway.sendEmail).toHaveBeenCalledTimes(4);
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
-                {
-                    to: [{ email: "jeune1@example.com", name: "Prenom1 Nom1" }],
-                    message: "Vous n’avez pas confirmé votre participation au séjour",
-                },
+                { to: [{ email: "jeune1@example.com", name: "Prenom1 Nom1" }], message },
                 EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
-                {
-                    to: [{ email: "parent1@example.com", name: "Prenom1 Nom1" }],
-                    message: "Vous n’avez pas confirmé votre participation au séjour",
-                },
+                { to: [{ email: "parent1@example.com", name: "Prenom1 Nom1" }], message },
                 EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
-                {
-                    to: [{ email: "parent2@example.com", name: "Prenom1 Nom1" }],
-                    message: "Vous n’avez pas confirmé votre participation au séjour",
-                },
+                { to: [{ email: "parent2@example.com", name: "Prenom1 Nom1" }], message },
                 EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
             expect(notificationGateway.sendEmail).toHaveBeenCalledWith(
-                {
-                    to: [{ email: "jeune2@example.com", name: "Prenom2 Nom2" }],
-                    message: "Vous n’avez pas confirmé votre participation au séjour",
-                },
+                { to: [{ email: "jeune2@example.com", name: "Prenom2 Nom2" }], message },
                 EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
         });
