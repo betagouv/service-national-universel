@@ -18,6 +18,7 @@ import {
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   LigneBusType,
+  getCohortPeriod,
 } from "snu-lib";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
@@ -122,10 +123,13 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       ligneId: ligneId ? ligneId : undefined,
       hasMeetingInformation: pdrOption !== "young-select" ? "true" : "false",
     });
-
     if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+      const cohortPeriod = getCohortPeriod(cohort);
+      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION;
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
+      let params = { cohortPeriod: cohortPeriod };
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, { emailTo, params, cc });
     }
 
     await young.save({ fromUser: req.user });
