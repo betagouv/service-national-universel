@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { DesisterTaskResult, TaskStatus, YOUNG_STATUS } from "snu-lib";
+import { DesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -10,6 +10,8 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification";
 import { JeuneService } from "../../jeune/Jeune.service";
 import { TaskGateway } from "@task/core/Task.gateway";
+import { AffectationService } from "../affectation/Affectation.service";
+import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -23,8 +25,10 @@ export class DesistementService {
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
+        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         private readonly cls: ClsService,
         private readonly jeuneService: JeuneService,
+        private readonly affectationService: AffectationService,
     ) {}
 
     async getJeunesIdsFromRapportKey(key: string): Promise<string[]> {
@@ -44,12 +48,22 @@ export class DesistementService {
             list.push({
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
-                desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
+                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                desistementMotif: "Non confirmation de la participation au séjour",
             });
         }
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
         const res = await this.jeuneGateway.bulkUpdate(list);
         this.cls.set("user", null);
+
+        const lignesDeBusIds = [
+            ...new Set(jeunes.map((jeune) => jeune.ligneDeBusId).filter((id): id is string => !!id)),
+        ];
+        if (lignesDeBusIds.length > 0) {
+            const lignesDeBus = await this.ligneDeBusGateway.findByIds(lignesDeBusIds);
+            await this.affectationService.syncPlaceDisponiblesLigneDeBus(lignesDeBus);
+        }
+
         return res;
     }
 

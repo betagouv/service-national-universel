@@ -7,9 +7,16 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ClsService } from "nestjs-cls";
 import { Logger } from "@nestjs/common";
 import { JeuneModel } from "../../jeune/Jeune.model";
-import { YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { EmailTemplate } from "@notification/core/Notification";
 import { JeuneService } from "../../jeune/Jeune.service";
+import { AffectationService } from "../affectation/Affectation.service";
+import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
+import { SessionGateway } from "../session/Session.gateway";
+import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
+import { SejourGateway } from "../sejour/Sejour.gateway";
+import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -20,16 +27,24 @@ describe("DesistementService", () => {
     let jeuneGateway: JeuneGateway;
     let fileGateway: FileGateway;
     let notificationGateway: NotificationGateway;
+    let ligneDeBusGateway: LigneDeBusGateway;
+    let affectationService: AffectationService;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DesistementService,
                 JeuneService,
+                AffectationService,
                 { provide: JeuneGateway, useValue: { bulkUpdate: jest.fn() } },
                 { provide: TaskGateway, useValue: { findById: jest.fn() } },
                 { provide: FileGateway, useValue: { downloadFile: jest.fn(), parseXLS: jest.fn() } },
                 { provide: NotificationGateway, useValue: { sendEmail: jest.fn() } },
+                { provide: LigneDeBusGateway, useValue: { findByIds: jest.fn() } },
+                { provide: SessionGateway, useValue: { findById: jest.fn() } },
+                { provide: PlanDeTransportGateway, useValue: { findByIds: jest.fn(), bulkUpdate: jest.fn() } },
+                { provide: PointDeRassemblementGateway, useValue: { findByIds: jest.fn() } },
+                { provide: SejourGateway, useValue: { finBySessionId: jest.fn() } },
                 { provide: ClsService, useValue: { set: jest.fn() } },
                 { provide: Logger, useValue: { log: jest.fn() } },
             ],
@@ -39,9 +54,33 @@ describe("DesistementService", () => {
         jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
         fileGateway = module.get<FileGateway>(FileGateway);
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
+        ligneDeBusGateway = module.get<LigneDeBusGateway>(LigneDeBusGateway);
+        affectationService = module.get<AffectationService>(AffectationService);
     });
 
     describe("desisterJeunes", () => {
+        it("should update lignes de bus occupancy when jeunes are withdrawn", async () => {
+            const lignesDeBus: LigneDeBusModel[] = [
+                { id: "ligneDeBusId1", placesOccupeesJeunes: 2 } as LigneDeBusModel,
+                { id: "ligneDeBusId2", placesOccupeesJeunes: 3 } as LigneDeBusModel,
+            ];
+
+            const jeunes: JeuneModel[] = [
+                { id: "jeuneId1", statut: YOUNG_STATUS.VALIDATED, ligneDeBusId: "ligneDeBusId1" } as JeuneModel,
+                { id: "jeuneId2", statut: YOUNG_STATUS.VALIDATED, ligneDeBusId: "ligneDeBusId2" } as JeuneModel,
+            ];
+
+            jest.spyOn(ligneDeBusGateway, "findByIds").mockResolvedValue(lignesDeBus);
+            jest.spyOn(affectationService, "syncPlaceDisponiblesLigneDeBus").mockResolvedValue();
+            jest.spyOn(jeuneGateway, "bulkUpdate").mockResolvedValue(2);
+
+            await service.desisterJeunes(jeunes);
+
+            expect(ligneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligneDeBusId1", "ligneDeBusId2"]);
+            expect(affectationService.syncPlaceDisponiblesLigneDeBus).toHaveBeenCalledWith(lignesDeBus);
+            expect(jeuneGateway.bulkUpdate).toHaveBeenCalled();
+        });
+
         it("should update jeunes status to withdrawn", async () => {
             const jeunes: JeuneModel[] = [
                 { id: "jeuneId1", statut: YOUNG_STATUS.VALIDATED } as JeuneModel,
@@ -57,12 +96,14 @@ describe("DesistementService", () => {
                 {
                     ...jeunes[0],
                     statut: YOUNG_STATUS.WITHDRAWN,
-                    desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
+                    statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                    desistementMotif: "Non confirmation de la participation au séjour",
                 },
                 {
                     ...jeunes[1],
                     statut: YOUNG_STATUS.WITHDRAWN,
-                    desistementMotif: "Vous n’avez pas confirmé votre participation au séjour",
+                    statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                    desistementMotif: "Non confirmation de la participation au séjour",
                 },
             ]);
         });
