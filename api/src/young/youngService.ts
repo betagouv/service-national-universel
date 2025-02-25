@@ -16,6 +16,9 @@ import {
   SUB_ROLES,
   WITHRAWN_REASONS,
   formatDateFRTimezoneUTC,
+  CohortType,
+  formatDepartement,
+  getCohortPeriod,
 } from "snu-lib";
 
 import {
@@ -28,6 +31,7 @@ import {
   EtablissementModel,
   ReferentDocument,
   SessionPhase1Model,
+  LigneBusModel,
 } from "../models";
 
 import { sendTemplate } from "../brevo";
@@ -268,7 +272,7 @@ async function getContactsCLE(classeId: string) {
   return await ReferentModel.find({ _id: { $in: contactCLEId } });
 }
 
-export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, actor) {
+export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: CohortType, withdrawnReason: string, actor: UserDto) {
   const oldStatusPhase1 = young.statusPhase1;
 
   // We notify the ref dep and the young
@@ -304,15 +308,36 @@ export async function handleNotifForYoungWithdrawn(young, cohort, withdrawnReaso
       }
     }
 
-    // If young affected, we notify the head center
+    // If young affected, we notify the head center and refs region
     if (oldStatusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.sessionPhase1Id != null) {
+      const ligneDeBus = await LigneBusModel.findOne({ _id: young.ligneId });
+      const params = {
+        contact_name: youngFullName,
+        date_cohorte: getCohortPeriod(cohort),
+        contact_departement: formatDepartement(young.department!),
+        contact_ligne: ligneDeBus?.busId || "",
+        message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
+      };
+
       const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
       const headCenter = await ReferentModel.findById(session?.headCenterId);
 
       if (headCenter) {
         await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.YOUNG_WITHDRAWN, {
           emailTo: [{ name: `${headCenter.firstName} ${headCenter.lastName}`, email: headCenter.email }],
-          params: { contact_name: youngFullName, message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+          params,
+        });
+      }
+
+      const referentsRegion = await ReferentModel.find({
+        role: ROLES.REFERENT_REGION,
+        subRole: SUB_ROLES.coordinator,
+        region: young.region,
+      });
+      for (const referentRegional of referentsRegion) {
+        await sendTemplate(SENDINBLUE_TEMPLATES.headCenter.YOUNG_WITHDRAWN, {
+          emailTo: [{ name: `${referentRegional.firstName} ${referentRegional.lastName}`, email: referentRegional.email }],
+          params,
         });
       }
     }
