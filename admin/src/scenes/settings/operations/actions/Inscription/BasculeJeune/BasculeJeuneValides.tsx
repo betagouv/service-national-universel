@@ -35,7 +35,15 @@ export default function BasculeJeuneValides({ session }: BasculeJeuneValidesProp
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Bascule des jeunes validés</div>
-        <Tooltip id="basule-jeunes-valides" title="Bascule des jeunes validés">
+        <Tooltip
+          id="basule-jeunes-valides"
+          title={
+            <ul>
+              <li>basculer les jeunes validés sur LC et/ou LP vers le prochain séjour sur lequel ils sont éligibles ou vers la cohorte à venir</li>
+              <li>possibilité d’envoyer une communication aux jeunes et à leur RL</li>
+              <li>une fois basculés, les jeunes passent au statut En attente de validation et les informations liées à leur phase 1 sont réinitialisées</li>
+            </ul>
+          }>
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}

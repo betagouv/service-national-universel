@@ -4,7 +4,7 @@ import cx from "classnames";
 
 interface TooltipProps {
   id: string;
-  title?: string;
+  title?: string | ReactNode;
   className?: string;
   tooltipClassName?: string;
   children: ReactNode;
