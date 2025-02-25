@@ -138,26 +138,48 @@ export class AffectationService {
         const lignesDeBusUpdatedList: LigneDeBusModel[] = [];
         const pdtUpdatedList: PlanDeTransportModel[] = [];
 
-        const pdtList = await this.planDeTransportGateway.findByIds(ligneDeBusList.map((ligne) => ligne.id));
+        const ligneDeBusId = ligneDeBusList.map((ligne) => ligne.id);
+        const pdtList = await this.planDeTransportGateway.findByIds(ligneDeBusId);
+        const ligneDeBusPlacesOccupeesJeunesList =
+            await this.ligneDeBusGateway.countPlaceOccupeesByLigneDeBusIds(ligneDeBusId);
 
         for (const ligneDeBus of ligneDeBusList) {
-            const placesOccupeesJeunes = await this.jeuneGateway.countAffectedByLigneDeBus(ligneDeBus.id);
+            const placesOccupeesJeunes = ligneDeBusPlacesOccupeesJeunesList.find((ligne) => ligne.id === ligneDeBus.id)
+                ?.placesOccupeesJeunes;
+            if (placesOccupeesJeunes === undefined) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    `Calcul du nombre de places occupées impossible pour la ligne de bus ${ligneDeBus.id} !`,
+                );
+            }
+            const pdt = pdtList.find((pdt) => pdt.id === ligneDeBus.id);
 
-            if (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes) {
+            if (
+                placesOccupeesJeunes &&
+                (ligneDeBus.placesOccupeesJeunes !== placesOccupeesJeunes || !pdt?.tauxRemplissageLigne)
+            ) {
+                this.logger.log(
+                    `Updating ligneDeBus ${ligneDeBus.numeroLigne} ${ligneDeBus.id} (${placesOccupeesJeunes} => ${ligneDeBus.placesOccupeesJeunes} | ${pdt?.tauxRemplissageLigne})`,
+                );
                 ligneDeBus.placesOccupeesJeunes = placesOccupeesJeunes;
                 lignesDeBusUpdatedList.push(ligneDeBus);
 
                 // Do the same update with planTransport
-                const pdt = pdtList.find((pdt) => pdt.id === ligneDeBus.id);
                 if (pdt) {
                     pdt.placesOccupeesJeunes = placesOccupeesJeunes;
                     if (pdt.capaciteJeunes) {
-                        pdt.lineFillingRate = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                        pdt.tauxRemplissageLigne = Math.floor((placesOccupeesJeunes / pdt.capaciteJeunes) * 100);
+                    } else {
+                        this.logger.error(`No capaciteJeunes for pdtId ${pdt.id} ${pdt.capaciteJeunes}`);
                     }
                     pdtUpdatedList.push(pdt);
                 } else {
-                    this.logger.warn(`PDT does not exist for ligneDeBusId ${ligneDeBus.id}`);
+                    this.logger.error(`PDT does not exist for ligneDeBusId ${ligneDeBus.id}`);
                 }
+            } else {
+                this.logger.warn(
+                    `No update needed for ligneDeBus ${ligneDeBus.numeroLigne} ${ligneDeBus.id} (${placesOccupeesJeunes} == ${ligneDeBus.placesOccupeesJeunes})`,
+                );
             }
         }
 

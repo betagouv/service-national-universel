@@ -520,6 +520,10 @@ function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
+function isHeadCenter(user: UserRoles) {
+  return user?.role === ROLES.HEAD_CENTER;
+}
+
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
 
 const FORCE_DISABLED_ASSIGN_COHESION_CENTER = false;
@@ -958,6 +962,7 @@ function canCreateTags(actor) {
 }
 
 function isSuperAdmin(actor) {
+  if (!actor) return false;
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
@@ -1236,6 +1241,7 @@ export {
   isChefEtablissement,
   isCoordinateurEtablissement,
   isReferentClasse,
+  isHeadCenter,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,

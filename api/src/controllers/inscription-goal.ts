@@ -2,7 +2,7 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
+import { canUpdateInscriptionGoals, canViewInscriptionGoals, FUNCTIONAL_ERRORS, InscriptionGoalsRoutes } from "snu-lib";
 
 import { capture } from "../sentry";
 import { YoungModel, InscriptionGoalModel, CohortModel } from "../models";

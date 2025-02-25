@@ -940,6 +940,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!youngCanWithdraw(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const cohort = await CohortModel.findOne({ name: young.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const mandatoryPhasesDone = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED;
     const inscriptionStatus = ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_CORRECTION] as string[]).includes(young.status!);
 
@@ -949,7 +950,7 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     const { withdrawnMessage, withdrawnReason } = value;
 
-    await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason);
+    await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
 
     young.set({
       status: YOUNG_STATUS.WITHDRAWN,
@@ -1036,7 +1037,7 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
-    const { error: documentError, value: document } = Joi.string()
+    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "rules" | "agreement" | "convocation">()
       .required()
       .valid(...keys)
       .validate(req.params.document, { stripUnknown: true });
@@ -1062,6 +1063,21 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
       await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: { type_document: translateFileStatusPhase1(document) },
+        cc,
+      });
+    }
+
+    // uniquement post affectation
+    if (document === "agreement") {
+      // youngPhase1Agreement est forcément true ici
+      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+        params: {
+          youngFirstName: young.firstName,
+          youngLastName: young.lastName,
+        },
         cc,
       });
     }
