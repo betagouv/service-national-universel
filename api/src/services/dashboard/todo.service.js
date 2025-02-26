@@ -22,8 +22,6 @@ service.todosByRole = async (user) => {
         sejour: [
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_NOT_CONFIRMED,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CONTACT_TO_FILL,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT,
@@ -42,8 +40,6 @@ service.todosByRole = async (user) => {
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL,
           //TODO : Schéma d’affectation. X volontaires prévus en trop dans le [Nom du département]
           //TODO : Intra-départemental. X volontaires demandant une affectation intradépartementale pour le séjour de [Février 2023 - C] (à suivre)
@@ -71,10 +67,7 @@ service.todosByRole = async (user) => {
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.YOUNG_TO_CONTACT,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE,
-          DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE,
           DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_MANAGER_TO_FILL,
           //TODO : Schéma d’affectation. X volontaires prévus en trop dans le [Nom du département]
           //TODO : Intra-départemental. X volontaires demandant une affectation intradépartementale pour le séjour de [Février 2023 - C] (à suivre)
