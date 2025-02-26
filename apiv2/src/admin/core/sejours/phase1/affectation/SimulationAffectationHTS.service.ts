@@ -1207,7 +1207,7 @@ export class SimulationAffectationHTSService {
             "Nombre de jeunes dans la simulation : " + (jeunesList.length + jeuneIntraDepartementList.length),
             "          dont affectés en amont : " + jeunesDejaAffectedList.length,
             "Nombre de jeunes affectés dans la simulation : " + jeunesNouvellementAffectedList.length,
-            "En attente d'affectation : " +
+            "Nombre de jeunes en attente d'affectation : " +
                 (jeuneAttenteAffectationList.length + jeuneIntraDepartementListUpdated.length),
             ...(type === "HTS" ? ["          dont intradep : " + jeuneIntraDepartementList.length] : []),
             ...infoNonAffectes.stats,
