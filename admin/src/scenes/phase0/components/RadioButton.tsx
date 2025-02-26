@@ -24,7 +24,7 @@ const RadioButton = ({
       <div className="flex flex-wrap">
         {options.map(({ label, value }, idx) => (
           <React.Fragment key={value}>
-            {idx > 0 && <div className="mx-4 w-[1px] bg-[#E5E5E5]" />}
+            {idx > 0 && <div className="mx-4 w-[1px]" />}
             <Option label={label} value={value === currentValue} onChange={() => change(value)} readonly={readonly} />
           </React.Fragment>
         ))}

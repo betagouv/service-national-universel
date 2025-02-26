@@ -12,16 +12,22 @@ import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { DatabaseModule } from "@infra/Database.module";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FileProvider } from "@shared/infra/File.provider";
+import { CampagneGateway } from "./core/gateway/Campagne.gateway";
+import { CampagneMongoRepository } from "./infra/CampagneMongo.repository";
+import { campagneMongoProviders } from "./infra/CampagneMongo.provider";
+import { CampagneController } from "./infra/api/Campagne.controller";
+import { CampagneService } from "./core/service/Campagne.service";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule],
-    controllers: [PlanMarketingController],
+    controllers: [PlanMarketingController, CampagneController],
     providers: [
         Logger,
         ImporterEtCreerListeDiffusion,
         AssocierListeDiffusionToCampagne,
         PlanMarketingActionSelectorService,
         planMarketingFactory,
+        CampagneService,
         {
             provide: TaskGateway,
             useClass: TaskRepository,
@@ -30,7 +36,12 @@ import { FileProvider } from "@shared/infra/File.provider";
             provide: FileGateway,
             useClass: FileProvider,
         },
+        {
+            provide: CampagneGateway,
+            useClass: CampagneMongoRepository,
+        },
         ...taskMongoProviders,
+        ...campagneMongoProviders,
     ],
 })
 export class PlanMarketingModule {}
