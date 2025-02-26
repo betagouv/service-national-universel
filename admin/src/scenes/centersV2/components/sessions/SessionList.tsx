@@ -8,14 +8,14 @@ import { toastr } from "react-redux-toastr";
 
 import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
 
-import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, COHORT_TYPE, isSessionEditionOpen, validateEmailAcademique } from "snu-lib";
+import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, CohesionCenterType, isSessionEditionOpen, isSuperAdmin, validateEmailAcademique } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import Pencil from "@/assets/icons/Pencil";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
-import { Center, Session } from "@/types";
+import { Session } from "@/types";
 import Trash from "@/assets/icons/Trash";
 import SessionHorizontalBar from "@/scenes/dashboardV2/components/graphs/SessionHorizontalBar";
 
@@ -26,19 +26,22 @@ import { Title } from "../commons";
 import TimeSchedule from "../TimeSchedule";
 import PedagoProject from "../PedagoProject";
 import { getDefaultSession } from "@/utils/session";
+import SyncPlacesButton from "./SyncPlacesButton";
+import SessionVolontairesButton from "./SessionVolontairesButton";
 
 type Props = {
-  center: Center;
-  setCenter: React.Dispatch<React.SetStateAction<Center>>;
+  center: CohesionCenterType;
+  onCenterChange: React.Dispatch<React.SetStateAction<CohesionCenterType>>;
   sessions: Session[];
-  setSessions: React.Dispatch<React.SetStateAction<Session[]>>;
+  onSessionsChange: React.Dispatch<React.SetStateAction<Session[]>>;
+  onRefetchSessions: () => void;
 };
 
 type Errors = {
   [key: string]: string;
 };
 
-export default function SessionList({ center, setCenter, sessions, setSessions }: Props) {
+export default function SessionList({ center, onCenterChange, sessions, onSessionsChange, onRefetchSessions }: Props) {
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -46,7 +49,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
   const cohortParam = new URLSearchParams(location.search).get("cohorte");
   const session = cohortParam ? sessions.find((session) => session.cohort === cohortParam) : getDefaultSession(sessions, cohorts);
   const cohort = cohorts.find((cohort) => cohort.name === session?.cohort);
-  const setSession = (newSession: Session) => setSessions(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
+  const setSession = (newSession: Session) => onSessionsChange(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
   const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
@@ -129,8 +132,8 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
       }
       setLoading(false);
       setShowModalDelete(false);
-      setCenter({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
-      setSessions(sessions.filter((s) => s._id !== session._id));
+      onCenterChange({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
+      onSessionsChange(sessions.filter((s) => s._id !== session._id));
       history.push({ search: `?cohorte=${center.cohorts[0]}` });
       toastr.success("La session a bien été supprimée", "");
     } catch (e) {
@@ -234,7 +237,6 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                   {errors?.placesTotal && <div className="text-[#EF4444] mx-auto mt-1">{errors?.placesTotal}</div>}
                 </div>
               </div>
-
               <div className="flex flex-call justify-start items-center w-full mt-2">
                 <div className="w-full mt-3">
                   <Label
@@ -267,6 +269,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
                 </div>
               </div>
               {errors?.sanitaryContactEmail && <div className="text-[#EF4444] mx-auto mt-1">{errors?.sanitaryContactEmail}</div>}
+              {isSuperAdmin(user) && <SyncPlacesButton session={cohort} centreId={center._id} onChange={() => onRefetchSessions()} />}
             </div>
             <div className="flex w-[10%] items-center justify-center">
               <div className="h-4/5 w-[1px] border-r-[1px] border-gray-300"></div>
@@ -317,11 +320,7 @@ export default function SessionList({ center, setCenter, sessions, setSessions }
               </div>
               <div className="flex mt-8 text-blue-600">
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 bg-white">
-                  <div className="flex w-full flex-1 items-center justify-center rounded-md border-[1px] border-blue-300 bg-blue-100 mb-2">
-                    <Link className="rounded-md px-4 py-2 text-sm" to={`/centre/${center._id}/${session._id}/general`}>
-                      Voir les volontaires
-                    </Link>
-                  </div>
+                  <SessionVolontairesButton session={cohort} centreId={center?._id} sejour={session} />
                   <div className="flex w-full flex-1 items-center justify-center rounded-md border-[1px] border-blue-300 bg-blue-100">
                     <Link className="rounded-md px-4 py-2 text-sm" to={`/centre/${center._id}/${session._id}/equipe`}>
                       Voir l&apos;équipe

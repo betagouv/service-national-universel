@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Logger, Param, Post, Request, UseGuards } from "@nestjs/common";
 
 import {
     AffectationRoutes,
@@ -30,13 +30,21 @@ import {
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
+import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
+import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
+import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 
 @Controller("affectation")
 export class AffectationController {
     constructor(
         private readonly affectationService: AffectationService,
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
+        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
+        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        private readonly logger: Logger,
     ) {}
 
     @UseGuards(AdminGuard)
@@ -334,5 +342,35 @@ export class AffectationController {
             },
         });
         return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/ligne-de-bus/sync-places")
+    async syncLigneDebus(
+        @Param("sessionId")
+        sessionId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesLigneDeBus"]["response"]> {
+        const session = await this.sessionGateway.findById(sessionId);
+        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
+        await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/centre/:centreId/sync-places")
+    async syncCentre(
+        @Param("sessionId")
+        sessionId: string,
+        @Param("centreId")
+        centreId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesCentre"]["response"]> {
+        const sejour = await this.sejourGateway.findBySessionIdAndCentreId(sessionId, centreId);
+        if (!sejour) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Sejour introuvable pour ce centre et cette session",
+            );
+        }
+        this.logger.warn("sync sejour: " + sejour.id);
+        await this.affectationService.syncPlacesDisponiblesSejours([sejour]);
     }
 }

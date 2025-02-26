@@ -32,7 +32,7 @@ export class AffectationService {
         @Inject(PlanDeTransportGateway) private readonly planDeTransportGateway: PlanDeTransportGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly logger: Logger,
     ) {}
@@ -91,7 +91,7 @@ export class AffectationService {
         if (ligneDeBusList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucune ligne de bus !");
         }
-        const sejoursList = await this.sejoursGateway.findBySessionId(sessionId);
+        const sejoursList = await this.sejourGateway.findBySessionId(sessionId);
         if (sejoursList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun sejours !");
         }
@@ -185,6 +185,35 @@ export class AffectationService {
 
         await this.ligneDeBusGateway.bulkUpdate(lignesDeBusUpdatedList);
         await this.planDeTransportGateway.bulkUpdate(pdtUpdatedList);
+    }
+
+    async syncPlacesDisponiblesSejours(sejourList: SejourModel[]) {
+        const sejourUpdatedList: SejourModel[] = [];
+
+        const sejourIds = sejourList.map((sejour) => sejour.id);
+        const sejourPlacesOccupeesJeunesList = await this.sejourGateway.countPlaceOccupeesBySejourIds(sejourIds);
+        for (const sejour of sejourList) {
+            const placesOccupeesJeunes = sejourPlacesOccupeesJeunesList.find(({ id }) => id === sejour.id)
+                ?.placesOccupeesJeunes;
+            if (placesOccupeesJeunes === undefined) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    `Calcul du nombre de places occupées impossible pour le sejour ${sejour.id} ${sejour.centreNom} !`,
+                );
+            }
+            const placesRestantes = (sejour.placesTotal || 0) - placesOccupeesJeunes;
+            if (placesRestantes >= 0) {
+                this.logger.log(`Updating sejour ${sejour.id} ${sejour.centreNom} (${placesRestantes})`);
+                sejour.placesRestantes = placesRestantes;
+                sejourUpdatedList.push(sejour);
+            } else {
+                this.logger.warn(
+                    `No update needed for sejour ${sejour.id} ${sejour.centreNom} (${placesRestantes} == ${sejour.placesRestantes})`,
+                );
+            }
+        }
+
+        await this.sejourGateway.bulkUpdate(sejourUpdatedList);
     }
 
     formatPourcent(value: number): string {
