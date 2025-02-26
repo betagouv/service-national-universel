@@ -40,7 +40,7 @@ export default function BasculeJeuneValides({ session }: BasculeJeuneValidesProp
           title={
             <ul>
               <li>basculer les jeunes validés sur LC et/ou LP vers le prochain séjour sur lequel ils sont éligibles ou vers la cohorte à venir</li>
-              <li>possibilité d’envoyer une communication aux jeunes et à leur RL</li>
+              <li>possibilité d’envoyer une communication aux jeunes et à leurs RL</li>
               <li>une fois basculés, les jeunes passent au statut En attente de validation et les informations liées à leur phase 1 sont réinitialisées</li>
             </ul>
           }>
