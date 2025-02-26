@@ -1,12 +1,12 @@
-import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
-import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 
 @Controller("campagne")
-@UseGuards(AdminGuard)
+@UseGuards(SuperAdminGuard)
 export class CampagneController {
     constructor(
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,

@@ -39,7 +39,6 @@ export default function CampagnesGeneriques() {
       ...campagneWithoutId,
       nom: "",
     };
-    console.log("newCampagne", newCampagne);
     setCampagnes((prev) => [newCampagne, ...prev]);
   };
 

@@ -250,7 +250,7 @@ const Home = () => {
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
                   <RestrictedRoute path="/injep-export" component={INJEPExport} />
                   <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
-                  <RestrictedRoute path="/plan-marketing/:tab?" component={MarketingCampaign} />
+                  {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={MarketingCampaign} /> : null}
 
                   {/* Plan de transport */}
                   {user?.role === "admin" && user?.subRole === SUB_ROLE_GOD ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
