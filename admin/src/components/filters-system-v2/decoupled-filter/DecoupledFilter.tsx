@@ -24,7 +24,7 @@ export function RootDecoupledFilter({ filterTree }: DecoupledFilterProps) {
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
               show={true}>
-              <PopoverPanel className="absolute left-0 z-10 mt-2 w-60 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+              <PopoverPanel className="absolute left-0 z-10 mt-2 w-65 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="flex flex-col gap-1 py-2">
                   {filterTree.map((item) => {
                     return <NextLevelDecoupledFilter key={item.value} item={item} />;
@@ -59,10 +59,10 @@ interface NextLevelDecoupledFilterProps {
 }
 
 function ItemDecoupledFilter({ item, className }: NextLevelDecoupledFilterProps) {
-  const { onCheckboxClick, getItemState, isIndeterminate } = useDecoupledFilter();
-
+  const { onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount } = useDecoupledFilter();
+  const selectedChildrenCount = getSelectedChildrenCount(item);
   return (
-    <div className={cx("flex items-center gap-2 p-2", className)}>
+    <div className={cx("flex items-center gap-2 pl-2", className)}>
       <input
         type="checkbox"
         checked={getItemState(item.value)}
@@ -74,9 +74,12 @@ function ItemDecoupledFilter({ item, className }: NextLevelDecoupledFilterProps)
         onChange={() => onCheckboxClick(item)}
       />
 
-      <div>
+      <div className="flex items-center gap-2">
         <span>{item.label}</span>
         {item.count && <span>({item.count})</span>}
+        {!!selectedChildrenCount && (
+          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">{selectedChildrenCount}</div>
+        )}
       </div>
 
       {item.children && <span className="absolute right-4">{">"}</span>}

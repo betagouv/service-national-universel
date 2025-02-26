@@ -1,11 +1,11 @@
-import { DataFilter } from "../components/Filter";
+import { getFilterArray } from "@/scenes/volontaires/utils";
 import { ItemDecoupledFilterData } from "./DecoupledFilter";
 
 export interface FilterDefinition {
   title: string;
   name: string;
   parentGroup?: string;
-  filterRootFilter: (data?: DataFilter[]) => DataFilter[];
+  filterRootFilter: (data?: { key: string }[]) => { key: string }[];
 }
 
 export interface ItemWithChildren {
@@ -13,6 +13,15 @@ export interface ItemWithChildren {
   filters: FilterDefinition[];
   children?: Record<string, ItemWithChildren>;
 }
+
+export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<string, { key: string }[]>, itemsWithChildren?: ItemWithChildren): ItemDecoupledFilterData[] => {
+  const filterArray = getFilterArray({});
+  return Object.entries(availableItemsFilters).map(([key, items]) => {
+    const label = filterArray.find((filter) => filter?.name === key)?.title || key;
+
+    return createFilterNode(label, key, items.length, key === itemsWithChildren?.key ? itemsWithChildren : undefined, items);
+  });
+};
 
 const createFilterNode = (label: string, value: string, count?: number, itemWithChildren?: ItemWithChildren, items?: { key: string }[]): ItemDecoupledFilterData => {
   const baseNode: ItemDecoupledFilterData = {
@@ -41,10 +50,4 @@ const createFilterNode = (label: string, value: string, count?: number, itemWith
   });
 
   return { ...baseNode, children };
-};
-
-export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<string, { key: string }[]>, itemsWithChildren?: ItemWithChildren): ItemDecoupledFilterData[] => {
-  return Object.entries(availableItemsFilters).map(([key, items]) =>
-    createFilterNode(key, key, items.length, key === itemsWithChildren?.key ? itemsWithChildren : undefined, items),
-  );
 };
