@@ -1,0 +1,10 @@
+ANONYMIZE_DB="true" # true to execute anonymization logic
+CC_DOCKERFILE="devops/anonymization/Dockerfile"
+CC_SECRET="<cc_secret>" # CC credentials
+CC_TASK="true"
+CC_TOKEN="<cc_token>" # CC credentials
+DATARIVER_APP_ID="<cc_app_id>" # Datariver application to suspend during anonymization
+DELETE_ES_INDEXES="true" # delete ES indexes before reindexation
+ES_ENDPOINT="<staging_es_uri>"
+SOURCE_DATABASE_URI="<prod_mongo_uri>"
+TARGET_DATABASE_URI="<staging_mongo_uri>"
