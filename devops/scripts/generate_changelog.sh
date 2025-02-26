@@ -59,7 +59,7 @@ cut -d $'\t' -f 1 NOTION_ID_CHANGELOG.csv | # get notion_ids
     sed '/^\s*$/d' | # remove empty lines (Notion.identifiant can be unset)
     uniq > NOTION_IDS.txt # remove duplicates
 
-identifiant_id='%7B%3Ci~' # id of property "Identifiant"
+identifiant_id='Gga_' # id of property "Identifiant" (GET https://api.notion.com/v1/databases/$NOTION_DATABASE_ID)
 sed -e 's/\(.*\)/{"property":"Identifiant","number":{"equals":\1}}/g' NOTION_IDS.txt |
     tr "\n" "," | # Replaces new lines with commas
     sed -e 's/,$//g' | # Remove last comma
