@@ -220,7 +220,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
         // mise à jour des placesOccupeesJeunes dans les bus
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
-        await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
+        await this.affectationService.syncPlacesDisponiblesLignesDeBus(ligneDeBusList);
 
         this.cls.set("user", null);
 

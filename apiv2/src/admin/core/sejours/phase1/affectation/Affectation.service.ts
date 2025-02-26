@@ -134,7 +134,7 @@ export class AffectationService {
         };
     }
 
-    async syncPlaceDisponiblesLigneDeBus(ligneDeBusList: LigneDeBusModel[]) {
+    async syncPlacesDisponiblesLignesDeBus(ligneDeBusList: LigneDeBusModel[]) {
         const lignesDeBusUpdatedList: LigneDeBusModel[] = [];
         const pdtUpdatedList: PlanDeTransportModel[] = [];
 
