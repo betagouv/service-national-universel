@@ -1,10 +1,10 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { CohesionCenterType } from "snu-lib";
+import { CenterDetailDto, CohesionCenterType } from "snu-lib";
 import ExternalLink from "@/assets/icons/ExternalLink";
 
 interface CentreLabelProps {
-  centre: Partial<CohesionCenterType>;
+  centre: Partial<CenterDetailDto | CohesionCenterType>;
   showLink?: boolean;
 }
 

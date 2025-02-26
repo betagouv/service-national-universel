@@ -4,17 +4,7 @@ import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import {
-  CohortType,
-  LigneBusDto,
-  PointDeRassemblementType,
-  ROLES,
-  canExportLigneBus,
-  getZonedDate,
-  isLigneBusDemandeDeModificationOpen,
-  ligneBusCanCreateDemandeDeModification,
-  translate,
-} from "snu-lib";
+import { CohortType, LigneBusDto, ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bus from "@/assets/icons/Bus";
@@ -29,7 +19,7 @@ import { Title } from "../../components/commons";
 import { exportLigneBusJeune } from "../../util";
 import Creation from "../modificationPanel/Creation";
 import BusTeam from "./components/BusTeam";
-import Centre from "./components/Centre";
+import Centre from "./components/Centre/Centre";
 import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
@@ -198,6 +188,8 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     },
   ];
 
+  if (!data || !cohort) return <Loader />;
+
   return (
     <>
       <div className="flex justify-between mr-8 items-center">
@@ -302,7 +294,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
                 />
               ))}
             </div>
-            <Centre bus={data} setBus={setData} cohort={cohort} />
+            <Centre initialData={data} setBus={setData} cohort={cohort} />
           </div>
         </div>
       </div>
