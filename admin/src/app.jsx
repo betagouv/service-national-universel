@@ -50,6 +50,7 @@ const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
 const Contact = lazy(() => import("./scenes/contact"));
 const Signup = lazy(() => import("./scenes/signup"));
 const ImportSiSnu = lazy(() => import("./scenes/importSiSnu"));
+const MarketingCampaign = lazy(() => import("./scenes/planMarketing/campagne"));
 
 //DashboardV2
 const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
@@ -249,6 +250,8 @@ const Home = () => {
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
                   <RestrictedRoute path="/injep-export" component={INJEPExport} />
                   <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
+                  {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={MarketingCampaign} /> : null}
+
                   {/* Plan de transport */}
                   {user?.role === "admin" && user?.subRole === SUB_ROLE_GOD ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
                   {/* Table de répartition */}

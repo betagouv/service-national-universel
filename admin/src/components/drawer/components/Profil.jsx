@@ -3,7 +3,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translate } from "snu-lib";
+import { ROLES, translate, SUB_ROLE_GOD } from "snu-lib";
 import { setUser, setPreviousSignin } from "@/redux/auth/actions";
 import api from "@/services/api";
 import AddUser from "../icons/AddUser";
@@ -14,7 +14,7 @@ import Support from "../icons/Support";
 import User from "../icons/User";
 import VericalDot from "../icons/VerticalDot";
 import Separator from "./Separator";
-import { HiOutlinePaperClip } from "react-icons/hi";
+import { HiOutlinePaperClip, HiOutlineMail } from "react-icons/hi";
 
 export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -133,6 +133,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={() => <HiOutlinePaperClip size={22} />} title="Import SI-SNU" link={"/import-si-snu"} />}
+                        {[ROLES.ADMIN].includes(user.role) && SUB_ROLE_GOD === user.subRole && (
+                          <NavItem Icon={() => <HiOutlineMail size={22} />} title="Marketing" link={"/plan-marketing/campagnes-generiques"} />
+                        )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
                         {<NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />}
                       </div>
