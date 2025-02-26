@@ -22,6 +22,8 @@ import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createFixtureClasse } from "../fixtures/classe";
 import * as featureService from "../../featureFlag/featureFlagService";
+import * as referentService from "../../cle/referent/referentService";
+import { ERRORS } from "../../utils";
 
 jest.mock("../../brevo", () => ({
   ...jest.requireActual("../../brevo"),
@@ -460,5 +462,70 @@ describe("POST /cle/referent/invite-coordonnateur", () => {
       email: faker.internet.email().toLowerCase(),
     });
     expect(res.statusCode).toEqual(400);
+  });
+
+  describe("POST /cle/referent/getMany", () => {
+    beforeEach(async () => {
+      await ReferentModel.deleteMany();
+      jest.clearAllMocks();
+    });
+
+    it("should return 200 OK and the list of referents", async () => {
+      const referent1 = await createReferentHelper(getNewSignupReferentFixture());
+      const referent2 = await createReferentHelper(getNewSignupReferentFixture());
+
+      jest.spyOn(referentService, "getReferentsByIds").mockResolvedValue([referent1, referent2]);
+
+      const res = await request(getAppHelper())
+        .post("/cle/referent/getMany")
+        .send({
+          ids: [referent1._id.toString(), referent2._id.toString()],
+        });
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body).toHaveProperty("ok", true);
+      expect(res.body.data).toHaveLength(2);
+      expect(res.body.data[0]._id).toEqual(referent1._id.toString());
+      expect(res.body.data[1]._id).toEqual(referent2._id.toString());
+    });
+
+    it("should return 400 Bad Request when request body is invalid", async () => {
+      const res = await request(getAppHelper()).post("/cle/referent/getMany").send({
+        invalid: "invalid",
+      });
+
+      expect(res.statusCode).toEqual(400);
+      expect(res.body).toHaveProperty("ok", false);
+      const validErrorCodes = [ERRORS.INVALID_PARAMS, ERRORS.INVALID_QUERY, ERRORS.INVALID_BODY];
+      expect(validErrorCodes).toContain(res.body.code);
+    });
+
+    it("should return 404 Not Found when referents are not found", async () => {
+      jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Referents not found"));
+
+      const res = await request(getAppHelper())
+        .post("/cle/referent/getMany")
+        .send({
+          ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
+        });
+
+      expect(res.statusCode).toEqual(404);
+      expect(res.body).toHaveProperty("ok", false);
+      expect(res.body).toHaveProperty("code", "NOT_FOUND");
+    });
+
+    it("should return 500 Internal Server Error when an unexpected error occurs", async () => {
+      jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Unexpected error"));
+
+      const res = await request(getAppHelper())
+        .post("/cle/referent/getMany")
+        .send({
+          ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
+        });
+
+      expect(res.statusCode).toEqual(500);
+      expect(res.body).toHaveProperty("ok", false);
+      expect(res.body).toHaveProperty("code", "Unexpected error");
+    });
   });
 });
