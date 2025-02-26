@@ -11,9 +11,9 @@ RUN npm ci
 COPY devops/anonymization/ ./
 COPY api/src/anonymization/ /build/api/src/anonymization/
 COPY devops/elastic-search/config/index_whitelist.txt ./config/index_whitelist.txt
+COPY devops/elastic-search-datariver/collections.csv /tmp/collections.csv
 
-RUN --mount=type=bind,src=devops/elastic-search-datariver/collections.csv,target=/tmp/collections.csv \
-    bash generate_monstache_config.sh '$DB_NAME' /tmp/collections.csv > ./config/monstache-template.toml
+RUN bash generate_monstache_config.sh '$DB_NAME' /tmp/collections.csv > ./config/monstache-template.toml
 
 ENV SOURCE_DATABASE_URI=
 ENV TARGET_DATABASE_URI=
