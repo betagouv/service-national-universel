@@ -36,47 +36,20 @@ export interface Filter {
 }
 
 interface ListeDiffusionFiltersProps {
-  key: string;
-  route: string;
-  pageId: string;
   filters: Filter[];
-  setData: (data: any) => void;
   selectedFilters: { [key: string]: Filter };
-  setSelectedFilters: (filters: { [key: string]: Filter }) => void;
-  paramData: any;
-  // setParamData: (data: any) => void;
+  onSelectFilters: (filters: { [key: string]: Filter }) => void;
   dataFilter: any;
-  defaultUrlParam?: any;
-  size?: any;
   intermediateFilters?: any[];
-  disabled?: boolean;
 }
 
-export default function ListeDiffusionFilters({
-  route,
-  pageId,
-  filters,
-  // setData,
-  selectedFilters,
-  setSelectedFilters,
-  // paramData,
-  dataFilter,
-  // setParamData,
-  defaultUrlParam = undefined,
-  // size,
-  intermediateFilters = [],
-  disabled = false,
-}: ListeDiffusionFiltersProps) {
+export default function ListeDiffusionFilters({ filters, selectedFilters, onSelectFilters, dataFilter, intermediateFilters = [] }: ListeDiffusionFiltersProps) {
   const [search, setSearch] = useState("");
   // const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
   const [categories, setCategories] = useState<string[]>([]);
   const [savedView, setSavedView] = useState([]);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [isShowing, setIsShowing] = useState<string | boolean>(false);
-
-  const location = useLocation();
-  const history = useHistory();
 
   const ref = useRef<HTMLButtonElement>(null);
   const refFilter = useRef<HTMLDivElement>(null);
@@ -130,38 +103,6 @@ export default function ListeDiffusionFilters({
     [filtersVisible],
   );
 
-  // const updateOnParamChange = useCallback(
-  //   debounce(async (selectedFilters, paramData, location, route, size) => {
-  //     buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
-  //       if (!res) return;
-  //       setDataFilter({ ...dataFilter, ...res.newFilters });
-  //       const newParamData: {
-  //         count: number;
-  //         filters: { [key: string]: Filter };
-  //         page?: number;
-  //       } = {
-  //         count: res.count,
-  //         filters: { ...dataFilter, ...res.newFilters },
-  //       };
-  //       if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
-  //       setParamData((paramData) => ({ ...paramData, ...newParamData }));
-  //       setData(res.data);
-  //       if (firstLoad) setFirstLoad(false);
-
-  //       // Hack: avoid unwanted refresh: https://stackoverflow.com/a/61596862/978690
-  //       const search = `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}`;
-  //       const { pathname } = history.location;
-  //       if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
-  //     });
-  //   }, 250),
-  //   [firstLoad],
-  // );
-
-  // useEffect(() => {
-  //   if (Object.keys(selectedFilters).length === 0) return;
-  //   // updateOnParamChange(selectedFilters, paramData, location, route, 10);
-  // }, [selectedFilters, paramData.page, paramData.sort, location, route]);
-
   const getDefaultFilters = () => {
     const newFilters = {};
     filters.map((f) => {
@@ -172,17 +113,6 @@ export default function ListeDiffusionFilters({
       }
     });
     return newFilters;
-  };
-
-  const updateSavedViewFromDbFilters = async () => {
-    try {
-      const res = await api.get("/filters/" + pageId);
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
-      setSavedView(res.data);
-    } catch (error) {
-      console.log(error);
-      toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
-    }
   };
 
   const handleDeleteFilter = async (id) => {
@@ -200,15 +130,13 @@ export default function ListeDiffusionFilters({
   function updateFiltersFromParams(params) {
     const defaultFilters = getDefaultFilters();
     const initialFilters = getURLParam(new URLSearchParams(params), () => {}, filters);
-    setSelectedFilters({ ...defaultFilters, ...initialFilters });
+    onSelectFilters({ ...defaultFilters, ...initialFilters });
   }
 
   const handleSelectUrl = (params) => {
     updateFiltersFromParams(params);
     setIsShowing(false);
   };
-
-  if (disabled) return null;
 
   return (
     <div>
@@ -277,7 +205,7 @@ export default function ListeDiffusionFilters({
                                         <IntermediateFilter
                                           // @ts-expect-error
                                           selectedFilters={selectedFilters}
-                                          setSelectedFilters={setSelectedFilters}
+                                          setSelectedFilters={onSelectFilters}
                                           setParamData={() => {}}
                                           intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
@@ -293,7 +221,7 @@ export default function ListeDiffusionFilters({
                                       filter={customItem}
                                       // @ts-expect-error
                                       selectedFilters={selectedFilters}
-                                      setSelectedFilters={setSelectedFilters}
+                                      setSelectedFilters={onSelectFilters}
                                       data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name || ""] || []}
                                       isShowing={isShowing === item.name}
                                       setIsShowing={(value) => setIsShowing(value)}

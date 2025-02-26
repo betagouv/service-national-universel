@@ -31,6 +31,11 @@ export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilte
   const onParamDataChange = () => {
     //
   };
+  // structuredClone();
+  const handleFilterChange = (filter: any) => {
+    setSelectedFilters(filter);
+  };
+  // const [selectedFilters, setSelectedFilters] = useState({});
   // const [paramData, setParamData] = useState({
   //   page: 0,
   //   sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
@@ -59,21 +64,17 @@ export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilte
         <div className="flex">
           <div className="flex text-xl pr-2">Filtres</div>
           <ListeDiffusionFilters
-            pageId={pageId}
-            route={route}
-            setData={() => {}}
             filters={filters}
             selectedFilters={selectedFilters}
-            setSelectedFilters={setSelectedFilters}
-            paramData={paramData}
+            onSelectFilters={handleFilterChange}
+            // paramData={paramData}
             // setParamData={setParamData}
             intermediateFilters={[getCohortGroups()]}
-            showInput={false}
             dataFilter={dataFilter}
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <SelectedFilters filterArray={filters} selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} paramData={paramData} setParamData={onParamDataChange} />
+          <SelectedFilters filterArray={filters} selectedFilters={selectedFilters} setSelectedFilters={handleFilterChange} paramData={paramData} setParamData={onParamDataChange} />
         </div>
       </div>
     </ListeDiffusionFilterContext.Provider>

@@ -5,12 +5,12 @@ import cx from "classnames";
 import { DecoupledFilterProvider, useDecoupledFilter } from "./DecoupledFilterContext";
 
 interface DecoupledFilterProps {
-  data: ItemDecoupledFilterData[];
+  filterTree: ItemDecoupledFilterData[];
 }
 
-export function RootDecoupledFilter({ data }: DecoupledFilterProps) {
+export function RootDecoupledFilter({ filterTree }: DecoupledFilterProps) {
   return (
-    <DecoupledFilterProvider initialData={data}>
+    <DecoupledFilterProvider filterTree={filterTree}>
       <Popover className="relative flex-row">
         {({ open }) => (
           <>
@@ -23,10 +23,10 @@ export function RootDecoupledFilter({ data }: DecoupledFilterProps) {
               leave="transition ease-in duration-150"
               leaveFrom="opacity-100 translate-y-0"
               leaveTo="opacity-0 translate-y-1"
-              show={open}>
+              show={true}>
               <PopoverPanel className="absolute left-0 z-10 mt-2 w-60 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
                 <div className="flex flex-col gap-1 py-2">
-                  {data.map((item) => {
+                  {filterTree.map((item) => {
                     return <NextLevelDecoupledFilter key={item.value} item={item} />;
                   })}
                 </div>
@@ -43,7 +43,7 @@ export interface ItemDecoupledFilterData {
   checked: boolean;
   label: string;
   value: string;
-  count: number;
+  count?: number;
   children?: ItemDecoupledFilterData[];
 }
 
@@ -73,9 +73,12 @@ function ItemDecoupledFilter({ item, className }: NextLevelDecoupledFilterProps)
         }}
         onChange={() => onCheckboxClick(item)}
       />
-      <span>
-        {item.label} ({item.count})
-      </span>
+
+      <div>
+        <span>{item.label}</span>
+        {item.count && <span>({item.count})</span>}
+      </div>
+
       {item.children && <span className="absolute right-4">{">"}</span>}
     </div>
   );

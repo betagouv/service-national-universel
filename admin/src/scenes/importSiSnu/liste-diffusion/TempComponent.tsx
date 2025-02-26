@@ -7,7 +7,26 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import ListeDiffusionFilterWrapper from "./ListeDiffusionFilterWrapper";
 import { Filter } from "./ListeDiffusionFilters";
+import { useSetState } from "react-use";
+import { da } from "date-fns/locale";
+import { mapAvailableFiltersToTreeFilter } from "@/components/filters-system-v2/decoupled-filter/DecoupledFilterService";
+import { getCohortGroups } from "@/services/cohort.service";
 
+export interface TempState {
+  params: {
+    count?: number;
+    page: number;
+    sort: {
+      label: string;
+      field: string;
+      order: string;
+    };
+    filters: TempFilters;
+  };
+  filters: TempFilters;
+}
+
+export type TempFilters = Record<string, { key: string }[]>;
 export default function TempComponent({ type }: { type: string }) {
   const pageId = "liste-diffusion-filter";
 
@@ -15,14 +34,23 @@ export default function TempComponent({ type }: { type: string }) {
   if (type === "volontaire") {
     route = "/elasticsearch/young/search?tab=volontaire";
   }
-  const [paramData, setParamData] = useState({
-    page: 0,
-    sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+  // const [paramData, setParamData] = useState({
+  //   page: 0,
+  //   sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+  // });
+  // const [dataFilter, setDataFilter] = useState({});
+  const [data, setData] = useSetState<TempState>({
+    params: {
+      page: 0,
+      sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+      filters: {},
+    },
+    filters: {},
   });
+
   const [firstLoad, setFirstLoad] = useState(true);
 
   const { data: labels, isPending, isError } = useFilterLabels(pageId);
-  const [dataFilter, setDataFilter] = useState({});
 
   const user = useSelector((state) => state.Auth.user);
   const filters = [
@@ -48,31 +76,26 @@ export default function TempComponent({ type }: { type: string }) {
     });
     return newFilters;
   };
-  //   console.log("filters", filters);
   useEffect(() => {
     const selectedFilters = getDefaultFilters();
 
     buildQuery(route, selectedFilters, 0, filters, { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" }, 10).then((res) => {
-      // console.log("updateOnParamChange.selectedFilters", selectedFilters);
-      // console.log("updateOnParamChange.paramData", paramData);
-      // console.log("updateOnParamChange.location", location);
-      // console.log("updateOnParamChange.route", route);
-      // console.log("res", res?.newFilters);
-
       if (!res) return;
       //   setTotal(res.count);
-      setDataFilter({ ...dataFilter, ...res.newFilters });
+      // setDataFilter({ ...dataFilter, ...res.newFilters });
+      setData({ filters: { ...data.filters, ...res.newFilters } });
       const newParamData: {
         count: number;
-        filters: { [key: string]: Filter };
+        filters: TempFilters;
         page?: number;
       } = {
         count: res.count,
-        filters: { ...dataFilter, ...res.newFilters },
+        filters: { ...data.filters, ...res.newFilters },
       };
       //@ts-expect-error not exist
-      if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
-      setParamData((paramData) => ({ ...paramData, ...newParamData }));
+      // if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
+      setData({ params: { ...data.params, ...newParamData } });
+      // setParamData((paramData) => ({ ...paramData, ...newParamData }));
       //   setData(res.data);
       if (firstLoad) setFirstLoad(false);
 
@@ -82,13 +105,16 @@ export default function TempComponent({ type }: { type: string }) {
       //   if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
     });
   }, []);
-
+  // console.log("TempComponent - dataFilter", data.filters);
+  // console.log("TempComponent - paramData", data.params);
+  const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(data.filters, getCohortGroups());
+  // console.log("TempComponent - tempDecoupledFilterData", tempDecoupledFilterData);
   return (
     <>
-      <ListeDiffusionFilterWrapper type="volontaire" paramData={paramData} dataFilter={dataFilter} id="a" />
-      <ListeDiffusionFilterWrapper type="autre" paramData={paramData} dataFilter={dataFilter} id="b" />
-      <ListeDiffusionFilterWrapper type="volontaire" paramData={paramData} dataFilter={dataFilter} id="c" />
-      <RootDecoupledFilter data={tempDecoupledFilterData} />
+      <ListeDiffusionFilterWrapper type="volontaire" paramData={data.params} dataFilter={data.filters} id="a" />
+      <ListeDiffusionFilterWrapper type="autre" paramData={data.params} dataFilter={data.filters} id="b" />
+      <ListeDiffusionFilterWrapper type="volontaire" paramData={data.params} dataFilter={data.filters} id="c" />
+      <RootDecoupledFilter filterTree={tempDecoupledFilterData} />
     </>
   );
 }
