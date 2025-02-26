@@ -53,7 +53,6 @@ interface ListeDiffusionFiltersProps {
 }
 
 export default function ListeDiffusionFilters({
-  key,
   route,
   pageId,
   filters,
@@ -90,7 +89,7 @@ export default function ListeDiffusionFilters({
 
   // Initialization
   useEffect(() => {
-    // updateFiltersFromParams(location.search);
+    updateFiltersFromParams({});
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {
@@ -283,14 +282,13 @@ export default function ListeDiffusionFilters({
                                           intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
-                                          key={key}
                                         />
                                       ),
                                     };
                                   }
                                   return (
                                     <FilterPopOver
-                                      key={key + "-" + item.title}
+                                      key={item.title}
                                       // @ts-expect-error
                                       filter={customItem}
                                       // @ts-expect-error

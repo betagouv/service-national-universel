@@ -10,7 +10,6 @@ export type IntermediateFilterProps = {
   dataFilter: { [key: string]: DataFilter[] };
   setFilter?: any;
   filter?: any;
-  key?: string;
 };
 
 export const isEverySubValueChecked = (filter: RowFilter, selectedFilters, dataOnDropDown: DataFilter[] | undefined) => {
@@ -27,7 +26,7 @@ export const syncRootFilter = (intermediateFilter: IIntermediateFilter, newSelec
   }
 };
 
-export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setParamData, intermediateFilter, dataFilter, setFilter, filter, key }: IntermediateFilterProps) => {
+export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setParamData, intermediateFilter, dataFilter, setFilter, filter }: IntermediateFilterProps) => {
   const [isShowingIntermediateFilter, setIsShowingIntermediateFilter] = useState("");
 
   const check = (filter: RowFilter, dataOnDropDown: DataFilter[]) => {
@@ -52,14 +51,14 @@ export const IntermediateFilter = ({ selectedFilters, setSelectedFilters, setPar
         return (
           <div className="flex cursor-pointer px-3 hover:bg-gray-50" key={`${filter.title}`}>
             <input
-              key={"input-intermediate-" + key + filter.name}
+              key={"input-intermediate-" + filter.name}
               type="checkbox"
               checked={isEverySubValueChecked(filter, selectedFilters, dataOnDropDown)}
               onChange={() => check(filter, dataOnDropDown)}
             />
             <div className="flex-grow">
               <FilterPopOver
-                key={"intermediate-" + key + filter.name}
+                key={"intermediate-" + filter.name}
                 filter={filter}
                 selectedFilters={selectedFilters}
                 setSelectedFilters={setSelectedFilters}

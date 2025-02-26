@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import ListeDiffusionFilterWrapper, { ListeDiffusionFilterProps } from "./ListeDiffusionFilterWrapper";
-import { buildQuery, currentFilterAsUrl } from "@/components/filters-system-v2/components/filters/utils";
-import { getFilterArray } from "@/scenes/volontaires/utils";
-import { useSelector } from "react-redux";
-import { Filter } from "./ListeDiffusionFilters";
-import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
+import { buildQuery } from "@/components/filters-system-v2/components/filters/utils";
 import { RootDecoupledFilter } from "@/components/filters-system-v2/decoupled-filter/DecoupledFilter";
 import { tempDecoupledFilterData } from "@/components/filters-system-v2/decoupled-filter/TempData";
+import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
+import { getFilterArray } from "@/scenes/volontaires/utils";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
+import ListeDiffusionFilterWrapper from "./ListeDiffusionFilterWrapper";
+import { Filter } from "./ListeDiffusionFilters";
 
 export default function TempComponent({ type }: { type: string }) {
   const pageId = "liste-diffusion-filter";
@@ -53,11 +53,11 @@ export default function TempComponent({ type }: { type: string }) {
     const selectedFilters = getDefaultFilters();
 
     buildQuery(route, selectedFilters, 0, filters, { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" }, 10).then((res) => {
-      console.log("updateOnParamChange.selectedFilters", selectedFilters);
-      console.log("updateOnParamChange.paramData", paramData);
-      console.log("updateOnParamChange.location", location);
-      console.log("updateOnParamChange.route", route);
-      console.log("res", res?.newFilters);
+      // console.log("updateOnParamChange.selectedFilters", selectedFilters);
+      // console.log("updateOnParamChange.paramData", paramData);
+      // console.log("updateOnParamChange.location", location);
+      // console.log("updateOnParamChange.route", route);
+      // console.log("res", res?.newFilters);
 
       if (!res) return;
       //   setTotal(res.count);
