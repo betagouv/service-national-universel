@@ -3,6 +3,11 @@ import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 
 @Injectable()
 export class PlanMarketingMockProvider implements PlanMarketingGateway {
+    findTemplateById(templateId: number): Promise<string | undefined> {
+        return new Promise((resolve, reject) => {
+            resolve("template42");
+        });
+    }
     findCampagneById(campagneId: string): Promise<any> {
         return new Promise((resolve, reject) => {
             resolve({ id: 42 });
