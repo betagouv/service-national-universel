@@ -111,7 +111,10 @@ export default function TempComponent({ type }: { type: string }) {
       <ListeDiffusionFilterWrapper type="volontaire" paramData={data.params} dataFilter={data.filters} id="a" />
       <ListeDiffusionFilterWrapper type="autre" paramData={data.params} dataFilter={data.filters} id="b" />
       <ListeDiffusionFilterWrapper type="volontaire" paramData={data.params} dataFilter={data.filters} id="c" />
-      <RootDecoupledFilter filterTree={tempDecoupledFilterData} />
+      <RootDecoupledFilter filterTree={tempDecoupledFilterData} id={"a"} />
+      <RootDecoupledFilter filterTree={tempDecoupledFilterData} id={"b"} />
+      <RootDecoupledFilter filterTree={tempDecoupledFilterData} id={"c"} />
+      <RootDecoupledFilter filterTree={tempDecoupledFilterData} id={"d"} />
     </>
   );
 }

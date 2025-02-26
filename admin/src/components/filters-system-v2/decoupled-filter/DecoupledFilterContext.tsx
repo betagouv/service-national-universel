@@ -6,11 +6,12 @@ interface DecoupledFilterContextType {
   getItemState: (value: string) => boolean;
   isIndeterminate: (item: ItemDecoupledFilterData) => boolean;
   getSelectedChildrenCount: (item: ItemDecoupledFilterData) => number;
+  id: string;
 }
 
 const DecoupledFilterContext = createContext<DecoupledFilterContextType | undefined>(undefined);
 
-export function DecoupledFilterProvider({ children, filterTree }: { children: React.ReactNode; filterTree: ItemDecoupledFilterData[] }) {
+export function DecoupledFilterProvider({ children, filterTree, id }: { children: React.ReactNode; filterTree: ItemDecoupledFilterData[]; id: string }) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   const getAllChildrenValues = (item: ItemDecoupledFilterData): string[] => {
@@ -101,7 +102,7 @@ export function DecoupledFilterProvider({ children, filterTree }: { children: Re
     return childrenValues.filter((value) => selectedItems.has(value)).length;
   };
 
-  return <DecoupledFilterContext.Provider value={{ onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount }}>{children}</DecoupledFilterContext.Provider>;
+  return <DecoupledFilterContext.Provider value={{ onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id }}>{children}</DecoupledFilterContext.Provider>;
 }
 
 export const useDecoupledFilter = () => {

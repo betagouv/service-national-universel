@@ -19,16 +19,18 @@ export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<st
   return Object.entries(availableItemsFilters).map(([key, items]) => {
     const label = filterArray.find((filter) => filter?.name === key)?.title || key;
 
-    return createFilterNode(label, key, items.length, key === itemsWithChildren?.key ? itemsWithChildren : undefined, items);
+    return createFilterNode(label, key, 0, key === itemsWithChildren?.key ? itemsWithChildren : undefined, items);
   });
 };
 
-const createFilterNode = (label: string, value: string, count?: number, itemWithChildren?: ItemWithChildren, items?: { key: string }[]): ItemDecoupledFilterData => {
+const createFilterNode = (label: string, value: string, level: number, itemWithChildren?: ItemWithChildren, items?: { key: string }[]): ItemDecoupledFilterData => {
+  const count = items?.length;
   const baseNode: ItemDecoupledFilterData = {
     checked: false,
     label,
     value,
     count,
+    level,
   };
 
   if (!itemWithChildren) {
@@ -39,13 +41,14 @@ const createFilterNode = (label: string, value: string, count?: number, itemWith
         checked: false,
         label: child.key,
         value: `${value}-${child.key}`,
+        level: level + 1,
       })),
     };
   }
 
   const children = itemWithChildren.filters.map((filter) => {
     const subChildren = filter.filterRootFilter(items);
-    const subNode = createFilterNode(filter.title, `${value}-${filter.name}`, undefined, itemWithChildren.children?.[filter.name], subChildren);
+    const subNode = createFilterNode(filter.title, `${value}-${filter.name}`, level + 1, itemWithChildren.children?.[filter.name], subChildren);
     return subNode;
   });
 
