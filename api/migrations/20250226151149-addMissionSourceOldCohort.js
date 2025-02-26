@@ -26,17 +26,17 @@ module.exports = {
       "à venir",
     ];
 
-    for (const cohort of cohorts) {
-      const filter = {
-        email: { $not: /reliquat/i },
-        source: { $exists: false },
-        status: { $ne: "DELETED" },
-        cohort: cohort,
-      };
-      const update = { $set: { source: "VOLONTAIRE" } };
-      const result = await db.collection("youngs").updateMany(filter, update);
+    const filter = {
+      email: { $not: /reliquat/i },
+      source: { $exists: false },
+      status: { $ne: "DELETED" },
+      cohort: { $in: cohorts }, // Utilisation de $in pour inclure toutes les cohortes
+    };
 
-      logger.info(`Updated ${result.modifiedCount} youngs in cohort ${cohort}`);
-    }
+    const update = { $set: { source: "VOLONTAIRE" } };
+
+    const result = await db.collection("youngs").updateMany(filter, update);
+
+    logger.info(`Updated ${result.modifiedCount} youngs in cohorts ${cohorts.join(", ")}`);
   },
 };
