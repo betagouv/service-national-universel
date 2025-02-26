@@ -30,7 +30,7 @@ module.exports = {
       email: { $not: /reliquat/i },
       source: { $exists: false },
       status: { $ne: "DELETED" },
-      cohort: { $in: cohorts }, // Utilisation de $in pour inclure toutes les cohortes
+      cohort: { $in: cohorts },
     };
 
     const update = { $set: { source: "VOLONTAIRE" } };
