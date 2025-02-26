@@ -4,7 +4,7 @@ import cx from "classnames";
 
 interface TooltipProps {
   id: string;
-  title?: string | ReactNode;
+  title?: string;
   className?: string;
   tooltipClassName?: string;
   children: ReactNode;
@@ -36,8 +36,8 @@ export default function Tooltip({
         arrowColor="white"
         disable={disabled}
       >
-        <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded-xl">
-          <div className="rounded bg-white py-2 px-6 text-gray-500">
+        <div className="flex max-w-[650px] flex-row flex-wrap gap-2 rounded-xl">
+          <div className="rounded bg-white py-2 px-6 text-gray-500 whitespace-pre">
             {title}
           </div>
         </div>

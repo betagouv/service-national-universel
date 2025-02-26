@@ -36,16 +36,10 @@ export default function BasculeJeuneNonValides({ session }: BasculeJeuneNonValid
         <div className="text-sm leading-5 font-bold">Bascule des jeunes non validés</div>
         <Tooltip
           id="basule-jeunes-non-valides"
-          title={
-            <ul>
-              <li>
-                basculer les jeunes “en cours”, “en attente de validation”, “réinscription”, “en attente de correction” vers le prochain séjour sur lequel ils sont éligibles ou
-                vers la cohorte à venir
-              </li>
-              <li>possibilité d’envoyer une communication aux jeunes et à leurs RL</li>
-              <li>une fois basculés, les jeunes gardent leur statut actuel</li>
-            </ul>
-          }>
+          title={`• basculer les jeunes “en cours”, “en attente de validation”, “réinscription”, “en attente de correction”
+  vers le prochain séjour sur lequel ils sont éligibles ou vers la cohorte à venir\r
+• Possibilité d'envoyer une communication aux jeunes et à leurs RL.\r
+• Une fois basculés, les jeunes gardent leur statut actuel`}>
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}
