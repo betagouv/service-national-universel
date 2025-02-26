@@ -19,4 +19,5 @@ ENV SOURCE_DATABASE_URI=
 ENV TARGET_DATABASE_URI=
 ENV ES_ENDPOINT=
 
-ENTRYPOINT ["bash", "docker_start.sh"]
+# ENTRYPOINT ["bash", "docker_start.sh"]
+ENTRYPOINT ["sleep", "3600"]
