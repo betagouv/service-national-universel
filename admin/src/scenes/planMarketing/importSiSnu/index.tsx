@@ -83,6 +83,7 @@ export default function ImportSiSnu() {
           </ButtonPrimary>
         </div>
       </div>
+      <TempComponent type="volontaire" />
       <div className="px-8">
         <Container>
           <div className="flex flex-col gap-8 ">

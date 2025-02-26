@@ -3,9 +3,8 @@ import React, { Fragment, useCallback, useEffect, useRef, useState } from "react
 import { useHistory, useLocation } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
-import FilterSvg from "../../../assets/icons/Filter";
+import FilterSvg from "../../../../assets/icons/Filter";
 
-import api from "../../../services/api";
 import { debounce } from "@/utils";
 import FilterPopOver from "@/components/filters-system-v2/components/filters/FilterPopOver";
 import { IntermediateFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";

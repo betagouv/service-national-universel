@@ -6,7 +6,7 @@ import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 import cx from "classnames";
-import { ListeDiffusionFilterContext } from "@/scenes/importSiSnu/liste-diffusion/ListeDiffusionFilterWrapper";
+import { ListeDiffusionFilterContext } from "@/scenes/planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
 
 // file used to show the popover for the all the possible values of a filter
 

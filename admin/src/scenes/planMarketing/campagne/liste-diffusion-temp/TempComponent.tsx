@@ -1,16 +1,13 @@
 import { buildQuery } from "@/components/filters-system-v2/components/filters/utils";
 import { RootDecoupledFilter } from "@/components/filters-system-v2/decoupled-filter/DecoupledFilter";
-import { tempDecoupledFilterData } from "@/components/filters-system-v2/decoupled-filter/TempData";
+import { mapAvailableFiltersToTreeFilter } from "@/components/filters-system-v2/decoupled-filter/DecoupledFilterService";
 import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
 import { getFilterArray } from "@/scenes/volontaires/utils";
+import { getCohortGroups } from "@/services/cohort.service";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import ListeDiffusionFilterWrapper from "./ListeDiffusionFilterWrapper";
-import { Filter } from "./ListeDiffusionFilters";
 import { useSetState } from "react-use";
-import { da } from "date-fns/locale";
-import { mapAvailableFiltersToTreeFilter } from "@/components/filters-system-v2/decoupled-filter/DecoupledFilterService";
-import { getCohortGroups } from "@/services/cohort.service";
+import ListeDiffusionFilterWrapper from "./ListeDiffusionFilterWrapper";
 
 export interface TempState {
   params: {

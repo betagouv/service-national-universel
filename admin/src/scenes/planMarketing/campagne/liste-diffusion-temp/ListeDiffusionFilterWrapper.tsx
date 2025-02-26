@@ -1,12 +1,12 @@
 import { SelectedFilters } from "@/components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
 import React, { createContext, useState } from "react";
-import { getFilterArray } from "../../volontaires/utils";
 
 import Loader from "@/components/Loader";
 import { useSelector } from "react-redux";
-import useFilterLabels from "../../volontaires/useFilterLabels";
 import ListeDiffusionFilters from "./ListeDiffusionFilters";
+import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
+import { getFilterArray } from "@/scenes/volontaires/utils";
 
 export interface ListeDiffusionFilterProps {
   type: string;

@@ -3,10 +3,12 @@ import { NavbarControlled } from "@snu/ds/admin";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
 import CampagnesGeneriques from "./CampagnesGeneriques";
+import TempComponent from "./liste-diffusion-temp/TempComponent";
 
 const tabs = [
   { id: "campagnes-generiques", title: "Campagnes Génériques" },
   { id: "listes-diffusion", title: "Listes de Diffusion" },
+  { id: "listes-diffusion-temp", title: "Listes de Diffusion Temp" },
 ];
 
 export default function MarketingCampaign() {
@@ -19,6 +21,8 @@ export default function MarketingCampaign() {
         return <CampagnesGeneriques />;
       case "listes-diffusion":
         return <div>Listes de Diffusion</div>;
+      case "listes-diffusion-temp":
+        return <TempComponent type="volontaire" />;
       default:
         return <CampagnesGeneriques />;
     }
