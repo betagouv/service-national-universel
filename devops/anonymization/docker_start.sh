@@ -1,5 +1,12 @@
 #!/bin/bash
 
+clever login --token=$CC_TOKEN --secret=$CC_SECRET
+clever stop --app $DATARIVER_APP_ID
+sleep 10
+clever restart --app $DATARIVER_APP_ID
+
+exit 1
+
 if [[ $SOURCE_DATABASE_URI == "" || $TARGET_DATABASE_URI == "" || $ES_ENDPOINT == "" ]]
 then
     echo "You must specify SOURCE_DATABASE_URI, TARGET_DATABASE_URI and ES_ENDPOINT in your environment"
@@ -8,6 +15,11 @@ fi
 
 if ! [[ -x "$(command -v monstache)" ]]; then
   echo 'ERROR: monstache is not installed : https://github.com/rwynn/monstache' >&2
+  exit 1
+fi
+
+if ! [[ -x "$(command -v clever)" ]]; then
+  echo 'ERROR: clever is not installed : https://github.com/CleverCloud/clever-tools/blob/master/docs/setup-systems.md' >&2
   exit 1
 fi
 

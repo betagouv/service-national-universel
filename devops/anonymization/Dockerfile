@@ -2,7 +2,7 @@ FROM node:20.17-alpine AS base
 
 RUN apk --no-cache add bash mongodb-tools jq curl util-linux gettext-envsubst
 RUN curl -L https://github.com/rwynn/monstache/releases/download/v6.7.14/monstache_v6.7.14_linux_x86_64.tar.gz | tar -xvz && mv monstache /usr/local/bin
-COPY --from=clevercloud/clever-tools /bin/clever /usr/local/bin/clever
+RUN npm install -g clever-tools
 
 WORKDIR /build/devops/anonymization
 
@@ -20,5 +20,4 @@ ENV SOURCE_DATABASE_URI=
 ENV TARGET_DATABASE_URI=
 ENV ES_ENDPOINT=
 
-# ENTRYPOINT ["bash", "docker_start.sh"]
-ENTRYPOINT ["sleep", "3600"]
+ENTRYPOINT ["bash", "docker_start.sh"]
