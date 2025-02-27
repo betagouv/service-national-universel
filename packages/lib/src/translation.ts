@@ -1203,6 +1203,8 @@ export const translateSimulationName = (name: string) => {
     case "BACULE_JEUNES_NONVALIDES_SIMULATION":
     case "BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER":
       return "Bascule des jeunes non validés";
+    case "DESISTEMENT_POST_AFFECTATION":
+      return "Désistement post affectation";
     default:
       return name;
   }
@@ -1225,6 +1227,15 @@ export const translateImportReferentiel = (name: string) => {
       return "Le fichier ne contient pas les bons onglets ou est vide";
     case "IMPORT_NOT_VALID":
       return "Cet import est invalide";
+    default:
+      return name;
+  }
+};
+
+export const translateMarketing = (name: string) => {
+  switch (name) {
+    case "TEMPLATE_NOT_FOUND":
+      return "Le template est introuvable";
     default:
       return name;
   }

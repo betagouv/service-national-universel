@@ -5,9 +5,9 @@ import { Link, useHistory } from "react-router-dom";
 import { Listbox, Transition } from "@headlessui/react";
 import { Fragment } from "react";
 import { BsDownload } from "react-icons/bs";
-import { HiOutlineChevronDown, HiOutlineChevronUp } from "react-icons/hi";
+import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
-import { youngExportFields } from "snu-lib";
+import { isSuperAdmin, youngExportFields } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Loader from "../../components/Loader";
@@ -22,13 +22,16 @@ import Panel from "./panel";
 import { getFilterArray, transformVolontaires, transformVolontairesSchool } from "./utils";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
+import { Button } from "@snu/ds/admin";
+import { useToggle } from "react-use";
+import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
+import { useBrevoExport } from "@/hooks/useBrevoExport";
 
 export default function VolontaireList() {
   const pageId = "young-list";
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
   const { data: labels, isPending, isError } = useFilterLabels(pageId);
-  if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
 
   const [volontaire, setVolontaire] = useState(null);
   const [isExportOpen, setIsExportOpen] = useState(false);
@@ -37,15 +40,25 @@ export default function VolontaireList() {
   //List state
   const [data, setData] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
+  const [isCreationListeBrevo, setIsCreationListeBrevo] = useToggle(false);
   const [paramData, setParamData] = useState({
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
 
+  const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("volontaire");
+
+
+  if (user?.role === ROLES.ADMINISTRATEUR_CLE) return history.push("/mes-eleves");
+
   if (isPending) return <Loader />;
   if (isError) return <div>Erreur lors de la récupération des filtres</div>;
 
   const filterArray = getFilterArray(user, labels);
+
+  const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
+    await exportToCsv(formValues, selectedFilters);
+  };
 
   return (
     <>
@@ -54,6 +67,10 @@ export default function VolontaireList() {
         <div className="flex items-center justify-between py-8">
           <Title>Volontaires</Title>
           <div className="flex items-center gap-2">
+            {isSuperAdmin(user) ? (
+              <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
+            ) : null}
+
             <button
               className="group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out"
               onClick={() => setIsExportOpen(true)}>
@@ -176,6 +193,13 @@ export default function VolontaireList() {
           }}
         />
       )}
+      <ModalCreationListeBrevo
+        isOpen={isCreationListeBrevo}
+        onClose={() => setIsCreationListeBrevo(false)}
+        onConfirm={handleBrevoContactCreationList}
+        youngCountFiltered={paramData?.count}
+        isLoadingProcess={isLoadingExportRecipients}
+      />
     </>
   );
 }

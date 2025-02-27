@@ -51,13 +51,6 @@ const getNoteData = (key, user) => {
       args: ["cohort"],
       btnLabel: "À déclarer",
     },
-    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE]: {
-      title: "Point de rassemblement",
-      content: "Au moins 1 point de rassemblement est à déclarer pour le séjour de $1 ($2)",
-      link: "/point-de-rassemblement/liste/liste-points?cohort=$1&department=$2",
-      args: ["cohort", "department"],
-      btnLabel: "À déclarer",
-    },
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: {
       title: "Emploi du temps",
       content: "emplois du temps n'ont pas été déposés. $1",
@@ -92,13 +85,6 @@ const getNoteData = (key, user) => {
       link: "centre/liste/session?headCenterExist=false&cohort=$1",
       args: ["cohort"],
       btnLabel: "À renseigner",
-    },
-    [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]: {
-      title: "Centre",
-      content: "Au moins 1 centre est en attente de déclaration pour le séjour de $1 ($2)",
-      link: "/centre/liste/session?cohort=$1&department=$2",
-      args: ["cohort", "department"],
-      btnLabel: "À déclarer",
     },
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: {
       title: "Pointage",
