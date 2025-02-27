@@ -20,6 +20,8 @@ import {
   LigneBusType,
   getCohortPeriod,
 } from "snu-lib";
+
+import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
@@ -321,6 +323,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
+          cta: `${config.APP_URL}`,
           youngFirstName: young.firstName,
           youngLastName: young.lastName,
         },

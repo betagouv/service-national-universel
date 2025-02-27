@@ -1075,6 +1075,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
       await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
+          cta: `${config.APP_URL}`,
           youngFirstName: young.firstName,
           youngLastName: young.lastName,
         },
