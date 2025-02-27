@@ -349,7 +349,7 @@ export class AffectationController {
     async syncLigneDebus(
         @Param("sessionId")
         sessionId: string,
-    ): Promise<AffectationRoutes["PostSyncPlacesLigneDeBus"]["response"]> {
+    ): Promise<AffectationRoutes["PostSyncPlacesLignesDeBus"]["response"]> {
         const session = await this.sessionGateway.findById(sessionId);
         const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
         await this.affectationService.syncPlacesDisponiblesLignesDeBus(ligneDeBusList);
