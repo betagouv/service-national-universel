@@ -15,32 +15,34 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { regionList, SubTitle, Title } from "../components/commons";
 import RegionRow from "./components/RegionRow";
 import SelectCohort from "@/components/cohorts/SelectCohort";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { AuthState } from "@/redux/auth/reducer";
 
 export default function NationalView() {
   const history = useHistory();
 
-  const cohorts = useSelector((state) => state.Cohorts);
-  const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const urlParams = new URLSearchParams(history.location.search);
   useDocumentTitle("Table de répartition");
 
   const [cohort, setCohort] = useState(urlParams.get("cohort") || cohorts?.[0]?.name);
-  const [youngsByRegion, setYoungsByRegion] = useState([]);
+  const [youngsByRegion, setYoungsByRegion] = useState<any[]>([]);
   const [placesCenterByRegion, setPlacesCenterByRegion] = useState({});
   const [loadingQuery, setLoadingQuery] = useState(false);
   const [searchRegion, setSearchRegion] = useState("");
   const [regions, setRegions] = useState(regionList);
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<any[]>([]);
 
   const getRepartitionRegion = async () => {
     try {
       const { data, ok } = await API.get(`/table-de-repartition/national/${cohort}`);
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des données", "");
       setData(data);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+      toastr.error("Oups, une erreur est survenue lors de la récupération des données", "");
     }
   };
 
@@ -55,14 +57,14 @@ export default function NationalView() {
         const response = await API.post("/elasticsearch/young/search", {
           filters: { cohort: [cohort], status: ["VALIDATED"] },
         });
-        if (!response.responses.length) return toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires");
+        if (!response.responses.length) return toastr.error("Oups, une erreur est survenue lors de la récupération des volontaires", "");
         setYoungsByRegion(response.responses[1].aggregations.region.names.buckets);
 
         //get places center by region
         const { ok, data } = await API.post("/elasticsearch/sessionphase1/export?needCohesionCenterInfo=true", {
           filters: { cohort: [cohort] },
         });
-        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres");
+        if (!ok) return toastr.error("Oups, une erreur est survenue lors de la récupération des centres", "");
 
         const sessionPlacesBycohesionCenterRegion = data.reduce((acc, item) => {
           const { region, placesTotal } = item._source;
@@ -77,13 +79,13 @@ export default function NationalView() {
         setLoadingQuery(false);
       } catch (e) {
         capture(e);
-        toastr.error("Oups, une erreur est survenue lors de la récupération des données");
+        toastr.error("Oups, une erreur est survenue lors de la récupération des données", "");
       }
     })();
   }, [cohort]);
 
   React.useEffect(() => {
-    let regions = regionList.filter((e) => {
+    const regions = regionList.filter((e) => {
       if (searchRegion === "") return true;
       return e.toLowerCase().includes(searchRegion.toLowerCase());
     });
@@ -95,11 +97,11 @@ export default function NationalView() {
       //update real time
       setData([...data, { fromRegion, toRegion }]);
       const { ok } = await API.post(`/table-de-repartition/region`, { fromRegion, toRegion, cohort });
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout de la region d'accueil");
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout de la region d'accueil", "");
       await getRepartitionRegion();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de l'ajout de la region d'accueil");
+      toastr.error("Oups, une erreur est survenue lors de l'ajout de la region d'accueil", "");
       await getRepartitionRegion();
     }
   };
@@ -107,14 +109,14 @@ export default function NationalView() {
   const onDelete = async (fromRegion, toRegion) => {
     try {
       //update real time
-      let update = data.filter((e) => e.fromRegion !== fromRegion || e.toRegion !== toRegion);
+      const update = data.filter((e) => e.fromRegion !== fromRegion || e.toRegion !== toRegion);
       setData(update);
       const { ok } = await API.post(`/table-de-repartition/delete/region`, { fromRegion, toRegion, cohort });
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la suppression de la region d'accueil");
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de la suppression de la region d'accueil", "");
       await getRepartitionRegion();
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la suppression de la region d'accueil");
+      toastr.error("Oups, une erreur est survenue lors de la suppression de la region d'accueil", "");
       await getRepartitionRegion();
     }
   };
