@@ -16,7 +16,6 @@ import useCohort from "@/services/useCohort";
 import plausibleEvent from "@/services/plausible";
 import { HiArrowRight } from "react-icons/hi";
 import Notice from "@/components/ui/alerts/Notice";
-import ConfirmationNotice from "../home/components/ConfirmationNotice";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
@@ -44,7 +43,6 @@ export default function WaitingAffectation() {
           <p className="font-bold">Vous êtes en attente d'affectation à un centre</p>
           <p>{text}</p>
         </Notice>
-        <ConfirmationNotice />
         {isCLE && (
           <div className="bg-blue-50 rounded-xl xl:flex text-center text-sm p-3 mt-4 gap-2">
             <div>

@@ -7,7 +7,6 @@ import useAuth from "@/services/useAuth";
 import plausibleEvent from "../../services/plausible";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
-import ConfirmationNotice from "./components/ConfirmationNotice";
 
 export default function WaitingAffectation() {
   const { young, isCLE } = useAuth();
@@ -24,8 +23,6 @@ export default function WaitingAffectation() {
           </div>
           <p className="ml-2 text-gray-500">Vous êtes actuellement en attente d’affectation à un lieu pour votre séjour de cohésion.</p>
         </div>
-
-        <ConfirmationNotice />
 
         <div className="mt-5 flex items-start">
           <Link to="/phase1" onClick={() => plausibleEvent("Phase1/CTA - Fill documents")}>
