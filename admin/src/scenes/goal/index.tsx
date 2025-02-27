@@ -12,17 +12,20 @@ import LoadingButton from "@/components/buttons/LoadingButton";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import ToggleBloc from "./ToggleBloc";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { useSelector } from "react-redux";
 
 export default function Goal() {
   useDocumentTitle("Objectifs");
 
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const [inscriptionGoals, setInscriptionGoals] = useState<{ department: string; region: string; max: null | number }[]>();
   const [loading, setLoading] = useState(false);
   const [blocsOpened, setBlocsOpened] = useState<string[]>([]);
   const [cohort, setCohort] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!cohort) setCohort("Février 2024 - C");
+    if (!cohort) setCohort(cohorts[0].name);
   }, []);
 
   const getInscriptionGoals = async () => {
