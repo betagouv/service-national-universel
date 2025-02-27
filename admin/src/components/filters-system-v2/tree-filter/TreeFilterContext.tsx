@@ -1,20 +1,21 @@
 import React, { createContext, useContext, useState } from "react";
-import { ItemDecoupledFilterData } from "./DecoupledFilter";
+import { TreeNodeFilterType } from "./TreeFilter";
 
-interface DecoupledFilterContextType {
-  onCheckboxClick: (item: ItemDecoupledFilterData) => void;
+interface TreeFilterContextType {
+  onCheckboxClick: (item: TreeNodeFilterType) => void;
   getItemState: (value: string) => boolean;
-  isIndeterminate: (item: ItemDecoupledFilterData) => boolean;
-  getSelectedChildrenCount: (item: ItemDecoupledFilterData) => number;
+  isIndeterminate: (item: TreeNodeFilterType) => boolean;
+  getSelectedChildrenCount: (item: TreeNodeFilterType) => number;
   id: string;
+  getSelectedItems: () => Set<string>;
 }
 
-const DecoupledFilterContext = createContext<DecoupledFilterContextType | undefined>(undefined);
+const TreeFilterContext = createContext<TreeFilterContextType | undefined>(undefined);
 
-export function DecoupledFilterProvider({ children, filterTree, id }: { children: React.ReactNode; filterTree: ItemDecoupledFilterData[]; id: string }) {
+export function TreeFilterProvider({ children, treeFilter, id }: { children: React.ReactNode; treeFilter: TreeNodeFilterType[]; id: string }) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-  const getAllChildrenValues = (item: ItemDecoupledFilterData): string[] => {
+  const getAllChildrenValues = (item: TreeNodeFilterType): string[] => {
     let values: string[] = [];
     if (item.children) {
       item.children.forEach((child) => {
@@ -24,7 +25,7 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
     return values;
   };
 
-  const findParentInTree = (items: ItemDecoupledFilterData[], targetValue: string): ItemDecoupledFilterData | null => {
+  const findParentInTree = (items: TreeNodeFilterType[], targetValue: string): TreeNodeFilterType | null => {
     for (const item of items) {
       if (item.children?.some((child) => child.value === targetValue)) {
         return item;
@@ -37,8 +38,8 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
     return null;
   };
 
-  const getAncestors = (items: ItemDecoupledFilterData[], targetValue: string): ItemDecoupledFilterData[] => {
-    const ancestors: ItemDecoupledFilterData[] = [];
+  const getAncestors = (items: TreeNodeFilterType[], targetValue: string): TreeNodeFilterType[] => {
+    const ancestors: TreeNodeFilterType[] = [];
     let currentParent = findParentInTree(items, targetValue);
 
     while (currentParent) {
@@ -49,7 +50,7 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
     return ancestors;
   };
 
-  const shouldParentBeChecked = (item: ItemDecoupledFilterData): boolean => {
+  const shouldParentBeChecked = (item: TreeNodeFilterType): boolean => {
     if (!item.children) return false;
     return item.children.every((child) => {
       const childValues = [child.value, ...getAllChildrenValues(child)];
@@ -57,12 +58,11 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
     });
   };
 
-  const onCheckboxClick = (item: ItemDecoupledFilterData) => {
+  const onCheckboxClick = (item: TreeNodeFilterType) => {
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
       const allChildrenValues = getAllChildrenValues(item);
-      const ancestors = getAncestors(filterTree, item.value);
-
+      const ancestors = getAncestors(treeFilter, item.value);
       if (newSet.has(item.value)) {
         // Uncheck item and all children
         newSet.delete(item.value);
@@ -77,6 +77,8 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
         ancestors.forEach((ancestor) => {
           if (shouldParentBeChecked(ancestor)) {
             newSet.add(ancestor.value);
+          } else {
+            newSet.delete(ancestor.value);
           }
         });
       }
@@ -89,24 +91,41 @@ export function DecoupledFilterProvider({ children, filterTree, id }: { children
     return selectedItems.has(value);
   };
 
-  const isIndeterminate = (item: ItemDecoupledFilterData): boolean => {
+  const isIndeterminate = (item: TreeNodeFilterType): boolean => {
     if (!item.children) return false;
     const childrenValues = getAllChildrenValues(item).filter((v) => v !== item.value);
     const selectedChildren = childrenValues.filter((value) => selectedItems.has(value));
     return selectedChildren.length > 0 && selectedChildren.length < childrenValues.length;
   };
 
-  const getSelectedChildrenCount = (item: ItemDecoupledFilterData): number => {
-    if (!item.children) return 0;
-    const childrenValues = getAllChildrenValues(item).filter((v) => v !== item.value);
-    return childrenValues.filter((value) => selectedItems.has(value)).length;
+  const getLeafValues = (item: TreeNodeFilterType): string[] => {
+    let values: string[] = [];
+    if (!item.children) {
+      return [item.value];
+    }
+    item.children.forEach((child) => {
+      values = [...values, ...getLeafValues(child)];
+    });
+    return values;
   };
 
-  return <DecoupledFilterContext.Provider value={{ onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id }}>{children}</DecoupledFilterContext.Provider>;
+  const getSelectedChildrenCount = (item: TreeNodeFilterType): number => {
+    if (!item.children) return 0;
+    const leafValues = getLeafValues(item).filter((v) => v !== item.value);
+    return leafValues.filter((value) => selectedItems.has(value)).length;
+  };
+
+  const getSelectedItems = (): Set<string> => {
+    return selectedItems;
+  };
+
+  return (
+    <TreeFilterContext.Provider value={{ onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id, getSelectedItems }}>{children}</TreeFilterContext.Provider>
+  );
 }
 
-export const useDecoupledFilter = () => {
-  const context = useContext(DecoupledFilterContext);
+export const useTreeFilter = () => {
+  const context = useContext(TreeFilterContext);
   if (!context) {
     throw new Error("useDecoupledFilter must be used within DecoupledFilterProvider");
   }

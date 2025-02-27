@@ -1,5 +1,5 @@
 import { getFilterArray } from "@/scenes/volontaires/utils";
-import { ItemDecoupledFilterData } from "./DecoupledFilter";
+import { TreeNodeFilterType } from "./TreeFilter";
 
 export interface FilterDefinition {
   title: string;
@@ -14,7 +14,7 @@ export interface ItemWithChildren {
   children?: Record<string, ItemWithChildren>;
 }
 
-export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<string, { key: string }[]>, itemsWithChildren?: ItemWithChildren): ItemDecoupledFilterData[] => {
+export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<string, { key: string }[]>, itemsWithChildren?: ItemWithChildren): TreeNodeFilterType[] => {
   const filterArray = getFilterArray({});
   return Object.entries(availableItemsFilters).map(([key, items]) => {
     const label = filterArray.find((filter) => filter?.name === key)?.title || key;
@@ -23,9 +23,9 @@ export const mapAvailableFiltersToTreeFilter = (availableItemsFilters: Record<st
   });
 };
 
-const createFilterNode = (label: string, value: string, level: number, itemWithChildren?: ItemWithChildren, items?: { key: string }[]): ItemDecoupledFilterData => {
+const createFilterNode = (label: string, value: string, level: number, itemWithChildren?: ItemWithChildren, items?: { key: string }[]): TreeNodeFilterType => {
   const count = items?.length;
-  const baseNode: ItemDecoupledFilterData = {
+  const baseNode: TreeNodeFilterType = {
     checked: false,
     label,
     value,
