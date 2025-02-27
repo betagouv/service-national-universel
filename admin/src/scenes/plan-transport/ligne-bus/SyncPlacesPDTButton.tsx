@@ -17,7 +17,10 @@ interface SyncPlacesPDTButtonProps {
 
 export default function SyncPlacesPDTButton({ cohort, disabled, onChange, className }: SyncPlacesPDTButtonProps) {
   const { isPending, mutate } = useMutation({
-    mutationFn: async () => AffectationService.postSyncPlacesLigneDeBus(cohort._id!),
+    mutationFn: async () => {
+      await AffectationService.postSyncPlacesLigneDeBus(cohort._id!);
+      await AffectationService.postSyncPlacesCentres(cohort._id!);
+    },
     onSuccess: () => {
       toastr.success("Les places dans les lignes de bus ont bien été recalculés ainsi que le taux de remplissage", "", { timeOut: 5000 });
       onChange();

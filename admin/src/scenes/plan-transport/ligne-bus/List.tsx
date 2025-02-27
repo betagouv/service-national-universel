@@ -189,7 +189,7 @@ export default function List() {
           />,
         ]}
       />
-      <div className="flex gap-2">
+      <div className="flex gap-2 items-center">
         {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
         {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
         {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}

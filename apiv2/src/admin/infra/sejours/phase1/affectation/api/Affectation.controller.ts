@@ -356,6 +356,16 @@ export class AffectationController {
     }
 
     @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/centre/sync-places")
+    async syncCentres(
+        @Param("sessionId")
+        sessionId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesCentre"]["response"]> {
+        const sejours = await this.sejourGateway.findBySessionId(sessionId);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejours);
+    }
+
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/centre/:centreId/sync-places")
     async syncCentre(
         @Param("sessionId")
@@ -370,7 +380,6 @@ export class AffectationController {
                 "Sejour introuvable pour ce centre et cette session",
             );
         }
-        this.logger.warn("sync sejour: " + sejour.id);
         await this.affectationService.syncPlacesDisponiblesSejours([sejour]);
     }
 }

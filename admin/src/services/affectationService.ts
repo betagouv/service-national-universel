@@ -82,8 +82,16 @@ const AffectationService = {
     })();
   },
   postSyncPlacesLigneDeBus: async (sessionId: string) => {
-    return await buildRequest<AffectationRoutes["PostSyncPlacesLigneDeBus"]>({
+    return await buildRequest<AffectationRoutes["PostSyncPlacesLignesDeBus"]>({
       path: "/affectation/{sessionId}/ligne-de-bus/sync-places",
+      method: "POST",
+      params: { sessionId },
+      target: "API_V2",
+    })();
+  },
+  postSyncPlacesCentres: async (sessionId: string) => {
+    return await buildRequest<AffectationRoutes["PostSyncPlacesCentres"]>({
+      path: "/affectation/{sessionId}/centre/sync-places",
       method: "POST",
       params: { sessionId },
       target: "API_V2",
