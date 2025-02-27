@@ -84,6 +84,57 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
+    async deleteOldList(): Promise<void> {
+        try {
+            // 1. Récupérer toutes les listes
+            const listsResponse = await this.contactsApi.getLists(undefined, undefined, "asc");
+            const lists = listsResponse.body.lists;
+            console.log(lists);
+            if (!lists || lists.length === 0) {
+                this.logger.warn("Aucune liste trouvée.");
+                return;
+            }
+    
+            // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
+            const folderNameToExclude = "DEV - Ne Pas Supprimer - WARNING";
+            const filteredLists = lists.filter((list) => list.name !== folderNameToExclude);
+            if (filteredLists.length === 0) {
+                this.logger.warn("Aucune liste à supprimer.");
+                return;
+            }
+    
+            // 3. Récupérer les détails de chaque liste
+            const detailedLists: brevo.GetExtendedList[] = [];
+            for (const list of filteredLists) {
+                const listDetails = await this.contactsApi.getList(list.id);
+                // console.log(listDetails.body.name);
+                // console.log(listDetails.body.createdAt);
+                detailedLists.push(listDetails.body);
+            }
+    
+            if (detailedLists.length === 0) {
+                this.logger.warn("Aucune liste avec une date de création valide.");
+                return;
+            }
+    
+            // 4. Trier les listes par date de création (du plus ancien au plus récent)
+            detailedLists.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    
+            // 5. Supprimer la plus ancienne liste
+            const oldestList = detailedLists[0];
+            console.log(oldestList);
+            this.logger.log(`Suppression de la liste la plus ancienne : ${oldestList.name} (ID: ${oldestList.id})`);
+    
+            await this.contactsApi.deleteList(oldestList.id);
+            this.logger.log(`Liste supprimée avec succès : ${oldestList.name}`);
+        } catch (error: any) {
+            this.logger.error(`Erreur lors de la suppression de la plus ancienne liste: ${error.message}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Erreur lors de la suppression de la liste: ${error.message}`);
+        }
+    }
+    
+    
+
     private setApiKey(
         apiInstance: brevo.ContactsApi | brevo.EmailCampaignsApi | brevo.TransactionalEmailsApi,
         value: string,
