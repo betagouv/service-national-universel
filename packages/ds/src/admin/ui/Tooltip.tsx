@@ -1,10 +1,11 @@
 import React, { ReactNode } from "react";
 import ReactTooltip from "react-tooltip";
 import cx from "classnames";
+import slugify from "slugify";
 
 interface TooltipProps {
-  id: string;
-  title?: string;
+  id?: string;
+  title: string;
   className?: string;
   tooltipClassName?: string;
   children: ReactNode;
@@ -19,7 +20,16 @@ export default function Tooltip({
   className,
   tooltipClassName,
 }: TooltipProps) {
-  const tooltipId = `tooltip-${id}`;
+  const tooltipId = id ? `tooltip-${id}` : generateSlugHashId(title);
+
+  function generateSlugHashId(input: string): string {
+    const utf8Bytes = new TextEncoder().encode(input);
+    const base64 = btoa(String.fromCharCode(...utf8Bytes));
+
+    const normalized = slugify(base64, { lower: true });
+
+    return normalized.slice(0, 30);
+  }
 
   return (
     <div className={cx(className)}>

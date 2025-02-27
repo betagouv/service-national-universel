@@ -35,7 +35,6 @@ export default function BasculeJeuneNonValides({ session }: BasculeJeuneNonValid
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Bascule des jeunes non validés</div>
         <Tooltip
-          id="basule-jeunes-non-valides"
           title={`• basculer les jeunes “en cours”, “en attente de validation”, “réinscription”, “en attente de correction”
   vers le prochain séjour sur lequel ils sont éligibles ou vers la cohorte à venir\r
 • Possibilité d'envoyer une communication aux jeunes et à leurs RL.\r

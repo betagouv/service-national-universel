@@ -36,7 +36,6 @@ export default function BasculeJeuneValides({ session }: BasculeJeuneValidesProp
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Bascule des jeunes validés</div>
         <Tooltip
-          id="basule-jeunes-valides"
           title={`• Basculer les jeunes validés sur LC et/ou LP vers le prochain séjour sur lequel
   ils sont éligibles ou vers la cohorte à venir.\r
 • Possibilité d'envoyer une communication aux jeunes et à leurs RL.\r
