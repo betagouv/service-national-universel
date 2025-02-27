@@ -1,11 +1,13 @@
 import { BusTeamDto } from "snu-lib/src/dto";
-import { LigneBusDocument } from "../../models";
+import { ClasseModel, LigneBusDocument, SessionPhase1Model } from "../../models";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
 
-import { CohortType, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
+import { CohortType, ERRORS, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
 import { sendTemplate } from "../../brevo";
+import { updatePlacesSessionPhase1 } from "../../utils";
+import { endSession, startSession, withTransaction } from "../../mongo";
 
 const { ObjectId } = Types;
 
@@ -184,6 +186,64 @@ export const updatePDRForLine = async (
   return ligneBus;
 };
 
+export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: string, actor: UserDto) {
+  const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
+  if (!currentSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
+
+  const newSessionPhase1 = await SessionPhase1Model.findById(sessionId);
+  if (!newSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
+
+  const transaction = await startSession();
+
+  try {
+    await withTransaction(transaction, async () => {
+      // Ligne
+      ligne.set({
+        sessionId,
+        centerId: newSessionPhase1.cohesionCenterId,
+      });
+
+      await ligne.save({ fromUser: actor });
+
+      // Plan de transport
+      const planDeTransport = await PlanTransportModel.findById(ligne._id);
+      if (!planDeTransport) throw new Error(ERRORS.NOT_FOUND);
+
+      planDeTransport.set({
+        centerId: newSessionPhase1.cohesionCenterId,
+        centerRegion: newSessionPhase1.region,
+        centerDepartment: newSessionPhase1.department,
+        centerAddress: newSessionPhase1.cityCentre,
+        centerZip: newSessionPhase1.zipCentre,
+        centerName: newSessionPhase1.nameCentre,
+        centerCode: newSessionPhase1.codeCentre,
+      });
+
+      await planDeTransport.save({ fromUser: actor });
+
+      // Jeunes
+      const filter = { ligneId: ligne._id };
+      const updateDoc = { $set: { sessionPhase1Id: sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId } };
+      await YoungModel.updateMany(filter, updateDoc, { fromUser: actor });
+
+      // Classe
+      const classe = await ClasseModel.findOne({ ligneId: ligne._id });
+      if (classe) {
+        classe.set({ sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId });
+        await classe.save({ fromUser: actor });
+      }
+    });
+  } catch (error) {
+    await transaction.abortTransaction();
+    throw error;
+  } finally {
+    await endSession(transaction);
+  }
+
+  await updatePlacesSessionPhase1(currentSessionPhase1, actor);
+  await updatePlacesSessionPhase1(newSessionPhase1, actor);
+}
+
 const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, cohort: CohortType) => {
   const updatedYoungs = await YoungModel.find({
     ligneId: ligneBusId,
@@ -208,5 +268,21 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
       emailTo: [{ email: young.email }],
       cc,
     });
+  }
+};
+
+export const notifyYoungChangeCenter = async (ligneBusId: string) => {
+  const updatedYoungs = await YoungModel.find({
+    ligneId: ligneBusId,
+  }).select("email parent1Email parent2Email");
+
+  const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
+
+  for (const young of updatedYoungs) {
+    const cc: { email: string }[] = [];
+    if (young.parent1Email) cc.push({ email: young.parent1Email });
+    if (young.parent2Email) cc.push({ email: young.parent2Email });
+
+    await sendTemplate(templateId, { emailTo: [{ email: young.email }], cc });
   }
 };

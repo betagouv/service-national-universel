@@ -6,11 +6,12 @@ import ExternalLink from "@/assets/icons/ExternalLink";
 interface CentreLabelProps {
   centre: Partial<CenterDetailDto | CohesionCenterType>;
   showLink?: boolean;
+  className?: string;
 }
 
-const CentreLabel: React.FC<CentreLabelProps> = ({ centre, showLink = false }) => {
+const CentreLabel: React.FC<CentreLabelProps> = ({ centre, showLink = false, className = "" }) => {
   return (
-    <div>
+    <div className={className}>
       <div className="flex items-center gap-2">
         <p className="text-[15px] font-medium leading-6 text-gray-800]">
           {centre.department} • {centre.region}

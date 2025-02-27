@@ -3,23 +3,27 @@ import { Button, Modal } from "@snu/ds/admin";
 import XCircleFull from "@/assets/icons/XCircleFull";
 import CheckCircleFull from "@/assets/icons/CheckCircleFull";
 import { useToggle } from "react-use";
-import { LigneBusDto } from "snu-lib";
+import { LigneBusDto, SENDINBLUE_TEMPLATES } from "snu-lib";
 import CentreLabel from "./CentreLabel";
 import { TfiReload } from "react-icons/tfi";
 import { HiExternalLink } from "react-icons/hi";
+import useSessions from "@/scenes/plan-transport/lib/useSessions";
 
 interface ConfirmChangesModalProps {
   isOpen: boolean;
   count: number;
   initialData: LigneBusDto;
-  formData: Partial<LigneBusDto>;
+  formData: { sessionId: string; centerArrivalTime: string; centerDepartureTime: string };
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
 }
 
 export default function CentreModal({ isOpen, initialData, formData, count, onConfirm, onCancel }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
-  const templateId = "2276";
+  const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
+  const { data } = useSessions(initialData.cohort);
+  const initialSession = data?.find((s) => s._id === initialData.sessionId);
+  const newSession = data?.find((s) => s._id === formData.sessionId);
 
   const handleConfirm = () => {
     onConfirm(isEmailing);
@@ -43,7 +47,7 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
             <div>
               <p className="text-xs font-medium">Ancien centre</p>
               <CenterCard
-                centerDetail={initialData.centerDetail!}
+                centerDetail={initialSession?.cohesionCenter}
                 centerArrivalTime={initialData.centerArrivalTime}
                 centerDepartureTime={initialData.centerDepartureTime}
                 icon={<XCircleFull className="text-red-500" />}
@@ -53,7 +57,7 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
             <div>
               <p className="text-xs font-medium">Nouveau centre</p>
               <CenterCard
-                centerDetail={formData.centerDetail!}
+                centerDetail={newSession?.cohesionCenter}
                 centerArrivalTime={formData.centerArrivalTime!}
                 centerDepartureTime={formData.centerDepartureTime!}
                 icon={<CheckCircleFull className="text-green-500" />}
