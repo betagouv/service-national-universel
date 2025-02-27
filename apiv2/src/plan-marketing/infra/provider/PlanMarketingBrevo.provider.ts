@@ -89,7 +89,6 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             // 1. Récupérer toutes les listes
             const listsResponse = await this.contactsApi.getLists(undefined, undefined, "asc");
             const lists = listsResponse.body.lists;
-            console.log(lists);
             if (!lists || lists.length === 0) {
                 this.logger.warn("Aucune liste trouvée.");
                 return;
@@ -107,8 +106,6 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             const detailedLists: brevo.GetExtendedList[] = [];
             for (const list of filteredLists) {
                 const listDetails = await this.contactsApi.getList(list.id);
-                // console.log(listDetails.body.name);
-                // console.log(listDetails.body.createdAt);
                 detailedLists.push(listDetails.body);
             }
     
@@ -122,7 +119,6 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     
             // 5. Supprimer la plus ancienne liste
             const oldestList = detailedLists[0];
-            console.log(oldestList);
             this.logger.log(`Suppression de la liste la plus ancienne : ${oldestList.name} (ID: ${oldestList.id})`);
     
             await this.contactsApi.deleteList(oldestList.id);
