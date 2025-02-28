@@ -4,9 +4,10 @@ import { useSelector } from "react-redux";
 import CentreLabel from "./CentreLabel";
 import { isSuperAdmin, LigneBusDto, ROLES } from "snu-lib";
 import { BsSearch } from "react-icons/bs";
-import useSessions, { SessionPhase1PopulatedWithCenter } from "@/scenes/plan-transport/lib/useSessions";
+import useSessions from "@/scenes/plan-transport/lib/useSessionsByCohort";
 import { AiOutlineStop } from "react-icons/ai";
 import Loader from "@/components/Loader";
+import { SessionPhase1PopulatedWithCenter } from "@/services/sessionPhase1Service";
 
 type Props = {
   sessionId: string;
@@ -50,7 +51,8 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
   if (isError) return <div>Erreur</div>;
 
   const selectedSession = sessions?.find((s) => s._id === sessionId);
-  const filteredData = filterResults(sessions, search);
+  const options = sessions.filter((s) => s._id !== sessionId);
+  const filteredOptions = filterResults(options, search);
 
   function handleSelect(session: SessionPhase1PopulatedWithCenter) {
     setSessionId(session._id);
@@ -87,10 +89,10 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
               <hr className="my-2" />
             </div>
             <div className="pb-2">
-              {filteredData.length === 0 ? (
+              {filteredOptions.length === 0 ? (
                 <div className="text-xs leading-4 text-gray-900">Aucun centre de cohésion trouvé</div>
               ) : (
-                filteredData.map((session) => <CenterButton key={session._id} session={session} ligne={ligne} onClick={() => handleSelect(session)} />)
+                filteredOptions.map((session) => <CenterButton key={session._id} session={session} ligne={ligne} onClick={() => handleSelect(session)} />)
               )}
             </div>
           </div>

@@ -6,7 +6,7 @@ import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
 import SessionSelector from "./SessionSelector";
-import useUpdateCentreSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateCentreSurLigneDeBus";
+import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateSessionSurLigneDeBus";
 import CentreModal from "./CentreModal";
 
 type Props = {
@@ -17,7 +17,7 @@ type Props = {
 
 export default function Centre({ bus, setBus, cohort }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const { mutate, isPending } = useUpdateCentreSurLigneDeBus(bus._id);
+  const { mutate, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
 
   const [isEditing, setIsEditing] = React.useState(false);
   const [openModal, setOpenModal] = React.useState(false);
@@ -145,6 +145,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
         initialData={bus}
         formData={{ sessionId, centerArrivalTime, centerDepartureTime }}
         count={bus.youngSeatsTaken}
+        isLoading={isPending}
       />
     </form>
   );

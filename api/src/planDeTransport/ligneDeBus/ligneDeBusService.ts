@@ -232,15 +232,16 @@ export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: s
         if (sendCampaign) await notifyReferentsCLEChangeCenter(classe);
       }
     });
+
+    await updatePlacesSessionPhase1(currentSessionPhase1, actor);
+    await updatePlacesSessionPhase1(newSessionPhase1, actor);
   } catch (error) {
+    console.log("🚀 ~ updateSessionForLine ~ error:", error);
     await transaction.abortTransaction();
     throw error;
   } finally {
     await endSession(transaction);
   }
-
-  await updatePlacesSessionPhase1(currentSessionPhase1, actor);
-  await updatePlacesSessionPhase1(newSessionPhase1, actor);
 }
 
 const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, cohort: CohortType) => {

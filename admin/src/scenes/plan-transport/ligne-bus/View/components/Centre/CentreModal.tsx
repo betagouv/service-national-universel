@@ -7,7 +7,7 @@ import { LigneBusDto, SENDINBLUE_TEMPLATES } from "snu-lib";
 import CentreLabel from "./CentreLabel";
 import { TfiReload } from "react-icons/tfi";
 import { HiExternalLink } from "react-icons/hi";
-import useSessions from "@/scenes/plan-transport/lib/useSessions";
+import useSessions from "@/scenes/plan-transport/lib/useSessionsByCohort";
 
 interface ConfirmChangesModalProps {
   isOpen: boolean;
@@ -16,9 +16,10 @@ interface ConfirmChangesModalProps {
   formData: { sessionId: string; centerArrivalTime: string; centerDepartureTime: string };
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
+  isLoading?: boolean;
 }
 
-export default function CentreModal({ isOpen, initialData, formData, count, onConfirm, onCancel }: ConfirmChangesModalProps) {
+export default function CentreModal({ isOpen, initialData, formData, count, onConfirm, onCancel, isLoading }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
   const { data } = useSessions(initialData.cohort);
@@ -83,7 +84,7 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
       footer={
         <div className="grid grid-cols-2 gap-3">
           <Button title="Annuler" type="secondary" onClick={onCancel} className="w-full" />
-          <Button title="Oui, valider" onClick={handleConfirm} className="w-full" />
+          <Button title={isLoading ? "Modification en cours" : "Oui, valider"} onClick={handleConfirm} disabled={isLoading} className="w-full" />
         </div>
       }
     />
