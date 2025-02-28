@@ -1,37 +1,38 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusCenter, CohortType, isBusEditionOpen, LigneBusDto, SessionPhase1Type } from "snu-lib";
+import { canEditLigneBusCenter, CohortType, isBusEditionOpen, LigneBusDto } from "snu-lib";
 import Pencil from "../../../../../../assets/icons/Pencil";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
 import SessionSelector from "./SessionSelector";
-import useUpdateLigneBus from "@/scenes/plan-transport/lib/useUpdateCentreSurLigneDeBus";
+import useUpdateCentreSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateCentreSurLigneDeBus";
 import CentreModal from "./CentreModal";
 
 type Props = {
-  data: LigneBusDto;
-  setData: (data) => void;
-  cohort: CohortType;
+  bus: LigneBusDto;
+  setBus: (data: LigneBusDto) => void;
+  cohort?: CohortType | null;
 };
-export default function Centre({ data, setData, cohort }: Props) {
+
+export default function Centre({ bus, setBus, cohort }: Props) {
   const [isEditing, setIsEditing] = React.useState(false);
   const [openModal, setOpenModal] = React.useState(false);
 
-  const [centerArrivalTime, setCenterArrivalTime] = React.useState(data.centerArrivalTime || "");
-  const [centerDepartureTime, setCenterDepartureTime] = React.useState(data.centerDepartureTime || "");
-  const [sessionId, setSessionId] = React.useState(data.sessionId);
+  const [centerArrivalTime, setCenterArrivalTime] = React.useState(bus.centerArrivalTime || "");
+  const [centerDepartureTime, setCenterDepartureTime] = React.useState(bus.centerDepartureTime || "");
+  const [sessionId, setSessionId] = React.useState(bus.sessionId);
 
   const user = useSelector((state: AuthState) => state.Auth.user);
   const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const { mutate, isPending } = useUpdateLigneBus(data._id);
+  const { mutate, isPending } = useUpdateCentreSurLigneDeBus(bus._id);
 
   const disabled = !canEditLigneBusCenter(user) || !isBusEditionOpen(user, cohort) || isPending;
 
   function resetData() {
-    setCenterArrivalTime(data.centerArrivalTime || "");
-    setCenterDepartureTime(data.centerDepartureTime || "");
-    setSessionId(data.sessionId);
+    setCenterArrivalTime(bus.centerArrivalTime || "");
+    setCenterDepartureTime(bus.centerDepartureTime || "");
+    setSessionId(bus.sessionId);
     setErrors({});
   }
 
@@ -66,7 +67,7 @@ export default function Centre({ data, setData, cohort }: Props) {
 
     mutate(payload, {
       onSuccess: (ligneInfo) => {
-        setData(ligneInfo);
+        setBus(ligneInfo);
         setIsEditing(false);
         setOpenModal(false);
       },
@@ -108,7 +109,7 @@ export default function Centre({ data, setData, cohort }: Props) {
       </div>
 
       <div className="mt-8 flex flex-col">
-        <SessionSelector sessionId={sessionId} setSessionId={setSessionId} ligne={data} disabled={!isEditing} />
+        <SessionSelector sessionId={sessionId} setSessionId={setSessionId} ligne={bus} disabled={!isEditing} />
 
         <div className="mt-8 flex items-center gap-4">
           <Field
@@ -137,9 +138,9 @@ export default function Centre({ data, setData, cohort }: Props) {
         isOpen={openModal}
         onCancel={() => setOpenModal(false)}
         onConfirm={handleConfirm}
-        initialData={data}
+        initialData={bus}
         formData={{ sessionId, centerArrivalTime, centerDepartureTime }}
-        count={data.youngSeatsTaken}
+        count={bus.youngSeatsTaken}
       />
     </form>
   );

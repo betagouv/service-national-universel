@@ -1,9 +1,9 @@
 import API from "@/services/api";
 import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
-import { LigneBusType, translate } from "snu-lib";
+import { LigneBusDto, LigneBusType, translate } from "snu-lib";
 
-async function updateCentreSurLigneDeBus(busId: string, payload: Partial<LigneBusType>): Promise<LigneBusType> {
+async function updateCentreSurLigneDeBus(busId: string, payload: Partial<LigneBusType>): Promise<LigneBusDto> {
   const { ok, code, data } = await API.put(`/ligne-de-bus/${busId}/centre`, payload);
   if (!ok) throw new Error(code);
   if (!data) throw new Error("No data returned");

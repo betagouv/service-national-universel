@@ -4,7 +4,17 @@ import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { CohortType, LigneBusDto, ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import {
+  CohortType,
+  LigneBusDto,
+  PointDeRassemblementType,
+  ROLES,
+  canExportLigneBus,
+  getZonedDate,
+  isLigneBusDemandeDeModificationOpen,
+  ligneBusCanCreateDemandeDeModification,
+  translate,
+} from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bus from "@/assets/icons/Bus";
@@ -19,13 +29,12 @@ import { Title } from "../../components/commons";
 import { exportLigneBusJeune } from "../../util";
 import Creation from "../modificationPanel/Creation";
 import BusTeam from "./components/BusTeam";
-import Centre from "./components/Centre/Centre";
+import Centre from "./components/Centre";
 import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
 import { useMount, useUpdateEffect } from "react-use";
-import { CohortState } from "@/redux/cohorts/reducer";
 
 export interface DataForCheck {
   meetingPoints: { youngsCount: number; meetingPointId: string }[];
@@ -34,12 +43,10 @@ export interface DataForCheck {
 }
 
 export default function View(props: RouteComponentProps<{ id: string }>) {
-  const id = props.match && props.match.params && props.match.params.id;
   const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [data, setData] = React.useState<LigneBusDto | null>(null);
-  const cohorts = useSelector((state: CohortState) => state.Cohorts);
-  const cohort = cohorts.find((c) => c.name === data?.cohort) as CohortType;
+  const [cohort, setCohort] = React.useState<CohortType | null>(null);
   const [dataForCheck, setDataForCheck] = React.useState<DataForCheck | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
@@ -49,7 +56,8 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
 
   const getBus = async () => {
     try {
-      if (!id) return;
+      const id = props.match && props.match.params && props.match.params.id;
+      if (!id) return <div />;
       const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/${id}`);
 
       if (!ok) {
@@ -60,6 +68,8 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
       const responseYoungs = await api.post(`/elasticsearch/young/in-bus/${String(id)}/search`, { filters: {} });
 
       setNbYoung(responseYoungs.responses[0].hits.total.value);
+
+      await getCohortDetails(reponseBus.cohort);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
@@ -69,7 +79,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   const getDataForCheck = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return;
+      if (!id) return <div />;
       const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
@@ -84,7 +94,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   const getDemandeDeModification = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return;
+      if (!id) return <div />;
       const { ok, code, data: reponseDemandeDeModification } = await api.get(`/demande-de-modification/ligne/${id}`);
       if (!ok) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
@@ -99,10 +109,24 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     }
   };
 
+  const getCohortDetails = async (cohort) => {
+    try {
+      const { ok, code, data } = await api.get(`/cohort/${cohort}`);
+      if (!ok) {
+        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
+      }
+      setCohort(data);
+    } catch (e) {
+      console.log(e);
+      capture(e);
+      toastr.error("Oups, une erreur est survenue lors de la récupération de la cohorte", "");
+    }
+  };
+
   const sendNotifRef = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return;
+      if (!id) return <div />;
       setIsLoading(true);
       const { ok, code } = await api.post(`/ligne-de-bus/${id}/notifyRef`);
       if (!ok) {
@@ -278,7 +302,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
                 />
               ))}
             </div>
-            <Centre data={data} setData={setData} cohort={cohort} />
+            <Centre bus={data} setBus={setData} cohort={cohort} />
           </div>
         </div>
       </div>

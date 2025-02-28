@@ -36,7 +36,7 @@ import { sendTemplate } from "../../brevo";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { getInfoBus, notifyYoungChangeCenter, updateSessionForLine } from "./ligneDeBusService";
+import { getInfoBus, updateSessionForLine } from "./ligneDeBusService";
 import { updatePDRForLine } from "../../services/LigneDeBusService";
 
 interface MeetingPointResult {
@@ -348,9 +348,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     await planDeTransport.save({ fromUser: req.user });
 
     if (sessionId && sessionId !== ligne.sessionId) {
-      await updateSessionForLine(ligne, sessionId, req.user);
-      if (sendCampaign) await notifyYoungChangeCenter(ligne._id);
-      // TODO: notifier les admins CLE et référents de classe
+      await updateSessionForLine(ligne, sessionId, req.user, sendCampaign);
     }
 
     const infoBus = await getInfoBus(ligne);

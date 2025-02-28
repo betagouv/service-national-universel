@@ -1,5 +1,5 @@
 import { BusTeamDto } from "snu-lib/src/dto";
-import { ClasseModel, LigneBusDocument, SessionPhase1Model } from "../../models";
+import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentModel, SessionPhase1Model } from "../../models";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
@@ -186,7 +186,7 @@ export const updatePDRForLine = async (
   return ligneBus;
 };
 
-export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: string, actor: UserDto) {
+export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: string, actor: UserDto, sendCampaign: boolean) {
   const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
   if (!currentSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
 
@@ -202,13 +202,11 @@ export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: s
         sessionId,
         centerId: newSessionPhase1.cohesionCenterId,
       });
-
       await ligne.save({ fromUser: actor });
 
       // Plan de transport
       const planDeTransport = await PlanTransportModel.findById(ligne._id);
       if (!planDeTransport) throw new Error(ERRORS.NOT_FOUND);
-
       planDeTransport.set({
         centerId: newSessionPhase1.cohesionCenterId,
         centerRegion: newSessionPhase1.region,
@@ -218,19 +216,20 @@ export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: s
         centerName: newSessionPhase1.nameCentre,
         centerCode: newSessionPhase1.codeCentre,
       });
-
       await planDeTransport.save({ fromUser: actor });
 
       // Jeunes
       const filter = { ligneId: ligne._id };
       const updateDoc = { $set: { sessionPhase1Id: sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId } };
       await YoungModel.updateMany(filter, updateDoc, { fromUser: actor });
+      if (sendCampaign) await notifyYoungChangeCenter(ligne._id);
 
-      // Classe
-      const classe = await ClasseModel.findOne({ ligneId: ligne._id });
-      if (classe) {
+      // Classes
+      const classes = await ClasseModel.find({ ligneId: ligne._id });
+      for (const classe of classes) {
         classe.set({ sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId });
         await classe.save({ fromUser: actor });
+        if (sendCampaign) await notifyReferentsCLEChangeCenter(classe);
       }
     });
   } catch (error) {
@@ -271,18 +270,27 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
   }
 };
 
-export const notifyYoungChangeCenter = async (ligneBusId: string) => {
-  const updatedYoungs = await YoungModel.find({
-    ligneId: ligneBusId,
-  }).select("email parent1Email parent2Email");
-
+async function notifyYoungChangeCenter(ligneBusId: string) {
+  const updatedYoungs = await YoungModel.find({ ligneId: ligneBusId }).select("email parent1Email parent2Email");
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
 
   for (const young of updatedYoungs) {
     const cc: { email: string }[] = [];
     if (young.parent1Email) cc.push({ email: young.parent1Email });
     if (young.parent2Email) cc.push({ email: young.parent2Email });
-
     await sendTemplate(templateId, { emailTo: [{ email: young.email }], cc });
   }
-};
+}
+
+async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
+  const referents = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
+  const emailTo = referents.map((r) => ({ email: r.email }));
+  const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
+  await sendTemplate(templateId, { emailTo });
+
+  const etablissement = await EtablissementModel.findById(classe.etablissementId);
+  if (!etablissement) throw new Error("Etablissement not found");
+  const adminCle = await ReferentModel.findOne({ _id: etablissement.coordinateurIds }).select("email");
+  if (!adminCle) throw new Error("Admin CLE not found");
+  await sendTemplate(templateId, { emailTo: [{ email: adminCle.email }] });
+}
