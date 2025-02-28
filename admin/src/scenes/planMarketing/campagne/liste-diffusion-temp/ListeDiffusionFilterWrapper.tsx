@@ -2,18 +2,16 @@ import { SelectedFilters } from "@/components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
 import React, { createContext, useState } from "react";
 
-import Loader from "@/components/Loader";
-import { useSelector } from "react-redux";
-import ListeDiffusionFilters from "./ListeDiffusionFilters";
-import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
-import { getFilterArray } from "@/scenes/volontaires/utils";
 import { Filter } from "@/components/filters-system-v2/components/Filters";
+import ListeDiffusionFilters from "./ListeDiffusionFilters";
+import { ListeDiffusionFiltres } from "snu-lib";
 
 export interface ListeDiffusionFilterProps {
   paramData: any;
   dataFilter: any;
   filters: any;
   id: string;
+  savedFilter?: ListeDiffusionFiltres;
 }
 
 export interface ListeDiffusionFilterContextProps {
@@ -21,10 +19,11 @@ export interface ListeDiffusionFilterContextProps {
 }
 export const ListeDiffusionFilterContext: React.Context<ListeDiffusionFilterContextProps> = createContext({ keyPrefix: "" });
 
-export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id }: ListeDiffusionFilterProps) {
-  const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Filter }>({ originalCohort: { filter: ["CLE juin 2024"] } });
+export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id, savedFilter }: ListeDiffusionFilterProps) {
+  const formattedSavedFilter = savedFilter ? Object.fromEntries(Object.entries(savedFilter).map(([key, value]) => [key, { filter: value }])) : {};
+  const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Filter }>(formattedSavedFilter);
 
-  const handleFilterChange = (filters: any) => {
+  const handleFilterChange = (filters: { [key: string]: Filter }) => {
     setSelectedFilters(filters);
   };
 
@@ -42,7 +41,14 @@ export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, fil
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <SelectedFilters filterArray={filters} selectedFilters={selectedFilters} setSelectedFilters={handleFilterChange} paramData={paramData} setParamData={() => {}} />
+          <SelectedFilters
+            filterArray={filters}
+            selectedFilters={selectedFilters}
+            setSelectedFilters={handleFilterChange}
+            paramData={paramData}
+            setParamData={() => {}}
+            disabled={false}
+          />
         </div>
       </div>
     </ListeDiffusionFilterContext.Provider>

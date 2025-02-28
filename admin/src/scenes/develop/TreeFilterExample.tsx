@@ -11,6 +11,7 @@ import { useSetState } from "react-use";
 import ListeDiffusionFilterWrapper from "../planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
 import Loader from "../../../../packages/ds/src/admin/layout/DataTable/Loader";
 import { useListeDiffusion } from "./ListeDiffusionHook";
+import { ListeDiffusionFiltres } from "snu-lib";
 
 export interface TempState {
   params: {
@@ -28,6 +29,8 @@ export interface TempState {
 
 export type TempFilters = Record<string, { key: string }[]>;
 export default function TreeFilterExample() {
+  const savedFilterExample: ListeDiffusionFiltres = { originalCohort: ["CLE juin 2024"] };
+
   const listeTypeYoung = "young-list";
   const routeVolontaire = "/elasticsearch/young/search?tab=volontaire";
 
@@ -42,9 +45,15 @@ export default function TreeFilterExample() {
   const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(dataYoung.filters, getCohortGroups());
   return (
     <>
-      <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="a" />
+      <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="a" savedFilter={savedFilterExample} />
       <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="b" />
-      <ListeDiffusionFilterWrapper paramData={dataInscription.params} dataFilter={dataInscription.filters} filters={filtersInscription} id="c" />
+      <ListeDiffusionFilterWrapper
+        paramData={dataInscription.params}
+        dataFilter={dataInscription.filters}
+        filters={filtersInscription}
+        id="c"
+        savedFilter={{ region: ["Auvergne-Rhône-Alpes"] }}
+      />
       {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"a"} /> */}
       {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"b"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
