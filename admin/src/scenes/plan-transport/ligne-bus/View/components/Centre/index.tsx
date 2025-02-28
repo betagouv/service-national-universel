@@ -16,16 +16,16 @@ type Props = {
 };
 
 export default function Centre({ bus, setBus, cohort }: Props) {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const { mutate, isPending } = useUpdateCentreSurLigneDeBus(bus._id);
+
   const [isEditing, setIsEditing] = React.useState(false);
   const [openModal, setOpenModal] = React.useState(false);
+  const [errors, setErrors] = React.useState<Record<string, string>>({});
 
   const [centerArrivalTime, setCenterArrivalTime] = React.useState(bus.centerArrivalTime || "");
   const [centerDepartureTime, setCenterDepartureTime] = React.useState(bus.centerDepartureTime || "");
   const [sessionId, setSessionId] = React.useState(bus.sessionId);
-
-  const user = useSelector((state: AuthState) => state.Auth.user);
-  const [errors, setErrors] = React.useState<Record<string, string>>({});
-  const { mutate, isPending } = useUpdateCentreSurLigneDeBus(bus._id);
 
   const disabled = !canEditLigneBusCenter(user) || !isBusEditionOpen(user, cohort) || isPending;
 
@@ -54,10 +54,14 @@ export default function Centre({ bus, setBus, cohort }: Props) {
       return;
     }
 
-    setOpenModal(true);
+    if (sessionId !== bus.sessionId) {
+      setOpenModal(true);
+    } else {
+      handleConfirm(false);
+    }
   }
 
-  function handleConfirm(sendCampaign: boolean) {
+  function handleConfirm(sendCampaign?: boolean) {
     const payload = {
       centerArrivalTime,
       centerDepartureTime,
@@ -67,9 +71,9 @@ export default function Centre({ bus, setBus, cohort }: Props) {
 
     mutate(payload, {
       onSuccess: (ligneInfo) => {
+        setOpenModal(false);
         setBus(ligneInfo);
         setIsEditing(false);
-        setOpenModal(false);
       },
     });
   }
