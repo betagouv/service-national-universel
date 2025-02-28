@@ -63,59 +63,6 @@ service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PARTICIPATION_NOT_CONFIRMED] = async (u
   };
 };
 
-service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE] = async (user, { notStarted: cohorts }) => {
-  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE]: [] };
-  const departmentsCohortsFromRepartition = await service.departmentsFromTableRepartition(user, cohorts);
-  // On récupère les points de rassemblement pour chaque cohorte groupés par département
-  // Si un département de la cohorte n'a pas de point de rassemblement on l'ajoute dans la liste à signaler.
-  const response = await esClient.msearch({
-    index: "pointderassemblement",
-    body: buildArbitratyNdJson(
-      ...cohorts.flatMap((cohort) => {
-        return [
-          { index: "pointderassemblement", type: "_doc" },
-          withAggs(
-            queryFromFilter(user.role, user.region, user.department, [
-              { terms: { "cohort.keyword": [cohort] } },
-              { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
-              { exists: { field: "matricule" } },
-              { bool: { must_not: { exists: { field: "deleted" } } } },
-            ]),
-            "department.keyword",
-          ),
-        ];
-      }),
-    ),
-  });
-
-  return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.MEETING_POINT_TO_DECLARE]: service.missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts) };
-};
-
-service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE] = async (user, { sessionEditionOpen: cohorts }) => {
-  if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]: [] };
-  const departmentsCohortsFromRepartition = await service.departmentsFromTableRepartition(user, cohorts);
-  // On récupère les entrées de session phase 1 pour chaque cohorte groupés par département
-  const response = await esClient.msearch({
-    index: "sessionphase1",
-    body: buildArbitratyNdJson(
-      ...cohorts.flatMap((cohort) => {
-        return [
-          { index: "sessionphase1", type: "_doc" },
-          withAggs(
-            queryFromFilter(user.role, user.region, user.department, [
-              { terms: { "cohort.keyword": [cohort] } },
-              { terms: { "department.keyword": departmentsCohortsFromRepartition.filter((e) => e.cohort === cohort).map((e) => e.fromDepartment) } },
-            ]),
-            "department.keyword",
-          ),
-        ];
-      }),
-    ),
-  });
-  // Pour chaque département, si le département n'a pas de session phase 1 pour la cohorte on l'ajoute dans la liste à signaler
-  return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CENTER_TO_DECLARE]: service.missingElementsByCohortDepartment(response, departmentsCohortsFromRepartition, cohorts) };
-};
-
 service[DASHBOARD_TODOS_FUNCTIONS.SEJOUR.DOCS] = async (user, { twoWeeksBeforeSessionStart: cohorts }) => {
   if (!cohorts.length) return { [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: [], [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: [] };
 

@@ -18,7 +18,10 @@ import {
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
   LigneBusType,
+  getCohortPeriod,
 } from "snu-lib";
+
+import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
@@ -122,10 +125,13 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       ligneId: ligneId ? ligneId : undefined,
       hasMeetingInformation: pdrOption !== "young-select" ? "true" : "false",
     });
-
     if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+      const cohortPeriod = getCohortPeriod(cohort);
+      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION;
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION, { emailTo });
+      let params = { cohortPeriod: cohortPeriod };
+      let cc = getCcOfYoung({ template, young });
+      await sendTemplate(template, { emailTo, params, cc });
     }
 
     await young.save({ fromUser: req.user });
@@ -314,9 +320,12 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if (key === "youngPhase1Agreement" && newValue === "true") {
       let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
       let cc = getCcOfYoung({ template, young });
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
+          cta: `${config.APP_URL}`,
+          date_cohorte: cohort ? getCohortPeriod(cohort) : "",
           youngFirstName: young.firstName,
           youngLastName: young.lastName,
         },
