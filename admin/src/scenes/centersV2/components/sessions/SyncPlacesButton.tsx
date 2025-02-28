@@ -29,7 +29,7 @@ export default function SyncPlacesButton({ session, centreId, onChange }: SyncPl
 
   return (
     <Button
-      title="Recacluler les places occupés"
+      title="Recalculer les places occupées"
       type="cancel"
       loading={isPending}
       disabled={!session?._id || !centreId}
