@@ -93,10 +93,10 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
                 this.logger.warn("Aucune liste trouvée.");
                 return;
             }
-    
+            
             // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
-            const folderNameToExclude = "DEV - Ne Pas Supprimer - WARNING";
-            const filteredLists = lists.filter((list) => list.name !== folderNameToExclude);
+            const folderIdToExclude = 589;
+            const filteredLists = lists.filter((list) => list.folderId !== folderIdToExclude);
             if (filteredLists.length === 0) {
                 this.logger.warn("Aucune liste à supprimer.");
                 return;
@@ -105,7 +105,6 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             // 3. Supprimer la plus ancienne liste
             const oldestList = filteredLists[0];
             this.logger.log(`Suppression de la liste la plus ancienne : ${oldestList.name} (ID: ${oldestList.id})`);
-    
             await this.contactsApi.deleteList(oldestList.id);
             this.logger.log(`Liste supprimée avec succès : ${oldestList.name}`);
         } catch (error: any) {
