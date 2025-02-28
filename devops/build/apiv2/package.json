@@ -5,7 +5,7 @@
     "node": "^20.17"
   },
   "scripts": {
-    "start": "node apiv2/main.js"
+    "start": "RELEASE=$CC_COMMIT_ID node apiv2/main.js"
   },
   "author": "SNU",
   "license": "ISC",
