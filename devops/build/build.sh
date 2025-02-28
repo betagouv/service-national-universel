@@ -61,7 +61,6 @@ if (( $back )); then
     mkdir -p $destination/packages/lib/
     mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
     mv out/node_modules $destination/
-    cp -R patches $destination/
 fi
 
 if [[ $application == "api" ]]; then

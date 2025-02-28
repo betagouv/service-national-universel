@@ -40,7 +40,6 @@ mv out/app/build $destination/app
 mkdir -p $destination/packages/lib/
 mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
 mv out/node_modules $destination/
-cp -R patches $destination/
 
 # api
 mkdir -p $destination/api/
