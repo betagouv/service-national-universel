@@ -1,11 +1,11 @@
 {
-  "name": "apiv2",
+  "name": "all",
   "version": "1.0.0",
   "engines": {
     "node": "^20.17"
   },
   "scripts": {
-    "start": "RELEASE=$CC_COMMIT_ID node apiv2/main.js"
+    "start": "RELEASE=$CC_COMMIT_ID pm2 start --no-daemon ecosystem.config.js"
   },
   "author": "SNU",
   "license": "ISC",
