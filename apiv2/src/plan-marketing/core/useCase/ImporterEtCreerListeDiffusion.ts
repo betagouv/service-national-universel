@@ -27,7 +27,7 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
 
-        await this.planMarketingGateway.deleteOldList();
+        await this.planMarketingGateway.deleteOldestListeDiffusion();
 
         // TODO : Veiller à récupérer le bon filePath => Eric
         const file = await this.fileGateway.downloadFile(pathFile);

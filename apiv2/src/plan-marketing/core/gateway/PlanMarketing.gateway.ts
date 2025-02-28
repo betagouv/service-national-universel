@@ -4,7 +4,7 @@ export interface PlanMarketingGateway {
     // TODO : add type when model of campagne is available
     findCampagneById(campagneId: string): Promise<any>;
     findTemplateById(templateId: number): Promise<string | undefined>;
-    deleteOldList(): Promise<void>;
+    deleteOldestListeDiffusion(): Promise<void>;
 }
 
 export const PlanMarketingGateway = Symbol("PlanMarketingGateway");

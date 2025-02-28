@@ -84,29 +84,29 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
-    async deleteOldList(): Promise<void> {
+    async deleteOldestListeDiffusion(): Promise<void> {
         try {
             // 1. Récupérer toutes les listes
             const listsResponse = await this.contactsApi.getLists(undefined, undefined, "asc");
-            const lists = listsResponse.body.lists;
-            if (!lists || lists.length === 0) {
+            const listeDiffusions = listsResponse.body.lists;
+            if (!listeDiffusions || listeDiffusions.length === 0) {
                 this.logger.warn("Aucune liste trouvée.");
                 return;
             }
             
             // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
             const folderIdToExclude = 589;
-            const filteredLists = lists.filter((list) => list.folderId !== folderIdToExclude);
-            if (filteredLists.length === 0) {
+            const filteredListsDiffusion = listeDiffusions.filter((list) => list.folderId !== folderIdToExclude);
+            if (filteredListsDiffusion.length === 0) {
                 this.logger.warn("Aucune liste à supprimer.");
                 return;
             }
     
             // 3. Supprimer la plus ancienne liste
-            const oldestList = filteredLists[0];
-            this.logger.log(`Suppression de la liste la plus ancienne : ${oldestList.name} (ID: ${oldestList.id})`);
-            await this.contactsApi.deleteList(oldestList.id);
-            this.logger.log(`Liste supprimée avec succès : ${oldestList.name}`);
+            const oldestListDiffusion = filteredListsDiffusion[0];
+            this.logger.log(`Suppression de la liste la plus ancienne : ${oldestListDiffusion.name} (ID: ${oldestListDiffusion.id})`);
+            await this.contactsApi.deleteList(oldestListDiffusion.id);
+            this.logger.log(`Liste supprimée avec succès : ${oldestListDiffusion.name}`);
         } catch (error: any) {
             this.logger.error(`Erreur lors de la suppression de la plus ancienne liste: ${error.message}`);
             throw new TechnicalException(TechnicalExceptionType.BREVO, `Erreur lors de la suppression de la liste: ${error.message}`);
