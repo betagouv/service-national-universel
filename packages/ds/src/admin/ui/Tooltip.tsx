@@ -1,10 +1,11 @@
 import React, { ReactNode } from "react";
 import ReactTooltip from "react-tooltip";
 import cx from "classnames";
+import { normalizeId } from "snu-lib";
 
 interface TooltipProps {
-  id: string;
-  title?: string;
+  id?: string;
+  title: string;
   className?: string;
   tooltipClassName?: string;
   children: ReactNode;
@@ -19,7 +20,7 @@ export default function Tooltip({
   className,
   tooltipClassName,
 }: TooltipProps) {
-  const tooltipId = `tooltip-${id}`;
+  const tooltipId = id ? `tooltip-${id}` : normalizeId(title);
 
   return (
     <div className={cx(className)}>
@@ -36,8 +37,8 @@ export default function Tooltip({
         arrowColor="white"
         disable={disabled}
       >
-        <div className="flex max-w-[600px] flex-row flex-wrap gap-2 rounded-xl">
-          <div className="rounded bg-white py-2 px-6 text-gray-500">
+        <div className="flex max-w-[650px] flex-row flex-wrap gap-2 rounded-xl">
+          <div className="rounded bg-white py-2 px-6 text-gray-500 whitespace-pre">
             {title}
           </div>
         </div>
