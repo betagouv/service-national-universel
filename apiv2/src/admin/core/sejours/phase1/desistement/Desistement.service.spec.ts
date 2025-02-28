@@ -71,13 +71,13 @@ describe("DesistementService", () => {
             ];
 
             jest.spyOn(ligneDeBusGateway, "findByIds").mockResolvedValue(lignesDeBus);
-            jest.spyOn(affectationService, "syncPlaceDisponiblesLigneDeBus").mockResolvedValue();
+            jest.spyOn(affectationService, "syncPlacesDisponiblesLignesDeBus").mockResolvedValue();
             jest.spyOn(jeuneGateway, "bulkUpdate").mockResolvedValue(2);
 
             await service.desisterJeunes(jeunes);
 
             expect(ligneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligneDeBusId1", "ligneDeBusId2"]);
-            expect(affectationService.syncPlaceDisponiblesLigneDeBus).toHaveBeenCalledWith(lignesDeBus);
+            expect(affectationService.syncPlacesDisponiblesLignesDeBus).toHaveBeenCalledWith(lignesDeBus);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalled();
         });
 
