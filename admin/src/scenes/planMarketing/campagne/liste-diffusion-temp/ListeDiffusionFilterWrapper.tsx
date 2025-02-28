@@ -7,11 +7,12 @@ import { useSelector } from "react-redux";
 import ListeDiffusionFilters from "./ListeDiffusionFilters";
 import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
 import { getFilterArray } from "@/scenes/volontaires/utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
 export interface ListeDiffusionFilterProps {
-  type: string;
   paramData: any;
   dataFilter: any;
+  filters: any;
   id: string;
 }
 
@@ -20,43 +21,12 @@ export interface ListeDiffusionFilterContextProps {
 }
 export const ListeDiffusionFilterContext: React.Context<ListeDiffusionFilterContextProps> = createContext({ keyPrefix: "" });
 
-export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilter, id }: ListeDiffusionFilterProps) {
-  // const [listeDiffusionFilter, setListeDiffusionFilter] = useState<ListeDiffusionFilterContextProps>({ keyPrefix: id });
+export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id }: ListeDiffusionFilterProps) {
+  const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Filter }>({ originalCohort: { filter: ["CLE juin 2024"] } });
 
-  // console.log("ListeDiffusionFilterWrapper", dataFilter);
-  const pageId = "liste-diffusion-filter";
-  const user = useSelector((state) => state.Auth.user);
-  const { data: labels, isPending, isError } = useFilterLabels(pageId);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const onParamDataChange = () => {
-    //
+  const handleFilterChange = (filters: any) => {
+    setSelectedFilters(filters);
   };
-  // structuredClone();
-  const handleFilterChange = (filter: any) => {
-    setSelectedFilters(filter);
-  };
-  // const [selectedFilters, setSelectedFilters] = useState({});
-  // const [paramData, setParamData] = useState({
-  //   page: 0,
-  //   sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
-  // });
-  const size = 10;
-  if (isPending) return <Loader />;
-  const filters = [
-    ...getFilterArray(user, labels).map((filter) => {
-      if (filter?.name === "status") {
-        return {
-          ...filter,
-          defaultValue: [],
-        };
-      }
-      return filter;
-    }),
-  ];
-  let route = "/elasticsearch/young/search";
-  if (type === "volontaire") {
-    route = "/elasticsearch/young/search?tab=volontaire";
-  }
 
   return (
     <ListeDiffusionFilterContext.Provider value={{ keyPrefix: id }}>
@@ -66,15 +36,13 @@ export default function ListeDiffusionFilterWrapper({ type, paramData, dataFilte
           <ListeDiffusionFilters
             filters={filters}
             selectedFilters={selectedFilters}
-            onSelectFilters={handleFilterChange}
-            // paramData={paramData}
-            // setParamData={setParamData}
+            onFiltersChange={handleFilterChange}
             intermediateFilters={[getCohortGroups()]}
             dataFilter={dataFilter}
           />
         </div>
         <div className="mt-2 flex flex-row flex-wrap items-center">
-          <SelectedFilters filterArray={filters} selectedFilters={selectedFilters} setSelectedFilters={handleFilterChange} paramData={paramData} setParamData={onParamDataChange} />
+          <SelectedFilters filterArray={filters} selectedFilters={selectedFilters} setSelectedFilters={handleFilterChange} paramData={paramData} setParamData={() => {}} />
         </div>
       </div>
     </ListeDiffusionFilterContext.Provider>

@@ -83,6 +83,7 @@ export interface TreeNodeFilterType {
   count?: number;
   children?: TreeNodeFilterType[];
   parent?: TreeNodeFilterType;
+  isLeaf: boolean;
 }
 
 export interface TreeNodeFilterProps {

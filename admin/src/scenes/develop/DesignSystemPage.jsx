@@ -218,7 +218,7 @@ export default function DesignSystemPage() {
         button={[<Button key={"button-1"} title={"Primary base"} />, <Button key={"button-2"} title={"Primary base"} loading />]}
       />
       <Container title="Filtres de type Tree WIP">
-        <TreeFilterExample type="volontaire" />
+        <TreeFilterExample />
       </Container>
       <Container title="Champs simples (InputText)">
         <div className="grid grid-cols-3 gap-4 w-full">

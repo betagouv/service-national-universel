@@ -1,15 +1,11 @@
-import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
+import { Popover, PopoverButton, PopoverPanel, Transition } from "@headlessui/react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 
 import FilterSvg from "../../../../assets/icons/Filter";
 
-import { debounce } from "@/utils";
 import FilterPopOver from "@/components/filters-system-v2/components/filters/FilterPopOver";
 import { IntermediateFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
-import ViewPopOver from "@/components/filters-system-v2/components/filters/SavedViewPopOver";
-import { normalizeString, buildQuery, getURLParam, currentFilterAsUrl } from "@/components/filters-system-v2/components/filters/utils";
+import { normalizeString } from "@/components/filters-system-v2/components/filters/utils";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -37,17 +33,15 @@ export interface Filter {
 interface ListeDiffusionFiltersProps {
   filters: Filter[];
   selectedFilters: { [key: string]: Filter };
-  onSelectFilters: (filters: { [key: string]: Filter }) => void;
+  onFiltersChange: (filters: { [key: string]: Filter }) => void;
   dataFilter: any;
   intermediateFilters?: any[];
 }
 
-export default function ListeDiffusionFilters({ filters, selectedFilters, onSelectFilters, dataFilter, intermediateFilters = [] }: ListeDiffusionFiltersProps) {
+export default function ListeDiffusionFilters({ filters, selectedFilters, onFiltersChange, dataFilter, intermediateFilters = [] }: ListeDiffusionFiltersProps) {
   const [search, setSearch] = useState("");
-  // const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
   const [categories, setCategories] = useState<string[]>([]);
-  const [savedView, setSavedView] = useState([]);
   const [isShowing, setIsShowing] = useState<string | boolean>(false);
 
   const ref = useRef<HTMLButtonElement>(null);
@@ -61,7 +55,8 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
 
   // Initialization
   useEffect(() => {
-    updateFiltersFromParams({});
+    const defaultFilters = getDefaultFilters();
+    onFiltersChange({ ...defaultFilters, ...selectedFilters });
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {
@@ -114,29 +109,6 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
     return newFilters;
   };
 
-  const handleDeleteFilter = async (id) => {
-    // try {
-    //   const res = await api.remove("/filters/" + id);
-    //   if (!res.ok) return toastr.error("Oops, une erreur est survenue", "");
-    //   toastr.success("Filtre supprimé avec succès", "");
-    //   updateSavedViewFromDbFilters();
-    //   return;
-    // } catch (error) {
-    //   console.log(error);
-    // }
-  };
-
-  function updateFiltersFromParams(params) {
-    const defaultFilters = getDefaultFilters();
-    const initialFilters = getURLParam(new URLSearchParams(params), () => {}, filters);
-    onSelectFilters({ ...defaultFilters, ...initialFilters });
-  }
-
-  const handleSelectUrl = (params) => {
-    updateFiltersFromParams(params);
-    setIsShowing(false);
-  };
-
   return (
     <div>
       <div className="flex flex-row items-center justify-between">
@@ -144,7 +116,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
           <Popover className="relative">
             {({ open }) => (
               <>
-                <Popover.Button
+                <PopoverButton
                   ref={ref}
                   onClick={() => setIsShowing(!isShowing)}
                   className={classNames(
@@ -154,7 +126,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
-                </Popover.Button>
+                </PopoverButton>
 
                 <Transition
                   as={Fragment}
@@ -165,18 +137,9 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
                   leaveTo="opacity-0 translate-y-1">
-                  <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
+                  <PopoverPanel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
                     <div className="rounded-lg shadow-lg">
                       <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
-                        {savedView.length > 0 && (
-                          <ViewPopOver
-                            setIsShowing={(value) => setIsShowing(value)}
-                            isShowing={isShowing === "view"}
-                            savedView={savedView}
-                            handleSelect={handleSelectUrl}
-                            handleDelete={handleDeleteFilter}
-                          />
-                        )}
                         <input
                           type="text"
                           value={search}
@@ -204,7 +167,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
                                         <IntermediateFilter
                                           // @ts-expect-error
                                           selectedFilters={selectedFilters}
-                                          setSelectedFilters={onSelectFilters}
+                                          setSelectedFilters={onFiltersChange}
                                           setParamData={() => {}}
                                           intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
@@ -220,7 +183,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
                                       filter={customItem}
                                       // @ts-expect-error
                                       selectedFilters={selectedFilters}
-                                      setSelectedFilters={onSelectFilters}
+                                      setSelectedFilters={onFiltersChange}
                                       data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name || ""] || []}
                                       isShowing={isShowing === item.name}
                                       setIsShowing={(value) => setIsShowing(value)}
@@ -233,7 +196,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onSele
                         </div>
                       </div>
                     </div>
-                  </Popover.Panel>
+                  </PopoverPanel>
                 </Transition>
               </>
             )}
