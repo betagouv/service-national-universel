@@ -1,5 +1,5 @@
 import { BusTeamDto } from "snu-lib/src/dto";
-import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentModel, SessionPhase1Model } from "../../models";
+import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
@@ -186,12 +186,23 @@ export const updatePDRForLine = async (
   return ligneBus;
 };
 
-export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: string, actor: UserDto, sendCampaign: boolean) {
+export async function updateSessionForLine({
+  ligne,
+  session,
+  actor,
+  sendCampaign,
+}: {
+  ligne: LigneBusDocument;
+  session: SessionPhase1Document;
+  actor: UserDto;
+  sendCampaign?: boolean;
+}) {
   const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
   if (!currentSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
 
-  const newSessionPhase1 = await SessionPhase1Model.findById(sessionId);
-  if (!newSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
+  if (ligne.youngSeatsTaken > (session.placesLeft || 0)) {
+    throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+  }
 
   const transaction = await startSession();
 
@@ -199,8 +210,8 @@ export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: s
     await withTransaction(transaction, async () => {
       // Ligne
       ligne.set({
-        sessionId,
-        centerId: newSessionPhase1.cohesionCenterId,
+        sessionId: session.id,
+        centerId: session.cohesionCenterId,
       });
       await ligne.save({ fromUser: actor });
 
@@ -208,37 +219,36 @@ export async function updateSessionForLine(ligne: LigneBusDocument, sessionId: s
       const planDeTransport = await PlanTransportModel.findById(ligne._id);
       if (!planDeTransport) throw new Error(ERRORS.NOT_FOUND);
       planDeTransport.set({
-        centerId: newSessionPhase1.cohesionCenterId,
-        centerRegion: newSessionPhase1.region,
-        centerDepartment: newSessionPhase1.department,
-        centerAddress: newSessionPhase1.cityCentre,
-        centerZip: newSessionPhase1.zipCentre,
-        centerName: newSessionPhase1.nameCentre,
-        centerCode: newSessionPhase1.codeCentre,
+        centerId: session.cohesionCenterId,
+        centerRegion: session.region,
+        centerDepartment: session.department,
+        centerAddress: session.cityCentre,
+        centerZip: session.zipCentre,
+        centerName: session.nameCentre,
+        centerCode: session.codeCentre,
       });
       await planDeTransport.save({ fromUser: actor });
 
       // Jeunes
       const filter = { ligneId: ligne._id };
-      const updateDoc = { $set: { sessionPhase1Id: sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId } };
+      const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
       await YoungModel.updateMany(filter, updateDoc, { fromUser: actor });
       if (sendCampaign) await notifyYoungChangeCenter(ligne._id);
 
       // Classes
       const classes = await ClasseModel.find({ ligneId: ligne._id });
       for (const classe of classes) {
-        classe.set({ sessionId, cohesionCenterId: newSessionPhase1.cohesionCenterId });
+        classe.set({
+          sessionId: session.id,
+          cohesionCenterId: session.cohesionCenterId,
+        });
         await classe.save({ fromUser: actor });
         if (sendCampaign) await notifyReferentsCLEChangeCenter(classe);
       }
     });
 
     await updatePlacesSessionPhase1(currentSessionPhase1, actor);
-    await updatePlacesSessionPhase1(newSessionPhase1, actor);
-  } catch (error) {
-    console.log("🚀 ~ updateSessionForLine ~ error:", error);
-    await transaction.abortTransaction();
-    throw error;
+    await updatePlacesSessionPhase1(session, actor);
   } finally {
     await endSession(transaction);
   }

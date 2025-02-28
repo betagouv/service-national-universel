@@ -30,6 +30,7 @@ import {
   SchemaDeRepartitionModel,
   ReferentModel,
   CohortModel,
+  SessionPhase1Model,
 } from "../../models";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
@@ -348,7 +349,14 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     await planDeTransport.save({ fromUser: req.user });
 
     if (sessionId && sessionId !== ligne.sessionId) {
-      await updateSessionForLine(ligne, sessionId, req.user, sendCampaign);
+      const session = await SessionPhase1Model.findById(sessionId);
+      if (!session) throw new Error(ERRORS.NOT_FOUND);
+      await updateSessionForLine({
+        ligne,
+        session,
+        actor: req.user,
+        sendCampaign,
+      });
     }
 
     const infoBus = await getInfoBus(ligne);
