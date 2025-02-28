@@ -7,7 +7,7 @@ waitForUpstream() {
     done
 }
 
-waitForUpstream("http://localhost:3000") # api
-waitForUpstream("http://localhost:3006") # apiv2
+waitForUpstream "http://127.0.0.1:3000" # api
+waitForUpstream "http://127.0.0.1:3006" # apiv2
 
 exec nginx -c nginx.conf
