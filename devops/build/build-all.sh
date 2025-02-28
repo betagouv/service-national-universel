@@ -50,6 +50,7 @@ mkdir -p $destination/apiv2/
 mv out/apiv2/{dist/*,node_modules} $destination/apiv2/
 
 envsubst '$APP_HOME $PORT' < devops/build/all/nginx.conf > $destination/nginx.conf
+mkdir -p $destination/nginx/proxy
 cp devops/build/all/{package.json,ecosystem.config.js,start-nginx.sh} $destination
 
 rm -Rf out
