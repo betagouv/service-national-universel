@@ -23,12 +23,6 @@ const DASHBOARD_TODOS_FUNCTIONS = {
     // Participation (À suivre) X volontaires n’ont pas confirmé leur participation au séjour de [Février 2023-C]
     // sejour_participation_non_confirmée
     PARTICIPATION_NOT_CONFIRMED: "participation_not_confirmed",
-    // Point de rassemblement (À déclarer) Au moins 1 point de rassemblement est à déclarer pour le séjour de [Février 2023-C].
-    // sejour_point_de_rassemblement_à_déclarer
-    MEETING_POINT_TO_DECLARE: "meeting_point_to_declare",
-    // Centre (À déclarer) Au moins 1 centre est en attente de déclaration pour le séjour de [Février 2023-C].
-    // sejour_centre_à_déclarer
-    CENTER_TO_DECLARE: "center_to_declare",
     // Emploi du temps (À relancer) X emplois du temps n’ont pas été déposés pour le séjour de [Février 2023 -C].
     // sejour_emploi_du_temps_non_déposé
     SCHEDULE_NOT_UPLOADED: "schedule_not_uploaded",
