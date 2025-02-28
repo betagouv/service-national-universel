@@ -102,23 +102,8 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
                 return;
             }
     
-            // 3. Récupérer les détails de chaque liste
-            const detailedLists: brevo.GetExtendedList[] = [];
-            for (const list of filteredLists) {
-                const listDetails = await this.contactsApi.getList(list.id);
-                detailedLists.push(listDetails.body);
-            }
-    
-            if (detailedLists.length === 0) {
-                this.logger.warn("Aucune liste avec une date de création valide.");
-                return;
-            }
-    
-            // 4. Trier les listes par date de création (du plus ancien au plus récent)
-            detailedLists.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
-    
-            // 5. Supprimer la plus ancienne liste
-            const oldestList = detailedLists[0];
+            // 3. Supprimer la plus ancienne liste
+            const oldestList = filteredLists[0];
             this.logger.log(`Suppression de la liste la plus ancienne : ${oldestList.name} (ID: ${oldestList.id})`);
     
             await this.contactsApi.deleteList(oldestList.id);
