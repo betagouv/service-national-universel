@@ -23,10 +23,10 @@ export default function Tooltip({
   const tooltipId = id ? `tooltip-${id}` : generateSlugHashId(title);
 
   function generateSlugHashId(input: string): string {
-    const utf8Bytes = new TextEncoder().encode(input);
-    const base64 = btoa(String.fromCharCode(...utf8Bytes));
-
-    const normalized = slugify(base64, { lower: true });
+    const normalized = input.normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "") //remove accents
+      .replaceAll(" ", "_") // remove spaces
+     .replace(/[^\/a-zA-Z0-9._-]/g, ""); // remove special characters
 
     return normalized.slice(0, 30);
   }
