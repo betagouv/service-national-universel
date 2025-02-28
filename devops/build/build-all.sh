@@ -9,7 +9,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-destination=$2
+destination=$1
 if [[ $destination == "" ]]; then
     echo "You must specify the destination directory"
     exit 1
