@@ -45,7 +45,7 @@ export default function TreeFilterExample() {
   const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(dataYoung.filters, getCohortGroups());
   return (
     <>
-      <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="a" savedFilter={savedFilterExample} />
+      {/* <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="a" savedFilter={savedFilterExample} />
       <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="b" />
       <ListeDiffusionFilterWrapper
         paramData={dataInscription.params}
@@ -53,12 +53,12 @@ export default function TreeFilterExample() {
         filters={filtersInscription}
         id="c"
         savedFilter={{ region: ["Auvergne-Rhône-Alpes"] }}
-      />
-      {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"a"} /> */}
+      /> */}
+      <TreeFilter treeFilter={tempDecoupledFilterData} id={"a"} />
       {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"b"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"d"} /> */}
-      {/* <TreeFilterWithoutHeadlessUi treeFilter={tempDecoupledFilterData} id={"a-2"} /> */}
+      <TreeFilterWithoutHeadlessUi treeFilter={tempDecoupledFilterData} id={"a-2"} />
     </>
   );
 }

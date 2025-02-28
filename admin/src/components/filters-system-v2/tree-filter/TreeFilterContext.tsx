@@ -2,117 +2,101 @@ import React, { createContext, useContext, useState } from "react";
 import { TreeNodeFilterType } from "./TreeFilter";
 
 interface TreeFilterContextType {
-  onCheckboxClick: (item: TreeNodeFilterType) => void;
-  getItemState: (value: string) => boolean;
-  isIndeterminate: (item: TreeNodeFilterType) => boolean;
-  getSelectedChildrenCount: (item: TreeNodeFilterType) => number;
+  onCheckboxClick: (nodeId: string) => void;
+  getItemState: (nodeId: string) => boolean;
+  isIndeterminate: (nodeId: string) => boolean;
+  getSelectedChildrenCount: (nodeId: string) => number;
   id: string;
   getSelectedItems: () => Set<string>;
+  getNode: (nodeId: string) => TreeNodeFilterType | undefined;
 }
 
 const TreeFilterContext = createContext<TreeFilterContextType | undefined>(undefined);
 
-export function TreeFilterProvider({ children, treeFilter, id }: { children: React.ReactNode; treeFilter: TreeNodeFilterType[]; id: string }) {
+export function TreeFilterProvider({ children, flatTree, id }: { children: React.ReactNode; flatTree: Record<string, TreeNodeFilterType>; id: string }) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
-  const getAllChildrenValues = (item: TreeNodeFilterType): string[] => {
-    let values: string[] = [];
-    if (item.children) {
-      item.children.forEach((child) => {
-        values = [...values, child.value, ...getAllChildrenValues(child)];
-      });
-    }
-    return values;
+  const getNode = (nodeId: string): TreeNodeFilterType | undefined => {
+    return flatTree[nodeId];
   };
 
-  const findParentInTree = (items: TreeNodeFilterType[], targetValue: string): TreeNodeFilterType | null => {
-    for (const item of items) {
-      if (item.children?.some((child) => child.value === targetValue)) {
-        return item;
-      }
-      if (item.children) {
-        const found = findParentInTree(item.children, targetValue);
-        if (found) return found;
-      }
-    }
-    return null;
+  const getAllDescendantIds = (nodeId: string): string[] => {
+    const node = getNode(nodeId);
+    if (!node?.childIds?.length) return [];
+
+    let descendants: string[] = [...node.childIds];
+    node.childIds.forEach((childId) => {
+      descendants = [...descendants, ...getAllDescendantIds(childId)];
+    });
+    return descendants;
   };
 
-  const getAncestors = (items: TreeNodeFilterType[], targetValue: string): TreeNodeFilterType[] => {
-    const ancestors: TreeNodeFilterType[] = [];
-    let currentParent = findParentInTree(items, targetValue);
+  // const getAncestorIds = (nodeId: string): string[] => {
+  //   const ancestors: string[] = [];
+  //   let node = getNode(nodeId);
+  //   while (node?.parentId) {
+  //     ancestors.push(node.parentId);
+  //     node = getNode(node.parentId);
+  //   }
+  //   return ancestors;
+  // };
 
-    while (currentParent) {
-      ancestors.push(currentParent);
-      currentParent = findParentInTree(items, currentParent.value);
-    }
-
-    return ancestors;
-  };
-
-  const shouldParentBeChecked = (item: TreeNodeFilterType): boolean => {
-    if (!item.children) return false;
-    return item.children.every((child) => {
-      const childValues = [child.value, ...getAllChildrenValues(child)];
-      return childValues.every((value) => selectedItems.has(value));
+  const shouldParentBeChecked = (nodeId: string): boolean => {
+    const node = getNode(nodeId);
+    if (!node?.childIds?.length) return false;
+    return node.childIds.every((childId) => {
+      const descendantIds = [childId, ...getAllDescendantIds(childId)];
+      return descendantIds.every((id) => selectedItems.has(id));
     });
   };
 
-  const onCheckboxClick = (item: TreeNodeFilterType) => {
+  const onCheckboxClick = (nodeId: string) => {
+    const node = getNode(nodeId);
+    if (!node) return;
+    const descendantIds = getAllDescendantIds(nodeId);
     setSelectedItems((prev) => {
       const newSet = new Set(prev);
-      const allChildrenValues = getAllChildrenValues(item);
-      const ancestors = getAncestors(treeFilter, item.value);
-      if (newSet.has(item.value)) {
-        // Uncheck item and all children
-        newSet.delete(item.value);
-        allChildrenValues.forEach((value) => newSet.delete(value));
-        // Clean up ancestors
-        ancestors.forEach((ancestor) => newSet.delete(ancestor.value));
-      } else {
-        // Check item and all children
-        newSet.add(item.value);
-        allChildrenValues.forEach((value) => newSet.add(value));
-        // Update ancestor selections if needed
-        ancestors.forEach((ancestor) => {
-          if (shouldParentBeChecked(ancestor)) {
-            newSet.add(ancestor.value);
-          } else {
-            newSet.delete(ancestor.value);
-          }
-        });
+      if (node.isLeaf && newSet.has(nodeId)) {
+        newSet.delete(nodeId);
+      } else if (node.isLeaf && !newSet.has(nodeId)) {
+        newSet.add(nodeId);
       }
 
+      if (!node.isLeaf) {
+        const haveChildrenSelected = descendantIds.some((id) => newSet.has(id));
+        if (haveChildrenSelected) {
+          descendantIds.forEach((id) => newSet.delete(id));
+        } else {
+          descendantIds.forEach((id) => newSet.add(id));
+        }
+      }
       return newSet;
     });
   };
 
-  const getItemState = (value: string): boolean => {
-    return selectedItems.has(value);
+  const shouldNodeBeChecked = (nodeId: string): boolean => {
+    const node = getNode(nodeId);
+    if (!node) return false;
+    return selectedItems.has(nodeId) || shouldParentBeChecked(nodeId);
   };
 
-  const isIndeterminate = (item: TreeNodeFilterType): boolean => {
-    if (!item.children) return false;
-    const childrenValues = getAllChildrenValues(item).filter((v) => v !== item.value);
-    const selectedChildren = childrenValues.filter((value) => selectedItems.has(value));
-    return selectedChildren.length > 0 && selectedChildren.length < childrenValues.length;
+  const getItemState = (nodeId: string): boolean => {
+    return selectedItems.has(nodeId) || shouldParentBeChecked(nodeId) || shouldNodeBeChecked(nodeId);
   };
 
-  const getLeafValues = (item: TreeNodeFilterType): string[] => {
-    let values: string[] = [];
-    if (!item.children) {
-      return [item.value];
-    }
-    item.children.forEach((child) => {
-      values = [...values, ...getLeafValues(child)];
-    });
-    return values;
+  const isIndeterminate = (nodeId: string): boolean => {
+    const node = getNode(nodeId);
+    if (!node?.childIds?.length) return false;
+    const descendantIds = getAllDescendantIds(nodeId).filter((id) => id !== nodeId);
+    const selectedDescendants = descendantIds.filter((id) => selectedItems.has(id));
+    return selectedDescendants.length > 0 && selectedDescendants.length < descendantIds.length;
   };
 
-  const getSelectedChildrenCount = (item: TreeNodeFilterType): number => {
-    if (!item.children) return 0;
-    const leafValues = getLeafValues(item).filter((v) => v !== item.value);
-    return leafValues.filter((value) => selectedItems.has(value)).length;
+  const getSelectedChildrenCount = (nodeId: string): number => {
+    const node = getNode(nodeId);
+    if (!node?.childIds?.length) return 0;
+    const leafIds = getAllDescendantIds(nodeId).filter((id) => id !== nodeId);
+    return leafIds.filter((id) => selectedItems.has(id)).length;
   };
 
   const getSelectedItems = (): Set<string> => {
@@ -120,14 +104,25 @@ export function TreeFilterProvider({ children, treeFilter, id }: { children: Rea
   };
 
   return (
-    <TreeFilterContext.Provider value={{ onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id, getSelectedItems }}>{children}</TreeFilterContext.Provider>
+    <TreeFilterContext.Provider
+      value={{
+        onCheckboxClick,
+        getItemState,
+        isIndeterminate,
+        getSelectedChildrenCount,
+        id,
+        getSelectedItems,
+        getNode,
+      }}>
+      {children}
+    </TreeFilterContext.Provider>
   );
 }
 
 export const useTreeFilter = () => {
   const context = useContext(TreeFilterContext);
   if (!context) {
-    throw new Error("useDecoupledFilter must be used within DecoupledFilterProvider");
+    throw new Error("useTreeFilter must be used within TreeFilterProvider");
   }
   return context;
 };
