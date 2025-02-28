@@ -1,7 +1,7 @@
 import React, { ReactNode } from "react";
 import ReactTooltip from "react-tooltip";
 import cx from "classnames";
-import slugify from "slugify";
+import { normalizeId } from "snu-lib";
 
 interface TooltipProps {
   id?: string;
@@ -20,16 +20,7 @@ export default function Tooltip({
   className,
   tooltipClassName,
 }: TooltipProps) {
-  const tooltipId = id ? `tooltip-${id}` : generateSlugHashId(title);
-
-  function generateSlugHashId(input: string): string {
-    const normalized = input.normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "") //remove accents
-      .replaceAll(" ", "_") // remove spaces
-     .replace(/[^\/a-zA-Z0-9._-]/g, ""); // remove special characters
-
-    return normalized.slice(0, 30);
-  }
+  const tooltipId = id ? `tooltip-${id}` : normalizeId(title);
 
   return (
     <div className={cx(className)}>

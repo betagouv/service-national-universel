@@ -215,6 +215,17 @@ const formatMessageForReadingInnerHTML = (content) => {
   return message;
 };
 
+function normalizeId(input: string): string {
+  return input
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") // Remove accents
+    .trim()
+    .replace(/\s+/g, "_") // Replace spaces with underscores
+    .replace(/[^a-zA-Z0-9._-]/g, "") // Remove special characters (except . _ -)
+    .toLowerCase() // Normalize to lowercase
+    .slice(0, 30); // Keep only the first 30 characters
+}
+
 export {
   isEndOfInscriptionManagement2021,
   isInRuralArea,
@@ -232,4 +243,5 @@ export {
   patternEmailAcademy,
   htmlCleaner,
   validateEmailAcademique,
+  normalizeId,
 };
