@@ -26,8 +26,6 @@ export default function SessionVolontairesButton({ session, centreId, sejour }: 
     enabled: !!sejour._id,
   });
 
-  console.log(youngCount);
-
   return (
     <div className="flex w-full flex-1 items-center justify-center rounded-md border-[1px] border-blue-300 bg-blue-100 mb-2">
       <Link className="rounded-md px-4 py-2 text-sm" to={`/centre/${centreId}/${sejour._id}/general`}>
