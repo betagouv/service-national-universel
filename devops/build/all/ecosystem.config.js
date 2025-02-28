@@ -28,9 +28,8 @@ module.exports = {
     },
     {
       name: 'nginx',
-      interpreter: 'nginx',
-      interpreter_args: '-c',
-      script: 'nginx.conf',
+      interpreter: 'bash',
+      script: 'start-nginx.sh'
     }
   ],
 };
