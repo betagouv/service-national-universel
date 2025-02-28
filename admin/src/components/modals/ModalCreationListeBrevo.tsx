@@ -58,14 +58,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
           <div className="space-y-6">
             <div>
-              <div>
-                <Label
-                  title="Dénomination de la liste de diffusion"
-                  tooltip="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo."
-                  name="name"
-                  className="text-gray-700 mb-2 flex items-center"
-                />
-              </div>
+              <Label
+                title="Dénomination de la liste de diffusion"
+                tooltip="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo."
+                name="name"
+                className="text-gray-700 mb-2 flex items-center"
+              />
               <Controller
                 name="name"
                 control={control}
