@@ -4,10 +4,10 @@ import { HiUsers } from "react-icons/hi";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import cx from "classnames";
 
-import { formatCohortPeriod } from "snu-lib";
+import { COHORTS, formatCohortPeriod } from "snu-lib";
 import { Select, BadgeNotif } from "@snu/ds/admin";
 import { CohortState } from "@/redux/cohorts/reducer";
-import { isBefore } from "date-fns";
+import { addDays, isBefore } from "date-fns";
 
 interface Props {
   cohort?: string | null;
@@ -34,7 +34,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
       updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
     return updatedCohorts.map((cohort) => {
-      const isOldCohort = isBefore(cohort.dateEnd, new Date());
+      const isOldCohort = cohort.name !== COHORTS.AVENIR && isBefore(addDays(cohort.dateEnd, 15), new Date());
       return {
         value: cohort.name,
         label: (

@@ -81,6 +81,30 @@ const AffectationService = {
       target: "API_V2",
     })();
   },
+  postSyncPlacesLigneDeBus: async (sessionId: string) => {
+    return await buildRequest<AffectationRoutes["PostSyncPlacesLignesDeBus"]>({
+      path: "/affectation/{sessionId}/ligne-de-bus/sync-places",
+      method: "POST",
+      params: { sessionId },
+      target: "API_V2",
+    })();
+  },
+  postSyncPlacesCentres: async (sessionId: string) => {
+    return await buildRequest<AffectationRoutes["PostSyncPlacesCentres"]>({
+      path: "/affectation/{sessionId}/centre/sync-places",
+      method: "POST",
+      params: { sessionId },
+      target: "API_V2",
+    })();
+  },
+  postSyncPlacesCentre: async (sessionId: string, centreId: string) => {
+    return await buildRequest<AffectationRoutes["PostSyncPlacesCentre"]>({
+      path: "/affectation/{sessionId}/centre/{centreId}/sync-places",
+      method: "POST",
+      params: { sessionId, centreId },
+      target: "API_V2",
+    })();
+  },
 };
 
 export { AffectationService };
