@@ -7,8 +7,9 @@ interface TreeFilterContextType {
   isIndeterminate: (nodeId: string) => boolean;
   getSelectedChildrenCount: (nodeId: string) => number;
   id: string;
-  getSelectedItems: () => Set<string>;
+  getSelectedItems: () => Record<string, string[]>;
   getNode: (nodeId: string) => TreeNodeFilterType | undefined;
+  deleteNode: (nodeId: string) => void;
 }
 
 const TreeFilterContext = createContext<TreeFilterContextType | undefined>(undefined);
@@ -30,16 +31,6 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
     });
     return descendants;
   };
-
-  // const getAncestorIds = (nodeId: string): string[] => {
-  //   const ancestors: string[] = [];
-  //   let node = getNode(nodeId);
-  //   while (node?.parentId) {
-  //     ancestors.push(node.parentId);
-  //     node = getNode(node.parentId);
-  //   }
-  //   return ancestors;
-  // };
 
   const shouldParentBeChecked = (nodeId: string): boolean => {
     const node = getNode(nodeId);
@@ -74,6 +65,22 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
     });
   };
 
+  const deleteNode = (nodeId: string) => {
+    const node = getNode(nodeId);
+    if (!node) return;
+    const descendantIds = getAllDescendantIds(nodeId);
+    setSelectedItems((prev) => {
+      const newSet = new Set(prev);
+      if (!node.isLeaf) {
+        const haveChildrenSelected = descendantIds.some((id) => newSet.has(id));
+        if (haveChildrenSelected) {
+          descendantIds.forEach((id) => newSet.delete(id));
+        }
+      }
+      return newSet;
+    });
+  };
+
   const shouldNodeBeChecked = (nodeId: string): boolean => {
     const node = getNode(nodeId);
     if (!node) return false;
@@ -99,8 +106,18 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
     return leafIds.filter((id) => selectedItems.has(id)).length;
   };
 
-  const getSelectedItems = (): Set<string> => {
-    return selectedItems;
+  const getSelectedItems = (): Record<string, string[]> => {
+    const result: Record<string, string[]> = {};
+    selectedItems.forEach((item) => {
+      const [key, ...value] = item.split("-");
+      if (!result[key]) {
+        result[key] = [];
+      }
+      if (value.length > 0) {
+        result[key].push(value.join("-"));
+      }
+    });
+    return result;
   };
 
   return (
@@ -113,6 +130,7 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
         id,
         getSelectedItems,
         getNode,
+        deleteNode,
       }}>
       {children}
     </TreeFilterContext.Provider>

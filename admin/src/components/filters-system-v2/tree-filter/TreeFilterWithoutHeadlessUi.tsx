@@ -2,6 +2,7 @@ import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import React, { useEffect, useRef, useState } from "react";
 import { TreeFilterProps, TreeNodeFilter } from "./TreeFilter";
 import { TreeFilterProvider, useTreeFilter } from "./TreeFilterContext";
+import { BsTrash } from "react-icons/bs";
 
 const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void) => {
   useEffect(() => {
@@ -46,7 +47,7 @@ export function TreeFilterWithoutHeadlessUi({ id, treeFilter }: TreeFilterProps)
 }
 
 function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }) {
-  const { id, getNode } = useTreeFilter();
+  const { id, getNode, deleteNode } = useTreeFilter();
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, () => setIsOpen(false));
@@ -56,13 +57,12 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
 
   if (!item.childIds?.length) {
     return (
-      <div className="flex items-center cursor-pointer gap-2 p-2 overflow-y-auto">
+      <div className="flex items-center cursor-pointer gap-2 p-2 overflow-y-auto hover:bg-gray-100">
         <TreeNodeFilter nodeId={nodeId} />
       </div>
     );
   }
 
-  // const overflow = item.childIds.length === 0 ? "overflow-y-auto" : "";
   const isLeaf = item.childIds?.every((childId) => {
     const child = getNode(childId);
     return child?.isLeaf;
@@ -70,12 +70,22 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
 
   return (
     <div className="relative" ref={ref}>
-      <div className={`flex w-full cursor-pointer items-center gap-2 p-2 ${isOpen ? "bg-gray-100" : ""}`} onClick={() => setIsOpen(!isOpen)}>
+      <div className={`flex w-full cursor-pointer items-center gap-2 p-2 hover:bg-gray-100`} onClick={() => setIsOpen(!isOpen)}>
         <TreeNodeFilter nodeId={nodeId} />
       </div>
       {isOpen && (
         <div className={`absolute left-full top-0 z-10 ml-2 w-60 max-h-[500px] ${isLeaf ? "overflow-y-auto" : ""} rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}>
-          <div className="px-3 pt-3 text-xs font-light leading-5 text-gray-700">{item?.label}</div>
+          <div className="flex items-center align-middle gap-2 justify-between px-3 pt-3 text-xs font-light leading-5 text-gray-700">
+            <div className="px-3 pt-3 text-xs font-light leading-5 text-gray-700">{item?.label}</div>
+            <BsTrash
+              className="h-4 w-4 text-gray-400 hover:text-red-500 cursor-pointer"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteNode(nodeId);
+              }}
+            />
+          </div>
+
           <div className="flex flex-col py-2 v-gap-2">{item.childIds?.map((childId) => <InnerLevelTreeFilter key={`next-level-${id}-${childId}`} nodeId={childId} />)}</div>
         </div>
       )}
@@ -85,13 +95,18 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
 
 const SelectedValues = () => {
   const { getSelectedItems } = useTreeFilter();
-  const selectedItems = Array.from(getSelectedItems());
+  const selectedItems = getSelectedItems();
 
   return (
     <div className="mt-2 flex flex-wrap gap-2">
-      {selectedItems.map((value) => (
-        <div key={`selected-values-${value}`} className="flex w-fit flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px]">
-          <div className="text-xs font-medium text-gray-700">{value}</div>
+      {Object.entries(selectedItems).map(([key, values]) => (
+        <div key={`selected-group-${key}`} className="flex flex-row items-center gap-2">
+          <span className="text-xs font-semibold text-gray-600">{key}:</span>
+          {values.map((value) => (
+            <div key={`selected-value-${key}-${value}`} className="flex w-fit flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px]">
+              <div className="text-xs font-medium text-gray-700">{value}</div>
+            </div>
+          ))}
         </div>
       ))}
     </div>

@@ -126,37 +126,43 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
   );
 }
 
-export function TreeNodeFilter({ nodeId }: { nodeId: string }) {
-  const { onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id, getNode } = useTreeFilter();
-  const item = getNode(nodeId);
-  if (!item) return null;
+export const TreeNodeFilter = React.memo(
+  function TreeNodeFilter({ nodeId }: { nodeId: string }) {
+    const { onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id, getNode } = useTreeFilter();
+    const item = getNode(nodeId);
+    if (!item) return null;
 
-  const selectedChildrenCount = getSelectedChildrenCount(nodeId);
-  return (
-    <div className={cx("flex items-center gap-2 pl-2 ")} onClick={() => onCheckboxClick(item.id)}>
-      {!item.isRoot && (
-        <input
-          // className="hover:cursor-pointer"
-          key={`input-${id}-${item.value}`}
-          type="checkbox"
-          checked={getItemState(item.id)}
-          ref={(input) => {
-            if (input) {
-              input.indeterminate = isIndeterminate(item.id);
-            }
-          }}
-        />
-      )}
-
-      <div className="flex items-center gap-2">
-        <span>{item.label}</span>
-        {item.count && <span>({item.count})</span>}
-        {!!selectedChildrenCount && (
-          <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">{selectedChildrenCount}</div>
+    const selectedChildrenCount = getSelectedChildrenCount(nodeId);
+    return (
+      <div className={cx("flex items-center gap-2 pl-2 ")}>
+        {!item.isRoot && (
+          <input
+            // className="hover:cursor-pointer"
+            key={`input-${id}-${item.value}`}
+            type="checkbox"
+            checked={getItemState(item.id)}
+            ref={(input) => {
+              if (input) {
+                input.indeterminate = isIndeterminate(item.id);
+              }
+            }}
+            onChange={() => onCheckboxClick(item.id)}
+          />
         )}
-      </div>
 
-      {item.childIds && <span className="absolute right-4">{">"}</span>}
-    </div>
-  );
-}
+        <div className="flex items-center gap-2">
+          <span>{item.label}</span>
+          {item.count && <span>({item.count})</span>}
+          {!!selectedChildrenCount && (
+            <div className="flex h-6 w-6 items-center justify-center rounded-full bg-indigo-100 text-xs font-normal text-blue-600">{selectedChildrenCount}</div>
+          )}
+        </div>
+
+        {item.childIds && <span className="absolute right-4">{">"}</span>}
+      </div>
+    );
+  },
+  (prevProps, nextProps) => {
+    return prevProps.nodeId === nextProps.nodeId;
+  },
+);
