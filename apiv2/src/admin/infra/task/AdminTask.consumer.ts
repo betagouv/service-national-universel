@@ -40,6 +40,8 @@ export class AdminTaskConsumer extends WorkerHost {
                 switch (job.name) {
                     case TaskName.AFFECTATION_HTS_SIMULATION:
                     case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
+                    case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION:
+                    case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER:
                     case TaskName.AFFECTATION_CLE_SIMULATION:
                     case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
                     case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:

@@ -4,26 +4,33 @@ import { logger } from "../../../logger";
 import { PointDeRassemblementCSV, PointDeRassemblementImportMapped } from "./pointDeRassemblementImport";
 
 export const mapPointDeRassemblements = (rawPdrs: PointDeRassemblementCSV[]): PointDeRassemblementImportMapped[] => {
-  return rawPdrs.map((rawPdr) => {
-    const rawPdrWithoutId: PointDeRassemblementImportMapped = {
-      // attention de garder le caractere spécial à la place de l'espace dans le nom de colonne
-      name: rawPdr["Point de Rassemblement : Désignation"],
-      address: rawPdr.Adresse,
-      complementAddress: rawPdr["Particularités pour accès"],
-      particularitesAcces: rawPdr["Particularités pour accès"],
-      city: rawPdr.Commune,
-      zip: rawPdr["Code postal"],
-      department: mapDepartment(rawPdr["Département"]),
-      region: mapRegion(rawPdr["Région académique"]),
-      academie: mapAcademy(rawPdr["Académie"]),
-      matricule: rawPdr["Matricule du point de rassemblement"],
-      uai: rawPdr["UAI"],
-      numeroOrdre: rawPdr["Numéro d'ordre"],
-      dateCreation: parseDate(rawPdr["Point de Rassemblement : Date de création"], "dd/MM/yyyy", new Date()),
-      dateDebutValidite: parseDate(rawPdr["Date  début validité de l'enregistrement"], "dd/MM/yyyy", new Date()),
-      dateDerniereModification: parseDate(rawPdr["Point de Rassemblement : Date de dernière modification"], "dd/MM/yyyy", new Date()),
-      // code: rawPdr["Matricule du point de rassemblement"],
-    };
+  return rawPdrs.map((rawPdr, index) => {
+    let rawPdrWithoutId: PointDeRassemblementImportMapped;
+    try {
+      rawPdrWithoutId = {
+        // attention de garder le caractere spécial à la place de l'espace dans le nom de colonne
+        name: rawPdr["Point de Rassemblement : Désignation"],
+        address: rawPdr.Adresse,
+        complementAddress: rawPdr["Particularités pour accès"],
+        particularitesAcces: rawPdr["Particularités pour accès"],
+        city: rawPdr.Commune,
+        zip: rawPdr["Code postal"],
+        department: mapDepartment(rawPdr["Département"]),
+        region: mapRegion(rawPdr["Région académique"]),
+        academie: mapAcademy(rawPdr["Académie"]),
+        matricule: rawPdr["Matricule du point de rassemblement"],
+        uai: rawPdr["UAI"],
+        numeroOrdre: rawPdr["Numéro d'ordre"],
+        dateCreation: parseDate(rawPdr["Point de Rassemblement : Date de création"], "dd/MM/yyyy", new Date()),
+        dateDebutValidite: parseDate(rawPdr["Date  début validité de l'enregistrement"], "dd/MM/yyyy", new Date()),
+        dateDerniereModification: parseDate(rawPdr["Point de Rassemblement : Date de dernière modification"], "dd/MM/yyyy", new Date()),
+        // code: rawPdr["Matricule du point de rassemblement"],
+      };
+    } catch (e) {
+      logger.error(`Error line  ${index + 1} while mapping PDR ${rawPdr["Matricule du point de rassemblement"]}`, e);
+      logger.error("Date de création: " + rawPdr["Point de Rassemblement : Date de création"]);
+      throw e;
+    }
     if (!rawPdrWithoutId.name) {
       throw new Error("NO NAME " + rawPdrWithoutId.matricule);
     }

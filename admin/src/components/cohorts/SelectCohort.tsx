@@ -4,9 +4,10 @@ import { HiUsers } from "react-icons/hi";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import cx from "classnames";
 
-import { formatCohortPeriod } from "snu-lib";
+import { COHORTS, formatCohortPeriod } from "snu-lib";
 import { Select, BadgeNotif } from "@snu/ds/admin";
 import { CohortState } from "@/redux/cohorts/reducer";
+import { addDays, isBefore } from "date-fns";
 
 interface Props {
   cohort?: string | null;
@@ -19,7 +20,7 @@ interface Props {
   isSearchable?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChange, disabled, className, isSearchable }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort = "dateStart", filterFn, onChange, disabled, className, isSearchable }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -32,16 +33,26 @@ export default function SelectCohort({ cohort, withBadge, sort, filterFn, onChan
     if (sort) {
       updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
-    return updatedCohorts.map((cohort) => ({
-      value: cohort.name,
-      label: (
-        <div className="flex flex-nowrap items-center justify-start gap-1.5 p-2.5 w-full">
-          <HiUsers size={24} className="mt-0.5 mr-1 min-w-[24px]" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
-          <span className="text-gray-500 font-medium whitespace-nowrap">{formatCohortPeriod(cohort, "short")}</span>
-          <span className="text-gray-900 font-bold text-ellipsis overflow-hidden whitespace-nowrap">{`${cohort.name} `}</span>
-        </div>
-      ),
-    }));
+    return updatedCohorts.map((cohort) => {
+      const isOldCohort = cohort.name !== COHORTS.AVENIR && isBefore(addDays(cohort.dateEnd, 15), new Date());
+      return {
+        value: cohort.name,
+        label: (
+          <div
+            className={cx("flex flex-nowrap items-center justify-start gap-1.5 p-2.5 w-full", {
+              "saturate-0": isOldCohort,
+            })}>
+            <HiUsers size={24} className="mt-0.5 mr-1 min-w-[24px]" color={cohort.name.includes("CLE") ? "#EC4899" : "#6366F1"} />
+            <span className="text-gray-500 font-medium whitespace-nowrap">{formatCohortPeriod(cohort, "short")}</span>
+            <span
+              className={cx("text-ellipsis overflow-hidden whitespace-nowrap font-bold", {
+                "text-gray-900": !isOldCohort,
+                "text-gray-500": isOldCohort,
+              })}>{`${cohort.name} `}</span>
+          </div>
+        ),
+      };
+    });
   }, [cohorts, filterFn, sort]);
 
   const currentCohortName = cohort ?? options?.[0]?.value;

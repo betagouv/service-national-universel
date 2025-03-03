@@ -83,7 +83,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   const refInput = React.useRef<HTMLInputElement>(null);
   const refButtonChangesPDR = React.useRef<HTMLButtonElement>(null);
 
-  const youngsCount = volume?.find((v) => v.meetingPointId === selectedPDR._id)?.youngsCount || 0;
+  const youngsCount = volume?.find((v) => v.meetingPointId === pdr._id)?.youngsCount || 0;
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -132,6 +132,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     const searchFields = ["name", "address", "particularitesAcces", "region", "department", "code", "city", "zip", "matricule"];
 
     const filteredPDR = listPDR.filter((item) => {
+      if (selectedPDR?._id === item._id) return false;
       if (search === "") return true;
       return searchFields.some((field) => item[field]?.toString().toLowerCase().includes(search.toLowerCase()));
     });

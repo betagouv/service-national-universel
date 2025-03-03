@@ -72,6 +72,7 @@ import {
   ContractType,
   CohortType,
   ReferentType,
+  getCohortPeriod,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -1072,9 +1073,12 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
       // youngPhase1Agreement est forcément true ici
       let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
       let cc = getCcOfYoung({ template, young });
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT, {
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      await sendTemplate(template, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
+          cta: `${config.APP_URL}`,
+          date_cohorte: cohort ? getCohortPeriod(cohort) : "",
           youngFirstName: young.firstName,
           youngLastName: young.lastName,
         },

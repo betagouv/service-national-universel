@@ -78,7 +78,6 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
         @Inject(ValiderAffectationCLEService) private validerAffectationCLEService: ValiderAffectationCLEService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
@@ -124,9 +123,8 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
             // Controle de coherence
             const erreur = this.validerAffectationCLEService.checkValiderAffectation(jeuneRapport, jeune, sejour);
             if (erreur) {
-                rapportData.push(
-                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, undefined, undefined, erreur),
-                );
+                rapportData.push(this.validerAffectationCLEService.formatJeuneRapport({ jeune, sejour, erreur }));
+                analytics.errors += 1;
                 continue;
             }
 
@@ -155,17 +153,13 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
             };
 
             this.logger.log(
-                `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${
-                    jeuneUpdated.sejourId
-                }, ligneDeBus: ${jeuneUpdated.ligneDeBusId}, pdr: ${jeuneUpdated.pointDeRassemblementId}, ${
+                `🚀 Jeune affecté: ${jeune.id}, centre: ${jeuneUpdated.centreId}, sejour: ${jeuneUpdated.sejourId}, ${
                     jeuneUpdated.hasPDR
                 } (${analytics.jeunesAffected + 1}/${jeuneAAffecterList.length})`,
             );
 
             jeunesUpdatedList.push(jeuneUpdated);
-            rapportData.push(
-                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, undefined, undefined),
-            );
+            rapportData.push(this.validerAffectationCLEService.formatJeuneRapport({ jeune: jeuneUpdated, sejour }));
             analytics.jeunesAffected += 1;
         }
 
@@ -175,7 +169,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
 
         // mise à jour des placesRestantes dans les centres
         this.logger.log(`Mise à jour des places dans les séjours`);
-        await this.sejoursGateway.bulkUpdate(sejoursList);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejoursList);
 
         this.cls.set("user", null);
 
@@ -184,7 +178,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
 
         // upload du rapport du s3
         const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
-        const fileName = `affectation-cle/affectation_${sessionId}_${timestamp}.xlsx`;
+        const fileName = `affectation-cle-dromcom/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
             {

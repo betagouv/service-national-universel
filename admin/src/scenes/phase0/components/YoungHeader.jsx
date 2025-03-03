@@ -170,6 +170,9 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
         onChange && onChange();
         toastr.success("Mis à jour!", "");
       },
+      onError: (e) => {
+        toastr.error(translate(e.message), "");
+      },
     });
   }
 

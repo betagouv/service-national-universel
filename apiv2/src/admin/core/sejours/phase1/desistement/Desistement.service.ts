@@ -61,7 +61,7 @@ export class DesistementService {
         ];
         if (lignesDeBusIds.length > 0) {
             const lignesDeBus = await this.ligneDeBusGateway.findByIds(lignesDeBusIds);
-            await this.affectationService.syncPlaceDisponiblesLigneDeBus(lignesDeBus);
+            await this.affectationService.syncPlacesDisponiblesLignesDeBus(lignesDeBus);
         }
 
         return res;
