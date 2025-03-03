@@ -1,26 +1,34 @@
 import React from "react";
 import { Button, Collapsable, Container, Label } from "@snu/ds/admin";
-import { ListeDiffusionEnum } from "snu-lib";
+import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
 import RadioButton from "@/scenes/phase0/components/RadioButton";
+import ListeDiffusionFilterWrapper from "../campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
 
 export interface ListeDiffusionDataProps {
   id: string;
   nom: string;
   type: ListeDiffusionEnum;
+  filters: ListeDiffusionFiltres;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+}
+interface ListeDiffusionFiltersView {
+  paramData: any;
+  dataFilter: any;
+  filters: any;
 }
 export interface DraftListeDiffusionDataProps extends Partial<ListeDiffusionDataProps> {}
 
 interface ListeDiffusionFormProps {
   listeDiffusionData: DraftListeDiffusionDataProps;
+  filter: { volontaires: ListeDiffusionFiltersView; inscriptions: ListeDiffusionFiltersView };
   onSave: (data: ListeDiffusionDataProps) => void;
   onCancel: () => void;
 }
 
-export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: ListeDiffusionFormProps) => {
+export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel }: ListeDiffusionFormProps) => {
   const {
     control,
     handleSubmit,
@@ -45,6 +53,12 @@ export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: Lis
     onSave(data);
     reset(data);
   };
+
+  let filtersView = filter?.volontaires;
+  if (listeDiffusionData.type === ListeDiffusionEnum.INSCRIPTIONS) {
+    filtersView = filter?.inscriptions;
+  }
+  console.log("filtersView", filtersView);
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
@@ -96,7 +110,21 @@ export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: Lis
           <hr className="border-t border-gray-200" />
           <div className="flex items-center gap-6">
             <Label title="Filtres" name="filtres" className="!text-xl text-gray-900 self-center" />
-            <Button title="Filtres TODO" type="secondary" disabled={true} className="text-sm" />
+            <Controller
+              name="filters"
+              control={control}
+              rules={{ required: "Ce champ est requis" }}
+              render={({ field }) => (
+                <ListeDiffusionFilterWrapper
+                  paramData={filtersView?.paramData}
+                  dataFilter={filtersView?.dataFilter}
+                  filters={filtersView.filters}
+                  id={listeDiffusionData.id}
+                  selectedFilters={field.value}
+                  onFiltersChange={field.onChange}
+                />
+              )}
+            />
           </div>
         </div>
 

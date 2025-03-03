@@ -1,82 +1,28 @@
-import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, useCallback, useEffect, useRef, useState } from "react";
-import { useHistory, useLocation } from "react-router-dom";
-import { toastr } from "react-redux-toastr";
+import { Popover, PopoverButton, PopoverPanel, Transition } from "@headlessui/react";
+import React, { Fragment, useEffect, useRef, useState } from "react";
 
-import FilterSvg from "../../../assets/icons/Filter";
-import FilterPopOver from "./filters/FilterPopOver";
-import ViewPopOver from "./filters/SavedViewPopOver";
+import FilterSvg from "../../../../assets/icons/Filter";
 
-import api from "../../../services/api";
-import { buildQuery, getURLParam, currentFilterAsUrl, normalizeString } from "./filters/utils";
-import { debounce } from "@/utils";
-import { IntermediateFilter } from "./filters/IntermediateFilter";
+import FilterPopOver from "@/components/filters-system-v2/components/filters/FilterPopOver";
+import { IntermediateFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
+import { normalizeString } from "@/components/filters-system-v2/components/filters/utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
+import cx from "classnames";
 
-function classNames(...classes) {
-  return classes.filter(Boolean).join(" ");
-}
-
-export interface Filter {
-  title?: string;
-  name?: string;
-  missingLabel?: string;
-  translate?: (item: any) => any;
-  filter?: any[];
-  // custom ?
-  parentGroup?: string;
-  customComponent?: any;
-  defaultValue?: string | string[];
-  isSingle?: boolean;
-  reduce?: (value: any[]) => any[];
-  sort?: (value: any[]) => any[];
-  getQuery?: (value: any) => any;
-  allowEmpty?: boolean;
-  disabledBaseQuery?: boolean;
-  options?: any;
-}
-
-interface FiltersProps {
-  route: string;
-  pageId: string;
+interface ListeDiffusionFiltersProps {
   filters: Filter[];
-  searchPlaceholder?: string;
-  setData: (data: any) => void;
-  selectedFilters: { [key: string]: Filter };
-  setSelectedFilters: (filters: { [key: string]: Filter }) => void;
-  paramData: any;
-  setParamData: (data: any) => void;
-  defaultUrlParam?: any;
-  size?: any;
+  selectedFilters: { [key: string]: { filter: string[] } };
+  onFiltersChange: (filters: { [key: string]: { filter: string[] } }) => void;
+  dataFilter: any;
   intermediateFilters?: any[];
-  disabled?: boolean;
 }
 
-export default function Filters({
-  route,
-  pageId,
-  filters,
-  searchPlaceholder = "",
-  setData,
-  selectedFilters,
-  setSelectedFilters,
-  paramData,
-  setParamData,
-  defaultUrlParam = undefined,
-  size,
-  intermediateFilters = [],
-  disabled = false,
-}: FiltersProps) {
-  console.log("Filters", filters);
+// Copy from ES coupled component : @/components/filters-system-v2/components/Filters
+export default function ListeDiffusionFilters({ filters, selectedFilters, onFiltersChange, dataFilter, intermediateFilters = [] }: ListeDiffusionFiltersProps) {
   const [search, setSearch] = useState("");
-  const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
   const [categories, setCategories] = useState<string[]>([]);
-  const [savedView, setSavedView] = useState([]);
-  const [firstLoad, setFirstLoad] = useState(true);
   const [isShowing, setIsShowing] = useState<string | boolean>(false);
-
-  const location = useLocation();
-  const history = useHistory();
 
   const ref = useRef<HTMLButtonElement>(null);
   const refFilter = useRef<HTMLDivElement>(null);
@@ -89,11 +35,8 @@ export default function Filters({
 
   // Initialization
   useEffect(() => {
-    // Initialize selected filters based on URL params.
-    updateFiltersFromParams(location.search);
-
-    // Load saved view (i.e. saved filters)
-    updateSavedViewFromDbFilters();
+    const defaultFilters = getDefaultFilters();
+    onFiltersChange({ ...defaultFilters, ...selectedFilters });
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {
@@ -134,38 +77,6 @@ export default function Filters({
     [filtersVisible],
   );
 
-  const updateOnParamChange = useCallback(
-    debounce(async (selectedFilters, paramData, location, route, size) => {
-      buildQuery(route, selectedFilters, paramData?.page, filters, paramData?.sort, size).then((res) => {
-        if (!res) return;
-        setDataFilter({ ...dataFilter, ...res.newFilters });
-        const newParamData: {
-          count: number;
-          filters: { [key: string]: Filter };
-          page?: number;
-        } = {
-          count: res.count,
-          filters: { ...dataFilter, ...res.newFilters },
-        };
-        if (paramData.count !== res.count && !firstLoad) newParamData.page = 0;
-        setParamData((paramData) => ({ ...paramData, ...newParamData }));
-        setData(res.data);
-        if (firstLoad) setFirstLoad(false);
-
-        // Hack: avoid unwanted refresh: https://stackoverflow.com/a/61596862/978690
-        const search = `?${currentFilterAsUrl(selectedFilters, paramData?.page, filters, defaultUrlParam)}`;
-        const { pathname } = history.location;
-        if (location.search !== search) window.history.replaceState({ path: pathname + search }, "", pathname + search);
-      });
-    }, 250),
-    [firstLoad],
-  );
-
-  useEffect(() => {
-    if (Object.keys(selectedFilters).length === 0) return;
-    updateOnParamChange(selectedFilters, paramData, location, route, size);
-  }, [selectedFilters, paramData.page, paramData.sort, location, route, size]);
-
   const getDefaultFilters = () => {
     const newFilters = {};
     filters.map((f) => {
@@ -178,72 +89,24 @@ export default function Filters({
     return newFilters;
   };
 
-  const updateSavedViewFromDbFilters = async () => {
-    try {
-      const res = await api.get("/filters/" + pageId);
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
-      setSavedView(res.data);
-    } catch (error) {
-      console.log(error);
-      toastr.error("Oops, une erreur est survenue lors du chargement des filtres", "");
-    }
-  };
-
-  const handleDeleteFilter = async (id) => {
-    try {
-      const res = await api.remove("/filters/" + id);
-      if (!res.ok) return toastr.error("Oops, une erreur est survenue", "");
-      toastr.success("Filtre supprimé avec succès", "");
-      updateSavedViewFromDbFilters();
-      return;
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  function updateFiltersFromParams(params) {
-    const defaultFilters = getDefaultFilters();
-    const initialFilters = getURLParam(new URLSearchParams(params), setParamData, filters);
-    setSelectedFilters({ ...defaultFilters, ...initialFilters });
-  }
-
-  const handleSelectUrl = (params) => {
-    updateFiltersFromParams(params);
-    setIsShowing(false);
-  };
-
-  if (disabled) return null;
-
   return (
     <div>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-start gap-2">
-          <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
-            <input
-              name={"searchbar"}
-              placeholder={searchPlaceholder}
-              value={selectedFilters?.searchbar?.filter?.[0] || ""}
-              onChange={(e) => {
-                setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
-              }}
-              className={`h-full w-full text-xs text-gray-600`}
-            />
-          </div>
-
           <Popover className="relative">
             {({ open }) => (
               <>
-                <Popover.Button
+                <PopoverButton
                   ref={ref}
                   onClick={() => setIsShowing(!isShowing)}
-                  className={classNames(
+                  className={cx(
                     open ? "ring-2 ring-blue-500 ring-offset-2" : "",
                     "flex h-[38px] cursor-pointer items-center gap-2 rounded-lg px-3 text-[14px] font-medium  outline-none",
                     hasSomeFilterSelected ? "bg-[#2563EB] text-white hover:bg-blue-700" : "bg-gray-100 text-gray-700 hover:bg-gray-200",
                   )}>
                   <FilterSvg className={`${hasSomeFilterSelected ? "text-white" : "text-gray-400"} h-4 w-4`} />
                   <span>Filtres</span>
-                </Popover.Button>
+                </PopoverButton>
 
                 <Transition
                   as={Fragment}
@@ -254,18 +117,9 @@ export default function Filters({
                   leave="transition ease-in duration-150"
                   leaveFrom="opacity-100 translate-y-0"
                   leaveTo="opacity-0 translate-y-1">
-                  <Popover.Panel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
+                  <PopoverPanel ref={refFilter} className="absolute left-0 z-10 mt-2 w-[305px]">
                     <div className="rounded-lg shadow-lg">
                       <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
-                        {savedView.length > 0 && (
-                          <ViewPopOver
-                            setIsShowing={(value) => setIsShowing(value)}
-                            isShowing={isShowing === "view"}
-                            savedView={savedView}
-                            handleSelect={handleSelectUrl}
-                            handleDelete={handleDeleteFilter}
-                          />
-                        )}
                         <input
                           type="text"
                           value={search}
@@ -275,7 +129,7 @@ export default function Filters({
                         />
                         <div className="flex flex-col overflow-y-auto">
                           {categories.map((category, index) => (
-                            <div key={category || "default"}>
+                            <div key={"key-" + category || "default"}>
                               {index !== 0 && <hr className="my-2 border-gray-100" />}
                               <div className="px-4 text-xs font-light leading-5 text-gray-500">{category}</div>
                               {filtersVisible
@@ -287,12 +141,13 @@ export default function Filters({
                                     customItem = {
                                       ...item,
                                       allowEmpty: false,
+                                      //@ts-ignore unknown property
+                                      showCount: false,
                                       customComponent: (setFilter, filter) => (
                                         <IntermediateFilter
-                                          // @ts-expect-error
                                           selectedFilters={selectedFilters}
-                                          setSelectedFilters={setSelectedFilters}
-                                          setParamData={setParamData}
+                                          setSelectedFilters={onFiltersChange}
+                                          setParamData={() => {}}
                                           intermediateFilter={intermediateFilter}
                                           dataFilter={dataFilter}
                                           setFilter={setFilter}
@@ -303,15 +158,13 @@ export default function Filters({
                                   return (
                                     <FilterPopOver
                                       key={item.title}
-                                      // @ts-expect-error
                                       filter={customItem}
-                                      // @ts-expect-error
                                       selectedFilters={selectedFilters}
-                                      setSelectedFilters={setSelectedFilters}
+                                      setSelectedFilters={onFiltersChange}
                                       data={item?.disabledBaseQuery ? item.options : dataFilter[item?.name || ""] || []}
                                       isShowing={isShowing === item.name}
                                       setIsShowing={(value) => setIsShowing(value)}
-                                      setParamData={setParamData}
+                                      setParamData={() => {}}
                                     />
                                   );
                                 })}
@@ -320,7 +173,7 @@ export default function Filters({
                         </div>
                       </div>
                     </div>
-                  </Popover.Panel>
+                  </PopoverPanel>
                 </Transition>
               </>
             )}

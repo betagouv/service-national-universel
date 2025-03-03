@@ -1,9 +1,10 @@
-import { ListeDiffusionEnum } from "snu-lib";
+import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 
 export interface ListeDiffusionModel {
     id: string;
     nom: string;
     type: ListeDiffusionEnum;
+    filters: ListeDiffusionFiltres;
     createdAt?: Date;
     updatedAt?: Date;
 }

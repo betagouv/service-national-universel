@@ -1,6 +1,5 @@
-
-import { ListeDiffusionType } from 'snu-lib';
-import { CreateListeDiffusionModel, ListeDiffusionModel } from '../core/ListeDiffusion.model';
+import { ListeDiffusionType } from "snu-lib";
+import { CreateListeDiffusionModel, ListeDiffusionModel } from "../core/ListeDiffusion.model";
 
 export class ListeDiffusionMapper {
     static toModel(document: ListeDiffusionType): ListeDiffusionModel {
@@ -8,6 +7,7 @@ export class ListeDiffusionMapper {
             id: document._id.toString(),
             nom: document.nom,
             type: document.type,
+            filters: document.filters,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
@@ -18,13 +18,17 @@ export class ListeDiffusionMapper {
             _id: model.id,
             nom: model.nom,
             type: model.type,
+            filters: model.filters,
         };
     }
 
-    static toEntityCreate(model: CreateListeDiffusionModel): Omit<ListeDiffusionType, "_id" | "createdAt" | "updatedAt"> {
+    static toEntityCreate(
+        model: CreateListeDiffusionModel,
+    ): Omit<ListeDiffusionType, "_id" | "createdAt" | "updatedAt"> {
         return {
             nom: model.nom,
             type: model.type,
+            filters: model.filters,
         };
     }
 }

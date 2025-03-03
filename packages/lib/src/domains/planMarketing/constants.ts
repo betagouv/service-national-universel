@@ -16,3 +16,7 @@ export enum ListeDiffusionEnum {
   VOLONTAIRES = "Volontaires",
   INSCRIPTIONS = "Inscriptions",
 }
+
+export interface ListeDiffusionFiltres {
+  [key: string]: string[];
+}

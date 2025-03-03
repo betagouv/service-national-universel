@@ -1,10 +1,11 @@
-import { ListeDiffusionEnum } from "../..";
+import { ListeDiffusionEnum, ListeDiffusionFiltres } from "../..";
 import { BasicRoute, RouteResponseBodyV2 } from "..";
 
 export interface ListeDiffusionPayload {
   id: string;
   nom: string;
   type: ListeDiffusionEnum;
+  filters: ListeDiffusionFiltres;
 }
 
 export interface CreateListeDiffusionPayload extends Omit<ListeDiffusionPayload, "id"> {}
