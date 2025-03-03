@@ -6,45 +6,43 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
-import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
+
 import { SejourGateway } from "../sejour/Sejour.gateway";
 
-import { ValiderAffectationCLE } from "./ValiderAffectationCLE";
+import { ValiderAffectationHTSDromCom } from "./ValiderAffectationHTSDromCom";
 
 import { CentreGateway } from "../centre/Centre.gateway";
 
 import { SessionGateway } from "../session/Session.gateway";
 
-import * as mockLignesBus from "./__tests__/lignebuses.json";
-import * as mockPdr from "./__tests__/pdr.json";
 import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
-import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
 import { YOUNG_STATUS } from "snu-lib";
-import { ValiderAffectationCLEDromCom } from "./ValiderAffectationCLEDromCom";
-import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
+import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
+import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 
-const sessionNom = "2025 CLE 03 Fevrier";
+const sessionNom = "2025 HTS 02 - Mai La Réunion";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
 }));
 
-describe("ValiderAffectationCLEDromcom", () => {
-    let validerAffectationCLEDromCom: ValiderAffectationCLEDromCom;
+describe("ValiderAffectationHTSDromCom", () => {
+    let validerAffectationHTSDromCom: ValiderAffectationHTSDromCom;
     let cls: ClsService;
 
     beforeEach(async () => {
-        const mockSession = { id: "mockedSessionId", name: "mockedSessionName" };
+        const mockSession = { id: sessionNom, name: sessionNom };
 
         const module: TestingModule = await Test.createTestingModule({
             imports: [ClsModule],
             providers: [
+                ValiderAffectationHTSDromCom,
+                ValiderAffectationHTSService,
                 AffectationService,
-                ValiderAffectationCLEService,
-                ValiderAffectationCLEDromCom,
                 Logger,
                 {
                     provide: FileGateway,
@@ -54,9 +52,10 @@ describe("ValiderAffectationCLEDromcom", () => {
                         downloadFile: jest.fn().mockResolvedValue({ Body: null }),
                         parseXLS: jest.fn().mockResolvedValue([
                             {
-                                "id du volontaire": "jeune1",
+                                id: "jeune1",
                                 sejourId: "6597e6acb86afb08146e8f86",
-                                classeCenterId: "609bebb00c1cc9a888ae8fa8",
+                                centreId: "609bebb00c1cc9a888ae8fa8",
+                                sessionNom: sessionNom,
                             },
                         ]),
                     },
@@ -69,7 +68,6 @@ describe("ValiderAffectationCLEDromcom", () => {
                                 id: "jeune1",
                                 statut: YOUNG_STATUS.VALIDATED,
                                 sessionNom: sessionNom,
-                                classeId: "classe1",
                             },
                         ]),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
@@ -95,31 +93,15 @@ describe("ValiderAffectationCLEDromcom", () => {
                     },
                 },
                 {
-                    provide: LigneDeBusGateway,
-                    useValue: {
-                        findBySessionId: jest.fn().mockResolvedValue(mockLignesBus),
-                        findBySessionNom: jest.fn().mockResolvedValue(mockLignesBus),
-                        bulkUpdate: jest.fn().mockResolvedValue(1),
-                    },
-                },
-                {
-                    provide: PointDeRassemblementGateway,
-                    useValue: {
-                        findBySessionId: jest.fn().mockResolvedValue(mockPdr),
-                        findByMatricules: jest.fn(),
-                        findByIds: jest.fn().mockResolvedValue(mockPdr),
-                    },
-                },
-                {
                     provide: SejourGateway,
                     useValue: {
                         findBySessionId: jest
                             .fn()
-                            .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom: sessionNom }))),
+                            .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom }))),
                         countPlaceOccupeesBySejourIds: jest.fn().mockResolvedValue(
                             mockSejours.map((sejour) => ({
                                 id: sejour.id,
-                                placesOccupeesJeunes: sejour.placesTotal,
+                                placesOccupeesJeunes: 50,
                             })),
                         ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
@@ -133,16 +115,20 @@ describe("ValiderAffectationCLEDromcom", () => {
                 },
                 {
                     provide: PlanDeTransportGateway,
-                    useValue: {
-                        findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
-                        findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
-                        bulkUpdate: jest.fn().mockResolvedValue(1),
-                    },
+                    useValue: {},
+                },
+                {
+                    provide: PointDeRassemblementGateway,
+                    useValue: {},
+                },
+                {
+                    provide: LigneDeBusGateway,
+                    useValue: {},
                 },
             ],
         }).compile();
         cls = module.get<ClsService>(ClsService);
-        validerAffectationCLEDromCom = module.get<ValiderAffectationCLEDromCom>(ValiderAffectationCLEDromCom);
+        validerAffectationHTSDromCom = module.get<ValiderAffectationHTSDromCom>(ValiderAffectationHTSDromCom);
     });
 
     it("should simulate young affectation", async () => {
@@ -150,7 +136,7 @@ describe("ValiderAffectationCLEDromcom", () => {
             // @ts-ignore
             { user: null },
             () =>
-                validerAffectationCLEDromCom.execute({
+                validerAffectationHTSDromCom.execute({
                     sessionId: sessionNom,
                     simulationTaskId: "simulationTaskId",
                     dateAffectation: new Date(),
@@ -162,7 +148,6 @@ describe("ValiderAffectationCLEDromcom", () => {
         expect(result.rapportData[0]).toEqual({
             centreId: "657334e06e801c0816d4550c",
             centreNom: "",
-            classeId: "classe1",
             dateNaissance: undefined,
             departement: undefined,
             email: undefined,

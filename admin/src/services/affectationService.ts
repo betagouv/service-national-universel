@@ -3,7 +3,7 @@ import { AffectationRoutes } from "snu-lib";
 import { buildRequest } from "@/utils/buildRequest";
 
 const AffectationService = {
-  getAffectation: async (sessionId: string, type: "HTS" | "CLE" | "CLE_DROMCOM") => {
+  getAffectation: async (sessionId: string, type: "HTS" | "HTS_DROMCOM" | "CLE" | "CLE_DROMCOM") => {
     return await buildRequest<AffectationRoutes["GetAffectation"]>({
       path: "/affectation/{sessionId}/{type}",
       method: "GET",
@@ -30,6 +30,16 @@ const AffectationService = {
       method: "POST",
       params: { sessionId },
       payload: { niveauScolaires, departements, etranger, affecterPDR, sdrImportId },
+      target: "API_V2",
+    })();
+  },
+
+  postSimulationAffectationHTSDromCom: async (sessionId: string, { niveauScolaires, departements, etranger }: AffectationRoutes["PostSimulationsHTSDromComRoute"]["payload"]) => {
+    return await buildRequest<AffectationRoutes["PostSimulationsHTSDromComRoute"]>({
+      path: "/affectation/{sessionId}/simulation/hts-dromcom",
+      method: "POST",
+      params: { sessionId },
+      payload: { niveauScolaires, departements, etranger },
       target: "API_V2",
     })();
   },
@@ -81,6 +91,14 @@ const AffectationService = {
       target: "API_V2",
     })();
   },
+  postValiderAffectationHtsDromCom: async (sessionId: string, simulationId: string) => {
+    return await buildRequest<AffectationRoutes["PostValiderAffectationHTSDromComRoute"]>({
+      path: "/affectation/{sessionId}/simulation/{simulationId}/valider/hts-dromcom",
+      method: "POST",
+      params: { sessionId, simulationId },
+      target: "API_V2",
+    })();
+  },
   postSyncPlacesLigneDeBus: async (sessionId: string) => {
     return await buildRequest<AffectationRoutes["PostSyncPlacesLignesDeBus"]>({
       path: "/affectation/{sessionId}/ligne-de-bus/sync-places",
@@ -102,7 +120,6 @@ const AffectationService = {
       path: "/affectation/{sessionId}/centre/{centreId}/sync-places",
       method: "POST",
       params: { sessionId, centreId },
-      target: "API_V2",
     })();
   },
 };

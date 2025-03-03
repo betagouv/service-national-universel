@@ -7,20 +7,15 @@ import { MIME_TYPES } from "snu-lib";
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileGateway } from "@shared/core/File.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
 import { SejourGateway } from "../sejour/Sejour.gateway";
 
-import { SimulationAffectationHTSTaskModel } from "./SimulationAffectationHTSTask.model";
-import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationHTS.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
-import { SejourModel } from "../sejour/Sejour.model";
 import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model";
-import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
-import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
+import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -52,12 +47,12 @@ export type ValiderAffectationRapportData = Array<
         | "parent2Telephone"
         | "centreId"
     > & {
-        ligneDeBusNumeroLigne: string;
-        pointDeRassemblementMatricule: string;
+        ligneDeBusNumeroLigne?: string;
+        pointDeRassemblementMatricule?: string;
         centreNom: string;
         "places restantes après l'inscription (centre)": string | number;
         "places totale (centre)": string | number;
-        error?: string;
+        erreur?: string;
     }
 >;
 
@@ -78,10 +73,11 @@ export type ValiderAffectationHTSResult = {
 export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResult> {
     constructor(
         @Inject(AffectationService) private readonly affectationService: AffectationService,
+        @Inject(ValiderAffectationHTSService)
+        private readonly validerAffectationHTSService: ValiderAffectationHTSService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -96,12 +92,13 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         const { session, ligneDeBusList, sejoursList, pdrList } =
             await this.affectationService.loadAffectationData(sessionId);
         // Récupération des données du rapport de simulation
-        const simulationJeunesAAffecterList = await this.getSimulationData(simulationTaskId);
+        const simulationJeunesAAffecterList =
+            await this.validerAffectationHTSService.getSimulationData(simulationTaskId);
 
-        this.logger.debug("Sessions found: " + sejoursList.length);
-        this.logger.debug("Meeting points found: " + pdrList.length);
-        this.logger.debug("Bus lines found: " + ligneDeBusList.length);
-        this.logger.debug("Young to affect: " + simulationJeunesAAffecterList.length);
+        this.logger.debug("Nombre de séjours: " + sejoursList.length);
+        this.logger.debug("Nombre de PDR: " + pdrList.length);
+        this.logger.debug("Nombre de LigneDeBus: " + ligneDeBusList.length);
+        this.logger.debug("Jeunes à affecter: " + simulationJeunesAAffecterList.length);
 
         const jeuneAAffecterList = await this.jeuneGateway.findByIds(
             simulationJeunesAAffecterList.map((jeune) => jeune.id),
@@ -119,7 +116,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             errors: 0,
         };
         const jeunesUpdatedList: JeuneModel[] = [];
-        const rapportData: Array<ReturnType<typeof this.formatJeuneRapport>> = [];
+        const rapportData: Array<ReturnType<typeof this.validerAffectationHTSService.formatJeuneRapport>> = [];
 
         // Traitement des jeunes
         for (const jeuneRapport of simulationJeunesAAffecterList) {
@@ -129,38 +126,15 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             const pdr = pdrList.find((pdr) => pdr.id === jeuneRapport["Point de rassemblement calculé"]); // TODO: utiliser le matricule
 
             // Controle de coherence
-            if (!sejour) {
-                this.logger.warn(`🚩 sejour introuvable: ${jeuneRapport.sejourId} (jeune: ${jeune.id})`);
-                throw new FunctionalException(
-                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
-                    `sejour non trouvé ${jeuneRapport.sejourId} (jeune: ${jeune.id})`,
-                );
-            }
-            if (!sejour.placesRestantes || sejour.placesRestantes < 0) {
-                console.error(`🚩 plus de place pour ce sejour: ${sejour.id} (jeune: ${jeune.id})`);
+            const erreur = this.validerAffectationHTSService.checkValiderAffectation(jeuneRapport, jeune, sejour);
+            if (erreur) {
                 rapportData.push(
-                    this.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, "plus de place pour ce sejour"),
+                    this.validerAffectationHTSService.formatJeuneRapport({ jeune, sejour, ligneDeBus, pdr, erreur }),
                 );
                 analytics.errors += 1;
                 continue;
             }
-            // session
-            if (jeune?.sessionNom !== sejour?.sessionNom) {
-                this.logger.warn(
-                    `🚩 Le jeune (${jeune?.id}) a changé de cohort depuis la simulation (sejour: ${sejour?.sessionNom}, jeune: ${jeune?.sessionNom})`,
-                );
-                rapportData.push(
-                    this.formatJeuneRapport(
-                        jeune,
-                        sejour,
-                        ligneDeBus,
-                        pdr,
-                        "jeune ayant changé de cohorte depuis la simulation",
-                    ),
-                );
-                analytics.errors += 1;
-                continue;
-            }
+
             // ligne de bus / PDR
             if (affecterPDR) {
                 if (!ligneDeBus) {
@@ -184,9 +158,9 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             }
 
             // Affectation du jeune
-            sejour.placesRestantes = sejour.placesRestantes - 1;
+            sejour!.placesRestantes = (sejour!.placesRestantes || 0) - 1;
 
-            const jeuneUpdated = this.affectationService.mapAffectationJeune(jeune, sejour, {
+            const jeuneUpdated = this.affectationService.mapAffectationJeune(jeune, sejour!, {
                 ...(affecterPDR
                     ? {
                           pointDeRassemblementId: pdr!.id,
@@ -206,7 +180,9 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             );
 
             jeunesUpdatedList.push(jeuneUpdated);
-            rapportData.push(this.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr));
+            rapportData.push(
+                this.validerAffectationHTSService.formatJeuneRapport({ jeune: jeuneUpdated, sejour, ligneDeBus, pdr }),
+            );
             analytics.jeunesAffected += 1;
         }
 
@@ -216,7 +192,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
 
         // mise à jour des placesRestantes dans les centres
         this.logger.log(`Mise à jour des places dans les séjours`);
-        await this.sejoursGateway.bulkUpdate(sejoursList);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejoursList);
 
         // mise à jour des placesOccupeesJeunes dans les bus
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
@@ -243,72 +219,5 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
             rapportFile,
             analytics,
         };
-    }
-
-    formatJeuneRapport(
-        jeune: JeuneModel,
-        sejour: SejourModel,
-        ligneDeBus?: LigneDeBusModel,
-        pdr?: PointDeRassemblementModel,
-        error = "",
-    ): ValiderAffectationRapportData[0] {
-        return {
-            id: jeune.id,
-            statut: jeune.statut,
-            statutPhase1: jeune.statutPhase1,
-            genre: jeune.genre === "female" ? "fille" : "garçon",
-            qpv: ["true", "oui"].includes(jeune.qpv!) ? "oui" : "non",
-            psh: ["true", "oui"].includes(jeune.psh!) ? "oui" : "non",
-            email: jeune.email,
-            region: jeune.region,
-            departement: jeune.departement,
-            sessionId: sejour?.id || "",
-            sessionNom: jeune.sessionNom,
-            ligneDeBusId: jeune.ligneDeBusId || "",
-            ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne || "",
-            pointDeRassemblementId: jeune.pointDeRassemblementId || "",
-            pointDeRassemblementMatricule: pdr?.matricule || "",
-            centreId: sejour?.centreId || "",
-            centreNom: sejour?.centreNom || "",
-            "places restantes après l'inscription (centre)": sejour?.placesRestantes || "",
-            "places totale (centre)": sejour?.placesTotal || "",
-            error,
-            ...(!error
-                ? {
-                      prenom: jeune.prenom,
-                      nom: jeune.nom,
-                      email: jeune.email,
-                      telephone: jeune.telephone,
-                      dateNaissance: jeune.dateNaissance,
-                      parent1Prenom: jeune.parent1Prenom,
-                      parent1Nom: jeune.parent1Nom,
-                      parent1Email: jeune.parent1Email,
-                      parent1Telephone: jeune.parent1Telephone,
-                      parent2Prenom: jeune.parent2Prenom,
-                      parent2Nom: jeune.parent2Nom,
-                      parent2Email: jeune.parent2Email,
-                      parent2Telephone: jeune.parent2Telephone,
-                  }
-                : {}),
-        };
-    }
-
-    async getSimulationData(taskId: string) {
-        const simulationTask: SimulationAffectationHTSTaskModel = await this.taskGateway.findById(taskId);
-        const rapportKey = simulationTask.metadata?.results?.rapportKey;
-        if (!rapportKey) {
-            throw new FunctionalException(
-                FunctionalExceptionCode.NOT_FOUND,
-                "Fichier associé à la simulation introuvable",
-            );
-        }
-        const importedFile = await this.fileGateway.downloadFile(rapportKey);
-        const parsedFile = await this.fileGateway.parseXLS<RapportData["jeunesNouvellementAffectedList"][0]>(
-            importedFile.Body,
-            {
-                sheetName: RAPPORT_SHEETS.AFFECTES,
-            },
-        );
-        return parsedFile;
     }
 }
