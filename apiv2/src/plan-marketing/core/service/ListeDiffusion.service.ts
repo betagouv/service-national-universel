@@ -1,7 +1,6 @@
 import { Inject, Injectable, NotFoundException } from "@nestjs/common";
 import { ListeDiffusionModel, CreateListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
-import { UpdateListeDiffusionDto } from "@plan-marketing/infra/api/ListeDiffusion.validation";
 
 @Injectable()
 export class ListeDiffusionService {
@@ -21,7 +20,7 @@ export class ListeDiffusionService {
         return listeDiffusion;
     }
 
-    async updateListeDiffusion(id: string, listeDiffusionDto: UpdateListeDiffusionDto) {
+    async updateListeDiffusion(id: string, listeDiffusionDto: ListeDiffusionModel) {
         await this.getListeDiffusionById(id);
 
         const updatedListeDiffusion = await this.listeDiffusionGateway.update(listeDiffusionDto);

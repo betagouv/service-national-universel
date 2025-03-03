@@ -4,6 +4,9 @@ import { PlanMarketingRoutes, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { ListeDiffusionDataProps } from "./ListeDiffusionForm";
 
+const LISTE_DIFFUSION_QUERY_KEY = "listes-diffusion";
+const DEFAULT_SORT = "DESC";
+
 export const useListeDiffusion = () => {
   const queryClient = useQueryClient();
 
@@ -31,7 +34,7 @@ export const useListeDiffusion = () => {
       //   }
       //   return [{ ...data }, ...old];
       // });
-      queryClient.invalidateQueries({ queryKey: ["listes-diffusion"] });
+      queryClient.invalidateQueries({ queryKey: [LISTE_DIFFUSION_QUERY_KEY] });
       toastr.clean();
       toastr.success("Succès", "Liste de diffusion sauvegardée avec succès", { timeOut: 5000 });
     },
@@ -42,10 +45,10 @@ export const useListeDiffusion = () => {
   });
 
   const { data: listesDiffusion, isLoading } = useQuery<ListeDiffusionDataProps[]>({
-    queryKey: ["listes-diffusion"],
+    queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT],
     enabled: true,
     refetchOnWindowFocus: false,
-    queryFn: () => ListeDiffusionService.search({ sort: "DESC" }),
+    queryFn: () => ListeDiffusionService.search({ sort: DEFAULT_SORT }),
   });
 
   return {
