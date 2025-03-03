@@ -39,9 +39,13 @@ export function AgreementModal({ isOpen, setIsOpen }) {
         </button>
         <div className="w-full p-4">
           <h1 className="pb-1 text-center text-xl text-gray-900">Confirmez votre participation au séjour</h1>
-          <p className="pb-4 text-center text-base text-gray-500">
-            Vous devez confirmer votre participation au séjour <b>sous 3 jours</b> à partir de votre affectation. Passé ce délai, votre place sera proposée à un autre volontaire.
-          </p>
+          {isCLE ? (
+            <p className="pb-4 text-center text-base text-gray-500">Confirmez votre participation au séjour pour accéder à votre convocation.</p>
+          ) : (
+            <p className="pb-4 text-center text-base text-gray-500">
+              Vous devez confirmer votre participation au séjour <b>sous 3 jours</b> à partir de votre affectation. Passé ce délai, votre place sera proposée à un autre volontaire.
+            </p>
+          )}
           <div className="mb-2 flex flex-shrink flex-col flex-wrap justify-center gap-6 p-2 lg:flex-row">
             <div className="flex flex-col rounded-2xl border-[1px] border-blue-600 py-5 px-5 shadow-sm w-80">
               <h1 className="pb-4 text-xl font-bold leading-7">Je confirme</h1>
