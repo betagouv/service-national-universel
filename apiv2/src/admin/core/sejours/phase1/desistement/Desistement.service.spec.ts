@@ -74,18 +74,8 @@ describe("DesistementService", () => {
             ];
 
             const jeunes: JeuneModel[] = [
-                {
-                    id: "jeuneId1",
-                    statut: YOUNG_STATUS.VALIDATED,
-                    ligneDeBusId: "ligneDeBusId1",
-                    sessionId: "sejourId",
-                } as JeuneModel,
-                {
-                    id: "jeuneId2",
-                    statut: YOUNG_STATUS.VALIDATED,
-                    ligneDeBusId: "ligneDeBusId2",
-                    sessionId: "sejourId",
-                } as JeuneModel,
+                { id: "jeuneId1", statut: YOUNG_STATUS.VALIDATED, ligneDeBusId: "ligneDeBusId1" } as JeuneModel,
+                { id: "jeuneId2", statut: YOUNG_STATUS.VALIDATED, ligneDeBusId: "ligneDeBusId2" } as JeuneModel,
             ];
 
             jest.spyOn(ligneDeBusGateway, "findByIds").mockResolvedValue(lignesDeBus);
@@ -94,12 +84,12 @@ describe("DesistementService", () => {
             jest.spyOn(sejourGateway, "findBySessionId").mockResolvedValue([sejour]);
             jest.spyOn(affectationService, "syncPlacesDisponiblesSejours").mockResolvedValue();
 
-            await service.desisterJeunes(jeunes);
+            await service.desisterJeunes(jeunes, "sessionId");
 
             expect(ligneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligneDeBusId1", "ligneDeBusId2"]);
             expect(affectationService.syncPlacesDisponiblesLignesDeBus).toHaveBeenCalledWith(lignesDeBus);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalled();
-            expect(sejourGateway.findBySessionId).toHaveBeenCalledWith("sejourId");
+            expect(sejourGateway.findBySessionId).toHaveBeenCalledWith("sessionId");
             expect(affectationService.syncPlacesDisponiblesSejours).toHaveBeenCalledWith([sejour]);
         });
 
@@ -112,7 +102,7 @@ describe("DesistementService", () => {
             jest.spyOn(jeuneGateway, "bulkUpdate").mockResolvedValue(2);
             jest.spyOn(affectationService, "syncPlacesDisponiblesSejours").mockResolvedValue();
 
-            const result = await service.desisterJeunes(jeunes);
+            const result = await service.desisterJeunes(jeunes, "sessionId");
 
             expect(result).toBe(2);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalledWith([

@@ -44,7 +44,7 @@ export class DesistementService {
     }
 
     @Transactional()
-    async desisterJeunes(jeunes: JeuneModel[]): Promise<number> {
+    async desisterJeunes(jeunes: JeuneModel[], sessionId: string): Promise<number> {
         const list: JeuneModel[] = [];
         for (const jeune of jeunes) {
             list.push({
@@ -66,7 +66,7 @@ export class DesistementService {
             await this.affectationService.syncPlacesDisponiblesLignesDeBus(lignesDeBus);
         }
 
-        const sejours = await this.sejourGateway.findBySessionId(jeunes[0].sessionId!);
+        const sejours = await this.sejourGateway.findBySessionId(sessionId);
         await this.affectationService.syncPlacesDisponiblesSejours(sejours);
 
         return res;
