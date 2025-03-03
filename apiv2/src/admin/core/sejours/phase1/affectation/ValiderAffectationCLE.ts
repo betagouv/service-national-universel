@@ -135,8 +135,9 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             const erreur = this.validerAffectationCLEService.checkValiderAffectation(jeuneRapport, jeune, sejour);
             if (erreur) {
                 rapportData.push(
-                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, erreur),
+                    this.validerAffectationCLEService.formatJeuneRapport({ jeune, sejour, ligneDeBus, pdr, erreur }),
                 );
+                analytics.errors += 1;
                 continue;
             }
 
@@ -195,7 +196,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
             jeunesUpdatedList.push(jeuneUpdated);
             rapportData.push(
-                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr),
+                this.validerAffectationCLEService.formatJeuneRapport({ jeune: jeuneUpdated, sejour, ligneDeBus, pdr }),
             );
             analytics.jeunesAffected += 1;
         }
@@ -206,7 +207,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
         // mise à jour des placesRestantes dans les centres
         this.logger.log(`Mise à jour des places dans les séjours`);
-        await this.sejoursGateway.bulkUpdate(sejoursList);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejoursList);
 
         // mise à jour des placesOccupeesJeunes dans les bus
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);

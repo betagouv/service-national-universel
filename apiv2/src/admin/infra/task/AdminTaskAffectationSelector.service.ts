@@ -7,6 +7,7 @@ import {
     ValiderAffectationCLETaskResult,
     ValiderAffectationHTSTaskResult,
     ValiderAffectationCLEDromComTaskResult,
+    SimulationAffectationHTSDromComTaskResult,
 } from "snu-lib";
 import { Job } from "bullmq";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
@@ -24,18 +25,23 @@ import { SimulationAffectationCLEDromCom } from "@admin/core/sejours/phase1/affe
 import { ValiderAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
 import { DesisterPostAffectationTaskModel } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectationTask.model";
 import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
+import { SimulationAffectationHTSDromCom } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSDromCom";
+import { ValiderAffectationHTSDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
+import { ValiderAffectationHTSDromComTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromComTask.model";
 
 @Injectable()
 export class AdminTaskAffectationSelectorService {
     constructor(
         private readonly simulationAffectationHts: SimulationAffectationHTS,
         private readonly validerAffectationHts: ValiderAffectationHTS,
-        private readonly adminTaskRepository: AdminTaskRepository,
+        private readonly simulationAffectationHtsDromCom: SimulationAffectationHTSDromCom,
+        private readonly validerAffectationHtsDromCom: ValiderAffectationHTSDromCom,
         private readonly simulationAffectationCle: SimulationAffectationCLE,
         private readonly validerAffectationCle: ValiderAffectationCLE,
         private readonly simulationAffectationCLEDromCom: SimulationAffectationCLEDromCom,
         private readonly validerAffectationCLEDromCom: ValiderAffectationCLEDromCom,
         private readonly desisterPostAffectation: DesisterPostAffectation,
+        private readonly adminTaskRepository: AdminTaskRepository,
     ) {}
     async handleAffectation(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
         let results = {} as Record<string, any>;
@@ -69,6 +75,44 @@ export class AdminTaskAffectationSelectorService {
                 } as ValiderAffectationHTSTaskResult;
                 // TODO: handle errors with partial results for all tasks
                 if (validationResult.analytics.jeunesAffected === 0) {
+                    await this.adminTaskRepository.update(task.id, {
+                        ...task,
+                        metadata: {
+                            ...task.metadata,
+                            results,
+                        },
+                    });
+                    throw new Error("Aucun jeune n'a été affecté");
+                }
+                break;
+
+            //  HTS METROPOLE
+            case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION:
+                const simulationHtsDromComTask: SimulationAffectationHTSTaskModel = task; // pour l'onglet historique (patches)
+                const simulationhtsDromcom = await this.simulationAffectationHtsDromCom.execute(
+                    simulationHtsDromComTask.metadata!.parameters!,
+                );
+                results = {
+                    rapportKey: simulationhtsDromcom.rapportFile.Key,
+                    jeunesNouvellementAffected: simulationhtsDromcom.analytics.jeunesNouvellementAffected,
+                    jeuneAttenteAffectation: simulationhtsDromcom.analytics.jeuneAttenteAffectation,
+                    jeunesDejaAffected: simulationhtsDromcom.analytics.jeunesDejaAffected,
+                } as SimulationAffectationHTSDromComTaskResult;
+                break;
+
+            case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER:
+                const validationHtsDromComTask: ValiderAffectationHTSDromComTaskModel = task;
+                const validationDromComResult = await this.validerAffectationHtsDromCom.execute({
+                    ...validationHtsDromComTask.metadata!.parameters!,
+                    dateAffectation: validationHtsDromComTask.createdAt,
+                });
+                results = {
+                    rapportKey: validationDromComResult.rapportFile.Key,
+                    jeunesAffected: validationDromComResult.analytics.jeunesAffected,
+                    errors: validationDromComResult.analytics.errors,
+                } as ValiderAffectationHTSTaskResult;
+                // TODO: handle errors with partial results for all tasks
+                if (validationDromComResult.analytics.jeunesAffected === 0) {
                     await this.adminTaskRepository.update(task.id, {
                         ...task,
                         metadata: {
