@@ -45,7 +45,7 @@ export default function Details({ cohesionCenter, meetingPoint, pointDeRassemble
   const isYoungAffected = young.cohesionCenterId ? true : false;
 
   const containerActionList = () => {
-    if (isYoungAffected) {
+    if (young.hasMeetingInformation === "true") {
       return [
         <Button
           key="affectation"

@@ -116,6 +116,12 @@ describe("ValiderAffectationCLEDromcom", () => {
                         findBySessionId: jest
                             .fn()
                             .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom: sessionNom }))),
+                        countPlaceOccupeesBySejourIds: jest.fn().mockResolvedValue(
+                            mockSejours.map((sejour) => ({
+                                id: sejour.id,
+                                placesOccupeesJeunes: sejour.placesTotal,
+                            })),
+                        ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },

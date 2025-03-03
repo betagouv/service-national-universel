@@ -4,19 +4,21 @@ import { useParams } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 
 import api from "@/services/api";
-import { ROLES, translate } from "@/utils";
+import { CohesionCenterType, ROLES, translate } from "@/utils";
 
 import Breadcrumbs from "@/components/Breadcrumbs";
 import Loader from "@/components/Loader";
 import CenterInformations from "./CenterInformations";
 import SessionList from "../components/sessions/SessionList";
 import { capture } from "@/sentry";
+import { AuthState } from "@/redux/auth/reducer";
+import { Session } from "@/types";
 
 export default function Index() {
-  const { id } = useParams();
-  const { user } = useSelector((state) => state.Auth);
-  const [center, setCenter] = useState();
-  const [sessions, setSessions] = useState();
+  const { id } = useParams<{ id: string }>();
+  const { user } = useSelector((state: AuthState) => state.Auth);
+  const [center, setCenter] = useState<CohesionCenterType>();
+  const [sessions, setSessions] = useState<Session[]>();
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -28,18 +30,11 @@ export default function Index() {
         if (!centerResponse.ok) {
           throw new Error(translate(centerResponse.code));
         }
-        const allSessions = await api.get(`/cohesion-center/${centerResponse.data._id}/session-phase1`);
-        if (!allSessions.ok) {
-          throw new Error(translate(allSessions.code));
-        }
 
+        loadSessions(centerResponse.data._id);
         // TODO: handle this in the backend
-        const populatedSessions = await populateSessions(allSessions.data);
-        const sessionFiltered = filterSessions(populatedSessions, user);
-        sessionFiltered.sort((a, b) => a.startDate - b.startDate);
 
         setCenter(centerResponse.data);
-        setSessions(sessionFiltered);
       } catch (e) {
         capture(e);
         toastr.error("Oups, une erreur est survenue", e.message);
@@ -49,13 +44,24 @@ export default function Index() {
     })();
   }, [id]);
 
+  const loadSessions = async (centerId: string) => {
+    const allSessions = await api.get(`/cohesion-center/${centerId}/session-phase1`);
+    if (!allSessions.ok) {
+      throw new Error(translate(allSessions.code));
+    }
+    const populatedSessions = await populateSessions(allSessions.data);
+    const sessionFiltered = filterSessions(populatedSessions, user);
+    sessionFiltered.sort((a, b) => a.startDate - b.startDate);
+    setSessions(sessionFiltered);
+  };
+
   if (loading) return <Loader />;
   if (!center || !sessions) return <div />;
   return (
     <>
       {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} />
-      <SessionList center={center} setCenter={setCenter} sessions={sessions} setSessions={setSessions} />
+      <SessionList center={center} onCenterChange={setCenter} sessions={sessions} onSessionsChange={setSessions} onRefetchSessions={() => loadSessions(center._id)} />
     </>
   );
 }
