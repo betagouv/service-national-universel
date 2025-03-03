@@ -1,5 +1,5 @@
 import { BusTeamDto } from "snu-lib/src/dto";
-import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
+import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentDocument, ReferentModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
 import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
@@ -294,14 +294,16 @@ async function notifyYoungChangeCenter(ligneBusId: string) {
 }
 
 async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
-  const referents = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
-  const emailTo = referents.map((r) => ({ email: r.email }));
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
+  const referentsClasse = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
+  const referentsEtablissement = await getReferentEtablissement(classe.etablissementId);
+  const emailTo = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];
   await sendTemplate(templateId, { emailTo });
+}
 
-  const etablissement = await EtablissementModel.findById(classe.etablissementId);
+async function getReferentEtablissement(etablissementId: string): Promise<ReferentDocument[]> {
+  const etablissement = await EtablissementModel.findById(etablissementId);
   if (!etablissement) throw new Error("Etablissement not found");
-  const adminCle = await ReferentModel.findOne({ _id: etablissement.coordinateurIds }).select("email");
-  if (!adminCle) throw new Error("Admin CLE not found");
-  await sendTemplate(templateId, { emailTo: [{ email: adminCle.email }] });
+  const referentsIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
+  return await ReferentModel.find({ _id: referentsIds }).select("email");
 }
