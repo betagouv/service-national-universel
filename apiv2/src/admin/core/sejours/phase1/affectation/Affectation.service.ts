@@ -14,6 +14,7 @@ import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { PlanDeTransportModel } from "../PlanDeTransport/PlanDeTransport.model";
+import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 
 export type StatusSimulation = {
     status: TaskStatus | "NONE";
@@ -28,7 +29,6 @@ export type StatusValidation = {
 export class AffectationService {
     constructor(
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
-        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(PlanDeTransportGateway) private readonly planDeTransportGateway: PlanDeTransportGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
@@ -80,31 +80,40 @@ export class AffectationService {
     }
 
     // Chargement des données associés à la session
-    async loadAffectationData(sessionId: string) {
+    async loadAffectationData(sessionId: string, withTransport = true) {
         const session = await this.sessionGateway.findById(sessionId);
         if (!session) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "sessionId");
         }
 
-        // TODO: utiliser cohortId (actuellement non présent en base sur les ligne de bus)
-        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
-        if (ligneDeBusList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucune ligne de bus !");
-        }
         const sejoursList = await this.sejourGateway.findBySessionId(sessionId);
         if (sejoursList.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun sejours !");
         }
-        // Les PDR ne sont plus rattachés à une session
-        const pdrIds = [...new Set(ligneDeBusList.flatMap((ligne) => ligne.pointDeRassemblementIds))];
-        const pdrList = await this.pointDeRassemblementGateway.findByIds(pdrIds);
-        if (pdrList.length === 0) {
-            throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun PDRs !");
+        let ligneDeBusList: LigneDeBusModel[] = [];
+        let pdrList: PointDeRassemblementModel[] = [];
+        if (withTransport) {
+            // TODO: utiliser cohortId (actuellement non présent en base sur les ligne de bus)
+            ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
+            if (ligneDeBusList.length === 0) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA,
+                    "Aucune ligne de bus !",
+                );
+            }
+
+            // Les PDR ne sont plus rattachés à une session
+            const pdrIds = [...new Set(ligneDeBusList.flatMap((ligne) => ligne.pointDeRassemblementIds))];
+            pdrList = await this.pointDeRassemblementGateway.findByIds(pdrIds);
+            if (pdrList.length === 0) {
+                throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun PDRs !");
+            }
         }
+
         return {
             session,
-            ligneDeBusList,
             sejoursList,
+            ligneDeBusList,
             pdrList,
         };
     }
@@ -138,13 +147,13 @@ export class AffectationService {
         const lignesDeBusUpdatedList: LigneDeBusModel[] = [];
         const pdtUpdatedList: PlanDeTransportModel[] = [];
 
-        const ligneDeBusId = ligneDeBusList.map((ligne) => ligne.id);
-        const pdtList = await this.planDeTransportGateway.findByIds(ligneDeBusId);
+        const ligneDeBusIds = ligneDeBusList.map((ligne) => ligne.id);
+        const pdtList = await this.planDeTransportGateway.findByIds(ligneDeBusIds);
         const ligneDeBusPlacesOccupeesJeunesList =
-            await this.ligneDeBusGateway.countPlaceOccupeesByLigneDeBusIds(ligneDeBusId);
+            await this.ligneDeBusGateway.countPlaceOccupeesByLigneDeBusIds(ligneDeBusIds);
 
         for (const ligneDeBus of ligneDeBusList) {
-            const placesOccupeesJeunes = ligneDeBusPlacesOccupeesJeunesList.find((ligne) => ligne.id === ligneDeBus.id)
+            const placesOccupeesJeunes = ligneDeBusPlacesOccupeesJeunesList.find(({ id }) => id === ligneDeBus.id)
                 ?.placesOccupeesJeunes;
             if (placesOccupeesJeunes === undefined) {
                 throw new FunctionalException(

@@ -2,59 +2,48 @@ import React from "react";
 
 import { HiOutlineLightningBolt } from "react-icons/hi";
 
-import { CohortDto, formatDepartement, GRADES, Phase1Routes, ReferentielRoutes, ReferentielTaskType, region2department, RegionsMetropole, TaskName, translate } from "snu-lib";
+import { CohortDto, formatDepartement, GRADES, Phase1Routes, region2department, RegionsDromComEtCorse, translate } from "snu-lib";
 import { Button, CollapsableSelectSwitcher, Modal, SectionSwitcher } from "@snu/ds/admin";
 import { useSetState } from "react-use";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { AffectationService } from "@/services/affectationService";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
-import { ReferentielService } from "@/services/ReferentielService";
 
-interface AffectationHTSSimulationMetropoleProps {
+interface AffectationHTSSimulationDromComModalProps {
   session: CohortDto;
   onClose: () => void;
 }
 
-export default function AffectationHTSSimulationMetropoleModal({ session, onClose }: AffectationHTSSimulationMetropoleProps) {
+export default function AffectationHTSSimulationDromComModal({ session, onClose }: AffectationHTSSimulationDromComModalProps) {
   const queryClient = useQueryClient();
 
   const [state, setState] = useSetState<{
     niveauScolaires: string[];
     departements: Record<string, string[]>;
     etranger: boolean;
-    affecterPDR: boolean;
   }>({
     niveauScolaires: session.eligibility?.schoolLevels?.filter((level: any) => Object.values(GRADES).includes(level)) || Object.values(GRADES),
-    departements: RegionsMetropole.reduce((acc, region) => {
-      acc[region] = region2department[region].filter((departement) => !session.eligibility?.zones || session.eligibility.zones.includes(departement));
+    departements: RegionsDromComEtCorse.reduce((acc, region) => {
+      acc[region] = region2department[region];
       return acc;
     }, {}),
     etranger: true,
-    affecterPDR: false,
   });
 
-  const { isPending: isLoadingImports, data: routesImports } = useQuery<ReferentielRoutes["GetImports"]["response"]>({
-    queryKey: ["last-task", TaskName.REFERENTIEL_IMPORT, ReferentielTaskType.IMPORT_ROUTES],
-    queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, type: ReferentielTaskType.IMPORT_ROUTES, limit: 1, sort: "DESC" }),
-  });
-
-  const sdrImport = routesImports?.[0];
-  const isReady = state.niveauScolaires.length > 0 && Object.values(state.departements).some((departements) => departements.length > 0) && !!sdrImport;
+  const isReady = Object.values(state.departements).some((departements) => departements.length > 0);
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
-      return await AffectationService.postSimulationAffectationHTSMetropole(session._id!, {
-        departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
+      return await AffectationService.postSimulationAffectationHTSDromCom(session._id!, {
         niveauScolaires: state.niveauScolaires as any,
-        sdrImportId: sdrImport!.id,
+        departements: Object.keys(state.departements).reduce((acc, region) => [...acc, ...state.departements[region]], []),
         etranger: state.etranger,
-        affecterPDR: state.affecterPDR,
       });
     },
     onSuccess: (task) => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      const queryKey = ["affectation", "hts", session._id];
+      const queryKey = ["affectation", "hts-dromcom", session._id];
       const oldStatus = queryClient.getQueryData<Phase1Routes["GetSimulationsRoute"]["response"]>(queryKey) || [];
       queryClient.setQueryData(queryKey, { ...oldStatus, simulation: { status: task.status } });
       onClose();
@@ -68,7 +57,6 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
   return (
     <Modal
       isOpen
-      noBodyScroll
       onClose={onClose}
       className="md:max-w-[800px]"
       content={
@@ -79,10 +67,7 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
                 <HiOutlineLightningBolt className="w-6 h-6" />
               </div>
             </div>
-            <h1 className="font-bold text-xl m-0">Affectation HTS (Metropole, hors Corse)</h1>
-            <p className="text-lg">
-              La simulation se basera sur le schéma de répartition suivant : <b>{isLoadingImports ? "..." : sdrImport?.metadata?.parameters?.fileName || "--"}</b>
-            </p>
+            <h1 className="font-bold text-xl m-0">Affectation HTS (DROM COM et Corse)</h1>
             <p className="py-3 px-4 text-sm leading-5 font-medium bg-amber-50 text-amber-600">Les HZR concernés par ce séjour seront pris en compte dans la simulation</p>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
@@ -99,11 +84,11 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
             <div className="flex flex-col w-full gap-2.5">
               <h2 className="text-lg leading-7 font-bold m-0">Découpage territorial</h2>
               <div className="flex flex-col w-full">
-                {RegionsMetropole.map((region) => (
+                {RegionsDromComEtCorse.map((region) => (
                   <CollapsableSelectSwitcher
                     key={region}
                     title={region}
-                    options={region2department[region].map((department) => ({ label: formatDepartement(department), value: department }))}
+                    options={region2department[region]?.map((department) => ({ label: formatDepartement(department), value: department }))}
                     values={state.departements[region]}
                     onChange={(values) => setState({ departements: { ...state.departements, [region]: values } })}
                     isOpen={false}
