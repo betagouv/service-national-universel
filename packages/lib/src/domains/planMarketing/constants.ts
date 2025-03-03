@@ -11,3 +11,8 @@ export enum DestinataireListeDiffusion {
   CHEFS_CENTRES = "CHEFS_CENTRES",
   COORDINATEURS_CLE = "COORDINATEURS_CLE",
 }
+
+export enum ListeDiffusionEnum {
+  VOLONTAIRES = "Volontaires",
+  INSCRIPTIONS = "Inscriptions",
+}
