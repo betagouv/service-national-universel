@@ -12,6 +12,7 @@ import { JeuneService } from "../../jeune/Jeune.service";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AffectationService } from "../affectation/Affectation.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
+import { SejourGateway } from "../sejour/Sejour.gateway";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -26,6 +27,7 @@ export class DesistementService {
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         private readonly cls: ClsService,
         private readonly jeuneService: JeuneService,
         private readonly affectationService: AffectationService,
@@ -63,6 +65,9 @@ export class DesistementService {
             const lignesDeBus = await this.ligneDeBusGateway.findByIds(lignesDeBusIds);
             await this.affectationService.syncPlacesDisponiblesLignesDeBus(lignesDeBus);
         }
+
+        const sejours = await this.sejourGateway.findBySessionId(jeunes[0].sessionId!);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejours);
 
         return res;
     }
