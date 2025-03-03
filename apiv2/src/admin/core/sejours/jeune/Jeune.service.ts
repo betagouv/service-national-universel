@@ -11,7 +11,7 @@ export class JeuneService {
         return this.classeGateway.findAll();
     }
 
-    groupJeunesByReponseAuxAffectations(jeunes: JeuneModel[], sessionId: string) {
+    groupJeunesByReponseAuxAffectations(jeunes: Partial<JeuneModel>[], sessionId: string) {
         return jeunes.reduce(
             (acc, jeune) => {
                 if (jeune.sessionId !== sessionId) {
@@ -29,10 +29,10 @@ export class JeuneService {
                 return acc;
             },
             {
-                jeunesAutreSession: [] as JeuneModel[],
-                jeunesDesistes: [] as JeuneModel[],
-                jeunesConfirmes: [] as JeuneModel[],
-                jeunesNonConfirmes: [] as JeuneModel[],
+                jeunesAutreSession: [] as Partial<JeuneModel>[],
+                jeunesDesistes: [] as Partial<JeuneModel>[],
+                jeunesConfirmes: [] as Partial<JeuneModel>[],
+                jeunesNonConfirmes: [] as Partial<JeuneModel>[],
             },
         );
     }

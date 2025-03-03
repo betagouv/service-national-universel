@@ -1,4 +1,4 @@
-import { YoungDto } from "src/dto/youngDto";
+import { YoungDto } from "../../youngDto";
 import { TaskDto } from "../../taskDto";
 import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 

@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { DesisterTaskResult, PreviewDesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { PreviewDesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -115,6 +115,17 @@ export class DesistementService {
         }
         const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
         const jeunes = await this.jeuneGateway.findByIds(ids);
-        return this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        const jeunesWithFilteredColumns = jeunes.map((jeune) => ({
+            id: jeune.id,
+            email: jeune.email,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
+            statut: jeune.statut,
+            statutPhase1: jeune.statutPhase1,
+            sejour: jeune.sessionNom,
+            region: jeune.region,
+            departement: jeune.departement,
+        }));
+        return this.jeuneService.groupJeunesByReponseAuxAffectations(jeunesWithFilteredColumns, sessionId);
     }
 }
