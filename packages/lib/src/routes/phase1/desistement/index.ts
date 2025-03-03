@@ -1,4 +1,4 @@
-import { BasicRoute, DesistementTaskDto, DesisterTaskResult, RouteResponseBodyV2 } from "../../..";
+import { BasicRoute, DesistementTaskDto, PreviewDesisterTaskResult, RouteResponseBodyV2 } from "../../..";
 
 interface PostDesistement extends BasicRoute {
   method: "POST";
@@ -12,7 +12,7 @@ interface GetPreview extends BasicRoute {
   method: "GET";
   path: "/desistement/{sessionId}/preview/{affectationTaskId}";
   params: { sessionId: string; affectationTaskId: string };
-  response: RouteResponseBodyV2<DesisterTaskResult>;
+  response: RouteResponseBodyV2<PreviewDesisterTaskResult>;
 }
 
 export type DesistementRoutes = {

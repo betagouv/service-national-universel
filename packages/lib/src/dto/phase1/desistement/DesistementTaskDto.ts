@@ -1,3 +1,4 @@
+import { YoungDto } from "src/dto/youngDto";
 import { TaskDto } from "../../taskDto";
 import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
@@ -13,6 +14,13 @@ export type DesisterTaskResult = {
   jeunesNonConfirmes: number;
   rapportKey?: string;
   jeunesModifies?: number;
+};
+
+export type PreviewDesisterTaskResult = {
+  jeunesDesistes: YoungDto[];
+  jeunesAutreSession: YoungDto[];
+  jeunesConfirmes: YoungDto[];
+  jeunesNonConfirmes: YoungDto[];
 };
 
 export interface DesistementTaskDto extends TaskDto<DesisterTaskParameters, DesisterTaskResult> {}

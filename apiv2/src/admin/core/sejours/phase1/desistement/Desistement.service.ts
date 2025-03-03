@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { DesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { DesisterTaskResult, PreviewDesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -108,20 +108,13 @@ export class DesistementService {
     }: {
         sessionId: string;
         affectationTaskId: string;
-    }): Promise<DesisterTaskResult> {
+    }): Promise<PreviewDesisterTaskResult> {
         const affectationTask = await this.taskGateway.findById(affectationTaskId);
         if (!affectationTask) {
             throw new Error("Affectation task not found");
         }
         const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
         const jeunes = await this.jeuneGateway.findByIds(ids);
-        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
-            this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
-        return {
-            jeunesDesistes: jeunesDesistes.length,
-            jeunesAutreSession: jeunesAutreSession.length,
-            jeunesConfirmes: jeunesConfirmes.length,
-            jeunesNonConfirmes: jeunesNonConfirmes.length,
-        };
+        return this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
     }
 }

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { CohortDto, formatDateFR, TaskName, translate, translateSimulationName } from "snu-lib";
+import { CohortDto, formatDateFR, TaskName, translateSimulationName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../shared/useTraitements";
 import dayjs from "dayjs";
@@ -8,6 +8,8 @@ import DesistementButton from "./DesistementButton";
 import { DesistementService } from "@/services/desistementService";
 import { useQuery } from "@tanstack/react-query";
 import Loader from "@/components/Loader";
+import * as FileSaver from "file-saver";
+import * as XLSX from "xlsx";
 
 export default function DesistementModal({ session, onClose }: { session: CohortDto; onClose: () => void }) {
   const { data: traitements, isPending, isError } = useTraitements({ sessionId: session._id!, action: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER, sort: "ASC" });
@@ -73,7 +75,27 @@ function PreviewText({ traitement }) {
     refetchOnWindowFocus: false,
   });
   const total = traitement?.metadata?.results?.jeunesAffected || 0;
-  const nonConfirmes = data?.jeunesNonConfirmes || 0;
+  const nonConfirmes = data?.jeunesNonConfirmes.length;
+
+  function handleClick() {
+    if (!data) return;
+    const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
+    const classeur = {
+      Sheets: {
+        "Non confirmation": XLSX.utils.json_to_sheet(data.jeunesNonConfirmes),
+        "Confirmation de la participation": XLSX.utils.json_to_sheet(data.jeunesConfirmes),
+        "Changement de séjour": XLSX.utils.json_to_sheet(data.jeunesAutreSession),
+        "Desistement après affectation": XLSX.utils.json_to_sheet(data.jeunesDesistes),
+      },
+      SheetNames: ["Non confirmation", "Confirmation de participation", "Changement de séjour", "Desistement après affectation"],
+    };
+    const excelBuffer = XLSX.write(classeur, { bookType: "xlsx", type: "array" });
+    const blob = new Blob([excelBuffer], { type: fileType });
+    const now = new Date();
+    const exportDate = `${now.getFullYear()}${now.getMonth() + 1}${("0" + now.getDate()).slice(-2)}`;
+    const exportTime = `${now.getHours()}${now.getMinutes()}`;
+    FileSaver.saveAs(blob, `${exportDate}_${exportTime}_desistement_preview.xlsx`);
+  }
 
   return (
     <div className="text-center text-lg">
@@ -87,6 +109,8 @@ function PreviewText({ traitement }) {
             Nombre de volontaires à désister : {nonConfirmes} / {total} affectés.
           </p>
           <p>Confirmez le désistement des volontaires n’ayant pas confirmé le séjour.</p>
+          <br />
+          <Button onClick={handleClick} title="Exporter la liste" type="secondary" className="w-full" />
         </>
       )}
     </div>
