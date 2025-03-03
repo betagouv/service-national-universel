@@ -16,6 +16,9 @@ jobs:
         run: npm install -g clever-tools
 
       - name: Merge main in deploy-ci
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           clever link app_9f11ed0e-0f52-4e94-8744-a61c2aa3fdc2
           clever deploy
