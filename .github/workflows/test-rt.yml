@@ -21,7 +21,7 @@ jobs:
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           clever link app_9f11ed0e-0f52-4e94-8744-a61c2aa3fdc2
-          clever deploy
+          clever deploy --force
 
       # - name: Merge main in deploy-ci
       #   run: |
