@@ -26,10 +26,10 @@ import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
 import Historic from "./Historic";
 import ListeDemandeModif from "./ListeDemandeModif";
-import ImportSDRButton from "./ImportSDRButton";
 import DeletePDTButton from "./DeletePDTButton";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
+import SyncPlacesPDTButton from "./SyncPlacesPDTButton";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
@@ -188,9 +188,9 @@ export default function List() {
           />,
         ]}
       />
-      <div className="flex gap-2">
-        {isSuperAdmin(user) && <ImportSDRButton className="mb-4" />}
+      <div className="flex gap-2 items-center">
         {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
+        {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
       </div>
       {hasValue && (
         <Navbar

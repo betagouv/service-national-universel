@@ -1,7 +1,6 @@
-import React, { ReactNode } from "react";
+import React, { ReactNode, useId } from "react";
 import ReactTooltip from "react-tooltip";
 import cx from "classnames";
-import { normalizeId } from "snu-lib";
 
 interface TooltipProps {
   id?: string;
@@ -20,7 +19,8 @@ export default function Tooltip({
   className,
   tooltipClassName,
 }: TooltipProps) {
-  const tooltipId = id ? `tooltip-${id}` : normalizeId(title);
+  const alternativeId = useId();
+  const tooltipId = id ? `tooltip-${id}` : alternativeId;
 
   return (
     <div className={cx(className)}>

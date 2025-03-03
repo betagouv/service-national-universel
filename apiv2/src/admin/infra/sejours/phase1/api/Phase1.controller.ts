@@ -1,4 +1,4 @@
-import { Controller, Delete, Get, Inject, Param, Query, UseGuards } from "@nestjs/common";
+import { Controller, Delete, Get, Inject, Param, Post, Query, UseGuards } from "@nestjs/common";
 
 import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
 
@@ -11,6 +11,7 @@ import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/af
 
 const PHASE1_SIMULATIONS_TASK_NAMES = [
     TaskName.AFFECTATION_HTS_SIMULATION,
+    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
     TaskName.AFFECTATION_CLE_SIMULATION,
     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
     TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
@@ -18,6 +19,7 @@ const PHASE1_SIMULATIONS_TASK_NAMES = [
 ];
 const PHASE1_TRAITEMENTS_TASK_NAMES = [
     TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
     TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
     TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
