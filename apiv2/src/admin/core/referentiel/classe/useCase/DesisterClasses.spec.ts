@@ -1,6 +1,10 @@
 import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
 import { DesisterClasses } from "./DesisterClasses";
 
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
+
 describe("DesisterClasses", () => {
     let useCase: DesisterClasses;
     let mockFileGateway: any;
