@@ -12,7 +12,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
       - name: Merge main in deploy-ci
         run: |
-          git remote -v
-          git push --force origin poc_rt:deploy-ci
+          clever link app_9f11ed0e-0f52-4e94-8744-a61c2aa3fdc2
+          clever deploy
+
+      # - name: Merge main in deploy-ci
+      #   run: |
+      #     git remote -v
+      #     git push --force origin poc_rt:deploy-ci
