@@ -14,6 +14,7 @@ export interface Phase1TaskParameters {
 
 export type Phase1TaskHTSTaskResult = {
   rapportKey: string;
+  jeunesAffected: number;
 };
 
 export interface Phase1HTSTaskDto extends TaskDto<Phase1TaskParameters, Phase1TaskHTSTaskResult> {}
