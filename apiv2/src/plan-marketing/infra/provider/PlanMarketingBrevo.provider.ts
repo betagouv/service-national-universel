@@ -85,20 +85,20 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     }
 
     async deleteOldestListeDiffusion(): Promise<void> {
+        const folderIdToExclude = 589;
         try {
             // 1. Récupérer toutes les listes
             const listsResponse = await this.contactsApi.getLists(undefined, undefined, "asc");
             const listeDiffusions = listsResponse.body.lists;
             if (!listeDiffusions || listeDiffusions.length === 0) {
-                this.logger.warn("Aucune liste trouvée.");
+                this.logger.log("Aucune liste trouvée.");
                 return;
             }
             
             // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
-            const folderIdToExclude = 589;
             const filteredListsDiffusion = listeDiffusions.filter((list) => list.folderId !== folderIdToExclude);
             if (filteredListsDiffusion.length === 0) {
-                this.logger.warn("Aucune liste à supprimer.");
+                this.logger.log("Aucune liste à supprimer.");
                 return;
             }
     
@@ -108,7 +108,6 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
             await this.contactsApi.deleteList(oldestListDiffusion.id);
             this.logger.log(`Liste supprimée avec succès : ${oldestListDiffusion.name}`);
         } catch (error: any) {
-            this.logger.error(`Erreur lors de la suppression de la plus ancienne liste: ${error.message}`);
             throw new TechnicalException(TechnicalExceptionType.BREVO, `Erreur lors de la suppression de la liste: ${error.message}`);
         }
     }
