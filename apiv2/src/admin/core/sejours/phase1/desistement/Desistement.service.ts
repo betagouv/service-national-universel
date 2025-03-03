@@ -125,6 +125,8 @@ export class DesistementService {
             sejour: jeune.sessionNom,
             region: jeune.region,
             departement: jeune.departement,
+            sessionId: jeune.sessionId,
+            confirmationParticipation: jeune.youngPhase1Agreement,
         }));
         return this.jeuneService.groupJeunesByReponseAuxAffectations(jeunesWithFilteredColumns, sessionId);
     }

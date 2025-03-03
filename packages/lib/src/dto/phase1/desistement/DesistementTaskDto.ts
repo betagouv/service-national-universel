@@ -17,10 +17,10 @@ export type DesisterTaskResult = {
 };
 
 export type PreviewDesisterTaskResult = {
-  jeunesDesistes: YoungDto[];
-  jeunesAutreSession: YoungDto[];
-  jeunesConfirmes: YoungDto[];
-  jeunesNonConfirmes: YoungDto[];
+  jeunesDesistes: Partial<YoungDto>[];
+  jeunesAutreSession: Partial<YoungDto>[];
+  jeunesConfirmes: Partial<YoungDto>[];
+  jeunesNonConfirmes: Partial<YoungDto>[];
 };
 
 export interface DesistementTaskDto extends TaskDto<DesisterTaskParameters, DesisterTaskResult> {}
