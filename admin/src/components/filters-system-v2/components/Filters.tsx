@@ -49,7 +49,6 @@ interface FiltersProps {
   size?: any;
   intermediateFilters?: any[];
   disabled?: boolean;
-  showInput?: boolean;
 }
 
 export default function Filters({
@@ -66,7 +65,6 @@ export default function Filters({
   size,
   intermediateFilters = [],
   disabled = false,
-  showInput = true,
 }: FiltersProps) {
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
@@ -219,19 +217,17 @@ export default function Filters({
     <div>
       <div className="flex flex-row items-center justify-between">
         <div className="flex flex-row items-center justify-start gap-2">
-          {showInput && (
-            <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
-              <input
-                name={"searchbar"}
-                placeholder={searchPlaceholder}
-                value={selectedFilters?.searchbar?.filter?.[0] || ""}
-                onChange={(e) => {
-                  setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
-                }}
-                className={`h-full w-full text-xs text-gray-600`}
-              />
-            </div>
-          )}
+          <div className="h-[38px] w-[305px] overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
+            <input
+              name={"searchbar"}
+              placeholder={searchPlaceholder}
+              value={selectedFilters?.searchbar?.filter?.[0] || ""}
+              onChange={(e) => {
+                setSelectedFilters({ ...selectedFilters, [e.target.name]: { filter: [e.target.value] } });
+              }}
+              className={`h-full w-full text-xs text-gray-600`}
+            />
+          </div>
 
           <Popover className="relative">
             {({ open }) => (
