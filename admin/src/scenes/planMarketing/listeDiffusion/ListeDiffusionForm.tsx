@@ -33,6 +33,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: Lis
     },
   });
 
+  const isEditing = listeDiffusionData.id !== undefined;
   const isOpen = listeDiffusionData.id === undefined || isDirty;
 
   const handleOnCancel = () => {
@@ -74,6 +75,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: Lis
                 name="type"
                 control={control}
                 rules={{ required: "Ce champ est requis" }}
+                disabled={isEditing}
                 render={({ field }) => (
                   <RadioButton
                     options={[
@@ -82,6 +84,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, onSave, onCancel }: Lis
                     ]}
                     value={field.value}
                     onChange={field.onChange}
+                    readonly={isEditing}
                   />
                 )}
               />
