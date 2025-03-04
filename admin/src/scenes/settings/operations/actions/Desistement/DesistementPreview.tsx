@@ -9,18 +9,22 @@ import { PreviewDesisterTaskResult, ValiderAffectationHTSTaskDto } from "snu-lib
 export default function DesistementPreview({ traitement }: { traitement: unknown }) {
   const affectationTask = traitement as ValiderAffectationHTSTaskDto;
   const sessionId = affectationTask.metadata?.parameters?.sessionId;
-  const { data, isPending, isError } = useQuery({
+  const {
+    data: desistementPreview,
+    isPending,
+    isError,
+  } = useQuery({
     queryKey: ["desistement", affectationTask.id],
     queryFn: () => DesistementService.getDesistementPreview(sessionId!, affectationTask.id),
     enabled: !!sessionId,
     refetchOnWindowFocus: false,
   });
   const total = affectationTask?.metadata?.results?.jeunesAffected || 0;
-  const nonConfirmes = data?.jeunesNonConfirmes.length;
+  const nonConfirmes = desistementPreview?.jeunesNonConfirmes.length;
 
   function handleClick() {
-    if (!data) return;
-    const sheets = formatSheets(data);
+    if (!desistementPreview) return;
+    const sheets = formatSheets(desistementPreview);
     const exportDateTime = getDateTimeString();
     const fileName = `Desistement_preview_${affectationTask.name}_${exportDateTime}`;
     saveAsExcelFile(sheets, fileName);
