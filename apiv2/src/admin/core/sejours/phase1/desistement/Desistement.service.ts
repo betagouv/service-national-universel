@@ -18,6 +18,21 @@ export type StatusDesistement = {
     lastCompletedAt: Date;
 };
 
+export type JeuneFilteredForDesistementExport = Pick<
+    JeuneModel,
+    | "id"
+    | "email"
+    | "prenom"
+    | "nom"
+    | "statut"
+    | "statutPhase1"
+    | "sessionNom"
+    | "region"
+    | "departement"
+    | "sessionId"
+    | "youngPhase1Agreement"
+>;
+
 @Injectable()
 export class DesistementService {
     constructor(
@@ -115,7 +130,23 @@ export class DesistementService {
         }
         const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
         const jeunes = await this.jeuneGateway.findByIds(ids);
-        const jeunesWithFilteredColumns = jeunes.map((jeune) => ({
+        const groups = this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        return Object.entries(groups).reduce(
+            (acc, [key, value]) => {
+                acc[key] = this.filterFields(value);
+                return acc;
+            },
+            {
+                jeunesNonConfirmes: [] as JeuneFilteredForDesistementExport[],
+                jeunesConfirmes: [] as JeuneFilteredForDesistementExport[],
+                jeunesAutreSession: [] as JeuneFilteredForDesistementExport[],
+                jeunesDesistes: [] as JeuneFilteredForDesistementExport[],
+            },
+        );
+    }
+
+    filterFields(jeunes: JeuneModel[]): JeuneFilteredForDesistementExport[] {
+        return jeunes.map((jeune) => ({
             id: jeune.id,
             email: jeune.email,
             prenom: jeune.prenom,
@@ -128,6 +159,5 @@ export class DesistementService {
             sessionId: jeune.sessionId,
             youngPhase1Agreement: jeune.youngPhase1Agreement,
         }));
-        return this.jeuneService.groupJeunesByReponseAuxAffectations(jeunesWithFilteredColumns, sessionId);
     }
 }

@@ -19,7 +19,7 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         const jeunes = await this.jeuneGateway.findByIds(ids);
         const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
             this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
-        const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes as JeuneModel[]);
+        const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes);
         this.logger.debug(`DesistementService: ${jeunesNonConfirmes.length} jeunes désistés`);
         // TODO: Rapport
         await this.desistementService.notifierJeunes(jeunesNonConfirmes as JeuneModel[]);

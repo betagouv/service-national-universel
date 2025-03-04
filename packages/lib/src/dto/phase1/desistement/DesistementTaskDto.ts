@@ -16,11 +16,16 @@ export type DesisterTaskResult = {
   jeunesModifies?: number;
 };
 
+export type JeuneFilteredForDesistementExportDto = Pick<
+  YoungDto,
+  "id" | "email" | "firstName" | "lastName" | "status" | "statusPhase1" | "cohort" | "region" | "department" | "cohortId" | "youngPhase1Agreement"
+>;
+
 export type PreviewDesisterTaskResult = {
-  jeunesDesistes: Partial<YoungDto>[];
-  jeunesAutreSession: Partial<YoungDto>[];
-  jeunesConfirmes: Partial<YoungDto>[];
-  jeunesNonConfirmes: Partial<YoungDto>[];
+  jeunesDesistes: JeuneFilteredForDesistementExportDto[];
+  jeunesAutreSession: JeuneFilteredForDesistementExportDto[];
+  jeunesConfirmes: JeuneFilteredForDesistementExportDto[];
+  jeunesNonConfirmes: JeuneFilteredForDesistementExportDto[];
 };
 
 export interface DesistementTaskDto extends TaskDto<DesisterTaskParameters, DesisterTaskResult> {}
