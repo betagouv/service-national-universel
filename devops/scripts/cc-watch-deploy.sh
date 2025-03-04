@@ -35,7 +35,6 @@ deployment_started=""
 until [[ $deployment_started ]]; do
     deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
         | jq '[ .[] | select(.state == "WIP" and .commit == $sha and .cause == "github") ] | .[0] // empty' --arg sha "$sha")
-    printf '.'
     sleep 5
 done
 
@@ -46,7 +45,6 @@ deployment_ended=""
 until [[ $deployment_ended ]]; do
     deployment_ended=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments/$deployment_id" \
         | jq '. | select(.state != "WIP" and .uuid == $uuid)' --arg uuid "$deployment_id")
-    printf '.'
     sleep 10
 done
 
