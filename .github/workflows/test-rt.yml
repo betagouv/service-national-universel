@@ -22,8 +22,8 @@ jobs:
 
       - name: Watch deployment
         env:
-          ORGANIZATION_ID: ${{ secrets.CC_ORGANIZATION_ID }}
-          APPLICATION_ID: ${{ secrets.CC_APPLICATION_ID_CI }}
+          ORGANIZATION_ID: ${{ vars.CC_ORGANIZATION_ID }}
+          APPLICATION_ID: ${{ vars.CC_APPLICATION_ID_CI }}
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: ./devops/scripts/cc-watch-deploy.sh
