@@ -11,21 +11,19 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
+
+      - name: Merge main in deploy-ci
+        run: |
+          git remote -v
+          git push --force origin poc_rt:deploy-ci
 
       - name: Install clever-tools
         run: npm install -g clever-tools
 
-      - name: Merge main in deploy-ci
+      - name: Watch deployment
         env:
+          ORGANIZATION_ID: ${{ secrets.CC_ORGANIZATION_ID }}
+          APPLICATION_ID: ${{ secrets.CC_APPLICATION_ID_CI }}
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: |
-          clever link app_9f11ed0e-0f52-4e94-8744-a61c2aa3fdc2
-          clever deploy --force
-
-      # - name: Merge main in deploy-ci
-      #   run: |
-      #     git remote -v
-      #     git push --force origin poc_rt:deploy-ci
+        run: ./devops/script/cc-watch-deploy.sh
