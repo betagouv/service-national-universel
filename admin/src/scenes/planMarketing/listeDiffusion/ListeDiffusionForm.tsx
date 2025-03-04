@@ -1,9 +1,9 @@
-import React, { useEffect } from "react";
+import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Button, Collapsable, Container, Label } from "@snu/ds/admin";
-import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
+import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
-import RadioButton from "@/scenes/phase0/components/RadioButton";
+import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 import ListeDiffusionFilterWrapper from "../campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
 
 export interface ListeDiffusionDataProps {
@@ -34,6 +34,8 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
     reset,
+    watch,
+    resetField,
   } = useForm<ListeDiffusionDataProps>({
     defaultValues: {
       type: ListeDiffusionEnum.VOLONTAIRES,
@@ -62,11 +64,12 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     reset(data);
   };
 
-  let filtersView = filter?.volontaires;
-  if (listeDiffusionData.type === ListeDiffusionEnum.INSCRIPTIONS) {
-    filtersView = filter?.inscriptions;
-  }
-  console.log("filtersView", filtersView);
+  watch((currentState, { name, type }) => {
+    console.log("currentState", currentState);
+    if (name === "type") {
+      resetField("filters");
+    }
+  });
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
@@ -90,7 +93,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
               />
               {errors.nom && <span className="text-red-500 text-sm mt-1">{errors.nom.message}</span>}
             </div>
-
+            <div>watch("type") {watch("type")}</div>
             <div className="flex-1">
               <Label title="Type de liste de diffusion" name="type" className="mb-2 flex items-center font-medium !text-sm" />
               <Controller
@@ -124,14 +127,53 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
               rules={{ required: "Ce champ est requis" }}
               render={({ field }) => (
                 <ListeDiffusionFilterWrapper
-                  paramData={filtersView?.paramData}
-                  dataFilter={filtersView?.dataFilter}
-                  filters={filtersView.filters}
+                  key={"volontaires-" + listeDiffusionData.id}
+                  paramData={filter?.volontaires.paramData}
+                  dataFilter={filter.volontaires?.dataFilter}
+                  filters={filter.volontaires?.filters}
                   id={listeDiffusionData.id}
                   selectedFilters={field.value}
                   onFiltersChange={field.onChange}
                 />
+
+                // <ListeDiffusionFilterWrapper
+                //   key={"inscriptions-" + listeDiffusionData.id}
+                //   paramData={filter.inscriptions?.paramData}
+                //   dataFilter={filter.inscriptions?.dataFilter}
+                //   filters={filter.inscriptions?.filters}
+                //   id={listeDiffusionData.id}
+                //   selectedFilters={field.value}
+                //   onFiltersChange={field.onChange}
+                // />
               )}
+
+              // render={({ field }) => {
+              //   console.log("watch('type')", watch("type"));
+              //   if (watch("type") === ListeDiffusionEnum.VOLONTAIRES) {
+              //     return (
+              //       <ListeDiffusionFilterWrapper
+              //         key={"volontaires-" + listeDiffusionData.id}
+              //         paramData={filter?.volontaires.paramData}
+              //         dataFilter={filter.volontaires?.dataFilter}
+              //         filters={filter.volontaires?.filters}
+              //         id={listeDiffusionData.id}
+              //         selectedFilters={field.value}
+              //         onFiltersChange={field.onChange}
+              //       />
+              //     );
+              //   }
+              //   return (
+              //     <ListeDiffusionFilterWrapper
+              //       key={"inscriptions-" + listeDiffusionData.id}
+              //       paramData={filter.inscriptions?.paramData}
+              //       dataFilter={filter.inscriptions?.dataFilter}
+              //       filters={filter.inscriptions?.filters}
+              //       id={listeDiffusionData.id}
+              //       selectedFilters={field.value}
+              //       onFiltersChange={field.onChange}
+              //     />
+              //   );
+              // }}
             />
           </div>
         </div>

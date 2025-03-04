@@ -12,18 +12,12 @@ export default function ListeDiffusion() {
   const [searchTerm, setSearchTerm] = useState("");
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
 
-  // Filtres des listes de diffusion
-  const listeTypeVolontaires = "young-list";
-  const routeVolontaires = "/elasticsearch/young/search?tab=volontaire";
-  const listeTypeInscriptions = "inscription-list";
-  const routeInscriptions = "/elasticsearch/young/search";
-  const { data: dataVolontaires, filters: filtersVolontaires, isPending: isPendingVolontaires } = useListeDiffusionFilter(listeTypeVolontaires, routeVolontaires);
-  const { data: dataInscriptions, filters: filtersInscriptions, isPending: isPendingInscriptions } = useListeDiffusionFilter(listeTypeInscriptions, routeInscriptions);
-  const isPending = isPendingInscriptions || isPendingVolontaires;
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilter();
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {
       type: ListeDiffusionEnum.VOLONTAIRES,
+      filters: {},
     };
     setDraftListe(newListe);
   };

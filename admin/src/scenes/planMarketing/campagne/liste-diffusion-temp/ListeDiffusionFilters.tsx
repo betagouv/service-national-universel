@@ -17,6 +17,7 @@ interface ListeDiffusionFiltersProps {
   intermediateFilters?: any[];
 }
 
+// Legacy code
 // Copy from ES coupled component : @/components/filters-system-v2/components/Filters
 export default function ListeDiffusionFilters({ filters, selectedFilters, onFiltersChange, dataFilter, intermediateFilters = [] }: ListeDiffusionFiltersProps) {
   const [search, setSearch] = useState("");

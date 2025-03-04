@@ -1,6 +1,6 @@
 import { SelectedFilters } from "@/components/filters-system-v2";
 import { getCohortGroups } from "@/services/cohort.service";
-import React, { createContext, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 
 import { Filter } from "@/components/filters-system-v2/components/Filters";
 import { ListeDiffusionFiltres } from "snu-lib";
@@ -20,17 +20,20 @@ export interface ListeDiffusionFilterContextProps {
 }
 export const ListeDiffusionFilterContext: React.Context<ListeDiffusionFilterContextProps> = createContext({});
 
-export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id, selectedFilters = {}, onFiltersChange }: ListeDiffusionFilterProps) {
-  console.log("Filters", filters);
-
+// Legacy code
+export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id, selectedFilters, onFiltersChange }: ListeDiffusionFilterProps) {
+  console.log("selectedFilters", selectedFilters);
   const formattedSelectedFilter: { [key: string]: { filter: string[] } } =
-    Object.fromEntries(Object.entries(selectedFilters).map(([key, value]) => [key, { filter: value }])) || {};
+    Object.fromEntries(Object.entries(selectedFilters || {}).map(([key, value]) => [key, { filter: value }])) || {};
+  console.log("dataFilter", dataFilter);
 
   const handleFilterChange = (filters: { [key: string]: { filter: string[] } }) => {
+    console.log("filters", filters);
     const formattedUpdatedFilters = Object.fromEntries(Object.entries(filters).map(([key, value]) => [key, value.filter]));
+    console.log("formattedUpdatedFilters", formattedUpdatedFilters);
     onFiltersChange(formattedUpdatedFilters);
   };
-
+  const cohortsGroups = getCohortGroups();
   return (
     <ListeDiffusionFilterContext.Provider value={{ keyPrefix: id }}>
       <div className="flex">
@@ -38,7 +41,7 @@ export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, fil
           filters={filters}
           selectedFilters={formattedSelectedFilter}
           onFiltersChange={handleFilterChange}
-          intermediateFilters={[getCohortGroups()]}
+          intermediateFilters={[cohortsGroups]}
           dataFilter={dataFilter}
         />
       </div>
