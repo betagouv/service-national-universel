@@ -61,7 +61,9 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
           <div className="space-y-6">
             <div>
               <div className="flex">
-                <Label title="Dénomination de la liste de diffusion" name="name" className="text-gray-700 mb-2 flex items-center" />
+                <label id="denomination-liste-diffusion" className="text-gray-700 mb-2 flex items-center">
+                  Dénomination de la liste de diffusion
+                </label>
                 <Tooltip title="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo.">
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
@@ -83,7 +85,9 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
             <div>
               <div className="flex">
-                <Label title="Identifiant de la campagne" name="campaignId" className="text-gray-700 mb-2 flex items-center" />
+                <label id="identifiant-campagne" className="text-gray-700 mb-2 flex items-center">
+                  Identifiant de la campagne
+                </label>
                 <Tooltip title="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée.">
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
@@ -105,7 +109,9 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
             <div>
               <div className="flex">
-                <Label title="Destinataires" name="recipients" className="text-gray-700 mb-2 flex items-center" />
+                <label id="destinataires-liste-diffusion" className="text-gray-700 mb-2 flex items-center">
+                  Destinataires
+                </label>
                 <Tooltip title="Sélectionnez la liste des destinataires de la campagne.">
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
