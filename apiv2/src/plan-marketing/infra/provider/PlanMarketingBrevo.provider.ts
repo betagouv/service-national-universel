@@ -34,6 +34,17 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
+    async getAllCampagnes(): Promise<any[]> {
+        this.logger.log(`getAllCampagnes()`);
+        try {
+            const result = await this.campaignsApi.getEmailCampaigns();
+            return result.body.campaigns || [];
+        } catch (error: any) {
+            this.logger.error(`Failed to get all campaigns:${JSON.stringify(error.body)}`);
+            return [];
+        }
+    }
+
     // TODO : add type when model of campagne is available
     async findCampagneById(campagneId: string): Promise<any> {
         this.logger.log(`findCampagneById() - campagneId: ${campagneId}`);
