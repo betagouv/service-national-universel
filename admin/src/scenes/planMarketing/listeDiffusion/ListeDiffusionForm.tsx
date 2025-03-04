@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Button, Collapsable, Container, Label } from "@snu/ds/admin";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 import { Controller, useForm } from "react-hook-form";
@@ -41,9 +41,17 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     },
   });
 
+  // Update the form when the listeDiffusionData changes
+  useEffect(() => {
+    reset({
+      type: ListeDiffusionEnum.VOLONTAIRES,
+      ...listeDiffusionData,
+    });
+  }, [listeDiffusionData, reset]);
+
   const isEditing = listeDiffusionData.id !== undefined;
   const isOpen = listeDiffusionData.id === undefined || isDirty;
-
+  console.log("isDirty", isDirty);
   const handleOnCancel = () => {
     reset();
     onCancel();

@@ -25,16 +25,13 @@ export const useListeDiffusion = () => {
       }
       return ListeDiffusionService.create(payload);
     },
-    onSuccess: () => {
-      // TODO: Voir pourquoi on ne peut pas mettre à jour la liste de diffusion
-      // et que l'on doit invalider la query
-      // queryClient.setQueryData<ListeDiffusionDataProps[]>(["listes-diffusion"], (old = []) => {
-      //   if (data.id) {
-      //     return old.map((item) => (item.id === data.id ? { ...data } : item));
-      //   }
-      //   return [{ ...data }, ...old];
-      // });
-      queryClient.invalidateQueries({ queryKey: [LISTE_DIFFUSION_QUERY_KEY] });
+    onSuccess: (data, variables) => {
+      queryClient.setQueryData<ListeDiffusionDataProps[]>([LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT], (old = []) => {
+        if (variables.id) {
+          return old.map((item) => (item.id === variables.id ? { ...item, ...variables.payload } : item));
+        }
+        return [data, ...old];
+      });
       toastr.clean();
       toastr.success("Succès", "Liste de diffusion sauvegardée avec succès", { timeOut: 5000 });
     },
