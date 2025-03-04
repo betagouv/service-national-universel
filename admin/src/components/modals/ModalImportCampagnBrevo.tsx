@@ -23,11 +23,10 @@ export interface BrevoListData {
   campaignId: string[];
 }
 
-export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, isLoadingProcess }: ModalImportCampagnBrevoProps) => {
+export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, isLoadingProcess }: ModalImportCampagnBrevoProps) => {
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [importAll, setImportAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-  const cohort = { name: "Tioto", type: "CLE" };
   const { handleSubmit, reset } = useForm<BrevoListData>({
     defaultValues: {
       name: "",
