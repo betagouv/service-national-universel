@@ -57,8 +57,8 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
     .filter((campagne) => campagne.nom.toLowerCase().includes(searchTerm.toLowerCase()));
 
   const onSubmitForm = handleSubmit((data) => {
-    const selectedCampaignsData = importAll ? filteredCampaigns : allCampagnesData.filter((campagne) => selectedCampaigns.includes(campagne._id));
-    onConfirm({ ...data, campaignId: selectedCampaignsData.map((campagne) => campagne._id) });
+    const selectedCampaignsData = importAll ? filteredCampaigns : allCampagnesData.filter((campagne) => selectedCampaigns.includes(campagne.id));
+    onConfirm({ ...data, campaignId: selectedCampaignsData.map((campagne) => campagne.id) });
     handleOnClose();
   });
   const handleOnClose = () => {
@@ -70,7 +70,7 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
   };
 
   const toggleSelectAll = (checked: boolean) => {
-    setSelectedCampaigns(checked ? filteredCampaigns.map((campagne) => campagne._id) : []);
+    setSelectedCampaigns(checked ? filteredCampaigns.map((campagne) => campagne.id) : []);
   };
 
   const toggleSelectCampaign = (campaignId: string, checked: boolean) => {
@@ -129,8 +129,8 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
                   <span className="text-sm font-bold">Tout sélectionner</span>
                 </div>
                 {filteredCampaigns.map((campagne) => (
-                  <div key={campagne._id} className="flex items-center gap-2">
-                    <input type="checkbox" onChange={(e) => toggleSelectCampaign(campagne._id, e.target.checked)} checked={selectedCampaigns.includes(campagne._id)} />
+                  <div key={campagne.id} className="flex items-center gap-2">
+                    <input type="checkbox" onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)} checked={selectedCampaigns.includes(campagne.id)} />
                     <span className="text-sm">{campagne.nom}</span>
                   </div>
                 ))}

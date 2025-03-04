@@ -3,7 +3,7 @@ import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 
 export interface CampagnePayload {
-  _id: string;
+  id: string;
   campagneGeneriqueId?: string;
   nom: string;
   objet: string;
