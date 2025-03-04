@@ -22,15 +22,11 @@ export const ListeDiffusionFilterContext: React.Context<ListeDiffusionFilterCont
 
 // Legacy code
 export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id, selectedFilters, onFiltersChange }: ListeDiffusionFilterProps) {
-  console.log("selectedFilters", selectedFilters);
   const formattedSelectedFilter: { [key: string]: { filter: string[] } } =
     Object.fromEntries(Object.entries(selectedFilters || {}).map(([key, value]) => [key, { filter: value }])) || {};
-  console.log("dataFilter", dataFilter);
 
   const handleFilterChange = (filters: { [key: string]: { filter: string[] } }) => {
-    console.log("filters", filters);
     const formattedUpdatedFilters = Object.fromEntries(Object.entries(filters).map(([key, value]) => [key, value.filter]));
-    console.log("formattedUpdatedFilters", formattedUpdatedFilters);
     onFiltersChange(formattedUpdatedFilters);
   };
   const cohortsGroups = getCohortGroups();
