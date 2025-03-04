@@ -20,10 +20,15 @@ export class ListeDiffusionService {
         return listeDiffusion;
     }
 
-    async updateListeDiffusion(id: string, listeDiffusionDto: ListeDiffusionModel) {
-        await this.getListeDiffusionById(id);
+    async updateListeDiffusion(id: string, listeDiffusionDto: Partial<ListeDiffusionModel>) {
+        const existingListeDiffusion = await this.getListeDiffusionById(id);
 
-        const updatedListeDiffusion = await this.listeDiffusionGateway.update(listeDiffusionDto);
+        const updatedListeDiffusion = await this.listeDiffusionGateway.update({
+            ...existingListeDiffusion,
+            ...listeDiffusionDto,
+            id,
+        });
+
         if (!updatedListeDiffusion) {
             throw new Error("Liste de diffusion n'a pas été mise à jour");
         }

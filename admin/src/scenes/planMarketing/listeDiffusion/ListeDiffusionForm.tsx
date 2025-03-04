@@ -88,7 +88,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
               <Controller
                 name="type"
                 control={control}
-                rules={{ required: "Ce champ est requis" }}
+                rules={{ required: !isEditing && "Ce champ est requis" }}
                 disabled={isEditing}
                 render={({ field }) => (
                   <RadioButton
