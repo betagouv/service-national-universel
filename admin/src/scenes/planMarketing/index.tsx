@@ -2,23 +2,29 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import { NavbarControlled } from "@snu/ds/admin";
 import React from "react";
 import { useHistory, useParams } from "react-router-dom";
-import CampagnesGeneriques from "./CampagnesGeneriques";
+import CampagnesGeneriques from "./campagne/CampagnesGeneriques";
+import ListeDiffusion from "./listeDiffusion/ListeDiffusion";
 
 const tabs = [
   { id: "campagnes-generiques", title: "Campagnes Génériques" },
   { id: "listes-diffusion", title: "Listes de Diffusion" },
 ];
+const defaultTab = "campagnes-generiques";
 
-export default function MarketingCampaign() {
+export default function PlanMarketing() {
   const history = useHistory();
-  const { tab = "active" } = useParams<{ tab: string }>();
+  const { tab } = useParams<{ tab: string }>();
+
+  if (!tab) {
+    history.push(`/plan-marketing/${defaultTab}`);
+  }
 
   const renderTabContent = () => {
     switch (tab) {
       case "campagnes-generiques":
         return <CampagnesGeneriques />;
       case "listes-diffusion":
-        return <div>Listes de Diffusion</div>;
+        return <ListeDiffusion />;
       default:
         return <CampagnesGeneriques />;
     }

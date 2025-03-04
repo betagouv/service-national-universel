@@ -1,6 +1,7 @@
 import { BasicRoute, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
 import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
+import { ListeDiffusionRoutes } from "./listeDiffusion";
 
 export interface CampagnePayload {
   id: string;
@@ -64,4 +65,5 @@ export type PlanMarketingRoutes = {
   SearchPlanMarketingRoute: SearchPlanMarketingRoute;
   ImportContacts: ImportContactsBrevoRoute;
   CreateDistributionList: CreateDistributionListBrevoRoute;
+  ListeDiffusionRoutes: ListeDiffusionRoutes;
 };

@@ -44,3 +44,4 @@ export * from "./waitingList";
 export * from "./young";
 export * from "./patch";
 export * from "./campagne";
+export * from "./listeDiffusion";
