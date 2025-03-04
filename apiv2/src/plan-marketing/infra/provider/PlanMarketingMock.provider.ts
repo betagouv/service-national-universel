@@ -37,4 +37,8 @@ export class PlanMarketingMockProvider implements PlanMarketingGateway {
     async creerListeDiffusion(nom: string): Promise<void> {
         Logger.log(`[MOCK] Creating liste diffusion with name: ${nom}`, "PlanMarketingMockProvider");
     }
+
+    async deleteOldestListeDiffusion(): Promise<void> {
+        Logger.log(`[MOCK] Deleting oldest liste diffusion`, "PlanMarketingMockProvider");
+    }
 }

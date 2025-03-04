@@ -95,6 +95,36 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
+    async deleteOldestListeDiffusion(): Promise<void> {
+        const folderIdToExclude = 589;
+        try {
+            // 1. Récupérer toutes les listes
+            const listsResponse = await this.contactsApi.getLists(undefined, undefined, "asc");
+            const listeDiffusions = listsResponse.body.lists;
+            if (!listeDiffusions || listeDiffusions.length === 0) {
+                this.logger.log("Aucune liste trouvée.");
+                return;
+            }
+            
+            // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
+            const filteredListsDiffusion = listeDiffusions.filter((list) => list.folderId !== folderIdToExclude);
+            if (filteredListsDiffusion.length === 0) {
+                this.logger.log("Aucune liste à supprimer.");
+                return;
+            }
+    
+            // 3. Supprimer la plus ancienne liste
+            const oldestListDiffusion = filteredListsDiffusion[0];
+            this.logger.log(`Suppression de la liste la plus ancienne : ${oldestListDiffusion.name} (ID: ${oldestListDiffusion.id})`);
+            await this.contactsApi.deleteList(oldestListDiffusion.id);
+            this.logger.log(`Liste supprimée avec succès : ${oldestListDiffusion.name}`);
+        } catch (error: any) {
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Erreur lors de la suppression de la liste: ${error.message}`);
+        }
+    }
+    
+    
+
     private setApiKey(
         apiInstance: brevo.ContactsApi | brevo.EmailCampaignsApi | brevo.TransactionalEmailsApi,
         value: string,
