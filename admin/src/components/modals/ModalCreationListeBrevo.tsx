@@ -58,8 +58,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
           <div className="space-y-6">
             <div>
-              <Label title="Dénomination de la liste de diffusion" tooltip="Dénomination de la liste de diffusion" name="name" className="text-gray-700 mb-2 flex items-center" />
-
+              <Label
+                title="Dénomination de la liste de diffusion"
+                tooltip="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo."
+                name="name"
+                className="text-gray-700 mb-2 flex items-center"
+              />
               <Controller
                 name="name"
                 control={control}
@@ -76,7 +80,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <Label title="Identifiant de la campagne" tooltip="Identifiant de la campagne" name="campaignId" className="text-gray-700 mb-2 flex items-center" />
+              <Label
+                title="Identifiant de la campagne"
+                tooltip="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée."
+                name="campaignId"
+                className="text-gray-700 mb-2 flex items-center"
+              />
               <Controller
                 name="campaignId"
                 control={control}
@@ -93,7 +102,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <Label title="Destinataires" tooltip="Destinataires" name="recipients" className="text-gray-700 mb-2 flex items-center" />
+              <Label title="Destinataires" tooltip="Sélectionnez la liste des destinataires de la campagne." name="recipients" className="text-gray-700 mb-2 flex items-center" />
               <Controller
                 name="recipients"
                 control={control}
