@@ -26,4 +26,4 @@ jobs:
           APPLICATION_ID: ${{ secrets.CC_APPLICATION_ID_CI }}
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/script/cc-watch-deploy.sh
+        run: ./devops/scripts/cc-watch-deploy.sh
