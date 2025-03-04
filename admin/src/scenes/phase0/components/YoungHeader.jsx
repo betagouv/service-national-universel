@@ -44,8 +44,8 @@ import downloadPDF from "@/utils/download-pdf";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
-import { useMutation } from "@tanstack/react-query";
-import { notifyYoungStatusChanged, updateYoung } from "../utils/service";
+import useUpdateYoung from "@/services/useUpdateYoung";
+import { notifyYoungStatusChanged } from "../utils/service";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -60,7 +60,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   const history = useHistory();
   const statusOptions = getStatusOptions();
   const [withdrawn, setWithdrawn] = useState({ reason: "", message: "" });
-  const { mutate } = useMutation({ mutationFn: (payload) => updateYoung(young._id, payload) });
+  const { mutate } = useUpdateYoung(young._id);
 
   function getStatusOptions() {
     if (young) {
@@ -168,10 +168,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
       onSuccess: async (data) => {
         await notifyYoungStatusChanged(data, young.status);
         onChange && onChange();
-        toastr.success("Mis à jour!", "");
-      },
-      onError: (e) => {
-        toastr.error(translate(e.message), "");
       },
     });
   }
