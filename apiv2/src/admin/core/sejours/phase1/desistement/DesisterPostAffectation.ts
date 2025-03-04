@@ -4,6 +4,7 @@ import { DesistementService } from "./Desistement.service";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { DesisterTaskResult } from "snu-lib";
 import { JeuneService } from "../../jeune/Jeune.service";
+import { JeuneModel } from "../../jeune/Jeune.model";
 
 export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
     constructor(
@@ -21,7 +22,7 @@ export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
         const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes, sessionId);
         this.logger.debug(`DesistementService: ${jeunesNonConfirmes.length} jeunes désistés`);
         // TODO: Rapport
-        await this.desistementService.notifierJeunes(jeunesNonConfirmes);
+        await this.desistementService.notifierJeunes(jeunesNonConfirmes as JeuneModel[]);
         return {
             jeunesDesistes: jeunesDesistes.length,
             jeunesAutreSession: jeunesAutreSession.length,
