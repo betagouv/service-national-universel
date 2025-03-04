@@ -3,6 +3,8 @@ import { Button, Modal, Label } from "@snu/ds/admin";
 import { useForm, Controller } from "react-hook-form";
 import { RecipientType } from "@/hooks/useBrevoRecipients";
 import { RecipientsSelection } from "../list/RecipientsSelection";
+import { HiOutlineInformationCircle } from "react-icons/hi";
+import { Tooltip } from "@snu/ds/admin";
 
 interface ModalCreationListeBrevoProps {
   isOpen: boolean;
@@ -58,12 +60,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
 
           <div className="space-y-6">
             <div>
-              <Label
-                title="Dénomination de la liste de diffusion"
-                tooltip="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo."
-                name="name"
-                className="text-gray-700 mb-2 flex items-center"
-              />
+              <div className="flex">
+                <Label title="Dénomination de la liste de diffusion" name="name" className="text-gray-700 mb-2 flex items-center" />
+                <Tooltip title="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo.">
+                  <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
+                </Tooltip>
+              </div>
               <Controller
                 name="name"
                 control={control}
@@ -80,12 +82,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <Label
-                title="Identifiant de la campagne"
-                tooltip="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée."
-                name="campaignId"
-                className="text-gray-700 mb-2 flex items-center"
-              />
+              <div className="flex">
+                <Label title="Identifiant de la campagne" name="campaignId" className="text-gray-700 mb-2 flex items-center" />
+                <Tooltip title="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée.">
+                  <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
+                </Tooltip>
+              </div>
               <Controller
                 name="campaignId"
                 control={control}
@@ -102,7 +104,12 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <Label title="Destinataires" tooltip="Sélectionnez la liste des destinataires de la campagne." name="recipients" className="text-gray-700 mb-2 flex items-center" />
+              <div className="flex">
+                <Label title="Destinataires" name="recipients" className="text-gray-700 mb-2 flex items-center" />
+                <Tooltip title="Sélectionnez la liste des destinataires de la campagne.">
+                  <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
+                </Tooltip>
+              </div>
               <Controller
                 name="recipients"
                 control={control}
