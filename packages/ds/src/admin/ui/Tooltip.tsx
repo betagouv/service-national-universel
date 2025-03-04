@@ -1,4 +1,4 @@
-import React, { ReactNode, useId } from "react";
+import React, { ReactNode, useId, useEffect } from "react";
 import ReactTooltip from "react-tooltip";
 import cx from "classnames";
 
@@ -9,6 +9,7 @@ interface TooltipProps {
   tooltipClassName?: string;
   children: ReactNode;
   disabled?: boolean;
+  isModal?: boolean;
 }
 
 export default function Tooltip({
@@ -18,9 +19,16 @@ export default function Tooltip({
   children,
   className,
   tooltipClassName,
+  isModal = false,
 }: TooltipProps) {
   const alternativeId = useId();
   const tooltipId = id ? `tooltip-${id}` : alternativeId;
+
+  useEffect(() => {
+    if (isModal) {
+      ReactTooltip.rebuild();
+    }
+  }, [isModal, title]);
 
   return (
     <div className={cx(className)}>
@@ -36,6 +44,7 @@ export default function Tooltip({
         )}
         arrowColor="white"
         disable={disabled}
+        effect="solid"
       >
         <div className="flex max-w-[650px] flex-row flex-wrap gap-2 rounded-xl">
           <div className="rounded bg-white py-2 px-6 text-gray-500 whitespace-pre">
