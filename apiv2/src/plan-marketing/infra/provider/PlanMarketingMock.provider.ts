@@ -3,6 +3,11 @@ import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 
 @Injectable()
 export class PlanMarketingMockProvider implements PlanMarketingGateway {
+    findTemplateById(templateId: number): Promise<string | undefined> {
+        return new Promise((resolve, reject) => {
+            resolve("template42");
+        });
+    }
     findCampagneById(campagneId: string): Promise<any> {
         return new Promise((resolve, reject) => {
             resolve({ id: 42 });
@@ -24,5 +29,9 @@ export class PlanMarketingMockProvider implements PlanMarketingGateway {
     }
     async creerListeDiffusion(nom: string): Promise<void> {
         Logger.log(`[MOCK] Creating liste diffusion with name: ${nom}`, "PlanMarketingMockProvider");
+    }
+
+    async deleteOldestListeDiffusion(): Promise<void> {
+        Logger.log(`[MOCK] Deleting oldest liste diffusion`, "PlanMarketingMockProvider");
     }
 }

@@ -110,7 +110,7 @@ export default function useReactSelectTheme({
     menu: (styles) => ({
       ...styles,
       border: "none",
-      boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+      boxShadow: "0px 0px 12px 0px rgba(0, 0, 0, 0.25)",
       "&:hover": {
         border: "none",
       },

@@ -150,11 +150,6 @@ export default function List() {
               tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
             />
           ),
-          isSuperAdmin(user) && (
-            <Link to="/classes/import">
-              <Button title="Mettre à jour" className="mr-2" loading={exportLoading} />
-            </Link>
-          ),
         ].filter(Boolean)}
       />
       {!isClasses && (

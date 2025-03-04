@@ -1191,6 +1191,9 @@ export const translateSimulationName = (name: string) => {
     case "AFFECTATION_HTS_SIMULATION":
     case "AFFECTATION_HTS_SIMULATION_VALIDER":
       return "Affectation HTS (Metropole, hors Corse)";
+    case "AFFECTATION_HTS_DROMCOM_SIMULATION":
+    case "AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER":
+      return "Affectation HTS (DROM COM et Corse)";
     case "AFFECTATION_CLE_SIMULATION":
     case "AFFECTATION_CLE_SIMULATION_VALIDER":
       return "Affectation CLE (Metropole, hors Corse)";
@@ -1227,6 +1230,15 @@ export const translateImportReferentiel = (name: string) => {
       return "Le fichier ne contient pas les bons onglets ou est vide";
     case "IMPORT_NOT_VALID":
       return "Cet import est invalide";
+    default:
+      return name;
+  }
+};
+
+export const translateMarketing = (name: string) => {
+  switch (name) {
+    case "TEMPLATE_NOT_FOUND":
+      return "Le template est introuvable";
     default:
       return name;
   }
