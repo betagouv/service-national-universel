@@ -1,0 +1,36 @@
+name: Anonymize (CRON)
+
+on:
+  push: # TODO : remove
+    branches:
+      - anonymization_cron
+  workflow_dispatch:
+  schedule:
+    - cron: "23 2 * * 1" # Every monday at 02:23 UTC
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  anonymize:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: production
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
+      - name: Merge main in anonymization
+        run: git push --force origin HEAD:anonymization
+
+      - name: Watch deployment
+        env:
+          ORGANIZATION_ID: ${{ vars.CC_ORGANIZATION_ID }}
+          APPLICATION_ID: ${{ vars.CC_APPLICATION_ID_ANONYMIZATION }}
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: ./devops/scripts/cc-watch-deploy.sh
