@@ -9,12 +9,6 @@ export class PlanMarketingMockProvider implements PlanMarketingGateway {
         });
     }
 
-    getAllCampagnes(): Promise<any[]> {
-        return new Promise((resolve, reject) => {
-            resolve([{ id: 42 }]);
-        });
-    }
-
     findCampagneById(campagneId: string): Promise<any> {
         return new Promise((resolve, reject) => {
             resolve({ id: 42 });

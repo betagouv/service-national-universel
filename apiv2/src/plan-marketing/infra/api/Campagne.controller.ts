@@ -17,12 +17,7 @@ export class CampagneController {
     async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
         return await this.campagneService.creerCampagne(dto);
     }
-    
-    @Get("all")
-    async getAllCampagnes(): Promise<any[]> {
-        return await this.campagneGateway.getAllCampagnes();
-    }
-    
+
     @Get(":id")
     async getById(@Param("id") id: string): Promise<CampagneModel> {
         const campagne = await this.campagneGateway.findById(id);

@@ -57,15 +57,6 @@ interface SearchPlanMarketingRoute extends BasicRoute {
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }
 
-interface GetAllCampagnesRoute extends BasicRoute {
-  method: "GET";
-  path: "/campagne/all";
-  query?: {
-    sort?: "ASC" | "DESC";
-  };
-  response: RouteResponseBodyV2<CampagneResponse[]>;
-}
-
 export type PlanMarketingRoutes = {
   GetPlanMarketingRoute: GetPlanMarketingRoute;
   CreatePlanMarketingRoute: CreatePlanMarketingRoute;
@@ -73,5 +64,4 @@ export type PlanMarketingRoutes = {
   SearchPlanMarketingRoute: SearchPlanMarketingRoute;
   ImportContacts: ImportContactsBrevoRoute;
   CreateDistributionList: CreateDistributionListBrevoRoute;
-  GetAllCampagnes: GetAllCampagnesRoute;
 };

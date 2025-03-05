@@ -34,23 +34,23 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
     },
   });
 
-  const {
-    mutate: fetchCampagnes,
-    data: allCampagnesData = [],
-    isPending: isLoadingCampagnes,
-  } = useMutation<CampagneResponse[], Error>({
-    mutationFn: async () => {
-      return await PlanMarketingService.getAll();
-    },
-    onError: (error) => {
-      capture(error);
-      toastr.error("Erreur", "Impossible de récupérer les campagnes");
-    },
-  });
+//   const {
+//     mutate: fetchCampagnes,
+//     data: allCampagnesData = [],
+//     isPending: isLoadingCampagnes,
+//   } = useMutation<CampagneResponse[], Error>({
+//     mutationFn: async () => {
+//       return await PlanMarketingService.getAll();
+//     },
+//     onError: (error) => {
+//       capture(error);
+//       toastr.error("Erreur", "Impossible de récupérer les campagnes");
+//     },
+//   });
 
-  if (isOpen && !allCampagnesData.length && !isLoadingCampagnes) {
-    fetchCampagnes();
-  }
+//   if (isOpen && !allCampagnesData.length && !isLoadingCampagnes) {
+//     fetchCampagnes();
+//   }
 
   const filteredCampaigns = allCampagnesData
     .filter((campagne) => campagne.type === "BOTH" || campagne.type === cohort.type)

@@ -34,8 +34,4 @@ export class CampagneMongoRepository implements CampagneGateway {
     async delete(id: string): Promise<void> {
         await this.campagneModel.findByIdAndDelete(id);
     }
-
-    async getAllCampagnes(): Promise<any[]> {
-        return this.campagneModel.find();
-    }
 }

@@ -29,15 +29,6 @@ const PlanMarketingService = {
       query,
     })();
   },
-
-  getAll: async (query?: PlanMarketingRoutes["GetAllCampagnes"]["query"]) => {
-    return await buildRequest<PlanMarketingRoutes["GetAllCampagnes"]>({
-      path: "/campagne/all",
-      method: "GET",
-      target: "API_V2",
-      query,
-    })();
-  },
 };
 
 export default PlanMarketingService;
