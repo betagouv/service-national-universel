@@ -1,9 +1,6 @@
 name: Anonymize (CRON)
 
 on:
-  push: # TODO : remove
-    branches:
-      - anonymization_cron
   workflow_dispatch:
   schedule:
     - cron: "23 2 * * 1" # Every monday at 02:23 UTC
@@ -24,7 +21,7 @@ jobs:
       - name: Install clever-tools
         run: npm install -g clever-tools
 
-      - name: Merge main in anonymization
+      - name: Merge production in anonymization
         run: git push --force origin HEAD:anonymization
 
       - name: Watch deployment
