@@ -1,5 +1,5 @@
 import React from "react";
-import { Button, Modal, Label } from "@snu/ds/admin";
+import { Button, Modal } from "@snu/ds/admin";
 import { useForm, Controller } from "react-hook-form";
 import { RecipientType } from "@/hooks/useBrevoRecipients";
 import { RecipientsSelection } from "../list/RecipientsSelection";
@@ -64,7 +64,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
                 <label id="denomination-liste-diffusion" className="text-gray-700 mb-2 flex items-center">
                   Dénomination de la liste de diffusion
                 </label>
-                <Tooltip title="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo." isModal>
+                <Tooltip title="Saisissez un nom pour la liste de diffusion. Vous pourrez retrouver ce nom dans Brevo." forceRefresh>
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
               </div>
@@ -88,7 +88,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
                 <label id="identifiant-campagne" className="text-gray-700 mb-2 flex items-center">
                   Identifiant de la campagne
                 </label>
-                <Tooltip title="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée." isModal>
+                <Tooltip title="Saisissez l'ID de la campagne Brevo à laquelle la liste de diffusion sera associée." forceRefresh>
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
               </div>
@@ -112,7 +112,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
                 <label id="destinataires-liste-diffusion" className="text-gray-700 mb-2 flex items-center">
                   Destinataires
                 </label>
-                <Tooltip title="Sélectionnez la liste des destinataires de la campagne." isModal>
+                <Tooltip title="Sélectionnez la liste des destinataires de la campagne." forceRefresh>
                   <HiOutlineInformationCircle className="text-gray-400 ml-2" size={16} />
                 </Tooltip>
               </div>

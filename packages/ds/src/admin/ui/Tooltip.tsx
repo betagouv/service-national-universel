@@ -9,7 +9,7 @@ interface TooltipProps {
   tooltipClassName?: string;
   children: ReactNode;
   disabled?: boolean;
-  isModal?: boolean;
+  forceRefresh?: boolean;
 }
 
 export default function Tooltip({
@@ -19,16 +19,16 @@ export default function Tooltip({
   children,
   className,
   tooltipClassName,
-  isModal = false,
+  forceRefresh = false,
 }: TooltipProps) {
   const alternativeId = useId();
   const tooltipId = id ? `tooltip-${id}` : alternativeId;
 
   useEffect(() => {
-    if (isModal) {
+    if (forceRefresh) {
       ReactTooltip.rebuild();
     }
-  }, [isModal, title]);
+  }, [forceRefresh, title]);
 
   return (
     <div className={cx(className)}>
