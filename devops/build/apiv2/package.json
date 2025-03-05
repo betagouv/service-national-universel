@@ -1,0 +1,13 @@
+{
+  "name": "apiv2",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "RELEASE=$CC_COMMIT_ID node apiv2/main.js"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}
