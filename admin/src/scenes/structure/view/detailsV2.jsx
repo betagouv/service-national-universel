@@ -104,13 +104,16 @@ function StructureForm({ structure, setStructure }) {
     }
   };
 
+  function reset() {
+    setData(structure);
+    setErrors({});
+  }
+
   return (
-    <main className="rounded-xl bg-white p-8 shadow-sm">
+    <form onSubmit={onSubmit} className="rounded-xl bg-white p-8 shadow-sm">
       <div className="flex w-full items-center justify-between">
         <h2 className="my-0 text-lg font-medium leading-6 text-gray-900">Informations générales</h2>
-        {canCreateStructure(user) && (
-          <EditButton isEditing={isEditing} setIsEditing={setIsEditing} isLoading={isLoading} onSubmit={onSubmit} defaultData={structure} setData={setData} setErrors={setErrors} />
-        )}
+        {canCreateStructure(user) && <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={isLoading} reset={reset} />}
       </div>
 
       <div className="my-4 flex">
@@ -301,6 +304,6 @@ function StructureForm({ structure, setStructure }) {
           </div>
         </div>
       </div>
-    </main>
+    </form>
   );
 }

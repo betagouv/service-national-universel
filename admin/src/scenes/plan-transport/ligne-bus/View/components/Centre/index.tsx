@@ -1,13 +1,14 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { canEditLigneBusCenter, CohortType, isBusEditionOpen, LigneBusDto } from "snu-lib";
-import Pencil from "../../../../../../assets/icons/Pencil";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
 import SessionSelector from "./SessionSelector";
 import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateSessionSurLigneDeBus";
 import CentreModal from "./CentreModal";
+import { Controller, SubmitHandler, useForm } from "react-hook-form";
+import EditButton from "@/components/buttons/EditButton";
 
 type Props = {
   bus: LigneBusDto;
@@ -15,60 +16,45 @@ type Props = {
   cohort?: CohortType | null;
 };
 
+export type CentreFormValues = {
+  centerArrivalTime: string;
+  centerDepartureTime: string;
+  sessionId: string;
+};
+
+const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
+
 export default function Centre({ bus, setBus, cohort }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const { mutate, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
-
   const [isEditing, setIsEditing] = React.useState(false);
   const [openModal, setOpenModal] = React.useState(false);
-  const [errors, setErrors] = React.useState<Record<string, string>>({});
-
-  const [centerArrivalTime, setCenterArrivalTime] = React.useState(bus.centerArrivalTime || "");
-  const [centerDepartureTime, setCenterDepartureTime] = React.useState(bus.centerDepartureTime || "");
-  const [sessionId, setSessionId] = React.useState(bus.sessionId);
+  const {
+    control,
+    handleSubmit,
+    formState: { errors },
+    reset,
+    getValues,
+  } = useForm({
+    defaultValues: {
+      centerArrivalTime: bus.centerArrivalTime || "",
+      centerDepartureTime: bus.centerDepartureTime || "",
+      sessionId: bus.sessionId,
+    },
+  });
 
   const disabled = !canEditLigneBusCenter(user) || !isBusEditionOpen(user, cohort) || isPending;
 
-  function resetData() {
-    setCenterArrivalTime(bus.centerArrivalTime || "");
-    setCenterDepartureTime(bus.centerDepartureTime || "");
-    setSessionId(bus.sessionId);
-    setErrors({});
-  }
-
-  function handleClick() {
-    setIsEditing(!isEditing);
-    resetData();
-  }
-
-  function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-
-    setErrors({});
-    const errors: Record<string, string> = {};
-    const regex = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
-    if (!regex.test(centerArrivalTime)) errors.centerArrivalTime = "Format invalide (hh:mm)";
-    if (!regex.test(centerDepartureTime)) errors.centerDepartureTime = "Format invalide (hh:mm)";
-    if (Object.keys(errors).length > 0) {
-      setErrors(errors);
-      return;
-    }
-
-    if (sessionId !== bus.sessionId) {
+  const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
+    if (data.sessionId !== bus.sessionId) {
       setOpenModal(true);
     } else {
-      handleConfirm(false);
+      handleConfirm(data, false);
     }
-  }
+  };
 
-  function handleConfirm(sendCampaign?: boolean) {
-    const payload = {
-      centerArrivalTime,
-      centerDepartureTime,
-      sessionId,
-      sendCampaign,
-    };
-
+  function handleConfirm(data: CentreFormValues, sendCampaign?: boolean) {
+    const payload = { ...data, sendCampaign };
     mutate(payload, {
       onSuccess: (ligneInfo) => {
         setOpenModal(false);
@@ -79,58 +65,38 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="w-1/2 rounded-xl bg-white p-8">
+    <form id="edit-center" onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <div className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</div>
-
-        {isEditing ? (
-          <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={handleClick}
-              disabled={isPending}
-              className="flex items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50">
-              Annuler
-            </button>
-            <button
-              type="submit"
-              disabled={isPending}
-              className="flex items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50">
-              <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-              Enregistrer les changements
-            </button>
-          </div>
-        ) : (
-          <button
-            type="button"
-            onClick={handleClick}
-            disabled={disabled}
-            className="flex items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50">
-            <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-            Modifier
-          </button>
-        )}
+        <EditButton form="edit-center" isEditing={isEditing} setIsEditing={setIsEditing} disabled={disabled} reset={reset} />
       </div>
 
       <div className="mt-8 flex flex-col">
-        <SessionSelector sessionId={sessionId} setSessionId={setSessionId} ligne={bus} disabled={!isEditing} />
+        <Controller
+          name="sessionId"
+          control={control}
+          render={({ field }) => <SessionSelector sessionId={field.value} setSessionId={field.onChange} ligne={bus} disabled={!isEditing} />}
+        />
 
         <div className="mt-8 flex items-center gap-4">
-          <Field
-            label="Heure d’arrivée"
-            onChange={(e) => setCenterArrivalTime(e.target.value)}
-            placeholder="hh:mm"
-            value={centerArrivalTime}
-            error={errors?.centerArrivalTime}
-            readOnly={!isEditing}
+          <Controller
+            name="centerArrivalTime"
+            control={control}
+            disabled={!isEditing}
+            rules={{ required: isEditing && "L'heure d'arrivée est requise", pattern }}
+            render={({ field }) => (
+              <Field label="Heure d’arrivée" onChange={field.onChange} placeholder="hh:mm" value={field.value} readOnly={!isEditing} error={errors.centerArrivalTime?.message} />
+            )}
           />
-          <Field
-            label="Heure de départ"
-            onChange={(e) => setCenterDepartureTime(e.target.value)}
-            placeholder="hh:mm"
-            value={centerDepartureTime}
-            error={errors?.centerDepartureTime}
-            readOnly={!isEditing}
+
+          <Controller
+            name="centerDepartureTime"
+            control={control}
+            disabled={!isEditing}
+            rules={{ required: isEditing && "L'heure de départ est requise", pattern }}
+            render={({ field }) => (
+              <Field label="Heure de départ" onChange={field.onChange} placeholder="hh:mm" value={field.value} readOnly={!isEditing} error={errors.centerDepartureTime?.message} />
+            )}
           />
         </div>
         <div className="mt-8 flex justify-end">
@@ -143,7 +109,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
         onCancel={() => setOpenModal(false)}
         onConfirm={handleConfirm}
         initialData={bus}
-        formData={{ sessionId, centerArrivalTime, centerDepartureTime }}
+        formData={{ sessionId: getValues("sessionId"), centerArrivalTime: getValues("centerArrivalTime"), centerDepartureTime: getValues("centerDepartureTime") }}
         count={bus.youngSeatsTaken}
         isLoading={isPending}
       />

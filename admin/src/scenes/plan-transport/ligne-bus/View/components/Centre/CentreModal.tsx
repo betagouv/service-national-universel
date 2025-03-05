@@ -8,13 +8,14 @@ import CentreLabel from "./CentreLabel";
 import { TfiReload } from "react-icons/tfi";
 import { HiExternalLink } from "react-icons/hi";
 import useSessions from "@/scenes/plan-transport/lib/useSessionsByCohort";
+import { CentreFormValues } from ".";
 
 interface ConfirmChangesModalProps {
   isOpen: boolean;
   count: number;
   initialData: LigneBusDto;
   formData: { sessionId: string; centerArrivalTime: string; centerDepartureTime: string };
-  onConfirm: (emailing: boolean) => void;
+  onConfirm: (data: CentreFormValues, emailing: boolean) => void;
   onCancel: () => void;
   isLoading?: boolean;
 }
@@ -27,7 +28,7 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
   const newSession = data?.find((s) => s._id === formData.sessionId);
 
   const handleConfirm = () => {
-    onConfirm(isEmailing);
+    onConfirm(formData, isEmailing);
   };
 
   return (
