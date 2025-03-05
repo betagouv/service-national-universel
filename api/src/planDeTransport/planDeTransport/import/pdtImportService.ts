@@ -352,7 +352,7 @@ export const validatePdtFile = async (
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
-      const center = await CohesionCenterModel.findById(line["ID CENTRE"]?.toLowerCase());
+      const center = await CohesionCenterModel.findOne({ _id: line["ID CENTRE"]?.toLowerCase(), deletedAt: { $exists: false } });
       if (!center) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_CENTER_ID, extra: line["ID CENTRE"] });
       }
