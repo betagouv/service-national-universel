@@ -52,9 +52,31 @@ export default function DesistementPreview({ traitement }: { traitement: unknown
 
 function formatSheets(data: PreviewDesisterTaskResult) {
   return {
-    "Non confirmation": data.jeunesNonConfirmes,
-    "Confirmation de participation": data.jeunesConfirmes,
-    "Changement de séjour": data.jeunesAutreSession,
-    "Desistement après affectation": data.jeunesDesistes,
+    Résumé: [
+      {
+        Groupe: "Total de volontaires affectés",
+        Total: data.jeunesDesistes.length + data.jeunesAutreSession.length + data.jeunesConfirmes.length + data.jeunesNonConfirmes.length,
+      },
+      {
+        Groupe: "Volontaires désistés au préalable",
+        Total: data.jeunesDesistes.length,
+      },
+      {
+        Groupe: "Volontaires ayant changé de séjour",
+        Total: data.jeunesAutreSession.length,
+      },
+      {
+        Groupe: "Volontaires confirmés",
+        Total: data.jeunesConfirmes.length,
+      },
+      {
+        Groupe: "Volontaires à désister",
+        Total: data.jeunesNonConfirmes.length,
+      },
+    ],
+    "A désister": data.jeunesNonConfirmes,
+    "Confirmations de participation": data.jeunesConfirmes,
+    "Changements de séjour": data.jeunesAutreSession,
+    "Desistements préalables": data.jeunesDesistes,
   };
 }
