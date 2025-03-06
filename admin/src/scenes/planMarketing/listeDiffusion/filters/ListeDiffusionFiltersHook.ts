@@ -74,7 +74,7 @@ export const useListeDiffusionFilters = () => {
         filters: { ...res.newFilters },
       };
       setIsPendingQueryInscriptions(false);
-
+      //@ts-expect-error params
       setDataInscriptions({ params: { ...newParamData }, filters: { ...res.newFilters } });
     });
   }, [filtersInscriptions]);
