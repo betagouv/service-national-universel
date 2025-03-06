@@ -1,14 +1,14 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button, Modal } from "@snu/ds/admin";
 import { useForm } from "react-hook-form";
 import PlanMarketingService from "@/services/planMarketingService";
-import { CampagneResponse } from "snu-lib/src/routes/planMarketing";
-import { useMutation } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { CohortType } from "snu-lib";
 import { RiDownload2Line } from "react-icons/ri";
 import { RiSearchLine } from "react-icons/ri";
+import { CampagneDataProps } from "../../scenes/planMarketing/campagne/CampagneForm";
 
 interface ModalImportCampagnBrevoProps {
   isOpen: boolean;
@@ -24,8 +24,8 @@ export interface BrevoListData {
 }
 
 export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, isLoadingProcess }: ModalImportCampagnBrevoProps) => {
+  const [campagnes, setCampagnes] = useState<CampagneDataProps[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
-  const [importAll, setImportAll] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const { handleSubmit, reset } = useForm<BrevoListData>({
     defaultValues: {
@@ -33,38 +33,31 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
       campaignId: [],
     },
   });
+  const { data: campagnesData, refetch } = useQuery({
+    queryKey: ["get-campagnes"],
+    queryFn: async () => {
+      return await PlanMarketingService.search({ generic: true });
+    },
+  });
 
-//   const {
-//     mutate: fetchCampagnes,
-//     data: allCampagnesData = [],
-//     isPending: isLoadingCampagnes,
-//   } = useMutation<CampagneResponse[], Error>({
-//     mutationFn: async () => {
-//       return await PlanMarketingService.getAll();
-//     },
-//     onError: (error) => {
-//       capture(error);
-//       toastr.error("Erreur", "Impossible de récupérer les campagnes");
-//     },
-//   });
+  useEffect(() => {
+    setCampagnes(campagnesData ?? []);
+  }, [campagnesData]);
 
-//   if (isOpen && !allCampagnesData.length && !isLoadingCampagnes) {
-//     fetchCampagnes();
-//   }
+  console.log(campagnes);
 
-  const filteredCampaigns = allCampagnesData
+  const filteredCampaigns = campagnes
     .filter((campagne) => campagne.type === "BOTH" || campagne.type === cohort.type)
     .filter((campagne) => campagne.nom.toLowerCase().includes(searchTerm.toLowerCase()));
 
-  const onSubmitForm = handleSubmit((data) => {
-    const selectedCampaignsData = importAll ? filteredCampaigns : allCampagnesData.filter((campagne) => selectedCampaigns.includes(campagne.id));
-    onConfirm({ ...data, campaignId: selectedCampaignsData.map((campagne) => campagne.id) });
+  const onSubmitForm = handleSubmit((formValues) => {
+    const selectedCampaignsData = campagnes.filter((campagne) => selectedCampaigns.includes(campagne.id));
+    onConfirm({ ...formValues, campaignId: selectedCampaignsData.map((campagne) => campagne.id) });
     handleOnClose();
   });
   const handleOnClose = () => {
     reset();
     setSelectedCampaigns([]);
-    setImportAll(false);
     setSearchTerm("");
     onClose();
   };
@@ -98,56 +91,38 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
           <div className="text-center mb-6">
             <h1 className="text-xl font-medium">Importer les campagnes</h1>
           </div>
-          <div className="flex gap-4 justify-center">
-            <label>
-              <input type="radio" name="importOption" value="select" onChange={() => setImportAll(false)} checked={!importAll} />
-              <span className="ml-2 text-sm font-medium">Sélectionner des campagnes</span>
-            </label>
-            <label>
-              <input type="radio" name="importOption" value="all" onChange={() => setImportAll(true)} checked={importAll} />
-              <span className="ml-2 text-sm font-medium">Tout importer</span>
-            </label>
-          </div>
           <hr className="my-4" />
-
-          {!importAll && (
-            <div>
-              <div className="flex justify-between items-center mb-4">
-                <span className="text-lg font-normal">{filteredCampaigns.length} campagnes trouvées</span>
-                <div className="flex items-center border p-2 text-sm rounded relative">
-                  <RiSearchLine className="text-gray-500 text-lg mr-2" />
-                  <input type="text" placeholder="Rechercher..." className="flex-1 outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    onChange={(e) => toggleSelectAll(e.target.checked)}
-                    checked={selectedCampaigns.length === filteredCampaigns.length && filteredCampaigns.length > 0}
-                  />
-                  <span className="text-sm font-bold">Tout sélectionner</span>
-                </div>
-                {filteredCampaigns.map((campagne) => (
-                  <div key={campagne.id} className="flex items-center gap-2">
-                    <input type="checkbox" onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)} checked={selectedCampaigns.includes(campagne.id)} />
-                    <span className="text-sm">{campagne.nom}</span>
-                  </div>
-                ))}
+          <div>
+            <div className="flex justify-between items-center mb-4">
+              <span className="text-lg font-normal">{filteredCampaigns.length} campagnes trouvées</span>
+              <div className="flex items-center border p-2 text-sm rounded relative">
+                <RiSearchLine className="text-gray-500 text-lg mr-2" />
+                <input type="text" placeholder="Rechercher..." className="flex-1 outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
               </div>
             </div>
-          )}
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  onChange={(e) => toggleSelectAll(e.target.checked)}
+                  checked={selectedCampaigns.length === filteredCampaigns.length && filteredCampaigns.length > 0}
+                />
+                <span className="text-sm font-bold">Tout sélectionner</span>
+              </div>
+              {filteredCampaigns.map((campagne) => (
+                <div key={campagne.id} className="flex items-center gap-2">
+                  <input type="checkbox" onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)} checked={selectedCampaigns.includes(campagne.id)} />
+                  <span className="text-sm">{campagne.nom}</span>
+                </div>
+              ))}
+            </div>
+          </div>
         </form>
       }
       footer={
         <div className="flex justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1" onClick={handleOnClose} disabled={isLoadingProcess} />
-          <Button
-            title={`Importer ${importAll ? filteredCampaigns.length : selectedCampaigns.length} campagnes`}
-            onClick={onSubmitForm}
-            className="flex-1"
-            loading={isLoadingProcess}
-          />
+          <Button title={`Importer ${selectedCampaigns.length} campagnes`} onClick={onSubmitForm} className="flex-1" loading={isLoadingProcess} />
         </div>
       }
     />
