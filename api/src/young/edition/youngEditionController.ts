@@ -181,7 +181,6 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       capture(error_id);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
     // --- validate data
     const bodySchema = Joi.object().keys({
       situation: Joi.string().valid(...Object.keys(YOUNG_SITUATIONS)),
@@ -195,7 +194,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       schoolZip: Joi.string().trim().allow(""),
       schoolDepartment: Joi.string().trim().allow(""),
       schoolRegion: Joi.string().trim().allow(""),
-      grade: Joi.string().valid(...Object.keys(GRADES)),
+      grade: Joi.string().valid(...Object.keys(GRADES), "CAP"),
       sameSchoolCLE: Joi.string().trim(),
 
       parent1Status: Joi.string().trim().allow(""),
@@ -246,6 +245,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     const { error, value } = result;
     if (error) {
       capture(error);
+      console.log(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
