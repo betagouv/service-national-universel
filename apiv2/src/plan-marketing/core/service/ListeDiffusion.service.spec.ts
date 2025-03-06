@@ -1,5 +1,5 @@
 import { ListeDiffusionService } from "./ListeDiffusion.service";
-import { NotFoundException } from "@nestjs/common";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 describe("ListeDiffusionService", () => {
     let service: ListeDiffusionService;
@@ -43,14 +43,13 @@ describe("ListeDiffusionService", () => {
         expect(result).toEqual(expectedResult);
     });
 
-    it("should throw NotFoundException when updating non-existing liste de diffusion", async () => {
+    it("should throw FunctionalException when updating non-existing liste de diffusion", async () => {
         const mockId = "INVALID-ID";
         const mockListeDiffusion = { name: "Liste Test Modifiée" };
-
-        mockListeDiffusionGateway.findById = jest.fn().mockResolvedValue(null);
+        mockListeDiffusionGateway.findById.mockResolvedValue(null);
 
         await expect(service.updateListeDiffusion(mockId, mockListeDiffusion as any)).rejects.toThrow(
-            NotFoundException,
+            new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND),
         );
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
@@ -69,38 +68,35 @@ describe("ListeDiffusionService", () => {
         expect(result).toEqual(mockListeDiffusion);
     });
 
-    it("should throw NotFoundException when getting non-existing liste de diffusion", async () => {
+    it("should throw FunctionalException when getting non-existing liste de diffusion", async () => {
         const mockId = "INVALID-ID";
-
         mockListeDiffusionGateway.findById.mockResolvedValue(null);
 
-        await expect(service.getListeDiffusionById(mockId)).rejects.toThrow(NotFoundException);
+        await expect(service.getListeDiffusionById(mockId)).rejects.toThrow(
+            new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND),
+        );
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
     });
 
     it("should delete liste de diffusion successfully", async () => {
         const mockId = "LIST-001";
-        const mockListeDiffusion = { id: mockId, name: "Liste Test" };
-
-        mockListeDiffusionGateway.findById.mockResolvedValue(mockListeDiffusion);
         mockListeDiffusionGateway.delete.mockResolvedValue(undefined);
 
         await service.deleteListeDiffusion(mockId);
 
-        expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
         expect(mockListeDiffusionGateway.delete).toHaveBeenCalledWith(mockId);
     });
 
-    it("should throw NotFoundException when deleting non-existing liste de diffusion", async () => {
+    it("should throw FunctionalException when deleting non-existing liste de diffusion", async () => {
         const mockId = "INVALID-ID";
+        mockListeDiffusionGateway.delete.mockRejectedValue(new Error());
 
-        mockListeDiffusionGateway.findById.mockResolvedValue(null);
+        await expect(service.deleteListeDiffusion(mockId)).rejects.toThrow(
+            new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND),
+        );
 
-        await expect(service.deleteListeDiffusion(mockId)).rejects.toThrow(NotFoundException);
-
-        expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
-        expect(mockListeDiffusionGateway.delete).not.toHaveBeenCalled();
+        expect(mockListeDiffusionGateway.delete).toHaveBeenCalledWith(mockId);
     });
 
     it("should search listes de diffusion successfully", async () => {
