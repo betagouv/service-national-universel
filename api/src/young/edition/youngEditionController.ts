@@ -195,7 +195,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       schoolZip: Joi.string().trim().allow(""),
       schoolDepartment: Joi.string().trim().allow(""),
       schoolRegion: Joi.string().trim().allow(""),
-      grade: Joi.string().valid(...Object.keys(GRADES)),
+      grade: Joi.string().valid(...Object.keys(GRADES), "CAP"),
       sameSchoolCLE: Joi.string().trim(),
 
       parent1Status: Joi.string().trim().allow(""),
