@@ -1,9 +1,28 @@
 import { Types } from "mongoose";
-import { LigneBusModel, LigneToPointModel, PlanTransportModel, YoungModel, CohortModel, PointDeRassemblementModel } from "../models";
-import { CohortType, ERRORS, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
+import {
+  LigneBusModel,
+  LigneToPointModel,
+  PlanTransportModel,
+  YoungModel,
+  CohortModel,
+  PointDeRassemblementModel,
+  ClasseModel,
+  ClasseDocument,
+  EtablissementModel,
+  ReferentModel,
+} from "../models";
+import { COHORT_TYPE, CohortType, ERRORS, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
 import { sendTemplate } from "../brevo";
+import { YoungDocument } from "../models/young";
 
 const { ObjectId } = Types;
+
+interface YoungsUpdated extends YoungDocument {
+  email: string;
+  parent1Email: string;
+  parent2Email: string;
+  classeId?: string;
+}
 
 export const updatePDRForLine = async (
   ligneBusId: string,
@@ -83,18 +102,24 @@ export const updatePDRForLine = async (
   );
 
   if (shouldSendEmailCampaign) {
-    await sendEmailCampaign(ligneBusId, newMeetingPointId, cohort);
+    const updatedYoungs: YoungsUpdated[] = await YoungModel.find({
+      ligneId: ligneBusId,
+      meetingPointId: newMeetingPointId,
+    }).select("email parent1Email parent2Email classeId");
+
+    await sendEmailCampaignToYoungAndRL(updatedYoungs, cohort);
+
+    if (cohort.type === COHORT_TYPE.CLE) {
+      const classe = await ClasseModel.findById(updatedYoungs[0].classeId);
+      if (!classe) throw new Error(ERRORS.NOT_FOUND);
+      await sendEmailCampaignToRefCLE(classe);
+    }
   }
 
   return ligneBus;
 };
 
-const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, cohort: CohortType) => {
-  const updatedYoungs = await YoungModel.find({
-    ligneId: ligneBusId,
-    meetingPointId: newMeetingPointId,
-  }).select("email parent1Email parent2Email");
-
+const sendEmailCampaignToYoungAndRL = async (youngs: YoungsUpdated[], cohort: CohortType) => {
   let isBeforeDeparture = false;
   let templateId: string | null = null;
   if (new Date() < new Date(cohort.dateStart)) {
@@ -106,20 +131,35 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
 
   if (!templateId) throw new Error("Modification date is out of range, no email sent.");
 
-  for (const young of updatedYoungs) {
-    const cc: { email: string }[] = [];
-    if (young.parent1Email) cc.push({ email: young.parent1Email });
-    if (young.parent2Email) cc.push({ email: young.parent2Email });
+  const sendEmails = async (youngs: YoungDocument[], sendToRL: boolean) => {
+    for (const young of youngs) {
+      const youngsParentMail: { email: string }[] = [];
+      if (young.parent1Email) youngsParentMail.push({ email: young.parent1Email });
+      if (young.parent2Email) youngsParentMail.push({ email: young.parent2Email });
 
-    const contacts = isBeforeDeparture
-      ? {
-          emailTo: [{ email: young.email }],
-          cc,
-        }
-      : {
-          emailTo: cc,
-        };
+      const contacts = sendToRL ? { emailTo: youngsParentMail, cc: [{ email: young.email }] } : { emailTo: [{ email: young.email }], cc: youngsParentMail };
 
-    await sendTemplate(templateId, contacts);
+      await sendTemplate(templateId, contacts);
+    }
+  };
+
+  if (isBeforeDeparture) {
+    await sendEmails(youngs, false);
+  } else {
+    const youngsFiltered = youngs.filter((young) => young.cohesionStayPresence !== "false" && young.departInform !== "true");
+    await sendEmails(youngsFiltered, true);
+  }
+};
+
+const sendEmailCampaignToRefCLE = async (classe: ClasseDocument) => {
+  const etablissementId = classe.etablissementId;
+  const etablissement = await EtablissementModel.findById(etablissementId);
+  if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
+  const referentsCLEIds = [...classe.referentClasseIds, ...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
+
+  const referentsCLE = await ReferentModel.find({ _id: { $in: referentsCLEIds } }).select("email");
+
+  for (const referent of referentsCLE) {
+    await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CHANGE_PDR, { emailTo: [{ email: referent.email }] });
   }
 };
