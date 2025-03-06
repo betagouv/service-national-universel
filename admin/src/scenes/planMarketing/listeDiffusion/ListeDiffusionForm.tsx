@@ -35,6 +35,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     formState: { errors, isDirty, isSubmitting },
     reset,
     watch,
+    setValue,
   } = useForm<ListeDiffusionDataProps>({
     defaultValues: {
       type: ListeDiffusionEnum.VOLONTAIRES,
@@ -50,6 +51,8 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     });
   }, [listeDiffusionData, reset]);
 
+  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+
   const isEditing = listeDiffusionData.id !== undefined;
   const isOpen = listeDiffusionData.id === undefined || isDirty;
 
@@ -63,13 +66,18 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     reset(data);
   };
 
-  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+  const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
+    setValue("filters", filters, { shouldDirty: true });
+    setSelectedFilters(filters);
+  };
 
   watch((currentState, { name }) => {
     if (name === "type") {
-      setSelectedFilters({});
+      handleSelectedFiltersChange({});
     }
   });
+
+  console.log("watch filters", watch("filters"));
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
@@ -128,7 +136,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
                 filters={filter.volontaires?.filters}
                 id={listeDiffusionData.id}
                 selectedFilters={selectedFilters}
-                onFiltersChange={setSelectedFilters}
+                onFiltersChange={handleSelectedFiltersChange}
               />
             ) : (
               <ListeDiffusionFiltersWrapper
@@ -138,7 +146,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
                 filters={filter.inscriptions?.filters}
                 id={listeDiffusionData.id}
                 selectedFilters={selectedFilters}
-                onFiltersChange={setSelectedFilters}
+                onFiltersChange={handleSelectedFiltersChange}
               />
             )}
           </div>
