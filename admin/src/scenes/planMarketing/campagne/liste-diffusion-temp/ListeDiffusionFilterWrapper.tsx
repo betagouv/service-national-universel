@@ -33,13 +33,7 @@ export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, fil
   return (
     <ListeDiffusionFilterContext.Provider value={{ keyPrefix: id }}>
       <div className="flex">
-        <ListeDiffusionFilters
-          filters={filters}
-          selectedFilters={formattedSelectedFilter}
-          onFiltersChange={handleFilterChange}
-          intermediateFilters={[cohortsGroups]}
-          dataFilter={dataFilter}
-        />
+        <ListeDiffusionFilters filters={filters} selectedFilters={formattedSelectedFilter} onFiltersChange={handleFilterChange} dataFilter={dataFilter} />
       </div>
       <div className="mt-2 flex flex-row flex-wrap items-center">
         <SelectedFilters

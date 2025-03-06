@@ -1,11 +1,12 @@
 import { Popover, Transition } from "@headlessui/react";
-import React, { Fragment, ReactElement } from "react";
+import React, { Fragment, ReactElement, useContext } from "react";
 import { BsChevronRight } from "react-icons/bs";
 import Trash from "../../../../assets/icons/Trash";
 import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 import cx from "classnames";
+import { ListeDiffusionFilterContext } from "@/scenes/planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -91,6 +92,7 @@ type DropDownProps = {
 };
 
 export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, intermediateFilter }: DropDownProps) => {
+  const keyPrefix = useContext(ListeDiffusionFilterContext)?.keyPrefix || "";
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
   const ref: React.MutableRefObject<any> = React.useRef(null);
@@ -224,7 +226,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
       leaveFrom="opacity-100 translate-y-0"
       leaveTo="opacity-0 translate-y-1">
       <Popover.Panel className={`absolute left-[101%] z-20 w-[305px] ${inListFilter ? "-translate-y-[36px]" : "translate-y-[4px]"}`}>
-        <div key={filter?.title} ref={ref} className="rounded-lg shadow-lg ">
+        <div key={`${keyPrefix}-${filter?.title}`} ref={ref} className="rounded-lg shadow-lg ">
           <div className="relative grid rounded-lg border-[1px] border-gray-100 bg-white py-2">
             <div className="mb-1 flex items-center justify-between py-2 px-3">
               <p className="text-xs font-light leading-5 text-gray-500">{filter?.title}</p>
@@ -254,7 +256,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
                         return (
                           <div
                             className="flex cursor-pointer items-center justify-between py-2 px-3 hover:bg-gray-50"
-                            key={`${option.key}-${filter.title}`}
+                            key={`${keyPrefix}-${option.key}-${filter.title}`}
                             onClick={() => handleSelect(option.key)}>
                             <div className="flex items-center gap-2 text-sm leading-5 text-gray-700">
                               {/* Avoid react alert by using onChange even if empty */}

@@ -66,7 +66,6 @@ export default function Filters({
   intermediateFilters = [],
   disabled = false,
 }: FiltersProps) {
-  console.log("Filters", filters);
   const [search, setSearch] = useState("");
   const [dataFilter, setDataFilter] = useState({});
   const [filtersVisible, setFiltersVisible] = useState(filters);
