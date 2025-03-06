@@ -15,10 +15,13 @@ import { AnnulerClasseDesistee } from "../../../sejours/cle/classe/useCase/Annul
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import {
+    ClasseDesisterModel,
+    ClasseDesisterXlsx,
     ClasseImportModel,
     ClasseImportRapport,
     ClasseImportXlsx,
     ClasseRapport,
+    DesisterClasseFileValidation,
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
 import { Transactional } from "@nestjs-cls/transactional";
@@ -45,9 +48,14 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         });
         const mappedClasses = ReferentielClasseMapper.mapImporterClassesFromFile(classesFromXslx);
 
+        const classesDesisteesFromXslx = await this.fileGateway.parseXLS<ClasseDesisterXlsx>(fileContent.Body, {
+            sheetName: DesisterClasseFileValidation.sheetName,
+        });
+        const mappedClassesDesistees = ReferentielClasseMapper.mapDesisterClassesFromFile(classesDesisteesFromXslx);
+
         for (const mappedClasse of mappedClasses) {
             try {
-                const result = await this.processClasse(mappedClasse);
+                const result = await this.processClasse(mappedClasse, mappedClassesDesistees);
                 report.push(result);
                 this.logger.log(`Classe ${mappedClasse.classeId} imported successfully`, ImporterClasses.name);
             } catch (error) {
@@ -68,7 +76,10 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
     }
 
     @Transactional()
-    private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {
+    private async processClasse(
+        classeImport: ClasseImportModel,
+        classesDesistees: ClasseDesisterModel[],
+    ): Promise<ClasseImportRapport> {
         let classe = await this.classeGateway.findById(classeImport.classeId);
         if (!classe) {
             throw new Error("Classe non trouvée en base");
@@ -78,6 +89,14 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             sessionCode: classeImport.sessionCode,
             cohortCode: classeImport.cohortCode,
         };
+        // Vérification de si la classe existe dans l'onglet desistement
+        if (classesDesistees.find((classe) => classe.classeId === classe.classeId)) {
+            return {
+                ...classeRapport,
+                error: "Classe existe dans les 2 onglets",
+            };
+        }
+
         const updatedFields: string[] = [];
 
         // Si la classe est désistée => annuler le désistement de la classe
