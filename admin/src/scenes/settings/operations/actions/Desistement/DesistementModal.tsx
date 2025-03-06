@@ -1,13 +1,11 @@
 import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { CohortDto, formatDateFR, TaskName, translate, translateSimulationName } from "snu-lib";
+import { CohortDto, formatDateFR, TaskName, translateSimulationName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../shared/useTraitements";
 import dayjs from "dayjs";
 import DesistementButton from "./DesistementButton";
-import { DesistementService } from "@/services/desistementService";
-import { useQuery } from "@tanstack/react-query";
-import Loader from "@/components/Loader";
+import DesistementPreview from "./DesistementPreview";
 
 export default function DesistementModal({ session, onClose }: { session: CohortDto; onClose: () => void }) {
   const { data: traitements, isPending, isError } = useTraitements({ sessionId: session._id!, action: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER, sort: "ASC" });
@@ -16,7 +14,8 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
     value: t.id,
     label: `${translateSimulationName(t.name)} - ${formatDateFR(dayjs(t.createdAt))}`,
   }));
-  const selectedTraitement = selectedOption ? traitements?.find((t) => t.id === selectedOption) : traitements?.[0];
+  const sortedTraitements = traitements?.sort((a, b) => dayjs(b.createdAt).diff(dayjs(a.createdAt)));
+  const selectedTraitement = selectedOption ? sortedTraitements?.find((t) => t.id === selectedOption) : sortedTraitements?.[0];
 
   return (
     <Modal
@@ -53,7 +52,7 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
             />
           )}
           <br />
-          {selectedTraitement && <PreviewText traitement={selectedTraitement} />}
+          {selectedTraitement && <DesistementPreview traitement={selectedTraitement} />}
         </>
       }
       footer={
@@ -63,32 +62,5 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
         </div>
       }
     />
-  );
-}
-
-function PreviewText({ traitement }) {
-  const { data, isPending, isError } = useQuery({
-    queryKey: ["desistement", traitement.id],
-    queryFn: () => DesistementService.getDesistementPreview(traitement.metadata?.parameters?.sessionId, traitement.id),
-    refetchOnWindowFocus: false,
-  });
-  const total = traitement?.metadata?.results?.jeunesAffected || 0;
-  const nonConfirmes = data?.jeunesNonConfirmes || 0;
-
-  return (
-    <div className="text-center text-lg">
-      {isError ? (
-        <p>Erreur</p>
-      ) : isPending ? (
-        <Loader />
-      ) : (
-        <>
-          <p>
-            Nombre de volontaires à désister : {nonConfirmes} / {total} affectés.
-          </p>
-          <p>Confirmez le désistement des volontaires n’ayant pas confirmé le séjour.</p>
-        </>
-      )}
-    </div>
   );
 }
