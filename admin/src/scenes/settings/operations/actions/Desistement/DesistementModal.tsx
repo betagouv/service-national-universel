@@ -14,7 +14,8 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
     value: t.id,
     label: `${translateSimulationName(t.name)} - ${formatDateFR(dayjs(t.createdAt))}`,
   }));
-  const selectedTraitement = selectedOption ? traitements?.find((t) => t.id === selectedOption) : traitements?.[0];
+  const sortedTraitements = traitements?.sort((a, b) => dayjs(b.createdAt).diff(dayjs(a.createdAt)));
+  const selectedTraitement = selectedOption ? sortedTraitements?.find((t) => t.id === selectedOption) : sortedTraitements?.[0];
 
   return (
     <Modal
