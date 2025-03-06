@@ -32,43 +32,8 @@ import { useBrevoExport } from "@/hooks/useBrevoExport";
 import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
 import { useToggle } from "react-use";
 
-export default function Inscription() {
-  useDocumentTitle("Inscriptions");
-  const pageId = "inscription-list";
-  const user = useSelector((state) => state.Auth.user);
-  const [young, setYoung] = useState(null);
-  const { data: labels, isPending: isLabelsPending } = useFilterLabels(pageId);
-  const [isCreationListeBrevo, setIsCreationListeBrevo] = useToggle(false);
-
-  //List state
-  const [data, setData] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [paramData, setParamData] = useState({
-    page: 0,
-    sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
-  });
-  const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("inscription");
-  const [size, setSize] = useState(10);
-
-  const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
-  const selectedClassId = selectedFilters?.classeId?.filter[0];
-  const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
-  const cohorts = useSelector((state) => state.Cohorts);
-  const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
-  const baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
-  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
-
-  if (isLabelsPending) return <Loader />;
-
-  const handleClickInscription = () => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-  };
-
-  const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
-    await exportToCsv(formValues, selectedFilters);
-  };
-
-  const filterArray = [
+export const getInscriptionFilterArray = (user, labels) => {
+  return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Autorisation de participation", name: "parentAllowSNU", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
     { title: "Statut", name: "status", parentGroup: "Général", missingLabel: "Non renseigné", translate: translateInscriptionStatus },
@@ -227,6 +192,44 @@ export default function Inscription() {
       translate: translate,
     },
   ].filter(Boolean);
+};
+export default function Inscription() {
+  useDocumentTitle("Inscriptions");
+  const pageId = "inscription-list";
+  const user = useSelector((state) => state.Auth.user);
+  const [young, setYoung] = useState(null);
+  const { data: labels, isPending: isLabelsPending } = useFilterLabels(pageId);
+  const [isCreationListeBrevo, setIsCreationListeBrevo] = useToggle(false);
+
+  //List state
+  const [data, setData] = useState([]);
+  const [selectedFilters, setSelectedFilters] = useState({});
+  const [paramData, setParamData] = useState({
+    page: 0,
+    sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
+  });
+  const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("inscription");
+  const [size, setSize] = useState(10);
+
+  const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
+  const selectedClassId = selectedFilters?.classeId?.filter[0];
+  const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
+  const baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
+
+  if (isLabelsPending) return <Loader />;
+
+  const handleClickInscription = () => {
+    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+  };
+
+  const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
+    await exportToCsv(formValues, selectedFilters);
+  };
+
+  const filterArray = getInscriptionFilterArray(user, labels);
 
   return (
     <>
