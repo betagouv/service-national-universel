@@ -12,6 +12,11 @@ export enum DestinataireListeDiffusion {
   COORDINATEURS_CLE = "COORDINATEURS_CLE",
 }
 
+export enum ListeDiffusionEnum {
+  VOLONTAIRES = "Volontaires",
+  INSCRIPTIONS = "Inscriptions",
+}
+
 export interface ListeDiffusionFiltres {
   [key: string]: string[];
 }

@@ -1,48 +1,16 @@
-import { buildQuery } from "@/components/filters-system-v2/components/filters/utils";
-import { TreeFilter } from "@/components/filters-system-v2/tree-filter/TreeFilter";
 import { mapAvailableFiltersToTreeFilter } from "@/components/filters-system-v2/tree-filter/TreeFilterService";
 import { TreeFilterWithoutHeadlessUi } from "@/components/filters-system-v2/tree-filter/TreeFilterWithoutHeadlessUi";
-import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
-import { getFilterArray } from "@/scenes/volontaires/utils";
 import { getCohortGroups } from "@/services/cohort.service";
-import React, { useEffect, useState } from "react";
-import { useSelector } from "react-redux";
-import { useSetState } from "react-use";
-import ListeDiffusionFilterWrapper from "../planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
+import React from "react";
 import Loader from "../../../../packages/ds/src/admin/layout/DataTable/Loader";
-import { useListeDiffusion } from "./ListeDiffusionHook";
-import { ListeDiffusionFiltres } from "snu-lib";
-
-export interface TempState {
-  params: {
-    count?: number;
-    page: number;
-    sort: {
-      label: string;
-      field: string;
-      order: string;
-    };
-    filters: TempFilters;
-  };
-  filters: TempFilters;
-}
+import { useListeDiffusionFilters } from "../planMarketing/listeDiffusion/filters/ListeDiffusionFiltersHook";
 
 export type TempFilters = Record<string, { key: string }[]>;
 export default function TreeFilterExample() {
-  const savedFilterExample: ListeDiffusionFiltres = { originalCohort: ["CLE juin 2024"] };
-
-  const listeTypeYoung = "young-list";
-  const routeVolontaire = "/elasticsearch/young/search?tab=volontaire";
-
-  const listeTypeInscription = "inscription-list";
-  const routeInscription = "/elasticsearch/young/search";
-
-  const { data: dataYoung, filters: filtersYoung, isPending: isPendingYoung } = useListeDiffusion(listeTypeYoung, routeVolontaire);
-  const { data: dataInscription, filters: filtersInscription, isPending: isPendingInscription } = useListeDiffusion(listeTypeInscription, routeInscription);
-  const isPending = isPendingInscription || isPendingYoung;
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
 
   if (isPending) return <Loader />;
-  const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(dataYoung.filters, getCohortGroups());
+  const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(dataVolontaires.filters, getCohortGroups());
   return (
     <>
       {/* <ListeDiffusionFilterWrapper paramData={dataYoung.params} dataFilter={dataYoung.filters} filters={filtersYoung} id="a" savedFilter={savedFilterExample} />
@@ -54,7 +22,7 @@ export default function TreeFilterExample() {
         id="c"
         savedFilter={{ region: ["Auvergne-Rhône-Alpes"] }}
       /> */}
-      <TreeFilter treeFilter={tempDecoupledFilterData} id={"a"} />
+      {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"a"} /> */}
       {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"b"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"d"} /> */}
