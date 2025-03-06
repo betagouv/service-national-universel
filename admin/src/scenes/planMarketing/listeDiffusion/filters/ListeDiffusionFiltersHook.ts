@@ -1,11 +1,8 @@
-import { Filter } from "@/components/filters-system-v2/components/Filters";
 import { buildQuery } from "@/components/filters-system-v2/components/filters/utils";
-import { TempState } from "@/scenes/develop/TreeFilterExample";
 import { getInscriptionFilterArray } from "@/scenes/inscription";
 import useFilterLabels from "@/scenes/volontaires/useFilterLabels";
 import { getFilterArray } from "@/scenes/volontaires/utils";
-import { set } from "mongoose";
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSetState } from "react-use";
 
@@ -32,6 +29,7 @@ export const useListeDiffusionFilters = () => {
 
   const { data: labelsVolontaires, isPending: isPendingVolontaires } = useFilterLabels("young-list");
   const { data: labelsInscriptions, isPending: isPendingInscriptions } = useFilterLabels("inscription-list");
+  //@ts-expect-error auth not exist
   const user = useSelector((state) => state.Auth.user);
   const [isPending, setIsPending] = useState(true);
   const [isPendingQueryInscriptions, setIsPendingQueryInscriptions] = useState(true);
@@ -62,6 +60,7 @@ export const useListeDiffusionFilters = () => {
         filters: { ...res.newFilters },
       };
       setIsPending(false);
+      //@ts-expect-error params
       setDataVolontaires({ params: { ...newParamData }, filters: { ...res.newFilters } });
     });
   }, [filtersVolontaires]);

@@ -159,6 +159,7 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onFilt
                                   return (
                                     <FilterPopOver
                                       key={item.title}
+                                      //@ts-ignore missing property
                                       filter={customItem}
                                       selectedFilters={selectedFilters}
                                       setSelectedFilters={onFiltersChange}
