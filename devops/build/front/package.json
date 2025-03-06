@@ -1,0 +1,13 @@
+{
+  "name": "nginx",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "nginx -c $APP_HOME/nginx.conf"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}

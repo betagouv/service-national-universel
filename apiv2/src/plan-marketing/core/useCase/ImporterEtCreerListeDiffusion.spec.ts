@@ -19,6 +19,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
             planMarketingGateway: {
                 importerContacts: jest.fn(),
                 findCampagneById: jest.fn(),
+                deleteOldestListeDiffusion: jest.fn(),
             },
             taskGateway: {
                 create: jest.fn(),
@@ -48,7 +49,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
         configService = moduleRef.get(ConfigService);
     });
 
-    it("should successfully import contacts and create task", async () => {
+    it("should successfully import contacts, delete oldest list and create task", async () => {
         const nomListe = "testList";
         const campagneId = "123";
         const pathFile = "path/to/file";
@@ -64,9 +65,11 @@ describe("ImporterEtCreerListeDiffusion", () => {
         fileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from(fileContent) } as any);
         planMarketingGateway.importerContacts.mockResolvedValue(processId);
         planMarketingGateway.findCampagneById.mockResolvedValue({ id: campagneId });
+        planMarketingGateway.deleteOldestListeDiffusion.mockResolvedValue();
 
         await useCase.execute(nomListe, campagneId, pathFile);
 
+        expect(planMarketingGateway.deleteOldestListeDiffusion).toHaveBeenCalled();
         expect(fileGateway.downloadFile).toHaveBeenCalledWith(pathFile);
         expect(planMarketingGateway.importerContacts).toHaveBeenCalledWith(
             nomListe,

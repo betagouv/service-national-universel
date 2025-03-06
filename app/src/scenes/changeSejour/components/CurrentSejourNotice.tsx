@@ -10,7 +10,7 @@ const CurrentSejourNotice = () => {
 
   const text =
     young.status === YOUNG_STATUS.WITHDRAWN ? (
-      <p>Vous vous êtes désisté(e) 🥲</p>
+      <p>Vous êtes désisté(e) 🥲</p>
     ) : young.status === YOUNG_STATUS.ABANDONED ? (
       <p>Vous avez abandonné votre inscription 🥲</p>
     ) : isCohortDone ? (

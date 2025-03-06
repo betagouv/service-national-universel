@@ -15,8 +15,8 @@ export function Programs() {
     if (open) plausibleEvent("Phase2/CTA - Afficher tout");
     setOpen(!open);
   }
-
-  const programs = open ? data : data.slice(0, 6);
+  const sortedData = [...data].sort((a, b) => a.order - b.order);
+  const programs = open ? sortedData : sortedData.slice(0, 6);
   return (
     <>
       <div className="mt-12 md:mt-20 mx-auto gap-x-4 md:gap-x-24 md:gap-y-20 grid grid-cols-2 md:grid-cols-3 w-fit">
