@@ -36,18 +36,20 @@ export const useListeDiffusionFilters = () => {
 
   useEffect(() => {
     if (!labelsVolontaires) return;
-    const newFilters = getFilterArray(user, labelsVolontaires).map((filter) => {
-      if (filter?.name === "status") {
-        return { ...filter, defaultValue: [] };
-      }
-      return filter;
-    }) as any;
+    const newFilters = getFilterArray(user, labelsVolontaires)
+      .filter((filter) => filter?.name !== "cohort")
+      .map((filter) => {
+        if (filter?.name === "status") {
+          return { ...filter, defaultValue: [] };
+        }
+        return filter;
+      }) as any;
     setFiltersVolontaires(newFilters);
   }, [labelsVolontaires, user]);
 
   useEffect(() => {
     if (!labelsInscriptions) return;
-    const newFilters = getInscriptionFilterArray(user, labelsInscriptions) as any;
+    const newFilters = getInscriptionFilterArray(user, labelsInscriptions).filter((filter) => filter?.name !== "cohort") as any;
     setFiltersInscriptions(newFilters);
   }, [labelsInscriptions, user]);
 
