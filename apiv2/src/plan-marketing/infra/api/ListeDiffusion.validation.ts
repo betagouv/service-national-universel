@@ -1,5 +1,5 @@
-import { CreateListeDiffusionModel, ListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
-import { IsEmpty, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
+import { CreateListeDiffusionModel, UpdateListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
+import { IsEnum, IsNotEmpty, IsObject, IsString } from "class-validator";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 
 export class CreateListeDiffusionDto implements CreateListeDiffusionModel {
@@ -16,7 +16,7 @@ export class CreateListeDiffusionDto implements CreateListeDiffusionModel {
     filters: ListeDiffusionFiltres;
 }
 
-export class UpdateListeDiffusionDto implements Partial<ListeDiffusionModel> {
+export class UpdateListeDiffusionDto implements UpdateListeDiffusionModel {
     @IsString()
     @IsNotEmpty()
     id: string;
@@ -24,10 +24,6 @@ export class UpdateListeDiffusionDto implements Partial<ListeDiffusionModel> {
     @IsString()
     @IsNotEmpty()
     nom: string;
-
-    @IsOptional()
-    @IsEnum(ListeDiffusionEnum)
-    type?: ListeDiffusionEnum;
 
     @IsObject()
     @IsNotEmpty()

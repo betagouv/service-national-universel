@@ -1,6 +1,7 @@
-import { Inject, Injectable, NotFoundException } from "@nestjs/common";
-import { ListeDiffusionModel, CreateListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
+import { Inject, Injectable } from "@nestjs/common";
+import { ListeDiffusionModel, CreateListeDiffusionModel, UpdateListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 @Injectable()
 export class ListeDiffusionService {
@@ -15,17 +16,18 @@ export class ListeDiffusionService {
     async getListeDiffusionById(id: string) {
         const listeDiffusion = await this.listeDiffusionGateway.findById(id);
         if (!listeDiffusion) {
-            throw new NotFoundException("Liste de diffusion non trouvée");
+            throw new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND)
         }
         return listeDiffusion;
     }
 
-    async updateListeDiffusion(id: string, listeDiffusionDto: Partial<ListeDiffusionModel>) {
+    async updateListeDiffusion(id: string, listeDiffusion: UpdateListeDiffusionModel) {
         const existingListeDiffusion = await this.getListeDiffusionById(id);
 
         const updatedListeDiffusion = await this.listeDiffusionGateway.update({
             ...existingListeDiffusion,
-            ...listeDiffusionDto,
+            ...listeDiffusion,
+            type: existingListeDiffusion.type,
             id,
         });
 
@@ -36,8 +38,11 @@ export class ListeDiffusionService {
     }
 
     async deleteListeDiffusion(id: string) {
-        await this.getListeDiffusionById(id);
-        await this.listeDiffusionGateway.delete(id);
+        try {
+            await this.listeDiffusionGateway.delete(id);
+        } catch (error) {
+            throw new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND);
+        }
     }
 
     async searchListesDiffusion(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {

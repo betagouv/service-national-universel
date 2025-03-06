@@ -10,3 +10,5 @@ export interface ListeDiffusionModel {
 }
 
 export type CreateListeDiffusionModel = Omit<ListeDiffusionModel, "id" | "createdAt" | "updatedAt">;
+
+export type UpdateListeDiffusionModel = Omit<ListeDiffusionModel, "type" | "createdAt" | "updatedAt">;
