@@ -39,7 +39,7 @@ describe("ListeDiffusionService", () => {
         const result = await service.updateListeDiffusion(mockId, mockListeDiffusion as any);
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
-        expect(mockListeDiffusionGateway.update).toHaveBeenCalledWith(mockListeDiffusion);
+        expect(mockListeDiffusionGateway.update).toHaveBeenCalledWith({ id: mockId, ...mockListeDiffusion });
         expect(result).toEqual(expectedResult);
     });
 
@@ -49,9 +49,9 @@ describe("ListeDiffusionService", () => {
 
         mockListeDiffusionGateway.findById = jest.fn().mockResolvedValue(null);
 
-        await expect(
-            service.updateListeDiffusion(mockId, mockListeDiffusion as any)
-        ).rejects.toThrow(NotFoundException);
+        await expect(service.updateListeDiffusion(mockId, mockListeDiffusion as any)).rejects.toThrow(
+            NotFoundException,
+        );
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
         expect(mockListeDiffusionGateway.update).not.toHaveBeenCalled();
@@ -74,9 +74,7 @@ describe("ListeDiffusionService", () => {
 
         mockListeDiffusionGateway.findById.mockResolvedValue(null);
 
-        await expect(
-            service.getListeDiffusionById(mockId)
-        ).rejects.toThrow(NotFoundException);
+        await expect(service.getListeDiffusionById(mockId)).rejects.toThrow(NotFoundException);
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
     });
@@ -99,9 +97,7 @@ describe("ListeDiffusionService", () => {
 
         mockListeDiffusionGateway.findById.mockResolvedValue(null);
 
-        await expect(
-            service.deleteListeDiffusion(mockId)
-        ).rejects.toThrow(NotFoundException);
+        await expect(service.deleteListeDiffusion(mockId)).rejects.toThrow(NotFoundException);
 
         expect(mockListeDiffusionGateway.findById).toHaveBeenCalledWith(mockId);
         expect(mockListeDiffusionGateway.delete).not.toHaveBeenCalled();
@@ -110,7 +106,7 @@ describe("ListeDiffusionService", () => {
     it("should search listes de diffusion successfully", async () => {
         const mockListes = [
             { id: "LIST-001", name: "Liste 1" },
-            { id: "LIST-002", name: "Liste 2" }
+            { id: "LIST-002", name: "Liste 2" },
         ];
         const mockFilter = { name: "Liste" };
         const mockSort = "ASC" as const;
@@ -126,7 +122,7 @@ describe("ListeDiffusionService", () => {
     it("should search listes de diffusion without parameters", async () => {
         const mockListes = [
             { id: "LIST-001", name: "Liste 1" },
-            { id: "LIST-002", name: "Liste 2" }
+            { id: "LIST-002", name: "Liste 2" },
         ];
 
         mockListeDiffusionGateway.search.mockResolvedValue(mockListes);

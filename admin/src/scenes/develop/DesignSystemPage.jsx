@@ -12,7 +12,6 @@ import api from "@/services/api";
 import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
 import Colors from "./components/Colors";
-import TreeFilterExample from "./TreeFilterExample";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
