@@ -5,7 +5,7 @@ import { getCohortGroups } from "@/services/cohort.service";
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useSetState } from "react-use";
-import ListeDiffusionFilterWrapper from "../planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
+import ListeDiffusionFiltersWrapper from "../planMarketing/listeDiffusion/filters/ListeDiffusionFiltersWrapper";
 import Loader from "../../../../packages/ds/src/admin/layout/DataTable/Loader";
 import { useListeDiffusion } from "./ListeDiffusionHook";
 import { ListeDiffusionFiltres } from "snu-lib";
@@ -43,7 +43,7 @@ export default function TreeFilterExample() {
   // const tempDecoupledFilterData = mapAvailableFiltersToTreeFilter(dataYoung.filters, getCohortGroups());
   return (
     <>
-      <ListeDiffusionFilterWrapper
+      <ListeDiffusionFiltersWrapper
         paramData={dataYoung.params}
         dataFilter={dataYoung.filters}
         filters={filtersYoung}

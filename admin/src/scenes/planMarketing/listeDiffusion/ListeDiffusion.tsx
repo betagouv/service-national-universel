@@ -5,14 +5,14 @@ import React, { useEffect, useMemo, useState } from "react";
 import { DraftListeDiffusionDataProps, ListeDiffusionDataProps, ListeDiffusionForm } from "./ListeDiffusionForm";
 import { useListeDiffusion } from "./ListeDiffusionHook";
 import { ListeDiffusionEnum } from "snu-lib";
-import { useListeDiffusionFilter } from "./ListeDiffusionFilterHook";
+import { useListeDiffusionFilters } from "./filters/ListeDiffusionFiltersHook";
 
 export default function ListeDiffusion() {
   const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
   const [searchTerm, setSearchTerm] = useState("");
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
 
-  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilter();
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {

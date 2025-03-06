@@ -1,6 +1,5 @@
 import { SelectedFilters } from "@/components/filters-system-v2";
-import { getCohortGroups } from "@/services/cohort.service";
-import React, { createContext, useEffect, useState } from "react";
+import React, { createContext } from "react";
 
 import { Filter } from "@/components/filters-system-v2/components/Filters";
 import { ListeDiffusionFiltres } from "snu-lib";
@@ -15,13 +14,13 @@ export interface ListeDiffusionFilterProps {
   onFiltersChange: (filters: ListeDiffusionFiltres) => void;
 }
 
-export interface ListeDiffusionFilterContextProps {
+export interface ListeDiffusionFiltersContextProps {
   keyPrefix?: string;
 }
-export const ListeDiffusionFilterContext: React.Context<ListeDiffusionFilterContextProps> = createContext({});
+export const ListeDiffusionFiltersContext: React.Context<ListeDiffusionFiltersContextProps> = createContext({});
 
 // Legacy code
-export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, filters, id, selectedFilters, onFiltersChange }: ListeDiffusionFilterProps) {
+export default function ListeDiffusionFiltersWrapper({ paramData, dataFilter, filters, id, selectedFilters, onFiltersChange }: ListeDiffusionFilterProps) {
   const formattedSelectedFilter: { [key: string]: { filter: string[] } } =
     Object.fromEntries(Object.entries(selectedFilters || {}).map(([key, value]) => [key, { filter: value }])) || {};
 
@@ -29,9 +28,8 @@ export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, fil
     const formattedUpdatedFilters = Object.fromEntries(Object.entries(filters).map(([key, value]) => [key, value.filter]));
     onFiltersChange(formattedUpdatedFilters);
   };
-  const cohortsGroups = getCohortGroups();
   return (
-    <ListeDiffusionFilterContext.Provider value={{ keyPrefix: id }}>
+    <ListeDiffusionFiltersContext.Provider value={{ keyPrefix: id }}>
       <div className="flex">
         <ListeDiffusionFilters filters={filters} selectedFilters={formattedSelectedFilter} onFiltersChange={handleFilterChange} dataFilter={dataFilter} />
       </div>
@@ -45,6 +43,6 @@ export default function ListeDiffusionFilterWrapper({ paramData, dataFilter, fil
           disabled={false}
         />
       </div>
-    </ListeDiffusionFilterContext.Provider>
+    </ListeDiffusionFiltersContext.Provider>
   );
 }

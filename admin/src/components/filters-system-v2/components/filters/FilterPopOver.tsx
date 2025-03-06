@@ -6,7 +6,7 @@ import { normalizeString } from "./utils";
 import { RowFilter, IIntermediateFilter, DataFilter } from "@/components/filters-system-v2/components/Filter";
 import { IntermediateFilterCount, syncRootFilter } from "@/components/filters-system-v2/components/filters/IntermediateFilter";
 import cx from "classnames";
-import { ListeDiffusionFilterContext } from "@/scenes/planMarketing/campagne/liste-diffusion-temp/ListeDiffusionFilterWrapper";
+import { ListeDiffusionFiltersContext } from "@/scenes/planMarketing/listeDiffusion/filters/ListeDiffusionFiltersWrapper";
 
 // file used to show the popover for the all the possible values of a filter
 
@@ -92,7 +92,7 @@ type DropDownProps = {
 };
 
 export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilters, data, inListFilter = true, setParamData, intermediateFilter }: DropDownProps) => {
-  const keyPrefix = useContext(ListeDiffusionFilterContext)?.keyPrefix || "";
+  const keyPrefix = useContext(ListeDiffusionFiltersContext)?.keyPrefix || "";
   const [search, setSearch] = React.useState("");
   const [optionsVisible, setOptionsVisible] = React.useState(data || []);
   const ref: React.MutableRefObject<any> = React.useRef(null);
