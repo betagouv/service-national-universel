@@ -88,17 +88,16 @@ export const updatePDRForLine = async (
 
   await planDeTransport.save({ fromUser: user });
 
-  const youngUpdateResult = await YoungModel.updateMany(
-    {
-      ligneId: ligneBusId,
-      meetingPointId: meetingPointId,
-    },
-    {
-      $set: {
-        meetingPointId: newMeetingPointId,
-      },
-    },
-    { fromUser: user },
+  const youngsToUpdate = await YoungModel.find({
+    ligneId: ligneBusId,
+    meetingPointId: meetingPointId,
+  });
+
+  await Promise.all(
+    youngsToUpdate.map(async (young) => {
+      young.meetingPointId = newMeetingPointId;
+      await young.save({ fromUser: user });
+    }),
   );
 
   if (shouldSendEmailCampaign) {
