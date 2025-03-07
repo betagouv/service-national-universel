@@ -12,7 +12,7 @@ export class CampagneController {
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         private readonly campagneService: CampagneService,
     ) {}
-
+    
     @Post()
     async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
         return await this.campagneService.creerCampagne(dto);
@@ -46,4 +46,5 @@ export class CampagneController {
     async delete(@Param("id") id: string): Promise<void> {
         await this.campagneGateway.delete(id);
     }
+
 }
