@@ -7,7 +7,7 @@ import { useSelector } from "react-redux";
 import { useSetState } from "react-use";
 
 // Legacy code
-export const useListeDiffusionFilters = () => {
+export const useListeDiffusionFilters = ({ addCohortFilter = false }: { addCohortFilter?: boolean }) => {
   const [dataVolontaires, setDataVolontaires] = useSetState({
     params: {
       page: 0,
@@ -37,7 +37,7 @@ export const useListeDiffusionFilters = () => {
   useEffect(() => {
     if (!labelsVolontaires) return;
     const newFilters = getFilterArray(user, labelsVolontaires)
-      .filter((filter) => filter?.name !== "cohort")
+      .filter((filter) => (addCohortFilter ? filter : filter?.name !== "cohort"))
       .map((filter) => {
         if (filter?.name === "status") {
           return { ...filter, defaultValue: [] };
@@ -49,7 +49,7 @@ export const useListeDiffusionFilters = () => {
 
   useEffect(() => {
     if (!labelsInscriptions) return;
-    const newFilters = getInscriptionFilterArray(user, labelsInscriptions).filter((filter) => filter?.name !== "cohort") as any;
+    const newFilters = getInscriptionFilterArray(user, labelsInscriptions).filter((filter) => (addCohortFilter ? filter : filter?.name !== "cohort")) as any;
     setFiltersInscriptions(newFilters);
   }, [labelsInscriptions, user]);
 

@@ -12,7 +12,7 @@ export default function ListeDiffusion() {
   const [searchTerm, setSearchTerm] = useState("");
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
 
-  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters({});
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {
