@@ -11,9 +11,12 @@ import {
     ClasseDesisterModel,
     ClasseDesisterRapport,
     ClasseDesisterXlsx,
-    ClasseRapport,
+    ClasseImportModel,
+    ClasseImportXlsx,
     DesisterClasseFileValidation,
+    ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
+import { Transactional } from "@nestjs-cls/transactional";
 Injectable();
 export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
     constructor(
@@ -29,9 +32,14 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
         });
         const mappedClasses = ReferentielClasseMapper.mapDesisterClassesFromFile(classesFromXslx);
 
+        const classesImportFromXslx = await this.fileGateway.parseXLS<ClasseImportXlsx>(fileContent.Body, {
+            sheetName: ImportClasseFileValidation.sheetName,
+        });
+        const mappedClassesImport = ReferentielClasseMapper.mapImporterClassesFromFile(classesImportFromXslx);
+
         for (const mappedClasse of mappedClasses) {
             try {
-                const result = await this.processClasse(mappedClasse);
+                const result = await this.processClasse(mappedClasse, mappedClassesImport);
                 report.push(result);
             } catch (error) {
                 report.push({
@@ -45,7 +53,11 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
 
         return report;
     }
-    private async processClasse(classeToDesister: ClasseDesisterModel): Promise<ClasseDesisterRapport> {
+    @Transactional()
+    private async processClasse(
+        classeToDesister: ClasseDesisterModel,
+        classesImport: ClasseImportModel[],
+    ): Promise<ClasseDesisterRapport> {
         if (!classeToDesister.classeId) {
             return {
                 classeId: classeToDesister.classeId,
@@ -54,6 +66,16 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
                 jeunesDesistesIds: "",
             };
         }
+        // Vérifier si la classe existe dans l'onglet d'import
+        if (classesImport.find((classe) => classe.classeId === classeToDesister.classeId)) {
+            return {
+                classeId: classeToDesister.classeId,
+                error: "Classe existe dans les 2 onglets",
+                result: "error",
+                jeunesDesistesIds: "",
+            };
+        }
+
         // Désister classe
         const classeDesistee = await this.classeGateway.updateStatut(
             classeToDesister.classeId,
