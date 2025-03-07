@@ -1,6 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { RegionAcademiqueGateway } from "./RegionAcademique.gateway";
-import { ImportRegionAcademiqueModel, RegionAcademiqueImportRapport, RegionAcademiqueModel } from "./RegionAcademique.model";
+import {
+    ImportRegionAcademiqueModel,
+    RegionAcademiqueImportRapport,
+    RegionAcademiqueModel,
+} from "./RegionAcademique.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
@@ -15,7 +19,7 @@ export class RegionAcademiqueImportService {
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(RegionAcademiqueGateway) private readonly regionAcademiqueGateway: RegionAcademiqueGateway,
-    ) { }
+    ) {}
 
     async import(regionAcademique: ImportRegionAcademiqueModel): Promise<RegionAcademiqueModel> {
         const regionAcademiqueDB = await this.regionAcademiqueGateway.findByCode(regionAcademique.code);
@@ -27,17 +31,20 @@ export class RegionAcademiqueImportService {
         if (this.canBeUpdated(regionAcademique, regionAcademiqueDB)) {
             return this.regionAcademiqueGateway.update({
                 ...regionAcademique,
-                id: regionAcademiqueDB.id
+                id: regionAcademiqueDB.id,
             } as RegionAcademiqueModel);
         }
 
         return regionAcademiqueDB;
     }
 
-    async processReport(parameters: ReferentielImportTaskParameters, ...reports: RegionAcademiqueImportRapport[][]): Promise<string> {
+    async processReport(
+        parameters: ReferentielImportTaskParameters,
+        ...reports: RegionAcademiqueImportRapport[][]
+    ): Promise<string> {
         const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
         const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
             data: fileBuffer,

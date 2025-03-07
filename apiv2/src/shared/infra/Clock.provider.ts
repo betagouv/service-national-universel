@@ -1,5 +1,3 @@
-import { Injectable } from "@nestjs/common";
-import { ClockGateway } from "@shared/core/Clock.gateway";
 import {
     add,
     addHours,
@@ -10,16 +8,21 @@ import {
     isWithinInterval as isWithinIntervalFns,
 } from "date-fns";
 
+import { getZonedDate } from "snu-lib";
+
+import { Injectable } from "@nestjs/common";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+
 @Injectable()
 export class ClockProvider implements ClockGateway {
-    getNowSafeIsoDate(): string {
-        return `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+    formatSafeIsoDate(date: Date): string {
+        return `${date.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
     }
     addDaysToNow(days: number): Date {
         return add(new Date(), { days });
     }
-    now() {
-        return new Date();
+    now({ timeZone }: { timeZone?: string } = { timeZone: "Europe/Paris" }) {
+        return getZonedDate(new Date(), timeZone);
     }
     isValidDate(date: Date): boolean {
         return !isNaN(new Date(date).getTime());

@@ -29,7 +29,8 @@ describe("ReferentielClasseService", () => {
             getMissingColumns: jest.fn(),
         };
         const mockClockGateway = {
-            getNowSafeIsoDate: jest.fn(),
+            now: jest.fn(),
+            formatSafeIsoDate: jest.fn(),
         };
         const mockNotificationGateway = {
             sendEmail: jest.fn(),
