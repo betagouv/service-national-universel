@@ -24,6 +24,7 @@ import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
 import { YOUNG_STATUS } from "snu-lib";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionNom = "Avril 2024 - C";
 
@@ -144,6 +145,13 @@ describe("ValiderAffectationHTS", () => {
                             .fn()
                             .mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id, capaciteJeunes: 100 }))),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
+                    },
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeIsoDate: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                     },
                 },
             ],

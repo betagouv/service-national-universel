@@ -24,7 +24,7 @@ export class ReferentielImportTaskService {
         mimetype,
         auteur,
     }: {
-        importType: typeof ReferentielTaskType[keyof typeof ReferentielTaskType];
+        importType: (typeof ReferentielTaskType)[keyof typeof ReferentielTaskType];
         fileName: string;
         buffer: Buffer;
         mimetype: string;
@@ -34,7 +34,7 @@ export class ReferentielImportTaskService {
             sheetName: IMPORT_TAB_NAMES[importType],
             defval: "",
         });
-        
+
         if (dataToImport.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_EMPTY_FILE);
         }
@@ -44,7 +44,7 @@ export class ReferentielImportTaskService {
             }
         }
 
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
         const folderPath = `${FilePath[importType]}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,
@@ -63,7 +63,7 @@ export class ReferentielImportTaskService {
                     fileLineCount: dataToImport.length,
                     auteur,
                 },
-            },  
+            },
         });
 
         return task;

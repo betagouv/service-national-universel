@@ -23,6 +23,7 @@ import { YOUNG_STATUS } from "snu-lib";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionNom = "2025 HTS 02 - Mai La Réunion";
 
@@ -124,6 +125,13 @@ describe("ValiderAffectationHTSDromCom", () => {
                 {
                     provide: LigneDeBusGateway,
                     useValue: {},
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeIsoDate: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
+                    },
                 },
             ],
         }).compile();

@@ -1,7 +1,7 @@
 export interface ClockGateway {
     addDaysToNow(days: number): Date;
-    now(): Date;
-    getNowSafeIsoDate(): string;
+    now(options?: { timeZone: string }): Date;
+    formatSafeIsoDate(date: Date): string;
     isValidDate(date: Date): boolean;
     formatShort(date: Date): string;
     isAfter(dateA: Date, dateB: Date);

@@ -11,14 +11,13 @@ import { TaskGateway } from "@task/core/Task.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
-import { SejourGateway } from "../sejour/Sejour.gateway";
-
 import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationCLE.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
 import { ValiderAffectationCLEDromComTaskParameters } from "./ValiderAffectationCLEDromComTask.model";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
 import { SimulationAffectationCLEDromComTaskModel } from "./SimulationAffectationCLEDromComTask.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -79,6 +78,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -177,7 +177,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
 
         // upload du rapport du s3
-        const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeIsoDate(dateAffectation);
         const fileName = `affectation-cle-dromcom/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,

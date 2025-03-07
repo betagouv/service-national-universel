@@ -12,6 +12,7 @@ import { SimulationAffectationCLETaskParameters } from "./SimulationAffectationC
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type SimulationAffectationCLEResult = {
     rapportData: RapportData;
@@ -35,6 +36,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(PointDeRassemblementGateway) private readonly pointDeRassemblementGateway: PointDeRassemblementGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -163,7 +165,7 @@ export class SimulationAffectationCLE implements UseCase<SimulationAffectationCL
 
         const fileBuffer = await this.simulationAffectationCLEService.generateRapportExcel(rapportData, "CLE");
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
         const fileName = `simulation-affectation-cle/affectation_simulation_cle_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

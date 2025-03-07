@@ -9,6 +9,7 @@ import { RapportData, SimulationAffectationCLEService, SimulationResultats } fro
 
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationCLEDromComTaskParameters } from "./SimulationAffectationCLEDromComTask.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type SimulationAffectationCLEDromComResult = {
     rapportData: RapportData;
@@ -30,6 +31,7 @@ export class SimulationAffectationCLEDromCom implements UseCase<SimulationAffect
         @Inject(SimulationAffectationCLEService)
         private readonly simulationAffectationCLEService: SimulationAffectationCLEService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -112,7 +114,7 @@ export class SimulationAffectationCLEDromCom implements UseCase<SimulationAffect
 
         const fileBuffer = await this.simulationAffectationCLEService.generateRapportExcel(rapportData, "CLE_DROMCOM");
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
         const fileName = `simulation-affectation-cle-dromcom/affectation_simulation_cle-dromcom_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
