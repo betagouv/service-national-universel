@@ -160,7 +160,7 @@ const ListStructure = () => {
         transform={exportTransform}
         exportFields={structureExportFields}
         route="/elasticsearch/structure/export"
-        exportTitle="Structure"
+        exportTitle="structures"
         selectedFilters={selectedFilters}
       />
     </div>
