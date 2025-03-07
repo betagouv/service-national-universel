@@ -1,6 +1,6 @@
 import { PointDeRassemblementType } from "../mongoSchema";
 
-type CenterDetailDto = {
+export type CenterDetailDto = {
   cohorts: string[];
   waitingList: any[];
   sessionStatus: any[];
