@@ -294,7 +294,7 @@ async function notifyYoungChangeCenter(ligneBusId: string) {
 }
 
 async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
-  const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
+  const templateId = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_CENTRE;
   const referentsClasse = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
   const referentsEtablissement = await getReferentEtablissement(classe.etablissementId);
   const emailTo = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];

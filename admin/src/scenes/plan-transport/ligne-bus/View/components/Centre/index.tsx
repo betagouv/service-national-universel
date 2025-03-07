@@ -26,7 +26,7 @@ const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
 
 export default function Centre({ bus, setBus, cohort }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const { mutate: mutateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
+  const { mutate: updateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
   const [isEditing, setIsEditing] = React.useState(false);
   const [openModal, setOpenModal] = React.useState(false);
   const {
@@ -46,9 +46,9 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   const disabled = !canEditLigneBusCenter(user) || !isBusEditionOpen(user, cohort);
 
   const tooltipMessage = !canEditLigneBusCenter(user)
-    ? "Vous n'avez pas les droits pour modifier ce centre de cohésion"
+    ? "Vous n'avez pas l'autorisation de modifier la destination d'une ligne de transport."
     : !isBusEditionOpen(user, cohort)
-      ? "La modification de ce centre de cohésion est fermée"
+      ? "La modification des lignes de transport est fermée sur ce séjour."
       : undefined;
 
   const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
@@ -61,7 +61,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
 
   function handleConfirm(data: CentreFormValues, sendCampaign?: boolean) {
     const payload = { ...data, sendCampaign };
-    mutateSessionSurLigneDeBus(payload, {
+    updateSessionSurLigneDeBus(payload, {
       onSuccess: (ligneInfo) => {
         setOpenModal(false);
         setBus(ligneInfo);
@@ -87,7 +87,6 @@ export default function Centre({ bus, setBus, cohort }: Props) {
             </div>
           )}
         />
-
         <Controller
           name="centerArrivalTime"
           control={control}
@@ -96,7 +95,6 @@ export default function Centre({ bus, setBus, cohort }: Props) {
             <Field label="Heure d’arrivée" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={errors.centerArrivalTime?.message} />
           )}
         />
-
         <Controller
           name="centerDepartureTime"
           control={control}
