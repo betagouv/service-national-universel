@@ -917,8 +917,8 @@ export class SimulationAffectationHTSService {
 
                 // on récupère les centres associés à la ligne de bus
                 const centre = centresTheorique.find((centre) => centre.id === currentLigne.centreId);
-                // on récupère les infos du centre si on ne les a pas déjà
-                if (centre && !centreNameList.includes(centre.nom || "")) {
+                // on récupère les infos du centre
+                if (centre) {
                     const sejour = sejourList.find((sejour) => sejour.centreId === centre.id);
                     const placesPrises = (sejour?.placesTotal || 0) - (sejour?.placesRestantes || 0);
                     centreNameList.push(centre.nom || "");
