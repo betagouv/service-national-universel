@@ -3,6 +3,9 @@ import { ConfigModule, ConfigService } from "@nestjs/config";
 import { BullModule } from "@nestjs/bullmq";
 import { Global, Module } from "@nestjs/common";
 import { QueueName } from "@shared/infra/Queue";
+import { BullBoardModule } from "@bull-board/nestjs";
+import { ExpressAdapter } from "@bull-board/express";
+import { BullMQAdapter } from "@bull-board/api/bullMQAdapter";
 
 @Global()
 @Module({
@@ -18,6 +21,10 @@ import { QueueName } from "@shared/infra/Queue";
                 lockDuration: 1000 * 60 * 5, // 5 minutes
             }),
         }),
+        BullBoardModule.forRoot({
+            route: "/queues",
+            adapter: ExpressAdapter, // Or FastifyAdapter from `@bull-board/fastify`
+        }),
         BullModule.registerQueue({
             name: QueueName.EMAIL,
         }),
@@ -26,6 +33,10 @@ import { QueueName } from "@shared/infra/Queue";
         }),
         BullModule.registerQueue({
             name: QueueName.ADMIN_TASK,
+        }),
+        BullBoardModule.forFeature({
+            name: QueueName.EMAIL,
+            adapter: BullMQAdapter,
         }),
     ],
     exports: [BullModule],
