@@ -28,6 +28,7 @@ import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gatew
 import { ClasseGateway } from "../../cle/classe/Classe.gateway";
 import { EtablissementGateway } from "../../cle/etablissement/Etablissement.gateway";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionName = "2025 CLE 03 Fevrier";
 
@@ -167,6 +168,13 @@ describe("SimulationAffectationCLE", () => {
                 {
                     provide: PlanDeTransportGateway,
                     useValue: {},
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeIsoDate: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
+                    },
                 },
             ],
         }).compile();
