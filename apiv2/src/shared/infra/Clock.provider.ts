@@ -21,8 +21,8 @@ export class ClockProvider implements ClockGateway {
     addDaysToNow(days: number): Date {
         return add(new Date(), { days });
     }
-    now({ timeZone }: { timeZone?: string } = { timeZone: "Europe/Paris" }) {
-        return getZonedDate(new Date(), timeZone);
+    now(options = { timeZone: "Europe/Paris" }) {
+        return getZonedDate(new Date(), options.timeZone);
     }
     isValidDate(date: Date): boolean {
         return !isNaN(new Date(date).getTime());
