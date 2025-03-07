@@ -26,6 +26,12 @@ export default function AffectationCLESimulationDromCom({ session }: Affectation
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "cle-dromcom", session._id], // check SimulationCleResultStartButton.tsx and AffectationCLESimulationDromComModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "CLE_DROMCOM"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "CLE";

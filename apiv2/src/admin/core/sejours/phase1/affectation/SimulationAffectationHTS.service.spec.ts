@@ -963,8 +963,8 @@ describe("SimulationAffectationHTSService", () => {
     });
 
     describe("verificationCentres", () => {
-        it("should return an array with modified values based on placesLeft and placesLigne", () => {
-            const nbPlacesDisponibleSurLignesApresAffectation = [20, 30, 40];
+        it("should return an array with modified values based on placesLeft and placesLigne (1)", () => {
+            const nbPlacesOccupeesSurLignesApresAffectation = [20, 30, 40];
             const placesLignes = [12, 18, 25];
             const ligneDep = ["ligne1", "ligne2", "ligne3"];
             const ligneDeBusList = [
@@ -982,7 +982,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const result = simulationAffectationHTSService.verificationCentres(
-                nbPlacesDisponibleSurLignesApresAffectation,
+                nbPlacesOccupeesSurLignesApresAffectation,
                 placesLignes,
                 ligneDep,
                 ligneDeBusList,
@@ -998,8 +998,8 @@ describe("SimulationAffectationHTSService", () => {
             expect(result[2]).toBeLessThanOrEqual(placesLignes[2]);
         });
 
-        it("should return an array with modified values based on placesLeft and placesLigne", () => {
-            const nbPlacesDisponibleSurLignesApresAffectation = [2, 3, 4];
+        it("should return an array with modified values based on placesLeft and placesLigne (2)", () => {
+            const nbPlacesOccupeesSurLignesApresAffectation = [2, 3, 4];
             const placesLignes = [12, 18, 25];
             const ligneDep = ["id1", "id2", "id3"];
             const ligneDeBusList = [
@@ -1015,7 +1015,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const result = simulationAffectationHTSService.verificationCentres(
-                nbPlacesDisponibleSurLignesApresAffectation,
+                nbPlacesOccupeesSurLignesApresAffectation,
                 placesLignes,
                 ligneDep,
                 ligneDeBusList,

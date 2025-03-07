@@ -26,6 +26,12 @@ export default function AffectationHTSSimulationMetropole({ session }: Affectati
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "hts", session._id], // check SimulationHtsResultStartButton.tsx and AffectationHTSSimulationMetropoleModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "HTS"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "VOLONTAIRE"; // HTS
