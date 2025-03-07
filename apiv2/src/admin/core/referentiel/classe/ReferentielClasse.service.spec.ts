@@ -81,7 +81,7 @@ describe("ReferentielClasseService", () => {
 
             fileGateway.parseXLS.mockResolvedValueOnce([{ someData: "test" }]).mockResolvedValueOnce([]);
             referentielService.getMissingColumns.mockReturnValueOnce([]);
-            clockGateway.getNowSafeIsoDate.mockReturnValueOnce(mockTimestamp);
+            clockGateway.formatSafeIsoDate.mockReturnValueOnce(mockTimestamp);
             fileGateway.uploadFile.mockResolvedValueOnce(mockS3Response as any);
             taskGateway.create.mockResolvedValueOnce({ id: "task-id" } as any);
 
@@ -106,7 +106,7 @@ describe("ReferentielClasseService", () => {
 
             fileGateway.parseXLS.mockResolvedValueOnce([]).mockResolvedValueOnce([{ someData: "test" }]);
             referentielService.getMissingColumns.mockReturnValueOnce([]);
-            clockGateway.getNowSafeIsoDate.mockReturnValueOnce(mockTimestamp);
+            clockGateway.formatSafeIsoDate.mockReturnValueOnce(mockTimestamp);
             fileGateway.uploadFile.mockResolvedValueOnce(mockS3Response as any);
             taskGateway.create.mockResolvedValueOnce({ id: "task-id" } as any);
 
@@ -135,7 +135,7 @@ describe("ReferentielClasseService", () => {
 
             referentielService.getMissingColumns.mockReturnValueOnce([]).mockReturnValueOnce([]);
 
-            clockGateway.getNowSafeIsoDate.mockReturnValueOnce(mockTimestamp);
+            clockGateway.formatSafeIsoDate.mockReturnValueOnce(mockTimestamp);
             fileGateway.uploadFile.mockResolvedValueOnce(mockS3Response as any);
             taskGateway.create.mockResolvedValueOnce({ id: "task-id" } as any);
 
@@ -179,7 +179,7 @@ describe("ReferentielClasseService", () => {
             const mockS3Response = { Key: "report-key" };
 
             fileGateway.generateExcel.mockResolvedValueOnce(Buffer.from("test"));
-            clockGateway.getNowSafeIsoDate.mockReturnValueOnce(mockTimestamp);
+            clockGateway.formatSafeIsoDate.mockReturnValueOnce(mockTimestamp);
             fileGateway.uploadFile.mockResolvedValueOnce(mockS3Response as any);
 
             const result = await service.processReport(mockParams, mockReport);
