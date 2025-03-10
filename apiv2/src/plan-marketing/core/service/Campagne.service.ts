@@ -27,4 +27,5 @@ export class CampagneService {
         }
         return this.campagneGateway.update(campagne);
     }
+
 }
