@@ -11,14 +11,12 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  STAGING_ENV_NAME: staging
   PROD_ENV_NAME: production
 
 jobs:
   prepare:
     runs-on: ubuntu-latest
     outputs:
-      staging_registry: ${{ steps.registry.outputs.staging_registry }}
       prod_registry: ${{ steps.registry.outputs.prod_registry }}
       build_matrix: ${{ steps.config.outputs.build }}
       deploy_matrix: ${{ steps.config.outputs.deploy }}
@@ -42,10 +40,6 @@ jobs:
           SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
           SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
         run: |
-          staging_registry=$(node get-docker-registry.js ${{ env.STAGING_ENV_NAME }})
-          echo "staging_registry: $staging_registry"
-          echo "staging_registry=$staging_registry" >> $GITHUB_OUTPUT
-
           prod_registry=$(node get-docker-registry.js ${{ env.PROD_ENV_NAME }})
           echo "prod_registry: $prod_registry"
           echo "prod_registry=$prod_registry" >> $GITHUB_OUTPUT
@@ -124,62 +118,26 @@ jobs:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  build_staging:
-    needs: [prepare, test]
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.build_matrix) }}
-
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Login to Docker Container Registry
-        uses: docker/login-action@v2
-        with:
-          username: nologin
-          password: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-          registry: ${{ needs.prepare.outputs.staging_registry }}
-
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
-
-      - name: Build image
-        working-directory: devops/scripts
-        env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-        run: |
-          node build-application-docker.js --push ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
-
   deploy_staging:
-    needs: [prepare, build_staging]
+    needs: test
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
 
     steps:
       - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+      - name: Install clever-tools
+        run: npm install -g clever-tools
 
-      - name: Deploy image on Scaleway
-        working-directory: devops/scripts
+      - name: Merge production in deploy-staging
+        run: git push --force origin HEAD:deploy-staging
+
+      - name: Watch deployment
         env:
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
-        run: |
-          node deploy-scaleway.js ${{ env.STAGING_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
+          ORGANIZATION_ID: ${{ vars.CC_ORGANIZATION_ID }}
+          APPLICATION_ID: ${{ vars.CC_APP_ID_STAGING_SNU_ALL }}
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: ./devops/scripts/cc-watch-deploy.sh
 
   build_production:
     needs: [prepare, test]
