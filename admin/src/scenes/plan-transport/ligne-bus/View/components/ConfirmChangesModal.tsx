@@ -33,7 +33,7 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
   }
 
-  const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.CHANGE_PDR;
+  const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_PDR;
 
   const handleConfirm = () => {
     onConfirm(isEmailing);
