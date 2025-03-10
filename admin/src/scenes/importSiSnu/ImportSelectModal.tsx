@@ -44,6 +44,18 @@ export default function ImportSelectModal({ onSuccess, onClose }: ImportSelectMo
       value: ReferentielTaskType.IMPORT_ROUTES,
       label: "Routes",
     },
+    {
+      value: ReferentielTaskType.IMPORT_DEPARTEMENTS,
+      label: "Départements",
+    },
+    {
+      value: ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES,
+      label: "Régions académiques",
+    },
+    {
+      value: ReferentielTaskType.IMPORT_ACADEMIES,
+      label: "Académies",
+    },
   ];
 
   const { isPending, mutate, error, reset } = useMutation<ReferentielRoutes["Import"]["response"], HttpError>({

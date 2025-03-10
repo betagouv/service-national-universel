@@ -6,6 +6,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { ReferentielTaskType, TaskName, TaskStatus } from "snu-lib";
 import { TaskModel } from "@task/core/Task.model";
 import { ReferentielImportTaskAuthor } from "./ReferentielImportTask.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const REQUIRED_COLUMN_NAMES = [
     "Session formule",
@@ -24,6 +25,7 @@ export class ReferentielRoutesService {
     constructor(
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
 
     async import({
@@ -53,7 +55,7 @@ export class ReferentielRoutesService {
         }
 
         // save file to s3
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const s3File = await this.fileGateway.uploadFile(`file/admin/referentiel/routes/${timestamp}_${fileName}`, {
             data: buffer,
             mimetype,

@@ -4,6 +4,7 @@ import { DesistementService } from "./Desistement.service";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { DesisterTaskResult } from "snu-lib";
 import { JeuneService } from "../../jeune/Jeune.service";
+import { JeuneModel } from "../../jeune/Jeune.model";
 
 export class DesisterPostAffectation implements UseCase<DesisterTaskResult> {
     constructor(

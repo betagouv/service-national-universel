@@ -55,10 +55,10 @@ export default function useReactSelectTheme({
         cursor: "pointer",
         fontWeight: isSelected ? "700" : "400",
         ":hover": {
-          backgroundColor: "#f3f4f6",
+          background: "#e5e7eb",
         },
         ...(isFocused && {
-          backgroundColor: "#f3f4f6",
+          backgroundColor: "#e5e7eb",
         }),
         ...(optionCustomStyle || {}),
       };

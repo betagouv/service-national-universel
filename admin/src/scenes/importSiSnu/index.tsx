@@ -45,6 +45,8 @@ export default function ImportSiSnu() {
   } = useQuery<ReferentielRoutes["GetImports"]["response"]>({
     queryKey: ["import-si-snu", filters, sort, lastTask],
     queryFn: async () => ReferentielService.getImports({ name: TaskName.REFERENTIEL_IMPORT, sort }),
+    refetchInterval: 3000,
+    enabled: !showModal,
   });
   const importRows: ImportFileRow[] = useMemo<ImportFileRow[]>(() => {
     return (

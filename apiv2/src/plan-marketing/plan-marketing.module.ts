@@ -17,10 +17,15 @@ import { CampagneMongoRepository } from "./infra/CampagneMongo.repository";
 import { campagneMongoProviders } from "./infra/CampagneMongo.provider";
 import { CampagneController } from "./infra/api/Campagne.controller";
 import { CampagneService } from "./core/service/Campagne.service";
+import { ListeDiffusionController } from "./infra/api/ListeDiffusion.controller";
+import { ListeDiffusionService } from "./core/service/ListeDiffusion.service";
+import { ListeDiffusionGateway } from "./core/gateway/ListeDiffusion.gateway";
+import { ListeDiffusionMongoRepository } from "./infra/ListeDiffusionMongo.repository";
+import { listeDiffusionMongoProviders } from "./infra/ListeDiffusion.provider";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule],
-    controllers: [PlanMarketingController, CampagneController],
+    controllers: [PlanMarketingController, CampagneController, ListeDiffusionController],
     providers: [
         Logger,
         ImporterEtCreerListeDiffusion,
@@ -28,6 +33,7 @@ import { CampagneService } from "./core/service/Campagne.service";
         PlanMarketingActionSelectorService,
         planMarketingFactory,
         CampagneService,
+        ListeDiffusionService,
         {
             provide: TaskGateway,
             useClass: TaskRepository,
@@ -40,8 +46,13 @@ import { CampagneService } from "./core/service/Campagne.service";
             provide: CampagneGateway,
             useClass: CampagneMongoRepository,
         },
+        {
+            provide: ListeDiffusionGateway,
+            useClass: ListeDiffusionMongoRepository,
+        },
         ...taskMongoProviders,
         ...campagneMongoProviders,
+        ...listeDiffusionMongoProviders,
     ],
 })
 export class PlanMarketingModule {}
