@@ -19,7 +19,7 @@ export class ClockProvider implements ClockGateway {
         if (options?.timeZone) {
             return this.getZonedDate(new Date(), options.timeZone);
         } else {
-            return new Date(); // UTC
+            return this.getZonedDate(new Date(), "UTC");
         }
     }
     getZonedDate(date: Date, timeZone: string = "Europe/Paris") {
