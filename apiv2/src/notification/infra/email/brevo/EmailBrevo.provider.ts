@@ -39,14 +39,16 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         let sendSmtpEmail = new brevo.SendSmtpEmail();
 
-        let attachments: SendSmtpEmailAttachmentInner[] = [];
+        const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail };
+
         if (emailParams.attachments && emailParams.attachments.length > 0) {
+            let attachments: SendSmtpEmailAttachmentInner[] = [];
             for (const attachment of emailParams.attachments) {
                 const file = await this.fileGateway.downloadFile(attachment.filePath);
                 attachments.push({ content: file.Body.toString("base64"), name: file.FileName });
             }
+            smtpEmailWithData.attachment = attachments;
         }
-        const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail, attachment: attachments };
 
         return await this.emailsApi.sendTransacEmail(smtpEmailWithData);
     }

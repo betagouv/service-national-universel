@@ -55,10 +55,10 @@ export default function useReactSelectTheme({
         cursor: "pointer",
         fontWeight: isSelected ? "700" : "400",
         ":hover": {
-          backgroundColor: "#f3f4f6",
+          background: "#e5e7eb",
         },
         ...(isFocused && {
-          backgroundColor: "#f3f4f6",
+          backgroundColor: "#e5e7eb",
         }),
         ...(optionCustomStyle || {}),
       };
@@ -110,7 +110,7 @@ export default function useReactSelectTheme({
     menu: (styles) => ({
       ...styles,
       border: "none",
-      boxShadow: "0px 0px 8px 0px rgba(0, 0, 0, 0.08)",
+      boxShadow: "0px 0px 12px 0px rgba(0, 0, 0, 0.25)",
       "&:hover": {
         border: "none",
       },

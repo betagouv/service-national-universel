@@ -26,6 +26,12 @@ export default function AffectationHTSSimulationMetropole({ session }: Affectati
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "hts", session._id], // check SimulationHtsResultStartButton.tsx and AffectationHTSSimulationMetropoleModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "HTS"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "VOLONTAIRE"; // HTS
@@ -35,7 +41,7 @@ export default function AffectationHTSSimulationMetropole({ session }: Affectati
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Affectation HTS (Metropole, hors Corse)</div>
-        <Tooltip id="affectation-hts-metropole" title="Affectation HTS (Metropole, hors Corse)">
+        <Tooltip title="Permet d’effectuer les simulations et les affectations des jeunes HTS pour les cohortes de métropole (hors Corse)">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}

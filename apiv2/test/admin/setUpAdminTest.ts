@@ -8,56 +8,54 @@ import { ClsModule } from "nestjs-cls";
 
 import { QueueName } from "@shared/infra/Queue";
 
-import { NotificationModule } from "@notification/Notification.module";
-import { QueueModule } from "@infra/Queue.module";
 import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
+import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
+import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
+import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
+import { historyProvider } from "@admin/infra/history/historyProvider";
 import { AuthController } from "@admin/infra/iam/api/Auth.controller";
 import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
 import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.provider";
+import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
+import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academie.provider";
+import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
+import { referentielGatewayProviders } from "@admin/infra/referentiel/initProvider/gateway";
+import { regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
 import { ClasseController } from "@admin/infra/sejours/cle/classe/api/Classe.controller";
 import { classeMongoProviders } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { etablissementMongoProviders } from "@admin/infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders as cleGatewayProviders } from "@admin/infra/sejours/cle/initProvider/gateway";
-import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
-import { gatewayProviders as jeuneGatewayProviders } from "@admin/infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "@admin/infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
-import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
-import { testDatabaseProviders } from "../testDatabaseProvider";
-import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
-import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
+import { gatewayProviders as jeuneGatewayProviders } from "@admin/infra/sejours/jeune/initProvider/gateway";
 import { jeuneMongoProviders } from "@admin/infra/sejours/jeune/provider/JeuneMongo.provider";
+import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
+import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
 import { centreMongoProviders } from "@admin/infra/sejours/phase1/centre/provider/CentreMongo.provider";
+import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
+import { gatewayProviders as sejourGatewayProviders } from "@admin/infra/sejours/phase1/initProvider/gateway";
+import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
+import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
+import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { ligneDeBusMongoProviders } from "@admin/infra/sejours/phase1/ligneDeBus/provider/LigneDeBusMongo.provider";
+import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { pointDeRassemblementMongoProviders } from "@admin/infra/sejours/phase1/pointDeRassemblement/provider/PointDeRassemblementMongo.provider";
+import { segmentDeLigneMongoProviders } from "@admin/infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { sejourMongoProviders } from "@admin/infra/sejours/phase1/sejour/provider/SejourMongo.provider";
 import { sessionMongoProviders } from "@admin/infra/sejours/phase1/session/provider/SessionMongo.provider";
-import { FileProvider } from "@shared/infra/File.provider";
-import { FileGateway } from "@shared/core/File.gateway";
-import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminTaskRepository } from "@admin/infra/task/AdminTaskMongo.repository";
-import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
-import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
-import { serviceProvider } from "@admin/infra/iam/service/serviceProvider";
-import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
-import { planDeTransportMongoProviders } from "@admin/infra/sejours/phase1/planDeTransport/provider/PlanDeTransportMongo.provider";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
-import { historyProvider } from "@admin/infra/history/historyProvider";
-import { referentielGatewayProviders } from "@admin/infra/referentiel/initProvider/gateway";
-import { ImportReferentielController } from "@admin/infra/referentiel/api/ImportReferentiel.controller";
-import { regionAcademiqueMongoProviders } from "@admin/infra/referentiel/regionAcademique/RegionAcademiqueMongo.provider";
-import { ReferentielImportTaskService } from "@admin/core/referentiel/ReferentielImportTask.service";
-import { segmentDeLigneMongoProviders } from "@admin/infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
-import { demandeModificationLigneDeBusMongoProviders } from "@admin/infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
-import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
-import { academieMongoProviders } from "@admin/infra/referentiel/academie/Academie.provider";
-import { departementMongoProviders } from "@admin/infra/referentiel/departement/DepartementMongo.provider";
-import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
-import { BasculeJeuneValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
-import { BasculeJeuneNonValidesController } from "@admin/infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
-import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
+import { QueueModule } from "@infra/Queue.module";
+import { NotificationModule } from "@notification/Notification.module";
+import { FileGateway } from "@shared/core/File.gateway";
+import { FileProvider } from "@shared/infra/File.provider";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
+import { testDatabaseProviders } from "../testDatabaseProvider";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -65,6 +63,17 @@ export interface SetupOptions {
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
+}));
+
+jest.mock("@bull-board/nestjs", () => ({
+    BullBoardModule: {
+        forRootAsync: () => ({
+            module: class BullBoardModule {},
+        }),
+        forFeature: () => ({
+            module: class BullBoardFeatureModule {},
+        }),
+    },
 }));
 
 let adminTestModule: TestingModule;

@@ -45,13 +45,19 @@ export class ValiderAffectationCLEService {
         return null;
     }
 
-    formatJeuneRapport(
-        jeune: JeuneModel,
-        sejour?: SejourModel,
-        ligneDeBus?: LigneDeBusModel,
-        pdr?: PointDeRassemblementModel,
+    formatJeuneRapport({
+        jeune,
+        sejour,
+        ligneDeBus,
+        pdr,
         erreur = "",
-    ) {
+    }: {
+        jeune: JeuneModel;
+        sejour?: SejourModel;
+        ligneDeBus?: LigneDeBusModel;
+        pdr?: PointDeRassemblementModel;
+        erreur?: string;
+    }) {
         return {
             id: jeune.id,
             statut: jeune.statut,
@@ -67,13 +73,13 @@ export class ValiderAffectationCLEService {
             classeId: jeune.classeId,
             ...(jeune.ligneDeBusId
                 ? {
-                      ligneDeBusId: jeune.ligneDeBusId || "",
+                      ligneDeBusId: jeune.ligneDeBusId,
                       ligneDeBusNumeroLigne: ligneDeBus?.numeroLigne || "",
                   }
                 : {}),
             ...(jeune.pointDeRassemblementId
                 ? {
-                      pointDeRassemblementId: jeune.pointDeRassemblementId || "",
+                      pointDeRassemblementId: jeune.pointDeRassemblementId,
                       pointDeRassemblementMatricule: pdr?.matricule || "",
                   }
                 : {}),

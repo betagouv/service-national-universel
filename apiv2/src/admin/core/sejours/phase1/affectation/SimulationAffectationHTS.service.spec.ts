@@ -102,7 +102,7 @@ describe("SimulationAffectationHTSService", () => {
                 ligneDeBusList,
             );
             expect(result).toEqual({
-                changementDepartements: [
+                changementsDepartement: [
                     {
                         origine: "Seine-Saint-Denis",
                         destination: [
@@ -115,7 +115,7 @@ describe("SimulationAffectationHTSService", () => {
                         ],
                     },
                 ],
-                changementDepartementsErreurs: [],
+                changementsDepartementErreurs: [],
             });
         });
     });
@@ -175,13 +175,13 @@ describe("SimulationAffectationHTSService", () => {
                 { centreId: "3", placesRestantes: 2, placesTotal: 10 },
             ] as SejourModel[];
 
-            const lignesList = [
+            const ligneList = [
                 { centreId: "1", placesOccupeesJeunes: 2, capaciteJeunes: 10 },
                 { centreId: "1", placesOccupeesJeunes: 3, capaciteJeunes: 10 },
                 { centreId: "2", placesOccupeesJeunes: 5, capaciteJeunes: 10 },
             ] as LigneDeBusModel[];
 
-            const result = simulationAffectationHTSService.calculTauxRemplissageParCentre(sejourList, lignesList);
+            const result = simulationAffectationHTSService.calculTauxRemplissageParCentre({ sejourList, ligneList });
 
             expect(result).toEqual({
                 centreIdList: ["1", "2", "3"],
@@ -193,9 +193,9 @@ describe("SimulationAffectationHTSService", () => {
         it("should calculate the filling rate per center correctly (0%)", () => {
             const sejourList = [{ centreId: "1", placesRestantes: 10, placesTotal: 10 }] as SejourModel[];
 
-            const lignesList = [{ centreId: "1", placesOccupeesJeunes: 10, capaciteJeunes: 10 }] as LigneDeBusModel[];
+            const ligneList = [{ centreId: "1", placesOccupeesJeunes: 10, capaciteJeunes: 10 }] as LigneDeBusModel[];
 
-            const result = simulationAffectationHTSService.calculTauxRemplissageParCentre(sejourList, lignesList);
+            const result = simulationAffectationHTSService.calculTauxRemplissageParCentre({ sejourList, ligneList });
 
             expect(result).toEqual({
                 centreIdList: ["1"],
@@ -737,12 +737,11 @@ describe("SimulationAffectationHTSService", () => {
                 },
             ] as LigneDeBusModel[];
 
-            const result = simulationAffectationHTSService.calculDistributionAffectations(
+            const result = simulationAffectationHTSService.calculDistributionAffectations({
                 jeunesList,
                 pdrList,
                 ligneDeBusList,
-                [],
-            );
+            });
 
             expect(result).toEqual({
                 departementList: ["75", "92"],
@@ -808,7 +807,7 @@ describe("SimulationAffectationHTSService", () => {
 
             // sans changement de département
             expect(
-                simulationAffectationHTSService.calculDistributionAffectations(jeunesList, pdrList, ligneDeBusList, []),
+                simulationAffectationHTSService.calculDistributionAffectations({ jeunesList, pdrList, ligneDeBusList }),
             ).toEqual({
                 departementList: ["Paris", "Seine-Saint-Denis"],
                 centreIdListParLigne: [["center1", "center1", "center1", "center1"], ["center2"]],
@@ -836,12 +835,12 @@ describe("SimulationAffectationHTSService", () => {
 
             // avec changement de département (ligne1 dédiée au 93)
             expect(
-                simulationAffectationHTSService.calculDistributionAffectations(
+                simulationAffectationHTSService.calculDistributionAffectations({
                     jeunesList,
                     pdrList,
                     ligneDeBusList,
                     changementsDepartement,
-                ),
+                }),
             ).toEqual({
                 departementList: ["Paris", "Seine-Saint-Denis"],
                 centreIdListParLigne: [
@@ -888,12 +887,12 @@ describe("SimulationAffectationHTSService", () => {
                 },
             ] as ChangementDepartement[];
             expect(
-                simulationAffectationHTSService.calculDistributionAffectations(
+                simulationAffectationHTSService.calculDistributionAffectations({
                     jeunesList,
                     pdrList,
                     ligneDeBusList,
                     changementsDepartement,
-                ),
+                }),
             ).toEqual({
                 departementList: ["Paris", "Seine-Saint-Denis"],
                 centreIdListParLigne: [
@@ -964,8 +963,8 @@ describe("SimulationAffectationHTSService", () => {
     });
 
     describe("verificationCentres", () => {
-        it("should return an array with modified values based on placesLeft and placesLigne", () => {
-            const nbPlacesDisponibleSurLignesApresAffectation = [20, 30, 40];
+        it("should return an array with modified values based on placesLeft and placesLigne (1)", () => {
+            const nbPlacesOccupeesSurLignesApresAffectation = [20, 30, 40];
             const placesLignes = [12, 18, 25];
             const ligneDep = ["ligne1", "ligne2", "ligne3"];
             const ligneDeBusList = [
@@ -983,7 +982,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const result = simulationAffectationHTSService.verificationCentres(
-                nbPlacesDisponibleSurLignesApresAffectation,
+                nbPlacesOccupeesSurLignesApresAffectation,
                 placesLignes,
                 ligneDep,
                 ligneDeBusList,
@@ -999,8 +998,8 @@ describe("SimulationAffectationHTSService", () => {
             expect(result[2]).toBeLessThanOrEqual(placesLignes[2]);
         });
 
-        it("should return an array with modified values based on placesLeft and placesLigne", () => {
-            const nbPlacesDisponibleSurLignesApresAffectation = [2, 3, 4];
+        it("should return an array with modified values based on placesLeft and placesLigne (2)", () => {
+            const nbPlacesOccupeesSurLignesApresAffectation = [2, 3, 4];
             const placesLignes = [12, 18, 25];
             const ligneDep = ["id1", "id2", "id3"];
             const ligneDeBusList = [
@@ -1016,7 +1015,7 @@ describe("SimulationAffectationHTSService", () => {
             ] as SejourModel[];
 
             const result = simulationAffectationHTSService.verificationCentres(
-                nbPlacesDisponibleSurLignesApresAffectation,
+                nbPlacesOccupeesSurLignesApresAffectation,
                 placesLignes,
                 ligneDep,
                 ligneDeBusList,
@@ -1165,7 +1164,7 @@ describe("SimulationAffectationHTSService", () => {
             const jeunesAvantAffectationList = jeunesList.slice(1);
             const jeuneIntraDepartementList = jeunesList.slice(0, 1);
 
-            const result = simulationAffectationHTSService.calculRapportAffectation(
+            const result = simulationAffectationHTSService.calculRapportAffectation({
                 jeunesList,
                 sejourList,
                 ligneDeBusList,
@@ -1173,16 +1172,14 @@ describe("SimulationAffectationHTSService", () => {
                 pdrList,
                 jeunesAvantAffectationList,
                 jeuneIntraDepartementList,
-                {
+                distributionJeunesDepartement: {
                     departementList: [],
                     jeuneIdListParDepartement: [],
                     ligneIdListParDepartement: [],
                     centreIdListParLigne: [],
                     placesDisponiblesParLigne: [],
                 },
-                [],
-                [],
-                {
+                analytics: {
                     selectedCost: 1e3,
                     tauxRepartitionCentreList: [],
                     centreIdList: [],
@@ -1193,7 +1190,8 @@ describe("SimulationAffectationHTSService", () => {
                     jeunesDejaAffected: 0,
                     jeunesNouvellementAffected: 0,
                 },
-            );
+                type: "HTS",
+            });
 
             // assertions
             expect(result.jeunesNouvellementAffectedList).toBeInstanceOf(Array);

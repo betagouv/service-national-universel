@@ -21,7 +21,7 @@ export class CampagneService {
 
     async updateCampagne(campagne: CampagneModel) {
         const template = await this.PlanMarketingGateway.findTemplateById(campagne.templateId);
-        console.log("template", template);
+
         if (!template) {
             throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
         }

@@ -2,7 +2,7 @@ import { Inject, Logger } from "@nestjs/common";
 import { ClsService } from "nestjs-cls";
 import { Transactional } from "@nestjs-cls/transactional";
 
-import { MIME_TYPES, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { MIME_TYPES, YOUNG_STATUS_PHASE1 } from "snu-lib";
 
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -11,17 +11,13 @@ import { TaskGateway } from "@task/core/Task.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
-import { SejourGateway } from "../sejour/Sejour.gateway";
-
 import { SimulationAffectationCLETaskModel } from "./SimulationAffectationCLETask.model";
 import { RAPPORT_SHEETS, RapportData } from "./SimulationAffectationCLE.service";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
-import { SejourModel } from "../sejour/Sejour.model";
 import { ValiderAffectationCLETaskParameters } from "./ValiderAffectationCLETask.model";
-import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
-import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -83,8 +79,8 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         @Inject(ValiderAffectationCLEService) private validerAffectationCLEService: ValiderAffectationCLEService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -135,8 +131,9 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
             const erreur = this.validerAffectationCLEService.checkValiderAffectation(jeuneRapport, jeune, sejour);
             if (erreur) {
                 rapportData.push(
-                    this.validerAffectationCLEService.formatJeuneRapport(jeune, sejour, ligneDeBus, pdr, erreur),
+                    this.validerAffectationCLEService.formatJeuneRapport({ jeune, sejour, ligneDeBus, pdr, erreur }),
                 );
+                analytics.errors += 1;
                 continue;
             }
 
@@ -195,7 +192,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
             jeunesUpdatedList.push(jeuneUpdated);
             rapportData.push(
-                this.validerAffectationCLEService.formatJeuneRapport(jeuneUpdated, sejour, ligneDeBus, pdr),
+                this.validerAffectationCLEService.formatJeuneRapport({ jeune: jeuneUpdated, sejour, ligneDeBus, pdr }),
             );
             analytics.jeunesAffected += 1;
         }
@@ -206,11 +203,11 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
 
         // mise à jour des placesRestantes dans les centres
         this.logger.log(`Mise à jour des places dans les séjours`);
-        await this.sejoursGateway.bulkUpdate(sejoursList);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejoursList);
 
         // mise à jour des placesOccupeesJeunes dans les bus
         this.logger.log(`Mise à jour des places dans les lignes de bus et PDT`);
-        await this.affectationService.syncPlaceDisponiblesLigneDeBus(ligneDeBusList);
+        await this.affectationService.syncPlacesDisponiblesLignesDeBus(ligneDeBusList);
 
         this.cls.set("user", null);
 
@@ -218,7 +215,7 @@ export class ValiderAffectationCLE implements UseCase<ValiderAffectationCLEResul
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
 
         // upload du rapport du s3
-        const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(dateAffectation);
         const fileName = `affectation-cle/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

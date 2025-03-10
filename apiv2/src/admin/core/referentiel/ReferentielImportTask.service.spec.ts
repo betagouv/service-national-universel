@@ -23,7 +23,8 @@ describe("ReferentielImportTaskService", () => {
                 {
                     provide: ClockGateway,
                     useValue: {
-                        getNowSafeIsoDate: jest.fn().mockReturnValue("2024-07-31T00:00:00.000Z"),
+                        now: jest.fn().mockReturnValue(new Date("2024-07-31T00:00:00.000Z")),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2024-07-31T00:00:00.000Z"),
                     },
                 },
                 {
@@ -46,9 +47,8 @@ describe("ReferentielImportTaskService", () => {
         [REGION_ACADEMIQUE_COLUMN_NAMES[0]]: "BRE",
         [REGION_ACADEMIQUE_COLUMN_NAMES[1]]: "BRETAGNE",
         [REGION_ACADEMIQUE_COLUMN_NAMES[2]]: "A",
-        [REGION_ACADEMIQUE_COLUMN_NAMES[3]]: "31/07/2024"
+        [REGION_ACADEMIQUE_COLUMN_NAMES[3]]: "31/07/2024",
     };
-    
 
     describe("import", () => {
         const mockAuteur = {
@@ -90,10 +90,10 @@ describe("ReferentielImportTaskService", () => {
                     "Session : Désignation de la session": "",
                     "Session : Date de début de la session": "",
                     "Session : Date de fin de la session": "",
-                   // Route: "",
+                    // Route: "",
                     "Code point de rassemblement initial": "",
                     "Point de rassemblement initial": "",
-                }
+                },
             ]);
             await expect(
                 referentielImportTaskService.import({
@@ -112,11 +112,9 @@ describe("ReferentielImportTaskService", () => {
             ).rejects.toThrow(new FunctionalException(FunctionalExceptionCode.IMPORT_MISSING_COLUMN));
         });
 
-        
-
         it("should import file with valid columns", async () => {
             jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([regionAcademiqueRecord]);
-            
+
             await referentielImportTaskService.import({
                 importType: ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES,
                 fileName: "fileName",
@@ -163,9 +161,12 @@ describe("ReferentielImportTaskService", () => {
 
             jest.spyOn(fileGateway, "parseXLS").mockResolvedValue([partialData]);
 
-            await expect(referentielImportTaskService.import(mockImportParams))
-                .rejects
-                .toThrow(new FunctionalException(FunctionalExceptionCode.IMPORT_MISSING_COLUMN, "Zone région académique édition"));
+            await expect(referentielImportTaskService.import(mockImportParams)).rejects.toThrow(
+                new FunctionalException(
+                    FunctionalExceptionCode.IMPORT_MISSING_COLUMN,
+                    "Zone région académique édition",
+                ),
+            );
         });
     });
 });

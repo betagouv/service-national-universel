@@ -73,7 +73,7 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
       className="md:max-w-[800px]"
       content={
         <div className="scroll-y-auto overflow-y-auto max-h-[80vh]">
-          <div className="flex flex-col items-center text-center gap-6 mb-8">
+          <div className="flex flex-col items-center text-center gap-5 mb-8">
             <div className="flex items-center">
               <div className="flex items-center justify-center w-12 h-12 rounded-full bg-gray-50">
                 <HiOutlineLightningBolt className="w-6 h-6" />
@@ -83,6 +83,7 @@ export default function AffectationHTSSimulationMetropoleModal({ session, onClos
             <p className="text-lg">
               La simulation se basera sur le schéma de répartition suivant : <b>{isLoadingImports ? "..." : sdrImport?.metadata?.parameters?.fileName || "--"}</b>
             </p>
+            <p className="py-3 px-4 text-sm leading-5 font-medium bg-amber-50 text-amber-600">Les HZR concernés par ce séjour seront pris en compte dans la simulation</p>
           </div>
           <div className="flex items-start flex-col w-full gap-8">
             <div className="flex flex-col w-full gap-2.5">

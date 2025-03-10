@@ -19,6 +19,7 @@ import { CentreGateway } from "../centre/Centre.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
 import { AffectationService } from "./Affectation.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 // TODO: déplacer dans un paramétrage dynamique
 const NB_MAX_ITERATION = 300;
@@ -46,6 +47,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -78,7 +80,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
             throw new FunctionalException(FunctionalExceptionCode.AFFECTATION_NOT_ENOUGH_DATA, "Aucun jeune !");
         }
 
-        const { changementDepartements, changementDepartementsErreurs } =
+        const { changementsDepartement, changementsDepartementErreurs } =
             await this.simulationAffectationHTSService.getChangementsDepartements(
                 sdrImportId,
                 centreList,
@@ -116,12 +118,12 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         );
 
         // on sépare pour chaque departement : les jeunes / pdr / lignes de bus / centre
-        const distributionJeunesDepartement = this.simulationAffectationHTSService.calculDistributionAffectations(
-            jeuneAttenteAffectationList,
+        const distributionJeunesDepartement = this.simulationAffectationHTSService.calculDistributionAffectations({
+            jeunesList: jeuneAttenteAffectationList,
             pdrList,
             ligneDeBusList,
-            changementDepartements,
-        );
+            changementsDepartement,
+        });
 
         const results: Omit<SimulationAffectationHTSResult, "rapportData" | "rapportFile"> = {
             jeuneList: [],
@@ -164,10 +166,10 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
                 tauxRemplissageCentres,
                 tauxOccupationLignesParCentreList,
                 centreIdList: centreIdTmp,
-            } = this.simulationAffectationHTSService.calculTauxRemplissageParCentre(
-                randomSejourList,
-                randomLigneDeBusList,
-            );
+            } = this.simulationAffectationHTSService.calculTauxRemplissageParCentre({
+                sejourList: randomSejourList,
+                ligneList: randomLigneDeBusList,
+            });
 
             const coutSimulation = this.simulationAffectationHTSService.calculCoutSimulation(
                 tauxRepartitionCentres,
@@ -212,23 +214,24 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         }
 
         // Calcul des données pour le rapport excel
-        const rapportData = this.simulationAffectationHTSService.calculRapportAffectation(
-            results.jeuneList,
-            results.sejourList,
-            results.ligneDeBusList,
+        const rapportData = this.simulationAffectationHTSService.calculRapportAffectation({
+            jeunesList: results.jeuneList,
+            sejourList: results.sejourList,
+            ligneDeBusList: results.ligneDeBusList,
             centreList,
             pdrList,
-            jeunesList,
+            jeunesAvantAffectationList: jeunesList,
             jeuneIntraDepartementList,
             distributionJeunesDepartement,
-            changementDepartements,
-            changementDepartementsErreurs,
-            results.analytics,
-        );
+            changementsDepartement,
+            changementsDepartementErreurs,
+            analytics: results.analytics,
+            type: "HTS",
+        });
 
-        const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData);
+        const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData, "HTS");
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-affectation-hts/affectation_simulation_hts_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

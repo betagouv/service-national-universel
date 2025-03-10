@@ -115,11 +115,11 @@ describe("AffectationController - CLE DROMCOM", () => {
         });
     });
 
-    describe("POST /affectation/:id/simulation/:taskId/valider/cle", () => {
+    describe("POST /affectation/:id/simulation/:taskId/valider/cle-dromcom", () => {
         it("should return 422 for invalid task (pending)", async () => {
             const session = await createSession();
             const task = await createTask({
-                name: TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+                name: TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
                 status: TaskStatus.PENDING,
                 metadata: {
                     parameters: {
@@ -129,7 +129,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${task.id}/valider/cle`,
+                `/affectation/${session.id}/simulation/${task.id}/valider/cle-dromcom`,
             );
 
             expect(response.status).toBe(422);
@@ -154,9 +154,9 @@ describe("AffectationController - CLE DROMCOM", () => {
                 lastCompletedAt: addHours(new Date(), -1),
             });
 
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider/cle`)
-                .send({ affecterPDR: true });
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+            );
 
             expect(response.status).toBe(422);
         });
@@ -180,9 +180,9 @@ describe("AffectationController - CLE DROMCOM", () => {
                 lastCompletedAt: addHours(new Date(), -2),
             });
 
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/${simuTask.id}/valider/cle`)
-                .send({ affecterPDR: true });
+            const response = await request(app.getHttpServer()).post(
+                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+            );
 
             expect(response.status).toBe(201);
         });

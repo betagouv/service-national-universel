@@ -26,6 +26,12 @@ export default function AffectationCLESimulationDromCom({ session }: Affectation
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "cle-dromcom", session._id], // check SimulationCleResultStartButton.tsx and AffectationCLESimulationDromComModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "CLE_DROMCOM"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "CLE";
@@ -35,7 +41,7 @@ export default function AffectationCLESimulationDromCom({ session }: Affectation
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
         <div className="text-sm leading-5 font-bold">Affectation CLE (DROM COM et Corse)</div>
-        <Tooltip id="affectation-cle-dromcom" title="Affectation CLE (DROM COM et Corse)">
+        <Tooltip title="Permet d’effectuer les simulations et les affectations des jeunes CLE pour les cohortes DROM COM et Corse">
           <HiOutlineInformationCircle className="text-gray-400" size={20} />
         </Tooltip>
         {isInProgress && <div className="text-xs leading-4 font-normal text-orange-500 italic">Simulation en cours...</div>}

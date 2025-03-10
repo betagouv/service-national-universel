@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, Inject, Logger, Param, Post, Request, UseGuards } from "@nestjs/common";
 
 import {
     AffectationRoutes,
@@ -8,6 +8,9 @@ import {
     ValiderAffectationHTSTaskParameters,
     SimulationAffectationCLETaskParameters,
     ValiderAffectationCLETaskParameters,
+    SimulationAffectationHTSDromComTaskParameters,
+    ValiderAffectationHTSDromComTaskParameters,
+    ValiderAffectationCLEDromComTaskParameters,
 } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
@@ -18,6 +21,7 @@ import { CustomRequest } from "@shared/infra/CustomRequest";
 import {
     PostSimulationsCleDromcomPayloadDto,
     PostSimulationsClePayloadDto,
+    PostSimulationsHtsDromcomPayloadDto,
     PostSimulationsHtsPayloadDto,
     PostSimulationValiderPayloadDto,
 } from "./Affectation.validation";
@@ -30,13 +34,21 @@ import {
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
+import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
+import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
+import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 
 @Controller("affectation")
 export class AffectationController {
     constructor(
         private readonly affectationService: AffectationService,
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
+        @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
+        @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        private readonly logger: Logger,
     ) {}
 
     @UseGuards(AdminGuard)
@@ -56,6 +68,16 @@ export class AffectationController {
                 traitement = await this.affectationService.getStatusValidation(
                     sessionId,
                     TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+                );
+                break;
+            case "HTS_DROMCOM":
+                simulation = await this.affectationService.getStatusSimulation(
+                    sessionId,
+                    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
+                );
+                traitement = await this.affectationService.getStatusValidation(
+                    sessionId,
+                    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
                 );
                 break;
             case "CLE":
@@ -145,6 +167,35 @@ export class AffectationController {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         return await this.simulationAffectationHTSService.extractPdfAnalyticsFromRapport(simulation);
+    }
+
+    @Post("/:sessionId/simulation/hts-dromcom")
+    async simulateHtsDromCom(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Body() payload: PostSimulationsHtsDromcomPayloadDto,
+    ): Promise<AffectationRoutes["PostSimulationsHTSDromComRoute"]["response"]> {
+        const parameters: SimulationAffectationHTSDromComTaskParameters = {
+            sessionId,
+            departements: payload.departements,
+            etranger: payload.etranger,
+            niveauScolaires: payload.niveauScolaires,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters,
+            },
+        });
+        return TaskMapper.toDto(task);
     }
 
     @UseGuards(AdminGuard)
@@ -251,6 +302,49 @@ export class AffectationController {
     }
 
     @UseGuards(AdminGuard)
+    @Post("/:sessionId/simulation/:taskId/valider/hts-dromcom")
+    async validerSimulationHTSDromCom(
+        @Request() request: CustomRequest,
+        @Param("sessionId") sessionId: string,
+        @Param("taskId") taskId: string,
+    ): Promise<AffectationRoutes["PostValiderAffectationHTSDromComRoute"]["response"]> {
+        const simulationTask = await this.taskGateway.findById(taskId);
+
+        // On verifie qu'une simulation n'a pas déjà été affecté en amont
+        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+            sessionId,
+            TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
+        );
+
+        if (
+            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status as TaskStatus) ||
+            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
+        ) {
+            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
+        }
+
+        const parameters: ValiderAffectationHTSDromComTaskParameters = {
+            sessionId,
+            simulationTaskId: taskId,
+            auteur: {
+                id: request.user.id,
+                prenom: request.user.prenom,
+                nom: request.user.nom,
+                role: request.user.role,
+                sousRole: request.user.sousRole,
+            },
+        };
+        const task = await this.taskGateway.create({
+            name: TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
+            status: TaskStatus.PENDING,
+            metadata: {
+                parameters,
+            },
+        });
+        return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(AdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider/cle")
     async validerSimulationCLE(
         @Request() request: CustomRequest,
@@ -315,7 +409,7 @@ export class AffectationController {
             throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
         }
 
-        const parameters: ValiderAffectationCLETaskParameters = {
+        const parameters: ValiderAffectationCLEDromComTaskParameters = {
             sessionId,
             simulationTaskId: taskId,
             auteur: {
@@ -334,5 +428,44 @@ export class AffectationController {
             },
         });
         return TaskMapper.toDto(task);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/ligne-de-bus/sync-places")
+    async syncLigneDebus(
+        @Param("sessionId")
+        sessionId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesLignesDeBus"]["response"]> {
+        const session = await this.sessionGateway.findById(sessionId);
+        const ligneDeBusList = await this.ligneDeBusGateway.findBySessionNom(session.nom);
+        await this.affectationService.syncPlacesDisponiblesLignesDeBus(ligneDeBusList);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/centre/sync-places")
+    async syncCentres(
+        @Param("sessionId")
+        sessionId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesCentre"]["response"]> {
+        const sejours = await this.sejourGateway.findBySessionId(sessionId);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejours);
+    }
+
+    @UseGuards(SuperAdminGuard)
+    @Post("/:sessionId/centre/:centreId/sync-places")
+    async syncCentre(
+        @Param("sessionId")
+        sessionId: string,
+        @Param("centreId")
+        centreId: string,
+    ): Promise<AffectationRoutes["PostSyncPlacesCentre"]["response"]> {
+        const sejour = await this.sejourGateway.findBySessionIdAndCentreId(sessionId, centreId);
+        if (!sejour) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Sejour introuvable pour ce centre et cette session",
+            );
+        }
+        await this.affectationService.syncPlacesDisponiblesSejours([sejour]);
     }
 }

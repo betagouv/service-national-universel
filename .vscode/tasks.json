@@ -95,7 +95,8 @@
     },
     {
       "label": "Start App",
-      "command": "npm run dev:app app",
+      "dependsOn": ["Build snu-lib"],
+      "command": "source ~/.zshrc && nvm use && npm run dev:app app",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -104,7 +105,8 @@
     },
     {
       "label": "Start Admin",
-      "command": "npm run dev:app admin",
+      "dependsOn": ["Build snu-lib"],
+      "command": "source ~/.zshrc && nvm use && npm run dev:app admin",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -118,6 +120,7 @@
     },
     {
       "label": "Start Api-v1 API",
+      "dependsOn": ["Build snu-lib"],
       "command": "source ~/.zshrc && nvm use && npm run dev:api",
       "type": "shell",
       "problemMatcher": [],
@@ -127,6 +130,7 @@
     },
     {
       "label": "Start Api-v1 TASKS",
+      "dependsOn": ["Build snu-lib"],
       "command": "source ~/.zshrc && nvm use && npm run dev:tasks",
       "type": "shell",
       "problemMatcher": [],
@@ -141,7 +145,8 @@
     },
     {
       "label": "Start Api-v2 API",
-      "command": "npm run dev:api",
+      "dependsOn": ["Build snu-lib"],
+      "command": "source ~/.zshrc && nvm use && npm run dev:api",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -150,6 +155,7 @@
     },
     {
       "label": "Start Api-v2 TASKS",
+      "dependsOn": ["Build snu-lib"],
       "command": "source ~/.zshrc && nvm use && npm run dev:tasks",
       "type": "shell",
       "problemMatcher": [],
@@ -159,7 +165,7 @@
     },
     {
       "label": "Start Apiv2",
-      "command": "npm run dev:app apiv2",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app apiv2",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -177,7 +183,8 @@
     },
     {
       "label": "Start snu-lib",
-      "command": "npm run dev:app snu-lib",
+      "dependsOn": ["Build snu-lib"],
+      "command": "source ~/.zshrc && nvm use && npm run dev:app snu-lib",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -185,8 +192,27 @@
       }
     },
     {
+      "label": "Build snu-lib",
+      "dependsOn": ["Clean turbo", "Clean snu-lib"],
+      "command": "source ~/.zshrc && nvm use && APP_NAME=snu-lib npm run build",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Clean snu-lib",
+      "command": "rm -fr .turbo common-js dist .rollup.cache",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./packages/lib"
+      }
+    },
+    {
       "label": "Start snu-ds",
-      "command": "npm run dev:app @snu/ds",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app @snu/ds",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -259,6 +285,15 @@
     {
       "label": "Get branch endpoints",
       "command": "source .env && export $(cut -d= -f1 .env) && npm run endpoints",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Clean turbo",
+      "command": "rm -fr .turbo ; rm -fr */*/.turbo ; true",
       "type": "shell",
       "problemMatcher": [],
       "options": {

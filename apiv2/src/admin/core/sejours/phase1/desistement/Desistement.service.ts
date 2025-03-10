@@ -1,6 +1,6 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { DesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { PreviewDesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
@@ -12,11 +12,27 @@ import { JeuneService } from "../../jeune/Jeune.service";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AffectationService } from "../affectation/Affectation.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
+import { SejourGateway } from "../sejour/Sejour.gateway";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
     lastCompletedAt: Date;
 };
+
+export type JeuneFilteredForDesistementExport = Pick<
+    JeuneModel,
+    | "id"
+    | "email"
+    | "prenom"
+    | "nom"
+    | "statut"
+    | "statutPhase1"
+    | "sessionNom"
+    | "region"
+    | "departement"
+    | "sessionId"
+    | "youngPhase1Agreement"
+>;
 
 @Injectable()
 export class DesistementService {
@@ -26,6 +42,7 @@ export class DesistementService {
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
+        @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         private readonly cls: ClsService,
         private readonly jeuneService: JeuneService,
         private readonly affectationService: AffectationService,
@@ -42,7 +59,7 @@ export class DesistementService {
     }
 
     @Transactional()
-    async desisterJeunes(jeunes: JeuneModel[]): Promise<number> {
+    async desisterJeunes(jeunes: JeuneModel[], sessionId: string): Promise<number> {
         const list: JeuneModel[] = [];
         for (const jeune of jeunes) {
             list.push({
@@ -61,8 +78,11 @@ export class DesistementService {
         ];
         if (lignesDeBusIds.length > 0) {
             const lignesDeBus = await this.ligneDeBusGateway.findByIds(lignesDeBusIds);
-            await this.affectationService.syncPlaceDisponiblesLigneDeBus(lignesDeBus);
+            await this.affectationService.syncPlacesDisponiblesLignesDeBus(lignesDeBus);
         }
+
+        const sejours = await this.sejourGateway.findBySessionId(sessionId);
+        await this.affectationService.syncPlacesDisponiblesSejours(sejours);
 
         return res;
     }
@@ -108,20 +128,41 @@ export class DesistementService {
     }: {
         sessionId: string;
         affectationTaskId: string;
-    }): Promise<DesisterTaskResult> {
+    }): Promise<PreviewDesisterTaskResult> {
         const affectationTask = await this.taskGateway.findById(affectationTaskId);
         if (!affectationTask) {
             throw new Error("Affectation task not found");
         }
         const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
         const jeunes = await this.jeuneGateway.findByIds(ids);
-        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
-            this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
-        return {
-            jeunesDesistes: jeunesDesistes.length,
-            jeunesAutreSession: jeunesAutreSession.length,
-            jeunesConfirmes: jeunesConfirmes.length,
-            jeunesNonConfirmes: jeunesNonConfirmes.length,
-        };
+        const groups = this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        return Object.entries(groups).reduce(
+            (acc, [key, value]) => {
+                acc[key] = this.filterFields(value);
+                return acc;
+            },
+            {
+                jeunesNonConfirmes: [] as JeuneFilteredForDesistementExport[],
+                jeunesConfirmes: [] as JeuneFilteredForDesistementExport[],
+                jeunesAutreSession: [] as JeuneFilteredForDesistementExport[],
+                jeunesDesistes: [] as JeuneFilteredForDesistementExport[],
+            },
+        );
+    }
+
+    filterFields(jeunes: JeuneModel[]): JeuneFilteredForDesistementExport[] {
+        return jeunes.map((jeune) => ({
+            id: jeune.id,
+            email: jeune.email,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
+            statut: jeune.statut,
+            statutPhase1: jeune.statutPhase1,
+            sejour: jeune.sessionNom,
+            region: jeune.region,
+            departement: jeune.departement,
+            sessionId: jeune.sessionId,
+            youngPhase1Agreement: jeune.youngPhase1Agreement,
+        }));
     }
 }

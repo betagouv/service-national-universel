@@ -23,6 +23,21 @@ export class PostSimulationsHtsPayloadDto {
     affecterPDR: boolean;
 }
 
+export class PostSimulationsHtsDromcomPayloadDto {
+    @IsArray()
+    @IsIn(Object.values(GRADES), { each: true })
+    @ArrayMinSize(1)
+    niveauScolaires: Array<keyof typeof GRADES>;
+
+    @IsArray()
+    @IsIn(RegionsDromComEtCorse.flatMap((region) => region2department[region]), { each: true })
+    @ArrayMinSize(1)
+    departements: string[];
+
+    @IsBoolean()
+    etranger: boolean;
+}
+
 export class PostSimulationsClePayloadDto {
     @IsArray()
     @IsIn(RegionsMetropoleAndCorse.flatMap((region) => region2department[region]), { each: true })

@@ -24,6 +24,7 @@ import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { YOUNG_STATUS } from "snu-lib";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionNom = "2025 CLE 03 Fevrier";
 
@@ -123,6 +124,12 @@ describe("ValiderAffectationCLE", () => {
                         findBySessionId: jest
                             .fn()
                             .mockResolvedValue(mockSejours.map((sejour) => ({ ...sejour, sessionNom: sessionNom }))),
+                        countPlaceOccupeesBySejourIds: jest.fn().mockResolvedValue(
+                            mockSejours.map((sejour) => ({
+                                id: sejour.id,
+                                placesOccupeesJeunes: 50,
+                            })),
+                        ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
                     },
                 },
@@ -136,8 +143,19 @@ describe("ValiderAffectationCLE", () => {
                     provide: PlanDeTransportGateway,
                     useValue: {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
-                        findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
+                        findByIds: jest
+                            .fn()
+                            .mockResolvedValue(
+                                mockLignesBus.map((ligne) => ({ id: ligne.id, capaciteJeunes: ligne.capaciteJeunes })),
+                            ),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
+                    },
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                     },
                 },
             ],

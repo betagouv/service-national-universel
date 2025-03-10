@@ -65,6 +65,9 @@ import { ValiderBasculeJeunesNonValides } from "./core/sejours/phase1/inscriptio
 import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/DesisterPostAffectation";
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { SimulationAffectationHTSDromCom } from "./core/sejours/phase1/affectation/SimulationAffectationHTSDromCom";
+import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/ValiderAffectationHTS.service";
+import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 
 @Module({
     imports: [
@@ -117,11 +120,14 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
         InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationHTS,
+        SimulationAffectationHTSDromCom,
         SimulationAffectationCLEService,
         SimulationAffectationCLE,
         SimulationAffectationCLEDromCom,
+        ValiderAffectationHTSService,
         ValiderAffectationCLEService,
         ValiderAffectationHTS,
+        ValiderAffectationHTSDromCom,
         ValiderAffectationCLE,
         ValiderAffectationCLEDromCom,
         DesisterPostAffectation,

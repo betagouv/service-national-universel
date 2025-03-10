@@ -17,6 +17,7 @@ import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gatew
 import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRassemblement.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
+import { SejourModel } from "../sejour/Sejour.model";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -29,6 +30,7 @@ describe("DesistementService", () => {
     let notificationGateway: NotificationGateway;
     let ligneDeBusGateway: LigneDeBusGateway;
     let affectationService: AffectationService;
+    let sejourGateway: SejourGateway;
 
     beforeEach(async () => {
         const module: TestingModule = await Test.createTestingModule({
@@ -44,7 +46,10 @@ describe("DesistementService", () => {
                 { provide: SessionGateway, useValue: { findById: jest.fn() } },
                 { provide: PlanDeTransportGateway, useValue: { findByIds: jest.fn(), bulkUpdate: jest.fn() } },
                 { provide: PointDeRassemblementGateway, useValue: { findByIds: jest.fn() } },
-                { provide: SejourGateway, useValue: { finBySessionId: jest.fn() } },
+                {
+                    provide: SejourGateway,
+                    useValue: { findBySessionId: jest.fn(), countPlaceOccupeesBySejourIds: jest.fn() },
+                },
                 { provide: ClsService, useValue: { set: jest.fn() } },
                 { provide: Logger, useValue: { log: jest.fn() } },
             ],
@@ -56,10 +61,13 @@ describe("DesistementService", () => {
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
         ligneDeBusGateway = module.get<LigneDeBusGateway>(LigneDeBusGateway);
         affectationService = module.get<AffectationService>(AffectationService);
+        sejourGateway = module.get<SejourGateway>(SejourGateway);
     });
 
     describe("desisterJeunes", () => {
-        it("should update lignes de bus occupancy when jeunes are withdrawn", async () => {
+        it("should update lignes de bus and session occupancy when jeunes are withdrawn", async () => {
+            const sejour = { id: "sejourId", sessionId: "sessionId" } as SejourModel;
+
             const lignesDeBus: LigneDeBusModel[] = [
                 { id: "ligneDeBusId1", placesOccupeesJeunes: 2 } as LigneDeBusModel,
                 { id: "ligneDeBusId2", placesOccupeesJeunes: 3 } as LigneDeBusModel,
@@ -71,14 +79,18 @@ describe("DesistementService", () => {
             ];
 
             jest.spyOn(ligneDeBusGateway, "findByIds").mockResolvedValue(lignesDeBus);
-            jest.spyOn(affectationService, "syncPlaceDisponiblesLigneDeBus").mockResolvedValue();
+            jest.spyOn(affectationService, "syncPlacesDisponiblesLignesDeBus").mockResolvedValue();
             jest.spyOn(jeuneGateway, "bulkUpdate").mockResolvedValue(2);
+            jest.spyOn(sejourGateway, "findBySessionId").mockResolvedValue([sejour]);
+            jest.spyOn(affectationService, "syncPlacesDisponiblesSejours").mockResolvedValue();
 
-            await service.desisterJeunes(jeunes);
+            await service.desisterJeunes(jeunes, "sessionId");
 
             expect(ligneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligneDeBusId1", "ligneDeBusId2"]);
-            expect(affectationService.syncPlaceDisponiblesLigneDeBus).toHaveBeenCalledWith(lignesDeBus);
+            expect(affectationService.syncPlacesDisponiblesLignesDeBus).toHaveBeenCalledWith(lignesDeBus);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalled();
+            expect(sejourGateway.findBySessionId).toHaveBeenCalledWith("sessionId");
+            expect(affectationService.syncPlacesDisponiblesSejours).toHaveBeenCalledWith([sejour]);
         });
 
         it("should update jeunes status to withdrawn", async () => {
@@ -88,8 +100,9 @@ describe("DesistementService", () => {
             ];
 
             jest.spyOn(jeuneGateway, "bulkUpdate").mockResolvedValue(2);
+            jest.spyOn(affectationService, "syncPlacesDisponiblesSejours").mockResolvedValue();
 
-            const result = await service.desisterJeunes(jeunes);
+            const result = await service.desisterJeunes(jeunes, "sessionId");
 
             expect(result).toBe(2);
             expect(jeuneGateway.bulkUpdate).toHaveBeenCalledWith([

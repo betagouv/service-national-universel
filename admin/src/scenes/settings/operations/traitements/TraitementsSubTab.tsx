@@ -74,6 +74,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
             renderCell: (traitement) => {
               switch (traitement.name) {
                 case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
+                case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER:
                 case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
                 case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
                   return <AffectationResultCell simulation={traitement} />;
@@ -81,7 +82,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
                 case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER:
                   return <BasculeJeuneValidesResultCell simulation={traitement} />;
                 case TaskName.DESISTEMENT_POST_AFFECTATION:
-                  return <DesistementResultCell traitement={traitement as DesistementTaskDto} />;
+                  return <DesistementResultCell traitement={traitement} />;
               }
               return null;
             },
