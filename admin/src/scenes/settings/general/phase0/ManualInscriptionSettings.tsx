@@ -1,9 +1,10 @@
-import { useCallback, useMemo } from "react";
-import { CohortDto } from "snu-lib";
-import { getManualInscriptionTogglesByCohortType } from "./getManualInscriptionTogglesByCohortType";
-import ReactTooltip from "react-tooltip";
-import React from "react";
+import React, { useCallback, useMemo } from "react";
 import { MdInfoOutline } from "react-icons/md";
+
+import { CohortDto } from "snu-lib";
+import { Tooltip } from "@snu/ds/admin";
+
+import { getManualInscriptionTogglesByCohortType } from "./getManualInscriptionTogglesByCohortType";
 
 interface ManualInscriptionSettingsProps {
   cohort: CohortDto;
@@ -43,12 +44,9 @@ export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps>
     <div className="flex flex-col gap-3">
       <div className="flex items-center gap-2">
         <p className="text-gray-900  text-xs font-medium">Inscriptions manuelles</p>
-        <MdInfoOutline data-tip data-for="inscriptions" className="text-gray-400 h-5 w-5 cursor-pointer" />
-        <ReactTooltip id="inscriptions" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md rounded-[6px]">
-          <p className=" text-left text-gray-600 text-xs w-[275px] !px-2 !py-1.5 list-outside">
-            Ouverture et fermeture pour les utilisateurs de la possibilité d’inscrire manuellement des jeunes.
-          </p>
-        </ReactTooltip>
+        <Tooltip title="Ouverture et fermeture pour les utilisateurs de la possibilité d’inscrire manuellement des jeunes">
+          <MdInfoOutline size={20} className="text-gray-400" />
+        </Tooltip>
       </div>
       {renderedManualInscriptionTogglesByCohortType}
     </div>

@@ -104,6 +104,7 @@ const PostEligibilityRouteSchema = {
   }),
   query: Joi.object<CohortsRoutes["PostEligibility"]["query"]>({
     getAllSessions: Joi.boolean().default(false),
+    type: Joi.string().allow("INSCRIPTION_MANUELLE").allow("BASCULE").allow(null),
   }),
   body: Joi.object<CohortsRoutes["PostEligibility"]["payload"]>({
     schoolDepartment: Joi.string().allow("", null),
