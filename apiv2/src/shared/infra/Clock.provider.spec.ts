@@ -11,7 +11,7 @@ describe("ClockProvider", () => {
 
     describe("formatSafeDateTime", () => {
         it("should format the date correctly", () => {
-            const date = new Date("2024-10-01T12:34:56.789Z");
+            const date = clockProvider.getZonedDate(new Date("2024-10-01T12:34:56.789Z"));
             const formattedDate = clockProvider.formatSafeDateTime(date);
             expect(formattedDate).toBe("2024-10-01T14-34-56");
         });
