@@ -29,6 +29,7 @@ router.post(
   async function (req: RouteRequest<CohortsRoutes["PostEligibility"]>, res: RouteResponse<CohortsRoutes["PostEligibility"]>) {
     try {
       let young: NonNullable<CohortsRoutes["PostEligibility"]["payload"]>;
+      let isManualInscription = false;
       const { id } = req.validatedParams;
       if (id) {
         const youngDocument = await YoungModel.findById(id).lean();
@@ -43,6 +44,7 @@ router.post(
           return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
         }
         young = body!;
+        isManualInscription = req.validatedQuery.type === "INSCRIPTION_MANUELLE";
       }
 
       let sessions: CohortsRoutes["PostEligibility"]["response"]["data"];
@@ -54,7 +56,7 @@ router.post(
       ) {
         sessions = await getAllSessions(young);
       } else {
-        sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null);
+        sessions = await getFilteredSessions(young, Number(req.headers["x-user-timezone"]) || null, isManualInscription, req.user);
       }
 
       return res.json({ ok: true, data: sessions });

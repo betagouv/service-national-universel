@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility } from "snu-lib";
+import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, UserDto, ROLES } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
 export type CohortDocumentWithPlaces = CohortDocument<{
@@ -25,7 +25,7 @@ type CohortQuery = {
 };
 
 // TODO: déplacer isReInscription dans un nouveau params plutot que dans le young
-export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null) {
+export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: string | number | null, isInscriptionManuel?: boolean, user?: UserDto) {
   let query: CohortQuery = { status: COHORT_STATUS.PUBLISHED };
 
   // En cas de changement de séjour, on propose uniquement les autres cohortes du groupe de cohorte actuel.
@@ -47,7 +47,9 @@ export async function getFilteredSessions(young: YoungInfo, timeZoneOffset?: str
     (session) =>
       session.getIsInscriptionOpen(Number(timeZoneOffset)) ||
       (session.getIsReInscriptionOpen(Number(timeZoneOffset)) && young.isReInscription) ||
-      (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)),
+      (session.getIsInstructionOpen(Number(timeZoneOffset)) && ([YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.WAITING_VALIDATION] as string[]).includes(young.status)) ||
+      (isInscriptionManuel && user?.role === ROLES.REFERENT_DEPARTMENT && session.inscriptionOpenForReferentDepartment) ||
+      (isInscriptionManuel && user?.role === ROLES.REFERENT_REGION && session.inscriptionOpenForReferentRegion),
   );
 
   const sessionsEligibles: CohortDocumentWithPlaces[] = sessionsOuvertes.filter((session) => {
