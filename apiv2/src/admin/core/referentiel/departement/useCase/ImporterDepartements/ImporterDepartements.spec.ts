@@ -63,7 +63,7 @@ describe("ImporterDepartements", () => {
                     provide: ClockGateway,
                     useValue: {
                         now: jest.fn(),
-                        formatSafeIsoDate: jest.fn().mockReturnValue(mockDate),
+                        formatSafeDateTime: jest.fn().mockReturnValue(mockDate),
                         isValidDate: jest.fn().mockReturnValue(true),
                     },
                 },

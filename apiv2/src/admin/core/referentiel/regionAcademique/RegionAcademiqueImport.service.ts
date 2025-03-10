@@ -44,7 +44,7 @@ export class RegionAcademiqueImportService {
     ): Promise<string> {
         const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
         const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
-        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
             data: fileBuffer,

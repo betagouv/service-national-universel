@@ -37,7 +37,7 @@ describe("ImportReferentielController", () => {
 
         const mockClockGateway = {
             now: jest.fn(),
-            formatSafeIsoDate: jest.fn(),
+            formatSafeDateTime: jest.fn(),
         };
         const mockNotificationGateway = {
             sendEmail: jest.fn(),

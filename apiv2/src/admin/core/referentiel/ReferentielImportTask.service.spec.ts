@@ -24,7 +24,7 @@ describe("ReferentielImportTaskService", () => {
                     provide: ClockGateway,
                     useValue: {
                         now: jest.fn().mockReturnValue(new Date("2024-07-31T00:00:00.000Z")),
-                        formatSafeIsoDate: jest.fn().mockReturnValue("2024-07-31T00:00:00.000Z"),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2024-07-31T00:00:00.000Z"),
                     },
                 },
                 {

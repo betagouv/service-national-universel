@@ -44,7 +44,7 @@ export class ReferentielImportTaskService {
             }
         }
 
-        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const folderPath = `${FilePath[importType]}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,

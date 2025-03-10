@@ -59,7 +59,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
         const fileBuffer = await this.fileGateway.generateExcel({ Volontaires: rapportData });
 
         // upload du rapport du s3
-        const timestamp = this.clockGateway.formatSafeIsoDate(dateValidation);
+        const timestamp = this.clockGateway.formatSafeDateTime(dateValidation);
         const fileName = `valider-bascule-jeunes-valides/bascule-jeunes-valides_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/inscription/${sessionId}/${fileName}`,

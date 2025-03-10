@@ -165,7 +165,7 @@ describe("SimulationAffectationCLEDromCom", () => {
                     provide: ClockGateway,
                     useValue: {
                         now: jest.fn(),
-                        formatSafeIsoDate: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                     },
                 },
             ],

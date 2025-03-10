@@ -160,7 +160,7 @@ export class ValiderAffectationHTSDromCom implements UseCase<ValiderAffectationH
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
 
         // upload du rapport du s3
-        const timestamp = this.clockGateway.formatSafeIsoDate(dateAffectation);
+        const timestamp = this.clockGateway.formatSafeDateTime(dateAffectation);
         const fileName = `affectation-hts-dromcom/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

@@ -61,7 +61,7 @@ describe("ImporterAcademies", () => {
                     provide: ClockGateway,
                     useValue: {
                         now: jest.fn().mockReturnValue(new Date(mockDate)),
-                        formatSafeIsoDate: jest.fn().mockReturnValue(mockDate),
+                        formatSafeDateTime: jest.fn().mockReturnValue(mockDate),
                         isValidDate: jest.fn().mockReturnValue(true),
                     },
                 },

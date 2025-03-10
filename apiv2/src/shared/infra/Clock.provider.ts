@@ -15,20 +15,27 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class ClockProvider implements ClockGateway {
-    formatSafeIsoDate(date: Date): string {
-        return `${date.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+    now(options?: { timeZone: string }) {
+        if (options?.timeZone) {
+            return this.getZonedDate(new Date(), options.timeZone);
+        } else {
+            return new Date(); // UTC
+        }
     }
-    addDaysToNow(days: number): Date {
-        return add(new Date(), { days });
-    }
-    now(options = { timeZone: "Europe/Paris" }) {
-        return getZonedDate(new Date(), options.timeZone);
+    getZonedDate(date: Date, timeZone: string = "Europe/Paris") {
+        return getZonedDate(date, timeZone);
     }
     isValidDate(date: Date): boolean {
         return !isNaN(new Date(date).getTime());
     }
     formatShort(date: Date): string {
         return format(date, "dd/MM/yyyy");
+    }
+    formatDateTime(date: Date): string {
+        return format(date, "yyyy-MM-dd'T'HH:mm:ss");
+    }
+    formatSafeDateTime(date: Date): string {
+        return `${this.formatDateTime(date)?.replaceAll(":", "-")?.replace(".", "-")}`;
     }
     isAfter(dateA: Date, dateB: Date) {
         return isAfterFns(dateA, dateB);
@@ -44,5 +51,8 @@ export class ClockProvider implements ClockGateway {
     }
     addHours(date: Date, hours: number): Date {
         return addHours(date, hours);
+    }
+    addDaysToNow(days: number): Date {
+        return add(new Date(), { days });
     }
 }

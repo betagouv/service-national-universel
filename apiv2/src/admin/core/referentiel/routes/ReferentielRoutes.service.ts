@@ -55,7 +55,7 @@ export class ReferentielRoutesService {
         }
 
         // save file to s3
-        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const s3File = await this.fileGateway.uploadFile(`file/admin/referentiel/routes/${timestamp}_${fileName}`, {
             data: buffer,
             mimetype,

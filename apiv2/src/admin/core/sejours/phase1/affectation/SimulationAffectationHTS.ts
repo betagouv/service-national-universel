@@ -231,7 +231,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
 
         const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData, "HTS");
 
-        const timestamp = this.clockGateway.formatSafeIsoDate(this.clockGateway.now());
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-affectation-hts/affectation_simulation_hts_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
