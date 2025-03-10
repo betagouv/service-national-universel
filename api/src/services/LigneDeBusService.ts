@@ -17,13 +17,6 @@ import { YoungDocument } from "../models/young";
 
 const { ObjectId } = Types;
 
-interface YoungsUpdated extends YoungDocument {
-  email: string;
-  parent1Email: string;
-  parent2Email: string;
-  classeId?: string;
-}
-
 export const updatePDRForLine = async (
   ligneBusId: string,
   transportType: string,
@@ -101,10 +94,10 @@ export const updatePDRForLine = async (
   );
 
   if (shouldSendEmailCampaign) {
-    const updatedYoungs: YoungsUpdated[] = await YoungModel.find({
+    const updatedYoungs = await YoungModel.find({
       ligneId: ligneBusId,
       meetingPointId: newMeetingPointId,
-    }).select("email parent1Email parent2Email classeId");
+    });
 
     await sendEmailCampaignToYoungAndRL(updatedYoungs, cohort);
 
@@ -118,7 +111,7 @@ export const updatePDRForLine = async (
   return ligneBus;
 };
 
-const sendEmailCampaignToYoungAndRL = async (youngs: YoungsUpdated[], cohort: CohortType) => {
+const sendEmailCampaignToYoungAndRL = async (youngs: YoungDocument[], cohort: CohortType) => {
   let isBeforeDeparture = false;
   let templateId: string | null = null;
   if (new Date() < new Date(cohort.dateStart)) {
@@ -130,23 +123,25 @@ const sendEmailCampaignToYoungAndRL = async (youngs: YoungsUpdated[], cohort: Co
 
   if (!templateId) throw new Error("Modification date is out of range, no email sent.");
 
-  const sendEmails = async (youngs: YoungDocument[], sendToRL: boolean) => {
-    for (const young of youngs) {
-      const youngsParentMail: { email: string }[] = [];
-      if (young.parent1Email) youngsParentMail.push({ email: young.parent1Email });
-      if (young.parent2Email) youngsParentMail.push({ email: young.parent2Email });
+  for (const young of youngs) {
+    if (isBeforeDeparture) {
+      const contacts = [young.email];
+      if (young.parent1Email) contacts.push(young.parent1Email);
+      if (young.parent2Email) contacts.push(young.parent2Email);
 
-      const contacts = sendToRL ? { emailTo: youngsParentMail, cc: [{ email: young.email }] } : { emailTo: [{ email: young.email }], cc: youngsParentMail };
-
-      await sendTemplate(templateId, contacts);
+      for (const contact of contacts) {
+        await sendTemplate(templateId, { emailTo: [{ email: contact }] });
+      }
+    } else {
+      if (young.cohesionStayPresence !== "false" && young.departInform !== "true") {
+        if (young.parent1Email) {
+          await sendTemplate(templateId, { emailTo: [{ email: young.parent1Email }], cc: [{ email: young.email }] });
+        }
+        if (young.parent2Email) {
+          await sendTemplate(templateId, { emailTo: [{ email: young.parent2Email }], cc: [{ email: young.email }] });
+        }
+      }
     }
-  };
-
-  if (isBeforeDeparture) {
-    await sendEmails(youngs, false);
-  } else {
-    const youngsFiltered = youngs.filter((young) => young.cohesionStayPresence !== "false" && young.departInform !== "true");
-    await sendEmails(youngsFiltered, true);
   }
 };
 
