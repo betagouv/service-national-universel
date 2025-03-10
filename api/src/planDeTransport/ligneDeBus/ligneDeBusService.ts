@@ -296,8 +296,10 @@ async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
   const templateId = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_CENTRE;
   const referentsClasse = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
   const referentsEtablissement = await getReferentEtablissement(classe.etablissementId);
-  const emailTo = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];
-  return await sendTemplate(templateId, { emailTo });
+  const emails = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];
+  for (const email of emails) {
+    await sendTemplate(templateId, { emailTo: [email] });
+  }
 }
 
 async function getReferentEtablissement(etablissementId: string): Promise<ReferentDocument[]> {
