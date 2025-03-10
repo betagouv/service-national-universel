@@ -26,6 +26,7 @@ import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
 import { AffectationService } from "./Affectation.service";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const cohortName = "Avril 2024 - C";
 
@@ -108,6 +109,13 @@ describe("SimulationAffectationHTS", () => {
                     useValue: {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
                         update: jest.fn(),
+                    },
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                     },
                 },
             ],

@@ -19,6 +19,7 @@ import { CentreGateway } from "../centre/Centre.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { SimulationAffectationHTSTaskParameters } from "./SimulationAffectationHTSTask.model";
 import { AffectationService } from "./Affectation.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 // TODO: déplacer dans un paramétrage dynamique
 const NB_MAX_ITERATION = 300;
@@ -46,6 +47,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -229,7 +231,7 @@ export class SimulationAffectationHTS implements UseCase<SimulationAffectationHT
 
         const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData, "HTS");
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-affectation-hts/affectation_simulation_hts_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

@@ -177,7 +177,7 @@ export class SimulationBasculeJeunes implements UseCase<SimulationBasculeJeunesR
             [RAPPORT_SHEETS.AVENIR]: rapportData.jeunesAvenir,
         });
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-${type}/${type}_simulation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/inscription/${sessionId}/${fileName}`,
