@@ -1,6 +1,6 @@
 import { ERRORS, UserDto } from "snu-lib";
 import { dbConnect, dbClose } from "../../__tests__/helpers/db";
-import { LigneBusDocument, LigneBusModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
+import { LigneBusModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
 
 import { syncMergedBus, updateSessionForLine } from "./ligneDeBusService";
 
@@ -47,7 +47,7 @@ describe("ligneDeBusService.updateSessionForLine", () => {
     const ligne = { _id: "busId", sessionId: "oldSessionId", youngSeatsTaken: 23 } as any;
 
     try {
-      await updateSessionForLine({ ligne, session: newSession, actor: user, sendCampaign: false });
+      await updateSessionForLine({ ligne, session: newSession, user, sendCampaign: false });
     } catch (e) {
       expect(e.message).toBe(ERRORS.OPERATION_NOT_ALLOWED);
     }

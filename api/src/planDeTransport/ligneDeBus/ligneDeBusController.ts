@@ -354,7 +354,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       await updateSessionForLine({
         ligne,
         session,
-        actor: req.user,
+        user: req.user,
         sendCampaign,
       });
     }
