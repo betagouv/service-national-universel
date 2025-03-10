@@ -39,7 +39,6 @@ export default function EditButton({
         >
           Annuler
         </button>
-
         <button
           form={form}
           type="submit"

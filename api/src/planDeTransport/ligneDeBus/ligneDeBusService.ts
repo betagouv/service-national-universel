@@ -189,12 +189,12 @@ export const updatePDRForLine = async (
 export async function updateSessionForLine({
   ligne,
   session,
-  actor,
+  user,
   sendCampaign,
 }: {
   ligne: LigneBusDocument;
   session: SessionPhase1Document;
-  actor: UserDto;
+  user: UserDto;
   sendCampaign?: boolean;
 }) {
   const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
@@ -213,7 +213,7 @@ export async function updateSessionForLine({
         sessionId: session.id,
         centerId: session.cohesionCenterId,
       });
-      await ligne.save({ fromUser: actor });
+      await ligne.save({ fromUser: user });
 
       // Plan de transport
       const planDeTransport = await PlanTransportModel.findById(ligne._id);
@@ -227,13 +227,13 @@ export async function updateSessionForLine({
         centerName: session.nameCentre,
         centerCode: session.codeCentre,
       });
-      await planDeTransport.save({ fromUser: actor });
+      await planDeTransport.save({ fromUser: user });
 
       // Jeunes
       const filter = { ligneId: ligne._id };
       const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
-      await YoungModel.updateMany(filter, updateDoc, { fromUser: actor });
-      if (sendCampaign) await notifyYoungChangeCenter(ligne._id);
+      await YoungModel.updateMany(filter, updateDoc, { fromUser: user });
+      if (sendCampaign) await notifyYoungsChangeCenter(ligne._id);
 
       // Classes
       const classes = await ClasseModel.find({ ligneId: ligne._id });
@@ -242,13 +242,13 @@ export async function updateSessionForLine({
           sessionId: session.id,
           cohesionCenterId: session.cohesionCenterId,
         });
-        await classe.save({ fromUser: actor });
+        await classe.save({ fromUser: user });
         if (sendCampaign) await notifyReferentsCLEChangeCenter(classe);
       }
     });
 
-    await updatePlacesSessionPhase1(currentSessionPhase1, actor);
-    await updatePlacesSessionPhase1(session, actor);
+    await updatePlacesSessionPhase1(currentSessionPhase1, user);
+    await updatePlacesSessionPhase1(session, user);
   } finally {
     await endSession(transaction);
   }
@@ -281,15 +281,14 @@ const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, 
   }
 };
 
-async function notifyYoungChangeCenter(ligneBusId: string) {
+async function notifyYoungsChangeCenter(ligneBusId: string) {
   const updatedYoungs = await YoungModel.find({ ligneId: ligneBusId }).select("email parent1Email parent2Email");
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
-
   for (const young of updatedYoungs) {
     const cc: { email: string }[] = [];
     if (young.parent1Email) cc.push({ email: young.parent1Email });
     if (young.parent2Email) cc.push({ email: young.parent2Email });
-    await sendTemplate(templateId, { emailTo: [{ email: young.email }], cc });
+    return await sendTemplate(templateId, { emailTo: [{ email: young.email }], cc });
   }
 }
 
@@ -298,7 +297,7 @@ async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
   const referentsClasse = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
   const referentsEtablissement = await getReferentEtablissement(classe.etablissementId);
   const emailTo = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];
-  await sendTemplate(templateId, { emailTo });
+  return await sendTemplate(templateId, { emailTo });
 }
 
 async function getReferentEtablissement(etablissementId: string): Promise<ReferentDocument[]> {

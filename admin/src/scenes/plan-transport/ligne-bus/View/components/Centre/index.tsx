@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { canEditLigneBusCenter, CohortType, isBusEditionOpen, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
@@ -27,15 +27,9 @@ const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
 export default function Centre({ bus, setBus, cohort }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const { mutate: updateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
-  const [isEditing, setIsEditing] = React.useState(false);
-  const [openModal, setOpenModal] = React.useState(false);
-  const {
-    control,
-    handleSubmit,
-    formState: { errors },
-    reset,
-    getValues,
-  } = useForm({
+  const [isEditing, setIsEditing] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const { control, handleSubmit, reset, getValues } = useForm({
     defaultValues: {
       centerArrivalTime: bus.centerArrivalTime,
       centerDepartureTime: bus.centerDepartureTime,
@@ -49,7 +43,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     ? "Vous n'avez pas l'autorisation de modifier la destination d'une ligne de transport."
     : !isBusEditionOpen(user, cohort)
       ? "La modification des lignes de transport est fermée sur ce séjour."
-      : undefined;
+      : "";
 
   const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
     if (data.sessionId !== bus.sessionId) {
@@ -71,10 +65,10 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   }
 
   return (
-    <form id="edit-center" onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
+    <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <p className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</p>
-        <EditButton form="edit-center" isEditing={isEditing} setIsEditing={setIsEditing} disabled={disabled} reset={reset} tooltipMessage={tooltipMessage} isLoading={isPending} />
+        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={disabled} reset={reset} tooltipMessage={tooltipMessage} isLoading={isPending} />
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8">
@@ -91,16 +85,16 @@ export default function Centre({ bus, setBus, cohort }: Props) {
           name="centerArrivalTime"
           control={control}
           rules={{ required: isEditing && "L'heure d'arrivée est requise", pattern: { value: pattern, message: "Format attendu: hh:mm" } }}
-          render={({ field }) => (
-            <Field label="Heure d’arrivée" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={errors.centerArrivalTime?.message} />
+          render={({ field, fieldState }) => (
+            <Field label="Heure d’arrivée" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={fieldState.error?.message} />
           )}
         />
         <Controller
           name="centerDepartureTime"
           control={control}
           rules={{ required: isEditing && "L'heure de départ est requise", pattern: { value: pattern, message: "Format attendu: hh:mm" } }}
-          render={({ field }) => (
-            <Field label="Heure de départ" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={errors.centerDepartureTime?.message} />
+          render={({ field, fieldState }) => (
+            <Field label="Heure de départ" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={fieldState.error?.message} />
           )}
         />
       </div>
@@ -114,7 +108,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
         onCancel={() => setOpenModal(false)}
         onConfirm={handleConfirm}
         initialData={bus}
-        formData={{ sessionId: getValues("sessionId"), centerArrivalTime: getValues("centerArrivalTime"), centerDepartureTime: getValues("centerDepartureTime") }}
+        formData={getValues()}
         count={bus.youngSeatsTaken}
         isLoading={isPending}
       />
