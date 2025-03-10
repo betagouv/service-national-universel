@@ -20,7 +20,7 @@ import {
   YOUNG_SOURCE,
   getSchoolYear,
   getDepartmentForInscriptionGoal,
-  CohortType,
+  CohortsRoutes,
   EtablissementDto,
 } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
@@ -37,6 +37,9 @@ import FieldSituationsParticulieres from "../phase0/components/FieldSituationsPa
 import Check from "@/assets/icons/Check";
 import PhoneField from "../phase0/components/PhoneField";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortService } from "@/services/cohortService";
 
 type FormErrors = {
   temporaryDate?: string;
@@ -149,12 +152,16 @@ type FormValues = {
   parent2ValidationDate?: string;
 };
 
+type CohortEligible = NonNullable<CohortsRoutes["PostEligibility"]["response"]["data"]>[0];
+
 export default function Create() {
   const history = useHistory();
   const location = useLocation();
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
-  const [cohorts, setCohorts] = useState<CohortType[]>([]);
+  const [cohorts, setCohorts] = useState<CohortEligible[]>([]);
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const classeId = new URLSearchParams(location.search).get("classeId");
@@ -478,32 +485,23 @@ export default function Create() {
     if ((values.grade !== "" || values.schooled === "false") && (values.department !== "" || values.schoolDepartment !== "") && values.birthdateAt !== null) {
       (async () => {
         try {
-          let body = {};
+          const payload = {
+            grade: values.grade,
+            birthdateAt: values.birthdateAt!,
+            zip: values.zip,
+          } as NonNullable<CohortsRoutes["PostEligibility"]["payload"]>;
           if (values.schooled === "true") {
-            body = {
-              schoolDepartment: values.schoolDepartment,
-              department: values.department,
-              schoolRegion: values.schoolRegion,
-              birthdateAt: values.birthdateAt,
-              grade: values.grade,
-              zip: values.zip,
-            };
-          } else {
-            body = {
-              grade: values.grade,
-              birthdateAt: values.birthdateAt,
-              zip: values.zip,
-            };
+            payload.schoolDepartment = values.schoolDepartment;
+            payload.department = values.department;
+            payload.schoolRegion = values.schoolRegion;
           }
-          const res = await api.post(`/cohort-session/eligibility/2023`, body);
-          if (res.data.msg) return setEgibilityError(res.data.msg);
-          if (res.data.length === 0) {
+          const cohortsEligible = await CohortService.getEligibilityForYoung({ payload, query: { type: "INSCRIPTION_MANUELLE" } });
+          if (!cohortsEligible || cohortsEligible.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
           } else {
             setEgibilityError("");
           }
-
-          setCohorts(res.data);
+          setCohorts(cohortsEligible!);
         } catch (e) {
           capture(e);
 
@@ -1221,7 +1219,7 @@ const PARENT_STATUS_NAME = {
 
 interface SectionConsentementsProps {
   young: FormValues;
-  cohort?: CohortType;
+  cohort?: CohortEligible;
   errors: FormErrors;
   setFieldValue: (field: string, value: string) => void;
 }
