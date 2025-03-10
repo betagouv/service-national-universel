@@ -1,13 +1,22 @@
-import { BusTeamDto } from "snu-lib/src/dto";
-import { ClasseDocument, ClasseModel, EtablissementModel, LigneBusDocument, ReferentDocument, ReferentModel, SessionPhase1Document, SessionPhase1Model } from "../../models";
-import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
+import {
+  ClasseModel,
+  LigneBusDocument,
+  SessionPhase1Document,
+  SessionPhase1Model,
+  LigneToPointModel,
+  PointDeRassemblementModel,
+  LigneBusModel,
+  CohesionCenterModel,
+  PlanTransportModel,
+  YoungModel,
+  CohortModel,
+} from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-
-import { CohortType, ERRORS, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
-import { sendTemplate } from "../../brevo";
+import { ERRORS, UserDto, checkTime, BusTeamDto } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
+import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
 
 const { ObjectId } = Types;
 
@@ -180,13 +189,14 @@ export const updatePDRForLine = async (
   );
 
   if (shouldSendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
-    await sendEmailCampaign(ligneBusId, newMeetingPointId, cohort);
+    const updatedYoungs = await YoungModel.find({ ligneId: ligneBusId, meetingPointId: newMeetingPointId });
+    await notifyYoungsAndRlsPDRWasUpdated(updatedYoungs, cohort);
   }
 
   return ligneBus;
 };
 
-export async function updateSessionForLine({
+export const updateSessionForLine = async ({
   ligne,
   session,
   user,
@@ -196,7 +206,7 @@ export async function updateSessionForLine({
   session: SessionPhase1Document;
   user: UserDto;
   sendCampaign?: boolean;
-}) {
+}) => {
   const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
   if (!currentSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
 
@@ -233,7 +243,10 @@ export async function updateSessionForLine({
       const filter = { ligneId: ligne._id };
       const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
       await YoungModel.updateMany(filter, updateDoc, { fromUser: user });
-      if (sendCampaign) await notifyYoungsChangeCenter(ligne._id);
+      if (sendCampaign) {
+        const updatedYoungs = await YoungModel.find(filter);
+        await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
+      }
 
       // Classes
       const classes = await ClasseModel.find({ ligneId: ligne._id });
@@ -243,7 +256,7 @@ export async function updateSessionForLine({
           cohesionCenterId: session.cohesionCenterId,
         });
         await classe.save({ fromUser: user });
-        if (sendCampaign) await notifyReferentsCLEChangeCenter(classe);
+        if (sendCampaign) await notifyReferentsCLELineWasUpdated(classe);
       }
     });
 
@@ -252,59 +265,4 @@ export async function updateSessionForLine({
   } finally {
     await endSession(transaction);
   }
-}
-
-const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, cohort: CohortType) => {
-  const updatedYoungs = await YoungModel.find({
-    ligneId: ligneBusId,
-    meetingPointId: newMeetingPointId,
-  }).select("email parent1Email parent2Email");
-
-  let templateId: string | null = null;
-  if (new Date() < new Date(cohort.dateStart)) {
-    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
-  } else if (new Date() < new Date(cohort.dateEnd)) {
-    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
-  }
-
-  if (!templateId) throw new Error("Modification date is out of range, no email sent.");
-
-  for (const young of updatedYoungs) {
-    const cc: { email: string }[] = [];
-    if (young.parent1Email) cc.push({ email: young.parent1Email });
-    if (young.parent2Email) cc.push({ email: young.parent2Email });
-
-    await sendTemplate(templateId, {
-      emailTo: [{ email: young.email }],
-      cc,
-    });
-  }
 };
-
-async function notifyYoungsChangeCenter(ligneBusId: string) {
-  const updatedYoungs = await YoungModel.find({ ligneId: ligneBusId }).select("email parent1Email parent2Email");
-  const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
-  for (const young of updatedYoungs) {
-    const cc: { email: string }[] = [];
-    if (young.parent1Email) cc.push({ email: young.parent1Email });
-    if (young.parent2Email) cc.push({ email: young.parent2Email });
-    return await sendTemplate(templateId, { emailTo: [{ email: young.email }], cc });
-  }
-}
-
-async function notifyReferentsCLEChangeCenter(classe: ClasseDocument) {
-  const templateId = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_CENTRE;
-  const referentsClasse = await ReferentModel.find({ _id: classe.referentClasseIds }).select("email");
-  const referentsEtablissement = await getReferentEtablissement(classe.etablissementId);
-  const emails = [...referentsClasse.map((r) => ({ email: r.email })), ...referentsEtablissement.map((r) => ({ email: r.email }))];
-  for (const email of emails) {
-    await sendTemplate(templateId, { emailTo: [email] });
-  }
-}
-
-async function getReferentEtablissement(etablissementId: string): Promise<ReferentDocument[]> {
-  const etablissement = await EtablissementModel.findById(etablissementId);
-  if (!etablissement) throw new Error("Etablissement not found");
-  const referentsIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
-  return await ReferentModel.find({ _id: referentsIds }).select("email");
-}

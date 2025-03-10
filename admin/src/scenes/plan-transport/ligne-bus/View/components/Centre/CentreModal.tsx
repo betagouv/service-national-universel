@@ -23,7 +23,7 @@ interface ConfirmChangesModalProps {
 export default function CentreModal({ isOpen, initialData, formData, count, onConfirm, onCancel, isLoading }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
-  const templateIdReferent = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_CENTRE;
+  const templateIdReferent = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
   const isCLE = initialData.cohort.includes("CLE");
   const { data } = useSessions(initialData.cohort);
   const initialSession = data?.find((s) => s._id === initialData.sessionId);
