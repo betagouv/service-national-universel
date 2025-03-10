@@ -34,7 +34,6 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
   }
 
   const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.CHANGE_PDR;
-  console.log("templateIdForCLE", templateIdForCLE);
 
   const handleConfirm = () => {
     onConfirm(isEmailing);
