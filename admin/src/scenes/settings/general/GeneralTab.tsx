@@ -306,8 +306,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                 <SimpleToggle
                   label="Dates spécifiques"
                   disabled={isLoading || readOnly}
-                  // @ts-ignore
-                  value={showSpecificDatesReInscription}
+                  value={!!showSpecificDatesReInscription}
                   onChange={(v) => {
                     if (v == false) onCohortChange({ ...cohort, reInscriptionEndDate: null, reInscriptionStartDate: null });
                     // @ts-ignore

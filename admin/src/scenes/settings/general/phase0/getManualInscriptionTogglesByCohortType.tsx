@@ -6,6 +6,7 @@ type ToggleItem = {
   label: string;
   value: boolean;
   field: keyof CohortDto;
+  disabled?: boolean;
 };
 
 interface ManualInscriptionCLETogglesProps {
@@ -48,11 +49,44 @@ const renderManualInscriptionCLEToggles = ({ cohort, handleToggleChange, isLoadi
   );
 };
 
+const renderManualInscriptionHTSToggles = ({ cohort, handleToggleChange, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+  const toggles: ToggleItem[] = [
+    {
+      label: "Référents régionaux",
+      value: cohort.inscriptionOpenForReferentRegion ?? false,
+      field: "inscriptionOpenForReferentRegion" as keyof CohortDto,
+      disabled: cohort.isInscriptionOpen,
+    },
+    {
+      label: "Référents départementaux",
+      value: cohort.inscriptionOpenForReferentDepartment ?? false,
+      field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
+      disabled: cohort.isInscriptionOpen,
+    },
+  ];
+
+  return (
+    <>
+      {toggles.map((toggle) => (
+        <SimpleToggle
+          key={toggle.field}
+          label={toggle.label}
+          value={toggle.value}
+          disabled={isLoading || readOnly || toggle.disabled}
+          onChange={() => handleToggleChange(toggle.field)}
+        />
+      ))}
+    </>
+  );
+};
+
 export const getManualInscriptionTogglesByCohortType = ({ cohort, handleToggleChange, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
   const cohortType = cohort.type as (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
   switch (cohortType) {
     case COHORT_TYPE.CLE:
       return renderManualInscriptionCLEToggles({ cohort, handleToggleChange, isLoading, readOnly });
+    case COHORT_TYPE.VOLONTAIRE:
+      return renderManualInscriptionHTSToggles({ cohort, handleToggleChange, isLoading, readOnly });
     default:
       return null;
   }
