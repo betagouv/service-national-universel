@@ -29,6 +29,8 @@ export default () => ({
     broker: {
         url: _env(envStr, "BROKER_URL", "redis://127.0.0.1:6379"), // REDIS_URL in v1
         queuePrefix: _env(envStr, "BROKER_QUEUE_PREFIX", environment), // TASK_QUEUE_PREFIX in v1
+        monitorUser: _env(envStr, "BROKER_MONITOR_USER"),
+        monitorSecret: _env(envStr, "BROKER_MONITOR_SECRET"),
     },
     email: {
         provider: _env(envStr, "EMAIL_PROVIDER", "brevo"), // MAIL_TRANSPORT in v1
