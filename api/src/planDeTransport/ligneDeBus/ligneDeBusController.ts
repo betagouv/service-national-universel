@@ -30,13 +30,14 @@ import {
   SchemaDeRepartitionModel,
   ReferentModel,
   CohortModel,
+  SessionPhase1Model,
 } from "../../models";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { getInfoBus } from "./ligneDeBusService";
+import { getInfoBus, updateSessionForLine } from "./ligneDeBusService";
 import { updatePDRForLine } from "../../services/LigneDeBusService";
 
 interface MeetingPointResult {
@@ -308,11 +309,13 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       id: Joi.string().required(),
       centerArrivalTime: Joi.string().required(),
       centerDepartureTime: Joi.string().required(),
+      sessionId: Joi.string(),
+      sendCampaign: Joi.boolean(),
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    let { id, centerArrivalTime, centerDepartureTime } = value;
+    let { id, centerArrivalTime, centerDepartureTime, sessionId, sendCampaign } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -344,6 +347,17 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     });
 
     await planDeTransport.save({ fromUser: req.user });
+
+    if (sessionId && sessionId !== ligne.sessionId) {
+      const session = await SessionPhase1Model.findById(sessionId);
+      if (!session) throw new Error(ERRORS.NOT_FOUND);
+      await updateSessionForLine({
+        ligne,
+        session,
+        user: req.user,
+        sendCampaign,
+      });
+    }
 
     const infoBus = await getInfoBus(ligne);
 
