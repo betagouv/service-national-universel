@@ -154,6 +154,6 @@ const sendEmailCampaignToRefCLE = async (classe: ClasseDocument) => {
   const referentsCLE = await ReferentModel.find({ _id: { $in: referentsCLEIds } }).select("email");
 
   for (const referent of referentsCLE) {
-    await sendTemplate(SENDINBLUE_TEMPLATES.CLE.CHANGE_PDR, { emailTo: [{ email: referent.email }] });
+    await sendTemplate(SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_PDR, { emailTo: [{ email: referent.email }] });
   }
 };
