@@ -1,6 +1,6 @@
 import PlanMarketingService from "@/services/planMarketingService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { translateMarketing } from "snu-lib";
+import { HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { CampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
@@ -28,9 +28,11 @@ export const useCampagneSpecifique = () => {
       toastr.clean();
       toastr.success("Succès", "Campagne sauvegardée avec succès", { timeOut: 5000 });
     },
-    onError: (error) => {
-      toastr.clean();
-      toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de la sauvegarde de la campagne", { timeOut: 5000 });
+    onError: (error: HttpError) => {
+      if (error?.statusCode === 422) {
+        toastr.clean();
+        toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de la sauvegarde de la campagne", { timeOut: 5000 });
+      }
     },
   });
 

@@ -1,4 +1,4 @@
-import { PlanMarketingRoutes, CampagneJeuneType } from "snu-lib";
+import { PlanMarketingRoutes, CampagneJeuneType, isCampagneSpecifique, hasCampagneGeneriqueId } from "snu-lib";
 import { CampagneSpecifiqueFormData } from "../CampagneSpecifiqueForm";
 
 type CampagneApiResponse = NonNullable<PlanMarketingRoutes["SearchPlanMarketingRoute"]["response"]>[number];
@@ -32,20 +32,6 @@ interface CampagneSpecifiqueWithRefPayload extends CampagneSpecifiqueBase {
   campagneGeneriqueId: string;
 }
 
-/**
- * Vérifie si une campagne est spécifique
- */
-const isCampagneSpecifique = (campagne: CampagneApiResponse): campagne is CampagneApiResponse & { generic: false } => {
-  return !campagne.generic;
-};
-
-/**
- * Vérifie si une campagne a une référence
- */
-const hasCampagneGeneriqueId = (campagne: CampagneApiResponse): campagne is CampagneApiResponse & { campagneGeneriqueId: string } => {
-  return "campagneGeneriqueId" in campagne;
-};
-
 export class CampagneSpecifiqueMapper {
   /**
    * Convertit une réponse de l'API en données de formulaire
@@ -63,6 +49,7 @@ export class CampagneSpecifiqueMapper {
         cohortId: campagne.cohortId,
         createdAt: campagne.createdAt,
         updatedAt: campagne.updatedAt,
+        generic: false,
         // TODO: Ajouter la partie des données de la campagne générique
         // car les champs sont portés par compagneGenericId (campagne parent)
         nom: "",
@@ -77,6 +64,7 @@ export class CampagneSpecifiqueMapper {
     // Si c'est une campagne sans référence, on garde tous les champs
     return {
       id: campagne.id,
+      generic: false,
       nom: campagne.nom,
       type: campagne.type,
       listeDiffusionId: campagne.listeDiffusionId,

@@ -3,7 +3,7 @@ import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip } 
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId } from "snu-lib";
 
 /**
  * Interface pour une campagne spécifique sans référence
@@ -20,6 +20,7 @@ export interface CampagneSpecifiqueFormData {
   contexte?: string;
   cohortId: string;
   campagneGeneriqueId?: string;
+  generic: false;
   readonly createdAt?: string;
   readonly updatedAt?: string;
 }
@@ -86,7 +87,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
   };
 
   const isNotSaved = isDirty && !isSubmitting;
-  const hasCampagneGenerique = campagneData.campagneGeneriqueId !== undefined;
+  const hasCampagneGenerique = hasCampagneGeneriqueId(campagneData);
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
@@ -99,7 +100,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 <div className="flex flex-col gap-2">
                   <div className="text-xl font-medium">{campagneData.nom}</div>
                   {hasCampagneGenerique ? (
-                    <a href={`/plan-marketing/campagnes-generiques?id=${watch("id")}`} className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                    <a href={`/plan-marketing/campagnes-generiques?id=${campagneData.id}`} className="text-blue-600 hover:underline text-sm flex items-center gap-1">
                       Editer la campagne globale
                       <HiPencil className="w-4 h-4" />
                     </a>
@@ -171,7 +172,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 )}
               />
               {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-              <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
+              <a href={`/email-preview/${campagneData.templateId}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
                 Voir l'aperçu
                 <HiOutlineEye className="ml-1" size={18} />
               </a>

@@ -1,6 +1,5 @@
-import { CampagneType } from "snu-lib";
+import { CampagneType, isCampagneWithRef, hasCampagneGeneriqueId, isCampagneGenerique } from "snu-lib";
 import { CampagneModel, CampagneSpecifiqueModel, CampagneGeneriqueModel, CreateCampagneModel } from "../core/Campagne.model";
-import { isCampagneWithRef } from "../core/utils/CampagneTypeGuards";
 
 export class CampagneMapper {
     /**
@@ -10,7 +9,7 @@ export class CampagneMapper {
      */
     static toModel(document: CampagneType): CampagneModel {
         // Cas 1 : Campagne spécifique avec référence - on ne garde que les champs minimaux
-        if (!document.generic && document.campagneGeneriqueId) {
+        if (!isCampagneGenerique(document) && hasCampagneGeneriqueId(document)) {
             return {
                 id: document._id.toString(),
                 generic: false,

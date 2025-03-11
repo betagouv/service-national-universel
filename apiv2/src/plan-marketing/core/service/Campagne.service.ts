@@ -3,7 +3,7 @@ import { CampagneModel, CreateCampagneModel } from "@plan-marketing/core/Campagn
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
-import { isCampagneWithRef } from "../utils/CampagneTypeGuards";
+import { isCampagneWithRef } from "snu-lib";
 
 @Injectable()
 export class CampagneService {
