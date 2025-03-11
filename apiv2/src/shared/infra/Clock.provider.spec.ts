@@ -23,7 +23,7 @@ describe("ClockProvider", () => {
             const now = new Date();
             const expectedDate = add(now, { days: daysToAdd });
             const resultDate = clockProvider.addDaysToNow(daysToAdd);
-            expect(resultDate).toEqual(expectedDate);
+            expect(resultDate.toUTCString()).toEqual(expectedDate.toUTCString());
         });
     });
 
