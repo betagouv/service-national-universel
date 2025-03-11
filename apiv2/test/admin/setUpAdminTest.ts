@@ -56,6 +56,7 @@ import { FileProvider } from "@shared/infra/File.provider";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { testDatabaseProviders } from "../testDatabaseProvider";
+import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -105,6 +106,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         ],
         providers: [
             ClasseService,
+            Phase1Service,
             AffectationService,
             InscriptionService,
             SimulationAffectationHTSService,

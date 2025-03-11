@@ -3,17 +3,26 @@ import { DesistementRoutes } from "snu-lib";
 import { buildRequest } from "@/utils/buildRequest";
 
 const DesistementService = {
-  getDesistementPreview: async (sessionId: string, affectationTaskId: string) => {
-    return await buildRequest<DesistementRoutes["GetPreview"]>({
-      path: "/desistement/{sessionId}/preview/{affectationTaskId}",
+  getDesistement: async (sessionId: string) => {
+    return await buildRequest<DesistementRoutes["GetDesistement"]>({
+      path: "/desistement/{sessionId}",
       method: "GET",
-      params: { sessionId, affectationTaskId },
+      params: { sessionId },
       target: "API_V2",
     })();
   },
-  postDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
-    return await buildRequest<DesistementRoutes["Post"]>({
-      path: "/desistement/{sessionId}",
+  postSimulationDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
+    return await buildRequest<DesistementRoutes["PostSimuler"]>({
+      path: "/desistement/{sessionId}/simulation",
+      method: "POST",
+      params: { sessionId },
+      payload: { affectationTaskId: taskId },
+      target: "API_V2",
+    })();
+  },
+  postValiderDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
+    return await buildRequest<DesistementRoutes["PostValider"]>({
+      path: "/desistement/{sessionId}/valider",
       method: "POST",
       params: { sessionId },
       payload: { affectationTaskId: taskId },

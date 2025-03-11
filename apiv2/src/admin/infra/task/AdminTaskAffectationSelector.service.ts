@@ -23,11 +23,13 @@ import { ValiderAffectationCLE } from "@admin/core/sejours/phase1/affectation/Va
 import { SimulationAffectationCLEDromComTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromComTask.model";
 import { SimulationAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLEDromCom";
 import { ValiderAffectationCLEDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationCLEDromCom";
-import { DesisterPostAffectationTaskModel } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectationTask.model";
-import { DesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/DesisterPostAffectation";
+import { ValiderDesisterPostAffectationTaskModel } from "@admin/core/sejours/phase1/desistement/ValiderDesisterPostAffectationTask.model";
+import { ValiderDesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { SimulationAffectationHTSDromCom } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSDromCom";
 import { ValiderAffectationHTSDromCom } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 import { ValiderAffectationHTSDromComTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromComTask.model";
+import { SimulationDesisterPostAffectationTaskModel } from "@admin/core/sejours/phase1/desistement/SimulationDesisterPostAffectationTask.model";
+import { SimulationDesisterPostAffectation } from "@admin/core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
 
 @Injectable()
 export class AdminTaskAffectationSelectorService {
@@ -40,7 +42,8 @@ export class AdminTaskAffectationSelectorService {
         private readonly validerAffectationCle: ValiderAffectationCLE,
         private readonly simulationAffectationCLEDromCom: SimulationAffectationCLEDromCom,
         private readonly validerAffectationCLEDromCom: ValiderAffectationCLEDromCom,
-        private readonly desisterPostAffectation: DesisterPostAffectation,
+        private readonly validerDesisterPostAffectation: ValiderDesisterPostAffectation,
+        private readonly simulationDesisterPostAffectation: SimulationDesisterPostAffectation,
         private readonly adminTaskRepository: AdminTaskRepository,
     ) {}
     async handleAffectation(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
@@ -200,18 +203,23 @@ export class AdminTaskAffectationSelectorService {
                 }
                 break;
 
-            case TaskName.DESISTEMENT_POST_AFFECTATION:
-                const desistementPostAffectationTask: DesisterPostAffectationTaskModel = task;
-                const affectationTask = await this.adminTaskRepository.findById(
-                    desistementPostAffectationTask.metadata!.parameters!.affectationTaskId,
+            case TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION:
+                const simulationDesistementTask: SimulationDesisterPostAffectationTaskModel = task;
+                const simulationDesistementResult = await this.simulationDesisterPostAffectation.execute(
+                    simulationDesistementTask.metadata!.parameters!,
                 );
-                if (!affectationTask) {
-                    throw new Error("Affectation task not found");
-                }
-                const desistementPostAffectationResult = await this.desisterPostAffectation.execute({
-                    sessionId: desistementPostAffectationTask.metadata!.parameters!.sessionId,
-                    rapportKey: affectationTask.metadata?.results.rapportKey,
-                });
+                results = {
+                    ...simulationDesistementResult.analytics,
+                    rapportKey: simulationDesistementResult.rapportFile.Key,
+                };
+                break;
+
+            case TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER:
+                const validerDesistementTask: ValiderDesisterPostAffectationTaskModel = task;
+
+                const desistementPostAffectationResult = await this.validerDesisterPostAffectation.execute(
+                    validerDesistementTask.metadata!.parameters!,
+                );
                 results = desistementPostAffectationResult;
                 break;
 

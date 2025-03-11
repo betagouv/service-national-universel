@@ -7,9 +7,9 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
-export default function DesistementButton({ sessionId, taskId, onClose, disabled }: { sessionId: string; taskId: string; onClose: () => void; disabled: boolean }) {
+export default function SimulationDesistementButton({ sessionId, taskId, onClose, disabled }: { sessionId: string; taskId: string; onClose: () => void; disabled: boolean }) {
   const { isPending, mutate } = useMutation({
-    mutationFn: () => DesistementService.postDesistement({ sessionId, taskId }),
+    mutationFn: () => DesistementService.postSimulationDesistement({ sessionId, taskId }),
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
       queryClient.invalidateQueries({ queryKey: ["desistement"] });

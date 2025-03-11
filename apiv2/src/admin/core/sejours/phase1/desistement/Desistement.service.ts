@@ -1,15 +1,12 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { PreviewDesisterTaskResult, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ValiderAffectationRapportData } from "../affectation/ValiderAffectationHTS";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { Transactional } from "@nestjs-cls/transactional";
-import { ClsService } from "nestjs-cls";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification";
-import { JeuneService } from "../../jeune/Jeune.service";
-import { TaskGateway } from "@task/core/Task.gateway";
 import { AffectationService } from "../affectation/Affectation.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
@@ -19,34 +16,42 @@ export type StatusDesistement = {
     lastCompletedAt: Date;
 };
 
-export type JeuneFilteredForDesistementExport = Pick<
-    JeuneModel,
-    | "id"
-    | "email"
-    | "prenom"
-    | "nom"
-    | "statut"
-    | "statutPhase1"
-    | "sessionNom"
-    | "region"
-    | "departement"
-    | "sessionId"
-    | "youngPhase1Agreement"
->;
-
 @Injectable()
 export class DesistementService {
     constructor(
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
-        private readonly cls: ClsService,
-        private readonly jeuneService: JeuneService,
         private readonly affectationService: AffectationService,
     ) {}
+
+    groupJeunesByReponseAuxAffectations(jeunes: JeuneModel[], sessionId: string) {
+        return jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.sessionId !== sessionId) {
+                    acc.jeunesAutreSession.push(jeune);
+                } else if (jeune.statut === YOUNG_STATUS.WITHDRAWN) {
+                    acc.jeunesDesistes.push(jeune);
+                } else if (jeune.youngPhase1Agreement === "true") {
+                    acc.jeunesConfirmes.push(jeune);
+                } else if (
+                    jeune.statut === YOUNG_STATUS.VALIDATED &&
+                    (jeune.youngPhase1Agreement === "false" || !jeune.youngPhase1Agreement)
+                ) {
+                    acc.jeunesNonConfirmes.push(jeune);
+                }
+                return acc;
+            },
+            {
+                jeunesAutreSession: [] as JeuneModel[],
+                jeunesDesistes: [] as JeuneModel[],
+                jeunesConfirmes: [] as JeuneModel[],
+                jeunesNonConfirmes: [] as JeuneModel[],
+            },
+        );
+    }
 
     async getJeunesIdsFromRapportKey(key: string): Promise<string[]> {
         const affectationFile = await this.fileGateway.downloadFile(key);
@@ -60,18 +65,17 @@ export class DesistementService {
 
     @Transactional()
     async desisterJeunes(jeunes: JeuneModel[], sessionId: string): Promise<number> {
-        const list: JeuneModel[] = [];
+        const jeunesList: JeuneModel[] = [];
         for (const jeune of jeunes) {
-            list.push({
+            jeunesList.push({
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
                 statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 desistementMotif: "Non confirmation de la participation au séjour",
             });
         }
-        this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
-        const res = await this.jeuneGateway.bulkUpdate(list);
-        this.cls.set("user", null);
+
+        const res = await this.jeuneGateway.bulkUpdate(jeunesList);
 
         const lignesDeBusIds = [
             ...new Set(jeunes.map((jeune) => jeune.ligneDeBusId).filter((id): id is string => !!id)),
@@ -120,49 +124,5 @@ export class DesistementService {
                 );
             }
         }
-    }
-
-    async preview({
-        sessionId,
-        affectationTaskId,
-    }: {
-        sessionId: string;
-        affectationTaskId: string;
-    }): Promise<PreviewDesisterTaskResult> {
-        const affectationTask = await this.taskGateway.findById(affectationTaskId);
-        if (!affectationTask) {
-            throw new Error("Affectation task not found");
-        }
-        const ids = await this.getJeunesIdsFromRapportKey(affectationTask.metadata?.results.rapportKey);
-        const jeunes = await this.jeuneGateway.findByIds(ids);
-        const groups = this.jeuneService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
-        return Object.entries(groups).reduce(
-            (acc, [key, value]) => {
-                acc[key] = this.filterFields(value);
-                return acc;
-            },
-            {
-                jeunesNonConfirmes: [] as JeuneFilteredForDesistementExport[],
-                jeunesConfirmes: [] as JeuneFilteredForDesistementExport[],
-                jeunesAutreSession: [] as JeuneFilteredForDesistementExport[],
-                jeunesDesistes: [] as JeuneFilteredForDesistementExport[],
-            },
-        );
-    }
-
-    filterFields(jeunes: JeuneModel[]): JeuneFilteredForDesistementExport[] {
-        return jeunes.map((jeune) => ({
-            id: jeune.id,
-            email: jeune.email,
-            prenom: jeune.prenom,
-            nom: jeune.nom,
-            statut: jeune.statut,
-            statutPhase1: jeune.statutPhase1,
-            sejour: jeune.sessionNom,
-            region: jeune.region,
-            departement: jeune.departement,
-            sessionId: jeune.sessionId,
-            youngPhase1Agreement: jeune.youngPhase1Agreement,
-        }));
     }
 }

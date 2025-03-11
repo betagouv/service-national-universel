@@ -159,7 +159,7 @@ export class SimulationAffectationHTSDromCom implements UseCase<SimulationAffect
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-affectation-hts-dromcom/affectation_simulation_hts-dromcom_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,

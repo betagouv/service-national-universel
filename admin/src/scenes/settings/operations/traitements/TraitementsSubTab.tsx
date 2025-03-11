@@ -2,7 +2,7 @@ import React, { useMemo, useState } from "react";
 import useTraitements from "../shared/useTraitements";
 import { useLocation } from "react-router-dom";
 
-import { CohortDto, DesistementTaskDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
+import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
 import { DataTable } from "@snu/ds/admin";
 
 import ActionCell from "../components/ActionCell";
@@ -81,7 +81,7 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
                 case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
                 case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER:
                   return <BasculeJeuneValidesResultCell simulation={traitement} />;
-                case TaskName.DESISTEMENT_POST_AFFECTATION:
+                case TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER:
                   return <DesistementResultCell traitement={traitement} />;
               }
               return null;

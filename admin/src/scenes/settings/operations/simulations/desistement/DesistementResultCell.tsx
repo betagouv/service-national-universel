@@ -1,8 +1,8 @@
 import React from "react";
-import { DesistementValiderTaskDto } from "snu-lib";
+import { DesistementSimulationTaskDto } from "snu-lib";
 
-export default function DesistementResultCell({ traitement }: { traitement: unknown }) {
-  const desistementTask = traitement as DesistementValiderTaskDto;
+export default function DesistementResultCell({ simulation }: { simulation: unknown }) {
+  const desistementTask = simulation as DesistementSimulationTaskDto;
   return (
     <div className="text-xs leading-4">
       <p>Désistements préalables : {desistementTask.metadata?.results?.jeunesDesistes ?? "--"}</p>
