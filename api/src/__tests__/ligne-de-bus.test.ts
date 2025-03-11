@@ -2,7 +2,17 @@ import { Types } from "mongoose";
 import request from "supertest";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { mockEsClient } from "./helpers/es";
-import { SchemaDeRepartitionModel, LigneToPointModel, CohesionCenterModel, YoungModel, CohortModel, LigneBusModel, PlanTransportModel, PointDeRassemblementModel } from "../models";
+import {
+  SchemaDeRepartitionModel,
+  LigneToPointModel,
+  CohesionCenterModel,
+  YoungModel,
+  CohortModel,
+  LigneBusModel,
+  PlanTransportModel,
+  PointDeRassemblementModel,
+  SessionPhase1Model,
+} from "../models";
 import { dbConnect, dbClose } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
@@ -12,7 +22,12 @@ import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getBusTeamFixture from "./fixtures/busTeam";
 import { ERRORS, ROLES } from "snu-lib";
 import { sendTemplate } from "../brevo";
-import { updatePDRForLine } from "../planDeTransport/ligneDeBus/ligneDeBusService";
+import getNewLigneToPointFixture from "./fixtures/PlanDeTransport/ligneToPoint";
+import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
+import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
+import getNewCohortFixture from "./fixtures/cohort";
+import getPlanDeTransportFixture from "./fixtures/PlanDeTransport/planDeTransport";
+import * as ligneDeBusService from "../planDeTransport/ligneDeBus/ligneDeBusService";
 
 const ObjectId = Types.ObjectId;
 
@@ -26,7 +41,10 @@ const mockModelMethodWithError = (model, method) => {
   });
 };
 
-jest.mock("../planDeTransport/ligneDeBus/ligneDeBusService");
+// jest.mock("../planDeTransport/ligneDeBus/ligneDeBusService", () => ({
+//   updatePDRForLine: jest.fn(),
+// }));
+
 jest.mock("../brevo", () => ({
   sendTemplate: jest.fn(),
 }));
@@ -162,6 +180,7 @@ describe("LigneDeBus", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
+      expect(res.body.data).toBeDefined();
       // expect(res.body.data.name).toBe(ligneBus.name);
       expect(res.body.data.centerDepartureTime).toBe(ligneBus.centerDepartureTime);
       expect(res.body.data.centerArrivalTime).toBe(ligneBus.centerArrivalTime);
@@ -647,9 +666,47 @@ describe("LigneDeBus", () => {
   });
 
   describe("PUT /:id/updatePDRForLine", () => {
-    it("should return 403 if user is not a super admin", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
+    let cohort;
+    let center;
+    let sessionPhase1;
+    let meetingPoint1;
+    let meetingPoint2;
+    let ligneBus;
+    let ligneToPoint;
+    let planDeTransport;
 
+    beforeAll(async () => {
+      cohort = await CohortModel.create(getNewCohortFixture());
+      center = await CohesionCenterModel.create(getNewCohesionCenterFixture());
+      sessionPhase1 = await SessionPhase1Model.create(getNewSessionPhase1Fixture({ cohortId: cohort._id, cohesionCenterId: center._id }));
+      meetingPoint1 = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      meetingPoint2 = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
+      ligneBus = await LigneBusModel.create(
+        getNewLigneBusFixture({ cohort: cohort.name, cohortId: cohort._id, centerId: center._id, sessionId: sessionPhase1._id, meetingPointsIds: [meetingPoint1._id] }),
+      );
+      ligneToPoint = await LigneToPointModel.create({ ...getNewLigneToPointFixture(), lineId: ligneBus._id, meetingPointId: meetingPoint1._id });
+      planDeTransport = await PlanTransportModel.create({
+        ...getPlanDeTransportFixture({
+          busId: ligneBus._id,
+          centerId: center._id,
+          cohortId: cohort._id,
+          cohort: cohort.name,
+        }),
+        _id: new ObjectId(ligneBus._id),
+      });
+      planDeTransport.pointDeRassemblements.push({
+        meetingPointId: meetingPoint1._id,
+        ...meetingPoint1._doc,
+        busArrivalHour: ligneToPoint.busArrivalHour,
+        meetingHour: ligneToPoint.meetingHour,
+        departureHour: ligneToPoint.departureHour,
+        returnHour: ligneToPoint.returnHour,
+        transportType: ligneToPoint.transportType,
+      });
+      await planDeTransport.save();
+    });
+
+    it("should return 403 if user is not a super admin", async () => {
       const res = await request(getAppHelper(userAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
         id: ligneBus._id,
         transportType: "bus",
@@ -668,11 +725,10 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 404 if ligne bus is not found", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      (updatePDRForLine as jest.Mock).mockRejectedValue(new Error(ERRORS.NOT_FOUND));
+      const fakeLigneBus = new LigneBusModel(getNewLigneBusFixture());
 
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`).send({
+        id: fakeLigneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -688,43 +744,7 @@ describe("LigneDeBus", () => {
       expect(res.body.code).toBe("NOT_FOUND");
     });
 
-    it("should update PDR for line successfully", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      (updatePDRForLine as jest.Mock).mockResolvedValue(ligneBus);
-
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
-        sendEmailCampaign: false,
-      });
-
-      expect(res.status).toBe(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data).toBeDefined();
-      expect(updatePDRForLine).toHaveBeenCalledWith(
-        ligneBus._id.toString(),
-        "bus",
-        "08:00",
-        "07:30",
-        "08:30",
-        "18:00",
-        "oldMeetingPointId",
-        "newMeetingPointId",
-        false,
-        expect.objectContaining(userSuperAdmin),
-      );
-    });
-
     it("should return 400 if meeting hour is after departure hour", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      (updatePDRForLine as jest.Mock).mockRejectedValue(new Error(ERRORS.INVALID_BODY));
-
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
         id: ligneBus._id,
         transportType: "bus",
@@ -742,31 +762,7 @@ describe("LigneDeBus", () => {
       expect(res.body.code).toBe("INVALID_BODY");
     });
 
-    it("should return 500 when there's an error", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      (updatePDRForLine as jest.Mock).mockRejectedValue(new Error("Test error"));
-
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
-        sendEmailCampaign: false,
-      });
-
-      expect(res.status).toBe(500);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("SERVER_ERROR");
-    });
-
     it("should return 400 if bus arrival hour is after departure hour", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      (updatePDRForLine as jest.Mock).mockRejectedValue(new Error(ERRORS.INVALID_BODY));
-
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
         id: ligneBus._id,
         transportType: "bus",
@@ -774,22 +770,37 @@ describe("LigneDeBus", () => {
         busArrivalHour: "09:00",
         departureHour: "08:30",
         returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
+        meetingPointId: meetingPoint1._id,
+        newMeetingPointId: meetingPoint2._id,
         sendEmailCampaign: false,
       });
 
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe("INVALID_BODY");
-      expect(updatePDRForLine).toHaveBeenCalled();
+    });
+
+    it("should update PDR for line successfully", async () => {
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+        id: ligneBus._id,
+        transportType: "bus",
+        meetingHour: "08:00",
+        busArrivalHour: "07:30",
+        departureHour: "08:30",
+        returnHour: "18:00",
+        meetingPointId: meetingPoint1._id,
+        newMeetingPointId: meetingPoint2._id,
+        sendEmailCampaign: false,
+      });
+
+      expect(res.status).toBe(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data).toBeDefined();
+      expect(res.body.data.meetingPointsIds).toStrictEqual([meetingPoint2._id.toString()]);
     });
 
     it("should send email campaign when sendEmailCampaign is true", async () => {
-      const ligneBus = await LigneBusModel.create(getNewLigneBusFixture());
-      const mockUpdatedLigneBus = { ...ligneBus.toObject(), _id: ligneBus._id.toString() };
-
-      (updatePDRForLine as jest.Mock).mockResolvedValue(mockUpdatedLigneBus);
+      const updatePDRForLineSpy = jest.spyOn(ligneDeBusService, "updatePDRForLine").mockResolvedValue(ligneBus);
       (sendTemplate as jest.Mock).mockResolvedValue({});
 
       const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
@@ -799,25 +810,26 @@ describe("LigneDeBus", () => {
         busArrivalHour: "07:30",
         departureHour: "08:30",
         returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
+        meetingPointId: meetingPoint1._id,
+        newMeetingPointId: meetingPoint2._id,
         sendEmailCampaign: true,
       });
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
-      expect(updatePDRForLine).toHaveBeenCalledWith(
+      expect(updatePDRForLineSpy).toHaveBeenCalledWith(
         ligneBus._id.toString(),
         "bus",
         "08:00",
         "07:30",
         "08:30",
         "18:00",
-        "oldMeetingPointId",
-        "newMeetingPointId",
+        meetingPoint1._id.toString(),
+        meetingPoint2._id.toString(),
         true,
         expect.objectContaining(userSuperAdmin),
       );
+      updatePDRForLineSpy.mockRestore();
     });
   });
 });

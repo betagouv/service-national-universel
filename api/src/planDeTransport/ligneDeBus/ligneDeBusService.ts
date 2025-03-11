@@ -17,6 +17,7 @@ import { ERRORS, UserDto, checkTime, BusTeamDto } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
+import { logger } from "../../logger";
 
 const { ObjectId } = Types;
 
@@ -57,7 +58,6 @@ export async function getInfoBus(line: LigneBusDocument) {
       youngCapacity: ligneBus.youngCapacity,
     }))[0];
   }
-
   return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails, mirrorBusDetails };
 }
 
@@ -124,17 +124,26 @@ export const updatePDRForLine = async (
   user: UserDto,
 ) => {
   const ligneBus = await LigneBusModel.findById(ligneBusId);
-  if (!ligneBus) throw new Error("NOT_FOUND");
+  if (!ligneBus) {
+    logger.error(`LigneBus not found ${ligneBusId}`);
+    throw new Error("NOT_FOUND");
+  }
 
   const cohort = await CohortModel.findOne({ name: ligneBus.cohort });
-  if (!cohort) throw new Error("NOT_FOUND");
+  if (!cohort) {
+    logger.error(`Cohort not found ${ligneBus.cohort}`);
+    throw new Error("NOT_FOUND");
+  }
 
   if (checkTime(departureHour, meetingHour) || checkTime(departureHour, busArrivalHour)) {
     throw new Error("INVALID_BODY");
   }
 
   const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneBusId, meetingPointId });
-  if (!ligneToPoint) throw new Error("NOT_FOUND");
+  if (!ligneToPoint) {
+    logger.error(`LigneToPoint not found ${ligneBusId} ${meetingPointId}`);
+    throw new Error("NOT_FOUND");
+  }
 
   ligneToPoint.set({
     transportType,
@@ -155,13 +164,22 @@ export const updatePDRForLine = async (
   }
 
   const planDeTransport = await PlanTransportModel.findById(ligneBusId);
-  if (!planDeTransport) throw new Error("NOT_FOUND");
+  if (!planDeTransport) {
+    logger.error(`PlanTransport not found ${ligneBusId}`);
+    throw new Error("NOT_FOUND");
+  }
 
   const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
-  if (!pointDeRassemblement) throw new Error("NOT_FOUND");
+  if (!pointDeRassemblement) {
+    logger.error(`PointDeRassemblement not found ${newMeetingPointId}`);
+    throw new Error("NOT_FOUND");
+  }
 
   const meetingPoint = planDeTransport.pointDeRassemblements.find((mp) => mp.meetingPointId === meetingPointId);
-  if (!meetingPoint) throw new Error("NOT_FOUND");
+  if (!meetingPoint) {
+    logger.error(`MeetingPoint not found ${meetingPointId}`);
+    throw new Error("NOT_FOUND");
+  }
 
   meetingPoint.set({
     meetingPointId: newMeetingPointId,
