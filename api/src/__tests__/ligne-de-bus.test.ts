@@ -26,7 +26,7 @@ const mockModelMethodWithError = (model, method) => {
   });
 };
 
-jest.mock("../services/LigneDeBusService");
+jest.mock("../planDeTransport/ligneDeBus/ligneDeBusService");
 jest.mock("../brevo", () => ({
   sendTemplate: jest.fn(),
 }));
