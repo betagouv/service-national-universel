@@ -1,0 +1,14 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "RELEASE=$CC_COMMIT_ID node api/src/index.js",
+    "tasks": "RELEASE=$CC_COMMIT_ID RUN_TASKS=true node api/src/index.js"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}

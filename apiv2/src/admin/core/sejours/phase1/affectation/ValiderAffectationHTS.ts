@@ -10,12 +10,11 @@ import { FileGateway } from "@shared/core/File.gateway";
 
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
-import { SejourGateway } from "../sejour/Sejour.gateway";
-
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { AffectationService } from "./Affectation.service";
 import { ValiderAffectationHTSTaskParameters } from "./ValiderAffectationHTSTask.model";
 import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -77,7 +76,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         private readonly validerAffectationHTSService: ValiderAffectationHTSService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
-        @Inject(SejourGateway) private readonly sejoursGateway: SejourGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -204,7 +203,7 @@ export class ValiderAffectationHTS implements UseCase<ValiderAffectationHTSResul
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
 
         // upload du rapport du s3
-        const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(dateAffectation);
         const fileName = `affectation-hts/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,

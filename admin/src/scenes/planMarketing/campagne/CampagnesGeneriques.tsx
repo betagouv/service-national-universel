@@ -5,6 +5,7 @@ import { useQuery } from "@tanstack/react-query";
 import React, { useEffect, useMemo, useState } from "react";
 import CampagneForm, { CampagneDataProps, DraftCampagneDataProps } from "./CampagneForm";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
@@ -19,6 +20,15 @@ export default function CampagnesGeneriques() {
       return await PlanMarketingService.search({ generic: true });
     },
   });
+
+  const { listesDiffusion } = useListeDiffusion();
+
+  const listeDiffusionOptions = useMemo(() => {
+    return listesDiffusion.map((liste) => ({
+      value: liste.id,
+      label: liste.nom,
+    }));
+  }, [listesDiffusion]);
 
   useEffect(() => {
     setCampagnes(campagnesData ?? []);
@@ -68,10 +78,7 @@ export default function CampagnesGeneriques() {
             key={`campagne-${campagne.id}`}
             campagneData={campagne}
             isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
-            listeDiffusionOptions={[
-              { value: "fake-id-1", label: "Fake liste 1" },
-              { value: "fake-id-2", label: "Fake liste 2" },
-            ]}
+            listeDiffusionOptions={listeDiffusionOptions}
             onSave={refetch}
             onDuplicate={(campagneData) => handleDuplicate(campagneData)}
           />

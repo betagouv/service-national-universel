@@ -17,6 +17,7 @@ import { AffectationService } from "./Affectation.service";
 
 import { ValiderAffectationHTSDromComTaskParameters } from "./ValiderAffectationHTSDromComTask.model";
 import { ValiderAffectationHTSService } from "./ValiderAffectationHTS.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type ValiderAffectationRapportData = Array<
     Pick<
@@ -76,6 +77,7 @@ export class ValiderAffectationHTSDromCom implements UseCase<ValiderAffectationH
         private readonly validerAffectationHTSService: ValiderAffectationHTSService,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -158,7 +160,7 @@ export class ValiderAffectationHTSDromCom implements UseCase<ValiderAffectationH
         const fileBuffer = await this.fileGateway.generateExcel({ Affectations: rapportData });
 
         // upload du rapport du s3
-        const timestamp = `${dateAffectation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(dateAffectation);
         const fileName = `affectation-hts-dromcom/affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
