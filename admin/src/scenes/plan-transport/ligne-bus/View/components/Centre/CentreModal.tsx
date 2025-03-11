@@ -75,17 +75,19 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
               <div className="leading-relaxed">
                 <p>Envoyer une campagne d’emailing aux volontaires ({count}) et à leurs représentants légaux.</p>
                 {isCLE && <p>Les référent de classe, chef d’établissement et coordinateurs seront également prévenus.</p>}
-                <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
-                  Visualiser l'aperçu pour les volontaires
-                  <HiExternalLink className="inline-block w-4 h-4 ml-1" />
-                </a>
-                <br />
-                {isCLE && (
-                  <a href={`/email-preview/${templateIdReferent}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
-                    Visualiser l'aperçu pour les référents CLE
+                <div className="mt-2">
+                  <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
+                    Visualiser l'aperçu pour les volontaires
                     <HiExternalLink className="inline-block w-4 h-4 ml-1" />
                   </a>
-                )}
+                  <br />
+                  {isCLE && (
+                    <a href={`/email-preview/${templateIdReferent}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
+                      Visualiser l'aperçu pour les référents CLE
+                      <HiExternalLink className="inline-block w-4 h-4 ml-1" />
+                    </a>
+                  )}
+                </div>
               </div>
             </label>
           </div>

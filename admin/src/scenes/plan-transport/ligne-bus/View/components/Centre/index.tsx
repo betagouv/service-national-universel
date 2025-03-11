@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { canEditLigneBusCenter, CohortType, isBusEditionOpen, LigneBusDto } from "snu-lib";
+import { CohortType, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
@@ -9,6 +9,7 @@ import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdate
 import CentreModal from "./CentreModal";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { EditButton } from "@snu/ds/admin";
+import { getAuthorizationToUpdateCenterOnLine } from "../../authorization";
 
 type Props = {
   bus: LigneBusDto;
@@ -37,13 +38,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     },
   });
 
-  const disabled = !canEditLigneBusCenter(user) || !isBusEditionOpen(user, cohort);
-
-  const tooltipMessage = !canEditLigneBusCenter(user)
-    ? "Vous n'avez pas l'autorisation de modifier la destination d'une ligne de transport."
-    : !isBusEditionOpen(user, cohort)
-      ? "La modification des lignes de transport est fermée sur ce séjour."
-      : "";
+  const { isAuthorized, message } = getAuthorizationToUpdateCenterOnLine(user, cohort);
 
   const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
     if (data.sessionId !== bus.sessionId) {
@@ -68,7 +63,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <p className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</p>
-        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={disabled} reset={reset} tooltipMessage={tooltipMessage} isLoading={isPending} />
+        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!isAuthorized} reset={reset} tooltipMessage={message} isLoading={isPending} />
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8">

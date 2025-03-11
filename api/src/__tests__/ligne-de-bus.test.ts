@@ -10,9 +10,9 @@ import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/poi
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getBusTeamFixture from "./fixtures/busTeam";
-import { updatePDRForLine } from "../services/LigneDeBusService";
 import { ERRORS, ROLES } from "snu-lib";
 import { sendTemplate } from "../brevo";
+import { updatePDRForLine } from "../planDeTransport/ligneDeBus/ligneDeBusService";
 
 const ObjectId = Types.ObjectId;
 
