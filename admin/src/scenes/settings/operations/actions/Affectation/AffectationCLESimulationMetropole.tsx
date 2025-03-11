@@ -26,6 +26,12 @@ export default function AffectationCLESimulationMetropole({ session }: Affectati
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "cle", session._id], // check SimulationCleResultStartButton.tsx and AffectationCLESimulationMetropoleModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "CLE"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "CLE";

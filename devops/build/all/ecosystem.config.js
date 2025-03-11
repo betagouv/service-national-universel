@@ -11,7 +11,7 @@ module.exports = {
       name: 'tasks',
       script: 'api/src/index.js',
       env: {
-        "PORT": 3005,
+        "PORT": 3002,
         "RUN_TASKS": "true"
       }
     },
@@ -19,12 +19,15 @@ module.exports = {
       name: 'apiv2',
       script: 'apiv2/main.js',
       env: {
-        "PORT": 3006
+        "PORT": 3001
       }
     },
     {
       name: 'tasksv2',
       script: 'apiv2/mainJob.js',
+      env: {
+        "PORT": 3003
+      }
     },
     {
       name: 'nginx',

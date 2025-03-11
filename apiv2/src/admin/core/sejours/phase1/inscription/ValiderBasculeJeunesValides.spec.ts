@@ -91,6 +91,8 @@ describe("ValiderBasculeJeunesValides", () => {
                 {
                     provide: ClockGateway,
                     useValue: {
+                        now: jest.fn(),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                         formatShort: jest.fn().mockReturnValue("DD/MM/YYYY"),
                     },
                 },

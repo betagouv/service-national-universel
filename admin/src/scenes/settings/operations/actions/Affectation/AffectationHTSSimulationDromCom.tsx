@@ -26,6 +26,12 @@ export default function AffectationHTSSimulationDromCom({ session }: Affectation
   } = useQuery<AffectationRoutes["GetAffectation"]["response"]>({
     queryKey: ["affectation", "hts-dromcom", session._id], // check SimulationCleResultStartButton.tsx and AffectationHTSSimulationDromComModal.tsx queryKey
     queryFn: async () => AffectationService.getAffectation(session._id!, "HTS_DROMCOM"),
+    refetchInterval: (data) => {
+      if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
+        return 1000;
+      }
+      return false;
+    },
   });
 
   const isValidSession = session.type === "VOLONTAIRE";

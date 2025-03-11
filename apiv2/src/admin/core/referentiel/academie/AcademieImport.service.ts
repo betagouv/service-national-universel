@@ -15,11 +15,11 @@ export class AcademieImportService {
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(AcademieGateway) private readonly academieGateway: AcademieGateway,
-    ) { }
+    ) {}
 
     async import(academie: ImportAcademieModel): Promise<AcademieModel> {
         const academieDB = await this.academieGateway.findByCode(academie.code);
-        
+
         if (!academieDB) {
             return this.academieGateway.create(academie);
         }
@@ -27,17 +27,20 @@ export class AcademieImportService {
         if (this.canBeUpdated(academie, academieDB)) {
             return this.academieGateway.update({
                 ...academie,
-                id: academieDB.id
+                id: academieDB.id,
             } as AcademieModel);
         }
 
         return academieDB;
     }
 
-    async processReport(parameters: ReferentielImportTaskParameters, ...reports: AcademieImportRapport[][]): Promise<string> {
+    async processReport(
+        parameters: ReferentielImportTaskParameters,
+        ...reports: AcademieImportRapport[][]
+    ): Promise<string> {
         const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
         const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
             data: fileBuffer,
