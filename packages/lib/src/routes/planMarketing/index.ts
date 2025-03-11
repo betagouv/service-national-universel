@@ -3,24 +3,52 @@ import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 import { ListeDiffusionRoutes } from "./listeDiffusion";
 
-export interface CampagnePayload {
+// Types de base pour les campagnes
+interface CampagneBase {
   id: string;
-  campagneGeneriqueId?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+interface CampagneComplete extends CampagneBase {
   nom: string;
   objet: string;
   contexte?: string;
   templateId: number;
   listeDiffusionId: string;
-  generic: boolean;
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
 }
 
-export type CreateCampagnePayload = Omit<CampagnePayload, "id">;
-export interface CampagneResponse extends CampagnePayload {
+// Types pour les campagnes génériques
+export interface CampagneGeneriquePayload extends CampagneComplete {
+  generic: true;
+}
+
+// Types pour les campagnes spécifiques
+interface CampagneSpecifiqueBase extends CampagneBase {
+  generic: false;
+  cohortId: string;
+}
+
+export interface CampagneSpecifiqueWithoutRefPayload extends CampagneComplete, CampagneSpecifiqueBase {}
+
+export interface CampagneSpecifiqueWithRefPayload extends CampagneSpecifiqueBase {
+  campagneGeneriqueId: string;
+}
+
+export type CampagnePayload = CampagneGeneriquePayload | CampagneSpecifiqueWithoutRefPayload | CampagneSpecifiqueWithRefPayload;
+
+type OmitBaseFields<T> = Omit<T, keyof CampagneBase>;
+export type CreateCampagneGeneriquePayload = OmitBaseFields<CampagneGeneriquePayload>;
+export type CreateCampagneSpecifiqueWithoutRefPayload = OmitBaseFields<CampagneSpecifiqueWithoutRefPayload>;
+export type CreateCampagneSpecifiqueWithRefPayload = OmitBaseFields<CampagneSpecifiqueWithRefPayload>;
+export type CreateCampagnePayload = CreateCampagneGeneriquePayload | CreateCampagneSpecifiqueWithoutRefPayload | CreateCampagneSpecifiqueWithRefPayload;
+
+export type CampagneResponse = CampagnePayload & {
   createdAt: string;
   updatedAt: string;
-}
+};
 
 interface GetPlanMarketingRoute extends BasicRoute {
   method: "GET";
