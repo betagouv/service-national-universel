@@ -31,7 +31,7 @@ export default function CampagnesGeneriques() {
   }, [listesDiffusion]);
 
   useEffect(() => {
-    setCampagnes(campagnesData ?? []);
+    setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
   }, [campagnesData]);
 
   const createNewCampagne = () => {
