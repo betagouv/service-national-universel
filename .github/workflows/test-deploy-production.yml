@@ -141,6 +141,7 @@ jobs:
   
   deploy_production:
     environment: production
+    if: ${{ vars.DEPLOY_ON_CC == 'true' }} # TODO : Remove
     needs: deploy_staging
     runs-on: ubuntu-latest
 
@@ -180,7 +181,7 @@ jobs:
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: ./devops/scripts/cc-watch-deploy.sh
 
-  build_production_docker:
+  build_production_docker:  # TODO : Remove
     needs: [prepare, test]
     runs-on: ubuntu-latest
     strategy:
@@ -212,7 +213,7 @@ jobs:
         run: |
           node build-application-docker.js --push ${{ env.PROD_ENV_NAME }} ${{matrix.app.name}} ${{matrix.app.tag}}
 
-  deploy_production_docker:
+  deploy_production_docker:  # TODO : Remove
     environment: production
     needs: [prepare, deploy_staging, build_production_docker]
     runs-on: ubuntu-latest
