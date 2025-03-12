@@ -695,17 +695,19 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.departSejourMotifComment = undefined;
     }
 
+    const { sessionPhase1Id, ligneId } = young;
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    if (sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
-    if (young.ligneId) {
-      const bus = await LigneBusModel.findById(young.ligneId);
+    if (ligneId) {
+      const bus = await LigneBusModel.findById(ligneId);
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
