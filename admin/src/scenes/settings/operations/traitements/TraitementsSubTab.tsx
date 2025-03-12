@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from "react";
-import useTraitements from "../shared/useTraitements";
+import useTraitements from "../hooks/useTraitements";
 import { useLocation } from "react-router-dom";
 
 import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
@@ -19,6 +19,7 @@ interface TraitementsSubTabProps {
 export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
   const { search } = useLocation();
   const currentAction = new URLSearchParams(search).get("action") || "";
+  const currentId = new URLSearchParams(search).get("id") || "";
 
   const [sort, setSort] = useState<"ASC" | "DESC">("DESC");
   const [filters, setFilters] = useState({
@@ -28,20 +29,22 @@ export default function TraitementsSubTab({ session }: TraitementsSubTabProps) {
     statut: "",
   });
 
-  const { isFetching: isLoading, error, data: traitements } = useTraitements({ sessionId: session._id!, action: currentAction, sort });
+  const { isFetching: isLoading, error, data: traitements } = useTraitements({ sessionId: session._id!, action: filters.action, sort });
 
   const traitementRows = useMemo(() => {
     return (
-      traitements?.map((simu) => ({
-        id: simu.id,
-        data: {
-          ...simu,
-          statut: translateTaskStatus(simu.status),
-          action: translateSimulationName(simu.name),
-          date: formatDateFR(getZonedDate(simu.createdAt)),
-          author: `${simu.metadata?.parameters?.auteur?.prenom || ""} ${simu.metadata?.parameters?.auteur?.nom || ""}`,
-        },
-      })) || []
+      traitements
+        ?.filter((simu) => !currentId || simu.id === currentId)
+        ?.map((simu) => ({
+          id: simu.id,
+          data: {
+            ...simu,
+            statut: translateTaskStatus(simu.status),
+            action: translateSimulationName(simu.name),
+            date: formatDateFR(getZonedDate(simu.createdAt)),
+            author: `${simu.metadata?.parameters?.auteur?.prenom || ""} ${simu.metadata?.parameters?.auteur?.nom || ""}`,
+          },
+        })) || []
     );
   }, [traitements]);
 

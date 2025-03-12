@@ -24,11 +24,23 @@ export default function ActionCell({ session, simulation }: ActionCellProps) {
       case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
         actionName = TaskName.AFFECTATION_HTS_SIMULATION;
         break;
+      case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER:
+        actionName = TaskName.AFFECTATION_HTS_SIMULATION;
+        break;
       case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
         actionName = TaskName.AFFECTATION_CLE_SIMULATION;
         break;
+      case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
+        actionName = TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION;
+        break;
       case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
         actionName = TaskName.BACULE_JEUNES_VALIDES_SIMULATION;
+        break;
+      case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
+        actionName = TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION;
+        break;
+      case TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER:
+        actionName = TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION;
         break;
     }
     if (actionName) {

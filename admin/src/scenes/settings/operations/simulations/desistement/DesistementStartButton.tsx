@@ -37,7 +37,7 @@ export default function DesistementStartButton({ simulation }: DesistementStartB
     [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(desistementStatus?.traitement.status as TaskStatus) ||
     (!!desistementStatus?.traitement?.lastCompletedAt && isBefore(new Date(simulationDesistement.createdAt), new Date(desistementStatus.traitement.lastCompletedAt)));
 
-  const isDisabled = simulationDesistement.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated;
+  const isDisabled = simulationDesistement.status !== TaskStatus.COMPLETED || isLoading || isError || isOutdated || !simulationDesistement.metadata?.results?.jeunesNonConfirmes;
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
@@ -85,6 +85,7 @@ export default function DesistementStartButton({ simulation }: DesistementStartB
               </div>
               <div className="flex flex-col w-full gap-2.5">
                 <h2 className="text-lg leading-7 font-bold m-0">Affectation sélectionnée</h2>
+                <div>Nom du fichier : {simulationDesistement.metadata?.parameters?.affectationFileName || "--"}</div>
               </div>
             </div>
           </div>

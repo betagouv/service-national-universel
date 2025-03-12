@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 import { CohortDto, formatDateFR, TaskName, translateSimulationName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
-import useTraitements from "../../shared/useTraitements";
+import useTraitements from "../../hooks/useTraitements";
 import dayjs from "dayjs";
 import SimulationDesistementButton from "./SimulationDesistementButton";
 

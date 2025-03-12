@@ -23,6 +23,7 @@ import SimulationHtsDromComResultCell from "./affectationHts/SimulationHtsDromCo
 import SimulationHtsDromComResultStartButton from "./affectationHts/SimulationHtsDromComResultStartButton";
 import DesistementResultCell from "./desistement/DesistementResultCell";
 import DesistementStartButton from "./desistement/DesistementStartButton";
+import DesistementActionCell from "./desistement/DesistementActionCell";
 
 interface SimulationsSubTabProps {
   session: CohortDto;
@@ -88,7 +89,12 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
               { key: "date", label: "Date" },
               { key: "author", label: "Auteur" },
             ],
-            renderCell: (simulation) => <ActionCell simulation={simulation} session={session} />,
+            renderCell: (simulation) => {
+              if (simulation.name === TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION) {
+                return <DesistementActionCell simulation={simulation} session={session} />;
+              }
+              return <ActionCell simulation={simulation} session={session} />;
+            },
           },
           {
             key: "metadata",

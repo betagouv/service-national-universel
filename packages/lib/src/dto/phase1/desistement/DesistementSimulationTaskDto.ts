@@ -3,6 +3,7 @@ import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
 export interface DesisterSimulationTaskParameters extends Phase1TaskParameters {
   affectationTaskId: string;
+  affectationFileName: string;
   // TODO en v2: filtrer par département, région, etc.
 }
 
