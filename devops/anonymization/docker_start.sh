@@ -28,17 +28,17 @@ if ! [[ -x "$(command -v clever)" ]]; then
   exit 1
 fi
 
-if [[ $ANONYMIZE_DB == "true" ]]
-then
-  echo "Start anonymization"
-  ./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
-fi
-
 echo "Login to CC"
 clever login --token=$CC_TOKEN --secret=$CC_SECRET
 
 echo "Stop datariver application"
 clever stop --app $DATARIVER_APP_ID
+
+if [[ $ANONYMIZE_DB == "true" ]]
+then
+  echo "Start anonymization"
+  ./anonymize_db.sh $SOURCE_DATABASE_URI $TARGET_DATABASE_URI
+fi
 
 if [[ $DELETE_ES_INDEXES == "true" ]]
 then
