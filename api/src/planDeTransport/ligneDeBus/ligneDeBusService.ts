@@ -13,7 +13,7 @@ import {
 } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto } from "snu-lib";
+import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
@@ -210,7 +210,12 @@ export const updatePDRForLine = async (
       );
 
       if (shouldSendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
-        const updatedYoungs = await YoungModel.find({ ligneId: ligneBusId, meetingPointId: newMeetingPointId });
+        const updatedYoungs = await YoungModel.find({
+          ligneId: ligneBusId,
+          meetingPointId: newMeetingPointId,
+          status: YOUNG_STATUS.VALIDATED,
+          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+        });
         await notifyYoungsAndRlsPDRWasUpdated(updatedYoungs, cohort);
       }
     });
@@ -284,7 +289,7 @@ export const updateSessionForLine = async ({
     await updatePlacesSessionPhase1(session, user);
 
     if (sendCampaign) {
-      const updatedYoungs = await YoungModel.find({ ligneId: ligne._id });
+      const updatedYoungs = await YoungModel.find({ ligneId: ligne._id, status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
       await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
       const classes = await ClasseModel.find({ ligneId: ligne._id });
       for (const classe of classes) {
