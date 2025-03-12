@@ -13,11 +13,12 @@ interface ConfirmChangesModalProps {
   youngsCount: number;
   beforeChangeFormData: PointDeRassemblementFormValueChanges;
   afterChangeFormData: PointDeRassemblementFormValueChanges;
+  loading: boolean;
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
 }
 
-export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount }: ConfirmChangesModalProps) {
+export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount, loading }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
 
   const isBeforeDeparture = cohort ? new Date() < new Date(cohort.dateStart) : false;
@@ -156,7 +157,7 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onCancel} />
-          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" />
+          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" loading={loading} />
         </div>
       }
     />

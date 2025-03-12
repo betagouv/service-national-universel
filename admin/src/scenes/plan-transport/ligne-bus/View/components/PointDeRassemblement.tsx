@@ -356,6 +356,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
           returnHour: data.returnHour || "",
         }}
         youngsCount={youngsCount}
+        loading={isLoading}
       />
     </>
   );
