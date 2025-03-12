@@ -13,7 +13,7 @@ import {
   PointDeRassemblementModel,
   SessionPhase1Model,
 } from "../models";
-import { dbConnect, dbClose } from "./helpers/db";
+import { dbConnect, dbClose, mockTransaction } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/pointDeRassemblement";
@@ -34,6 +34,8 @@ const ObjectId = Types.ObjectId;
 mockEsClient({
   lignebus: [{ _id: "ligneId" }],
 });
+// disable transaction for this test
+mockTransaction();
 
 const mockModelMethodWithError = (model, method) => {
   jest.spyOn(model, method).mockImplementation(() => {
