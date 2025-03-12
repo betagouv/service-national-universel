@@ -8,7 +8,7 @@ import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
 const CAMPAGNE_SPECIFIQUE_QUERY_KEY = "campagnes-specifiques";
 const DEFAULT_SORT = "DESC";
 
-export const useCampagneSpecifique = () => {
+export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
   const queryClient = useQueryClient();
 
   const { mutate: saveCampagne } = useMutation({
@@ -37,11 +37,11 @@ export const useCampagneSpecifique = () => {
   });
 
   const { data: campagnes, isLoading } = useQuery<CampagneSpecifiqueFormData[]>({
-    queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT],
+    queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
     enabled: true,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const response = await PlanMarketingService.search({ generic: false, sort: DEFAULT_SORT });
+      const response = await PlanMarketingService.search({ generic: false, sort: DEFAULT_SORT, cohortId: sessionId });
       return response.map(CampagneSpecifiqueMapper.toFormData);
     },
   });

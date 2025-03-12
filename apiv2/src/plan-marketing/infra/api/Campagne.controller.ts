@@ -33,8 +33,10 @@ export class CampagneController {
         generic?: boolean,
         @Query("sort")
         sort?: "ASC" | "DESC",
+        @Query("cohortId")
+        cohortId?: string,
     ): Promise<CampagneModel[]> {
-        return await this.campagneGateway.search({ generic }, sort);
+        return await this.campagneGateway.search({ generic, cohortId }, sort);
     }
 
     @Put(":id")

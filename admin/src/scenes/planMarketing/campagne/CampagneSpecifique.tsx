@@ -11,7 +11,7 @@ interface CampagneSpecifiqueProps {
 }
 
 export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProps) {
-  const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique();
+  const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
   const [searchTerm, setSearchTerm] = useState("");
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
 

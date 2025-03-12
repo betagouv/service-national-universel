@@ -82,6 +82,7 @@ interface SearchPlanMarketingRoute extends BasicRoute {
   query?: {
     generic?: boolean;
     sort?: "ASC" | "DESC";
+    cohortId?: string;
   };
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }

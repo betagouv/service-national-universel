@@ -1,4 +1,4 @@
-import RadioButton from "@/scenes/phase0/components/RadioButton";
+import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
@@ -43,9 +43,9 @@ export interface CampagneSpecifiqueFormProps {
 
 const recipientOptions = [
   { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes" },
+  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux" },
   { value: DestinataireListeDiffusion.REFERENTS_CLASSES, label: "Référents de classes" },
   { value: DestinataireListeDiffusion.CHEFS_ETABLISSEMENT, label: "Chefs d'établissement" },
-  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux" },
   { value: DestinataireListeDiffusion.CHEFS_CENTRES, label: "Chefs de centres" },
   { value: DestinataireListeDiffusion.COORDINATEURS_CLE, label: "Coordinateurs CLE" },
 ];
@@ -188,7 +188,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 </Tooltip>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-x-8 gap-y-3">
                 <Controller
                   name="destinataires"
                   control={control}
@@ -196,14 +196,13 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                   render={({ field }) => (
                     <>
                       {recipientOptions.map((option) => (
-                        <label key={option.value} className="flex items-center gap-2">
-                          <RadioButton
-                            options={[{ value: option.value, label: "" }]}
-                            value={field.value?.includes(option.value) ? option.value : ""}
-                            onChange={(value) => {
-                              const newValue = value ? [...(field.value || []), option.value] : field.value?.filter((v) => v !== option.value);
-                              field.onChange(newValue);
-                            }}
+                        <label key={option.value} className="flex items-center space-x-3 cursor-pointer">
+                          <Checkbox
+                            checked={field.value?.includes(option.value)}
+                            className={`w-4 h-4 text-blue-600 ${errors.destinataires ? "border-red-500" : ""}`}
+                            onChange={() =>
+                              field.onChange(field.value?.includes(option.value) ? field.value?.filter((v) => v !== option.value) : [...(field.value || []), option.value])
+                            }
                           />
                           <span>{option.label}</span>
                         </label>
