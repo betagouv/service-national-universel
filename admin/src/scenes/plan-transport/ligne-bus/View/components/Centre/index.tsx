@@ -63,7 +63,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <p className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</p>
-        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!isAuthorized} reset={reset} tooltipMessage={message} isLoading={isPending} />
+        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!isAuthorized} onReset={reset} tooltipMessage={message} isLoading={isPending} />
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8">

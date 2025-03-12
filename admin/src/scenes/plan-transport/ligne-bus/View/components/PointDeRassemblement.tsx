@@ -219,7 +219,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
             <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
           </div>
-          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} reset={handleCancelChanges} disabled={!isAuthorized} tooltipMessage={message} />
+          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} onReset={handleCancelChanges} disabled={!isAuthorized} tooltipMessage={message} />
         </div>
         <div className="mt-8 flex flex-col">
           <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">

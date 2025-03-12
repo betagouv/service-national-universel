@@ -8,7 +8,7 @@ type Props = {
   setIsEditing: (value: boolean) => void;
   disabled: boolean;
   isLoading: boolean;
-  reset: () => void;
+  onReset: () => void;
   tooltipMessage?: string;
 };
 
@@ -18,7 +18,7 @@ export default function EditButton({
   setIsEditing,
   disabled,
   isLoading,
-  reset,
+  onReset,
   tooltipMessage = "Modification impossible",
 }: Props) {
   const tooltipId = useId();
