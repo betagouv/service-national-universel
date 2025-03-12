@@ -40,7 +40,6 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         const ids = simulationData.jeunesADesister.map((jeune) => jeune.id);
         const jeunes = await this.jeuneGateway.findByIds(ids);
 
-        //const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
         const groups = this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
 
         const rapportData = Object.entries(groups).reduce(
