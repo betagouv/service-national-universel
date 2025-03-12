@@ -212,9 +212,9 @@ export const updatePDRForLine = async (
       if (shouldSendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
         const updatedYoungs = await YoungModel.find({
           ligneId: ligneBusId,
-          meetingPointId: newMeetingPointId,
+          meetingPointId: meetingPointId,
           status: YOUNG_STATUS.VALIDATED,
-          statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+          statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] },
         });
         await notifyYoungsAndRlsPDRWasUpdated(updatedYoungs, cohort);
       }
