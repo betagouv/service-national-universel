@@ -27,12 +27,12 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
 
     async execute({
         sessionId,
-        desistementTaskId,
+        simulationTaskId,
     }: {
         sessionId: string;
-        desistementTaskId: string;
+        simulationTaskId: string;
     }): Promise<DesisterValiderTaskResult> {
-        const simulationData = await this.getRapportSimulation(desistementTaskId);
+        const simulationData = await this.getRapportSimulation(simulationTaskId);
 
         this.logger.debug("Jeunes à desister: " + simulationData.jeunesADesister.length);
 

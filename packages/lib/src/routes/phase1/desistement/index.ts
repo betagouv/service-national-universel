@@ -10,9 +10,8 @@ interface PostSimulerDesistementRoute extends BasicRoute {
 
 interface PostValiderDesistementRoute extends BasicRoute {
   method: "POST";
-  path: "/desistement/{sessionId}/valider";
-  params: { sessionId: string };
-  payload: { affectationTaskId: string };
+  path: "/desistement/{sessionId}/simulation/{taskId}/valider";
+  params: { sessionId: string; taskId: string };
   response: RouteResponseBodyV2<DesistementValiderTaskDto>;
 }
 

@@ -22,10 +22,9 @@ const DesistementService = {
   },
   postValiderDesistement: async ({ sessionId, taskId }: { sessionId: string; taskId: string }) => {
     return await buildRequest<DesistementRoutes["PostValider"]>({
-      path: "/desistement/{sessionId}/valider",
+      path: "/desistement/{sessionId}/simulation/{taskId}/valider",
       method: "POST",
-      params: { sessionId },
-      payload: { affectationTaskId: taskId },
+      params: { sessionId, taskId },
       target: "API_V2",
     })();
   },

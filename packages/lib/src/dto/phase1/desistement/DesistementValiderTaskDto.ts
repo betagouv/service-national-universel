@@ -2,8 +2,7 @@ import { TaskDto } from "../../taskDto";
 import { Phase1TaskParameters } from "../Phase1HTSTaskDto";
 
 export interface DesisterValiderTaskParameters extends Phase1TaskParameters {
-  affectationTaskId: string;
-  // TODO en v2: filtrer par département, région, etc.
+  simulationTaskId: string;
 }
 
 export type DesisterValiderTaskResult = {

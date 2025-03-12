@@ -3,7 +3,7 @@ import { DesisterValiderTaskResult } from "snu-lib";
 
 export interface ValiderDesisterPostAffectationTaskParameters {
     sessionId: string;
-    desistementTaskId: string;
+    simulationTaskId: string;
 }
 
 export type ValiderDesisterPostAffectationTaskModel = TaskModel<

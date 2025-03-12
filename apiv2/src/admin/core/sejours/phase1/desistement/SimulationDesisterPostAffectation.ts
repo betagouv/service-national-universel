@@ -12,6 +12,8 @@ import {
     RAPPORT_SHEETS,
     RapportData,
 } from "./SimulationDesisterPostAffectationTask.model";
+import { ValiderAffectationHTSDromComTaskModel } from "../affectation/ValiderAffectationHTSDromComTask.model";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 export type SimulationDesistementResult = {
     rapportData: RapportData;
@@ -46,12 +48,16 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
         sessionId: string;
         affectationTaskId: string;
     }): Promise<SimulationDesistementResult> {
-        const affectationTask = await this.taskGateway.findById(affectationTaskId);
-        if (!affectationTask) {
-            throw new Error("Affectation task not found");
+        const affectationTask: ValiderAffectationHTSDromComTaskModel =
+            await this.taskGateway.findById(affectationTaskId);
+        if (!affectationTask.metadata?.results?.rapportKey) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Fichier associé à l'affectation introuvable",
+            );
         }
         const ids = await this.desistementService.getJeunesIdsFromRapportKey(
-            affectationTask.metadata?.results.rapportKey,
+            affectationTask.metadata.results.rapportKey,
         );
         const jeunes = await this.jeuneGateway.findByIds(ids);
         this.logger.log("desistement post affectation nb jeunes", jeunes.length);
