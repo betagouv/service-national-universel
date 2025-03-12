@@ -576,7 +576,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (newYoung.status === "REINSCRIPTION") {
+    if (newYoung.status === YOUNG_STATUS.REINSCRIPTION) {
       newYoung.cohesionStayPresence = undefined;
       newYoung.presenceJDM = undefined;
       newYoung.departSejourAt = undefined;
@@ -679,19 +679,35 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const { withdrawnReason } = newYoung;
       await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
       newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
+      // reset des informations d'affectation
+      newYoung.cohesionCenterId = undefined;
+      newYoung.sessionPhase1Id = undefined;
+      newYoung.meetingPointId = undefined;
+      newYoung.ligneId = undefined;
+      newYoung.hasMeetingInformation = undefined;
+      newYoung.transportInfoGivenByLocal = undefined;
+      newYoung.deplacementPhase1Autonomous = undefined;
+      newYoung.cohesionStayPresence = undefined;
+      newYoung.presenceJDM = undefined;
+      newYoung.departInform = undefined;
+      newYoung.departSejourAt = undefined;
+      newYoung.departSejourMotif = undefined;
+      newYoung.departSejourMotifComment = undefined;
     }
+
+    const { sessionPhase1Id, ligneId } = young;
 
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    if (sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
-    if (young.ligneId) {
-      const bus = await LigneBusModel.findById(young.ligneId);
+    if (ligneId) {
+      const bus = await LigneBusModel.findById(ligneId);
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
