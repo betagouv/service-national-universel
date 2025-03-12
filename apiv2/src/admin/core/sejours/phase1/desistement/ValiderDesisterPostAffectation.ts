@@ -4,8 +4,8 @@ import { ClsService } from "nestjs-cls";
 import { UseCase } from "@shared/core/UseCase";
 import { DesistementService } from "./Desistement.service";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
-import { DesisterValiderTaskResult } from "snu-lib";
-
+import { DesisterValiderTaskResult, MIME_TYPES } from "snu-lib";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 import {
     RAPPORT_SHEETS,
     RapportData,
@@ -21,6 +21,7 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -39,26 +40,49 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         const ids = simulationData.jeunesADesister.map((jeune) => jeune.id);
         const jeunes = await this.jeuneGateway.findByIds(ids);
 
-        const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
-            this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        //const { jeunesAutreSession, jeunesConfirmes, jeunesDesistes, jeunesNonConfirmes } =
+        const groups = this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+
+        const rapportData = Object.entries(groups).reduce(
+            (acc, [key, jeunes]) => {
+                acc[key] = this.desistementService.mapJeunes(jeunes);
+                return acc;
+            },
+            {
+                jeunesNonConfirmes: [],
+                jeunesConfirmes: [],
+                jeunesAutreSession: [],
+                jeunesDesistes: [],
+            } as RapportData,
+        );
 
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
 
-        const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes, sessionId);
+        const jeunesModifies = await this.desistementService.desisterJeunes(rapportData.jeunesNonConfirmes, sessionId);
 
         this.cls.set("user", null);
-        this.logger.debug(`DesistementService: ${jeunesNonConfirmes.length} jeunes désistés`);
+        this.logger.debug(`DesistementService: ${rapportData.jeunesNonConfirmes.length} jeunes désistés`);
 
-        // TODO: Rapport
+        // création du fichier excel de rapport
+        const fileBuffer = await this.desistementService.generateRapportPostDesistement(rapportData);
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
+        const fileName = `desistement/desistement-post-affectation_${sessionId}_${timestamp}.xlsx`;
+        const rapportFile = await this.fileGateway.uploadFile(
+            `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
+            {
+                data: fileBuffer,
+                mimetype: MIME_TYPES.EXCEL,
+            },
+        );
 
-        await this.desistementService.notifierJeunes(jeunesNonConfirmes);
+        await this.desistementService.notifierJeunes(rapportData.jeunesNonConfirmes);
         return {
-            jeunesDesistes: jeunesDesistes.length,
-            jeunesAutreSession: jeunesAutreSession.length,
-            jeunesConfirmes: jeunesConfirmes.length,
-            jeunesNonConfirmes: jeunesNonConfirmes.length,
+            jeunesDesistes: rapportData.jeunesDesistes.length,
+            jeunesAutreSession: rapportData.jeunesAutreSession.length,
+            jeunesConfirmes: rapportData.jeunesConfirmes.length,
+            jeunesNonConfirmes: rapportData.jeunesNonConfirmes.length,
             jeunesModifies,
-            rapportKey: "",
+            rapportKey: `file/admin/sejours/phase1/affectation/${sessionId}/${fileName}`,
         };
     }
 
