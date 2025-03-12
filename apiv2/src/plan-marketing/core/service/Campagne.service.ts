@@ -12,6 +12,15 @@ export class CampagneService {
         @Inject(PlanMarketingGateway) private readonly PlanMarketingGateway: PlanMarketingGateway,
     ) {}
 
+    async findById(id: string) {
+        const campagne = await this.campagneGateway.findById(id);
+        if (!campagne) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+        }
+
+        return campagne;
+    }
+
     async creerCampagne(campagne: CreateCampagneModel) {
         if (isCampagneWithRef(campagne)) {
             return this.campagneGateway.save(campagne);
@@ -25,8 +34,8 @@ export class CampagneService {
     }
 
     async updateCampagne(campagne: CampagneModel) {
-        if (isCampagneWithRef(campagne)) {
-            return this.campagneGateway.update(campagne);
+        if (!("templateId" in campagne)) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA);
         }
 
         const template = await this.PlanMarketingGateway.findTemplateById(campagne.templateId);
@@ -34,5 +43,9 @@ export class CampagneService {
             throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
         }
         return this.campagneGateway.update(campagne);
+    }
+
+    async updateAndRemoveRef(campagne: CampagneModel) {
+        return this.campagneGateway.updateAndRemoveRef(campagne);
     }
 }

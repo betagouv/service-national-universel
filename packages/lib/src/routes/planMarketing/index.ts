@@ -22,7 +22,7 @@ interface CampagneComplete extends CampagneBase {
 
 // Types pour les campagnes génériques
 export interface CampagneGeneriquePayload extends CampagneComplete {
-  generic: true;
+  generic: boolean;
 }
 
 // Types pour les campagnes spécifiques
@@ -45,10 +45,11 @@ export type CreateCampagneSpecifiqueWithoutRefPayload = OmitBaseFields<CampagneS
 export type CreateCampagneSpecifiqueWithRefPayload = OmitBaseFields<CampagneSpecifiqueWithRefPayload>;
 export type CreateCampagnePayload = CreateCampagneGeneriquePayload | CreateCampagneSpecifiqueWithoutRefPayload | CreateCampagneSpecifiqueWithRefPayload;
 
-export type CampagneResponse = CampagnePayload & {
-  createdAt: string;
-  updatedAt: string;
-};
+export type CampagneResponse = CampagneComplete &
+  CampagneSpecifiqueWithRefPayload & {
+    createdAt: string;
+    updatedAt: string;
+  };
 
 interface GetPlanMarketingRoute extends BasicRoute {
   method: "GET";
