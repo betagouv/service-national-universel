@@ -273,7 +273,7 @@ export const updateSessionForLine = async ({
           sessionId: session.id,
           cohesionCenterId: session.cohesionCenterId,
         });
-        await classe.save({ fromUser: user });
+        await classe.save({ fromUser: user, session: transaction });
         if (sendCampaign) await notifyReferentsCLELineWasUpdated(classe);
       }
     });
