@@ -260,7 +260,7 @@ export const updateSessionForLine = async ({
       // Jeunes
       const filter = { ligneId: ligne._id };
       const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
-      await YoungModel.updateMany(filter, updateDoc, { fromUser: user });
+      await YoungModel.updateMany(filter, updateDoc, { fromUser: user, session: transaction });
       if (sendCampaign) {
         const updatedYoungs = await YoungModel.find(filter);
         await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
