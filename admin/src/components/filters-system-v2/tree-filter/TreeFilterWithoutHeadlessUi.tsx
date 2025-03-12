@@ -19,13 +19,13 @@ const useClickOutside = (ref: React.RefObject<HTMLElement>, handler: () => void)
   }, [ref, handler]);
 };
 
-export function TreeFilterWithoutHeadlessUi({ id, treeFilter }: TreeFilterProps) {
+export function TreeFilterWithoutHeadlessUi({ id, treeFilter, showSelectedValues, showSelectedValuesCount }: TreeFilterProps) {
   const [isOpen, setIsOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, () => setIsOpen(false));
 
   return (
-    <TreeFilterProvider flatTree={treeFilter} id={id}>
+    <TreeFilterProvider flatTree={treeFilter} id={id} showSelectedValuesCount={showSelectedValuesCount}>
       <div className="flex flex-col" ref={ref}>
         <div className="relative flex-row">
           <div className="flex items-center gap-2 p-2">
@@ -33,24 +33,23 @@ export function TreeFilterWithoutHeadlessUi({ id, treeFilter }: TreeFilterProps)
               Filtres
             </ButtonPrimary>
           </div>
-          {isOpen && (
-            <div className="absolute left-0 z-10 mt-2 w-65 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
+          {isOpen && treeFilter["0"] && (
+            <div className="absolute left-0 z-10 mt-2 w-64 rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5">
               <div className="px-3 pt-3 text-xs font-light leading-5 text-gray-500">{treeFilter["0"].label}</div>
-              <div className="flex flex-col gap-1 py-2">{treeFilter["0"].childIds?.map((childId) => <InnerLevelTreeFilter key={`${id}-${childId}`} nodeId={childId} />)}</div>
+              <div className="flex flex-col gap-1 py-2">{treeFilter["0"].childIds?.map((childId) => <InnerLevelTreeFilter key={`root-${id}-${childId}`} nodeId={childId} />)}</div>
             </div>
           )}
         </div>
-        <SelectedValues />
+        {showSelectedValues && <SelectedValues />}
       </div>
     </TreeFilterProvider>
   );
 }
 
-function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }) {
+function InnerLevelTreeFilter({ nodeId }: { nodeId: string }) {
   const { id, getNode, deleteNode } = useTreeFilter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
-
   const ref = useRef<HTMLDivElement>(null);
   useClickOutside(ref, () => setIsOpen(false));
 
@@ -60,7 +59,7 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
   if (!item.childIds?.length) {
     return (
       <div className="flex items-center gap-2 p-2 overflow-y-auto hover:bg-gray-100 cursor-pointer">
-        <TreeNodeFilter nodeId={nodeId} />
+        <TreeNodeFilter nodeId={nodeId} key={`tnf-no-childIds-${id}-${nodeId}`} />
       </div>
     );
   }
@@ -78,7 +77,7 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
   return (
     <div className="relative" ref={ref}>
       <div className={`flex w-full cursor-pointer items-center gap-2 p-2 hover:bg-gray-100`} onClick={() => setIsOpen(!isOpen)}>
-        <TreeNodeFilter nodeId={nodeId} />
+        <TreeNodeFilter nodeId={nodeId} key={`tnf-${id}-${nodeId}`} />
       </div>
       {isOpen && (
         <div className={`absolute left-full top-0 z-10 ml-2 w-64 max-h-[500px] ${isLeaf ? "overflow-y-auto" : ""} rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}>
@@ -100,14 +99,14 @@ function InnerLevelTreeFilter({ nodeId }: { nodeId: string; className?: string }
               onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
-          <div className="flex flex-col py-2 v-gap-2">{filteredIds?.map((childId) => <InnerLevelTreeFilter key={`next-level-${id}-${childId}`} nodeId={childId} />)}</div>
+          <div className="flex flex-col py-2 v-gap-2">{filteredIds?.map((childId) => <InnerLevelTreeFilter key={`itl-${id}-nl-${childId}`} nodeId={childId} />)}</div>
         </div>
       )}
     </div>
   );
 }
 
-const SelectedValues = () => {
+export const SelectedValues = () => {
   const { getSelectedItems } = useTreeFilter();
   const selectedItems = getSelectedItems();
 
@@ -116,11 +115,13 @@ const SelectedValues = () => {
       {Object.entries(selectedItems).map(([key, values]) => (
         <div key={`selected-group-${key}`} className="flex flex-row items-center gap-2">
           <span className="text-xs font-semibold text-gray-600">{key}:</span>
-          {values.map((value) => (
-            <div key={`selected-value-${key}-${value}`} className="flex w-fit flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px]">
-              <div className="text-xs font-medium text-gray-700">{value}</div>
-            </div>
-          ))}
+          <div className="flex w-fit flex-row items-center gap-1 rounded-md border-[1px] border-gray-200 py-1.5 pr-1.5 pl-[12px]">
+            {values.map((value) => (
+              <div key={`selected-value-${key}-${value}`} className="flex w-fit flex-row items-center rounded-md gap-1 bg-gray-200 py-1.5 pr-1.5 pl-[12px]">
+                <div className="text-xs font-medium text-gray-700  ">{value}</div>
+              </div>
+            ))}
+          </div>
         </div>
       ))}
     </div>
