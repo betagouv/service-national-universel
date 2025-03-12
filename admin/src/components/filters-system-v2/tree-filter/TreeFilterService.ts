@@ -23,11 +23,9 @@ export const mapAvailableFiltersToTreeFilter = (
 
   // Initialize root node
   flatTree["0"] = {
-    id: "0",
     checked: false,
     label: "Général",
     value: "root",
-    level: 0,
     isLeaf: false,
     childIds: [],
     isRoot: true,
@@ -35,16 +33,12 @@ export const mapAvailableFiltersToTreeFilter = (
   };
 
   const createNode = (label: string, value: string, level: number, groupKey: string, itemWithChildren?: ItemWithChildren, items?: { key: string }[], parentId?: string): string => {
-    const count = items?.length;
     const nodeId = `${groupKey}-${value}`;
 
     flatTree[nodeId] = {
-      id: nodeId,
       checked: false,
       label,
       value,
-      count,
-      level,
       isLeaf: !itemWithChildren && (!items || items.length === 0),
       parentId,
       childIds: [],
@@ -58,11 +52,9 @@ export const mapAvailableFiltersToTreeFilter = (
       const childIds = items.map((child) => {
         const childId = `${groupKey}-${child.key}`;
         flatTree[childId] = {
-          id: childId,
           checked: false,
           label: child.key,
           value: child.key,
-          level: level + 1,
           isLeaf: true,
           parentId: nodeId,
           isRoot: false,
