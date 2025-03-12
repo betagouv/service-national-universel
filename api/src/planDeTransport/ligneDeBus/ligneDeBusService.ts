@@ -241,7 +241,7 @@ export const updateSessionForLine = async ({
         sessionId: session.id,
         centerId: session.cohesionCenterId,
       });
-      await ligne.save({ fromUser: user });
+      await ligne.save({ fromUser: user, session: transaction });
 
       // Plan de transport
       const planDeTransport = await PlanTransportModel.findById(ligne._id);
