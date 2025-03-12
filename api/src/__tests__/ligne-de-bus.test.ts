@@ -674,6 +674,7 @@ describe("LigneDeBus", () => {
     let ligneBus;
     let ligneToPoint;
     let planDeTransport;
+    let payload;
 
     beforeAll(async () => {
       cohort = await CohortModel.create(getNewCohortFixture());
@@ -704,20 +705,21 @@ describe("LigneDeBus", () => {
         transportType: ligneToPoint.transportType,
       });
       await planDeTransport.save();
-    });
-
-    it("should return 403 if user is not a super admin", async () => {
-      const res = await request(getAppHelper(userAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
+      payload = {
         id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
         departureHour: "08:30",
         returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
+        meetingPointId: meetingPoint1._id,
+        newMeetingPointId: meetingPoint2._id,
         sendEmailCampaign: false,
-      });
+      };
+    });
+
+    it("should return 403 if user is not a super admin", async () => {
+      const res = await request(getAppHelper(userAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send(payload);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -726,18 +728,9 @@ describe("LigneDeBus", () => {
 
     it("should return 404 if ligne bus is not found", async () => {
       const fakeLigneBus = new LigneBusModel(getNewLigneBusFixture());
-
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`).send({
-        id: fakeLigneBus._id,
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
-        sendEmailCampaign: false,
-      });
+      const res = await request(getAppHelper(userSuperAdmin))
+        .put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`)
+        .send({ ...payload, id: fakeLigneBus._id });
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -745,17 +738,9 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 400 if meeting hour is after departure hour", async () => {
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "09:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: "oldMeetingPointId",
-        newMeetingPointId: "newMeetingPointId",
-        sendEmailCampaign: false,
-      });
+      const res = await request(getAppHelper(userSuperAdmin))
+        .put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`)
+        .send({ ...payload, meetingHour: "09:00", departureHour: "08:30" });
 
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
@@ -763,17 +748,9 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 400 if bus arrival hour is after departure hour", async () => {
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "07:00",
-        busArrivalHour: "09:00",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: meetingPoint1._id,
-        newMeetingPointId: meetingPoint2._id,
-        sendEmailCampaign: false,
-      });
+      const res = await request(getAppHelper(userSuperAdmin))
+        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
+        .send({ ...payload, busArrivalHour: "09:00", departureHour: "08:30" });
 
       expect(res.status).toBe(400);
       expect(res.body.ok).toBe(false);
@@ -781,17 +758,7 @@ describe("LigneDeBus", () => {
     });
 
     it("should update PDR for line successfully", async () => {
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: meetingPoint1._id,
-        newMeetingPointId: meetingPoint2._id,
-        sendEmailCampaign: false,
-      });
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send(payload);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -802,18 +769,9 @@ describe("LigneDeBus", () => {
     it("should send email campaign when sendEmailCampaign is true", async () => {
       const updatePDRForLineSpy = jest.spyOn(ligneDeBusService, "updatePDRForLine").mockResolvedValue(ligneBus);
       (sendTemplate as jest.Mock).mockResolvedValue({});
-
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send({
-        id: ligneBus._id,
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: meetingPoint1._id,
-        newMeetingPointId: meetingPoint2._id,
-        sendEmailCampaign: true,
-      });
+      const res = await request(getAppHelper(userSuperAdmin))
+        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
+        .send({ ...payload, sendEmailCampaign: true });
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
