@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useMemo, useState } from "react";
 import { TreeNodeFilterType } from "./TreeFilter";
 
 interface TreeFilterContextType {
@@ -10,15 +10,29 @@ interface TreeFilterContextType {
   getSelectedItems: () => Record<string, string[]>;
   getNode: (nodeId: string) => TreeNodeFilterType | undefined;
   deleteNode: (nodeId: string) => void;
+  showSelectedValues?: boolean;
+  showSelectedValuesCount?: boolean;
 }
 
 const TreeFilterContext = createContext<TreeFilterContextType | undefined>(undefined);
 
-export function TreeFilterProvider({ children, flatTree, id }: { children: React.ReactNode; flatTree: Record<string, TreeNodeFilterType>; id: string }) {
+export function TreeFilterProvider({
+  children,
+  flatTree,
+  id,
+  showSelectedValues,
+  showSelectedValuesCount,
+}: {
+  children: React.ReactNode;
+  flatTree: Record<string, TreeNodeFilterType>;
+  id: string;
+  showSelectedValues?: boolean;
+  showSelectedValuesCount?: boolean;
+}) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
   const getNode = (nodeId: string): TreeNodeFilterType | undefined => {
-    return flatTree[nodeId];
+    return { ...flatTree[nodeId] };
   };
 
   const getAllDescendantIds = (nodeId: string): string[] => {
@@ -120,6 +134,20 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
     return result;
   };
 
+  const initSelectedItems = () => {
+    const selectedItemsToInit = new Set<string>();
+    Object.entries(flatTree).forEach(([id, node]) => {
+      if (node.checked) {
+        selectedItemsToInit.add(id);
+      }
+    });
+    setSelectedItems(selectedItemsToInit);
+  };
+
+  useMemo(() => {
+    initSelectedItems();
+  }, [flatTree]);
+
   return (
     <TreeFilterContext.Provider
       value={{
@@ -131,6 +159,8 @@ export function TreeFilterProvider({ children, flatTree, id }: { children: React
         getSelectedItems,
         getNode,
         deleteNode,
+        showSelectedValues,
+        showSelectedValuesCount,
       }}>
       {children}
     </TreeFilterContext.Provider>
