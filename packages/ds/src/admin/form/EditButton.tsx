@@ -32,7 +32,7 @@ export default function EditButton({
           type="reset"
           onClick={() => {
             setIsEditing(false);
-            reset();
+            onReset();
           }}
           disabled={isLoading}
           className={`${className} border-gray-100 text-gray-600 bg-gray-100 hover:border-gray-600`}
