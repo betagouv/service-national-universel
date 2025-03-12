@@ -262,16 +262,12 @@ export const updateSessionForLine = async ({
         centerName: session.nameCentre,
         centerCode: session.codeCentre,
       });
-      await planDeTransport.save({ fromUser: user });
+      await planDeTransport.save({ fromUser: user, session: transaction });
 
       // Jeunes
       const filter = { ligneId: ligne._id };
       const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
       await YoungModel.updateMany(filter, updateDoc, { fromUser: user, session: transaction });
-      if (sendCampaign) {
-        const updatedYoungs = await YoungModel.find(filter);
-        await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
-      }
 
       // Classes
       const classes = await ClasseModel.find({ ligneId: ligne._id });
@@ -281,12 +277,20 @@ export const updateSessionForLine = async ({
           cohesionCenterId: session.cohesionCenterId,
         });
         await classe.save({ fromUser: user, session: transaction });
-        if (sendCampaign) await notifyReferentsCLELineWasUpdated(classe);
       }
     });
 
     await updatePlacesSessionPhase1(currentSessionPhase1, user);
     await updatePlacesSessionPhase1(session, user);
+
+    if (sendCampaign) {
+      const updatedYoungs = await YoungModel.find({ ligneId: ligne._id });
+      await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
+      const classes = await ClasseModel.find({ ligneId: ligne._id });
+      for (const classe of classes) {
+        await notifyReferentsCLELineWasUpdated(classe);
+      }
+    }
   } finally {
     await endSession(transaction);
   }

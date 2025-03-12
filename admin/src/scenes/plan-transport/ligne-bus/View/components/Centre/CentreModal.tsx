@@ -25,9 +25,9 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
   const templateIdReferent = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
   const isCLE = initialData.cohort.includes("CLE");
-  const { data } = useSessions(initialData.cohort);
-  const initialSession = data?.find((s) => s._id === initialData.sessionId);
-  const newSession = data?.find((s) => s._id === formData.sessionId);
+  const { data: sessions } = useSessions(initialData.cohort);
+  const initialSession = sessions?.find((s) => s._id === initialData.sessionId);
+  const newSession = sessions?.find((s) => s._id === formData.sessionId);
 
   const handleConfirm = () => {
     onConfirm(formData, isEmailing);
@@ -97,7 +97,7 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
       footer={
         <div className="grid grid-cols-2 gap-3">
           <Button title="Annuler" type="secondary" onClick={onCancel} className="w-full" />
-          <Button title={isLoading ? "Modification en cours" : "Oui, valider"} onClick={handleConfirm} disabled={isLoading} className="w-full" />
+          <Button title="Oui, valider" loading={isLoading} onClick={handleConfirm} className="w-full" />
         </div>
       }
     />
