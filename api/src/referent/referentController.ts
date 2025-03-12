@@ -576,7 +576,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       }
     }
 
-    if (newYoung.status === "REINSCRIPTION") {
+    if (newYoung.status === YOUNG_STATUS.REINSCRIPTION) {
       newYoung.cohesionStayPresence = undefined;
       newYoung.presenceJDM = undefined;
       newYoung.departSejourAt = undefined;
@@ -679,6 +679,20 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       const { withdrawnReason } = newYoung;
       await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
       newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
+      // reset des informations d'affectation
+      newYoung.cohesionCenterId = undefined;
+      newYoung.sessionPhase1Id = undefined;
+      newYoung.meetingPointId = undefined;
+      newYoung.ligneId = undefined;
+      newYoung.hasMeetingInformation = undefined;
+      newYoung.transportInfoGivenByLocal = undefined;
+      newYoung.deplacementPhase1Autonomous = undefined;
+      newYoung.cohesionStayPresence = undefined;
+      newYoung.presenceJDM = undefined;
+      newYoung.departInform = undefined;
+      newYoung.departSejourAt = undefined;
+      newYoung.departSejourMotif = undefined;
+      newYoung.departSejourMotifComment = undefined;
     }
 
     young.set(newYoung);
