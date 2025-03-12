@@ -67,6 +67,20 @@ export class DesistementService {
                 statut: YOUNG_STATUS.WITHDRAWN,
                 statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 desistementMotif: "Non confirmation de la participation au séjour",
+                // reset des informations d'affectation
+                centreId: undefined,
+                sejourId: undefined,
+                pointDeRassemblementId: undefined,
+                ligneDeBusId: undefined,
+                hasPDR: undefined,
+                transportInfoGivenByLocal: undefined,
+                deplacementPhase1Autonomous: undefined,
+                presenceArrivee: undefined,
+                presenceJDM: undefined,
+                departInform: undefined,
+                departSejourAt: undefined,
+                departSejourMotif: undefined,
+                departSejourMotifComment: undefined,
             });
         }
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
