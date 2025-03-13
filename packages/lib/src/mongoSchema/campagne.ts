@@ -6,6 +6,9 @@ export const CampagneSchema = {
   campagneGeneriqueId: {
     type: String,
   },
+  originalCampagneGeneriqueId: {
+    type: String,
+  },
   nom: {
     type: String,
   },

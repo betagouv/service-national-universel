@@ -39,6 +39,8 @@ export interface CampagneGeneriqueModel extends CampagneComplete {
 export interface CampagneSpecifiqueModelWithoutRef extends CampagneComplete {
     generic: false;
     cohortId: string;
+    campagneGeneriqueId?: undefined;
+    originalCampagneGeneriqueId?: string;
 }
 
 /**
@@ -58,7 +60,15 @@ export type CampagneModel = CampagneGeneriqueModel | CampagneSpecifiqueModel;
 
 // Types pour la création de campagnes
 export type CreateCampagneGeneriqueModel = Omit<CampagneGeneriqueModel, "id" | "createdAt" | "updatedAt">;
-export type CreateCampagneSpecifiqueModelWithoutRef = Omit<CampagneSpecifiqueModelWithoutRef, "id" | "createdAt" | "updatedAt">;
-export type CreateCampagneSpecifiqueModelWithRef = Omit<CampagneSpecifiqueModelWithRef, "id" | "createdAt" | "updatedAt">;
-export type CreateCampagneSpecifiqueModel = CreateCampagneSpecifiqueModelWithoutRef | CreateCampagneSpecifiqueModelWithRef;
+export type CreateCampagneSpecifiqueModelWithoutRef = Omit<
+    CampagneSpecifiqueModelWithoutRef,
+    "id" | "createdAt" | "updatedAt"
+>;
+export type CreateCampagneSpecifiqueModelWithRef = Omit<
+    CampagneSpecifiqueModelWithRef,
+    "id" | "createdAt" | "updatedAt"
+>;
+export type CreateCampagneSpecifiqueModel =
+    | CreateCampagneSpecifiqueModelWithoutRef
+    | CreateCampagneSpecifiqueModelWithRef;
 export type CreateCampagneModel = CreateCampagneGeneriqueModel | CreateCampagneSpecifiqueModel;
