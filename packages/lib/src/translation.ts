@@ -1239,6 +1239,8 @@ export const translateMarketing = (name: string) => {
   switch (name) {
     case "TEMPLATE_NOT_FOUND":
       return "Le template est introuvable";
+    case "LISTE_DIFFUSION_NOT_FOUND":
+      return "La liste de diffusion est introuvable";
     default:
       return name;
   }

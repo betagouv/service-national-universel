@@ -23,6 +23,7 @@ import Loader from "@/components/Loader";
 import EligibilityTab from "./eligibility/EligibilityTab";
 import GeneralTab from "./general/GeneralTab";
 import OperationsTab from "./operations/OperationsTab";
+import MarketingTab from "./marketing/MarketingTab";
 
 export default function Settings() {
   const history = useHistory();
@@ -30,7 +31,7 @@ export default function Settings() {
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
-  const currentTab = (tab || "general") as "general" | "eligibility" | "operations";
+  const currentTab = (tab || "general") as "general" | "eligibility" | "operations" | "marketing";
 
   const [cohort, setCohort] = useState<CohortDto>();
   const [isLoading, setIsLoading] = useState(true);
@@ -105,6 +106,12 @@ export default function Settings() {
             title: "Opérations",
             leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
             content: <OperationsTab session={cohort} />,
+          },
+          {
+            id: "marketing" as const,
+            title: "Marketing",
+            leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
+            content: <MarketingTab session={cohort} />,
           },
         ]
       : []),

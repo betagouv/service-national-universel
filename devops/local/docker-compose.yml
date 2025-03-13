@@ -43,7 +43,6 @@ services:
       - 3001:3000
     environment:
       - REDIS_HOST=redis
-      - BULL_PREFIX=development
     networks:
       - redis
   env-setup:

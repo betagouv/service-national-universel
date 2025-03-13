@@ -23,7 +23,9 @@ export class EmailConsumer extends WorkerHost {
             })
             .catch((error) => {
                 this.logger.error(
-                    `Error sending email template "${job.name}" - ${error.message} - ${error.stack}`,
+                    `Error sending email template "${job.name}" - ${error.message} - ${
+                        error.statusCode
+                    } - ${JSON.stringify(error.body)} ${error.stack}`,
                     EmailConsumer.name,
                 );
                 throw error;

@@ -10,13 +10,13 @@
     "scripts": {
         "dev": "concurrently 'npm run dev:api' 'npm run dev:tasks'",
         "dev:api": "nest start api --debug --watch --preserveWatchOutput",
-        "dev:tasks": "nest start job --debug --watch --preserveWatchOutput",
+        "dev:tasks": "PORT=3006 nest start job --debug --watch --preserveWatchOutput",
         "build": "nest build",
         "format": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"",
         "start": "concurrently 'nest start api' 'nest start job'",
         "start:dev": "concurrently 'npm run start:api' 'npm run start:job'",
         "start:api": "nest start api --debug --watch",
-        "start:job": "nest start job --debug --watch",
+        "start:job": "PORT=3006 nest start job --debug --watch",
         "start:debug": "nest start --debug --watch",
         "start:prod": "node dist/main",
         "lint": "eslint \"{src,apps,libs,test}/**/*.ts\" --fix",
@@ -28,6 +28,9 @@
         "clean": "rm -fr node_modules dist .turbo"
     },
     "dependencies": {
+        "@bull-board/api": "^6.7.10",
+        "@bull-board/express": "^6.7.10",
+        "@bull-board/nestjs": "^6.7.10",
         "@fast-csv/parse": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs-cls/transactional": "^2.4.3",
@@ -45,6 +48,7 @@
         "class-transformer": "^0.5.1",
         "class-validator": "^0.14.1",
         "date-fns": "^3.6.0",
+        "express-basic-auth": "^1.2.1",
         "mongoose": "^8.9.1",
         "mongoose-patch-history": "^2.0",
         "nestjs-cls": "^4.4.1",

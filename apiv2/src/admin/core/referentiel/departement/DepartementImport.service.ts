@@ -15,11 +15,11 @@ export class DepartementImportService {
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(DepartementGateway) private readonly departementGateway: DepartementGateway,
-    ) { }
+    ) {}
 
     async import(departement: ImportDepartementModel): Promise<DepartementModel> {
         const departementDB = await this.departementGateway.findByCode(departement.code);
-        
+
         if (!departementDB) {
             return this.departementGateway.create(departement);
         }
@@ -27,17 +27,20 @@ export class DepartementImportService {
         if (this.canBeUpdated(departement, departementDB)) {
             return this.departementGateway.update({
                 ...departement,
-                id: departementDB.id
+                id: departementDB.id,
             } as DepartementModel);
         }
 
         return departementDB;
     }
 
-    async processReport(parameters: ReferentielImportTaskParameters, ...reports: DepartementImportRapport[][]): Promise<string> {
+    async processReport(
+        parameters: ReferentielImportTaskParameters,
+        ...reports: DepartementImportRapport[][]
+    ): Promise<string> {
         const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
         const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
             data: fileBuffer,

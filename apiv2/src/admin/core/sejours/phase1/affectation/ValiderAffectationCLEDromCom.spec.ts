@@ -25,6 +25,7 @@ import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gatew
 import { YOUNG_STATUS } from "snu-lib";
 import { ValiderAffectationCLEDromCom } from "./ValiderAffectationCLEDromCom";
 import { ValiderAffectationCLEService } from "./ValiderAffectationCLE.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionNom = "2025 CLE 03 Fevrier";
 
@@ -137,6 +138,13 @@ describe("ValiderAffectationCLEDromcom", () => {
                         findById: jest.fn().mockResolvedValue({ id: "pdt1" }),
                         findByIds: jest.fn().mockResolvedValue(mockLignesBus.map((ligne) => ({ id: ligne.id }))),
                         bulkUpdate: jest.fn().mockResolvedValue(1),
+                    },
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                     },
                 },
             ],
