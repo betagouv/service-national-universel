@@ -29,6 +29,7 @@ import { AnalyticsModule } from "src/analytics/analytics.module";
 import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
 import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElastic.repository";
 import { AdminModule } from "@admin/Admin.module";
+import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -67,6 +68,7 @@ import { AdminModule } from "@admin/Admin.module";
             provide: SearchYoungGateway,
             useClass: SearchYoungElasticRepository,
         },
+        EnvoyerCampagne,
     ],
 })
 export class PlanMarketingModule {}

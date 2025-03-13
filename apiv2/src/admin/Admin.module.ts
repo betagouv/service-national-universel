@@ -151,6 +151,7 @@ import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/Cl
         CLASSE_MONGOOSE_ENTITY,
         REFERENT_MONGOOSE_ENTITY,
         ...cleGatewayProviders,
+        ...phase1GatewayProviders,
     ],
 })
 export class AdminModule {

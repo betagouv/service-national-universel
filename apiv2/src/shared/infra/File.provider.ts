@@ -1,9 +1,10 @@
 import { promises as fs } from "fs";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
+import { format, writeToString } from "@fast-csv/format";
 import * as XLSX from "xlsx";
 import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 import { ERRORS } from "snu-lib";
 import { FileGateway } from "@shared/core/File.gateway";
@@ -13,7 +14,14 @@ import { TechnicalException, TechnicalExceptionType } from "./TechnicalException
 // TODO: à déplacer dans le module "file"
 @Injectable()
 export class FileProvider implements FileGateway {
+    private readonly logger: Logger = new Logger(FileProvider.name);
+
     constructor(private readonly config: ConfigService) {}
+    async generateCSV<T>(data: Record<string, any>[]): Promise<string> {
+        this.logger.log(`Generating CSV with ${data.length} rows with column names: ${Object.keys(data?.[0])}`);
+        const csvString = await writeToString(data, { headers: true });
+        return csvString;
+    }
 
     async readFile(filePath: string): Promise<Buffer> {
         return fs.readFile(filePath);

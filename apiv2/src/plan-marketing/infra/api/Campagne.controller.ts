@@ -5,6 +5,7 @@ import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
+import { EnvoyerCampagne } from "@plan-marketing/core/useCase/EnvoyerCampagne";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -13,8 +14,9 @@ export class CampagneController {
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         private readonly campagneService: CampagneService,
         private readonly mettreAJourCampagne: MettreAJourCampagne,
+        private readonly envoyerCampagne: EnvoyerCampagne,
     ) {}
-    
+
     @Post()
     async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
         return await this.campagneService.creerCampagne(dto);
@@ -51,4 +53,8 @@ export class CampagneController {
         await this.campagneGateway.delete(id);
     }
 
+    @Post(":id/send")
+    async send(@Param("id") id: string): Promise<void> {
+        return await this.envoyerCampagne.execute(id);
+    }
 }

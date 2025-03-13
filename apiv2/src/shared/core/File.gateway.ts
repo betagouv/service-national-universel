@@ -23,6 +23,7 @@ export interface FileGateway {
             skipRows?: number;
         },
     ): Promise<T[]>;
+    generateCSV<T>(data: Record<string, any>[]): Promise<string>;
     parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]>;
     generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer>;
     uploadFile(
