@@ -1,4 +1,4 @@
-import { region2zone, SessionPhase1Type } from "snu-lib";
+import { region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
@@ -166,15 +166,23 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
 };
 
 const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped) => {
-  if (sessionCenter.sessionFormule.includes("CLE")) {
-    return sessionCenter.sessionFormule;
-  }
   let snuId = sessionCenter.sessionFormule;
+  if (sessionCenter.sessionFormule.includes("CLE")) {
+    return snuId;
+  }
   const codeRegion = sessionCenter.sejourSnuId.replaceAll(`_${sessionCenter.cohesionCenterMatricule}`, "").replaceAll(`${sessionCenter.sessionFormule}_`, "");
   const region = mapTrigrammeToRegion(codeRegion);
+  if (!region) {
+    return snuId;
+  }
+  // DROM COM
+  if (RegionsHorsMetropole.includes(region)) {
+    return `${snuId}_${codeRegion}`;
+  }
+  // Sejours zonés (A, B, C)
   const zone = region2zone[region!];
   if (zone?.length === 1) {
-    snuId += `_${zone}`;
+    return `${snuId}_${zone}`;
   }
   return snuId;
 };
