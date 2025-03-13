@@ -19,7 +19,7 @@ export interface CampagneDataProps {
   listeDiffusionId: string;
   templateId: number;
   objet: string;
-  generic: true;
+  generic: boolean;
   destinataires: DestinataireListeDiffusion[];
   contexte?: string;
   readonly createdAt?: string;
@@ -27,7 +27,7 @@ export interface CampagneDataProps {
 }
 
 export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
-  generic: true;
+  generic: boolean;
 }
 
 export interface CampagneFormProps {
