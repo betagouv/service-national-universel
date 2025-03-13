@@ -1,3 +1,4 @@
+const { logger } = require("../src/logger");
 const { LigneBusModel } = require("../src/models");
 
 module.exports = {
@@ -44,10 +45,10 @@ module.exports = {
     for (const ligneIncoherente of lignesIncoherentes) {
       const pdrsEtapes = ligneIncoherente.etapesByLigne.map((etape) => etape.meetingPointId);
       if (ligneIncoherente.nbEtapes > ligneIncoherente.nbPdrs) {
-        console.log("Ligne ", ligneIncoherente.id, "modifications pdrs", ligneIncoherente.meetingPointsIds, "=>", pdrsEtapes);
+        logger.info(`Ligne ${ligneIncoherente.id} modifications pdrs ${ligneIncoherente.meetingPointsIds} => ${pdrsEtapes}`);
         await LigneBusModel.updateOne({ _id: ligneIncoherente.id }, { $set: { meetingPointsIds: pdrsEtapes } }, { fromUser: { firstName: "Corrections PDRs", lastName: "" } });
       } else {
-        console.log("Ligne ", ligneIncoherente.id, "n'a pas plus d'étapes que de pdrs", ligneIncoherente.meetingPointsIds, ligneIncoherente.nbPdrs);
+        logger.info(`Ligne ${ligneIncoherente.id} n'a pas plus d'étapes que de pdrs ${ligneIncoherente.meetingPointsIds} ${ligneIncoherente.nbPdrs}`);
       }
     }
   },
