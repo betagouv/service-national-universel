@@ -15,16 +15,26 @@ export type SimulationDesisterPostAffectationTaskModel = TaskModel<
 
 export type JeuneSimulationDesistementRapport = Pick<
     JeuneModel,
+    | "sessionNom"
     | "id"
-    | "email"
     | "prenom"
     | "nom"
-    | "statut"
-    | "statutPhase1"
-    | "sessionNom"
+    | "email"
+    | "genre"
     | "region"
     | "departement"
+    | "statut"
+    | "statutPhase1"
     | "sessionId"
+    | "centreId"
+    | "pointDeRassemblementId"
+    | "ligneDeBusId"
+    | "parent1Nom"
+    | "parent1Prenom"
+    | "parent1Email"
+    | "parent2Nom"
+    | "parent2Prenom"
+    | "parent2Email"
     | "youngPhase1Agreement"
 >;
 
@@ -37,8 +47,8 @@ export type RapportData = {
 
 export const RAPPORT_SHEETS = {
     RESUME: "Résumé",
-    A_DESITER: "A désister",
-    CONFIRMATION_PARTICIPATION: "Confirmations de participation",
-    CHANGEMENTS_SEJOUR: "Changements de séjour",
-    DESITEMENT_PREALABLE: "Desistements préalables",
+    A_DESITER: "Jeunes désistés",
+    CONFIRMATION_PARTICIPATION: "ont confirmé leur séjour",
+    CHANGEMENTS_SEJOUR: "ont changé de séjour",
+    DESITEMENT_PREALABLE: "se sont désistés en amont",
 };

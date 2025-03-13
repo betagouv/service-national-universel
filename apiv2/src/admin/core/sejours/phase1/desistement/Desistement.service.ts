@@ -133,16 +133,26 @@ export class DesistementService {
 
     mapJeunes(jeunes: JeuneModel[]): JeuneSimulationDesistementRapport[] {
         return jeunes.map((jeune) => ({
+            sejour: jeune.sessionNom,
             id: jeune.id,
-            email: jeune.email,
             prenom: jeune.prenom,
             nom: jeune.nom,
+            email: jeune.email,
+            sexe: jeune.genre,
+            departement: jeune.departement,
+            region: jeune.region,
             statut: jeune.statut,
             statutPhase1: jeune.statutPhase1,
-            sejour: jeune.sessionNom,
-            region: jeune.region,
-            departement: jeune.departement,
             sessionId: jeune.sessionId,
+            "centre d'affectation": jeune.centreId,
+            "PDR d'affectation": jeune.pointDeRassemblementId,
+            Ligne: jeune.ligneDeBusId,
+            "RL1 Nom": jeune.parent1Nom,
+            "RL1 Prénom": jeune.parent1Prenom,
+            "RL1 Email": jeune.parent1Email,
+            "RL2 Nom": jeune.parent2Nom || "",
+            "RL2 Prénom": jeune.parent2Prenom || "",
+            "RL2 Email": jeune.parent2Email || "",
             youngPhase1Agreement: jeune.youngPhase1Agreement,
         }));
     }
@@ -167,11 +177,11 @@ export class DesistementService {
                     Total: rapportData.jeunesAutreSession.length,
                 },
                 {
-                    Groupe: "Volontaires confirmés",
+                    Groupe: "Volontaires ayant confirmés leur séjour",
                     Total: rapportData.jeunesConfirmes.length,
                 },
                 {
-                    Groupe: "Volontaires à désister",
+                    Groupe: "Volontaires désistés par ce traitement",
                     Total: rapportData.jeunesNonConfirmes.length,
                 },
             ],
