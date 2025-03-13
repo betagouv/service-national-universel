@@ -196,7 +196,7 @@ export const updatePDRForLine = async (
 
       await planDeTransport.save({ fromUser: user, session: transaction });
 
-      const youngUpdateResult = await YoungModel.updateMany(
+      await YoungModel.updateMany(
         {
           ligneId: ligneBusId,
           meetingPointId: meetingPointId,
@@ -296,7 +296,11 @@ export const updateSessionForLine = async ({
     await updatePlacesSessionPhase1(session, user);
 
     if (sendCampaign) {
-      const updatedYoungs = await YoungModel.find({ ligneId: ligne._id, status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
+      const updatedYoungs = await YoungModel.find({
+        ligneId: ligne._id,
+        status: YOUNG_STATUS.VALIDATED,
+        statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] },
+      });
       await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
       const classes = await ClasseModel.find({ ligneId: ligne._id });
       for (const classe of classes) {
