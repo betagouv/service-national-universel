@@ -42,7 +42,6 @@ export class CampagneController {
     @Put(":id")
     async update(@Param("id") id: string, @Body() dto: UpdateCampagneDto): Promise<CampagneModel | null> {
         return await this.mettreAJourCampagne.execute(dto);
-        // return await this.campagneService.updateCampagne(dto);
     }
 
     @Delete(":id")

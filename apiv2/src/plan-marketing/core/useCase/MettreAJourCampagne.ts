@@ -25,7 +25,6 @@ export class MettreAJourCampagne implements UseCase<CampagneModel | null> {
                 id: retrievedCampagne.id,
                 generic: false,
                 cohortId: retrievedCampagne.cohortId,
-                campagneGeneriqueId: undefined,
                 originalCampagneGeneriqueId: retrievedCampagne.campagneGeneriqueId,
                 nom: (campagne as CampagneSpecifiqueModelWithoutRef).nom,
                 objet: (campagne as CampagneSpecifiqueModelWithoutRef).objet,
