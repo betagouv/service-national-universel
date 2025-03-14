@@ -13,12 +13,11 @@ interface ConfirmChangesModalProps {
   youngsCount: number;
   beforeChangeFormData: PointDeRassemblementFormValueChanges;
   afterChangeFormData: PointDeRassemblementFormValueChanges;
-  loading: boolean;
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
 }
 
-export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount, loading }: ConfirmChangesModalProps) {
+export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
 
   const isBeforeDeparture = cohort ? new Date() < new Date(cohort.dateStart) : false;
@@ -34,7 +33,7 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
   }
 
-  const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
+  const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.PHASE_1_CHANGEMENT_PDR;
 
   const handleConfirm = () => {
     onConfirm(isEmailing);
@@ -157,7 +156,7 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onCancel} />
-          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" loading={loading} />
+          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" />
         </div>
       }
     />

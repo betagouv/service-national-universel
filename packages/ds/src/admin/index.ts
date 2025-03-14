@@ -9,7 +9,6 @@ import Label from "./form/Label";
 import Select, { SelectOption } from "./form/Select/Select";
 export { default as CollapsableSelectSwitcher } from "./form/CollapsableSelectSwitcher";
 export { default as SectionSwitcher } from "./form/SectionSwitcher";
-import EditButton from "./form/EditButton";
 
 // Layout
 import Container from "./layout/Container";
@@ -38,7 +37,6 @@ export {
   InputNumber,
   InputPhone,
   Label,
-  EditButton,
 
   // Layout
   Container,
