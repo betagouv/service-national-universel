@@ -6,6 +6,7 @@ export interface CampagneGateway {
     search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]>;
     update(campagne: CampagneModel): Promise<CampagneModel | null>;
     delete(id: string): Promise<void>;
+    updateAndRemoveRef(campagne: CampagneModel): Promise<CampagneModel | null>;
 }
 
 export const CampagneGateway = Symbol("CampagneGateway");

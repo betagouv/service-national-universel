@@ -4,6 +4,7 @@ import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
+import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -11,6 +12,7 @@ export class CampagneController {
     constructor(
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         private readonly campagneService: CampagneService,
+        private readonly mettreAJourCampagne: MettreAJourCampagne,
     ) {}
 
     @Post()
@@ -33,13 +35,15 @@ export class CampagneController {
         generic?: boolean,
         @Query("sort")
         sort?: "ASC" | "DESC",
+        @Query("cohortId")
+        cohortId?: string,
     ): Promise<CampagneModel[]> {
-        return await this.campagneGateway.search({ generic }, sort);
+        return await this.campagneGateway.search({ generic, cohortId }, sort);
     }
 
     @Put(":id")
     async update(@Param("id") id: string, @Body() dto: UpdateCampagneDto): Promise<CampagneModel | null> {
-        return await this.campagneService.updateCampagne(dto);
+        return await this.mettreAJourCampagne.execute(dto);
     }
 
     @Delete(":id")

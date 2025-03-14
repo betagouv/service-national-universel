@@ -21,11 +21,15 @@ export interface CampagneDataProps {
   objet: string;
   generic: boolean;
   destinataires: DestinataireListeDiffusion[];
+  contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
 }
 
-export interface DraftCampagneDataProps extends Partial<CampagneDataProps> {}
+export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
+  generic: boolean;
+}
+
 export interface CampagneFormProps {
   campagneData: DraftCampagneDataProps;
   isDupliquerCampagneDisabled: boolean;

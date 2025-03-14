@@ -1,50 +1,148 @@
-import { CampagneType } from "snu-lib";
-import { CampagneModel, CreateCampagneModel } from "../core/Campagne.model";
+import { CampagneType, isCampagneWithRef, hasCampagneGeneriqueId, isCampagneGenerique } from "snu-lib";
+import {
+    CampagneModel,
+    CampagneSpecifiqueModel,
+    CampagneGeneriqueModel,
+    CreateCampagneModel,
+} from "../core/Campagne.model";
 
 export class CampagneMapper {
+    /**
+     * Convertit un document en modèle métier
+     * @param document Document de la base de données
+     * @returns Modèle métier typé selon le cas d'utilisation
+     */
     static toModel(document: CampagneType): CampagneModel {
-        return {
+        // Cas 1 : Campagne spécifique avec référence - on ne garde que les champs minimaux
+        if (!isCampagneGenerique(document) && hasCampagneGeneriqueId(document)) {
+            return {
+                id: document._id.toString(),
+                generic: false,
+                cohortId: document.cohortId!,
+                campagneGeneriqueId: document.campagneGeneriqueId,
+                createdAt: document.createdAt,
+                updatedAt: document.updatedAt,
+            } as CampagneSpecifiqueModel;
+        }
+
+        // Champs communs pour les autres cas
+        const baseModel = {
             id: document._id.toString(),
-            campagneGeneriqueId: document.campagneGeneriqueId,
             nom: document.nom,
             objet: document.objet,
             contexte: document.contexte,
             templateId: document.templateId,
             listeDiffusionId: document.listeDiffusionId,
-            generic: document.generic,
             destinataires: document.destinataires,
             type: document.type,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
+
+        // Cas 2 : Campagne générique - tous les champs + generic: true
+        if (document.generic) {
+            return {
+                ...baseModel,
+                generic: true,
+            } as CampagneGeneriqueModel;
+        }
+
+        // Cas 3 : Campagne spécifique sans référence - tous les champs + cohortId
+        return {
+            ...baseModel,
+            generic: false,
+            cohortId: document.cohortId!,
+        } as CampagneSpecifiqueModel;
     }
 
+    /**
+     * Convertit un modèle métier en entité pour la mise à jour en base
+     * @param model Modèle métier
+     * @returns Entité pour la base de données
+     */
     static toEntity(model: CampagneModel): Omit<CampagneType, "createdAt" | "updatedAt"> {
-        return {
+        // Cas 1 : Campagne spécifique avec référence - uniquement les champs minimaux
+        if (isCampagneWithRef(model)) {
+            return {
+                _id: model.id,
+                generic: false,
+                cohortId: model.cohortId,
+                campagneGeneriqueId: model.campagneGeneriqueId,
+            } as Omit<CampagneType, "createdAt" | "updatedAt">;
+        }
+
+        // Champs communs pour les autres cas
+        const baseEntity = {
             _id: model.id,
-            campagneGeneriqueId: model.campagneGeneriqueId,
             nom: model.nom,
             objet: model.objet,
             contexte: model.contexte,
             templateId: model.templateId,
             listeDiffusionId: model.listeDiffusionId,
-            generic: model.generic,
             destinataires: model.destinataires,
             type: model.type,
+            generic: model.generic,
+        };
+
+        // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
+        if (model.generic) {
+            return {
+                ...baseEntity,
+                cohortId: undefined,
+                campagneGeneriqueId: undefined,
+            };
+        }
+
+        // Cas 3 : Campagne spécifique sans référence - tous les champs + cohortId
+        return {
+            ...baseEntity,
+            cohortId: model.cohortId,
+            campagneGeneriqueId: undefined,
+            originalCampagneGeneriqueId: model.originalCampagneGeneriqueId,
         };
     }
 
+    /**
+     * Convertit un modèle de création en entité pour l'insertion en base
+     * @param model Modèle de création
+     * @returns Entité pour la base de données
+     */
     static toEntityCreate(model: CreateCampagneModel): Omit<CampagneType, "_id" | "createdAt" | "updatedAt"> {
-        return {
-            campagneGeneriqueId: model.campagneGeneriqueId,
+        // Cas 1 : Campagne spécifique avec référence - uniquement les champs minimaux
+        if (isCampagneWithRef(model)) {
+            return {
+                generic: false,
+                cohortId: model.cohortId,
+                campagneGeneriqueId: model.campagneGeneriqueId,
+            } as Omit<CampagneType, "_id" | "createdAt" | "updatedAt">;
+        }
+
+        // Champs communs pour les autres cas
+        const baseEntity = {
             nom: model.nom,
             objet: model.objet,
             contexte: model.contexte,
             templateId: model.templateId,
             listeDiffusionId: model.listeDiffusionId,
-            generic: model.generic,
             destinataires: model.destinataires,
             type: model.type,
+            generic: model.generic,
+        };
+
+        // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
+        if (model.generic) {
+            return {
+                ...baseEntity,
+                cohortId: undefined,
+                campagneGeneriqueId: undefined,
+            };
+        }
+
+        // Cas 3 : Campagne spécifique sans référence - tous les champs + cohortId
+        return {
+            ...baseEntity,
+            cohortId: model.cohortId,
+            campagneGeneriqueId: undefined,
         };
     }
 }
