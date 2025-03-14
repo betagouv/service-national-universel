@@ -30,6 +30,9 @@ jobs:
 
       - name: App - Fetch Build Secrets
         id: secrets
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           secrets=$(clever env --app ${{ vars.CC_APPLICATION_ID_CI }})
           echo "prod_registry=$prod_registry" >> $GITHUB_OUTPUT
