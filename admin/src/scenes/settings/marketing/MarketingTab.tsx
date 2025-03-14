@@ -7,5 +7,5 @@ interface MarketingTabProps {
 }
 
 export default function MarketingTab({ session }: MarketingTabProps) {
-  return <CampagneSpecifique sessionId={session._id!} />;
+  return <CampagneSpecifique session={session} />;
 }

@@ -14,7 +14,7 @@ export class CampagneController {
         private readonly campagneService: CampagneService,
         private readonly mettreAJourCampagne: MettreAJourCampagne,
     ) {}
-
+    
     @Post()
     async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
         return await this.campagneService.creerCampagne(dto);
@@ -50,4 +50,5 @@ export class CampagneController {
     async delete(@Param("id") id: string): Promise<void> {
         await this.campagneGateway.delete(id);
     }
+
 }
