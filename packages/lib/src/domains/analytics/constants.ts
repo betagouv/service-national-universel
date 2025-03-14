@@ -6,6 +6,7 @@ export interface SearchParams {
   size?: number;
   sortField?: string;
   sortOrder?: "asc" | "desc";
+  full?: boolean;
 }
 
 export interface SearchTerm {

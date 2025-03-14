@@ -35,6 +35,7 @@ export class CampagneMapper {
             listeDiffusionId: document.listeDiffusionId,
             destinataires: document.destinataires,
             type: document.type,
+            envois: document.envois,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
@@ -82,6 +83,7 @@ export class CampagneMapper {
             destinataires: model.destinataires,
             type: model.type,
             generic: model.generic,
+            envois: model.envois || [],
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -107,7 +109,9 @@ export class CampagneMapper {
      * @param model Modèle de création
      * @returns Entité pour la base de données
      */
-    static toEntityCreate(model: CreateCampagneModel): Omit<CampagneType, "_id" | "createdAt" | "updatedAt"> {
+    static toEntityCreate(
+        model: CreateCampagneModel,
+    ): Omit<CampagneType, "_id" | "createdAt" | "updatedAt" | "envois"> {
         // Cas 1 : Campagne spécifique avec référence - uniquement les champs minimaux
         if (isCampagneWithRef(model)) {
             return {

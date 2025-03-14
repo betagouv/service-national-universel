@@ -3,7 +3,7 @@ import { DatabaseModule } from "@infra/Database.module"; // TO REMOVE ?
 import { JwtAuthModule } from "@infra/JwtAuth.module";
 // import { databaseProviders } from "@infra/Database.provider"; // TO REMOVE ?
 import { QueueModule } from "@infra/Queue.module";
-import { Logger, MiddlewareConsumer, Module, RequestMethod } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, RequestMethod, forwardRef } from "@nestjs/common";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { ContactProducer } from "@notification/infra/email/Contact.producer";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
@@ -19,10 +19,13 @@ import { AddUserToRequestMiddleware } from "./infra/iam/auth/AddUserToRequest.mi
 import { AuthProvider } from "./infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "./infra/iam/auth/JwtToken.service";
 import { ContactGateway } from "./infra/iam/Contact.gateway";
-import { referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
+import { REFERENT_MONGOOSE_ENTITY, referentMongoProviders } from "./infra/iam/provider/ReferentMongo.provider";
 import { ClasseController } from "./infra/sejours/cle/classe/api/Classe.controller";
-import { classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
-import { etablissementMongoProviders } from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
+import { CLASSE_MONGOOSE_ENTITY, classeMongoProviders } from "./infra/sejours/cle/classe/provider/ClasseMongo.provider";
+import {
+    ETABLISSEMENT_MONGOOSE_ENTITY,
+    etablissementMongoProviders,
+} from "./infra/sejours/cle/etablissement/provider/EtablissementMongo.provider";
 import { gatewayProviders as cleGatewayProviders } from "./infra/sejours/cle/initProvider/gateway";
 import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phase1/initProvider/gateway";
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
@@ -66,6 +69,8 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/DesisterPostAffectation";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { ClasseGateway } from "./core/sejours/cle/classe/Classe.gateway";
+import { ClasseRepository } from "./infra/sejours/cle/classe/repository/mongo/ClasseMongo.repository";
 
 @Module({
     imports: [
@@ -85,7 +90,7 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
         NotificationModule,
         QueueModule,
         TaskModule,
-        PlanMarketingModule,
+        // forwardRef(() => PlanMarketingModule),
         ReferentielModule,
     ],
     controllers: [
@@ -139,6 +144,14 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
         ...jeuneGatewayProviders,
         ...referentielUseCaseProviders,
         ...serviceProvider,
+    ],
+    exports: [
+        ClsModule,
+        ETABLISSEMENT_MONGOOSE_ENTITY,
+        CLASSE_MONGOOSE_ENTITY,
+        REFERENT_MONGOOSE_ENTITY,
+        ...cleGatewayProviders,
+        ...phase1GatewayProviders,
     ],
 })
 export class AdminModule {

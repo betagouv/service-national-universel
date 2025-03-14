@@ -33,7 +33,7 @@ export default () => ({
         monitorSecret: _env(envStr, "BROKER_MONITOR_SECRET"),
     },
     email: {
-        provider: _env(envStr, "EMAIL_PROVIDER", "brevo"), // MAIL_TRANSPORT in v1
+        provider: _env(envStr, "EMAIL_PROVIDER", "mock"), // MAIL_TRANSPORT in v1
         apiKey: _env(envStr, "EMAIL_SERVICE_API_KEY"), // SENDINBLUEKEY in v1
         smtpHost: _env(envStr, "SMTP_HOST", "localhost"),
         smtpPort: _env(envInt, "SMTP_PORT", 1025),

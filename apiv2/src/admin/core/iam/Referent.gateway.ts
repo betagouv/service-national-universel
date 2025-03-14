@@ -13,6 +13,7 @@ export interface ReferentGateway {
     generateInvitationTokenById(id: string): Promise<ReferentModel>;
     delete(id: string): Promise<void>;
     findByRoleAndEtablissement(role: string, etablissementId?: string, search?: string): Promise<ReferentModelLight[]>;
+    findByCohesionCenterIds(cohesionCenterIds: string[]): Promise<ReferentModel[]>;
 }
 
 export const ReferentGateway = Symbol("ReferentGateway");
