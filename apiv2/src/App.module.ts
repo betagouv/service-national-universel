@@ -8,7 +8,9 @@ import { AdminModule } from "./admin/Admin.module";
 import { CorrelationIdMiddleware } from "./shared/infra/CorrelationId.middleware.js";
 import { LoggerRequestMiddleware } from "./shared/infra/LoggerRequest.middleware";
 import { HealthCheckController } from "@infra/HealthCheck.controller";
-import { PlanMarketingModule } from './plan-marketing/plan-marketing.module';
+import { PlanMarketingModule } from "./plan-marketing/plan-marketing.module";
+import { AnalyticsModule } from "./analytics/analytics.module";
+import { RouterModule } from "@nestjs/core";
 
 @Module({
     imports: [
@@ -19,6 +21,13 @@ import { PlanMarketingModule } from './plan-marketing/plan-marketing.module';
         AdminModule,
         QueueModule,
         PlanMarketingModule,
+        AnalyticsModule,
+        RouterModule.register([
+            {
+                path: "analytics",
+                module: AnalyticsModule,
+            },
+        ]),
     ],
     controllers: [HealthCheckController],
     providers: [Logger],
