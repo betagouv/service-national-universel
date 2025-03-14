@@ -35,9 +35,9 @@ jobs:
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           secrets=$(clever env --app ${{ vars.CC_APPLICATION_ID_CI }})
-          echo "prod_registry=$prod_registry" >> $GITHUB_OUTPUT
+          echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      - name: Build and push
+      - name: App - Build and push
         env:
           APP_NAME: app
         uses: docker/build-push-action@v6
