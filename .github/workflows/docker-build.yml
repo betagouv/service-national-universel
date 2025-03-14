@@ -34,7 +34,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APPLICATION_ID_CI }} | tail -n +2)
+          secrets=$(clever env --app ${{ vars.CC_APPLICATION_ID_CI }} | tail -n +2 | sed 's/"/""/g)
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: App - Build and push
