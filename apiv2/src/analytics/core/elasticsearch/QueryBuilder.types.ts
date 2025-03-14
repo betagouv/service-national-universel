@@ -5,6 +5,7 @@ export interface ESSearchQuery<T> {
         size?: number;
         query: ESQuery;
         sort?: Array<{ [key in NestedKeys<T>]?: { order: "asc" | "desc" } }>;
+        _source?: string[] | boolean;
     };
 }
 
@@ -35,6 +36,7 @@ export interface ESFilterQuery {
 export interface SearchParams {
     searchTerm?: string;
     filters?: Record<string, string | string[]>;
+    sourceFields?: string[];
     page?: number;
     size?: number;
     sortField?: string;

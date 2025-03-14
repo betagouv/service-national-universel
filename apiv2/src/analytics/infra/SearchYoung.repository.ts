@@ -10,7 +10,9 @@ export class SearchYoungRepository implements SearchYoungGateway {
     constructor(private readonly elasticsearchService: ElasticsearchService) {}
 
     async searchYoungForListeDiffusion(params: SearchParams): Promise<SearchYoungResult> {
-        const queryBuilder = new ElasticsearchQueryBuilder<YoungType>("young").setPagination(params.page, params.size);
+        const queryBuilder = new ElasticsearchQueryBuilder<YoungType>("young")
+            .setPagination(params.page, params.size)
+            .setSourceFields(params.sourceFields); // Only return these fields
 
         if (params.filters) {
             queryBuilder.setFilters(params.filters);

@@ -59,6 +59,12 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
+    setSourceFields(fields: string[] | undefined): this {
+        if (!fields) return this;
+        this.query.body._source = fields;
+        return this;
+    }
+
     build(): ESSearchQuery<T> {
         return this.query;
     }
