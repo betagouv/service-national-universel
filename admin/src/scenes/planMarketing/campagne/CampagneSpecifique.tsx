@@ -5,6 +5,7 @@ import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 interface CampagneSpecifiqueProps {
   sessionId: string;
@@ -12,7 +13,6 @@ interface CampagneSpecifiqueProps {
 
 export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProps) {
   const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
-  const [searchTerm, setSearchTerm] = useState("");
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
 
   const { listesDiffusion } = useListeDiffusion();
@@ -23,6 +23,12 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
       label: liste.nom,
     }));
   }, [listesDiffusion]);
+
+  const allCampagnes = useMemo(() => {
+    return draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
+  }, [campagnes, draftCampagne]);
+
+  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(allCampagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const createNewCampagne = () => {
     const newCampagne: DraftCampagneSpecifiqueFormData = {
@@ -46,13 +52,6 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
       },
     );
   };
-
-  const filteredCampagnes = useMemo(() => {
-    const allCampagnes = draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
-    return allCampagnes
-      .filter((campagne) => campagne.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !campagne.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [campagnes, searchTerm, draftCampagne]);
 
   const isNouvelleCampagneDisabled = useMemo(() => {
     return draftCampagne !== null;

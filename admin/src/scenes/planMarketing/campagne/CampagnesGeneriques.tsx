@@ -6,10 +6,10 @@ import React, { useEffect, useMemo, useState } from "react";
 import CampagneForm, { CampagneDataProps, DraftCampagneDataProps } from "./CampagneForm";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const isNouvelleCampagneDisabled = useMemo(() => {
     return campagnes.some((campagne) => campagne.id === undefined);
   }, [campagnes]);
@@ -34,6 +34,8 @@ export default function CampagnesGeneriques() {
     setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
   }, [campagnesData]);
 
+  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(campagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
+
   const createNewCampagne = () => {
     const newCampagne: DraftCampagneDataProps = {
       type: CampagneJeuneType.VOLONTAIRE,
@@ -51,12 +53,6 @@ export default function CampagnesGeneriques() {
     };
     setCampagnes((prev) => [newCampagne, ...prev]);
   };
-
-  const filteredCampagnes = useMemo(() => {
-    return campagnes
-      .filter((campagne) => campagne.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !campagne.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [campagnes, searchTerm]);
 
   return (
     <>
