@@ -27,7 +27,12 @@ export class CampagneMongoRepository implements CampagneGateway {
     }
 
     async update(campagne: CampagneModel): Promise<CampagneModel | null> {
-        const updated = await this.campagneModel.findByIdAndUpdate(campagne.id, campagne, { new: true });
+        // Le mapper est nécessaire pour garantir la cohérence des différents types de campagnes:
+        // - Pour une campagne générique : tous les champs sont conservés
+        // - Pour une campagne spécifique sans référence : tous les champs + cohortId sont conservés
+        // - Pour une campagne spécifique avec référence : seuls generic, cohortId et campagneGeneriqueId sont conservés, les autres sont effacés
+        const entityToUpdate = CampagneMapper.toEntity(campagne);
+        const updated = await this.campagneModel.findByIdAndUpdate(campagne.id, entityToUpdate, { new: true });
         return updated ? CampagneMapper.toModel(updated) : null;
     }
 

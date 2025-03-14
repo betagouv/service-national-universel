@@ -19,13 +19,17 @@ export interface CampagneDataProps {
   listeDiffusionId: string;
   templateId: number;
   objet: string;
-  generic: boolean;
+  generic: true;
   destinataires: DestinataireListeDiffusion[];
+  contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
 }
 
-export interface DraftCampagneDataProps extends Partial<CampagneDataProps> {}
+export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
+  generic: true;
+}
+
 export interface CampagneFormProps {
   campagneData: DraftCampagneDataProps;
   isDupliquerCampagneDisabled: boolean;
