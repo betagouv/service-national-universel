@@ -56,4 +56,7 @@ export default () => ({
     marketing: {
         folderId: _env(envInt, "MARKETING_FOLDER_ID", 1886),
     },
+    elastic: {
+        url: _env(envStr, "ES_ENDPOINT", "http://localhost:9200"),
+    },
 });
