@@ -1,5 +1,10 @@
 import { CampagneType, isCampagneWithRef, hasCampagneGeneriqueId, isCampagneGenerique } from "snu-lib";
-import { CampagneModel, CampagneSpecifiqueModel, CampagneGeneriqueModel, CreateCampagneModel } from "../core/Campagne.model";
+import {
+    CampagneModel,
+    CampagneSpecifiqueModel,
+    CampagneGeneriqueModel,
+    CreateCampagneModel,
+} from "../core/Campagne.model";
 
 export class CampagneMapper {
     /**
@@ -93,6 +98,7 @@ export class CampagneMapper {
             ...baseEntity,
             cohortId: model.cohortId,
             campagneGeneriqueId: undefined,
+            originalCampagneGeneriqueId: model.originalCampagneGeneriqueId,
         };
     }
 
