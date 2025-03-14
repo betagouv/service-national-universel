@@ -17,6 +17,7 @@ export interface ESQuery {
     bool: {
         must: Array<ESMustQuery>;
         filter?: Array<ESFilterQuery>;
+        should?: Array<ESMustQuery>;
     };
 }
 
@@ -24,23 +25,21 @@ export interface ESMustQuery {
     multi_match?: {
         query: string;
         fields: string[];
+        type?: "best_fields" | "most_fields" | "cross_fields" | "phrase" | "phrase_prefix";
+        fuzziness?: "AUTO";
+        operator?: "or" | "and";
+    };
+    bool: {
+        should: Array<any>;
+        minimum_should_match: number;
     };
     match_all?: Record<string, never>;
     terms?: Record<string, string[]>;
+    match?: Record<string, { query: string; fuzziness?: "AUTO" }>;
 }
 
 export interface ESFilterQuery {
     terms: Record<string, string[]>;
-}
-
-export interface SearchParams {
-    searchTerm?: string;
-    filters?: Record<string, string | string[]>;
-    sourceFields?: string[];
-    page?: number;
-    size?: number;
-    sortField?: string;
-    sortOrder?: "asc" | "desc";
 }
 
 export interface ESSearchResponse<T> {

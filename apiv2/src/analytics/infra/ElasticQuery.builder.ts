@@ -1,4 +1,5 @@
-import { ESSearchQuery, SearchParams, NestedKeys } from "./QueryBuilder.types";
+import { SearchTerm } from "snu-lib";
+import { ESSearchQuery, NestedKeys } from "./ElasticQuery";
 
 export class ElasticsearchQueryBuilder<T> {
     private query: ESSearchQuery<T>;
@@ -23,26 +24,51 @@ export class ElasticsearchQueryBuilder<T> {
     }
 
     setSort(field: NestedKeys<T>, order: "asc" | "desc"): this {
+        if (!field) {
+            return this;
+        }
         const sortObject = { [`${field}.keyword`]: { order } } as { [key in NestedKeys<T>]: { order: "asc" | "desc" } };
         this.query.body.sort = [sortObject];
         return this;
     }
 
-    setSearchTerm(searchTerm: string, fields: string[]): this {
-        if (searchTerm) {
-            this.query.body.query.bool.must.push({
-                multi_match: {
-                    query: searchTerm,
-                    fields,
-                },
-            });
-        } else {
-            this.query.body.query.bool.must.push({ match_all: {} });
+    setSearchTerm(searchTerm: SearchTerm | undefined): this {
+        if (!searchTerm?.value) {
+            return this;
         }
+
+        const should = searchTerm.fields.flatMap((field) => [
+            {
+                wildcard: {
+                    [`${field}.keyword`]: {
+                        value: `${searchTerm.value}*`,
+                    },
+                },
+            },
+            {
+                wildcard: {
+                    [`${field}.keyword`]: {
+                        value: `*${searchTerm.value}`,
+                    },
+                },
+            },
+        ]);
+
+        this.query.body.query.bool.must.push({
+            bool: {
+                should,
+                minimum_should_match: 1,
+            },
+        });
+
         return this;
     }
 
-    setFilters(filters: Record<string, string | string[]>): this {
+    setFilters(filters: Record<string, string | string[]> | undefined): this {
+        if (!filters) {
+            return this;
+        }
+
         if (!this.query.body.query.bool.filter) {
             this.query.body.query.bool.filter = [];
         }
@@ -60,7 +86,9 @@ export class ElasticsearchQueryBuilder<T> {
     }
 
     setSourceFields(fields: string[] | undefined): this {
-        if (!fields) return this;
+        if (!fields) {
+            return this;
+        }
         this.query.body._source = fields;
         return this;
     }

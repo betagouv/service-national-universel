@@ -1,8 +1,8 @@
 import { Module } from "@nestjs/common";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import { ElasticsearchModule } from "@nestjs/elasticsearch";
 import { SearchYoungGateway } from "./core/SearchYoung.gateway";
-import { SearchYoungRepository } from "./infra/SearchYoung.repository";
-import { ConfigModule, ConfigService } from "@nestjs/config";
+import { SearchYoungElasticRepository } from "./infra/SearchYoungElastic.repository";
 import { SearchYoungController } from "./infra/api/SearchYoung.controller";
 
 @Module({
@@ -18,7 +18,7 @@ import { SearchYoungController } from "./infra/api/SearchYoung.controller";
     providers: [
         {
             provide: SearchYoungGateway,
-            useClass: SearchYoungRepository,
+            useClass: SearchYoungElasticRepository,
         },
     ],
     controllers: [SearchYoungController],

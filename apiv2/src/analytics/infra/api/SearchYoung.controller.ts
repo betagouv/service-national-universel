@@ -1,13 +1,16 @@
-import { Body, Controller, Get, Inject, Post, Query } from "@nestjs/common";
+import { Body, Controller, Inject, Post, UseGuards } from "@nestjs/common";
 import { SearchYoungGateway, SearchYoungResult } from "src/analytics/core/SearchYoung.gateway";
-import { SearchYoungDto } from "./dto/SearchYoung.dto";
+import { SearchYoungDto } from "./dto/SearchYoung.validation";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
+import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 
 @Controller("/search-young")
+@UseGuards(SuperAdminGuard, AdminGuard)
 export class SearchYoungController {
     constructor(@Inject(SearchYoungGateway) private readonly searchYoungGateway: SearchYoungGateway) {}
 
     @Post()
     async searchYoung(@Body() query: SearchYoungDto): Promise<SearchYoungResult> {
-        return this.searchYoungGateway.searchYoungForListeDiffusion(query);
+        return this.searchYoungGateway.searchYoung(query);
     }
 }

@@ -1,11 +1,21 @@
-import { IsOptional, IsString, IsInt, Min, IsObject, IsIn } from "class-validator";
+import { IsOptional, IsString, IsInt, Min, IsObject, IsIn, ValidateNested } from "class-validator";
 import { Transform, Type } from "class-transformer";
-import { SearchParams } from "src/analytics/core/elasticsearch/QueryBuilder.types";
+import { SearchParams, SearchTerm } from "snu-lib";
+
+class SearchTermDto implements SearchTerm {
+    @IsString()
+    value: string;
+
+    @IsString({ each: true })
+    fields: string[];
+}
 
 export class SearchYoungDto implements SearchParams {
     @IsOptional()
-    @IsString()
-    searchTerm?: string;
+    @IsObject()
+    @ValidateNested()
+    @Type(() => SearchTermDto)
+    searchTerm?: SearchTermDto;
 
     @IsOptional()
     @IsInt()
@@ -21,14 +31,14 @@ export class SearchYoungDto implements SearchParams {
 
     @IsOptional()
     @IsObject()
-    @Transform(({ value }) => {
-        try {
-            return typeof value === "string" ? JSON.parse(value) : value;
-        } catch {
-            return value;
-        }
-    })
+    @ValidateNested()
+    @Type(() => Object)
     filters?: Record<string, string | string[]>;
+
+    @IsOptional()
+    @IsString({ each: true })
+    @Type(() => String)
+    sourceFields?: string[];
 
     @IsOptional()
     @IsString()
