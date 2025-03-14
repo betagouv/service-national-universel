@@ -1,37 +1,32 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { ConfigService } from "@nestjs/config";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { TaskName, TaskStatus } from "snu-lib";
-import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-
-//@Deprecated("Utiliser CreerListeDiffusion et ImporterContacts")
-@Injectable()
-export class ImporterEtCreerListeDiffusion implements UseCase<void> {
-    private readonly logger: Logger = new Logger(ImporterEtCreerListeDiffusion.name);
+import { ConfigService } from "@nestjs/config";
+import { TaskName, TaskStatus } from "snu-lib";
+import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
+import { CreerListeDiffusion } from "./CreerListeDiffusion";
+Injectable();
+export class CreerListeDiffusionEtImporterContacts implements UseCase<void> {
+    private readonly logger: Logger = new Logger(CreerListeDiffusionEtImporterContacts.name);
 
     constructor(
         @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-        @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        private readonly creerListeDiffusion: CreerListeDiffusion,
         private readonly config: ConfigService,
     ) {}
-
-    async execute(nomListe: string, campagneId: string, pathFile: string): Promise<void> {
-        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}, pathFile: ${pathFile}`);
+    async execute(nomListe: string, campagneId: string): Promise<void> {
+        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
         const campagne = await this.planMarketingGateway.findCampagneById(campagneId);
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
 
-        await this.planMarketingGateway.deleteOldestListeDiffusion();
-
-        // TODO : Veiller à récupérer le bon filePath => Eric
-        const file = await this.fileGateway.downloadFile(pathFile);
-        const contacts = file.Body.toString();
+        // Créer la liste de diffusion
+        const contacts = "";
 
         const processId = await this.planMarketingGateway.importerContacts(
             nomListe,

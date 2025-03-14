@@ -14,7 +14,7 @@ export class PlanMarketingMockProvider implements PlanMarketingGateway {
             resolve({ id: 42 });
         });
     }
-    importerContacts(nomListe: string, contacts: any, folderId: number, notifyUrl: string): Promise<number> {
+    importerContacts(nomListe: string, contacts: string, folderId: number, notifyUrl: string): Promise<number> {
         Logger.log(`[MOCK] Importing contacts to liste diffusion: ${nomListe}`, "PlanMarketingMockProvider");
 
         return new Promise((resolve, reject) => {
