@@ -1,9 +1,9 @@
 import CampagneSpecifique from "@/scenes/planMarketing/campagne/CampagneSpecifique";
 import React from "react";
-import { CohortType } from "snu-lib";
+import { CohortDto } from "snu-lib";
 
 interface MarketingTabProps {
-  session: CohortType;
+  session: CohortDto;
 }
 
 export default function MarketingTab({ session }: MarketingTabProps) {
