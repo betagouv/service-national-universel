@@ -23,9 +23,14 @@ import { ListeDiffusionGateway } from "./core/gateway/ListeDiffusion.gateway";
 import { ListeDiffusionMongoRepository } from "./infra/ListeDiffusionMongo.repository";
 import { listeDiffusionMongoProviders } from "./infra/ListeDiffusion.provider";
 import { MettreAJourCampagne } from "./core/useCase/MettreAJourCampagne";
+import { CreerListeDiffusion } from "./core/useCase/CreerListeDiffusion";
+import { CreerListeDiffusionEtImporterContacts } from "./core/useCase/CreerListeDiffusionEtImporterContacts";
+import { AnalyticsModule } from "src/analytics/analytics.module";
+import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
+import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElastic.repository";
 
 @Module({
-    imports: [ConfigModule, TaskModule, DatabaseModule],
+    imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule],
     controllers: [PlanMarketingController, CampagneController, ListeDiffusionController],
     providers: [
         Logger,
@@ -35,6 +40,8 @@ import { MettreAJourCampagne } from "./core/useCase/MettreAJourCampagne";
         planMarketingFactory,
         CampagneService,
         ListeDiffusionService,
+        CreerListeDiffusion,
+        CreerListeDiffusionEtImporterContacts,
         {
             provide: TaskGateway,
             useClass: TaskRepository,
@@ -55,6 +62,10 @@ import { MettreAJourCampagne } from "./core/useCase/MettreAJourCampagne";
         ...campagneMongoProviders,
         ...listeDiffusionMongoProviders,
         MettreAJourCampagne,
+        {
+            provide: SearchYoungGateway,
+            useClass: SearchYoungElasticRepository,
+        },
     ],
 })
 export class PlanMarketingModule {}
