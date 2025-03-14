@@ -10,6 +10,11 @@ import { EmailTemplate, EmailWithMessage } from "@notification/core/Notification
 import { AffectationService } from "../affectation/Affectation.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
+import {
+    JeuneSimulationDesistementRapport,
+    RAPPORT_SHEETS,
+    RapportData,
+} from "./SimulationDesisterPostAffectationTask.model";
 
 export type StatusDesistement = {
     status: TaskStatus | "NONE";
@@ -124,5 +129,67 @@ export class DesistementService {
                 );
             }
         }
+    }
+
+    mapJeunes(jeunes: JeuneModel[]): JeuneSimulationDesistementRapport[] {
+        return jeunes.map((jeune) => ({
+            sejour: jeune.sessionNom,
+            id: jeune.id,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
+            email: jeune.email,
+            sexe: jeune.genre,
+            departement: jeune.departement,
+            region: jeune.region,
+            statut: jeune.statut,
+            statutPhase1: jeune.statutPhase1,
+            sessionId: jeune.sessionId,
+            "centre d'affectation": jeune.centreId,
+            "PDR d'affectation": jeune.pointDeRassemblementId,
+            Ligne: jeune.ligneDeBusId,
+            "RL1 Nom": jeune.parent1Nom,
+            "RL1 Prénom": jeune.parent1Prenom,
+            "RL1 Email": jeune.parent1Email,
+            "RL2 Nom": jeune.parent2Nom || "",
+            "RL2 Prénom": jeune.parent2Prenom || "",
+            "RL2 Email": jeune.parent2Email || "",
+            youngPhase1Agreement: jeune.youngPhase1Agreement,
+        }));
+    }
+
+    async generateRapportPostDesistement(rapportData: RapportData): Promise<Buffer> {
+        const fileBuffer = await this.fileGateway.generateExcel({
+            [RAPPORT_SHEETS.RESUME]: [
+                {
+                    Groupe: "Total de volontaires affectés",
+                    Total:
+                        rapportData.jeunesDesistes.length +
+                        rapportData.jeunesAutreSession.length +
+                        rapportData.jeunesConfirmes.length +
+                        rapportData.jeunesNonConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés au préalable",
+                    Total: rapportData.jeunesDesistes.length,
+                },
+                {
+                    Groupe: "Volontaires ayant changé de séjour",
+                    Total: rapportData.jeunesAutreSession.length,
+                },
+                {
+                    Groupe: "Volontaires ayant confirmés leur séjour",
+                    Total: rapportData.jeunesConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés par ce traitement",
+                    Total: rapportData.jeunesNonConfirmes.length,
+                },
+            ],
+            [RAPPORT_SHEETS.A_DESITER]: rapportData.jeunesNonConfirmes,
+            [RAPPORT_SHEETS.CONFIRMATION_PARTICIPATION]: rapportData.jeunesConfirmes,
+            [RAPPORT_SHEETS.CHANGEMENTS_SEJOUR]: rapportData.jeunesAutreSession,
+            [RAPPORT_SHEETS.DESITEMENT_PREALABLE]: rapportData.jeunesDesistes,
+        });
+        return fileBuffer;
     }
 }

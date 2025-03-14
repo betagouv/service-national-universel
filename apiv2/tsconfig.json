@@ -30,5 +30,4 @@
             "@plan-marketing/*": ["src/plan-marketing/*"]
         }
     }
-    // "references": [{ "path": "../packages/lib" }]
 }

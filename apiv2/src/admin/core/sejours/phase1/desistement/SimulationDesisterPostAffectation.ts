@@ -4,14 +4,9 @@ import { DesistementService } from "./Desistement.service";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { MIME_TYPES } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { JeuneModel } from "../../jeune/Jeune.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import {
-    JeuneSimulationDesistementRapport,
-    RAPPORT_SHEETS,
-    RapportData,
-} from "./SimulationDesisterPostAffectationTask.model";
+import { RapportData } from "./SimulationDesisterPostAffectationTask.model";
 import { ValiderAffectationHTSDromComTaskModel } from "../affectation/ValiderAffectationHTSDromComTask.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
@@ -66,7 +61,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
 
         const rapportData = Object.entries(groups).reduce(
             (acc, [key, jeunes]) => {
-                acc[key] = this.mapJeunes(jeunes);
+                acc[key] = this.desistementService.mapJeunes(jeunes);
                 return acc;
             },
             {
@@ -78,39 +73,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
         );
 
         // création du fichier excel de rapport
-        const fileBuffer = await this.fileGateway.generateExcel({
-            [RAPPORT_SHEETS.RESUME]: [
-                {
-                    Groupe: "Total de volontaires affectés",
-                    Total:
-                        rapportData.jeunesDesistes.length +
-                        rapportData.jeunesAutreSession.length +
-                        rapportData.jeunesConfirmes.length +
-                        rapportData.jeunesNonConfirmes.length,
-                },
-                {
-                    Groupe: "Volontaires désistés au préalable",
-                    Total: rapportData.jeunesDesistes.length,
-                },
-                {
-                    Groupe: "Volontaires ayant changé de séjour",
-                    Total: rapportData.jeunesAutreSession.length,
-                },
-                {
-                    Groupe: "Volontaires confirmés",
-                    Total: rapportData.jeunesConfirmes.length,
-                },
-                {
-                    Groupe: "Volontaires à désister",
-                    Total: rapportData.jeunesNonConfirmes.length,
-                },
-            ],
-            [RAPPORT_SHEETS.A_DESITER]: rapportData.jeunesNonConfirmes,
-            [RAPPORT_SHEETS.CONFIRMATION_PARTICIPATION]: rapportData.jeunesConfirmes,
-            [RAPPORT_SHEETS.CHANGEMENTS_SEJOUR]: rapportData.jeunesAutreSession,
-            [RAPPORT_SHEETS.DESITEMENT_PREALABLE]: rapportData.jeunesDesistes,
-        });
-
+        const fileBuffer = await this.desistementService.generateRapportPostDesistement(rapportData);
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-desistement/desistement-simulation-post-affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
@@ -131,21 +94,5 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
             rapportData,
             rapportFile,
         };
-    }
-
-    mapJeunes(jeunes: JeuneModel[]): JeuneSimulationDesistementRapport[] {
-        return jeunes.map((jeune) => ({
-            id: jeune.id,
-            email: jeune.email,
-            prenom: jeune.prenom,
-            nom: jeune.nom,
-            statut: jeune.statut,
-            statutPhase1: jeune.statutPhase1,
-            sejour: jeune.sessionNom,
-            region: jeune.region,
-            departement: jeune.departement,
-            sessionId: jeune.sessionId,
-            youngPhase1Agreement: jeune.youngPhase1Agreement,
-        }));
     }
 }
