@@ -92,8 +92,8 @@ export default function TreeFilterExample() {
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"d"} /> */}
       <TreeFilterWithoutHeadlessUi treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
-      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-2"} showSelectedValues={true} showSelectedValuesCount={true} />
-      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-3"} />
+      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-2"} showSelectedValues={true} />
+      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-3"} showSelectedValues={true} />
     </>
   );
 }
