@@ -41,6 +41,7 @@ export interface FileGateway {
         path: string,
     ): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }>;
     deleteFile(path: string): Promise<void>;
+    baseName(path: string): string;
 }
 
 export const FileGateway = Symbol("FileGateway");

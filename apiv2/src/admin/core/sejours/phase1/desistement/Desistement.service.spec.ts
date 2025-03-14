@@ -9,7 +9,6 @@ import { Logger } from "@nestjs/common";
 import { JeuneModel } from "../../jeune/Jeune.model";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { EmailTemplate } from "@notification/core/Notification";
-import { JeuneService } from "../../jeune/Jeune.service";
 import { AffectationService } from "../affectation/Affectation.service";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { SessionGateway } from "../session/Session.gateway";
@@ -36,7 +35,6 @@ describe("DesistementService", () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 DesistementService,
-                JeuneService,
                 AffectationService,
                 { provide: JeuneGateway, useValue: { bulkUpdate: jest.fn() } },
                 { provide: TaskGateway, useValue: { findById: jest.fn() } },
@@ -156,6 +154,29 @@ describe("DesistementService", () => {
                 { to: [{ email: "jeune2@example.com", name: "Prenom2 Nom2" }], message },
                 EmailTemplate.DESISTEMENT_PAR_TIERS,
             );
+        });
+    });
+
+    describe("groupJeunesByReponseAuxAffectations", () => {
+        it("should group jeunes by categories", () => {
+            const jeunes: JeuneModel[] = [
+                { sessionId: "sessionId1", statut: YOUNG_STATUS.WITHDRAWN, youngPhase1Agreement: "true" } as JeuneModel,
+                {
+                    sessionId: "sessionId1",
+                    statut: YOUNG_STATUS.VALIDATED,
+                    youngPhase1Agreement: "false",
+                } as JeuneModel,
+                { sessionId: "sessionId2", statut: YOUNG_STATUS.VALIDATED, youngPhase1Agreement: "true" } as JeuneModel,
+            ];
+
+            const result = service.groupJeunesByReponseAuxAffectations(jeunes, "sessionId1");
+
+            expect(result).toEqual({
+                jeunesAutreSession: [jeunes[2]],
+                jeunesDesistes: [jeunes[0]],
+                jeunesConfirmes: [],
+                jeunesNonConfirmes: [jeunes[1]],
+            });
         });
     });
 });

@@ -64,8 +64,8 @@ import { InscriptionService } from "./core/sejours/phase1/inscription/Inscriptio
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { DesistementController } from "./infra/sejours/phase1/desistement/api/Desistement.controller";
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
-import { DesisterPostAffectation } from "./core/sejours/phase1/desistement/DesisterPostAffectation";
-import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
+import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
 
 @Module({
     imports: [
@@ -102,13 +102,13 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
     ],
     providers: [
         ClasseService,
+        Phase1Service,
         AffectationService,
         InscriptionService,
         SimulationAffectationHTSService,
         SimulationAffectationCLEService,
         DesistementService,
-        DesisterPostAffectation,
-        JeuneService,
+        ValiderDesisterPostAffectation,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,

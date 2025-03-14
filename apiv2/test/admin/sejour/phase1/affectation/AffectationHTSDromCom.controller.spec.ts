@@ -8,17 +8,17 @@ import { departmentList, GRADES, region2department, RegionsDromComEtCorse, TaskN
 
 import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
+import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
 
-import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { createSession } from "../helper/SessionHelper";
 
 describe("AffectationController - HTS DROMCOM", () => {
     let app: INestApplication;
     let affectationController: AffectationController;
-    let affectationService: AffectationService;
+    let phase1Service: Phase1Service;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
     let taskGateway: TaskGateway;
@@ -38,7 +38,7 @@ describe("AffectationController - HTS DROMCOM", () => {
         app.use(mockedAddUserToRequestMiddleware);
 
         taskGateway = module.get<TaskGateway>(TaskGateway);
-        affectationService = module.get<AffectationService>(AffectationService);
+        phase1Service = module.get<Phase1Service>(Phase1Service);
         await app.init();
         const tasks = await taskGateway.findAll();
         taskGateway.deleteMany(tasks.map((task) => task.id));
@@ -153,7 +153,7 @@ describe("AffectationController - HTS DROMCOM", () => {
             });
 
             // la dernière affectation reel est plus récente que la simulation
-            jest.spyOn(affectationService, "getStatusValidation").mockResolvedValue({
+            jest.spyOn(phase1Service, "getStatusValidation").mockResolvedValue({
                 status: TaskStatus.COMPLETED,
                 lastCompletedAt: addHours(new Date(), -1),
             });
@@ -179,7 +179,7 @@ describe("AffectationController - HTS DROMCOM", () => {
             });
 
             // la dernière affectation reel est plus vieille que la simulation
-            jest.spyOn(affectationService, "getStatusValidation").mockResolvedValue({
+            jest.spyOn(phase1Service, "getStatusValidation").mockResolvedValue({
                 status: TaskStatus.COMPLETED,
                 lastCompletedAt: addHours(new Date(), -2),
             });
