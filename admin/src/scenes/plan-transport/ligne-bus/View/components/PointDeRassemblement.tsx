@@ -5,28 +5,30 @@ import { BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useToggle } from "react-use";
 
-import { CohortType, isSuperAdmin, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { canEditLigneBusPointDeRassemblement, CohortType, isBusEditionOpen, isSuperAdmin, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
+import Pencil from "@/assets/icons/Pencil";
 import { capture } from "@/sentry";
 import Loader from "@/components/Loader";
 
 import Select from "../../components/Select";
 import Field from "../../components/Field";
 import PDRIcon from "../../components/Icons/PDR";
-import { Button, EditButton } from "@snu/ds/admin";
+import { Button } from "@snu/ds/admin";
 import { checkTime } from "snu-lib";
 
 import PointDeRassemblementLabel from "./PointDeRassemblementLabel";
 import ConfirmChangesModal from "./ConfirmChangesModal";
-import { getAuthorizationToUpdatePdrOnLine } from "../authorization";
 
 const options = [
   { label: "Bus", value: "bus" },
   { label: "Train", value: "train" },
   { label: "Avion", value: "avion" },
 ];
+
+const keys = ["code", "name", "city", "zip", "department", "region"];
 
 interface FormErrors {
   meetingHour?: string;
@@ -193,13 +195,9 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     }
   };
 
-  const handleConfirmChangesPDR = useCallback(
-    async (e) => {
-      e.preventDefault();
-      toggleConfirmChangesModal(true);
-    },
-    [toggleConfirmChangesModal],
-  );
+  const handleConfirmChangesPDR = useCallback(async () => {
+    toggleConfirmChangesModal(true);
+  }, [toggleConfirmChangesModal]);
 
   if (!volume) {
     return (
@@ -209,24 +207,48 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     );
   }
 
-  const { isAuthorized, message } = getAuthorizationToUpdatePdrOnLine(user, cohort);
-
   return (
     <>
-      <form onSubmit={handleConfirmChangesPDR} className="w-full rounded-xl bg-white p-8">
+      <div className="w-full rounded-xl bg-white p-8">
         <div className="relative flex items-start justify-between flex-wrap-reverse gap-y-4">
           <div className="flex items-center gap-4">
             <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
           </div>
-          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} onReset={handleCancelChanges} disabled={!isAuthorized} tooltipMessage={message} />
+          {canEditLigneBusPointDeRassemblement(user) || isBusEditionOpen(user, cohort) ? (
+            !editPdr ? (
+              <button
+                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                onClick={() => setEditPdr(true)}
+                disabled={isLoading}>
+                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                Modifier
+              </button>
+            ) : (
+              <div className="flex flex-rows items-end justify-end gap-2 flex-row-reverse ml-auto">
+                <button
+                  className="flex cursor-pointer items-center gap-2 rounded-full  border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleConfirmChangesPDR}
+                  disabled={isLoading}>
+                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                  Enregistrer les changements
+                </button>
+                <button
+                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                  onClick={handleCancelChanges}
+                  disabled={isLoading}>
+                  Annuler
+                </button>
+              </div>
+            )
+          ) : null}
         </div>
         <div className="mt-8 flex flex-col">
           <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
             <div className="flex justify-between flex-row items-center">
               <PointDeRassemblementLabel pdr={selectedPDR} showLink={user.role !== ROLES.TRANSPORTER} />
               {isSuperAdmin(user) && editPdr && (
-                <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
+                <button ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
                   Changer de lieu
                 </button>
               )}
@@ -340,7 +362,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
             <PDRIcon />
           </div>
         </div>
-      </form>
+      </div>
       <ConfirmChangesModal
         isOpen={showConfirmChangesModal}
         onCancel={handleCancelChanges}
@@ -356,7 +378,6 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
           returnHour: data.returnHour || "",
         }}
         youngsCount={youngsCount}
-        loading={isLoading}
       />
     </>
   );

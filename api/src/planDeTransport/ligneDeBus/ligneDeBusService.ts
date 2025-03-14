@@ -1,23 +1,11 @@
-import {
-  ClasseModel,
-  LigneBusDocument,
-  SessionPhase1Document,
-  SessionPhase1Model,
-  LigneToPointModel,
-  PointDeRassemblementModel,
-  LigneBusModel,
-  CohesionCenterModel,
-  PlanTransportModel,
-  YoungModel,
-  CohortModel,
-} from "../../models";
+import { BusTeamDto } from "snu-lib/src/dto";
+import { LigneBusDocument } from "../../models";
+import { LigneToPointModel, PointDeRassemblementModel, LigneBusModel, CohesionCenterModel, PlanTransportModel, YoungModel, CohortModel } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE } from "snu-lib";
-import { updatePlacesSessionPhase1 } from "../../utils";
-import { endSession, startSession, withTransaction } from "../../mongo";
-import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
-import { logger } from "../../logger";
+
+import { CohortType, SENDINBLUE_TEMPLATES, UserDto, checkTime } from "snu-lib";
+import { sendTemplate } from "../../brevo";
 
 const { ObjectId } = Types;
 
@@ -58,6 +46,7 @@ export async function getInfoBus(line: LigneBusDocument) {
       youngCapacity: ligneBus.youngCapacity,
     }))[0];
   }
+
   return { ...line._doc, meetingsPointsDetail, centerDetail, mergedBusDetails, mirrorBusDetails };
 }
 
@@ -124,190 +113,100 @@ export const updatePDRForLine = async (
   user: UserDto,
 ) => {
   const ligneBus = await LigneBusModel.findById(ligneBusId);
-  if (!ligneBus) {
-    logger.error(`LigneBus not found ${ligneBusId}`);
-    throw new Error("NOT_FOUND");
-  }
+  if (!ligneBus) throw new Error("NOT_FOUND");
 
   const cohort = await CohortModel.findOne({ name: ligneBus.cohort });
-  if (!cohort) {
-    logger.error(`Cohort not found ${ligneBus.cohort}`);
-    throw new Error("NOT_FOUND");
-  }
+  if (!cohort) throw new Error("NOT_FOUND");
 
   if (checkTime(departureHour, meetingHour) || checkTime(departureHour, busArrivalHour)) {
     throw new Error("INVALID_BODY");
   }
 
   const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneBusId, meetingPointId });
-  if (!ligneToPoint) {
-    logger.error(`LigneToPoint not found ${ligneBusId} ${meetingPointId}`);
-    throw new Error("NOT_FOUND");
+  if (!ligneToPoint) throw new Error("NOT_FOUND");
+
+  ligneToPoint.set({
+    transportType,
+    meetingHour,
+    busArrivalHour,
+    departureHour,
+    returnHour,
+    ...(meetingPointId !== newMeetingPointId && { meetingPointId: newMeetingPointId }),
+  });
+
+  await ligneToPoint.save({ fromUser: user });
+
+  if (meetingPointId !== newMeetingPointId) {
+    const meetingPointsIds = ligneBus.meetingPointsIds.filter((id) => id !== meetingPointId);
+    meetingPointsIds.push(newMeetingPointId);
+    ligneBus.set({ meetingPointsIds });
+    await ligneBus.save({ fromUser: user });
   }
 
-  const transaction = await startSession();
-  try {
-    await withTransaction(transaction, async () => {
-      ligneToPoint.set({
-        transportType,
-        meetingHour,
-        busArrivalHour,
-        departureHour,
-        returnHour,
-        ...(meetingPointId !== newMeetingPointId && { meetingPointId: newMeetingPointId }),
-      });
+  const planDeTransport = await PlanTransportModel.findById(ligneBusId);
+  if (!planDeTransport) throw new Error("NOT_FOUND");
 
-      await ligneToPoint.save({ fromUser: user, session: transaction });
+  const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
+  if (!pointDeRassemblement) throw new Error("NOT_FOUND");
 
-      if (meetingPointId !== newMeetingPointId) {
-        const meetingPointsIds = ligneBus.meetingPointsIds.filter((id) => id !== meetingPointId);
-        meetingPointsIds.push(newMeetingPointId);
-        ligneBus.set({ meetingPointsIds });
-        await ligneBus.save({ fromUser: user, session: transaction });
-      }
+  const meetingPoint = planDeTransport.pointDeRassemblements.find((mp) => mp.meetingPointId === meetingPointId);
+  if (!meetingPoint) throw new Error("NOT_FOUND");
 
-      const planDeTransport = await PlanTransportModel.findById(ligneBusId);
-      if (!planDeTransport) {
-        logger.error(`PlanTransport not found ${ligneBusId}`);
-        throw new Error("NOT_FOUND");
-      }
+  meetingPoint.set({
+    meetingPointId: newMeetingPointId,
+    ...pointDeRassemblement._doc,
+    busArrivalHour: ligneToPoint.busArrivalHour,
+    meetingHour: ligneToPoint.meetingHour,
+    departureHour: ligneToPoint.departureHour,
+    returnHour: ligneToPoint.returnHour,
+    transportType: ligneToPoint.transportType,
+  });
 
-      const pointDeRassemblement = await PointDeRassemblementModel.findById(new ObjectId(newMeetingPointId));
-      if (!pointDeRassemblement) {
-        logger.error(`PointDeRassemblement not found ${newMeetingPointId}`);
-        throw new Error("NOT_FOUND");
-      }
+  await planDeTransport.save({ fromUser: user });
 
-      const meetingPoint = planDeTransport.pointDeRassemblements.find((mp) => mp.meetingPointId === meetingPointId);
-      if (!meetingPoint) {
-        logger.error(`MeetingPoint not found ${meetingPointId}`);
-        throw new Error("NOT_FOUND");
-      }
-
-      meetingPoint.set({
+  const youngUpdateResult = await YoungModel.updateMany(
+    {
+      ligneId: ligneBusId,
+      meetingPointId: meetingPointId,
+    },
+    {
+      $set: {
         meetingPointId: newMeetingPointId,
-        ...pointDeRassemblement._doc,
-        busArrivalHour: ligneToPoint.busArrivalHour,
-        meetingHour: ligneToPoint.meetingHour,
-        departureHour: ligneToPoint.departureHour,
-        returnHour: ligneToPoint.returnHour,
-        transportType: ligneToPoint.transportType,
-      });
+      },
+    },
+    { fromUser: user },
+  );
 
-      await planDeTransport.save({ fromUser: user, session: transaction });
-
-      await YoungModel.updateMany(
-        {
-          ligneId: ligneBusId,
-          meetingPointId: meetingPointId,
-        },
-        {
-          $set: {
-            meetingPointId: newMeetingPointId,
-          },
-        },
-        { fromUser: user, session: transaction },
-      );
-
-      if (shouldSendEmailCampaign) {
-        const updatedYoungs = await YoungModel.find({
-          ligneId: ligneBusId,
-          meetingPointId: meetingPointId,
-          status: YOUNG_STATUS.VALIDATED,
-          statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] },
-        });
-        await notifyYoungsAndRlsPDRWasUpdated(updatedYoungs, cohort);
-
-        if (cohort.type === COHORT_TYPE.CLE) {
-          const classes = await ClasseModel.find({ ligneId: ligneBusId });
-          for (const classe of classes) {
-            await notifyReferentsCLELineWasUpdated(classe);
-          }
-        }
-      }
-    });
-  } finally {
-    await endSession(transaction);
+  if (shouldSendEmailCampaign && youngUpdateResult.modifiedCount > 0) {
+    await sendEmailCampaign(ligneBusId, newMeetingPointId, cohort);
   }
 
   return ligneBus;
 };
 
-export const updateSessionForLine = async ({
-  ligne,
-  session,
-  user,
-  sendCampaign,
-}: {
-  ligne: LigneBusDocument;
-  session: SessionPhase1Document;
-  user: UserDto;
-  sendCampaign?: boolean;
-}) => {
-  const currentSessionPhase1 = await SessionPhase1Model.findById(ligne.sessionId);
-  if (!currentSessionPhase1) throw new Error(ERRORS.NOT_FOUND);
+const sendEmailCampaign = async (ligneBusId: string, newMeetingPointId: string, cohort: CohortType) => {
+  const updatedYoungs = await YoungModel.find({
+    ligneId: ligneBusId,
+    meetingPointId: newMeetingPointId,
+  }).select("email parent1Email parent2Email");
 
-  if (ligne.youngSeatsTaken > (session.placesLeft || 0)) {
-    throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+  let templateId: string | null = null;
+  if (new Date() < new Date(cohort.dateStart)) {
+    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
+  } else if (new Date() < new Date(cohort.dateEnd)) {
+    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
   }
 
-  const transaction = await startSession();
+  if (!templateId) throw new Error("Modification date is out of range, no email sent.");
 
-  try {
-    await withTransaction(transaction, async () => {
-      // Ligne
-      ligne.set({
-        sessionId: session.id,
-        centerId: session.cohesionCenterId,
-      });
-      await ligne.save({ fromUser: user, session: transaction });
+  for (const young of updatedYoungs) {
+    const cc: { email: string }[] = [];
+    if (young.parent1Email) cc.push({ email: young.parent1Email });
+    if (young.parent2Email) cc.push({ email: young.parent2Email });
 
-      // Plan de transport
-      const planDeTransport = await PlanTransportModel.findById(ligne._id);
-      if (!planDeTransport) throw new Error(ERRORS.NOT_FOUND);
-      planDeTransport.set({
-        centerId: session.cohesionCenterId,
-        centerRegion: session.region,
-        centerDepartment: session.department,
-        centerAddress: session.cityCentre,
-        centerZip: session.zipCentre,
-        centerName: session.nameCentre,
-        centerCode: session.codeCentre,
-      });
-      await planDeTransport.save({ fromUser: user, session: transaction });
-
-      // Jeunes
-      const filter = { ligneId: ligne._id };
-      const updateDoc = { $set: { sessionPhase1Id: session.id, cohesionCenterId: session.cohesionCenterId } };
-      await YoungModel.updateMany(filter, updateDoc, { fromUser: user, session: transaction });
-
-      // Classes
-      const classes = await ClasseModel.find({ ligneId: ligne._id });
-      for (const classe of classes) {
-        classe.set({
-          sessionId: session.id,
-          cohesionCenterId: session.cohesionCenterId,
-        });
-        await classe.save({ fromUser: user, session: transaction });
-      }
+    await sendTemplate(templateId, {
+      emailTo: [{ email: young.email }],
+      cc,
     });
-
-    await updatePlacesSessionPhase1(currentSessionPhase1, user);
-    await updatePlacesSessionPhase1(session, user);
-
-    if (sendCampaign) {
-      const updatedYoungs = await YoungModel.find({
-        ligneId: ligne._id,
-        status: YOUNG_STATUS.VALIDATED,
-        statusPhase1: { $in: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] },
-      });
-      await notifyYoungsAndRlsSessionWasUpdated(updatedYoungs);
-      const classes = await ClasseModel.find({ ligneId: ligne._id });
-      for (const classe of classes) {
-        await notifyReferentsCLELineWasUpdated(classe);
-      }
-    }
-  } finally {
-    await endSession(transaction);
   }
 };
