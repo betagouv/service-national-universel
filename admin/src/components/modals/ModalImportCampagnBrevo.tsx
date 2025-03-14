@@ -1,50 +1,44 @@
-import React, { useState, useEffect } from "react";
-import { Button, Modal } from "@snu/ds/admin";
+import React, { useState, useEffect, useCallback } from "react";
+import { Button, Modal, InputText, InputCheckbox } from "@snu/ds/admin";
 import { useForm } from "react-hook-form";
 import PlanMarketingService from "@/services/planMarketingService";
 import { useQuery } from "@tanstack/react-query";
-import { toastr } from "react-redux-toastr";
-import { capture } from "@/sentry";
 import { CohortType } from "snu-lib";
-import { RiDownload2Line } from "react-icons/ri";
-import { RiSearchLine } from "react-icons/ri";
+import { RiDownload2Line, RiSearchLine } from "react-icons/ri";
 import { CampagneDataProps } from "../../scenes/planMarketing/campagne/CampagneForm";
+import { CampagneSpecifiqueFormData } from "@/scenes/planMarketing/campagne/CampagneSpecifiqueForm";
 
 interface ModalImportCampagnBrevoProps {
   isOpen: boolean;
   onClose: () => void;
-  onConfirm: (data: BrevoListData) => void;
+  onConfirm: (data: CampagneSpecificData) => void;
   cohort: CohortType;
-  isLoadingProcess: boolean;
+  campagneSpecific: CampagneSpecifiqueFormData[];
 }
 
-export interface BrevoListData {
-  name: string;
-  campaignId: string[];
+export interface CampagneSpecificData {
+  campagneGeneriqueId: string[];
+  cohortId: string;
 }
 
-export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, isLoadingProcess }: ModalImportCampagnBrevoProps) => {
+export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, campagneSpecific }: ModalImportCampagnBrevoProps) => {
   const [campagnes, setCampagnes] = useState<CampagneDataProps[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
-  const { handleSubmit, reset } = useForm<BrevoListData>({
-    defaultValues: {
-      name: "",
-      campaignId: [],
-    },
+  const { handleSubmit, reset } = useForm<CampagneSpecificData>({
+    defaultValues: { campagneGeneriqueId: [] },
   });
-  const { data: campagnesData, refetch } = useQuery({
+
+  const isCampaignDisabled = useCallback((campagneId: string): boolean => campagneSpecific.some((campSpec) => campSpec.campagneGeneriqueId === campagneId), [campagneSpecific]);
+
+  const { data: campagnesData } = useQuery({
     queryKey: ["get-campagnes"],
-    queryFn: async () => {
-      return await PlanMarketingService.search({ generic: true });
-    },
+    queryFn: async () => await PlanMarketingService.search({ generic: true }),
   });
 
   useEffect(() => {
-    setCampagnes(campagnesData ?? []);
+    setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
   }, [campagnesData]);
-
-  console.log(campagnes);
 
   const filteredCampaigns = campagnes
     .filter((campagne) => campagne.type === "BOTH" || campagne.type === cohort.type)
@@ -52,9 +46,14 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
 
   const onSubmitForm = handleSubmit((formValues) => {
     const selectedCampaignsData = campagnes.filter((campagne) => selectedCampaigns.includes(campagne.id));
-    onConfirm({ ...formValues, campaignId: selectedCampaignsData.map((campagne) => campagne.id) });
+    onConfirm({
+      ...formValues,
+      campagneGeneriqueId: selectedCampaignsData.map((campagne) => campagne.id),
+      cohortId: cohort._id!,
+    });
     handleOnClose();
   });
+
   const handleOnClose = () => {
     reset();
     setSelectedCampaigns([]);
@@ -62,18 +61,14 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
     onClose();
   };
 
+  const allSelectableCampaigns = filteredCampaigns.filter((campagne) => !isCampaignDisabled(campagne.id));
+
   const toggleSelectAll = (checked: boolean) => {
-    setSelectedCampaigns(checked ? filteredCampaigns.map((campagne) => campagne.id) : []);
+    setSelectedCampaigns(checked ? allSelectableCampaigns.map((campagne) => campagne.id) : []);
   };
 
   const toggleSelectCampaign = (campaignId: string, checked: boolean) => {
-    setSelectedCampaigns((prev) => {
-      if (checked) {
-        return [...prev, campaignId];
-      } else {
-        return prev.filter((id) => id !== campaignId);
-      }
-    });
+    setSelectedCampaigns((prev) => (checked ? [...prev, campaignId] : prev.filter((id) => id !== campaignId)));
   };
 
   return (
@@ -95,34 +90,51 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, is
           <div>
             <div className="flex justify-between items-center mb-4">
               <span className="text-lg font-normal">{filteredCampaigns.length} campagnes trouvées</span>
-              <div className="flex items-center border p-2 text-sm rounded relative">
-                <RiSearchLine className="text-gray-500 text-lg mr-2" />
-                <input type="text" placeholder="Rechercher..." className="flex-1 outline-none" value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} />
-              </div>
+              <InputText
+                name="search"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                placeholder="Rechercher..."
+                className="flex"
+                icon={<RiSearchLine className="text-gray-500 text-lg mr-2" />}
+              />
             </div>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
-                <input
-                  type="checkbox"
+                <InputCheckbox
+                  name="selectAll"
+                  checked={selectedCampaigns.length === allSelectableCampaigns.length && allSelectableCampaigns.length > 0}
                   onChange={(e) => toggleSelectAll(e.target.checked)}
-                  checked={selectedCampaigns.length === filteredCampaigns.length && filteredCampaigns.length > 0}
+                  label="Tout sélectionner"
                 />
-                <span className="text-sm font-bold">Tout sélectionner</span>
               </div>
-              {filteredCampaigns.map((campagne) => (
-                <div key={campagne.id} className="flex items-center gap-2">
-                  <input type="checkbox" onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)} checked={selectedCampaigns.includes(campagne.id)} />
-                  <span className="text-sm">{campagne.nom}</span>
-                </div>
-              ))}
+              {filteredCampaigns.map((campagne) => {
+                const disabled = isCampaignDisabled(campagne.id);
+                return (
+                  <div className="flex justify-between items-center gap-4" key={campagne.id}>
+                    <InputCheckbox
+                      name={`checkbox-${campagne.id}`}
+                      checked={selectedCampaigns.includes(campagne.id)}
+                      onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)}
+                      disabled={disabled}
+                      label={campagne.nom}
+                    />
+                    {disabled && (
+                      <div>
+                        <span className="text-sm font-normal text-gray-400">Déjà importée</span>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </form>
       }
       footer={
         <div className="flex justify-between gap-6">
-          <Button title="Annuler" type="secondary" className="flex-1" onClick={handleOnClose} disabled={isLoadingProcess} />
-          <Button title={`Importer ${selectedCampaigns.length} campagnes`} onClick={onSubmitForm} className="flex-1" loading={isLoadingProcess} />
+          <Button title="Annuler" type="secondary" className="flex-1" onClick={handleOnClose} />
+          <Button title={`Importer ${selectedCampaigns.length} campagnes`} onClick={onSubmitForm} className="flex-1" />
         </div>
       }
     />

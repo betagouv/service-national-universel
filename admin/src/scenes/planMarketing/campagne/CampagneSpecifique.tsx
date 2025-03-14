@@ -1,19 +1,29 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { InputText } from "@snu/ds/admin";
 import React, { useMemo, useState } from "react";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, CohortType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
+import { ModalImportCampagnBrevo } from "@/components/modals/ModalImportCampagnBrevo";
+import { useToggle } from "react-use";
 
 interface CampagneSpecifiqueProps {
-  sessionId: string;
+  session: CohortType;
 }
 
-export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProps) {
+export interface CampagneSpecificData {
+  campagneGeneriqueId: string[];
+  cohortId: string;
+  generic: boolean;
+}
+
+export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
+  const sessionId = session._id!;
   const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
   const [searchTerm, setSearchTerm] = useState("");
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
+  const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
 
   const { listesDiffusion } = useListeDiffusion();
 
@@ -31,6 +41,17 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
       cohortId: sessionId,
     };
     setDraftCampagne(newCampagne);
+  };
+
+  const handleImportCampagneGenerique = (data: CampagneSpecificData) => {
+    data.campagneGeneriqueId.forEach((genericId) => {
+      const newSpecificCampaign = {
+        campagneGeneriqueId: genericId,
+        cohortId: data.cohortId,
+        generic: false,
+      };
+      saveCampagne({ payload: newSpecificCampaign as any });
+    });
   };
 
   const handleOnSave = (campagne: CampagneSpecifiqueFormData & { generic: false }) => {
@@ -76,6 +97,9 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
               Nouvelle campagne
             </ButtonPrimary>
+            <ButtonPrimary onClick={() => setIsImportCampagneSpecifique(true)} className="h-[50px] w-[300px]">
+              Importer une campagne
+            </ButtonPrimary>
           </div>
         </div>
       </div>
@@ -91,6 +115,14 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
           />
         ))}
       </div>
+
+      <ModalImportCampagnBrevo
+        isOpen={isImportCampagneSpecifique}
+        onClose={() => setIsImportCampagneSpecifique(false)}
+        onConfirm={handleImportCampagneGenerique}
+        cohort={session}
+        campagneSpecific={campagnes}
+      />
     </>
   );
 }
