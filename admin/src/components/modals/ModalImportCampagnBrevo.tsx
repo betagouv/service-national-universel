@@ -3,7 +3,7 @@ import { Button, Modal, InputText, InputCheckbox } from "@snu/ds/admin";
 import { useForm } from "react-hook-form";
 import PlanMarketingService from "@/services/planMarketingService";
 import { useQuery } from "@tanstack/react-query";
-import { CohortType } from "snu-lib";
+import { CohortDto } from "snu-lib";
 import { RiDownload2Line, RiSearchLine } from "react-icons/ri";
 import { CampagneDataProps } from "../../scenes/planMarketing/campagne/CampagneForm";
 import { CampagneSpecifiqueFormData } from "@/scenes/planMarketing/campagne/CampagneSpecifiqueForm";
@@ -12,7 +12,7 @@ interface ModalImportCampagnBrevoProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (data: CampagneSpecificData) => void;
-  cohort: CohortType;
+  cohort: CohortDto;
   campagneSpecific: CampagneSpecifiqueFormData[];
 }
 

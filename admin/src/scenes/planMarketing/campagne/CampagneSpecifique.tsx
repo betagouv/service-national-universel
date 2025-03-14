@@ -1,7 +1,7 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { InputText } from "@snu/ds/admin";
 import React, { useMemo, useState } from "react";
-import { CampagneJeuneType, CohortType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, CohortDto, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
@@ -9,7 +9,7 @@ import { ModalImportCampagnBrevo } from "@/components/modals/ModalImportCampagnB
 import { useToggle } from "react-use";
 
 interface CampagneSpecifiqueProps {
-  session: CohortType;
+  session: CohortDto;
 }
 
 export interface CampagneSpecificData {
