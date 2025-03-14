@@ -95,7 +95,7 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, ca
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 placeholder="Rechercher..."
-                className="flex"
+                className="flex mr-1"
                 icon={<RiSearchLine className="text-gray-500 text-lg mr-2" />}
               />
             </div>
