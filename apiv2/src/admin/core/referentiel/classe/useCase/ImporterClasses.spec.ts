@@ -210,7 +210,7 @@ describe("ImporterClasses", () => {
         const mockXlsxData = [
             {
                 "Session formule": "2024",
-                "Identifiant de la classe engagée": "CLASS-001",
+                "Identifiant de la classe engagée": "class-001",
             },
         ];
 
@@ -221,7 +221,7 @@ describe("ImporterClasses", () => {
         mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
 
         mockClasseGateway.findById.mockResolvedValue({
-            id: "CLASS-001",
+            id: "class-001",
         });
 
         const result = await useCase.execute({
@@ -235,7 +235,7 @@ describe("ImporterClasses", () => {
 
         expect(result).toEqual([
             {
-                classeId: "CLASS-001",
+                classeId: "class-001",
                 cohortCode: "2024",
                 error: "Classe existe dans les 2 onglets",
                 sessionCode: "undefined_undefined",

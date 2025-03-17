@@ -90,7 +90,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             cohortCode: classeImport.cohortCode,
         };
         // Vérification de si la classe existe dans l'onglet desistement
-        if (classesDesistees.find((classe) => classe.classeId === classe.classeId)) {
+        if (classesDesistees.find((classeDesistee) => classeDesistee.classeId === classe.id)) {
             return {
                 ...classeRapport,
                 error: "Classe existe dans les 2 onglets",
