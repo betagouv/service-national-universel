@@ -7,6 +7,7 @@ import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
 import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
 import { useToggle } from "react-use";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -19,7 +20,6 @@ export interface CampagnesGeneriquesImportData {
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
   const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
-  const [searchTerm, setSearchTerm] = useState("");
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
 
@@ -31,6 +31,12 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       label: liste.nom,
     }));
   }, [listesDiffusion]);
+
+  const allCampagnes = useMemo(() => {
+    return draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
+  }, [campagnes, draftCampagne]);
+
+  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(allCampagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const createNewCampagne = () => {
     const newCampagne: DraftCampagneSpecifiqueFormData = {
@@ -73,13 +79,6 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       },
     );
   };
-
-  const filteredCampagnes = useMemo(() => {
-    const allCampagnes = draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
-    return allCampagnes
-      .filter((campagne) => campagne.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !campagne.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [campagnes, searchTerm, draftCampagne]);
 
   const isNouvelleCampagneDisabled = useMemo(() => {
     return draftCampagne !== null;

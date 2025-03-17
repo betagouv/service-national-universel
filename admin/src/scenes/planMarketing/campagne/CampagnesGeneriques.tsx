@@ -7,12 +7,13 @@ import CampagneForm, { CampagneDataProps, DraftCampagneDataProps } from "./Campa
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useLocation } from "react-router-dom";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
   const [openCampagneId, setOpenCampagneId] = useState<string | null>(null);
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(campagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -76,12 +77,6 @@ export default function CampagnesGeneriques() {
     };
     setCampagnes((prev) => [newCampagne, ...prev]);
   };
-
-  const filteredCampagnes = useMemo(() => {
-    return campagnes
-      .filter((campagne) => campagne.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !campagne.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [campagnes, searchTerm]);
 
   return (
     <>
