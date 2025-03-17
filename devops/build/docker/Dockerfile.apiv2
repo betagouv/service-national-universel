@@ -57,7 +57,7 @@ COPY --from=builder /build/${APP_NAME}/dist/ ${APP_NAME}/
 
 COPY --from=builder /build/node_modules/ node_modules/
 
-COPY devops/build/api/package.json package.json
+COPY devops/build/${APP_NAME}/package.json package.json
 
 ENV ENVIRONMENT=${ENVIRONMENT}
 ENV RELEASE=${RELEASE}
