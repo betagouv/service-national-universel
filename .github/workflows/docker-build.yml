@@ -36,7 +36,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g' > app.env
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > app.env
 
       - name: App - Build and push
         env:
@@ -61,7 +61,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g' > admin.env
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > admin.env
 
       - name: Admin - Build and push
         env:
@@ -86,7 +86,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g' > api.env
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > api.env
 
       - name: Api - Build and push
         env:
@@ -111,7 +111,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g' > apiv2.env
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > apiv2.env
 
       - name: ApiV2 - Build and push
         env:
