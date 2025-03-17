@@ -7,7 +7,7 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { DesisterValiderTaskResult, MIME_TYPES } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import {
-    RAPPORT_SHEETS,
+    RAPPORT_SHEETS_SIMULATION,
     RapportData,
     SimulationDesisterPostAffectationTaskModel,
 } from "./SimulationDesisterPostAffectationTask.model";
@@ -40,11 +40,22 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         const ids = simulationData.jeunesADesister.map((jeune) => jeune.id);
         const jeunes = await this.jeuneGateway.findByIds(ids);
 
-        const groups = this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        const jeunesByStatus = this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        const jeunesModifies = await this.desistementService.desisterJeunes(
+            jeunesByStatus.jeunesNonConfirmes,
+            sessionId,
+        );
 
-        const rapportData = Object.entries(groups).reduce(
+        if (jeunesModifies !== jeunesByStatus.jeunesNonConfirmes.length) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.RESULT_DIFFERENT_THAN_SIMULATION,
+                "Nombre de jeunes désistés différent de la simulation",
+            );
+        }
+
+        const rapportData = Object.entries(jeunesByStatus).reduce(
             (acc, [key, jeunes]) => {
-                acc[key] = this.desistementService.mapJeunes(jeunes);
+                acc[key] = this.desistementService.mapJeunesTraitement(jeunes);
                 return acc;
             },
             {
@@ -57,13 +68,11 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
 
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
 
-        const jeunesModifies = await this.desistementService.desisterJeunes(rapportData.jeunesNonConfirmes, sessionId);
-
         this.cls.set("user", null);
         this.logger.debug(`DesistementService: ${rapportData.jeunesNonConfirmes.length} jeunes désistés`);
 
         // création du fichier excel de rapport
-        const fileBuffer = await this.desistementService.generateRapportPostDesistement(rapportData);
+        const fileBuffer = await this.desistementService.generateRapportTraitementPostDesistement(rapportData);
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `desistement/desistement-post-affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
@@ -88,6 +97,7 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
     async getRapportSimulation(taskId: string) {
         const simulationTask: SimulationDesisterPostAffectationTaskModel = await this.taskGateway.findById(taskId);
         const rapportKey = simulationTask.metadata?.results?.rapportKey;
+
         if (!rapportKey) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_FOUND,
@@ -98,7 +108,7 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         const jeunesADesister = await this.fileGateway.parseXLS<RapportData["jeunesNonConfirmes"][0]>(
             importedFile.Body,
             {
-                sheetName: RAPPORT_SHEETS.A_DESITER,
+                sheetName: RAPPORT_SHEETS_SIMULATION.A_DESITER,
             },
         );
 

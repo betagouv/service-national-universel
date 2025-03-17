@@ -61,7 +61,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
 
         const rapportData = Object.entries(groups).reduce(
             (acc, [key, jeunes]) => {
-                acc[key] = this.desistementService.mapJeunes(jeunes);
+                acc[key] = this.desistementService.mapJeunesSimulation(jeunes);
                 return acc;
             },
             {
@@ -73,7 +73,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
         );
 
         // création du fichier excel de rapport
-        const fileBuffer = await this.desistementService.generateRapportPostDesistement(rapportData);
+        const fileBuffer = await this.desistementService.generateRapportSimulationPostDesistement(rapportData);
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-desistement/desistement-simulation-post-affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
