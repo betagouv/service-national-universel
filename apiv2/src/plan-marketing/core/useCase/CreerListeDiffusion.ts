@@ -69,7 +69,7 @@ export class CreerListeDiffusion implements UseCase<string> {
         const contactsQuery: SearchParams = {
             filters: filtreListeDiffusionWithCohortId,
             sourceFields: ["email", "parent1Email", "parent2Email"],
-            size: 10000,
+            full: true,
         };
         return contactsQuery;
     }
