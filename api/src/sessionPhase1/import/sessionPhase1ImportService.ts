@@ -5,6 +5,8 @@ import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./s
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
 import { normalizeDepartmentName } from "snu-lib";
 import { mapTrigrammeToRegion } from "../../services/regionService";
+import { updatePlacesSessionPhase1 } from "../../utils";
+
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
   sessionFormule?: string;
@@ -104,11 +106,16 @@ const createSession = async (
     // on met à jour les places disponibles si la session existe déjà
     logger.warn(`Session already exists for cohesion center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
     foundSession.placesTotal = sessionCenter.sessionPlaces;
+
     if (sessionCenter.sejourSnuId && !foundSession.sejourSnuIds.includes(sessionCenter.sejourSnuId)) {
       logger.warn(`Add missing sejourSnuId ${sessionCenter.sejourSnuId}`);
       foundSession.sejourSnuIds.push(sessionCenter.sejourSnuId);
     }
-    await foundSession.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
+
+    await foundSession.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER2" } });
+    // on synchronise les places disponibles
+    await updatePlacesSessionPhase1(foundSession, { firstName: "IMPORT_SESSION_COHESION_CENTER" });
+
     return {
       sessionId: foundSession._id,
       sessionFormule: sessionCenter.sessionFormule,
