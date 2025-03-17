@@ -7,12 +7,13 @@ import logo_snu from "@/assets/logo-snu.png";
 
 import Separator from "./Separator";
 
-interface Props {
+interface HeaderProps {
   open?: boolean;
   setOpen?: (isOpen: boolean) => void;
+  onDemoChange: () => void;
 }
 
-export default function Header({ open, setOpen }: Props) {
+export default function Header({ open, setOpen, onDemoChange }: HeaderProps) {
   const { isProduction } = useEnvironment();
 
   //save the current state of the sidebar in the local storage
@@ -29,7 +30,7 @@ export default function Header({ open, setOpen }: Props) {
   return (
     <>
       <button className={`group relative flex flex-row h-[116px] !pt-8 !pb-7 !pl-4 hover:bg-[#1B1F42] items-center ${open && "!pr-2"}`} onClick={onChangeOpen}>
-        {!isProduction && <TestBadge open={open} />}
+        {!isProduction && <TestBadge open={open} onDemoChange={onDemoChange} />}
         <img className={cx("w-[56px] h-[56px]", { "saturate-50": !isProduction })} src={logo_snu} alt="logo_snu" />
         {open && (
           <p className="ml-3 text-white uppercase text-sm font-medium text-left leading-[17px] w-full">
@@ -44,11 +45,15 @@ export default function Header({ open, setOpen }: Props) {
   );
 }
 
-const TestBadge = ({ open }) => {
+const TestBadge = ({ open, onDemoChange }: { open?: boolean; onDemoChange: () => void }) => {
   const { isDevelopment } = useEnvironment();
 
   return (
-    <div
+    <button
+      onClick={(e) => {
+        e.stopPropagation();
+        onDemoChange();
+      }}
       className={cx("absolute top-[5px] h-[18px] border-[1px] border-white rounded-full flex justify-center items-center px-1", {
         "right-[10px]": open,
         "right-1/2 transform translate-x-1/2": !open,
@@ -59,6 +64,6 @@ const TestBadge = ({ open }) => {
         {isDevelopment && "DEV"}
         {!isDevelopment && "TEST"}
       </div>
-    </div>
+    </button>
   );
 };
