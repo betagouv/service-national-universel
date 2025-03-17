@@ -36,6 +36,7 @@ export interface CampagneFormProps {
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: () => void;
   onDuplicate: (campagneData: CampagneDataProps) => void;
+  forceOpen?: boolean;
 }
 
 const recipientOptions = [
@@ -48,7 +49,7 @@ const recipientOptions = [
 ];
 
 export default React.memo(
-  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate }: CampagneFormProps) {
+  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false }: CampagneFormProps) {
     const { state, handleChange, saveCampagne, isPending, isDirty } = useCampagneForm(campagneData, onSave);
     const { errors, validateForm } = useCampagneError(state);
 
@@ -73,7 +74,7 @@ export default React.memo(
     return (
       <Container className={`pb-2 pt-2 mb-2 ${isNotSaved ? "border-2 border-blue-600" : "border-2"}`}>
         <Collapsable
-          open={isOpen}
+          open={isOpen || forceOpen}
           header={
             <div className="flex w-full gap-16 p-2 pr-8 pb-0">
               <div className="flex-1">
