@@ -30,87 +30,88 @@ jobs:
       - name: Install clever-tools
         run: npm install -g clever-tools
 
-      # APP
-      # - name: App - Fetch Build Secrets
-      #   id: app
-      #   env:
-      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-      #   run: |
-      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-      #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
+      # App
+      - name: App - Fetch Build Secrets
+        id: app
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      # - name: App - Build and push
-      #   env:
-      #     APP_NAME: app
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     push: true
-      #     file: devops/build/docker/Dockerfile.front
-      #     tags: |
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
-      #     build-args: |
-      #       "APP_NAME=${{ env.APP_NAME }}"
-      #       "RELEASE=${{ env.RELEASE }}"
-      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-      #     secrets: |
-      #       "BUILD_SECRETS=${{ steps.app.outputs.secrets }}"
+      - name: App - Build and push
+        env:
+          APP_NAME: app
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: devops/build/docker/Dockerfile.front
+          tags: |
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+          build-args: |
+            "APP_NAME=${{ env.APP_NAME }}"
+            "RELEASE=${{ env.RELEASE }}"
+            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
+          secrets: |
+            "BUILD_SECRETS=${{ steps.app.outputs.secrets }}"
 
       # Admin
-      # - name: Admin - Fetch Build Secrets
-      #   id: admin
-      #   env:
-      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-      #   run: |
-      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-      #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
+      - name: Admin - Fetch Build Secrets
+        id: admin
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      # - name: Admin - Build and push
-      #   env:
-      #     APP_NAME: admin
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     push: true
-      #     file: devops/build/docker/Dockerfile.front
-      #     tags: |
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
-      #     build-args: |
-      #       "APP_NAME=${{ env.APP_NAME }}"
-      #       "RELEASE=${{ env.RELEASE }}"
-      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-      #     secrets: |
-      #       "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
+      - name: Admin - Build and push
+        env:
+          APP_NAME: admin
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: devops/build/docker/Dockerfile.front
+          tags: |
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+          build-args: |
+            "APP_NAME=${{ env.APP_NAME }}"
+            "RELEASE=${{ env.RELEASE }}"
+            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
+          secrets: |
+            "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
 
       # Api
-      # - name: Api - Fetch Build Secrets
-      #   id: api
-      #   env:
-      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-      #   run: |
-      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-      #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
+      - name: Api - Fetch Build Secrets
+        id: api
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      # - name: Api - Build and push
-      #   env:
-      #     APP_NAME: api
-      #   uses: docker/build-push-action@v6
-      #   with:
-      #     push: true
-      #     file: devops/build/docker/Dockerfile.api
-      #     tags: |
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
-      #     build-args: |
-      #       "APP_NAME=${{ env.APP_NAME }}"
-      #       "RELEASE=${{ env.RELEASE }}"
-      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-      #     secrets: |
-      #       "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
+      - name: Api - Build and push
+        env:
+          APP_NAME: api
+        uses: docker/build-push-action@v6
+        with:
+          push: true
+          file: devops/build/docker/Dockerfile.api
+          tags: |
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+          build-args: |
+            "APP_NAME=${{ env.APP_NAME }}"
+            "RELEASE=${{ env.RELEASE }}"
+            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
+          secrets: |
+            "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
 
+      # ApiV2
       - name: ApiV2 - Fetch Build Secrets
         id: apiv2
         env:
