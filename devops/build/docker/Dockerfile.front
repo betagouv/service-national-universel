@@ -46,6 +46,6 @@ FROM nginx
 
 ARG APP_NAME
 
-COPY --from=builder /build/${APP_NAME}/build/ /usr/share/nginx/html
+COPY --from=builder /build/${APP_NAME}/build/ /usr/share/nginx/html/
 
 RUN sed -i"" 's#index  index.html index.htm;#index  index.html;\n\ttry_files $uri /index.html;#g' /etc/nginx/conf.d/default.conf

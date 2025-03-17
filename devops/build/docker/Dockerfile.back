@@ -1,0 +1,69 @@
+FROM node:20.17-alpine AS base
+
+FROM base AS pruner
+WORKDIR /build
+
+ARG APP_NAME
+
+RUN --mount=type=bind,src=.,target=/src \
+    --mount=type=cache,target=/root/.npm \
+<<EOF
+turbo_version=$(cat /src/package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
+npm install --global "turbo@$turbo_version"
+EOF
+
+RUN --mount=type=bind,src=.,target=/src \
+    turbo prune --docker --cwd /src --out-dir /build ${APP_NAME}
+
+
+FROM base AS builder
+WORKDIR /build
+
+ARG APP_NAME
+
+COPY --from=pruner /build/json/ .
+RUN mkdir ${APP_NAME}/public
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --no-audit --no-fund
+
+ARG ENVIRONMENT
+ARG RELEASE
+
+COPY --from=pruner /build/full/ .
+RUN --mount=type=secret,id=BUILD_SECRETS \
+<<EOF
+    export $(cat /run/secrets/BUILD_SECRETS | xargs)
+    npx turbo run build
+EOF
+
+RUN --mount=type=cache,target=/root/.npm \
+    npm ci --omit dev ${APP_NAME} --include-workspace-root
+
+
+
+FROM base
+
+ARG APP_NAME
+ARG ENVIRONMENT
+ARG RELEASE
+
+WORKDIR /run
+
+
+COPY --from=builder /build/packages/lib/node_modules/ packages/lib/node_modules/
+COPY --from=builder /build/packages/lib/dist/ packages/lib/
+
+COPY --from=builder /build/${APP_NAME}/public/ ${APP_NAME}/public/
+COPY --from=builder /build/${APP_NAME}/node_modules/ ${APP_NAME}/node_modules/
+COPY --from=builder /build/${APP_NAME}/migrations/ ${APP_NAME}/migrations/
+COPY --from=builder /build/${APP_NAME}/src/ ${APP_NAME}/src/
+
+COPY --from=builder /build/node_modules/ node_modules/
+
+COPY devops/build/api/package.json package.json
+
+ENV ENVIRONMENT=${ENVIRONMENT}
+ENV RELEASE=${RELEASE}
+ENV NPM_SCRIPT="start"
+
+CMD npm run $NPM_SCRIPT
