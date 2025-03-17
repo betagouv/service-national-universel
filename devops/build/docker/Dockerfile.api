@@ -3,7 +3,7 @@ FROM node:20.17-alpine AS base
 FROM base AS pruner
 WORKDIR /build
 
-ARG APP_NAME
+ARG APP_NAME="api"
 
 RUN --mount=type=bind,src=.,target=/src \
     --mount=type=cache,target=/root/.npm \
@@ -19,7 +19,7 @@ RUN --mount=type=bind,src=.,target=/src \
 FROM base AS builder
 WORKDIR /build
 
-ARG APP_NAME
+ARG APP_NAME="api"
 
 COPY --from=pruner /build/json/ .
 RUN mkdir ${APP_NAME}/public
@@ -43,7 +43,7 @@ RUN --mount=type=cache,target=/root/.npm \
 
 FROM base
 
-ARG APP_NAME
+ARG APP_NAME="api"
 ARG ENVIRONMENT
 ARG RELEASE
 

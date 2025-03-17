@@ -7,6 +7,8 @@ on:
 
 env:
   DOCKER_REGISTRY: rg.fr-par.scw.cloud/snu-staging
+  RELEASE: ${{ github.sha }}
+  ENVIRONMENT: production
 
 jobs:
   build:
@@ -47,11 +49,11 @@ jobs:
       #     file: devops/build/docker/Dockerfile.front
       #     tags: |
       #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}"
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
       #     build-args: |
       #       "APP_NAME=${{ env.APP_NAME }}"
-      #       "RELEASE=${{ github.sha }}"
-      #       "ENVIRONMENT=production"
+      #       "RELEASE=${{ env.RELEASE }}"
+      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
       #     secrets: |
       #       "BUILD_SECRETS=${{ steps.app.outputs.secrets }}"
 
@@ -74,17 +76,43 @@ jobs:
       #     file: devops/build/docker/Dockerfile.front
       #     tags: |
       #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}"
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
       #     build-args: |
       #       "APP_NAME=${{ env.APP_NAME }}"
-      #       "RELEASE=${{ github.sha }}"
-      #       "ENVIRONMENT=production"
+      #       "RELEASE=${{ env.RELEASE }}"
+      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
       #     secrets: |
       #       "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
 
       # Api
-      - name: Api - Fetch Build Secrets
-        id: api
+      # - name: Api - Fetch Build Secrets
+      #   id: api
+      #   env:
+      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+      #   run: |
+      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+      #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
+
+      # - name: Api - Build and push
+      #   env:
+      #     APP_NAME: api
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     file: devops/build/docker/Dockerfile.api
+      #     tags: |
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+      #     build-args: |
+      #       "APP_NAME=${{ env.APP_NAME }}"
+      #       "RELEASE=${{ env.RELEASE }}"
+      #       "ENVIRONMENT=${{ env.ENVIRONMENT }}"
+      #     secrets: |
+      #       "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
+
+      - name: ApiV2 - Fetch Build Secrets
+        id: apiv2
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
@@ -92,19 +120,19 @@ jobs:
           secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      - name: Api - Build and push
+      - name: ApiV2 - Build and push
         env:
-          APP_NAME: api
+          APP_NAME: apiv2
         uses: docker/build-push-action@v6
         with:
           push: true
-          file: devops/build/docker/Dockerfile.back
+          file: devops/build/docker/Dockerfile.apiv2
           tags: |
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
-            "RELEASE=${{ github.sha }}"
-            "ENVIRONMENT=production"
+            "RELEASE=${{ env.RELEASE }}"
+            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secrets: |
-            "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
+            "BUILD_SECRETS=${{ steps.apiv2.outputs.secrets }}"
