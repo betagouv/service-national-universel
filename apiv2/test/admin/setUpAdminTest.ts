@@ -57,6 +57,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
+import { DesistementController } from "@admin/infra/sejours/phase1/desistement/api/Desistement.controller";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -101,6 +102,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             AffectationController,
             BasculeJeuneValidesController,
             BasculeJeuneNonValidesController,
+            DesistementController,
             Phase1Controller,
             AuthController,
         ],
@@ -155,7 +157,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .useFactory({ factory: testDatabaseProviders(setupOptions.newContainer).useFactory })
         .compile();
 
-    const app = adminTestModule.createNestApplication({ logger: false });
+    const app = adminTestModule.createNestApplication({ logger: ["error"] });
     app.useGlobalPipes(new ValidationPipe());
 
     return { app, adminTestModule };

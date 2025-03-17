@@ -10,9 +10,13 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
 import { Phase1Service, StatusSimulation, StatusValidation } from "@admin/core/sejours/phase1/Phase1.service";
-import { PostSimulationsDesistementPayloadDto } from "./Desistement.validation";
+import {
+    GetDesistementParamsDto,
+    PostSimulationDesistementParamsDto,
+    PostSimulationsDesistementPayloadDto,
+    PostValiderDesistementParamsDto,
+} from "./Desistement.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ValiderAffectationHTSDromComTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromComTask.model";
 import { FileGateway } from "@shared/core/File.gateway";
@@ -28,8 +32,7 @@ export class DesistementController {
     @UseGuards(AdminGuard)
     @Get("/:sessionId")
     async getStatus(
-        @Param("sessionId") sessionId: string,
-        @Param("type") type: string,
+        @Param() { sessionId }: GetDesistementParamsDto,
     ): Promise<DesistementRoutes["GetDesistement"]["response"]> {
         let simulation: StatusSimulation;
         let traitement: StatusValidation;
@@ -56,7 +59,7 @@ export class DesistementController {
     @Post("/:sessionId/simulation")
     async simulationDesister(
         @Request() request: CustomRequest,
-        @Param("sessionId") sessionId: string,
+        @Param() { sessionId }: PostSimulationDesistementParamsDto,
         @Body() payload: PostSimulationsDesistementPayloadDto,
     ): Promise<DesistementRoutes["PostSimuler"]["response"]> {
         const affectationTask: ValiderAffectationHTSDromComTaskModel = await this.taskGateway.findById(
@@ -94,8 +97,7 @@ export class DesistementController {
     @Post("/:sessionId/simulation/:taskId/valider")
     async validerionDesister(
         @Request() request: CustomRequest,
-        @Param("sessionId") sessionId: string,
-        @Param("taskId") taskId: string,
+        @Param() { sessionId, taskId }: PostValiderDesistementParamsDto,
     ): Promise<DesistementRoutes["PostSimuler"]["response"]> {
         const simulationTask = await this.taskGateway.findById(taskId);
 
