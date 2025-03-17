@@ -64,7 +64,7 @@ jobs:
           secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
-      - name: App - Build and push
+      - name: Admin - Build and push
         env:
           APP_NAME: admin
         uses: docker/build-push-action@v6
