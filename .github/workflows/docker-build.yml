@@ -32,13 +32,11 @@ jobs:
 
       # App
       - name: App - Fetch Build Secrets
-        id: app
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-          echo "secrets=$secrets" >> $GITHUB_OUTPUT
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 > app.env
 
       - name: App - Build and push
         env:
@@ -54,18 +52,16 @@ jobs:
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
             "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-          secrets: |
-            "BUILD_SECRETS=${{ steps.app.outputs.secrets }}"
+          secret-files: |
+            "BUILD_SECRETS=./app.env"
 
       # Admin
       - name: Admin - Fetch Build Secrets
-        id: admin
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-          echo "secrets=$secrets" >> $GITHUB_OUTPUT
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 > admin.env
 
       - name: Admin - Build and push
         env:
@@ -81,18 +77,16 @@ jobs:
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
             "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-          secrets: |
-            "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
+          secret-files: |
+            "BUILD_SECRETS=./admin.env"
 
       # Api
       - name: Api - Fetch Build Secrets
-        id: api
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-          echo "secrets=$secrets" >> $GITHUB_OUTPUT
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 > api.env
 
       - name: Api - Build and push
         env:
@@ -108,18 +102,16 @@ jobs:
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
             "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-          secrets: |
-            "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
+          secret-files: |
+            "BUILD_SECRETS=./api.env"
 
       # ApiV2
       - name: ApiV2 - Fetch Build Secrets
-        id: apiv2
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
-          echo "secrets=$secrets" >> $GITHUB_OUTPUT
+          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 > apiv2.env
 
       - name: ApiV2 - Build and push
         env:
@@ -135,5 +127,5 @@ jobs:
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
             "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-          secrets: |
-            "BUILD_SECRETS=${{ steps.apiv2.outputs.secrets }}"
+          secret-files: |
+            "BUILD_SECRETS=./apiv2.env"
