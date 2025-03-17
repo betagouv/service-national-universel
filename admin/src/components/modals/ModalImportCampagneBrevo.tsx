@@ -8,20 +8,19 @@ import { RiDownload2Line, RiSearchLine } from "react-icons/ri";
 import { CampagneDataProps } from "../../scenes/planMarketing/campagne/CampagneForm";
 import { CampagneSpecifiqueFormData } from "@/scenes/planMarketing/campagne/CampagneSpecifiqueForm";
 
-interface ModalImportCampagnBrevoProps {
+interface ModalImportCampagneBrevoProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: (data: CampagneSpecificData) => void;
   cohort: CohortDto;
-  campagneSpecific: CampagneSpecifiqueFormData[];
+  campagnesSpecifiques: CampagneSpecifiqueFormData[];
 }
 
 export interface CampagneSpecificData {
   campagneGeneriqueId: string[];
-  cohortId: string;
 }
 
-export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, campagneSpecific }: ModalImportCampagnBrevoProps) => {
+export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, campagnesSpecifiques: campagneSpecific }: ModalImportCampagneBrevoProps) => {
   const [campagnes, setCampagnes] = useState<CampagneDataProps[]>([]);
   const [selectedCampaigns, setSelectedCampaigns] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
@@ -49,7 +48,6 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, ca
     onConfirm({
       ...formValues,
       campagneGeneriqueId: selectedCampaignsData.map((campagne) => campagne.id),
-      cohortId: cohort._id!,
     });
     handleOnClose();
   });
@@ -134,7 +132,7 @@ export const ModalImportCampagnBrevo = ({ isOpen, onClose, onConfirm, cohort, ca
       footer={
         <div className="flex justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1" onClick={handleOnClose} />
-          <Button title={`Importer ${selectedCampaigns.length} campagnes`} onClick={onSubmitForm} className="flex-1" />
+          <Button title={`Importer ${selectedCampaigns.length} campagne${selectedCampaigns.length > 1 ? "s" : ""}`} onClick={onSubmitForm} className="flex-1" />
         </div>
       }
     />

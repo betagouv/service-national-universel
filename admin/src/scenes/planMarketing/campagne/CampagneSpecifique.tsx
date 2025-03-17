@@ -5,17 +5,15 @@ import { CampagneJeuneType, CohortDto, DestinataireListeDiffusion } from "snu-li
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
-import { ModalImportCampagnBrevo } from "@/components/modals/ModalImportCampagnBrevo";
+import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
 import { useToggle } from "react-use";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
 }
 
-export interface CampagneSpecificData {
+export interface CampagnesGeneriquesImportData {
   campagneGeneriqueId: string[];
-  cohortId: string;
-  generic: boolean;
 }
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
@@ -43,14 +41,22 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     setDraftCampagne(newCampagne);
   };
 
-  const handleImportCampagneGenerique = (data: CampagneSpecificData) => {
+  const handleImportCampagneGenerique = (data: CampagnesGeneriquesImportData) => {
     data.campagneGeneriqueId.forEach((genericId) => {
-      const newSpecificCampaign = {
+      const newSpecificCampaign: CampagneSpecifiqueFormData & { generic: false } = {
         campagneGeneriqueId: genericId,
-        cohortId: data.cohortId,
-        generic: false,
+        cohortId: sessionId,
+        generic: false as const,
+        // Props d'une campagne spécifique qui seront omit dans le payload
+        // de création saveCampagne car CampagneSpecifiqueAvecRef (voir CampagneSpecifiqueMapper.toCreatePayload)
+        nom: "",
+        type: CampagneJeuneType.VOLONTAIRE,
+        listeDiffusionId: "",
+        templateId: 0,
+        objet: "",
+        destinataires: [DestinataireListeDiffusion.JEUNES],
       };
-      saveCampagne({ payload: newSpecificCampaign as any });
+      saveCampagne({ payload: newSpecificCampaign });
     });
   };
 
@@ -91,7 +97,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     <>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between pb-8">
-          <div className="text-2xl font-bold leading-7 text-gray-900">Campagnes Spécifiques</div>
+          <div className="text-2xl font-bold leading-7 text-gray-900">Marketing</div>
           <div className="flex items-center gap-4">
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
@@ -116,12 +122,12 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         ))}
       </div>
 
-      <ModalImportCampagnBrevo
+      <ModalImportCampagneBrevo
         isOpen={isImportCampagneSpecifique}
         onClose={() => setIsImportCampagneSpecifique(false)}
         onConfirm={handleImportCampagneGenerique}
         cohort={session}
-        campagneSpecific={campagnes}
+        campagnesSpecifiques={campagnes}
       />
     </>
   );

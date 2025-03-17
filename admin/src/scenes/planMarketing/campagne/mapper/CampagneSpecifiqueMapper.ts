@@ -1,4 +1,4 @@
-import { PlanMarketingRoutes, CampagneJeuneType, isCampagneSpecifique, hasCampagneGeneriqueId } from "snu-lib";
+import { PlanMarketingRoutes, isCampagneSpecifique, hasCampagneGeneriqueId } from "snu-lib";
 import { CampagneSpecifiqueFormData } from "../CampagneSpecifiqueForm";
 
 type CampagneApiResponse = NonNullable<PlanMarketingRoutes["SearchPlanMarketingRoute"]["response"]>[number];
@@ -65,7 +65,7 @@ export class CampagneSpecifiqueMapper {
    */
   static toCreatePayload(formData: CampagneSpecifiqueFormData & { generic: false }): CreateCampagnePayload {
     // Si c'est une campagne avec référence
-    if ("campagneGeneriqueId" in formData && typeof formData.campagneGeneriqueId === "string") {
+    if (hasCampagneGeneriqueId(formData) && typeof formData.campagneGeneriqueId === "string") {
       const payload: Omit<CampagneSpecifiqueWithRefPayload, "id" | "createdAt" | "updatedAt"> = {
         generic: false,
         cohortId: formData.cohortId,

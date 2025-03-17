@@ -172,7 +172,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 )}
               />
               {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-              <a href={`/email-preview/${campagneData.templateId}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
+              <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
                 Voir l'aperçu
                 <HiOutlineEye className="ml-1" size={18} />
               </a>
