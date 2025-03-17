@@ -8,12 +8,15 @@ import { DesisterValiderTaskResult, MIME_TYPES } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import {
     RAPPORT_SHEETS_SIMULATION,
+    JeuneTraitementDesistementRapport,
     RapportData,
     SimulationDesisterPostAffectationTaskModel,
 } from "./SimulationDesisterPostAffectationTask.model";
+import { RAPPORT_SHEETS_TRAITEMENT } from "./ValiderDesisterPostAffectationTask.model";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileGateway } from "@shared/core/File.gateway";
+import { JeuneModel } from "../../jeune/Jeune.model";
 
 export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTaskResult> {
     constructor(
@@ -40,31 +43,23 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         const ids = simulationData.jeunesADesister.map((jeune) => jeune.id);
         const jeunes = await this.jeuneGateway.findByIds(ids);
 
-        const jeunesByStatus = this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
-        const jeunesModifies = await this.desistementService.desisterJeunes(
-            jeunesByStatus.jeunesNonConfirmes,
-            sessionId,
-        );
+        const { jeunesNonConfirmes, jeunesConfirmes, jeunesAutreSession, jeunesDesistes } =
+            this.desistementService.groupJeunesByReponseAuxAffectations(jeunes, sessionId);
+        const jeunesModifies = await this.desistementService.desisterJeunes(jeunesNonConfirmes, sessionId);
 
-        if (jeunesModifies !== jeunesByStatus.jeunesNonConfirmes.length) {
+        if (jeunesModifies !== jeunesNonConfirmes.length) {
             throw new FunctionalException(
                 FunctionalExceptionCode.RESULT_DIFFERENT_THAN_SIMULATION,
                 "Nombre de jeunes désistés différent de la simulation",
             );
         }
 
-        const rapportData = Object.entries(jeunesByStatus).reduce(
-            (acc, [key, jeunes]) => {
-                acc[key] = this.desistementService.mapJeunesTraitement(jeunes);
-                return acc;
-            },
-            {
-                jeunesNonConfirmes: [],
-                jeunesConfirmes: [],
-                jeunesAutreSession: [],
-                jeunesDesistes: [],
-            } as RapportData,
-        );
+        const rapportData = {
+            jeunesNonConfirmes: this.mapJeunesTraitement(jeunesNonConfirmes),
+            jeunesConfirmes: this.mapJeunesTraitement(jeunesConfirmes),
+            jeunesAutreSession: this.mapJeunesTraitement(jeunesAutreSession),
+            jeunesDesistes: this.mapJeunesTraitement(jeunesDesistes),
+        } as RapportData;
 
         this.cls.set("user", { firstName: "Traitement - Désistement après affectation" });
 
@@ -72,7 +67,7 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         this.logger.debug(`DesistementService: ${rapportData.jeunesNonConfirmes.length} jeunes désistés`);
 
         // création du fichier excel de rapport
-        const fileBuffer = await this.desistementService.generateRapportTraitementPostDesistement(rapportData);
+        const fileBuffer = await this.generateRapportTraitementPostDesistement(rapportData);
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `desistement/desistement-post-affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
@@ -115,5 +110,67 @@ export class ValiderDesisterPostAffectation implements UseCase<DesisterValiderTa
         return {
             jeunesADesister,
         };
+    }
+
+    mapJeunesTraitement(jeunes: JeuneModel[]): JeuneTraitementDesistementRapport[] {
+        return jeunes.map((jeune) => ({
+            sejour: jeune.sessionNom,
+            id: jeune.id,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
+            email: jeune.email,
+            sexe: jeune.genre,
+            departement: jeune.departement,
+            region: jeune.region,
+            statut: jeune.statut,
+            statutPhase1: jeune.statutPhase1,
+            sessionId: jeune.sessionId,
+            "centre d'affectation": jeune.centreId,
+            "PDR d'affectation": jeune.pointDeRassemblementId,
+            Ligne: jeune.ligneDeBusId,
+            "RL1 Nom": jeune.parent1Nom,
+            "RL1 Prénom": jeune.parent1Prenom,
+            "RL1 Email": jeune.parent1Email,
+            "RL2 Nom": jeune.parent2Nom || "",
+            "RL2 Prénom": jeune.parent2Prenom || "",
+            "RL2 Email": jeune.parent2Email || "",
+            youngPhase1Agreement: jeune.youngPhase1Agreement,
+        }));
+    }
+
+    async generateRapportTraitementPostDesistement(rapportData: RapportData): Promise<Buffer> {
+        const fileBuffer = await this.fileGateway.generateExcel({
+            [RAPPORT_SHEETS_TRAITEMENT.RESUME]: [
+                {
+                    Groupe: "Total de volontaires affectés",
+                    Total:
+                        rapportData.jeunesDesistes.length +
+                        rapportData.jeunesAutreSession.length +
+                        rapportData.jeunesConfirmes.length +
+                        rapportData.jeunesNonConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés au préalable",
+                    Total: rapportData.jeunesDesistes.length,
+                },
+                {
+                    Groupe: "Volontaires ayant changé de séjour",
+                    Total: rapportData.jeunesAutreSession.length,
+                },
+                {
+                    Groupe: "Volontaires ayant confirmés leur séjour",
+                    Total: rapportData.jeunesConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés par ce traitement",
+                    Total: rapportData.jeunesNonConfirmes.length,
+                },
+            ],
+            [RAPPORT_SHEETS_TRAITEMENT.DESISTES]: rapportData.jeunesNonConfirmes,
+            [RAPPORT_SHEETS_TRAITEMENT.CONFIRMATION_PARTICIPATION]: rapportData.jeunesConfirmes,
+            [RAPPORT_SHEETS_TRAITEMENT.CHANGEMENTS_SEJOUR]: rapportData.jeunesAutreSession,
+            [RAPPORT_SHEETS_TRAITEMENT.DESITEMENT_PREALABLE]: rapportData.jeunesDesistes,
+        });
+        return fileBuffer;
     }
 }

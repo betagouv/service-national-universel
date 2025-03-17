@@ -67,11 +67,3 @@ export const RAPPORT_SHEETS_SIMULATION = {
     CHANGEMENTS_SEJOUR: "Changements de séjour",
     DESITEMENT_PREALABLE: "Desistements préalables",
 };
-
-export const RAPPORT_SHEETS_TRAITEMENT = {
-    RESUME: "Résumé",
-    A_DESITER: "Jeunes désistés",
-    CONFIRMATION_PARTICIPATION: "ont confirmé leur séjour",
-    CHANGEMENTS_SEJOUR: "ont changé de séjour",
-    DESITEMENT_PREALABLE: "se sont désistés en amont",
-};

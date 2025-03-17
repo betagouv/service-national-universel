@@ -6,9 +6,14 @@ import { MIME_TYPES } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import { RapportData } from "./SimulationDesisterPostAffectationTask.model";
+import {
+    JeuneSimulationDesistementRapport,
+    RapportData,
+    RAPPORT_SHEETS_SIMULATION,
+} from "./SimulationDesisterPostAffectationTask.model";
 import { ValiderAffectationHTSDromComTaskModel } from "../affectation/ValiderAffectationHTSDromComTask.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { JeuneModel } from "../../jeune/Jeune.model";
 
 export type SimulationDesistementResult = {
     rapportData: RapportData;
@@ -61,7 +66,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
 
         const rapportData = Object.entries(groups).reduce(
             (acc, [key, jeunes]) => {
-                acc[key] = this.desistementService.mapJeunesSimulation(jeunes);
+                acc[key] = this.mapJeunesSimulation(jeunes);
                 return acc;
             },
             {
@@ -73,7 +78,7 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
         );
 
         // création du fichier excel de rapport
-        const fileBuffer = await this.desistementService.generateRapportSimulationPostDesistement(rapportData);
+        const fileBuffer = await this.generateRapportSimulationPostDesistement(rapportData);
         const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-desistement/desistement-simulation-post-affectation_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
@@ -94,5 +99,57 @@ export class SimulationDesisterPostAffectation implements UseCase<SimulationDesi
             rapportData,
             rapportFile,
         };
+    }
+
+    mapJeunesSimulation(jeunes: JeuneModel[]): JeuneSimulationDesistementRapport[] {
+        return jeunes.map((jeune) => ({
+            id: jeune.id,
+            email: jeune.email,
+            prenom: jeune.prenom,
+            nom: jeune.nom,
+            statut: jeune.statut,
+            statutPhase1: jeune.statutPhase1,
+            sejour: jeune.sessionNom,
+            region: jeune.region,
+            departement: jeune.departement,
+            sessionId: jeune.sessionId,
+            youngPhase1Agreement: jeune.youngPhase1Agreement,
+        }));
+    }
+
+    async generateRapportSimulationPostDesistement(rapportData: RapportData): Promise<Buffer> {
+        const fileBuffer = await this.fileGateway.generateExcel({
+            [RAPPORT_SHEETS_SIMULATION.RESUME]: [
+                {
+                    Groupe: "Total de volontaires affectés",
+                    Total:
+                        rapportData.jeunesDesistes.length +
+                        rapportData.jeunesAutreSession.length +
+                        rapportData.jeunesConfirmes.length +
+                        rapportData.jeunesNonConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés au préalable",
+                    Total: rapportData.jeunesDesistes.length,
+                },
+                {
+                    Groupe: "Volontaires ayant changé de séjour",
+                    Total: rapportData.jeunesAutreSession.length,
+                },
+                {
+                    Groupe: "Volontaires ayant confirmés leur séjour",
+                    Total: rapportData.jeunesConfirmes.length,
+                },
+                {
+                    Groupe: "Volontaires désistés par ce traitement",
+                    Total: rapportData.jeunesNonConfirmes.length,
+                },
+            ],
+            [RAPPORT_SHEETS_SIMULATION.A_DESITER]: rapportData.jeunesNonConfirmes,
+            [RAPPORT_SHEETS_SIMULATION.CONFIRMATION_PARTICIPATION]: rapportData.jeunesConfirmes,
+            [RAPPORT_SHEETS_SIMULATION.CHANGEMENTS_SEJOUR]: rapportData.jeunesAutreSession,
+            [RAPPORT_SHEETS_SIMULATION.DESITEMENT_PREALABLE]: rapportData.jeunesDesistes,
+        });
+        return fileBuffer;
     }
 }
