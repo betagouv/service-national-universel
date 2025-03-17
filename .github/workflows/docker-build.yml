@@ -28,18 +28,45 @@ jobs:
       - name: Install clever-tools
         run: npm install -g clever-tools
 
-      - name: App - Fetch Build Secrets
-        id: secrets
+      # APP
+      # - name: App - Fetch Build Secrets
+      #   id: app
+      #   env:
+      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+      #   run: |
+      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }} | tail -n +2 | sed 's/"/""/g')
+      #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
+
+      # - name: App - Build and push
+      #   env:
+      #     APP_NAME: app
+      #   uses: docker/build-push-action@v6
+      #   with:
+      #     push: true
+      #     file: devops/build/docker/Dockerfile.front
+      #     tags: |
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
+      #       "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ github.sha }}"
+      #     build-args: |
+      #       "APP_NAME=${{ env.APP_NAME }}"
+      #       "RELEASE=${{ github.sha }}"
+      #       "ENVIRONMENT=production"
+      #     secrets: |
+      #       "BUILD_SECRETS=${{ steps.app.outputs.secrets }}"
+
+      - name: Admin - Fetch Build Secrets
+        id: admin
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APPLICATION_ID_CI }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }} | tail -n +2 | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: App - Build and push
         env:
-          APP_NAME: app
+          APP_NAME: admin
         uses: docker/build-push-action@v6
         with:
           push: true
@@ -50,8 +77,6 @@ jobs:
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ github.sha }}"
-            "ENVIRONMENT=ci"
+            "ENVIRONMENT=production"
           secrets: |
-            "BUILD_SECRETS=${{ steps.secrets.outputs.secrets }}"
-          # secret-files: |
-          #   "BUILD_SECRETS=./build.env"
+            "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
