@@ -165,6 +165,6 @@ describe("ValiderDesisterPostAffectation", () => {
         expect(desistementService.groupJeunesByReponseAuxAffectations).toHaveBeenCalled();
         expect(desistementService.desisterJeunes).toHaveBeenCalledWith(expect.any(Array), sessionNom);
         expect(desistementService.notifierJeunes).toHaveBeenCalledWith(expect.any(Array));
-        expect(desistementService.generateRapportPostDesistement).toHaveBeenCalled();
+        expect(desistementService.generateRapportTraitementPostDesistement).toHaveBeenCalled();
     });
 });
