@@ -37,7 +37,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: App - Build and push
@@ -64,7 +64,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: Admin - Build and push
@@ -91,7 +91,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: Api - Build and push
@@ -118,7 +118,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" | sed 's/"/""/g')
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: ApiV2 - Build and push
