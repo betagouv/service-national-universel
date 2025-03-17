@@ -45,9 +45,11 @@ describe("ValiderDesisterPostAffectation", () => {
                             jeunesConfirmes: Array(25).fill({ id: "young-id" }),
                             jeunesNonConfirmes: Array(25).fill({ id: "young-id" }),
                         }),
-                        mapJeunes: jest.fn((jeunes) => jeunes),
+                        mapJeunesTraitement: jest.fn((jeunes) => jeunes),
                         desisterJeunes: jest.fn().mockResolvedValue(25),
-                        generateRapportPostDesistement: jest.fn().mockResolvedValue(Buffer.from("mock-excel")),
+                        generateRapportTraitementPostDesistement: jest
+                            .fn()
+                            .mockResolvedValue(Buffer.from("mock-excel")),
                         notifierJeunes: jest.fn().mockResolvedValue(undefined),
                     },
                 },
