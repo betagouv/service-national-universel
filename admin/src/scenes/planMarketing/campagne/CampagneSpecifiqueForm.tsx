@@ -56,6 +56,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
     reset,
+    watch,
   } = useForm<CampagneSpecifiqueFormData>({
     defaultValues: {
       type: CampagneJeuneType.VOLONTAIRE,

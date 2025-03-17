@@ -78,6 +78,20 @@ export default function CampagnesGeneriques() {
     setCampagnes((prev) => [newCampagne, ...prev]);
   };
 
+  const refCallbacks = useMemo(() => {
+    return filteredCampagnes.reduce(
+      (acc, campagne) => {
+        if (campagne.id) {
+          acc[campagne.id] = (el: HTMLDivElement | null) => {
+            campagneRefs.current[campagne.id!] = el;
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, (el: HTMLDivElement | null) => void>,
+    );
+  }, [filteredCampagnes]);
+
   return (
     <>
       <div className="flex flex-col gap-6">
@@ -94,7 +108,7 @@ export default function CampagnesGeneriques() {
 
       <div className="flex flex-col gap-0">
         {filteredCampagnes.map((campagne) => (
-          <div key={`campagne-${campagne.id}`} ref={(el) => campagne.id && (campagneRefs.current[campagne.id] = el)}>
+          <div key={`campagne-${campagne.id}`} ref={campagne.id ? refCallbacks[campagne.id] : null}>
             <CampagneForm
               campagneData={campagne}
               isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}

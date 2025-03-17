@@ -53,8 +53,6 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         campagneGeneriqueId: genericId,
         cohortId: sessionId,
         generic: false as const,
-        // Props d'une campagne spécifique qui seront omit dans le payload
-        // de création saveCampagne car CampagneSpecifiqueAvecRef (voir CampagneSpecifiqueMapper.toCreatePayload)
         nom: "",
         type: CampagneJeuneType.VOLONTAIRE,
         listeDiffusionId: "",
