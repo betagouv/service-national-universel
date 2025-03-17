@@ -5,11 +5,19 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ConfigService } from "@nestjs/config";
-import { SearchParams, TaskName, TaskStatus, isCampagneGenerique, isCampagneWithRef } from "snu-lib";
+import {
+    CampagneSpecifique,
+    SearchParams,
+    TaskName,
+    TaskStatus,
+    isCampagneGenerique,
+    isCampagneWithRef,
+} from "snu-lib";
 import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { ListeDiffusionService } from "../service/ListeDiffusion.service";
 import { SearchYoungGateway } from "src/analytics/core/SearchYoung.gateway";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
+import { CampagneModel, CampagneSpecifiqueModelWithRefAndGeneric } from "../Campagne.model";
 Injectable();
 export class CreerListeDiffusion implements UseCase<string> {
     private readonly logger: Logger = new Logger(CreerListeDiffusion.name);
@@ -23,7 +31,6 @@ export class CreerListeDiffusion implements UseCase<string> {
     async execute(campagneId: string): Promise<string> {
         this.logger.log(`campagneId: ${campagneId}`);
         const campagne = await this.campagneGateway.findById(campagneId);
-        let campagneToBeUsed = campagne;
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
@@ -31,9 +38,26 @@ export class CreerListeDiffusion implements UseCase<string> {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_SHOULD_NOT_BE_GENERIC);
         }
 
-        // TODO : gérer les campagnes spécifiques liées
+        let contactsQuery = await this.buildListeDiffusionFiltre(campagne);
+
         if (isCampagneWithRef(campagne)) {
-            const campagneGenerique = await this.campagneGateway.findById(campagne.campagneGeneriqueId);
+            this.logger.log(
+                `Cas campagne spécifique liée à une campagne générique, campagne: ${campagne.id}, liée à la campagne générique: ${campagne.campagneGeneriqueId}`,
+            );
+            const campagneSpecifique = await this.campagneGateway.findSpecifiqueWithRefById(campagne.id);
+            contactsQuery = await this.buildListeDiffusionFiltre(campagneSpecifique);
+        }
+        const contacts = await this.searchYoungGateway.searchYoung(contactsQuery);
+
+        // TODO: changer la signature
+        return JSON.stringify(contacts);
+    }
+
+    private async buildListeDiffusionFiltre(
+        campagne: CampagneSpecifique | CampagneSpecifiqueModelWithRefAndGeneric | null,
+    ): Promise<SearchParams> {
+        if (!campagne) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
         //@ts-expect-error
         const listeDiffusion = await this.listeDiffusionService.getListeDiffusionById(campagne.listeDiffusionId);
@@ -42,9 +66,11 @@ export class CreerListeDiffusion implements UseCase<string> {
         }
         const filtreListeDiffusionWithCohortId = { ...listeDiffusion.filters, cohortId: [campagne.cohortId] };
         // Créer la liste de diffusion
-        const contactsQuery: SearchParams = { filters: filtreListeDiffusionWithCohortId };
-        const contacts = await this.searchYoungGateway.searchYoung(contactsQuery);
-
-        return JSON.stringify(contacts);
+        const contactsQuery: SearchParams = {
+            filters: filtreListeDiffusionWithCohortId,
+            sourceFields: ["email", "parent1Email", "parent2Email"],
+            size: 10000,
+        };
+        return contactsQuery;
     }
 }

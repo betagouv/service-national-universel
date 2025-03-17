@@ -54,6 +54,12 @@ export interface CampagneSpecifiqueModelWithRef extends CampagneBase {
     campagneGeneriqueId: string;
 }
 
+export interface CampagneSpecifiqueModelWithRefAndGeneric extends CampagneComplete {
+    generic: false;
+    cohortId: string;
+    campagneGeneriqueId: string;
+}
+
 // Types unions pour les différents cas d'utilisation
 export type CampagneSpecifiqueModel = CampagneSpecifiqueModelWithoutRef | CampagneSpecifiqueModelWithRef;
 export type CampagneModel = CampagneGeneriqueModel | CampagneSpecifiqueModel;
