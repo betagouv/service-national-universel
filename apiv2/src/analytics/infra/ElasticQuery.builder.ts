@@ -115,4 +115,13 @@ export class ElasticsearchQueryBuilder<T> {
     build(): ESSearchQuery<T> {
         return this.query;
     }
+
+    buildCountQuery() {
+        return {
+            index: this.query.index,
+            body: {
+                query: this.query.body.query,
+            },
+        };
+    }
 }
