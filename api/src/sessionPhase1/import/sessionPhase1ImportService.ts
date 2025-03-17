@@ -1,4 +1,4 @@
-import { region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
+import { CohortType, region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
@@ -32,8 +32,14 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
-    const zonedSnuId = getZonedSnuId(sessionCenter);
-    const foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
+    const { snuId: zonedSnuId, isDromCom } = getZonedSnuId(sessionCenter);
+    let foundCohort: null | CohortDocument = null;
+    if (isDromCom) {
+      foundCohort = await CohortModel.findOne({ snuId: zonedSnuId });
+    } else {
+      // check la cohort zoné ou la cohort par defaut
+      foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
+    }
     if (!foundCohort?._id) {
       processedSessionReport = await processCohortNotFound(sessionCenter, zonedSnuId);
       report.push(processedSessionReport);
@@ -43,7 +49,7 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
     // Somme des effectifs pour une même cohort
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
-      (sc) => sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc) === zonedSnuId,
+      (sc) => sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc).snuId === zonedSnuId,
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
@@ -168,21 +174,21 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
 const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped) => {
   let snuId = sessionCenter.sessionFormule;
   if (sessionCenter.sessionFormule.includes("CLE")) {
-    return snuId;
+    return { snuId };
   }
   const codeRegion = sessionCenter.sejourSnuId.replaceAll(`_${sessionCenter.cohesionCenterMatricule}`, "").replaceAll(`${sessionCenter.sessionFormule}_`, "");
   const region = mapTrigrammeToRegion(codeRegion);
   if (!region) {
-    return snuId;
+    return { snuId };
   }
   // DROM COM
   if (RegionsHorsMetropole.includes(region)) {
-    return `${snuId}_${codeRegion}`;
+    return { snuId: `${snuId}_${codeRegion}`, isDromCom: true };
   }
   // Sejours zonés (A, B, C)
   const zone = region2zone[region!];
   if (zone?.length === 1) {
-    return `${snuId}_${zone}`;
+    return { snuId: `${snuId}_${zone}` };
   }
-  return snuId;
+  return { snuId };
 };
