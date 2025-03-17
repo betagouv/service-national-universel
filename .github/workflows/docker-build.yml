@@ -107,4 +107,4 @@ jobs:
             "RELEASE=${{ github.sha }}"
             "ENVIRONMENT=production"
           secrets: |
-            "BUILD_SECRETS=${{ steps.admin.outputs.secrets }}"
+            "BUILD_SECRETS=${{ steps.api.outputs.secrets }}"
