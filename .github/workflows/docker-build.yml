@@ -35,7 +35,8 @@ jobs:
       #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
       #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
       #   run: |
-      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }} | tail -n +2 | sed 's/"/""/g')
+      #     secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+      #     echo "::add-mask::$secrets"
       #     echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       # - name: App - Build and push
@@ -61,7 +62,8 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          secrets=$(clever env --app ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }} | tail -n +2 | sed 's/"/""/g')
+          secrets=$(clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | sed 's/"/""/g')
+          echo "::add-mask::$secrets"
           echo "secrets=$secrets" >> $GITHUB_OUTPUT
 
       - name: App - Build and push
