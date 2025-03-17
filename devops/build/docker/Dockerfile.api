@@ -62,8 +62,11 @@ COPY --from=builder /build/node_modules/ node_modules/
 
 COPY devops/build/${APP_NAME}/package.json package.json
 
+ENV PORT="8080"
 ENV ENVIRONMENT=${ENVIRONMENT}
 ENV RELEASE=${RELEASE}
 ENV NPM_SCRIPT="start"
+
+EXPOSE ${PORT}
 
 CMD npm run $NPM_SCRIPT
