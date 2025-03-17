@@ -1075,6 +1075,10 @@ const getYoungStatusForAVenir = (young: YoungType) => {
 
 const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
   switch (young.status) {
+    case YOUNG_STATUS.IN_PROGRESS:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.REINSCRIPTION:
+      return YOUNG_STATUS.REINSCRIPTION;
     case YOUNG_STATUS.WITHDRAWN:
       return YOUNG_STATUS.WAITING_VALIDATION;
     case YOUNG_STATUS.REFUSED:
