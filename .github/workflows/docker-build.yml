@@ -6,7 +6,7 @@ on:
       - docker-backup
 
 env:
-  DOCKER_REGISTRY: rg.fr-par.scw.cloud/snu-staging
+  DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
   RELEASE: ${{ github.sha }}
   ENVIRONMENT: production
 
