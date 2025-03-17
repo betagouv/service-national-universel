@@ -19,7 +19,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       return PlanMarketingService.create(CampagneSpecifiqueMapper.toCreatePayload(payload));
     },
     onSuccess: (data, variables) => {
-      queryClient.setQueryData<CampagneSpecifiqueFormData[]>([CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT], (old = []) => {
+      queryClient.setQueryData<CampagneSpecifiqueFormData[]>([CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId], (old = []) => {
         if (variables.id) {
           return old.map((item) => (item.id === variables.id ? ({ ...item, ...variables.payload } as CampagneSpecifiqueFormData) : item));
         }
