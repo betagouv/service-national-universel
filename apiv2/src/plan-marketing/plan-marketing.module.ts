@@ -28,9 +28,10 @@ import { CreerListeDiffusionEtImporterContacts } from "./core/useCase/CreerListe
 import { AnalyticsModule } from "src/analytics/analytics.module";
 import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
 import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElastic.repository";
+import { AdminModule } from "@admin/Admin.module";
 
 @Module({
-    imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule],
+    imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
     controllers: [PlanMarketingController, CampagneController, ListeDiffusionController],
     providers: [
         Logger,

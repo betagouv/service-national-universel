@@ -44,7 +44,6 @@ export class PlanMarketingController {
     @UseGuards(AdminGuard)
     @Post("envoyer-campagne/:id")
     async envoyerCampagne(@Param("id") campagneId: string): Promise<string> {
-        console.log("envoyerCampagne", campagneId);
         return await this.creerListeDiffusion.execute(campagneId);
     }
 }
