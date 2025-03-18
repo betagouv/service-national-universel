@@ -1,6 +1,10 @@
 import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
 import { DesisterClasses } from "./DesisterClasses";
 
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
+
 describe("DesisterClasses", () => {
     let useCase: DesisterClasses;
     let mockFileGateway: any;
@@ -44,7 +48,8 @@ describe("DesisterClasses", () => {
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.findById.mockResolvedValue(mockClasse);
         mockJeuneGateway.findByClasseId.mockResolvedValue(mockJeunes);
         mockClasseGateway.updateStatut.mockResolvedValue({ ...mockClasse, statut: STATUS_CLASSE.WITHDRAWN });
@@ -133,7 +138,8 @@ describe("DesisterClasses", () => {
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.updateStatut.mockImplementation((id) => ({
             id,
             statut: STATUS_CLASSE.WITHDRAWN,
@@ -161,7 +167,8 @@ describe("DesisterClasses", () => {
         const mockXlsxData = [{ "Identifiant de la classe engagée": "CLASS-001" }];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]);
         mockClasseGateway.updateStatut.mockRejectedValue(new Error("Database error"));
 
         const result = await useCase.execute({
@@ -185,7 +192,8 @@ describe("DesisterClasses", () => {
         const mockXlsxData = [{ "Identifiant de la classe engagée": "CLASS-001" }];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.updateStatut.mockResolvedValue({
             id: "CLASS-001",
             statut: STATUS_CLASSE.WITHDRAWN,
@@ -206,6 +214,34 @@ describe("DesisterClasses", () => {
             classeId: "class-001",
             error: "Update failed",
             result: "error",
+            jeunesDesistesIds: "",
+        });
+    });
+
+    it("should handle duplicate import and desist classe error", async () => {
+        const mockXlsxData = [
+            {
+                "Identifiant de la classe engagée": "CLASS-001",
+            },
+        ];
+
+        mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
+        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockClasseGateway.findById.mockResolvedValue(mockXlsxData);
+
+        const result = await useCase.execute({
+            fileKey: "test.xlsx",
+            folderPath: "/test",
+            auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
+            fileName: "test.xlsx",
+            fileLineCount: 1,
+            type: ReferentielTaskType.IMPORT_DESISTER_CLASSES,
+        });
+
+        expect(result[0]).toEqual({
+            classeId: "class-001",
+            result: "error",
+            error: "Classe existe dans les 2 onglets",
             jeunesDesistesIds: "",
         });
     });
