@@ -9,7 +9,7 @@ if [ "$#" -lt 1 ]; then
     exit 1
 fi
 
-container_id=$2
+container_id=$1
 
 if [[ $container_id == "" ]]
 then
