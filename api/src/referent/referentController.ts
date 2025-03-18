@@ -587,6 +587,14 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.sessionPhase1Id = undefined;
       newYoung.statusPhase1 = YOUNG_STATUS_PHASE1.WAITING_AFFECTATION;
     }
+    if (newYoung.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED) {
+      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
+        return res.status(400).send({
+          ok: false,
+          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
+        });
+      }
+    }
 
     if (newYoung?.department && young?.department && newYoung?.department !== young?.department) {
       await notifDepartmentChange(newYoung.department, SENDINBLUE_TEMPLATES.young.DEPARTMENT_IN, young, { previousDepartment: young.department });
@@ -1075,6 +1083,10 @@ const getYoungStatusForAVenir = (young: YoungType) => {
 
 const getYoungStatusForBasculeCLEtoHTS = (young: YoungType) => {
   switch (young.status) {
+    case YOUNG_STATUS.IN_PROGRESS:
+      return YOUNG_STATUS.IN_PROGRESS;
+    case YOUNG_STATUS.REINSCRIPTION:
+      return YOUNG_STATUS.REINSCRIPTION;
     case YOUNG_STATUS.WITHDRAWN:
       return YOUNG_STATUS.WAITING_VALIDATION;
     case YOUNG_STATUS.REFUSED:
