@@ -377,6 +377,8 @@ const translate = (value) => {
       return "L'objectif d'inscription de la région a été atteint !";
     case FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED:
       return "Aucun objectif d'inscription défini pour le département !";
+    case FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS:
+      return "Les informations nécessaires à l'affectation ne sont pas disponibles ! (confirmation PDR, centre, PDR, ligne de bus)";
     case "NOT_ENOUGH_DATA":
       return "Données insuffisantes";
     case "AFFECTATION_NOT_ENOUGH_DATA":
