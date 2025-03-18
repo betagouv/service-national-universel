@@ -31,11 +31,6 @@ then
     exit 1
 fi
 
-if ! [[ -x "$(command -v jq)" ]]; then
-  echo 'ERROR: jq is not installed' >&2
-  exit 1
-fi
-
 data=$($(dirname $0)/get-secrets-from-cc.sh $app_id \
   | sed 's/^\(.*\)="\(.*\)"$/{"key": "\1", "value": "\2"}/g' \
   | tr "\n" "," \

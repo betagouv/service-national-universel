@@ -1,0 +1,31 @@
+name: Scaleway - Deploy
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - docker-backup
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app_id:
+          [
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}",
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_APIV2 }}",
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_APP }}",
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_ADMIN }}",
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}",
+            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKSV2 }}",
+          ]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: App - Fetch Build Secrets
+        env:
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+        run: |
+          ./devops/scripts/scw/deploy.sh ${{ matrix.app_id }}

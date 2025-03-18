@@ -1,9 +1,9 @@
-name: Docker Build backup
+name: Scaleway - Docker Build backup
 
 on:
-  push:
-    branches:
-      - docker-backup
+  workflow_dispatch:
+  schedule:
+    - cron: "47 1 * * 3" # Every wednesday at 01:47 UTC
 
 env:
   DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
@@ -130,8 +130,8 @@ jobs:
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/apiv2.env"
 
-      # Update SCW environment variables
-      - name: ApiV2 - Fetch Build Secrets
+      # Update environment
+      - name: Update containers environment
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
