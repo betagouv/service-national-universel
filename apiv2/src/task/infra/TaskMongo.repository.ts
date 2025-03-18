@@ -29,7 +29,7 @@ export class TaskRepository implements TaskGateway {
     async findById(id: string): Promise<TaskModel> {
         const task = await this.taskMongooseEntity.findById(id);
         if (!task) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "task");
         }
         return TaskMapper.toModel(task);
     }

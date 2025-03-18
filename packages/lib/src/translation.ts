@@ -1209,6 +1209,8 @@ export const translateSimulationName = (name: string) => {
     case "BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER":
       return "Bascule des jeunes non validés";
     case "DESISTEMENT_POST_AFFECTATION":
+    case "DESISTEMENT_POST_AFFECTATION_SIMULATION":
+    case "DESISTEMENT_POST_AFFECTATION_VALIDER":
       return "Désistement post affectation";
     default:
       return name;

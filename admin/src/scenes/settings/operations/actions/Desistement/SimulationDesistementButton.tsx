@@ -7,12 +7,12 @@ import { toastr } from "react-redux-toastr";
 import { translate } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 
-export default function DesistementButton({ sessionId, taskId, onClose, disabled }: { sessionId: string; taskId: string; onClose: () => void; disabled: boolean }) {
+export default function SimulationDesistementButton({ sessionId, taskId, onClose, disabled }: { sessionId: string; taskId: string; onClose: () => void; disabled: boolean }) {
   const { isPending, mutate } = useMutation({
-    mutationFn: () => DesistementService.postDesistement({ sessionId, taskId }),
+    mutationFn: () => DesistementService.postSimulationDesistement({ sessionId, taskId }),
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      queryClient.invalidateQueries({ queryKey: ["desistement"] });
+      queryClient.invalidateQueries({ queryKey: ["desistement", sessionId] });
       onClose();
     },
     onError: (error: Error) => {
@@ -21,5 +21,5 @@ export default function DesistementButton({ sessionId, taskId, onClose, disabled
     },
   });
 
-  return <Button onClick={() => mutate()} title="Confirmer les désistements" disabled={disabled || isPending} className="w-full" />;
+  return <Button onClick={() => mutate()} title="Lancer une simulation" disabled={disabled || isPending} className="w-full" />;
 }

@@ -26,11 +26,7 @@ import {
     PostSimulationValiderPayloadDto,
 } from "./Affectation.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import {
-    AffectationService,
-    StatusSimulation,
-    StatusValidation,
-} from "@admin/core/sejours/phase1/affectation/Affectation.service";
+import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
@@ -38,12 +34,14 @@ import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
+import { Phase1Service, StatusSimulation, StatusValidation } from "@admin/core/sejours/phase1/Phase1.service";
 
 @Controller("affectation")
 export class AffectationController {
     constructor(
         private readonly affectationService: AffectationService,
         private readonly simulationAffectationHTSService: SimulationAffectationHTSService,
+        @Inject(Phase1Service) private readonly phase1Service: Phase1Service,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(LigneDeBusGateway) private readonly ligneDeBusGateway: LigneDeBusGateway,
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
@@ -61,41 +59,41 @@ export class AffectationController {
         let traitement: StatusValidation;
         switch (type) {
             case "HTS":
-                simulation = await this.affectationService.getStatusSimulation(
+                simulation = await this.phase1Service.getStatusSimulation(
                     sessionId,
                     TaskName.AFFECTATION_HTS_SIMULATION,
                 );
-                traitement = await this.affectationService.getStatusValidation(
+                traitement = await this.phase1Service.getStatusValidation(
                     sessionId,
                     TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
                 );
                 break;
             case "HTS_DROMCOM":
-                simulation = await this.affectationService.getStatusSimulation(
+                simulation = await this.phase1Service.getStatusSimulation(
                     sessionId,
                     TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
                 );
-                traitement = await this.affectationService.getStatusValidation(
+                traitement = await this.phase1Service.getStatusValidation(
                     sessionId,
                     TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
                 );
                 break;
             case "CLE":
-                simulation = await this.affectationService.getStatusSimulation(
+                simulation = await this.phase1Service.getStatusSimulation(
                     sessionId,
                     TaskName.AFFECTATION_CLE_SIMULATION,
                 );
-                traitement = await this.affectationService.getStatusValidation(
+                traitement = await this.phase1Service.getStatusValidation(
                     sessionId,
                     TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
                 );
                 break;
             case "CLE_DROMCOM":
-                simulation = await this.affectationService.getStatusSimulation(
+                simulation = await this.phase1Service.getStatusSimulation(
                     sessionId,
                     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
                 );
-                traitement = await this.affectationService.getStatusValidation(
+                traitement = await this.phase1Service.getStatusValidation(
                     sessionId,
                     TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
                 );
@@ -267,7 +265,7 @@ export class AffectationController {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+        const { status, lastCompletedAt } = await this.phase1Service.getStatusValidation(
             sessionId,
             TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
         );
@@ -311,7 +309,7 @@ export class AffectationController {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+        const { status, lastCompletedAt } = await this.phase1Service.getStatusValidation(
             sessionId,
             TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
         );
@@ -354,7 +352,7 @@ export class AffectationController {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+        const { status, lastCompletedAt } = await this.phase1Service.getStatusValidation(
             sessionId,
             TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
         );
@@ -397,7 +395,7 @@ export class AffectationController {
         const simulationTask = await this.taskGateway.findById(taskId);
 
         // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.affectationService.getStatusValidation(
+        const { status, lastCompletedAt } = await this.phase1Service.getStatusValidation(
             sessionId,
             TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
         );
