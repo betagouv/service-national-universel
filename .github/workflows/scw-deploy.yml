@@ -2,6 +2,9 @@ name: Scaleway - Deploy
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - docker-backup
 
 jobs:
   build:
