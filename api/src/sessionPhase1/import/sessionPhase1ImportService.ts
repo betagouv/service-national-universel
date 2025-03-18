@@ -112,7 +112,7 @@ const createSession = async (
       foundSession.sejourSnuIds.push(sessionCenter.sejourSnuId);
     }
 
-    await foundSession.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER2" } });
+    await foundSession.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
     // on synchronise les places disponibles
     await updatePlacesSessionPhase1(foundSession, { firstName: "IMPORT_SESSION_COHESION_CENTER" });
 
