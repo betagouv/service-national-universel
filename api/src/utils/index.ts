@@ -378,7 +378,7 @@ async function updateSeatsTakenInBusLine(busline) {
 }
 
 const sendAutoCancelMeetingPoint = async (young) => {
-  const cc = [];
+  const cc: { email: string }[] = [];
   if (young.parent1Email) cc.push({ email: young.parent1Email });
   if (young.parent2Email) cc.push({ email: young.parent2Email });
   await sendEmail(
@@ -638,7 +638,7 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
     //on filtre les contrats liés à ces candidatures filtrée précédement
     const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
 
-    const arrayContract = [];
+    const arrayContract: ("VALIDATED" | "DRAFT" | "SENT")[] = [];
     for (const contract of activeContracts) {
       const status = checkStatusContract(contract);
       const application = await ApplicationModel.findById(contract.applicationId);
@@ -698,9 +698,9 @@ function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
-const getCcOfYoung = ({ template, young }) => {
+const getCcOfYoung = ({ template, young }): { name: string; email: string }[] => {
   if (!young || !template) return [];
-  let cc = [];
+  let cc: { name: string; email: string }[] = [];
   if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -852,9 +852,9 @@ const updateYoungApplicationFilesType = async (application, user) => {
     const young = await YoungModel.findById(application.youngId);
     const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-    const listFiles = [];
+    const listFiles: string[] = [];
     applications.map(async (application) => {
-      const currentListFiles = [];
+      const currentListFiles: string[] = [];
       if (application.contractAvenantFiles.length > 0) {
         currentListFiles.push("contractAvenantFiles");
         listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
