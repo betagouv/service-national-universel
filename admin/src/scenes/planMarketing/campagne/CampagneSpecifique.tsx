@@ -1,19 +1,27 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { InputText } from "@snu/ds/admin";
 import React, { useMemo, useState } from "react";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, CohortDto, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
 import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
+import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
+import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 
 interface CampagneSpecifiqueProps {
-  sessionId: string;
+  session: CohortDto;
 }
 
-export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProps) {
+export interface CampagnesGeneriquesImportData {
+  campagneGeneriqueId: string[];
+}
+
+export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
+  const sessionId = session._id!;
   const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
+  const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
 
   const { listesDiffusion } = useListeDiffusion();
 
@@ -37,6 +45,23 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
       cohortId: sessionId,
     };
     setDraftCampagne(newCampagne);
+  };
+
+  const handleImportCampagneGenerique = (data: CampagnesGeneriquesImportData) => {
+    data.campagneGeneriqueId.forEach((genericId) => {
+      const newSpecificCampaign: CampagneSpecifiqueFormData & { generic: false } = {
+        campagneGeneriqueId: genericId,
+        cohortId: sessionId,
+        generic: false as const,
+        nom: "",
+        type: CampagneJeuneType.VOLONTAIRE,
+        listeDiffusionId: "",
+        templateId: 0,
+        objet: "",
+        destinataires: [DestinataireListeDiffusion.JEUNES],
+      };
+      saveCampagne({ payload: newSpecificCampaign });
+    });
   };
 
   const handleOnSave = (campagne: CampagneSpecifiqueFormData & { generic: false }) => {
@@ -69,11 +94,14 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
     <>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between pb-8">
-          <div className="text-2xl font-bold leading-7 text-gray-900">Campagnes Spécifiques</div>
+          <div className="text-2xl font-bold leading-7 text-gray-900">Marketing</div>
           <div className="flex items-center gap-4">
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
               Nouvelle campagne
+            </ButtonPrimary>
+            <ButtonPrimary onClick={() => setIsImportCampagneSpecifique(true)} className="h-[50px] w-[300px]">
+              Importer une campagne
             </ButtonPrimary>
           </div>
         </div>
@@ -90,6 +118,14 @@ export default function CampagneSpecifique({ sessionId }: CampagneSpecifiqueProp
           />
         ))}
       </div>
+
+      <ModalImportCampagneBrevo
+        isOpen={isImportCampagneSpecifique}
+        onClose={() => setIsImportCampagneSpecifique(false)}
+        onConfirm={handleImportCampagneGenerique}
+        cohort={session}
+        campagnesSpecifiques={campagnes}
+      />
     </>
   );
 }

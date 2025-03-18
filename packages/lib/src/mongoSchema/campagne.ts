@@ -35,7 +35,6 @@ export const CampagneSchema = {
         enum: Object.values(DestinataireListeDiffusion),
       },
     ],
-    default: [],
   },
   type: {
     type: String,

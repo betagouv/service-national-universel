@@ -56,6 +56,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
     handleSubmit,
     formState: { errors, isDirty, isSubmitting },
     reset,
+    watch,
   } = useForm<CampagneSpecifiqueFormData>({
     defaultValues: {
       type: CampagneJeuneType.VOLONTAIRE,
@@ -99,7 +100,9 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 <div className="flex flex-col gap-2">
                   <div className="text-xl font-medium">{campagneData.nom}</div>
                   {hasCampagneGenerique ? (
-                    <a href={`/plan-marketing/campagnes-generiques?id=${campagneData.id}`} className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                    <a
+                      href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
+                      className="text-blue-600 hover:underline text-sm flex items-center gap-1">
                       Editer la campagne globale
                       <HiPencil className="w-4 h-4" />
                     </a>
@@ -171,7 +174,7 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 )}
               />
               {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-              <a href={`/email-preview/${campagneData.templateId}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
+              <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
                 Voir l'aperçu
                 <HiOutlineEye className="ml-1" size={18} />
               </a>
