@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Button, Modal, InputText, InputCheckbox } from "@snu/ds/admin";
 import { useForm } from "react-hook-form";
 import PlanMarketingService from "@/services/planMarketingService";
@@ -39,9 +39,11 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
     setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
   }, [campagnesData]);
 
-  const filteredCampaigns = campagnes
-    .filter((campagne) => campagne.type === "BOTH" || campagne.type === cohort.type)
-    .filter((campagne) => campagne.nom.toLowerCase().includes(searchTerm.toLowerCase()));
+  const filteredCampaigns = useMemo(() => {
+    return campagnes
+      .filter((campagne) => campagne.type === "BOTH" || campagne.type === cohort.type)
+      .filter((campagne) => campagne.nom.toLowerCase().includes(searchTerm.toLowerCase()));
+  }, [campagnes, cohort.type, searchTerm]);
 
   const onSubmitForm = handleSubmit((formValues) => {
     const selectedCampaignsData = campagnes.filter((campagne) => selectedCampaigns.includes(campagne.id));
@@ -59,7 +61,9 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
     onClose();
   };
 
-  const allSelectableCampaigns = filteredCampaigns.filter((campagne) => !isCampaignDisabled(campagne.id));
+  const allSelectableCampaigns = useMemo(() => {
+    return filteredCampaigns.filter((campagne) => !isCampaignDisabled(campagne.id));
+  }, [filteredCampaigns, isCampaignDisabled]);
 
   const toggleSelectAll = (checked: boolean) => {
     setSelectedCampaigns(checked ? allSelectableCampaigns.map((campagne) => campagne.id) : []);
