@@ -20,7 +20,7 @@ export default function SimulationDesistement({ session }: { session: CohortDto 
     isError,
     data: desistementStatus,
   } = useQuery<DesistementRoutes["GetDesistement"]["response"]>({
-    queryKey: ["desitement", session._id], // check SimulationDesistementResultStartButton.tsx and SimulationDesistementButton.tsx queryKey
+    queryKey: ["desistement", session._id], // check SimulationDesistementResultStartButton.tsx and SimulationDesistementButton.tsx queryKey
     queryFn: async () => DesistementService.getDesistement(session._id!),
     refetchInterval: (data) => {
       if ([TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(data.state.data?.simulation?.status as TaskStatus)) {
@@ -29,7 +29,7 @@ export default function SimulationDesistement({ session }: { session: CohortDto 
       return false;
     },
   });
-  const isValidSession = session.type === "VOLONTAIRE"; // HTS
+  const isValidSession = session.type === COHORT_TYPE.VOLONTAIRE; // HTS
   const isInProgress = desistementStatus && [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(desistementStatus?.simulation?.status as TaskStatus);
 
   return (
