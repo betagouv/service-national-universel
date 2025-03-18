@@ -61,14 +61,14 @@ export default function PhaseStatusSelector({ young, onChange }) {
       try {
         const result = await api.put(`/young-edition/${young._id}/phasestatus`, { [`statusPhase${phase}`]: status });
         if (result.ok) {
-          toastr.success("Le nouveau statut a bien été modifié.");
+          toastr.success("Le nouveau statut a bien été modifié.", { timeOut: 5000 });
           onChange && onChange();
         } else {
-          toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.");
+          toastr.error("Erreur ! Nous n'avons pas pu enregistrer le changement de statut", translate(result.code), { timeOut: 5000 });
         }
       } catch (err) {
         console.log(err);
-        toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.");
+        toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.", { timeOut: 5000 });
       }
     }
   }
