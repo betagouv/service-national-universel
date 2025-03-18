@@ -12,7 +12,7 @@ export default function SimulationDesistementButton({ sessionId, taskId, onClose
     mutationFn: () => DesistementService.postSimulationDesistement({ sessionId, taskId }),
     onSuccess: () => {
       toastr.success("Le traitement a bien été ajouté", "", { timeOut: 5000 });
-      queryClient.invalidateQueries({ queryKey: ["desistement"] });
+      queryClient.invalidateQueries({ queryKey: ["desistement", sessionId] });
       onClose();
     },
     onError: (error: Error) => {
@@ -21,5 +21,5 @@ export default function SimulationDesistementButton({ sessionId, taskId, onClose
     },
   });
 
-  return <Button onClick={() => mutate()} title="Confirmer les désistements" disabled={disabled || isPending} className="w-full" />;
+  return <Button onClick={() => mutate()} title="Lancer une simulation" disabled={disabled || isPending} className="w-full" />;
 }
