@@ -36,6 +36,7 @@ RUN --mount=type=secret,id=BUILD_SECRETS \
     npx turbo run build
 EOF
 
+COPY patches/ patches/ 
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --omit dev ${APP_NAME} --include-workspace-root
 
