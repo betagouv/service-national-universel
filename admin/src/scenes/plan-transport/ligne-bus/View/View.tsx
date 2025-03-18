@@ -4,17 +4,7 @@ import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import {
-  CohortType,
-  LigneBusDto,
-  PointDeRassemblementType,
-  ROLES,
-  canExportLigneBus,
-  getZonedDate,
-  isLigneBusDemandeDeModificationOpen,
-  ligneBusCanCreateDemandeDeModification,
-  translate,
-} from "snu-lib";
+import { CohortType, LigneBusDto, ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bus from "@/assets/icons/Bus";
