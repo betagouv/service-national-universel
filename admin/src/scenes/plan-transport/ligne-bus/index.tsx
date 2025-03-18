@@ -19,7 +19,7 @@ export default function Index() {
       <SentryRoute path="/ligne-de-bus/import" component={Import} />
       <SentryRoute path="/ligne-de-bus/volontaires/bus/:id" component={ListBus} />
       <SentryRoute path="/ligne-de-bus/volontaires/point-de-rassemblement/:id" component={ListPDR} />
-      <SentryRoute path="/ligne-de-bus/:id" render={(props) => <View key={props.match.params.id} {...props} />} />
+      <SentryRoute path="/ligne-de-bus/:id" component={View} />
       <SentryRoute path="/ligne-de-bus" component={List} />
     </Switch>
   );

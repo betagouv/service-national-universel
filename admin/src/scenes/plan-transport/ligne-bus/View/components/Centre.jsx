@@ -26,7 +26,7 @@ export default function Centre({ bus, setBus, cohort }) {
       centerDepartureTime: bus.centerDepartureTime || "",
     });
     setErrors({});
-  }, [editCenter]);
+  }, [editCenter, bus]);
 
   const onSubmitInfo = async () => {
     try {
