@@ -36,7 +36,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > ${{ runner.temp }}/app.env
+          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }} > ${{ runner.temp }}/app.env
 
       - name: App - Build and push
         env:
@@ -61,7 +61,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > ${{ runner.temp }}/admin.env
+          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }} > ${{ runner.temp }}/admin.env
 
       - name: Admin - Build and push
         env:
@@ -86,7 +86,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > ${{ runner.temp }}/api.env
+          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }} > ${{ runner.temp }}/api.env
 
       - name: Api - Build and push
         env:
@@ -111,7 +111,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever env --app ${{ vars.CC_APP_ID_CI_SNU_ALL }} | tail -n +2 | grep -v "^CC_" > ${{ runner.temp }}/apiv2.env
+          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} > ${{ runner.temp }}/apiv2.env
 
       - name: ApiV2 - Build and push
         env:
@@ -129,3 +129,17 @@ jobs:
             "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/apiv2.env"
+
+      # Update SCW environment variables
+      - name: ApiV2 - Fetch Build Secrets
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+        run: |
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_APP }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_ADMIN }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_APIV2 }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKS }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKSV2 }}
