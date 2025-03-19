@@ -2,8 +2,6 @@ name: Scaleway - Deploy
 
 on:
   workflow_dispatch:
-  push:
-    branches: ["scw-apiv2"] # TODO : remove
 
 jobs:
   prepare:
