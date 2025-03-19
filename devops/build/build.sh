@@ -40,6 +40,9 @@ turbo prune $application
 if (( $front )); then
     cp tsconfig.front.json out
 fi
+if [[ $application == "api" ]]; then
+    cp -r patches out
+fi
 cd out
 npm ci --no-audit --no-fund
 turbo run build
