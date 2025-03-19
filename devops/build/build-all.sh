@@ -23,6 +23,7 @@ npm install --global "turbo@$turbo_version"
 rm -Rf out
 turbo prune app admin api apiv2
 cp tsconfig.front.json out
+cp -r patches out
 cd out
 npm ci --no-audit --no-fund
 turbo run build

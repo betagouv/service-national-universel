@@ -4,13 +4,13 @@ set -e
 
 if [[ $ORGANIZATION_ID == "" ]]
 then
-    echo "You must specify the source"
+    echo "You must specify the ORGANIZATION_ID"
     exit 1
 fi
 
 if [[ $APPLICATION_ID == "" ]]
 then
-    echo "You must specify the destination database URI"
+    echo "You must specify the APPLICATION_ID"
     exit 1
 fi
 
