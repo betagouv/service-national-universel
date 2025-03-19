@@ -10,7 +10,6 @@ on:
 env:
   DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
   RELEASE: ${{ github.sha }}
-  ENVIRONMENT: production
 
 jobs:
   build:
@@ -53,7 +52,6 @@ jobs:
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/app.env"
 
@@ -78,7 +76,6 @@ jobs:
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/admin.env"
 
@@ -103,9 +100,7 @@ jobs:
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
           build-args: |
-            "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/back.env"
 

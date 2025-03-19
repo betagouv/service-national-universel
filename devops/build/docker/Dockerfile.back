@@ -17,13 +17,10 @@ RUN --mount=type=bind,src=.,target=/src \
 FROM base AS builder
 WORKDIR /build
 
-ARG APP_NAME="api"
-
 COPY --from=pruner /build/json/ .
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --no-audit --no-fund
 
-ARG ENVIRONMENT
 ARG RELEASE
 
 COPY --from=pruner /build/full/ .
@@ -68,8 +65,6 @@ COPY devops/build/docker/back/ecosystem.tasks.config.js ecosystem.tasks.config.j
 ENV PORT="8080"
 EXPOSE ${PORT}
 
-ARG ENVIRONMENT
-ENV ENVIRONMENT=${ENVIRONMENT}
 ARG RELEASE
 ENV RELEASE=${RELEASE}
 ENV NPM_SCRIPT="start"
