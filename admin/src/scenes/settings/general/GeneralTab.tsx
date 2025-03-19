@@ -23,7 +23,7 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import { CleSettings } from "./components/CleSettings";
 import { InformationsConvoyage } from "./components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "./phase0/ManualInscriptionSettings";
-import { Select } from "@snu/ds/admin";
+import { Select, Tooltip } from "@snu/ds/admin";
 import CohortGroupSelector from "./components/CohortGroupSelector";
 
 // Define the interface for GeneralTab props
@@ -155,6 +155,22 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   </div>
                   <CohortGroupSelector cohort={cohort} setCohort={onCohortChange} readOnly={readOnly} />
                 </div>
+                {cohort.type === COHORT_TYPE.CLE && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-gray-900  text-xs font-medium">Cohorte spécifique</p>
+                      <Tooltip title={`Lors de l'import des centres de sessions considérer cette cohorte comme à part. Ne pas rattacher "${cohort.snuId}" à la cohort principale`}>
+                        <MdInfoOutline size={20} className="text-gray-400" />
+                      </Tooltip>
+                    </div>
+                    <SimpleToggle
+                      label="Cohorte spécifique DROM-COM"
+                      disabled={isLoading || readOnly}
+                      value={cohort.specificSnuIdCohort}
+                      onChange={() => onCohortChange({ ...cohort, specificSnuIdCohort: !cohort.specificSnuIdCohort })}
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
