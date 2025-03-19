@@ -1,6 +1,6 @@
-import { CohortType, region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
+import { region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
-import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
+import { ClasseModel, CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, LigneBusModel, SessionPhase1Model, YoungModel } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
 import { normalizeDepartmentName } from "snu-lib";
@@ -20,13 +20,16 @@ export interface SessionCohesionCenterImportReport {
 }
 
 export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCenterCSV[]) => {
-  const mappedSessionCenter = mapSessionCohesionCentersForSept2024(SessionsFromCSV);
+  const mappedSessionCenter = await mapSessionCohesionCentersWithZoneSnuId(SessionsFromCSV);
+
+  logger.info(`Importing sessions phase 1, ${mappedSessionCenter.length} lines`);
 
   const report: SessionCohesionCenterImportReport[] = [];
 
-  const specificCohortsSnuids = (await CohortModel.find({ specificSnuIdCohort: true })).map((cohort) => cohort.snuId);
-
   for (const sessionCenter of mappedSessionCenter) {
+    if (!sessionCenter.cohesionCenterMatricule) {
+      continue;
+    }
     let processedSessionReport: SessionCohesionCenterImportReport;
     const foundCenter = await CohesionCenterModel.findOne({ matricule: sessionCenter.cohesionCenterMatricule });
     if (!foundCenter?.id) {
@@ -34,16 +37,16 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
-    const { snuId: zonedSnuId, isDromCom } = getZonedSnuId(sessionCenter, specificCohortsSnuids);
+
     let foundCohort: null | CohortDocument = null;
-    if (isDromCom) {
-      foundCohort = await CohortModel.findOne({ snuId: zonedSnuId });
+    if (sessionCenter.isDromCom) {
+      foundCohort = await CohortModel.findOne({ snuId: sessionCenter.zonedSnuId });
     } else {
       // check la cohort zoné ou la cohort par defaut
-      foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
+      foundCohort = await CohortModel.findOne({ $or: [{ snuId: sessionCenter.zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
     }
     if (!foundCohort?._id) {
-      processedSessionReport = await processCohortNotFound(sessionCenter, zonedSnuId);
+      processedSessionReport = await processCohortNotFound(sessionCenter, sessionCenter.zonedSnuId);
       report.push(processedSessionReport);
       continue;
     }
@@ -52,14 +55,12 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
       (sc) =>
-        sc.sessionFormule === sessionCenter.sessionFormule &&
-        sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule &&
-        getZonedSnuId(sc, specificCohortsSnuids).snuId === zonedSnuId,
+        sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && sc.zonedSnuId === sessionCenter.zonedSnuId,
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
       logger.warn(
-        `Multiple sessions found (${multiSessions.length}) for ${zonedSnuId} (${sessionCenter.cohesionCenterMatricule}): ${sessionPlaces} > ${sessionCenter.sessionPlaces}.`,
+        `Multiple sessions found (${multiSessions.length}) for ${sessionCenter.zonedSnuId} (${sessionCenter.cohesionCenterMatricule}): ${sessionPlaces} > ${sessionCenter.sessionPlaces}.`,
       );
       sessionCenterUpdated.sessionPlaces = sessionPlaces;
     }
@@ -71,6 +72,77 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
 
     report.push(processedSessionReport);
   }
+  return report;
+};
+
+export const removeDeprecatedSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCenterCSV[]) => {
+  const mappedSessionCenter = await mapSessionCohesionCentersWithZoneSnuId(SessionsFromCSV);
+
+  const report: SessionCohesionCenterImportReport[] = [];
+
+  const cohortsList = await CohortModel.find({ name: new RegExp(`${new Date().getFullYear()}`), dateStart: { $gte: new Date() } });
+  const sessionPhase1List = await SessionPhase1Model.find({ cohortId: { $in: cohortsList.map((cohort) => cohort._id) } });
+
+  logger.info(`Removing deprecated sessions phase 1, testing ${sessionPhase1List.length} sessions, for ${cohortsList.length} cohorts`);
+
+  for (const sessionPhase1 of sessionPhase1List) {
+    const centreSession = mappedSessionCenter.find((sessionCenter) => sessionPhase1.sejourSnuIds.includes(sessionCenter.sejourSnuId));
+    if (!centreSession) {
+      logger.warn(`Session not found (${sessionPhase1._id}) in CSV for sejourSnuId ${sessionPhase1.sejourSnuIds.join(",")}`);
+      const nbYoung = await YoungModel.countDocuments({ sessionPhase1Id: sessionPhase1._id });
+      const classes = await ClasseModel.find({ sessionId: sessionPhase1._id });
+      const lignes = await LigneBusModel.find({ cohort: sessionPhase1.cohort, centerId: sessionPhase1.cohesionCenterId });
+      if (nbYoung > 0) {
+        logger.warn(`Session ${sessionPhase1._id} has ${nbYoung} youngs, cannot delete it`);
+        report.push({
+          sessionId: sessionPhase1._id,
+          sessionFormule: sessionPhase1.cohort,
+          sessionSnuId: sessionPhase1.sejourSnuIds.join(","),
+          cohesionCenterId: sessionPhase1.cohesionCenterId,
+          cohesionCenterMatricule: undefined,
+          action: "nothing",
+          comment: `cannot delete session with youngs`,
+          warning: `${nbYoung} youngs`,
+        });
+      } else if (classes.length > 0) {
+        logger.warn(`Session ${sessionPhase1._id} has ${classes.length} classes, cannot delete it`);
+        report.push({
+          sessionId: sessionPhase1._id,
+          sessionFormule: sessionPhase1.cohort,
+          sessionSnuId: sessionPhase1.sejourSnuIds.join(","),
+          cohesionCenterId: sessionPhase1.cohesionCenterId,
+          cohesionCenterMatricule: undefined,
+          action: "nothing",
+          comment: `cannot delete session with classe`,
+          warning: `classes: ${classes.map((classe) => classe._id).join(",")}`,
+        });
+      } else if (lignes.length > 0) {
+        logger.warn(`Session ${sessionPhase1._id} has ${lignes.length} lignes, cannot delete it`);
+        report.push({
+          sessionId: sessionPhase1._id,
+          sessionFormule: sessionPhase1.cohort,
+          sessionSnuId: sessionPhase1.sejourSnuIds.join(","),
+          cohesionCenterId: sessionPhase1.cohesionCenterId,
+          cohesionCenterMatricule: undefined,
+          action: "nothing",
+          comment: `cannot delete session with pdt`,
+          warning: `lignes: ${lignes.map((ligne) => ligne._id).join(",")}`,
+        });
+      } else {
+        // await sessionPhase1.deleteOne();
+        report.push({
+          sessionId: sessionPhase1._id,
+          sessionFormule: sessionPhase1.cohort,
+          sessionSnuId: sessionPhase1.sejourSnuIds.join(","),
+          cohesionCenterId: sessionPhase1.cohesionCenterId,
+          cohesionCenterMatricule: undefined,
+          action: "deleted",
+          comment: "session not found in file",
+        });
+      }
+    }
+  }
+
   return report;
 };
 
@@ -176,34 +248,46 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
   return foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
 };
 
-const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped, specificCohorts: string[]) => {
+const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped, specificCohorts: string[]): { snuId: string; isDromCom?: boolean } => {
   let snuId = sessionCenter.sessionFormule;
-  const codeRegion = sessionCenter.sejourSnuId.replaceAll(`_${sessionCenter.cohesionCenterMatricule}`, "").replaceAll(`${sessionCenter.sessionFormule}_`, "");
-  const snuIdRegion = `${snuId}_${codeRegion}`;
 
   // les cohortes CLE n'ont pas de dates spécifiques pour les DROM COM ou les zones académiques
   if (sessionCenter.sessionFormule.includes("CLE")) {
     // cas particulier (ex: 2025 CLE 18 - Martinique)
-    if (specificCohorts.includes(snuIdRegion)) {
-      return { snuId: snuIdRegion, isDromCom: true };
+    if (specificCohorts.includes(sessionCenter.sejourSnuIdRegion!)) {
+      return { snuId: sessionCenter.sejourSnuIdRegion!, isDromCom: true };
     }
     return { snuId };
   }
 
   // HTS
-  const region = mapTrigrammeToRegion(codeRegion);
+  const region = mapTrigrammeToRegion(sessionCenter.codeRegion);
   // sans région on ne peux pas faire de distinction
   if (!region) {
     return { snuId };
   }
   // DROM COM et Corse
   if (RegionsHorsMetropole.includes(region)) {
-    return { snuId: snuIdRegion, isDromCom: true };
+    return { snuId: sessionCenter.sejourSnuIdRegion!, isDromCom: true };
   }
   // Sejours zonés (A, B, C)
   const zone = region2zone[region!];
   if (zone?.length === 1) {
-    return { snuId: `${snuId}_${zone}` };
+    return { snuId: `${sessionCenter.sessionFormule}_${zone}` };
   }
   return { snuId };
+};
+
+const mapSessionCohesionCentersWithZoneSnuId = async (SessionsFromCSV: SessionCohesionCenterCSV[]) => {
+  const specificCohortsSnuids = (await CohortModel.find({ specificSnuIdCohort: true })).map((cohort) => cohort.snuId);
+  const mappedSessionCenter = mapSessionCohesionCentersForSept2024(SessionsFromCSV).map((sessionCentre) => {
+    const { snuId, isDromCom } = getZonedSnuId(sessionCentre, specificCohortsSnuids);
+    return {
+      ...sessionCentre,
+      zonedSnuId: snuId,
+      isDromCom,
+    };
+  });
+
+  return mappedSessionCenter;
 };
