@@ -948,6 +948,7 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
 
     if (payload.source === YOUNG_SOURCE.CLE) {
       const correctionRequestsFiltered = young?.correctionRequests?.filter((correction) => correction.field !== "CniFile") || [];
+      // on ne récupère pas les données d'affectation de la classe (le jeune sera affecté plus tard)
       young.set({
         source: YOUNG_SOURCE.CLE,
         etablissementId: payload.etablissementId,
@@ -958,9 +959,6 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
         reinscriptionStep2023: reinscriptionStep,
         latestCNIFileExpirationDate: undefined,
         latestCNIFileCategory: undefined,
-        cohesionCenterId: classe.cohesionCenterId,
-        sessionPhase1Id: classe.sessionId,
-        meetingPointId: classe.pointDeRassemblementId,
         correctionRequests: correctionRequestsFiltered,
         schooled: "true",
         schoolName: etablissement.name,
