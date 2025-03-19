@@ -3,8 +3,6 @@ FROM node:20.17-alpine AS base
 FROM base AS pruner
 WORKDIR /build
 
-ARG APP_NAME="api"
-
 RUN --mount=type=bind,src=.,target=/src \
     --mount=type=cache,target=/root/.npm \
 <<EOF
@@ -13,7 +11,7 @@ npm install --global "turbo@$turbo_version"
 EOF
 
 RUN --mount=type=bind,src=.,target=/src \
-    turbo prune --docker --cwd /src --out-dir /build ${APP_NAME}
+    turbo prune --docker --cwd /src --out-dir /build api apiv2
 
 
 FROM base AS builder
@@ -22,7 +20,6 @@ WORKDIR /build
 ARG APP_NAME="api"
 
 COPY --from=pruner /build/json/ .
-RUN mkdir ${APP_NAME}/public
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --no-audit --no-fund
 
@@ -38,27 +35,35 @@ EOF
 
 COPY patches/ patches/ 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit dev ${APP_NAME} --include-workspace-root
+    npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root
 
 
 
 FROM base
 
-WORKDIR /run
+RUN apk add --no-cache nginx curl
 
-ARG APP_NAME="api"
+COPY /devops/build/docker/back/nginx.conf /etc/nginx/http.d/default.conf
+
+WORKDIR /run
 
 COPY --from=builder /build/packages/lib/node_modules/ packages/lib/node_modules/
 COPY --from=builder /build/packages/lib/dist/ packages/lib/
 
-COPY --from=builder /build/${APP_NAME}/public/ ${APP_NAME}/public/
-COPY --from=builder /build/${APP_NAME}/node_modules/ ${APP_NAME}/node_modules/
-COPY --from=builder /build/${APP_NAME}/migrations/ ${APP_NAME}/migrations/
-COPY --from=builder /build/${APP_NAME}/src/ ${APP_NAME}/src/
+COPY --from=builder /build/api/public/ api/public/
+COPY --from=builder /build/api/node_modules/ api/node_modules/
+COPY --from=builder /build/api/migrations/ api/migrations/
+COPY --from=builder /build/api/src/ api/src/
+
+COPY --from=builder /build/apiv2/node_modules/ apiv2/node_modules/
+COPY --from=builder /build/apiv2/dist/ apiv2/
 
 COPY --from=builder /build/node_modules/ node_modules/
 
-COPY devops/build/${APP_NAME}/package.json package.json
+COPY devops/build/docker/back/package.json package.json
+COPY devops/build/docker/back/start-nginx.sh start-nginx.sh
+COPY devops/build/docker/back/ecosystem.api.config.js ecosystem.api.config.js
+COPY devops/build/docker/back/ecosystem.tasks.config.js ecosystem.tasks.config.js
 
 ENV PORT="8080"
 EXPOSE ${PORT}

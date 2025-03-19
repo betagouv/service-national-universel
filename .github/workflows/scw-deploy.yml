@@ -11,11 +11,9 @@ jobs:
         app_id:
           [
             "${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}",
-            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_APIV2 }}",
             "${{ vars.SCW_APP_ID_PRODUCTION_SNU_APP }}",
             "${{ vars.SCW_APP_ID_PRODUCTION_SNU_ADMIN }}",
             "${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}",
-            "${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKSV2 }}",
           ]
 
     steps:
