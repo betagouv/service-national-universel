@@ -22,7 +22,7 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { PointDeRassemblementGateway } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.gateway";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway";
-import { ColumnCsvName, ColumnType } from "../ListeDiffusion.model";
+import { COLUMN_CSV_HEADERS, ColumnCsvName, ColumnType } from "../ListeDiffusion.model";
 import { SegmentDeLigneGateway } from "@admin/core/sejours/phase1/segmentDeLigne/SegmentDeLigne.gateway";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 Injectable();
@@ -46,9 +46,11 @@ export class CreerListeDiffusion implements UseCase<string> {
     async execute(campagneId: string): Promise<string> {
         this.logger.log(`campagneId: ${campagneId}`);
         const campagne = await this.campagneGateway.findById(campagneId);
+
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
+
         if (isCampagneGenerique(campagne)) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_SHOULD_NOT_BE_GENERIC);
         }
@@ -68,6 +70,7 @@ export class CreerListeDiffusion implements UseCase<string> {
             destinataires = campagne.destinataires;
             contactsQuery = await this.buildListeDiffusionFiltre(campagne, destinataires);
         }
+
         const youngs = await this.searchYoungGateway.searchYoung(contactsQuery);
 
         const classeIds = new Set<string>();
@@ -88,6 +91,7 @@ export class CreerListeDiffusion implements UseCase<string> {
                 cohesionCenterIds.add(young.cohesionCenterId);
             }
         }
+        const classes = await this.classeGateway.findByIds([...classeIds]);
         const referentIds = await this.classeGateway.findReferentIdsByClasseIds([...classeIds]);
         const referents = await this.referentGateway.findByIds(referentIds);
         const pointDeRassemblements = await this.pointDeRassemblementGateway.findByIds([...meetingPointIds]);
@@ -95,48 +99,92 @@ export class CreerListeDiffusion implements UseCase<string> {
         const centres = await this.centreGateway.findByIds([...cohesionCenterIds]);
         const segmentDeLignes = await this.segmentDeLigneGateway.findByLigneDeBusIds([...ligneIds]);
 
-        const contactsForListeDiffusion: ColumnCsvName[] = youngs.hits.map((young) => {
+        const buildCsvContactRow = (young: YoungType) => {
             const dateAller = lignes.find((ligne) => ligne.id === young.ligneId)?.dateDepart;
-
             const dateRetour = lignes.find((ligne) => ligne.id === young.ligneId)?.dateRetour;
-
             return {
                 type: ColumnType.jeunes,
                 PRENOM: young.firstName,
                 NOM: young.lastName,
                 EMAIL: young.email,
                 COHORT: young.cohort,
-                CENTRE: centres.find((centre) => centre.id === young.cohesionCenterId)?.nom,
-                VILLECENTRE: centres.find((centre) => centre.id === young.cohesionCenterId)?.ville,
+                CENTRE: centres.find((centre) => centre?.id === young.cohesionCenterId)?.nom,
+                VILLECENTRE: centres.find((centre) => centre?.id === young.cohesionCenterId)?.ville,
                 PRENOMVOLONTAIRE: young.firstName,
                 NOMVOLONTAIRE: young.lastName,
-                PDR_ALLER: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.nom,
-                PDR_ALLER_ADRESSE: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.adresse,
-                PDR_ALLER_VILLE: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.ville,
-                PDR_RETOUR: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.nom,
-                PDR_RETOUR_VILLE: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.ville,
-                PDR_RETOUR_ADRESSE: pointDeRassemblements.find((pdr) => pdr.id === young.meetingPointId)?.adresse,
+                PDR_ALLER: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.nom,
+                PDR_ALLER_ADRESSE: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.adresse,
+                PDR_ALLER_VILLE: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.ville,
+                PDR_RETOUR: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.nom,
+                PDR_RETOUR_VILLE: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.ville,
+                PDR_RETOUR_ADRESSE: pointDeRassemblements.find((pdr) => pdr?.id === young.meetingPointId)?.adresse,
                 DATE_ALLER: this.clockGateway.isValidDate(dateAller) ? this.clockGateway.formatShort(dateAller) : "",
-                HEURE_ALLER: segmentDeLignes.find((segment) => segment.ligneDeBusId === young.ligneId)?.heureDepart,
+                HEURE_ALLER: segmentDeLignes.find((segment) => segment?.ligneDeBusId === young.ligneId)?.heureDepart,
                 DATE_RETOUR: this.clockGateway.isValidDate(dateRetour) ? this.clockGateway.formatShort(dateRetour) : "",
-                HEURE_RETOUR: segmentDeLignes.find((segment) => segment.ligneDeBusId === young.ligneId)?.heureRetour,
+                HEURE_RETOUR: segmentDeLignes.find((segment) => segment?.ligneDeBusId === young.ligneId)?.heureRetour,
+                PRENOM_RL1: "",
+                NOM_RL1: "",
+                PRENOM_RL2: "",
+                NOM_RL2: "",
                 role: "",
             };
+        };
+
+        const contactsForListeDiffusion: ColumnCsvName[] = [];
+        youngs.hits.forEach((young) => {
+            const contactRow = buildCsvContactRow(young);
+            contactsForListeDiffusion.push(contactRow);
+            if (young.parent1Email) {
+                const contactRowParent1 = {
+                    ...contactRow,
+                    type: ColumnType.representants,
+                    PRENOM_RL1: young.parent1FirstName,
+                    NOM_RL1: young.parent1LastName,
+                    EMAIL: young.parent1Email,
+                };
+                contactsForListeDiffusion.push(contactRowParent1);
+            }
+            if (young.parent2Email) {
+                const contactRowParent2 = {
+                    ...contactRow,
+                    type: ColumnType.representants,
+                    PRENOM_RL2: young.parent2FirstName,
+                    NOM_RL2: young.parent2LastName,
+                    EMAIL: young.parent2Email,
+                };
+                contactsForListeDiffusion.push(contactRowParent2);
+            }
         });
 
         // Cas REFERENTS_CLASSES
         if (destinataires.includes(DestinataireListeDiffusion.REFERENTS_CLASSES)) {
             this.logger.log(`Cas REFERENTS_CLASSES, campagne: ${campagne.id}`);
-
             contactsForListeDiffusion.push(
                 ...referents
                     .filter((referent) => referent.role === ROLES.REFERENT_CLASSE)
-                    .map((referent) => ({
-                        type: ColumnType.representants,
-                        PRENOM: referent.prenom,
-                        NOM: referent.nom,
-                        EMAIL: referent.email,
-                    })),
+                    .map((referent) => {
+                        const classe = classes.find((classe) => classe.referentClasseIds.includes(referent.id));
+                        const young = youngs.hits.find((young) => young.classeId === classe?.id);
+                        if (young) {
+                            const contactYoungRow = buildCsvContactRow(young);
+                            return {
+                                ...contactYoungRow,
+                                type: ColumnType.referents,
+                                PRENOM: referent.prenom,
+                                NOM: referent.nom,
+                                EMAIL: referent.email,
+                                role: referent.role,
+                            };
+                        }
+
+                        return {
+                            type: ColumnType.referents,
+                            PRENOM: referent.prenom,
+                            NOM: referent.nom,
+                            EMAIL: referent.email,
+                            role: referent.role,
+                        };
+                    }),
             );
         }
 
@@ -150,13 +198,28 @@ export class CreerListeDiffusion implements UseCase<string> {
                             referent.role === ROLES.ADMINISTRATEUR_CLE &&
                             referent.sousRole === SUB_ROLES.referent_etablissement,
                     )
-                    .map((referent) => ({
-                        type: ColumnType.representants,
-                        PRENOM: referent.prenom,
-                        NOM: referent.nom,
-                        EMAIL: referent.email,
-                        role: referent.role,
-                    })),
+                    .map((referent) => {
+                        const classe = classes.find((classe) => classe.referentClasseIds.includes(referent.id));
+                        const young = youngs.hits.find((young) => young.classeId === classe?.id);
+                        if (young) {
+                            const contactYoungRow = buildCsvContactRow(young);
+                            return {
+                                ...contactYoungRow,
+                                type: ColumnType["chefs-centres"],
+                                PRENOM: referent.prenom,
+                                NOM: referent.nom,
+                                EMAIL: referent.email,
+                                role: referent.role,
+                            };
+                        }
+                        return {
+                            type: ColumnType["chefs-centres"],
+                            PRENOM: referent.prenom,
+                            NOM: referent.nom,
+                            EMAIL: referent.email,
+                            role: referent.role,
+                        };
+                    }),
             );
         }
 
@@ -173,13 +236,27 @@ export class CreerListeDiffusion implements UseCase<string> {
             contactsForListeDiffusion.push(
                 ...referentsChefsDeCentre
                     .filter((referentChefDeCentre) => referentChefDeCentre.role === ROLES.HEAD_CENTER)
-                    .map((referentChefDeCentre) => ({
-                        type: ColumnType.representants,
-                        PRENOM: referentChefDeCentre.prenom,
-                        NOM: referentChefDeCentre.nom,
-                        EMAIL: referentChefDeCentre.email,
-                        role: referentChefDeCentre.role,
-                    })),
+                    .map((referent) => {
+                        const young = youngs.hits.find((young) => young.cohesionCenterId === referent.cohesionCenterId);
+                        if (young) {
+                            const contactYoungRow = buildCsvContactRow(young);
+                            return {
+                                ...contactYoungRow,
+                                type: ColumnType["chefs-centres"],
+                                PRENOM: referent.prenom,
+                                NOM: referent.nom,
+                                EMAIL: referent.email,
+                                role: referent.role,
+                            };
+                        }
+                        return {
+                            type: ColumnType["chefs-centres"],
+                            PRENOM: referent.prenom,
+                            NOM: referent.nom,
+                            EMAIL: referent.email,
+                            role: referent.role,
+                        };
+                    }),
             );
         }
 
@@ -193,19 +270,36 @@ export class CreerListeDiffusion implements UseCase<string> {
                             referent.role === ROLES.ADMINISTRATEUR_CLE &&
                             referent.sousRole === SUB_ROLES.coordinateur_cle,
                     )
-                    .map((referent) => ({
-                        type: ColumnType.representants,
-                        PRENOM: referent.prenom,
-                        NOM: referent.nom,
-                        email: referent.email,
-                        role: referent.role,
-                    })),
+                    .map((referent) => {
+                        const classe = classes.find((classe) => classe.referentClasseIds.includes(referent.id));
+                        const young = youngs.hits.find((young) => young.classeId === classe?.id);
+                        if (young) {
+                            const contactYoungRow = buildCsvContactRow(young);
+                            return {
+                                ...contactYoungRow,
+                                type: ColumnType.administrateurs,
+                                PRENOM: referent.prenom,
+                                NOM: referent.nom,
+                                EMAIL: referent.email,
+                                role: referent.role,
+                            };
+                        }
+                        return {
+                            type: ColumnType.administrateurs,
+                            PRENOM: referent.prenom,
+                            NOM: referent.nom,
+                            EMAIL: referent.email,
+                            role: referent.role,
+                        };
+                    }),
             );
         }
 
-        const csvContacts = await this.fileGateway.generateCSV(contactsForListeDiffusion);
+        const csvContacts = await this.fileGateway.generateCSV(contactsForListeDiffusion, {
+            headers: COLUMN_CSV_HEADERS,
+            delimiter: ";",
+        });
 
-        // return JSON.stringify(contactsForListeDiffusion);
         return csvContacts;
     }
 
@@ -229,11 +323,18 @@ export class CreerListeDiffusion implements UseCase<string> {
         // Créer la liste de diffusion
         const contactsQuery: SearchParams = {
             filters: filtreListeDiffusionWithCohortId,
-            sourceFields: ["email", "firstName", "lastName", "meetingPointId", "ligneId", "cohesionCenterId", "cohort"],
+            sourceFields: ["email", "firstName", "lastName", "meetingPointId", "ligneId", "cohort"],
             full: true,
         };
         if (destinataires.includes(DestinataireListeDiffusion.REPRESENTANTS_LEGAUX)) {
-            contactsQuery.sourceFields?.push("parent1Email", "parent2Email");
+            contactsQuery.sourceFields?.push(
+                "parent1Email",
+                "parent1FirstName",
+                "parent1LastName",
+                "parent2Email",
+                "parent2FirstName",
+                "parent2LastName",
+            );
         }
         if (destinataires.includes(DestinataireListeDiffusion.REFERENTS_CLASSES)) {
             contactsQuery.sourceFields?.push("classeId", "etablissementId");
@@ -244,10 +345,5 @@ export class CreerListeDiffusion implements UseCase<string> {
         }
 
         return contactsQuery;
-    }
-
-    private mapColumnName(csvContacts: string): string {
-        //
-        return "";
     }
 }

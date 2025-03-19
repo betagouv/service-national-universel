@@ -15,6 +15,10 @@ export class ClasseRepository implements ClasseGateway {
 
         private readonly cls: ClsService,
     ) {}
+    async findByIds(ids: string[]): Promise<ClasseModel[]> {
+        const classes = await this.classeMongooseEntity.find({ _id: { $in: ids } });
+        return ClasseMapper.toModels(classes);
+    }
 
     async updateStatut(classeId: string, statut: keyof typeof STATUS_CLASSE): Promise<ClasseModel> {
         const classe = await this.classeMongooseEntity.findByIdAndUpdate(classeId, { status: statut });

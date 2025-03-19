@@ -11,6 +11,7 @@ export interface ClasseGateway {
     updateStatut(classeId: string, statut: keyof typeof STATUS_CLASSE): Promise<ClasseModel>;
     findByLigneDeBusIds(ids: string[]): Promise<ClasseModel[]>;
     findBySessionIdAndDepartmentNotWithdrawn(sessionId: string, departements: string[]): Promise<ClasseModel[]>;
+    findByIds(ids: string[]): Promise<ClasseModel[]>;
 }
 
 export const ClasseGateway = Symbol("ClasseGateway");
