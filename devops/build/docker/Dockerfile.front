@@ -26,10 +26,8 @@ RUN mkdir ${APP_NAME}/public
 RUN --mount=type=cache,target=/root/.npm \
     npm ci --no-audit --no-fund
 
-ARG ENVIRONMENT
 ARG RELEASE
 
-ENV VITE_ENVIRONMENT=${ENVIRONMENT}
 ENV VITE_RELEASE=${RELEASE}
 
 COPY --from=pruner /build/full/ .
