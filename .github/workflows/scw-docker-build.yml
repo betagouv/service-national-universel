@@ -8,7 +8,6 @@ on:
 env:
   DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
   RELEASE: ${{ github.sha }}
-  ENVIRONMENT: production
 
 jobs:
   build:
@@ -51,7 +50,6 @@ jobs:
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/app.env"
 
@@ -76,17 +74,18 @@ jobs:
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/admin.env"
 
-      # Api
+      # Api & Apiv2
       - name: Api - Fetch Build Secrets
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }} > ${{ runner.temp }}/api.env
+          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} >> ${{ runner.temp }}/api.env
+          sort ${{ runner.temp }}/api.env | uniq > ${{ runner.temp }}/back.env
 
       - name: Api - Build and push
         env:
@@ -94,41 +93,14 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           push: true
-          file: devops/build/docker/Dockerfile.api
+          file: devops/build/docker/Dockerfile.back
           tags: |
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
           build-args: |
-            "APP_NAME=${{ env.APP_NAME }}"
             "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
           secret-files: |
-            "BUILD_SECRETS=${{ runner.temp }}/api.env"
-
-      # ApiV2
-      - name: ApiV2 - Fetch Build Secrets
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: |
-          ./devops/scripts/scw/get-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} > ${{ runner.temp }}/apiv2.env
-
-      - name: ApiV2 - Build and push
-        env:
-          APP_NAME: apiv2
-        uses: docker/build-push-action@v6
-        with:
-          push: true
-          file: devops/build/docker/Dockerfile.apiv2
-          tags: |
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
-          build-args: |
-            "APP_NAME=${{ env.APP_NAME }}"
-            "RELEASE=${{ env.RELEASE }}"
-            "ENVIRONMENT=${{ env.ENVIRONMENT }}"
-          secret-files: |
-            "BUILD_SECRETS=${{ runner.temp }}/apiv2.env"
+            "BUILD_SECRETS=${{ runner.temp }}/back.env"
 
       # Update environment
       - name: Update containers environment
@@ -140,6 +112,6 @@ jobs:
           ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_APP }}
           ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_ADMIN }}
           ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}
-          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_APIV2 }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}
           ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKS }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}
-          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKSV2 }}
+          ./devops/scripts/scw/update-secrets-from-cc.sh ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }} ${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}
