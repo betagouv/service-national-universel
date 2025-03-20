@@ -178,11 +178,9 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         }
     
         // Récupérer les jeunes de la classe
-        const jeunes = await this.jeuneGateway.findByClasseId(classeId);
-    
-        // Filtrer les jeunes qui ont le même cohortId que la classe pour ne pas désister des jeune qui ont changer de séjour
-        const jeunesFiltres = jeunes.filter(jeune => jeune.sessionId === classe.sessionId);
-        const jeunesUpdatedList: JeuneModel[] = jeunesFiltres.map(jeune => ({
+        const jeunes = await this.jeuneGateway.findByClasseIdAndSessionId(classeId, classe.sessionId!);
+
+        const jeunesUpdatedList: JeuneModel[] = jeunes.map(jeune => ({
             ...jeune,
             sessionId: newSession.id,
             sessionNom: newSession.nom,
