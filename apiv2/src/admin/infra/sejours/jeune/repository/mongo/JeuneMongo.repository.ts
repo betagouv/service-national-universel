@@ -82,7 +82,7 @@ export class JeuneRepository implements JeuneGateway {
     }
 
 
-    async findByClasseIdAndSessionId( classeId: string, sessionId: string,): Promise<JeuneModel[]> {
+    async findByClasseIdAndSessionId( classeId: string, sessionId: string): Promise<JeuneModel[]> {
         const jeunes = await this.jeuneMongooseEntity.find({
             cohortId: sessionId,
             classeId,

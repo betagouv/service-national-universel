@@ -83,7 +83,7 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
         );
         // Désister jeunes de la classe en évitant de désister les jeunes basculer sur HTS ayant garder un classeId
         const classe = await this.classeGateway.findById(classeToDesister.classeId);
-        if (!classe) {
+        if (!classe || !classe.sessionId) {
             return {
                 classeId: classeToDesister.classeId,
                 error: "Classe introuvable en base de données",
@@ -91,7 +91,8 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
                 jeunesDesistesIds: "",
             };
         }
-        const jeunesToDesister = await this.jeuneGateway.findByClasseIdAndSessionId(classeToDesister.classeId, classe.sessionId!);
+   
+        const jeunesToDesister = await this.jeuneGateway.findByClasseIdAndSessionId(classeToDesister.classeId, classe.sessionId);
         // Filtrer les jeunes ayant le même cohortId que la classe
         const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map(jeune => ({
             ...jeune,
