@@ -182,7 +182,7 @@ describe("DesisterClasses", () => {
         });
 
         expect(result[0]).toEqual({
-            classeId: "class-001",
+            classeId: "CLASS-001",
             error: "Database error",
             result: "error",
             jeunesDesistesIds: "",
@@ -212,7 +212,7 @@ describe("DesisterClasses", () => {
         });
 
         expect(result[0]).toEqual({
-            classeId: "class-001",
+            classeId: "CLASS-001",
             error: "Update failed",
             result: "error",
             jeunesDesistesIds: "",
@@ -240,7 +240,7 @@ describe("DesisterClasses", () => {
         });
 
         expect(result[0]).toEqual({
-            classeId: "class-001",
+            classeId: "CLASS-001",
             result: "error",
             error: "Classe existe dans les 2 onglets",
             jeunesDesistesIds: "",
