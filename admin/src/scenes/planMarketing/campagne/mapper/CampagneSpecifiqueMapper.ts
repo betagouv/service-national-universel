@@ -1,4 +1,4 @@
-import { PlanMarketingRoutes, isCampagneSpecifique, hasCampagneGeneriqueId } from "snu-lib";
+import { PlanMarketingRoutes, isCampagneSpecifique, hasCampagneGeneriqueId, CampagneEnvoi } from "snu-lib";
 import { CampagneSpecifiqueFormData } from "../CampagneSpecifiqueForm";
 
 type CampagneApiResponse = NonNullable<PlanMarketingRoutes["SearchPlanMarketingRoute"]["response"]>[number];
@@ -37,7 +37,7 @@ export class CampagneSpecifiqueMapper {
    * Convertit une réponse de l'API en données de formulaire
    * @throws Error si la campagne n'est pas une campagne spécifique
    */
-  static toFormData(campagne: CampagneApiResponse): CampagneSpecifiqueFormData {
+  static toFormData(campagne: CampagneApiResponse): CampagneSpecifiqueFormData & { envois: CampagneEnvoi[] | undefined } {
     if (!isCampagneSpecifique(campagne)) {
       throw new Error("La campagne n'est pas une campagne spécifique");
     }
@@ -55,6 +55,7 @@ export class CampagneSpecifiqueMapper {
       contexte: campagne.contexte,
       cohortId: campagne.cohortId,
       campagneGeneriqueId: campagne.campagneGeneriqueId,
+      envois: campagne.envois,
       createdAt: campagne.createdAt,
       updatedAt: campagne.updatedAt,
     };

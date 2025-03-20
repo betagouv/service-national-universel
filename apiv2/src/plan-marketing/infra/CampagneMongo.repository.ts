@@ -19,9 +19,11 @@ export class CampagneMongoRepository implements CampagneGateway {
         private campagneModel: Model<CampagneDocument>,
     ) {}
     async addEnvoiToCampagneById(campagneId: string, envoi: CampagneEnvoi): Promise<CampagneModel | null> {
-        const campagne = await this.campagneModel.findById(campagneId);
-        campagne?.envois.push(envoi);
-        const updated = await campagne?.save();
+        const updated = await this.campagneModel.findByIdAndUpdate(
+            campagneId,
+            { $push: { envois: { ...envoi, _id: undefined } } },
+            { new: true },
+        );
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async findSpecifiqueWithRefById(id: string): Promise<CampagneSpecifiqueModelWithRefAndGeneric | null> {

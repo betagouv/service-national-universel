@@ -46,6 +46,7 @@ export class PlanMarketingActionSelectorService {
                 case TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE_PUIS_ENVOYER_CAMPAGNE:
                     await this.envoyerCampagne.execute(
                         task.metadata?.parameters?.nomListe,
+                        task.metadata?.parameters?.campagneId,
                         task.metadata?.parameters?.campagneProviderId,
                     );
                     await this.taskGateway.toSuccess(task.id, {

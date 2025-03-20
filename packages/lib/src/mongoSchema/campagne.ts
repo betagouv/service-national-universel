@@ -48,6 +48,7 @@ export const CampagneSchema = {
       {
         date: { type: Date, required: true },
         statut: { type: String, enum: EnvoiCampagneStatut, required: true },
+        _id: false,
       },
     ],
   },

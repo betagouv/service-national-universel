@@ -15,16 +15,20 @@ export class EnvoyerCampagne implements UseCase<void> {
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
-    async execute(nomListe: string | undefined, campagneProviderId: string | undefined): Promise<void> {
-        if (nomListe === undefined || campagneProviderId === undefined) {
+    async execute(
+        nomListe: string | undefined,
+        campagneId: string | undefined,
+        campagneProviderId: string | undefined,
+    ): Promise<void> {
+        if (nomListe === undefined || campagneId === undefined || campagneProviderId === undefined) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_FOUND,
                 "Nom de liste et campagneProviderId sont requis",
             );
         }
         await this.associerListeDiffusionToCampagne.execute(nomListe, campagneProviderId);
-        await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
-        await this.campagneGateway.addEnvoiToCampagneById(campagneProviderId, {
+        // await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
+        await this.campagneGateway.addEnvoiToCampagneById(campagneId, {
             date: this.clockGateway.now(),
             statut: EnvoiCampagneStatut.TERMINE,
         });
