@@ -224,7 +224,12 @@ export default React.memo(
           isOpen={isConfirmModalOpen}
           onClose={closeModal}
           className="md:max-w-[600px] text-center"
-          header={<div className="text-lg font-bold">Modification de la campagne générique</div>}
+          header={
+            <div className="text-center">
+              <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
+              <h3 className="text-xl font-medium">Modification de la campagne générique</h3>
+            </div>
+          }
           content={<div className="text-gray-700">La mise à jour de cette campagne générique entrainera la modification des campagnes spécifiques associées.</div>}
           footer={
             <div className="flex items-center justify-between gap-6">

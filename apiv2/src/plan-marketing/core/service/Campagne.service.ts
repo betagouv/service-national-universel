@@ -46,6 +46,12 @@ export class CampagneService {
     }
 
     async updateAndRemoveRef(campagne: CampagneModel) {
+        if (("templateId" in campagne)) {
+            const template = await this.PlanMarketingGateway.findTemplateById(campagne.templateId);
+            if (!template) {
+                throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
+            }
+        }
         return this.campagneGateway.updateAndRemoveRef(campagne);
     }
 }

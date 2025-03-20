@@ -171,7 +171,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 <div>
                   <div className="flex gap-2">
                     <Label title="ID du template Brevo" name="templateId" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-template-brevo" title="L'ID du template Brevo">
+                    <Tooltip id="id-template-brevo" title="Saisissez l'id du template Brevo">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
@@ -283,6 +283,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
           className="max-w-lg"
           header={
             <div className="text-center">
+              <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
               <h3 className="text-xl font-medium">Modification d'une campagne spécifique</h3>
             </div>
           }
