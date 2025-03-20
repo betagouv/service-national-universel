@@ -158,8 +158,11 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                 {cohort.type === COHORT_TYPE.CLE && (
                   <div className="flex flex-col gap-3">
                     <div className="flex items-center gap-2">
-                      <p className="text-gray-900  text-xs font-medium">Cohorte spécifique</p>
-                      <Tooltip title={`Lors de l'import des centres de sessions considérer cette cohorte comme à part. Ne pas rattacher "${cohort.snuId}" à la cohort principale`}>
+                      <p className="text-gray-900  text-xs font-medium">Traitement spécifique lié au SI SNU</p>
+                      <Tooltip
+                        title={`Le bouton doit être activé pour que les centres concernés soient rattachés correctement à cette
+cohorte spécifique lors de l’import du fichier des centres de sessions.
+Cette fonctionnalité est à utiliser uniquement pour les séjours CLE spécifiques aux DROM COM`}>
                         <MdInfoOutline size={20} className="text-gray-400" />
                       </Tooltip>
                     </div>
