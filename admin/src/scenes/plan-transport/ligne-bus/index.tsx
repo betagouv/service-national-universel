@@ -1,6 +1,5 @@
 import React from "react";
 import { Switch } from "react-router-dom";
-
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
 import Historic from "./Historic";
