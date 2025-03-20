@@ -24,5 +24,4 @@ if ! [[ -x "$(command -v clever)" ]]; then
 fi
 
 clever env --app $app_id --format human \
-  | grep -v -e '^#' -e '^CC_' -e '^VITE_ENVIRONMENT=' -e '^ENVIRONMENT=' -e '^VITE_RELEASE=' -e '^RELEASE' \
-  | sed 's#APIV2_URL="https://api\(.*\)/v2"$#APIV2_URL="https://apiv2\1"#g'
+  | grep -v -e '^#' -e '^CC_'
