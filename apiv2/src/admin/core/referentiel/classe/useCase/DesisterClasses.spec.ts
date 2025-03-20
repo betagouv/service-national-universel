@@ -40,11 +40,12 @@ describe("DesisterClasses", () => {
         const mockClasse = {
             id: "CLASS-001",
             statut: STATUS_CLASSE.ASSIGNED,
+            sessionId: "SESSION-001"
         };
 
         const mockJeunes = [
-            { id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED },
-            { id: "YOUNG-002", statut: YOUNG_STATUS.VALIDATED },
+            { id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED, sessionId: "SESSION-001" },
+            { id: "YOUNG-002", statut: YOUNG_STATUS.VALIDATED, sessionId: "SESSION-001" },
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
