@@ -37,7 +37,7 @@ describe("ImporterClasses", () => {
             findByMatricule: jest.fn(),
         };
         mockJeuneGateway = {
-            findByClasseId: jest.fn(),
+            findByClasseIdAndSessionId: jest.fn(),
             bulkUpdate: jest.fn(),
         };
         mockSejourGateway = {

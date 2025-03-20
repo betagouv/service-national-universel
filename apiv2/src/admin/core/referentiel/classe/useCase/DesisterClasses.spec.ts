@@ -23,7 +23,7 @@ describe("DesisterClasses", () => {
             updateStatut: jest.fn(),
         };
         mockJeuneGateway = {
-            findByClasseId: jest.fn(),
+            findByClasseIdAndSessionId: jest.fn(),
             bulkUpdate: jest.fn(),
         };
 

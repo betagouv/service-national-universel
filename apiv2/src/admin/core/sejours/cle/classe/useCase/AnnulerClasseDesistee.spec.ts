@@ -11,7 +11,7 @@ describe("AnnulerClasseDesistee", () => {
 
     beforeEach(() => {
         mockJeuneGateway = {
-            findByClasseId: jest.fn(),
+            findByClasseIdAndSessionId: jest.fn(),
             update: jest.fn(),
         };
         mockClasseGateway = {
