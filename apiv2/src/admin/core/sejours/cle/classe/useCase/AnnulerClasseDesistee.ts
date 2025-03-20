@@ -47,10 +47,12 @@ export class AnnulerClasseDesistee implements UseCase<AnnulerClasseDesisteeModel
             ...classe,
             statut: nextStatut,
         });
-
+        
         // Récupérer les jeunes de la classe
-        const jeunes = await this.jeuneGateway.findByClasseId(classe.id);
-        for (const jeune of jeunes) {
+        const jeunes = await this.jeuneGateway.findByClasseId(classe.id);        
+        // Filtrer les jeunes qui ont le même cohortId que la classe
+        const jeunesFiltres = jeunes.filter(jeune => jeune.sessionId === classe.sessionId);
+        for (const jeune of jeunesFiltres) {
             // // Récupérer le statut de chaque jeune
             const jeuneHistory = await this.historyGateway.findLastByReferenceIdAndPath(
                 HistoryType.JEUNE,

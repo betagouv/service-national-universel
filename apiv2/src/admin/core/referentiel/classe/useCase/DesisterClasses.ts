@@ -81,15 +81,24 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
             classeToDesister.classeId,
             STATUS_CLASSE.WITHDRAWN,
         );
-        // Désister jeunes de la classe
-        const jeunesToDesister = await this.jeuneGateway.findByClasseId(classeToDesister.classeId);
-        const jeunesToDesisterList: JeuneModel[] = [];
-        for (const jeune of jeunesToDesister) {
-            jeunesToDesisterList.push({
-                ...jeune,
-                statut: YOUNG_STATUS.ABANDONED,
-            });
+        // Désister jeunes de la classe en évitant de désister les jeunes basculer sur HTS ayant garder un classeId
+        const classe = await this.classeGateway.findById(classeToDesister.classeId);
+        if (!classe) {
+            return {
+                classeId: classeToDesister.classeId,
+                error: "Classe introuvable en base de données",
+                result: "error",
+                jeunesDesistesIds: "",
+            };
         }
+        const jeunesToDesister = await this.jeuneGateway.findByClasseId(classeToDesister.classeId);
+        // Filtrer les jeunes ayant le même cohortId que la classe
+        const jeunesFiltres = jeunesToDesister.filter(jeune => jeune.sessionId === classe.sessionId);
+        const jeunesToDesisterList: JeuneModel[] = jeunesFiltres.map(jeune => ({
+            ...jeune,
+            statut: YOUNG_STATUS.ABANDONED,
+        }));
+        
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
 
         return {
