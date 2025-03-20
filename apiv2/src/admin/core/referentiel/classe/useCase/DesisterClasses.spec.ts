@@ -51,7 +51,7 @@ describe("DesisterClasses", () => {
         mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
         mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.findById.mockResolvedValue(mockClasse);
-        mockJeuneGateway.findByClasseId.mockResolvedValue(mockJeunes);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue(mockJeunes);
         mockClasseGateway.updateStatut.mockResolvedValue({ ...mockClasse, statut: STATUS_CLASSE.WITHDRAWN });
 
         const result = await useCase.execute({
@@ -144,7 +144,7 @@ describe("DesisterClasses", () => {
             id,
             statut: STATUS_CLASSE.WITHDRAWN,
         }));
-        mockJeuneGateway.findByClasseId.mockImplementation((id) => [
+        mockJeuneGateway.findByClasseIdAndSessionId.mockImplementation((id) => [
             { id: `YOUNG-${id}-1`, statut: YOUNG_STATUS.VALIDATED },
             { id: `YOUNG-${id}-2`, statut: YOUNG_STATUS.VALIDATED },
         ]);
@@ -198,7 +198,7 @@ describe("DesisterClasses", () => {
             id: "CLASS-001",
             statut: STATUS_CLASSE.WITHDRAWN,
         });
-        mockJeuneGateway.findByClasseId.mockResolvedValue([{ id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED }]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([{ id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED }]);
         mockJeuneGateway.bulkUpdate.mockRejectedValue(new Error("Update failed"));
 
         const result = await useCase.execute({

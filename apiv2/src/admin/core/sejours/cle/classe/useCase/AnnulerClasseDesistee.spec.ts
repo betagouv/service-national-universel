@@ -43,7 +43,7 @@ describe("AnnulerClasseDesistee", () => {
                 ops: [{ path: "/status", value: YOUNG_STATUS.VALIDATED }],
             });
 
-        mockJeuneGateway.findByClasseId.mockResolvedValue([mockYoung]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([mockYoung]);
 
         mockClasseGateway.update.mockResolvedValue({
             ...mockClasse,
@@ -79,7 +79,7 @@ describe("AnnulerClasseDesistee", () => {
         } as ClasseModel;
 
         mockHistoryGateway.findLastByReferenceIdAndPath.mockResolvedValue(null);
-        mockJeuneGateway.findByClasseId.mockResolvedValue([]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([]);
 
         mockClasseGateway.update.mockResolvedValue({
             ...mockClasse,
@@ -109,7 +109,7 @@ describe("AnnulerClasseDesistee", () => {
             })
             .mockResolvedValueOnce(null);
 
-        mockJeuneGateway.findByClasseId.mockResolvedValue([mockYoung]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([mockYoung]);
 
         mockClasseGateway.update.mockResolvedValue({
             ...mockClasse,
