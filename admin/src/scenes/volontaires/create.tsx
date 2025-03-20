@@ -1,5 +1,7 @@
 import React, { useState } from "react";
 import validator from "validator";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 
 import { translate } from "@/utils";
 import api from "@/services/api";
@@ -22,6 +24,7 @@ import {
   getDepartmentForInscriptionGoal,
   CohortType,
   EtablissementDto,
+  ROLES,
 } from "snu-lib";
 import { youngSchooledSituationOptions, youngActiveSituationOptions, youngEmployedSituationOptions } from "../phase0/commons";
 import dayjs from "@/utils/dayjs.utils";
@@ -158,6 +161,7 @@ export default function Create() {
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const classeId = new URLSearchParams(location.search).get("classeId");
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [values, setValues] = useState<FormValues>({
@@ -478,6 +482,10 @@ export default function Create() {
     if ((values.grade !== "" || values.schooled === "false") && (values.department !== "" || values.schoolDepartment !== "") && values.birthdateAt !== null) {
       (async () => {
         try {
+          let getAllSessions = "";
+          if (classeId && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+            getAllSessions = "?getAllSessions=true";
+          }
           let body = {};
           if (values.schooled === "true") {
             body = {
@@ -495,7 +503,7 @@ export default function Create() {
               zip: values.zip,
             };
           }
-          const res = await api.post(`/cohort-session/eligibility/2023`, body);
+          const res = await api.post(`/cohort-session/eligibility/2023${getAllSessions}`, body);
           if (res.data.msg) return setEgibilityError(res.data.msg);
           if (res.data.length === 0) {
             setEgibilityError("Il n'y a malheureusement plus de séjour disponible.");
@@ -516,6 +524,8 @@ export default function Create() {
       setCohorts([]);
     }
   }, [values.schoolDepartment, values.department, values.schoolRegion, values.region, values.grade, values.birthdateAt]);
+
+  console.log(egibilityError);
 
   return (
     <div className="py-4 px-8">
