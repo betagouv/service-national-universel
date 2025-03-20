@@ -5,28 +5,32 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ConfigService } from "@nestjs/config";
-import { TaskName, TaskStatus } from "snu-lib";
+import { TaskName, TaskStatus, isCampagneGenerique } from "snu-lib";
 import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { CreerListeDiffusion } from "./CreerListeDiffusion";
+import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
+import { CampagneGateway } from "../gateway/Campagne.gateway";
+import { CampagneSpecifiqueModelWithRefAndGeneric, CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";
+
 Injectable();
-export class CreerListeDiffusionEtImporterContacts implements UseCase<void> {
-    private readonly logger: Logger = new Logger(CreerListeDiffusionEtImporterContacts.name);
+export class ImporterContacts implements UseCase<void> {
+    private readonly logger: Logger = new Logger(ImporterContacts.name);
 
     constructor(
         @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-        private readonly creerListeDiffusion: CreerListeDiffusion,
+        @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
+        @Inject(ListeDiffusionGateway) private readonly listeDiffusionGateway: ListeDiffusionGateway,
         private readonly config: ConfigService,
     ) {}
-    async execute(nomListe: string, campagneId: string): Promise<void> {
-        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
-        const campagne = await this.planMarketingGateway.findCampagneById(campagneId);
+    async execute(campagneId: string, campagneFournisseurId: number, contacts: string): Promise<void> {
+        this.logger.log(`campagneId: ${campagneId}`);
+        const campagne = (await this.campagneGateway.findById(campagneId)) as CampagneSpecifiqueModelWithRefAndGeneric;
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
-
-        // Créer la liste de diffusion
-        const contacts = "";
+        const listeDiffusion = await this.listeDiffusionGateway.findById(campagne.listeDiffusionId);
+        const nomListe = listeDiffusion?.nom!;
 
         const processId = await this.planMarketingGateway.importerContacts(
             nomListe,
@@ -36,13 +40,14 @@ export class CreerListeDiffusionEtImporterContacts implements UseCase<void> {
         );
 
         const planMarketingTaskModel: PlanMarketingCreateTaskModel = {
-            name: TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE,
+            name: TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE_PUIS_ENVOYER_CAMPAGNE,
             status: TaskStatus.PENDING,
             metadata: {
                 parameters: {
                     processId: processId,
                     nomListe: nomListe,
                     campagneId: campagneId,
+                    campagneProviderId: String(campagneFournisseurId),
                 },
             },
         };

@@ -1,16 +1,23 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
-import { CampagneModel } from "../Campagne.model";
+import { AssocierListeDiffusionToCampagne } from "./AssocierListeDiffusionToCampagne";
+import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 Injectable();
 export class EnvoyerCampagne implements UseCase<void> {
-    constructor() {}
-    async execute(campagneId: string): Promise<void> {
-        // Créer la campagne sur Brevo
-        //
-        // Créer la liste de diffusion et upload sur bucket
-        //
-        // Appel de ImporterEtCreerListeDiffusion
-        // => Créer la liste de diffusion sur Brevo
-        // => Rattacher la campagne à la liste de diffusion sur Brevo
+    constructor(
+        @Inject(AssocierListeDiffusionToCampagne)
+        private readonly associerListeDiffusionToCampagne: AssocierListeDiffusionToCampagne,
+        @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
+    ) {}
+    async execute(nomListe: string | undefined, campagneProviderId: string | undefined): Promise<void> {
+        if (nomListe === undefined || campagneProviderId === undefined) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_FOUND,
+                "Nom de liste et campagneProviderId sont requis",
+            );
+        }
+        await this.associerListeDiffusionToCampagne.execute(nomListe, campagneProviderId);
+        await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
     }
 }

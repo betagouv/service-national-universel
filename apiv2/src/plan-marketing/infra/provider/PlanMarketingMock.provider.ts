@@ -1,8 +1,18 @@
 import { Injectable, Logger } from "@nestjs/common";
-import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
+import { PlanMarketingCampagne, PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 
 @Injectable()
 export class PlanMarketingMockProvider implements PlanMarketingGateway {
+    sendCampagneNow(campagneId: string): Promise<void> {
+        return new Promise((resolve, reject) => {
+            resolve();
+        });
+    }
+    createCampagne(campagne: PlanMarketingCampagne): Promise<Pick<PlanMarketingCampagne, "id">> {
+        return new Promise((resolve, reject) => {
+            resolve(campagne);
+        });
+    }
     findTemplateById(templateId: number): Promise<string | undefined> {
         return new Promise((resolve, reject) => {
             resolve("template42");

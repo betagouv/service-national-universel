@@ -6,6 +6,7 @@ import { IsString, IsNotEmpty, IsNumber } from "class-validator";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
 import { PlanMarketingGateway } from "@plan-marketing/core/gateway/PlanMarketing.gateway";
 import { CreerListeDiffusion } from "@plan-marketing/core/useCase/CreerListeDiffusion";
+import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 
 class ImporterContactsEtCreerListeDiffusionDto {
     @IsString()
@@ -26,7 +27,7 @@ export class PlanMarketingController {
     constructor(
         private readonly importerEtCreerListeDiffusion: ImporterEtCreerListeDiffusion,
         private readonly planMarketingActionSelectorService: PlanMarketingActionSelectorService,
-        private readonly creerListeDiffusion: CreerListeDiffusion,
+        private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
     ) {}
 
     @UseGuards(AdminGuard)
@@ -42,8 +43,8 @@ export class PlanMarketingController {
     }
 
     @UseGuards(AdminGuard)
-    @Post("envoyer-campagne/:id")
-    async envoyerCampagne(@Param("id") campagneId: string): Promise<string> {
-        return await this.creerListeDiffusion.execute(campagneId);
+    @Post("campagne/:id/envoyer")
+    async envoyerCampagne(@Param("id") campagneId: string): Promise<void> {
+        return await this.preparerEnvoiCampagne.execute(campagneId);
     }
 }

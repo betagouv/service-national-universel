@@ -1,6 +1,6 @@
 import * as brevo from "@getbrevo/brevo";
 import { Injectable, Logger } from "@nestjs/common";
-import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
+import { PlanMarketingCampagne, PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 import { ConfigService } from "@nestjs/config";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 
@@ -60,6 +60,35 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         } catch (error: any) {
             this.logger.error(`Failed to import contacts:${JSON.stringify(error.body)}`);
             throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to import contacts: ${error.message}`);
+        }
+    }
+
+    async createCampagne(campagne: PlanMarketingCampagne): Promise<Pick<PlanMarketingCampagne, "id">> {
+        this.logger.log(`createCampagne() - campagne: ${campagne.name}`);
+        try {
+            const createEmailCampaign: brevo.CreateEmailCampaign = {
+                name: campagne.name,
+                sender: campagne.sender,
+                templateId: campagne.templateId,
+                subject: campagne.subject,
+                recipients: campagne.recipients,
+            };
+
+            return (await this.campaignsApi.createEmailCampaign(createEmailCampaign)).body;
+        } catch (error: any) {
+            this.logger.error(`Failed to create campaign:${JSON.stringify(error.body)}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to create campaign: ${error.message}`);
+        }
+    }
+
+    async sendCampagneNow(campagneId: string): Promise<void> {
+        this.logger.log(`sendCampagne() - campagne: ${campagneId}`);
+        try {
+            await this.campaignsApi.sendEmailCampaignNow(parseInt(campagneId));
+            return Promise.resolve();
+        } catch (error: any) {
+            this.logger.error(`Failed to send campaign:${JSON.stringify(error.body)}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to send campaign: ${error.message}`);
         }
     }
 

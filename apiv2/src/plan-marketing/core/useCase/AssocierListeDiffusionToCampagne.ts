@@ -9,15 +9,16 @@ export class AssocierListeDiffusionToCampagne implements UseCase<void> {
 
     constructor(@Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway) {}
 
-    async execute(nomListe?: string, campagneId?: string): Promise<void> {
-        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}`);
-        if (!nomListe || !campagneId) {
+    async execute(nomListe?: string, campagneProviderId?: string): Promise<void> {
+        // campagneId du provider
+        this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneProviderId}`);
+        if (!nomListe || !campagneProviderId) {
             throw new FunctionalException(
                 FunctionalExceptionCode.CANNOT_ASSOCIATE_LIST_TO_CAMPAIGN,
                 "nomListe et campagneId sont obligatoires",
             );
         }
 
-        return await this.planMarketingGateway.updateCampagne(nomListe, campagneId);
+        return await this.planMarketingGateway.updateCampagne(nomListe, campagneProviderId);
     }
 }
