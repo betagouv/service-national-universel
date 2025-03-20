@@ -2,6 +2,7 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Model } from "mongoose";
 import { CampagneGateway } from "../core/gateway/Campagne.gateway";
 import {
+    CampagneEnvoi,
     CampagneModel,
     CampagneSpecifiqueModelWithRefAndGeneric,
     CampagneSpecifiqueModelWithoutRef,
@@ -17,6 +18,12 @@ export class CampagneMongoRepository implements CampagneGateway {
         @Inject(CAMPAGNE_MONGOOSE_ENTITY)
         private campagneModel: Model<CampagneDocument>,
     ) {}
+    async addEnvoiToCampagneById(campagneId: string, envoi: CampagneEnvoi): Promise<CampagneModel | null> {
+        const campagne = await this.campagneModel.findById(campagneId);
+        campagne?.envois.push(envoi);
+        const updated = await campagne?.save();
+        return updated ? CampagneMapper.toModel(updated) : null;
+    }
     async findSpecifiqueWithRefById(id: string): Promise<CampagneSpecifiqueModelWithRefAndGeneric | null> {
         const campagneEntity = await this.campagneModel.findById(id);
         if (!campagneEntity) {
@@ -35,6 +42,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     listeDiffusionId: campagneGenerique.listeDiffusionId!,
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type!,
+                    envois: [],
                 };
             }
         }

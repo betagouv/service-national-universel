@@ -1,4 +1,5 @@
 import {
+    CampagneEnvoi,
     CampagneModel,
     CampagneSpecifiqueModelWithRefAndGeneric,
     CampagneSpecifiqueModelWithoutRef,
@@ -14,6 +15,7 @@ export interface CampagneGateway {
     updateAndRemoveRef(campagne: CampagneModel): Promise<CampagneModel | null>;
     findSpecifiqueWithRefById(id: string): Promise<CampagneSpecifiqueModelWithRefAndGeneric | null>;
     findSpecifiqueWithoutRefById(id: string): Promise<CampagneSpecifiqueModelWithoutRef | null>;
+    addEnvoiToCampagneById(campagneId: string, envoi: CampagneEnvoi): Promise<CampagneModel | null>;
 }
 
 export const CampagneGateway = Symbol("CampagneGateway");

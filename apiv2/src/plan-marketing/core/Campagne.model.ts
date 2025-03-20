@@ -1,4 +1,4 @@
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "snu-lib";
 
 /**
  * Interface de base pour toutes les campagnes
@@ -10,6 +10,10 @@ interface CampagneBase {
     updatedAt?: Date;
 }
 
+export interface CampagneEnvoi {
+    date: Date;
+    statut: EnvoiCampagneStatut;
+}
 /**
  * Interface pour les campagnes avec tous les champs
  * Utilisée pour les campagnes génériques et spécifiques sans référence
@@ -22,6 +26,7 @@ interface CampagneComplete extends CampagneBase {
     listeDiffusionId: string;
     destinataires: DestinataireListeDiffusion[];
     type: CampagneJeuneType;
+    envois?: CampagneEnvoi[];
 }
 
 /**
@@ -65,10 +70,10 @@ export type CampagneSpecifiqueModel = CampagneSpecifiqueModelWithoutRef | Campag
 export type CampagneModel = CampagneGeneriqueModel | CampagneSpecifiqueModel;
 
 // Types pour la création de campagnes
-export type CreateCampagneGeneriqueModel = Omit<CampagneGeneriqueModel, "id" | "createdAt" | "updatedAt">;
+export type CreateCampagneGeneriqueModel = Omit<CampagneGeneriqueModel, "id" | "createdAt" | "updatedAt" | "envois">;
 export type CreateCampagneSpecifiqueModelWithoutRef = Omit<
     CampagneSpecifiqueModelWithoutRef,
-    "id" | "createdAt" | "updatedAt"
+    "id" | "createdAt" | "updatedAt" | "envois"
 >;
 export type CreateCampagneSpecifiqueModelWithRef = Omit<
     CampagneSpecifiqueModelWithRef,

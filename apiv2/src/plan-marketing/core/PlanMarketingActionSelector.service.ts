@@ -49,7 +49,7 @@ export class PlanMarketingActionSelectorService {
                         task.metadata?.parameters?.campagneProviderId,
                     );
                     await this.taskGateway.toSuccess(task.id, {
-                        description: "Campagne envoyée par le provider",
+                        description: "Campagne et liste envoyées au provider",
                     });
                     break;
                 default: {

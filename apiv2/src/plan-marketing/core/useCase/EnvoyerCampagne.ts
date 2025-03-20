@@ -3,12 +3,17 @@ import { UseCase } from "@shared/core/UseCase";
 import { AssocierListeDiffusionToCampagne } from "./AssocierListeDiffusionToCampagne";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { CampagneGateway } from "../gateway/Campagne.gateway";
+import { EnvoiCampagneStatut } from "snu-lib";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 Injectable();
 export class EnvoyerCampagne implements UseCase<void> {
     constructor(
         @Inject(AssocierListeDiffusionToCampagne)
         private readonly associerListeDiffusionToCampagne: AssocierListeDiffusionToCampagne,
         @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
+        @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
     async execute(nomListe: string | undefined, campagneProviderId: string | undefined): Promise<void> {
         if (nomListe === undefined || campagneProviderId === undefined) {
@@ -19,5 +24,9 @@ export class EnvoyerCampagne implements UseCase<void> {
         }
         await this.associerListeDiffusionToCampagne.execute(nomListe, campagneProviderId);
         await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
+        await this.campagneGateway.addEnvoiToCampagneById(campagneProviderId, {
+            date: this.clockGateway.now(),
+            statut: EnvoiCampagneStatut.TERMINE,
+        });
     }
 }
