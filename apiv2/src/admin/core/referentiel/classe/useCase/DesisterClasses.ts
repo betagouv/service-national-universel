@@ -91,14 +91,17 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
                 jeunesDesistesIds: "",
             };
         }
-   
-        const jeunesToDesister = await this.jeuneGateway.findByClasseIdAndSessionId(classeToDesister.classeId, classe.sessionId);
+
+        const jeunesToDesister = await this.jeuneGateway.findByClasseIdAndSessionId(
+            classeToDesister.classeId,
+            classe.sessionId,
+        );
         // Filtrer les jeunes ayant le même cohortId que la classe
-        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map(jeune => ({
+        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => ({
             ...jeune,
             statut: YOUNG_STATUS.ABANDONED,
         }));
-        
+
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
 
         return {

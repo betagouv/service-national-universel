@@ -8,6 +8,7 @@ jest.mock("@nestjs-cls/transactional", () => ({
 describe("DesisterClasses", () => {
     let useCase: DesisterClasses;
     let mockFileGateway: any;
+    let mockSessionGateway: any;
     let mockClasseGateway: any;
     let mockJeuneGateway: any;
 
@@ -26,6 +27,9 @@ describe("DesisterClasses", () => {
             findByClasseIdAndSessionId: jest.fn(),
             bulkUpdate: jest.fn(),
         };
+        mockSessionGateway = {
+            findBySnuId: jest.fn(),
+        };
 
         useCase = new DesisterClasses(mockFileGateway, mockClasseGateway, mockJeuneGateway);
     });
@@ -40,7 +44,7 @@ describe("DesisterClasses", () => {
         const mockClasse = {
             id: "CLASS-001",
             statut: STATUS_CLASSE.ASSIGNED,
-            sessionId: "SESSION-001"
+            sessionId: "SESSION-001",
         };
 
         const mockJeunes = [
@@ -137,10 +141,17 @@ describe("DesisterClasses", () => {
             { "Identifiant de la classe engagée": "CLASS-001" },
             { "Identifiant de la classe engagée": "CLASS-002" },
         ];
+        const mockClasse = {
+            id: "CLASS-001",
+            statut: STATUS_CLASSE.ASSIGNED,
+            sessionId: "SESSION-001",
+        };
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
         mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
         mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
+        mockClasseGateway.findById.mockResolvedValue(mockClasse);
+        mockSessionGateway.findBySnuId.mockResolvedValue({ sessionId: mockClasse.sessionId });
         mockClasseGateway.updateStatut.mockImplementation((id) => ({
             id,
             statut: STATUS_CLASSE.WITHDRAWN,
@@ -158,6 +169,7 @@ describe("DesisterClasses", () => {
             fileLineCount: 2,
             type: ReferentielTaskType.IMPORT_DESISTER_CLASSES,
         });
+
         expect(result).toHaveLength(2);
         expect(result[0].result).toBe("success");
         expect(result[1].result).toBe("success");
@@ -167,9 +179,17 @@ describe("DesisterClasses", () => {
     it("should handle gateway errors gracefully", async () => {
         const mockXlsxData = [{ "Identifiant de la classe engagée": "CLASS-001" }];
 
+        const mockClasse = {
+            id: "CLASS-001",
+            statut: STATUS_CLASSE.ASSIGNED,
+            sessionId: "SESSION-001",
+        };
+
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
         mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData);
         mockFileGateway.parseXLS.mockResolvedValueOnce([]);
+        mockClasseGateway.findById.mockResolvedValue(mockClasse);
+        mockSessionGateway.findBySnuId.mockResolvedValue({ sessionId: mockClasse.sessionId });
         mockClasseGateway.updateStatut.mockRejectedValue(new Error("Database error"));
 
         const result = await useCase.execute({
@@ -192,14 +212,24 @@ describe("DesisterClasses", () => {
     it("should handle jeune update errors", async () => {
         const mockXlsxData = [{ "Identifiant de la classe engagée": "CLASS-001" }];
 
+        const mockClasse = {
+            id: "CLASS-001",
+            statut: STATUS_CLASSE.ASSIGNED,
+            sessionId: "SESSION-001",
+        };
+
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
         mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
         mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
+        mockClasseGateway.findById.mockResolvedValue(mockClasse);
+        mockSessionGateway.findBySnuId.mockResolvedValue({ sessionId: mockClasse.sessionId });
         mockClasseGateway.updateStatut.mockResolvedValue({
             id: "CLASS-001",
             statut: STATUS_CLASSE.WITHDRAWN,
         });
-        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([{ id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED }]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([
+            { id: "YOUNG-001", statut: YOUNG_STATUS.VALIDATED },
+        ]);
         mockJeuneGateway.bulkUpdate.mockRejectedValue(new Error("Update failed"));
 
         const result = await useCase.execute({
@@ -226,9 +256,17 @@ describe("DesisterClasses", () => {
             },
         ];
 
+        const mockClasse = {
+            id: "CLASS-001",
+            statut: STATUS_CLASSE.ASSIGNED,
+            sessionId: "SESSION-001",
+        };
+
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
         mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
         mockClasseGateway.findById.mockResolvedValue(mockXlsxData);
+        mockClasseGateway.findById.mockResolvedValue(mockClasse);
+        mockSessionGateway.findBySnuId.mockResolvedValue({ sessionId: mockClasse.sessionId });
 
         const result = await useCase.execute({
             fileKey: "test.xlsx",
