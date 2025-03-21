@@ -1,0 +1,14 @@
+{
+  "name": "all",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "pm2 start --no-daemon ecosystem.api.config.js",
+    "tasks": "pm2 start --no-daemon ecosystem.tasks.config.js"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}
