@@ -168,18 +168,26 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
     }
 
     private async updateYoungCohorts(classeId: string, newSession: any): Promise<void> {
-        const jeunes = await this.jeuneGateway.findByClasseId(classeId);
-        const jeunesUpdatedList: JeuneModel[] = [];
-        for (const jeune of jeunes) {
-            jeunesUpdatedList.push({
-                ...jeune,
-                sessionId: newSession.id,
-                sessionNom: newSession.nom,
-                originalSessionId: jeune.sessionId,
-                originalSessionNom: jeune.sessionNom,
-                sessionChangeReason: "Import SI-SNU",
-            });
+        // Récupérer la classe depuis la base de données pour obtenir son cohortId
+        const classe = await this.classeGateway.findById(classeId);
+
+        if (!classe) {
+            this.logger.error(`Classe introuvable en base de données : ${classeId}`, ImporterClasses.name);
+            return;
         }
+
+        // Récupérer les jeunes de la classe
+        const jeunes = await this.jeuneGateway.findByClasseIdAndSessionId(classeId, classe.sessionId!);
+
+        const jeunesUpdatedList: JeuneModel[] = jeunes.map((jeune) => ({
+            ...jeune,
+            sessionId: newSession.id,
+            sessionNom: newSession.nom,
+            originalSessionId: jeune.sessionId,
+            originalSessionNom: jeune.sessionNom,
+            sessionChangeReason: "Import SI-SNU",
+        }));
+
         await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
         this.logger.log(
             `Updated ${jeunesUpdatedList.length} jeunes with new session ${newSession.nom}`,
