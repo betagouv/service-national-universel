@@ -16,11 +16,12 @@ export interface PostEligibilityRoute extends BasicRoute {
     zip?: string;
   };
   query?: {
+    type?: "INSCRIPTION_MANUELLE" | "BASCULE";
     getAllSessions?: boolean;
   };
   response: RouteResponseBody<
     Array<
-      Pick<CohortType, "_id" | "name" | "type" | "event" | "dateStart" | "dateEnd"> & {
+      CohortType & {
         numberOfCandidates?: number;
         numberOfValidated?: number;
         goal?: number;

@@ -31,7 +31,6 @@ export default function SchoolEditor({ young, onChange, className, showBackgroun
 
   useEffect(() => {
     if (young) {
-      console.log("young.schoolCity: ", young.schoolCity);
       setSchoolInFrance(!!young.schoolCountry && young.schoolCountry.toUpperCase() === "FRANCE");
     } else {
       setSchoolInFrance(true);
