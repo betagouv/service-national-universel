@@ -37,7 +37,7 @@ describe("ImporterClasses", () => {
             findByMatricule: jest.fn(),
         };
         mockJeuneGateway = {
-            findByClasseId: jest.fn(),
+            findByClasseIdAndSessionId: jest.fn(),
             bulkUpdate: jest.fn(),
         };
         mockSejourGateway = {
@@ -99,7 +99,7 @@ describe("ImporterClasses", () => {
         mockPdrGateway.findByMatricule.mockResolvedValue({
             id: "PDR-001",
         });
-        mockJeuneGateway.findByClasseId.mockResolvedValue([]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([]);
 
         const result = await useCase.execute({
             fileKey: "test.xlsx",
@@ -181,7 +181,7 @@ describe("ImporterClasses", () => {
         mockSejourGateway.findBySejourSnuId.mockResolvedValue({
             id: "SEJOUR-001",
         });
-        mockJeuneGateway.findByClasseId.mockResolvedValue([
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([
             { id: "YOUNG-001", sessionId: "OLD-SESSION", sessionNom: "Old Session" },
         ]);
 
