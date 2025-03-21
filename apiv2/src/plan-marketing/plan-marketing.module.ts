@@ -22,6 +22,7 @@ import { ListeDiffusionService } from "./core/service/ListeDiffusion.service";
 import { ListeDiffusionGateway } from "./core/gateway/ListeDiffusion.gateway";
 import { ListeDiffusionMongoRepository } from "./infra/ListeDiffusionMongo.repository";
 import { listeDiffusionMongoProviders } from "./infra/ListeDiffusion.provider";
+import { MettreAJourCampagne } from "./core/useCase/MettreAJourCampagne";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule],
@@ -53,6 +54,7 @@ import { listeDiffusionMongoProviders } from "./infra/ListeDiffusion.provider";
         ...taskMongoProviders,
         ...campagneMongoProviders,
         ...listeDiffusionMongoProviders,
+        MettreAJourCampagne,
     ],
 })
 export class PlanMarketingModule {}

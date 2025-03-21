@@ -6,24 +6,23 @@ export const CampagneSchema = {
   campagneGeneriqueId: {
     type: String,
   },
+  originalCampagneGeneriqueId: {
+    type: String,
+  },
   nom: {
     type: String,
-    required: true,
   },
   objet: {
     type: String,
-    required: true,
   },
   contexte: {
     type: String,
   },
   templateId: {
     type: Number,
-    required: true,
   },
   listeDiffusionId: {
     type: String,
-    required: true,
   },
   generic: {
     type: Boolean,
@@ -36,13 +35,13 @@ export const CampagneSchema = {
         enum: Object.values(DestinataireListeDiffusion),
       },
     ],
-    required: true,
-    default: [],
   },
   type: {
     type: String,
     enum: Object.values(CampagneJeuneType),
-    required: true,
+  },
+  cohortId: {
+    type: String,
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

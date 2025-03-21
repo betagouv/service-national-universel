@@ -1,18 +1,24 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { InputText } from "@snu/ds/admin";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useMemo, useState } from "react";
 
 import { DraftListeDiffusionDataProps, ListeDiffusionDataProps, ListeDiffusionForm } from "./ListeDiffusionForm";
 import { useListeDiffusion } from "./ListeDiffusionHook";
 import { ListeDiffusionEnum } from "snu-lib";
 import { useListeDiffusionFilters } from "./filters/ListeDiffusionFiltersHook";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 export default function ListeDiffusion() {
   const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
-  const [searchTerm, setSearchTerm] = useState("");
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
 
   const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
+
+  const allListes = useMemo(() => {
+    return draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
+  }, [listesDiffusion, draftListe]);
+
+  const { searchTerm, setSearchTerm, filteredItems: filteredListes } = useSearchTerm(allListes, (liste) => liste.nom, { sortBy: "createdAt" });
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {
@@ -39,13 +45,6 @@ export default function ListeDiffusion() {
   const handleOnCancel = () => {
     setDraftListe(null);
   };
-
-  const filteredListes = useMemo(() => {
-    const allListes = draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
-    return allListes
-      .filter((liste) => liste.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !liste.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [listesDiffusion, searchTerm, draftListe]);
 
   const isNewListeDiffusion = useMemo(() => {
     return draftListe !== null;
