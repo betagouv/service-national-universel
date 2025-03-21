@@ -2,7 +2,7 @@ import PlanMarketingService from "@/services/planMarketingService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
-import { CampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
+import { CampagneSpecifiqueFormData, ValidationErrors } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
 
 const CAMPAGNE_SPECIFIQUE_QUERY_KEY = "campagnes-specifiques";
@@ -11,8 +11,18 @@ const DEFAULT_SORT = "DESC";
 interface SaveCampagneParams {
   id?: string;
   payload: CampagneSpecifiqueFormData & { generic: false };
-  onSuccess?: (success: boolean) => void;
+  onSuccess?: (success: boolean, errors?: ValidationErrors) => void;
 }
+
+const mapErrorCodeToValidationErrors = (errorCode: string): ValidationErrors => {
+  const errors: ValidationErrors = {};
+
+  if (errorCode === "TEMPLATE_NOT_FOUND") {
+    errors.templateId = true;
+  }
+
+  return errors;
+};
 
 export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
   const queryClient = useQueryClient();
@@ -41,8 +51,10 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
         toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de la sauvegarde de la campagne", { timeOut: 5000 });
       }
 
+      const errors = mapErrorCodeToValidationErrors(error.message);
+
       if (variables.onSuccess) {
-        variables.onSuccess(false);
+        variables.onSuccess(false, errors);
       }
     },
   });

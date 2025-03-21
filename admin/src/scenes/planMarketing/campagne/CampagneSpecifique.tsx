@@ -84,12 +84,17 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     saveCampagne({
       id: campagne.id,
       payload: campagne,
-      onSuccess: (success) => {
+      onSuccess: (success, errors) => {
         if (success) {
           setDraftCampagne(null);
           if (formRef && formRef.current) {
             formRef.current.resetForm(campagne);
           }
+        } else if (errors && Object.keys(errors).length > 0 && formRef && formRef.current) {
+          formRef.current.resetForm({
+            ...campagne,
+            validationErrors: errors,
+          });
         }
       },
     });
@@ -132,7 +137,9 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             campagneData={campagne}
             listeDiffusionOptions={listeDiffusionOptions}
             onSave={handleOnSave}
-            onCancel={() => setDraftCampagne(null)}
+            onCancel={() => {
+              setDraftCampagne(null);
+            }}
           />
         ))}
       </div>

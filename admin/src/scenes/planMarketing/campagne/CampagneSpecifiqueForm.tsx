@@ -1,9 +1,13 @@
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal } from "@snu/ds/admin";
-import React, { useEffect, useState, useImperativeHandle, forwardRef } from "react";
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId } from "snu-lib";
+
+export interface ValidationErrors {
+  templateId?: boolean;
+}
 
 /**
  * Interface pour une campagne spécifique sans référence
@@ -23,6 +27,7 @@ export interface CampagneSpecifiqueFormData {
   generic: false;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+  validationErrors?: ValidationErrors;
 }
 
 export type DraftCampagneSpecifiqueFormData = Partial<CampagneSpecifiqueFormData> & {
@@ -62,6 +67,8 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       formState: { errors, isDirty, isSubmitting },
       reset,
       watch,
+      setError,
+      clearErrors,
     } = useForm<CampagneSpecifiqueFormData>({
       defaultValues: {
         type: CampagneJeuneType.VOLONTAIRE,
@@ -72,9 +79,31 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+    const setApiErrors = useCallback(
+      (validationErrors?: ValidationErrors) => {
+        clearErrors();
+
+        if (!validationErrors) return;
+
+        if (validationErrors.templateId) {
+          setError("templateId", {
+            type: "api",
+            message: "L'ID du template n'est pas correct",
+          });
+        }
+      },
+      [clearErrors, setError],
+    );
+
     useImperativeHandle(ref, () => ({
       resetForm: (data: CampagneSpecifiqueFormData) => {
-        reset(data);
+        const { validationErrors, ...restData } = data;
+        reset(restData);
+
+        // Application des erreurs d'API après reset
+        if (validationErrors) {
+          setApiErrors(validationErrors);
+        }
       },
     }));
 
@@ -84,9 +113,15 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
         destinataires: [DestinataireListeDiffusion.JEUNES],
         ...campagneData,
       });
-    }, [campagneData, reset]);
 
-    const isOpen = campagneData.id === undefined || isDirty;
+      // Application des erreurs d'API lors du chargement initial
+      if (campagneData.validationErrors) {
+        setApiErrors(campagneData.validationErrors);
+      }
+    }, [campagneData, reset, setApiErrors]);
+
+    // Le formulaire est ouvert s'il est nouveau, modifié ou s'il contient des erreurs
+    const isOpen = campagneData.id === undefined || isDirty || Object.keys(errors).length > 0;
 
     const handleOnCancel = () => {
       reset();
@@ -109,6 +144,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const isNotSaved = isDirty && !isSubmitting;
     const hasCampagneGenerique = hasCampagneGeneriqueId(campagneData);
+    const templateErrorMessage = errors.templateId?.type === "api" ? errors.templateId.message : undefined;
 
     return (
       <>
@@ -185,16 +221,18 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                         {...field}
                         type="number"
                         className={`w-full p-2 border rounded focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                          errors.templateId ? "border-red-500" : "border-gray-300"
+                          errors.templateId || templateErrorMessage ? "border-red-500" : "border-gray-300"
                         }`}
                       />
                     )}
                   />
                   {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-                  <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center mt-2">
-                    Voir l'aperçu
-                    <HiOutlineEye className="ml-1" size={18} />
-                  </a>
+                  <div className="block mt-2">
+                    <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center">
+                      Voir l'aperçu
+                      <HiOutlineEye className="ml-1" size={18} />
+                    </a>
+                  </div>
                 </div>
               </div>
 
