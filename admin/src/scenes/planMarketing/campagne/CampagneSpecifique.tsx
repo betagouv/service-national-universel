@@ -1,10 +1,10 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { InputText } from "@snu/ds/admin";
-import React, { useMemo, useState } from "react";
+import React, { useMemo, useState, useRef, createRef } from "react";
 import { CampagneJeuneType, CohortDto, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useCampagneSpecifique } from "./CampagneSpecifiqueHook";
-import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
+import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecifiqueFormData, CampagneSpecifiqueFormRefMethods } from "./CampagneSpecifiqueForm";
 import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
@@ -32,8 +32,19 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     }));
   }, [listesDiffusion]);
 
+  const formRefs = useRef<Record<string, React.RefObject<CampagneSpecifiqueFormRefMethods>>>({});
+
   const allCampagnes = useMemo(() => {
-    return draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
+    const campagnesArray = draftCampagne ? [draftCampagne, ...campagnes] : campagnes;
+
+    campagnesArray.forEach((campagne) => {
+      const id = campagne.id || "draft";
+      if (!formRefs.current[id]) {
+        formRefs.current[id] = createRef<CampagneSpecifiqueFormRefMethods>();
+      }
+    });
+
+    return campagnesArray;
   }, [campagnes, draftCampagne]);
 
   const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(allCampagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
@@ -60,22 +71,33 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         objet: "",
         destinataires: [DestinataireListeDiffusion.JEUNES],
       };
-      saveCampagne({ payload: newSpecificCampaign });
+      saveCampagne({
+        payload: newSpecificCampaign,
+      });
     });
   };
 
   const handleOnSave = (campagne: CampagneSpecifiqueFormData & { generic: false }) => {
-    saveCampagne(
-      {
-        id: campagne.id,
-        payload: campagne,
-      },
-      {
-        onSuccess: () => {
+    const formId = campagne.id || "draft";
+    const formRef = formRefs.current[formId];
+
+    saveCampagne({
+      id: campagne.id,
+      payload: campagne,
+      onSuccess: (success, errors) => {
+        if (success) {
           setDraftCampagne(null);
-        },
+          if (formRef && formRef.current) {
+            formRef.current.resetForm(campagne);
+          }
+        } else if (errors && Object.keys(errors).length > 0 && formRef && formRef.current) {
+          formRef.current.resetForm({
+            ...campagne,
+            validationErrors: errors,
+          });
+        }
       },
-    );
+    });
   };
 
   const isNouvelleCampagneDisabled = useMemo(() => {
@@ -110,11 +132,14 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       <div className="flex flex-col gap-0">
         {filteredCampagnes.map((campagne) => (
           <CampagneSpecifiqueForm
-            key={`campagne-${campagne.id}`}
+            key={`campagne-${campagne.id || "draft"}`}
+            ref={formRefs.current[campagne.id || "draft"]}
             campagneData={campagne}
             listeDiffusionOptions={listeDiffusionOptions}
             onSave={handleOnSave}
-            onCancel={() => setDraftCampagne(null)}
+            onCancel={() => {
+              setDraftCampagne(null);
+            }}
           />
         ))}
       </div>

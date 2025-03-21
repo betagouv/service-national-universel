@@ -4,7 +4,7 @@ import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
-import { HiOutlineLightningBolt } from "react-icons/hi";
+import { HiOutlineLightningBolt, HiOutlineMail } from "react-icons/hi";
 
 import { CohortDto, isSuperAdmin, ROLES } from "snu-lib";
 import { NavbarControlled } from "@snu/ds/admin";
@@ -110,7 +110,7 @@ export default function Settings() {
           {
             id: "marketing" as const,
             title: "Marketing",
-            leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
+            leftIcon: <HiOutlineMail size={20} className="mt-0.5" />,
             content: <MarketingTab session={cohort} />,
           },
         ]
