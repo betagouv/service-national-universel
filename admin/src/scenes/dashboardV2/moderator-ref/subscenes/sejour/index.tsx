@@ -33,7 +33,6 @@ import OccupationCardHorizontal from "./components/OccupationCardHorizontal";
 import Presences from "../../../components/sejour/Presences";
 import StatusPhase1 from "../../../components/sejour/StatusPhase1";
 import TabSession from "./components/TabSession";
-import BandeauInfo from "../../../components/BandeauInfo";
 
 type FilterOption = {
   key: string;
@@ -224,7 +223,6 @@ export default function Index() {
 
   return (
     <Page>
-      <BandeauInfo />
       <Header
         title="Tableau de bord"
         breadcrumb={[{ title: "Tableau de bord" }]}
