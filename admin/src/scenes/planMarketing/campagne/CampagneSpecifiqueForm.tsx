@@ -1,9 +1,9 @@
 import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip } from "@snu/ds/admin";
+import { Badge, Button, Collapsable, Container, Label, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
-import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi } from "snu-lib";
 
 /**
  * Interface pour une campagne spécifique sans référence
@@ -34,8 +34,16 @@ interface ListeDiffusionOption {
   label: string;
 }
 
+const formatLocalDate = (date: Date) => {
+  return new Date(date).toLocaleDateString("fr-FR", {
+    day: "2-digit",
+    month: "2-digit",
+    year: "numeric",
+  });
+};
+
 export interface CampagneSpecifiqueFormProps {
-  campagneData: DraftCampagneSpecifiqueFormData;
+  campagneData: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined };
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
@@ -127,7 +135,30 @@ export const CampagneSpecifiqueForm = ({ campagneData, listeDiffusionOptions, on
                 </>
               )}
             </div>
-            <div className="flex-1">{/* TODO: wrapper pour les labels des dates d'envoie et relances */}</div>
+            <div className="flex-1 flex flex-row gap-4">
+              <div>
+                {campagneData.envois
+                  ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
+                  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                  .slice(0, 1)
+                  .map((envoi, index) => <Badge key={index} title={`Envoyé le ${formatLocalDate(envoi.date)}`} status={"VALIDATED"} />)}
+              </div>
+              <div>
+                {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (
+                  <div className="text-sm text-gray-500">
+                    <span>{(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) - 1} relances</span>
+                    <div>
+                      {campagneData?.envois
+                        ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                        .slice(1)
+                        ?.map((envoi) => formatLocalDate(envoi.date))
+                        .join(" • ")}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
           </div>
         }>
         <div className="flex flex-col gap-6 p-2">

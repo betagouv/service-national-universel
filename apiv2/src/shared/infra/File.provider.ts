@@ -1,19 +1,27 @@
 import { promises as fs } from "fs";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
+import { format, writeToString, FormatterOptionsArgs } from "@fast-csv/format";
 import * as XLSX from "xlsx";
 import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
-import { Injectable } from "@nestjs/common";
+import { Injectable, Logger } from "@nestjs/common";
 
 import { ERRORS } from "snu-lib";
-import { FileGateway } from "@shared/core/File.gateway";
+import { CsvOptions, FileGateway } from "@shared/core/File.gateway";
 
 import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
 
 // TODO: à déplacer dans le module "file"
 @Injectable()
 export class FileProvider implements FileGateway {
+    private readonly logger: Logger = new Logger(FileProvider.name);
+
     constructor(private readonly config: ConfigService) {}
+    async generateCSV(recordArray: Record<string, any>[], options: CsvOptions): Promise<string> {
+        this.logger.log(`Generating CSV with ${recordArray.length} rows with column names:${options.headers}`);
+
+        return writeToString(recordArray, { headers: true, quote: '"', ...options });
+    }
 
     async readFile(filePath: string): Promise<Buffer> {
         return fs.readFile(filePath);

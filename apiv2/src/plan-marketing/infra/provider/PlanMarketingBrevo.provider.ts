@@ -1,6 +1,6 @@
 import * as brevo from "@getbrevo/brevo";
 import { Injectable, Logger } from "@nestjs/common";
-import { PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
+import { PlanMarketingCampagne, PlanMarketingGateway } from "../../core/gateway/PlanMarketing.gateway";
 import { ConfigService } from "@nestjs/config";
 import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
 
@@ -45,7 +45,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         }
     }
 
-    async importerContacts(nomListe: string, contacts: any, folderId: number, notifyUrl: string): Promise<number> {
+    async importerContacts(nomListe: string, contacts: string, folderId: number, notifyUrl: string): Promise<number> {
         this.logger.log(`importerContacts() - nomListe: ${nomListe}, notifyUrl: ${notifyUrl}`);
         const requestContactImport = new brevo.RequestContactImport();
         requestContactImport.fileBody = contacts;
@@ -60,6 +60,35 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         } catch (error: any) {
             this.logger.error(`Failed to import contacts:${JSON.stringify(error.body)}`);
             throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to import contacts: ${error.message}`);
+        }
+    }
+
+    async createCampagne(campagne: PlanMarketingCampagne): Promise<Pick<PlanMarketingCampagne, "id">> {
+        this.logger.log(`createCampagne() - campagne: ${campagne.name}`);
+        try {
+            const createEmailCampaign: brevo.CreateEmailCampaign = {
+                name: campagne.name,
+                sender: campagne.sender,
+                templateId: campagne.templateId,
+                subject: campagne.subject,
+                recipients: campagne.recipients,
+            };
+
+            return (await this.campaignsApi.createEmailCampaign(createEmailCampaign)).body;
+        } catch (error: any) {
+            this.logger.error(`Failed to create campaign:${JSON.stringify(error.body)}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to create campaign: ${error.message}`);
+        }
+    }
+
+    async sendCampagneNow(campagneId: string): Promise<void> {
+        this.logger.log(`sendCampagne() - campagne: ${campagneId}`);
+        try {
+            await this.campaignsApi.sendEmailCampaignNow(parseInt(campagneId));
+            return Promise.resolve();
+        } catch (error: any) {
+            this.logger.error(`Failed to send campaign:${JSON.stringify(error.body)}`);
+            throw new TechnicalException(TechnicalExceptionType.BREVO, `Failed to send campaign: ${error.message}`);
         }
     }
 
@@ -94,25 +123,28 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
                 this.logger.log("Aucune liste trouvée.");
                 return;
             }
-            
+
             // 2. Exclure le dossier "DEV - Ne Pas Supprimer - WARNING"
             const filteredListsDiffusion = listeDiffusions.filter((list) => list.folderId !== folderIdToExclude);
             if (filteredListsDiffusion.length === 0) {
                 this.logger.log("Aucune liste à supprimer.");
                 return;
             }
-    
+
             // 3. Supprimer la plus ancienne liste
             const oldestListDiffusion = filteredListsDiffusion[0];
-            this.logger.log(`Suppression de la liste la plus ancienne : ${oldestListDiffusion.name} (ID: ${oldestListDiffusion.id})`);
+            this.logger.log(
+                `Suppression de la liste la plus ancienne : ${oldestListDiffusion.name} (ID: ${oldestListDiffusion.id})`,
+            );
             await this.contactsApi.deleteList(oldestListDiffusion.id);
             this.logger.log(`Liste supprimée avec succès : ${oldestListDiffusion.name}`);
         } catch (error: any) {
-            throw new TechnicalException(TechnicalExceptionType.BREVO, `Erreur lors de la suppression de la liste: ${error.message}`);
+            throw new TechnicalException(
+                TechnicalExceptionType.BREVO,
+                `Erreur lors de la suppression de la liste: ${error.message}`,
+            );
         }
     }
-    
-    
 
     private setApiKey(
         apiInstance: brevo.ContactsApi | brevo.EmailCampaignsApi | brevo.TransactionalEmailsApi,

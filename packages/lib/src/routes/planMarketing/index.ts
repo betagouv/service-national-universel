@@ -1,4 +1,4 @@
-import { BasicRoute, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
+import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
 import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 import { ListeDiffusionRoutes } from "./listeDiffusion";
@@ -18,6 +18,7 @@ interface CampagneComplete extends CampagneBase {
   listeDiffusionId: string;
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
+  envois?: CampagneEnvoi[];
 }
 
 // Types pour les campagnes génériques

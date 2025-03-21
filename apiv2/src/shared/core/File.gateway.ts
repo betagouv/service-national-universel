@@ -1,4 +1,8 @@
 // TODO: à déplacer dans le module "file"
+export interface CsvOptions {
+    headers?: boolean | string[];
+    delimiter: string;
+}
 export interface FileGateway {
     readFile(filePath: string): Promise<Buffer>;
     parseCSV<T>(
@@ -23,6 +27,7 @@ export interface FileGateway {
             skipRows?: number;
         },
     ): Promise<T[]>;
+    generateCSV(data: Record<string, any>[], options: CsvOptions): Promise<string>;
     parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]>;
     generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer>;
     uploadFile(

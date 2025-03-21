@@ -1,6 +1,6 @@
 import PlanMarketingService from "@/services/planMarketingService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HttpError, translateMarketing } from "snu-lib";
+import { CampagneEnvoi, HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { CampagneSpecifiqueFormData } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
@@ -33,7 +33,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     },
   });
 
-  const { data: campagnes, isLoading } = useQuery<CampagneSpecifiqueFormData[]>({
+  const { data: campagnes, isLoading } = useQuery<(CampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] })[]>({
     queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
     enabled: true,
     refetchOnWindowFocus: false,

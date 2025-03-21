@@ -1,5 +1,5 @@
 import { SearchTerm } from "snu-lib";
-import { ESSearchQuery, NestedKeys } from "./ElasticQuery";
+import { ESSearchQuery } from "./ElasticQuery";
 
 export class ElasticsearchQueryBuilder<T> {
     private query: ESSearchQuery<T>;
@@ -23,12 +23,15 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
-    setSort(field: NestedKeys<T>, order: "asc" | "desc"): this {
+    setSort(field?: string, order: "asc" | "desc" = "asc", tiebreaker?: string): this {
+        if (tiebreaker) {
+            this.query.body.sort = [{ [`${tiebreaker}`]: { order } }];
+        }
         if (!field) {
             return this;
         }
-        const sortObject = { [`${field}.keyword`]: { order } } as { [key in NestedKeys<T>]: { order: "asc" | "desc" } };
-        this.query.body.sort = [sortObject];
+        const sortObject = { [`${field}.keyword`]: { order } };
+        this.query.body.sort?.push(sortObject);
         return this;
     }
 
@@ -93,7 +96,32 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
+    setPit(pitId: string): this {
+        this.query.index = undefined;
+        this.query.body.pit = {
+            id: pitId,
+            keep_alive: "1m",
+        };
+        return this;
+    }
+
+    setSearchAfter(searchAfter: any[] | undefined): this {
+        if (searchAfter) {
+            this.query.body.search_after = searchAfter;
+        }
+        return this;
+    }
+
     build(): ESSearchQuery<T> {
         return this.query;
+    }
+
+    buildCountQuery() {
+        return {
+            index: this.query.index,
+            body: {
+                query: this.query.body.query,
+            },
+        };
     }
 }

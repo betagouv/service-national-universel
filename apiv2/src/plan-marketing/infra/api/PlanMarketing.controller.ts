@@ -5,6 +5,8 @@ import { BrevoIpGuard } from "../guard/BrevoIpGuard";
 import { IsString, IsNotEmpty, IsNumber } from "class-validator";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
 import { PlanMarketingGateway } from "@plan-marketing/core/gateway/PlanMarketing.gateway";
+import { CreerListeDiffusion } from "@plan-marketing/core/useCase/CreerListeDiffusion";
+import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 
 class ImporterContactsEtCreerListeDiffusionDto {
     @IsString()
@@ -25,6 +27,7 @@ export class PlanMarketingController {
     constructor(
         private readonly importerEtCreerListeDiffusion: ImporterEtCreerListeDiffusion,
         private readonly planMarketingActionSelectorService: PlanMarketingActionSelectorService,
+        private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
     ) {}
 
     @UseGuards(AdminGuard)
@@ -37,5 +40,11 @@ export class PlanMarketingController {
     @UseGuards(BrevoIpGuard)
     async webhook(@Body("proc_success") processId: string) {
         await this.planMarketingActionSelectorService.selectAction(Number(processId));
+    }
+
+    @UseGuards(AdminGuard)
+    @Post("campagne/:id/envoyer")
+    async envoyerCampagne(@Param("id") campagneId: string): Promise<void> {
+        return await this.preparerEnvoiCampagne.execute(campagneId);
     }
 }
