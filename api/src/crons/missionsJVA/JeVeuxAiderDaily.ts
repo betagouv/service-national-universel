@@ -14,8 +14,9 @@ const run = async () => {
   logger.info(`Cleaning outdated missions`);
   slack.info({ title: "sync with JVA missions", text: "I'm cleaning the outdated JVA missions !" });
   try {
-    await cancelOldMissions(startTime);
-    await slack.success({ title: "sync with JVA missions" });
+    // TODO: US-489 - Revoir les RG => l'annulation des missions est problèmatique
+    // await cancelOldMissions(startTime);
+    await slack.success({ title: "sync with JVA missions", text: "Annulation retirée temporairement" });
   } catch (error) {
     capture(error);
     slack.error({ title: "sync with JVA missions", text: "Error while deleting outdated missions !" });
