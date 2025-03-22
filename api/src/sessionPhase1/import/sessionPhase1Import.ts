@@ -14,4 +14,6 @@ export type SessionCohesionCenterImportMapped = {
   cohesionCenterPlacesTotal: number;
   sessionPlaces: number;
   sejourSnuId: string;
+  sejourSnuIdRegion?: string;
+  codeRegion?: string;
 };
