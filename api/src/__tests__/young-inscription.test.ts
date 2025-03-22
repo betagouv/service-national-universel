@@ -1,11 +1,13 @@
 import request from "supertest";
+
+import { COHORTS, YOUNG_STATUS } from "snu-lib";
+import { fakerFR as faker } from "@faker-js/faker";
+
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
 import { dbConnect, dbClose } from "./helpers/db";
-import { STEPS2023, YOUNG_STATUS, YOUNG_SITUATIONS } from "../utils";
-import { COHORTS } from "snu-lib";
-import { fakerFR as faker } from "@faker-js/faker";
+import { STEPS2023, YOUNG_SITUATIONS } from "../utils";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 

@@ -51,7 +51,6 @@ import {
   ERRORS,
   isYoung,
   inSevenDays,
-  FILE_STATUS_PHASE1,
   STEPS2023,
   getCcOfYoung,
   notifDepartmentChange,
@@ -108,6 +107,8 @@ import {
   isAdmin,
   isReferentReg,
   canValidateYoungToLP,
+  FILE_STATUS_PHASE1,
+  ERRORS as ERRORS_LIB,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import scanFile from "../utils/virusScanner";
@@ -863,8 +864,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     let etablissement: any = undefined;
     if (value.source === YOUNG_SOURCE.CLE) {
       const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(value.etablissementId), await ClasseModel.findById(value.classeId)]);
-      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
-      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS_LIB.ETABLISSEMENT_NOT_FOUND });
+      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS_LIB.CLASSE_NOT_FOUND });
       classe = dbClasse;
       etablissement = dbEtablissement;
       if (classe.seatsTaken >= classe.totalSeats) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -874,8 +875,8 @@ router.put("/young/:id/change-cohort", passport.authenticate("referent", { sessi
     let previousClasse: any = undefined;
     if (young.source === YOUNG_SOURCE.CLE) {
       const [dbEtablissement, dbClasse] = await Promise.all([await EtablissementModel.findById(young.etablissementId), await ClasseModel.findById(young.classeId)]);
-      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS.ETABLISSEMENT_NOT_FOUND });
-      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS.CLASSE_NOT_FOUND });
+      if (!dbEtablissement) return res.status(404).send({ ok: false, code: ERRORS_LIB.ETABLISSEMENT_NOT_FOUND });
+      if (!dbClasse) return res.status(404).send({ ok: false, code: ERRORS_LIB.CLASSE_NOT_FOUND });
       previousEtablissement = dbEtablissement;
       previousClasse = dbClasse;
     }

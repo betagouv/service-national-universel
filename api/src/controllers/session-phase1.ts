@@ -22,7 +22,7 @@ import {
   SessionPhase1TokenModel,
   SchemaDeRepartitionModel,
 } from "../models";
-import { ERRORS, updatePlacesSessionPhase1, isYoung, YOUNG_STATUS, uploadFile, deleteFile, getFile, updateHeadCenter } from "../utils";
+import { ERRORS, updatePlacesSessionPhase1, isYoung, uploadFile, deleteFile, getFile, updateHeadCenter } from "../utils";
 import {
   ROLES,
   SENDINBLUE_TEMPLATES,
@@ -42,6 +42,7 @@ import {
   formatDateTimeZone,
   YoungDto,
   SessionPhase1Type,
+  YOUNG_STATUS,
 } from "snu-lib";
 import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
 import { validateSessionPhase1, validateId } from "../utils/validator";

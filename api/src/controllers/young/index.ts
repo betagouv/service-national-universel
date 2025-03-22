@@ -14,18 +14,7 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import {
-  ReferentModel,
-  YoungModel,
-  ApplicationModel,
-  SessionPhase1Model,
-  LigneBusModel,
-  ClasseModel,
-  EtablissementModel,
-  CohortModel,
-  ApplicationDocument,
-  ReferentDocument,
-} from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,

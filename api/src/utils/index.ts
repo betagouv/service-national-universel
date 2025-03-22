@@ -1,9 +1,9 @@
-const AWS = require("aws-sdk");
-const https = require("https");
-const http = require("http");
-const passwordValidator = require("password-validator");
-const sanitizeHtml = require("sanitize-html");
-const {
+import AWS from "aws-sdk";
+import https from "https";
+import http from "http";
+import passwordValidator from "password-validator";
+import sanitizeHtml from "sanitize-html";
+import {
   YoungModel,
   ReferentModel,
   ContractModel,
@@ -14,64 +14,61 @@ const {
   SessionPhase1Model,
   CohortModel,
   MissionEquivalenceModel,
-} = require("../models");
+} from "../models";
 
-const { sendEmail, sendTemplate } = require("../brevo");
-const path = require("path");
-const fs = require("fs");
-const { addDays } = require("date-fns");
-const { config } = require("../config");
-const { logger } = require("../logger");
-const {
+import { sendEmail, sendTemplate } from "../brevo";
+import path from "path";
+import fs from "fs";
+import { addDays } from "date-fns";
+import { config } from "../config";
+import { logger } from "../logger";
+import {
   getDepartureDate,
-  YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   APPLICATION_STATUS,
-  FILE_STATUS_PHASE1,
   ROLES,
   SUB_ROLES,
   EQUIVALENCE_STATUS,
-  ERRORS: LIB_ERRORS,
   DEPART_SEJOUR_MOTIFS_NOT_DONE,
-} = require("snu-lib");
-const { capture, captureMessage } = require("../sentry");
-const { getCohortDateInfo } = require("./cohort");
-const dayjs = require("dayjs");
-const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
-const { updateStatusPhase1WithOldRules, updateStatusPhase1WithSpecificCase } = require("./old_cohorts_logic");
+} from "snu-lib";
+import { capture, captureMessage } from "../sentry";
+import { getCohortDateInfo } from "./cohort";
+import dayjs from "dayjs";
+import { getCohortIdsFromCohortName } from "../cohort/cohortService";
+import { updateStatusPhase1WithOldRules, updateStatusPhase1WithSpecificCase } from "./old_cohorts_logic";
 
 // Timeout a promise in ms
-const timeout = (prom, time) => {
+export const timeout = (prom, time) => {
   let timer;
   return Promise.race([prom, new Promise((_r, rej) => (timer = setTimeout(rej, time)))]).finally(() => clearTimeout(timer));
 };
 
-function sanitizeAll(text) {
+export function sanitizeAll(text) {
   return sanitizeHtml(text || "", { allowedTags: ["li", "br", "b"], allowedAttributes: {} });
 }
 
-function getReq(url, cb) {
+export function getReq(url, cb) {
   if (url.toString().indexOf("https") === 0) return https.get(url, cb);
   return http.get(url, cb);
 }
 
-const SUPPORT_BUCKET_CONFIG = {
+export const SUPPORT_BUCKET_CONFIG = {
   bucket: config.PUBLIC_BUCKET_NAME_SUPPORT,
   endpoint: config.CELLAR_ENDPOINT_SUPPORT,
   accessKeyId: config.CELLAR_KEYID_SUPPORT,
   secretAccessKey: config.CELLAR_KEYSECRET_SUPPORT,
 };
 
-const DEFAULT_BUCKET_CONFIG = {
+export const DEFAULT_BUCKET_CONFIG = {
   bucket: config.BUCKET_NAME,
   endpoint: config.CELLAR_ENDPOINT,
   accessKeyId: config.CELLAR_KEYID,
   secretAccessKey: config.CELLAR_KEYSECRET,
 };
 
-function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
+export function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
   const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
@@ -91,7 +88,7 @@ function uploadFile(path, file, config = DEFAULT_BUCKET_CONFIG) {
   });
 }
 
-const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
+export const getFile = (name, config = DEFAULT_BUCKET_CONFIG): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }> => {
   const { bucket, endpoint, accessKeyId, secretAccessKey } = config;
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
@@ -101,13 +98,13 @@ const getFile = (name, config = DEFAULT_BUCKET_CONFIG) => {
         captureMessage(`Error getting file : ${name}`, { extra: { error: err } });
         reject(err);
       } else {
-        resolve(data);
+        resolve(data as any);
       }
     });
   });
 };
 
-function uploadPublicPicture(path, file) {
+export function uploadPublicPicture(path, file) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = {
@@ -125,7 +122,7 @@ function uploadPublicPicture(path, file) {
   });
 }
 
-function deleteFile(path) {
+export function deleteFile(path) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = { Bucket: config.BUCKET_NAME, Key: path };
@@ -136,7 +133,7 @@ function deleteFile(path) {
   });
 }
 
-function listFiles(path) {
+export function listFiles(path): any {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = { Bucket: config.BUCKET_NAME, Prefix: path };
@@ -147,7 +144,7 @@ function listFiles(path) {
   });
 }
 
-function deleteFilesByList(filesList) {
+export function deleteFilesByList(filesList) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = { Bucket: config.BUCKET_NAME, Delete: { Objects: filesList } };
@@ -158,7 +155,7 @@ function deleteFilesByList(filesList) {
   });
 }
 
-function getMetaDataFile(path) {
+export function getMetaDataFile(path) {
   return new Promise((resolve, reject) => {
     const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
     const params = { Bucket: config.BUCKET_NAME, Key: path };
@@ -169,7 +166,7 @@ function getMetaDataFile(path) {
   });
 }
 
-function getSignedUrl(path) {
+export function getSignedUrl(path) {
   const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT, accessKeyId: config.CELLAR_KEYID, secretAccessKey: config.CELLAR_KEYSECRET });
   return s3bucket.getSignedUrl("getObject", {
     Bucket: config.BUCKET_NAME,
@@ -177,7 +174,7 @@ function getSignedUrl(path) {
   });
 }
 
-function getSignedUrlForApiAssociation(path) {
+export function getSignedUrlForApiAssociation(path) {
   const s3bucket = new AWS.S3({
     endpoint: config.API_ASSOCIATION_CELLAR_ENDPOINT,
     accessKeyId: config.API_ASSOCIATION_CELLAR_KEYID,
@@ -189,7 +186,7 @@ function getSignedUrlForApiAssociation(path) {
   });
 }
 
-function fileExist(url) {
+export function fileExist(url) {
   return new Promise((resolve) => {
     getReq(url, (resp) => {
       if (resp.statusCode === 200) return resolve(true);
@@ -201,7 +198,7 @@ function fileExist(url) {
   });
 }
 
-function validatePassword(password) {
+export function validatePassword(password) {
   const schema = new passwordValidator();
   schema
     .is()
@@ -218,7 +215,7 @@ function validatePassword(password) {
   return schema.validate(password);
 }
 
-const updatePlacesCenter = async (center, fromUser) => {
+export const updatePlacesCenter = async (center, fromUser) => {
   try {
     const youngs = await YoungModel.find({ cohesionCenterId: center._id });
     const placesTaken = youngs.filter((young) => ["AFFECTED", "WAITING_ACCEPTATION", "DONE"].includes(young.statusPhase1) && young.status === "VALIDATED").length;
@@ -237,7 +234,7 @@ const updatePlacesCenter = async (center, fromUser) => {
 // first iteration
 // duplicate of updatePlacesCenter
 // we'll remove the updatePlacesCenter function once the migration is done
-const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
+export const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   try {
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
     const placesTaken = youngs.filter(
@@ -255,7 +252,17 @@ const updatePlacesSessionPhase1 = async (sessionPhase1, fromUser) => {
   return sessionPhase1;
 };
 
-const updateCenterDependencies = async (center, fromUser) => {
+export const placesTakenSessionPhase1 = async (sessionPhase1) => {
+  const placesTaken = await YoungModel.countDocuments({
+    sessionPhase1Id: sessionPhase1._id,
+    status: "VALIDATED",
+    statusPhase1: { $in: ["AFFECTED", "DONE"] },
+    cohesionStayPresence: { $ne: "false" },
+  });
+  return placesTaken;
+};
+
+export const updateCenterDependencies = async (center, fromUser) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
     young.set({
@@ -296,7 +303,7 @@ const updateCenterDependencies = async (center, fromUser) => {
   });
 };
 
-const deleteCenterDependencies = async (center, fromUser) => {
+export const deleteCenterDependencies = async (center, fromUser) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {
     young.set({
@@ -319,7 +326,7 @@ const deleteCenterDependencies = async (center, fromUser) => {
   });
 };
 
-const updatePlacesBus = async (bus) => {
+export const updatePlacesBus = async (bus) => {
   try {
     const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
     if (!meetingPoints?.length) {
@@ -334,7 +341,7 @@ const updatePlacesBus = async (bus) => {
       },
     });
     const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp)) && young.status === "VALIDATED",
+      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp!)) && young.status === "VALIDATED",
     ).length;
     const placesLeft = Math.max(0, bus.capacity - placesTaken);
     if (bus.placesLeft !== placesLeft) {
@@ -348,7 +355,7 @@ const updatePlacesBus = async (bus) => {
   return bus;
 };
 
-async function updateSeatsTakenInBusLine(busline) {
+export async function updateSeatsTakenInBusLine(busline) {
   try {
     const seatsTaken = await YoungModel.countDocuments({
       $and: [
@@ -377,15 +384,15 @@ async function updateSeatsTakenInBusLine(busline) {
   return busline;
 }
 
-const sendAutoCancelMeetingPoint = async (young) => {
-  const cc = [];
+export const sendAutoCancelMeetingPoint = async (young) => {
+  const cc: { email: string }[] = [];
   if (young.parent1Email) cc.push({ email: young.parent1Email });
   if (young.parent2Email) cc.push({ email: young.parent2Email });
   await sendEmail(
     {
       name: `${young.firstName} ${young.lastName}`,
       email: young.email,
-    },
+    } as any,
     "Sélection de votre point de rassemblement - Action à faire",
     fs
       .readFileSync(path.resolve(__dirname, "../templates/autoCancelMeetingPoint.html"))
@@ -397,7 +404,7 @@ const sendAutoCancelMeetingPoint = async (young) => {
   );
 };
 
-async function updateYoungPhase2StatusAndHours(young, fromUser) {
+export async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
     // Récupération des applications et équivalences pertinentes
     const applications = await ApplicationModel.find({ youngId: young._id });
@@ -430,7 +437,7 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
         return acc;
       }, 0) +
       equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
           return acc + (equivalence.missionDuration || 0);
         }
         return acc;
@@ -489,7 +496,7 @@ async function updateYoungPhase2StatusAndHours(young, fromUser) {
   }
 }
 
-async function updateYoungPhase2Hours(young, fromUser) {
+export async function updateYoungPhase2Hours(young, fromUser) {
   try {
     const applications = await ApplicationModel.find({
       youngId: young._id,
@@ -520,7 +527,7 @@ async function updateYoungPhase2Hours(young, fromUser) {
         return acc;
       }, 0) +
       equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status)) {
+        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
           return acc + (equivalence.missionDuration || 0);
         }
         return acc;
@@ -539,7 +546,7 @@ async function updateYoungPhase2Hours(young, fromUser) {
 
 // This function should always be called after updateYoungPhase2Hours.
 // This could be refactored in one function.
-const updateStatusPhase2 = async (young, fromUser) => {
+export const updateStatusPhase2 = async (young, fromUser) => {
   try {
     const applications = await ApplicationModel.find({ youngId: young._id });
 
@@ -596,7 +603,7 @@ const updateStatusPhase2 = async (young, fromUser) => {
   }
 };
 
-const checkStatusContract = (contract) => {
+export const checkStatusContract = (contract) => {
   if (!contract.invitationSent || contract.invitationSent === "false") return "DRAFT";
   // To find if everybody has validated we count actual tokens and number of validated. It should be improved later.
   const tokenKeys = ["projectManagerToken", "structureManagerToken"];
@@ -625,7 +632,7 @@ const checkStatusContract = (contract) => {
   }
 };
 
-const updateYoungStatusPhase2Contract = async (young, fromUser) => {
+export const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   try {
     const contracts = await ContractModel.find({ youngId: young._id });
 
@@ -638,12 +645,12 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
     //on filtre les contrats liés à ces candidatures filtrée précédement
     const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
 
-    const arrayContract = [];
+    const arrayContract: string[] = [];
     for (const contract of activeContracts) {
       const status = checkStatusContract(contract);
       const application = await ApplicationModel.findById(contract.applicationId);
-      application.contractStatus = status;
-      await application.save({ fromUser });
+      application!.contractStatus = status;
+      await application!.save({ fromUser });
       arrayContract.push(status);
     }
 
@@ -657,7 +664,7 @@ const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   }
 };
 
-async function cancelPendingApplications(pendingApplication, fromUser) {
+export async function cancelPendingApplications(pendingApplication, fromUser) {
   for (const application of pendingApplication) {
     application.set({ status: APPLICATION_STATUS.CANCEL });
     await application.save({ fromUser });
@@ -665,14 +672,14 @@ async function cancelPendingApplications(pendingApplication, fromUser) {
   }
 }
 
-async function cancelPendingEquivalence(pendingEquivalences, fromUser) {
+export async function cancelPendingEquivalence(pendingEquivalences, fromUser) {
   for (const equivalence of pendingEquivalences) {
     equivalence.set({ status: EQUIVALENCE_STATUS.REFUSED, message: "La phase 2 a été validée" });
     await equivalence.save({ fromUser });
   }
 }
 
-async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
+export async function sendNotificationApplicationClosedBecausePhase2Validated(application) {
   if (application.tutorId) {
     const responsible = await ReferentModel.findById(application.tutorId);
     if (responsible)
@@ -687,20 +694,20 @@ async function sendNotificationApplicationClosedBecausePhase2Validated(applicati
   }
 }
 
-function isYoung(user) {
+export function isYoung(user) {
   return user instanceof YoungModel;
 }
-function isReferent(user) {
+export function isReferent(user) {
   return user instanceof ReferentModel;
 }
 
-function inSevenDays() {
+export function inSevenDays() {
   return Date.now() + 86400000 * 7;
 }
 
-const getCcOfYoung = ({ template, young }) => {
+export const getCcOfYoung = ({ template, young }) => {
   if (!young || !template) return [];
-  let cc = [];
+  let cc: { name: string; email: string }[] = [];
   if (Object.values(SENDINBLUE_TEMPLATES.young).includes(template)) {
     if (young.parent1Email && young.parent1FirstName && young.parent1LastName) cc.push({ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email });
     if (young.parent2Email && young.parent2FirstName && young.parent2LastName) cc.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
@@ -708,7 +715,7 @@ const getCcOfYoung = ({ template, young }) => {
   return cc;
 };
 
-async function notifDepartmentChange(department, template, young, extraParams = {}) {
+export async function notifDepartmentChange(department, template, young, extraParams = {}) {
   const referents = await ReferentModel.find({ department: department, role: ROLES.REFERENT_DEPARTMENT });
   for (let referent of referents) {
     await sendTemplate(template, {
@@ -723,7 +730,7 @@ async function notifDepartmentChange(department, template, young, extraParams = 
   }
 }
 
-async function addingDayToDate(days, dateStart) {
+export async function addingDayToDate(days, dateStart) {
   const startDate = new Date(dateStart);
   const newDate = addDays(startDate, days);
   const formattedValidationDate = newDate.toISOString();
@@ -731,7 +738,7 @@ async function addingDayToDate(days, dateStart) {
   return formattedValidationDate;
 }
 
-async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
+export async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
   const youngCohort = await CohortModel.findOne({ name: young.cohort });
   let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
 
@@ -740,7 +747,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
     validationDate: dateDeValidation,
     validationDateForTerminaleGrade: dateDeValidationTerminale,
     dateStart: dateStartCohort,
-  } = await getCohortDateInfo(sessionPhase1.cohort);
+  } = (await getCohortDateInfo(sessionPhase1.cohort)) as any;
 
   // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
   const bus = await LigneBusModel.findById(young.ligneId);
@@ -760,7 +767,7 @@ async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) 
   return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
 }
 
-async function updateStatusPhase1(young, validationDateWithDays, user) {
+export async function updateStatusPhase1(young, validationDateWithDays, user) {
   const initialState = young.statusPhase1;
   try {
     const now = new Date();
@@ -807,7 +814,7 @@ async function updateStatusPhase1(young, validationDateWithDays, user) {
   }
 }
 
-const getReferentManagerPhase2 = async (department) => {
+export const getReferentManagerPhase2 = async (department) => {
   let toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.manager_phase2,
     role: ROLES.REFERENT_DEPARTMENT,
@@ -847,14 +854,14 @@ const getReferentManagerPhase2 = async (department) => {
   return toReferent;
 };
 
-const updateYoungApplicationFilesType = async (application, user) => {
+export const updateYoungApplicationFilesType = async (application, user) => {
   try {
     const young = await YoungModel.findById(application.youngId);
     const applications = await ApplicationModel.find({ youngId: application.youngId });
 
-    const listFiles = [];
+    const listFiles: string[] = [];
     applications.map(async (application) => {
-      const currentListFiles = [];
+      const currentListFiles: string[] = [];
       if (application.contractAvenantFiles.length > 0) {
         currentListFiles.push("contractAvenantFiles");
         listFiles.indexOf("contractAvenantFiles") === -1 && listFiles.push("contractAvenantFiles");
@@ -874,24 +881,24 @@ const updateYoungApplicationFilesType = async (application, user) => {
       application.set({ filesType: currentListFiles });
       await application.save({ fromUser: user });
     });
-    young.set({ phase2ApplicationFilesType: listFiles });
-    await young.save({ fromUser: user });
+    young!.set({ phase2ApplicationFilesType: listFiles });
+    await young!.save({ fromUser: user });
   } catch (e) {
     capture(e);
   }
 };
 
-const updateHeadCenter = async (headCenterId, user) => {
+export const updateHeadCenter = async (headCenterId, user) => {
   const headCenter = await ReferentModel.findById(headCenterId);
   if (!headCenter) return;
   const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
-  const cohorts = new Set(sessions.map((s) => s.cohort));
+  const cohorts = new Set(sessions.map((s) => s.cohort!));
   const cohortIds = await getCohortIdsFromCohortName([...cohorts]);
   headCenter.set({ cohorts: [...cohorts], cohortIds: cohortIds });
   await headCenter.save({ fromUser: user });
 };
 
-const getTransporter = async () => {
+export const getTransporter = async () => {
   let toReferent = await ReferentModel.find({
     role: ROLES.TRANSPORTER,
   });
@@ -899,7 +906,7 @@ const getTransporter = async () => {
 };
 
 // TODO: move to snu-lib
-const ERRORS = {
+export const ERRORS = {
   SERVER_ERROR: "SERVER_ERROR",
   NOT_FOUND: "NOT_FOUND",
   BAD_REQUEST: "BAD_REQUEST",
@@ -941,9 +948,12 @@ const ERRORS = {
   ALREADY_EXISTS: "ALREADY_EXISTS",
   YOUNG_NOT_FOUND: "YOUNG_NOT_FOUND",
   FEATURE_NOT_AVAILABLE: "FEATURE_NOT_AVAILABLE",
+  APPLICATION_NOT_FOUND: "APPLICATION_NOT_FOUND",
+  YOUNG_NOT_EDITABLE: "YOUNG_NOT_EDITABLE",
+  NOT_ALLOWED: "NOT_ALLOWED",
 };
 
-const YOUNG_SITUATIONS = {
+export const YOUNG_SITUATIONS = {
   GENERAL_SCHOOL: "GENERAL_SCHOOL",
   PROFESSIONAL_SCHOOL: "PROFESSIONAL_SCHOOL",
   AGRICULTURAL_SCHOOL: "AGRICULTURAL_SCHOOL",
@@ -959,7 +969,7 @@ const YOUNG_SITUATIONS = {
   NOTHING: "NOTHING", // @todo find a better key --'
 };
 
-const STEPS = {
+export const STEPS = {
   PROFIL: "PROFIL",
   COORDONNEES: "COORDONNEES",
   AVAILABILITY: "AVAILABILITY",
@@ -969,7 +979,7 @@ const STEPS = {
   DOCUMENTS: "DOCUMENTS",
   DONE: "DONE",
 };
-const STEPS2023 = {
+export const STEPS2023 = {
   EMAIL_WAITING_VALIDATION: "EMAIL_WAITING_VALIDATION",
   COORDONNEES: "COORDONNEES",
   CONSENTEMENTS: "CONSENTEMENTS",
@@ -980,7 +990,7 @@ const STEPS2023 = {
   DONE: "DONE",
 };
 
-const validateBirthDate = (date) => {
+export const validateBirthDate = (date) => {
   const d = dayjs(date);
   if (!d.isValid()) return false;
   if (d.isBefore(dayjs(new Date(2000, 0, 1)))) return false;
@@ -988,62 +998,10 @@ const validateBirthDate = (date) => {
   return true;
 };
 
-const normalizeString = (str) => {
+export const normalizeString = (str) => {
   return str
     .normalize("NFD") // Normalise la chaîne de caractères (décompose les accents)
     .replace(/[\u0300-\u036f]/g, "") // Supprime les diacritiques (accents)
     .replace(/[-\s._']/g, "") // Supprime les tirets, espaces, points, apostrophes, et underscores
     .toLowerCase(); // Convertit tout en minuscules
-};
-
-module.exports = {
-  timeout,
-  uploadFile,
-  uploadPublicPicture,
-  getFile,
-  fileExist,
-  validatePassword,
-  ERRORS,
-  getSignedUrl,
-  updatePlacesCenter,
-  updatePlacesSessionPhase1,
-  updateCenterDependencies,
-  deleteCenterDependencies,
-  updatePlacesBus,
-  updateStatusPhase1,
-  updateSeatsTakenInBusLine,
-  sendAutoCancelMeetingPoint,
-  listFiles,
-  deleteFile,
-  isYoung,
-  isReferent,
-  inSevenDays,
-  updateYoungPhase2Hours,
-  updateStatusPhase2,
-  updateYoungPhase2StatusAndHours,
-  getSignedUrlForApiAssociation,
-  updateYoungStatusPhase2Contract,
-  checkStatusContract,
-  sanitizeAll,
-  YOUNG_STATUS,
-  YOUNG_STATUS_PHASE1,
-  YOUNG_STATUS_PHASE2,
-  YOUNG_SITUATIONS,
-  STEPS,
-  STEPS2023,
-  FILE_STATUS_PHASE1,
-  getCcOfYoung,
-  notifDepartmentChange,
-  autoValidationSessionPhase1Young,
-  getReferentManagerPhase2,
-  SUPPORT_BUCKET_CONFIG,
-  cancelPendingApplications,
-  cancelPendingEquivalence,
-  updateYoungApplicationFilesType,
-  updateHeadCenter,
-  getTransporter,
-  getMetaDataFile,
-  deleteFilesByList,
-  validateBirthDate,
-  normalizeString,
 };

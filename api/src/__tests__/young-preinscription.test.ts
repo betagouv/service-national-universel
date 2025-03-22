@@ -1,8 +1,7 @@
 import request from "supertest";
 import getAppHelper from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
-import { YOUNG_STATUS } from "../utils";
-import { ERRORS, GRADES } from "snu-lib";
+import { ERRORS, GRADES, YOUNG_STATUS } from "snu-lib";
 import { fakerFR as faker } from "@faker-js/faker";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
