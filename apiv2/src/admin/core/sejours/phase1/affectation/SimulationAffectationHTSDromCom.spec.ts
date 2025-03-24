@@ -25,6 +25,7 @@ import { SimulationAffectationHTSService } from "./SimulationAffectationHTS.serv
 import * as mockJeunes from "./__tests__/youngs.json";
 import * as mockSejours from "./__tests__/sejours.json";
 import * as mockCentres from "./__tests__/centres.json";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 const sessionNom = "2025 HTS 02 - Mai La Réunion";
 
@@ -105,6 +106,13 @@ describe("SimulationAffectationHTSDromCom", () => {
                 {
                     provide: PlanDeTransportGateway,
                     useValue: {},
+                },
+                {
+                    provide: ClockGateway,
+                    useValue: {
+                        now: jest.fn(),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
+                    },
                 },
             ],
         }).compile();

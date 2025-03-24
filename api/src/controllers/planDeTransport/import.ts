@@ -228,7 +228,7 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
             acc.push({
               lineId: busLine._id.toString()?.toLowerCase(),
               meetingPointId: pdrValue as string,
-              transportType: line[`TYPE DE TRANSPORT PDR ${pdrNumber}`]?.toString().toLowerCase() || "",
+              transportType: mapTransportType(line[`TYPE DE TRANSPORT PDR ${pdrNumber}`] as string),
               busArrivalHour: formatTime(line[`HEURE ALLER ARRIVÉE AU PDR ${pdrNumber}`] as string),
               departureHour: formatTime(line[`HEURE DEPART DU PDR ${pdrNumber}`] as string),
               meetingHour: getPDRMeetingHour(

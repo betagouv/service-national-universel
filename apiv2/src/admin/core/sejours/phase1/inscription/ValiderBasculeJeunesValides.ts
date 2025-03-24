@@ -9,12 +9,14 @@ import { ValiderBasculeJeunesValidesTaskParameters } from "./ValiderBasculeJeune
 import { SessionGateway } from "../session/Session.gateway";
 
 import { ValiderBasculeJeunesResult, ValiderBasculeJeunesService } from "./ValiderBasculeJeunes.service";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunesResult> {
     constructor(
         private readonly validerBasculeJeunesService: ValiderBasculeJeunesService,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
 
@@ -57,7 +59,7 @@ export class ValiderBasculeJeunesValides implements UseCase<ValiderBasculeJeunes
         const fileBuffer = await this.fileGateway.generateExcel({ Volontaires: rapportData });
 
         // upload du rapport du s3
-        const timestamp = `${dateValidation.toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(dateValidation);
         const fileName = `valider-bascule-jeunes-valides/bascule-jeunes-valides_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/inscription/${sessionId}/${fileName}`,

@@ -70,6 +70,7 @@
     "react-router-dom": "5.3.4",
     "react-select": "^5.9.0",
     "react-tooltip": "^4.5.1",
+    "react-use": "^17.5.0",
     "reactstrap": "8.10.1",
     "redux": "4.2.1",
     "redux-thunk": "^2.4.0",

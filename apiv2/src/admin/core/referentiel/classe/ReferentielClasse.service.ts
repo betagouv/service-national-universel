@@ -92,7 +92,7 @@ export class ReferentielClasseService {
             throw new FunctionalException(FunctionalExceptionCode.NOT_IMPLEMENTED_YET);
         }
 
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const folderPath = `${FilePath[ReferentielTaskType.IMPORT_CLASSES]}/export-${timestamp}`;
         const s3File = await this.fileGateway.uploadFile(`${folderPath}/${fileName}`, {
             data: buffer,
@@ -120,7 +120,7 @@ export class ReferentielClasseService {
     async processReport(parameters: ReferentielImportTaskParameters, ...reports: ClasseRapport[][]): Promise<string> {
         const sheetsReports = Object.fromEntries(reports.map((report, index) => [`rapport-${index + 1}`, report]));
         const fileBuffer = await this.fileGateway.generateExcel(sheetsReports);
-        const timestamp = this.clockGateway.getNowSafeIsoDate();
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const reportName = `rapport-import-${parameters.type}-${timestamp}.xlsx`;
         const s3File = await this.fileGateway.uploadFile(`${parameters.folderPath}/${reportName}`, {
             data: fileBuffer,

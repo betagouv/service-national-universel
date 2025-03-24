@@ -35,7 +35,8 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
 
   _y = doc.y;
   if (contacts.length && young.source !== "CLE") {
-    doc.font(FONT_BOLD).text("Affaire suivie par :", { underline: true, paragraphGap: 5 });
+    doc.moveDown(2.5);
+    doc.font(FONT_BOLD).text("Votre point de contact :", { underline: true, paragraphGap: 5 });
     doc
       .font(FONT)
       .fontSize(8)

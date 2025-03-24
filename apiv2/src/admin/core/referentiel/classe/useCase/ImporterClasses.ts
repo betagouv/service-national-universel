@@ -15,12 +15,16 @@ import { AnnulerClasseDesistee } from "../../../sejours/cle/classe/useCase/Annul
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import {
+    ClasseDesisterModel,
+    ClasseDesisterXlsx,
     ClasseImportModel,
     ClasseImportRapport,
     ClasseImportXlsx,
     ClasseRapport,
+    DesisterClasseFileValidation,
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
+import { Transactional } from "@nestjs-cls/transactional";
 
 @Injectable()
 export class ImporterClasses implements UseCase<ClasseRapport[]> {
@@ -44,9 +48,14 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         });
         const mappedClasses = ReferentielClasseMapper.mapImporterClassesFromFile(classesFromXslx);
 
+        const classesDesisteesFromXslx = await this.fileGateway.parseXLS<ClasseDesisterXlsx>(fileContent.Body, {
+            sheetName: DesisterClasseFileValidation.sheetName,
+        });
+        const mappedClassesDesistees = ReferentielClasseMapper.mapDesisterClassesFromFile(classesDesisteesFromXslx);
+
         for (const mappedClasse of mappedClasses) {
             try {
-                const result = await this.processClasse(mappedClasse);
+                const result = await this.processClasse(mappedClasse, mappedClassesDesistees);
                 report.push(result);
                 this.logger.log(`Classe ${mappedClasse.classeId} imported successfully`, ImporterClasses.name);
             } catch (error) {
@@ -66,7 +75,11 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         return report;
     }
 
-    private async processClasse(classeImport: ClasseImportModel): Promise<ClasseImportRapport> {
+    @Transactional()
+    private async processClasse(
+        classeImport: ClasseImportModel,
+        classesDesistees: ClasseDesisterModel[],
+    ): Promise<ClasseImportRapport> {
         let classe = await this.classeGateway.findById(classeImport.classeId);
         if (!classe) {
             throw new Error("Classe non trouvée en base");
@@ -76,6 +89,14 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             sessionCode: classeImport.sessionCode,
             cohortCode: classeImport.cohortCode,
         };
+        // Vérification de si la classe existe dans l'onglet desistement
+        if (classesDesistees.find((classeDesistee) => classeDesistee.classeId === classe.id)) {
+            return {
+                ...classeRapport,
+                error: "Classe existe dans les 2 onglets",
+            };
+        }
+
         const updatedFields: string[] = [];
 
         // Si la classe est désistée => annuler le désistement de la classe
@@ -147,18 +168,26 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
     }
 
     private async updateYoungCohorts(classeId: string, newSession: any): Promise<void> {
-        const jeunes = await this.jeuneGateway.findByClasseId(classeId);
-        const jeunesUpdatedList: JeuneModel[] = [];
-        for (const jeune of jeunes) {
-            jeunesUpdatedList.push({
-                ...jeune,
-                sessionId: newSession.id,
-                sessionNom: newSession.nom,
-                originalSessionId: jeune.sessionId,
-                originalSessionNom: jeune.sessionNom,
-                sessionChangeReason: "Import SI-SNU",
-            });
+        // Récupérer la classe depuis la base de données pour obtenir son cohortId
+        const classe = await this.classeGateway.findById(classeId);
+
+        if (!classe) {
+            this.logger.error(`Classe introuvable en base de données : ${classeId}`, ImporterClasses.name);
+            return;
         }
+
+        // Récupérer les jeunes de la classe
+        const jeunes = await this.jeuneGateway.findByClasseIdAndSessionId(classeId, classe.sessionId!);
+
+        const jeunesUpdatedList: JeuneModel[] = jeunes.map((jeune) => ({
+            ...jeune,
+            sessionId: newSession.id,
+            sessionNom: newSession.nom,
+            originalSessionId: jeune.sessionId,
+            originalSessionNom: jeune.sessionNom,
+            sessionChangeReason: "Import SI-SNU",
+        }));
+
         await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
         this.logger.log(
             `Updated ${jeunesUpdatedList.length} jeunes with new session ${newSession.nom}`,

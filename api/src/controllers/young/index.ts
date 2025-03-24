@@ -953,23 +953,39 @@ router.put("/withdraw", passport.authenticate("young", { session: false, failWit
 
     await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
 
+    const { sessionPhase1Id, ligneId } = young;
+
     young.set({
       status: YOUNG_STATUS.WITHDRAWN,
       statusPhase1: young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1,
       lastStatusAt: Date.now(),
       withdrawnMessage,
       withdrawnReason,
+      // reset des informations d'affectation
+      cohesionCenterId: undefined,
+      sessionPhase1Id: undefined,
+      meetingPointId: undefined,
+      ligneId: undefined,
+      hasMeetingInformation: undefined,
+      transportInfoGivenByLocal: undefined,
+      deplacementPhase1Autonomous: undefined,
+      cohesionStayPresence: undefined,
+      presenceJDM: undefined,
+      departInform: undefined,
+      departSejourAt: undefined,
+      departSejourMotif: undefined,
+      departSejourMotifComment: undefined,
     });
 
     const updatedYoung = await young.save({ fromUser: req.user });
-    if (young.sessionPhase1Id) {
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+    if (sessionPhase1Id) {
+      const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Id);
       if (sessionPhase1) await updatePlacesSessionPhase1(sessionPhase1, req.user);
     }
 
     // if they had a bus, we check if we need to update the places taken / left in the bus
-    if (young.ligneId) {
-      const bus = await LigneBusModel.findById(young.ligneId);
+    if (ligneId) {
+      const bus = await LigneBusModel.findById(ligneId);
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
@@ -1163,7 +1179,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     const youngs = await YoungModel.find({ _id: { $in: ids } });
     if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1175,7 +1191,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
         young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
       } else {
-        young.set({ [key]: newValue });
+        young.set({ [key]: newValue, statusPhase2OpenedAt: new Date() });
       }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);

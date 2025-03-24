@@ -18,6 +18,7 @@ import { AffectationService } from "./Affectation.service";
 import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { CentreGateway } from "../centre/Centre.gateway";
 import { SejourModel } from "../sejour/Sejour.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 
 export type SimulationAffectationHTSDromComResult = {
     rapportData: RapportData;
@@ -48,6 +49,7 @@ export class SimulationAffectationHTSDromCom implements UseCase<SimulationAffect
         @Inject(CentreGateway) private readonly centresGateway: CentreGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         private readonly logger: Logger,
     ) {}
     async execute({
@@ -154,7 +156,7 @@ export class SimulationAffectationHTSDromCom implements UseCase<SimulationAffect
 
         const fileBuffer = await this.simulationAffectationHTSService.generateRapportExcel(rapportData, "HTS_DROMCOM");
 
-        const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
+        const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
         const fileName = `simulation-affectation-hts-dromcom/affectation_simulation_hts-dromcom_${sessionId}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `file/admin/sejours/phase1/affectation/simulation/${sessionId}/${fileName}`,

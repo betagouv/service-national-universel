@@ -293,7 +293,7 @@
     },
     {
       "label": "Clean turbo",
-      "command": "rm -fr .turbo && rm -fr */*/.turbo",
+      "command": "rm -fr .turbo ; rm -fr */*/.turbo ; true",
       "type": "shell",
       "problemMatcher": [],
       "options": {

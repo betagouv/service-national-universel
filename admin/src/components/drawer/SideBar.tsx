@@ -4,6 +4,7 @@ import { useLocation } from "react-router-dom";
 import cx from "classnames";
 import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
+import { useToggle } from "react-use";
 
 import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled } from "snu-lib";
 
@@ -59,6 +60,7 @@ const SideBar = ({ sessionsList }) => {
   const test = useSelector((state: AuthState) => state.Auth.previousSigninToken);
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
+  const [isDemo, toggleDemo] = useToggle(false);
 
   //Redux
   const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
@@ -289,14 +291,14 @@ const SideBar = ({ sessionsList }) => {
         { "w-[88px]": !open },
         { "top-[5vh] max-h-[95vh]": test },
         { "h-screen max-h-screen": !test },
-        { "bg-[#25294F]": isProduction },
-        { "bg-blue-800": isDevelopment },
-        { "bg-teal-900": isCustom },
-        { "bg-yellow-900": isCi },
-        { "bg-black": isPrepoduction },
+        { "bg-[#25294F]": isProduction || isDemo },
+        { "bg-blue-800": isDevelopment && !isDemo },
+        { "bg-teal-900": isCustom && !isDemo },
+        { "bg-yellow-900": isCi && !isDemo },
+        { "bg-black": isPrepoduction && !isDemo },
       )}>
       <div className="flex flex-col justify-between h-full min-h-full">
-        <Header open={open} setOpen={setOpen} />
+        <Header open={open} setOpen={setOpen} onDemoChange={toggleDemo} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
         {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>

@@ -5,7 +5,7 @@ import XCircleFull from "@/assets/icons/XCircleFull";
 import CheckCircleFull from "@/assets/icons/CheckCircleFull";
 import PointDeRassemblementLabel from "./PointDeRassemblementLabel";
 import { useToggle } from "react-use";
-import { CohortType, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { COHORT_TYPE, CohortType, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 interface ConfirmChangesModalProps {
   isOpen: boolean;
@@ -13,14 +13,16 @@ interface ConfirmChangesModalProps {
   youngsCount: number;
   beforeChangeFormData: PointDeRassemblementFormValueChanges;
   afterChangeFormData: PointDeRassemblementFormValueChanges;
+  loading: boolean;
   onConfirm: (emailing: boolean) => void;
   onCancel: () => void;
 }
 
-export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount }: ConfirmChangesModalProps) {
+export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount, loading }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
 
   const isBeforeDeparture = cohort ? new Date() < new Date(cohort.dateStart) : false;
+  const isCohortCLE = cohort ? cohort.type === COHORT_TYPE.CLE : false;
 
   // CHANGE_PDR_BEFORE_DEPARTURE: this default template is used.
   let templateId: string | null = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
@@ -31,6 +33,8 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
   } else if (new Date() < new Date(cohort.dateEnd)) {
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
   }
+
+  const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
 
   const handleConfirm = () => {
     onConfirm(isEmailing);
@@ -112,20 +116,37 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
 
             <div className="mt-8 border-t border-gray-200 w-full pt-8">
               <label className="flex items-start space-x-2">
-                <input type="checkbox" className="mt-1" checked={isEmailing} onChange={toggleEmailing} />
-                <div className="flex flex-col items-start">
-                  {isBeforeDeparture ? (
-                    <span>Envoyer une campagne d’emailing aux volontaires ({youngsCount}) et à leurs représentants légaux.</span>
-                  ) : (
-                    <span>Envoyer une campagne d'emailing aux représentants légaux.</span>
-                  )}
-                  {templateId ? (
-                    <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                      Visualiser l'aperçu
-                      <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                      </svg>
-                    </a>
+                <input type="checkbox" className="my-auto" checked={isEmailing} onChange={toggleEmailing} />
+                <div className="w-full flex flex-col">
+                  <div className="w-full flex justify-between items-start">
+                    {isBeforeDeparture ? (
+                      <span>Envoyer une campagne d’emailing aux volontaires ({youngsCount}) et à leurs représentants légaux.</span>
+                    ) : (
+                      <span>Envoyer une campagne d'emailing aux représentants légaux et aux jeunes.</span>
+                    )}
+                    {templateId ? (
+                      <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                        Visualiser l'aperçu
+                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    ) : null}
+                  </div>
+                  {isCohortCLE ? (
+                    <div className="w-full flex justify-between items-start">
+                      <span className="w-3/4">Les référents de classe, chefs d’établissement et coordinateurs seront également prévenus.</span>
+                      <a
+                        href={`/email-preview/${templateIdForCLE}`}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                        Visualiser l'aperçu
+                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
                   ) : null}
                 </div>
               </label>
@@ -136,7 +157,7 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
       footer={
         <div className="flex items-center justify-between gap-6">
           <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={onCancel} />
-          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" />
+          <Button title="Oui, valider" onClick={handleConfirm} className="flex-1" loading={loading} />
         </div>
       }
     />

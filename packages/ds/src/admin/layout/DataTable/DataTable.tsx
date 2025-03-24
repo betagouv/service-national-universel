@@ -2,7 +2,7 @@ import React, { HTMLAttributes, useMemo } from "react";
 import cx from "classnames";
 import { HiFilter } from "react-icons/hi";
 
-import { Select } from "../..";
+import { Button, Select } from "../..";
 import SortOption from "./SortOption";
 import Loader from "./Loader";
 
@@ -43,6 +43,8 @@ export interface DataTableProps<R extends DataTableRow>
   readonly isSortable?: boolean;
   readonly filters?: Record<string, string>;
   readonly onFiltersChange?: (filters: Record<string, string>) => void;
+  readonly withReloadButton?: boolean;
+  readonly onReload?: () => void;
 }
 
 export default function DataTable<R extends DataTableRow>({
@@ -59,6 +61,8 @@ export default function DataTable<R extends DataTableRow>({
   loadingLabel,
   isError,
   errorLabel,
+  withReloadButton,
+  onReload,
 }: DataTableProps<R>) {
   const filterOptions = useMemo(() => {
     return columnDefs
@@ -120,6 +124,9 @@ export default function DataTable<R extends DataTableRow>({
     <>
       {isSortable && (
         <div className="flex items-end justify-items-end">
+          {withReloadButton && (
+            <Button onClick={onReload} title="Rafraichir" type="cancel" />
+          )}
           {isRefreshing && (
             <Loader label={loadingLabel || "Actualisation en cours...."} />
           )}

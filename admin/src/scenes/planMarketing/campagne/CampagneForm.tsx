@@ -1,7 +1,7 @@
 import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, InputText, Select, SelectOption, Tooltip } from "@snu/ds/admin";
-import React, { useState } from "react";
+import React from "react";
 import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useCampagneForm } from "./CampagneFormHook";
@@ -149,7 +149,7 @@ export default React.memo(
 
                 <div className="grid grid-cols-2 gap-4 mt-2">
                   {recipientOptions.map((option) => (
-                    <div key={option.value} className="flex items-center gap-2">
+                    <label key={option.value} className="flex items-center gap-2 cursor-pointer">
                       <Checkbox
                         checked={state.destinataires?.includes(option.value)}
                         onChange={() =>
@@ -160,7 +160,7 @@ export default React.memo(
                         }
                       />
                       <span>{option.label}</span>
-                    </div>
+                    </label>
                   ))}
                 </div>
                 <ErrorMessage message={errors.recipients} />

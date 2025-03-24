@@ -30,31 +30,15 @@ import {
   SchemaDeRepartitionModel,
   ReferentModel,
   CohortModel,
+  SessionPhase1Model,
 } from "../../models";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { ERRORS } from "../../utils";
 import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { getInfoBus } from "./ligneDeBusService";
-import { updatePDRForLine } from "../../services/LigneDeBusService";
-
-interface MeetingPointResult {
-  youngsCount: number;
-  meetingPointId: string;
-}
-
-interface Patch {
-  modelName: string;
-  date: Date;
-  ref: string;
-  refName: string;
-  op: string;
-  path: string;
-  value: any;
-  originalValue: any;
-  user: any;
-}
+import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBusService";
+import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
 
 const router = express.Router();
 
@@ -181,7 +165,7 @@ router.put("/:id/info", passport.authenticate("referent", { session: false, fail
 
     const infoBus = await getInfoBus(ligne);
 
-    await notifyTranporteurs(ligne, "Informations générales");
+    await notifyTransporteurLineWasUpdated(ligne, "Informations générales");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -247,7 +231,7 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
 
     const infoBus = await getInfoBus(ligne);
 
-    await notifyTranporteurs(ligne, "Équipe");
+    await notifyTransporteurLineWasUpdated(ligne, "Équipe");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -293,7 +277,7 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
 
     const infoBus = await getInfoBus(ligne);
 
-    await notifyTranporteurs(ligne, "Équipe");
+    await notifyTransporteurLineWasUpdated(ligne, "Équipe");
 
     res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -308,11 +292,13 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       id: Joi.string().required(),
       centerArrivalTime: Joi.string().required(),
       centerDepartureTime: Joi.string().required(),
+      sessionId: Joi.string(),
+      sendCampaign: Joi.boolean(),
     }).validate({ ...req.params, ...req.body });
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    let { id, centerArrivalTime, centerDepartureTime } = value;
+    let { id, centerArrivalTime, centerDepartureTime, sessionId, sendCampaign } = value;
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -345,9 +331,20 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     await planDeTransport.save({ fromUser: req.user });
 
+    if (sessionId && sessionId !== ligne.sessionId) {
+      const session = await SessionPhase1Model.findById(sessionId);
+      if (!session) throw new Error(ERRORS.NOT_FOUND);
+      await updateSessionForLine({
+        ligne,
+        session,
+        user: req.user,
+        sendCampaign,
+      });
+    }
+
     const infoBus = await getInfoBus(ligne);
 
-    await notifyTranporteurs(ligne, "Centre de cohésion");
+    await notifyTransporteurLineWasUpdated(ligne, "Centre de cohésion");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -442,7 +439,7 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
     const infoBus = await getInfoBus(ligne);
 
-    await notifyTranporteurs(ligne, "Point de rassemblement");
+    await notifyTransporteurLineWasUpdated(ligne, "Point de rassemblement");
 
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
@@ -604,10 +601,12 @@ router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { sess
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohesionCenter = await CohesionCenterModel.findById(ligneBus.centerId);
-    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const PDR = await PointDeRassemblementModel.find({ region: cohesionCenter.region, deletedAt: { $exists: false } });
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0])
+    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const PDR = await PointDeRassemblementModel.find({ region: pointDeRassemblement.region, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: PDR });
   } catch (error) {
@@ -1185,24 +1184,6 @@ function mergeArrayItems(array: any[], subProperty?: string | null | undefined) 
     }
   }
   return Object.values(set);
-}
-
-async function notifyTranporteurs(ligne, type) {
-  const usersToNotify = await ReferentModel.find({ role: ROLES.TRANSPORTER });
-
-  await sendTemplate(SENDINBLUE_TEMPLATES.PLAN_TRANSPORT.NOTIF_TRANSPORTEUR_MODIF, {
-    emailTo: usersToNotify.map((referent) => ({
-      name: `${referent.firstName} ${referent.lastName}`,
-      email: referent.email,
-    })),
-    params: {
-      type,
-      cohort: ligne.cohort,
-      ID: ligne._id.toString(),
-      lineName: ligne.busId,
-      cta: `${config.ADMIN_URL}/ligne-de-bus/${ligne._id.toString()}`,
-    },
-  });
 }
 
 export default router;

@@ -48,6 +48,10 @@ async function fetchDataForYoung(young) {
   return { session, cohort, cohesionCenter };
 }
 
+const normalizeCohesionCenterName = (cohesionCenterName: string) => {
+  return cohesionCenterName.includes("DOUBLONS NE PAS UTILISER") ? cohesionCenterName.substring(27) : cohesionCenterName;
+};
+
 function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter) {
   if (!cohesionCenter) {
     throw new Error(ERRORS.NO_COHESION_CENTER_FOUND);
@@ -85,7 +89,7 @@ function render(doc: typeof PDFDocument, young, session, cohort, cohesionCenter)
     .text("séjour de cohésion", { continued: true })
     .font(FONT)
     .text(`, ${COHESION_DATE}, au centre de :`)
-    .text(`${COHESION_CENTER_NAME} ${COHESION_CENTER_LOCATION},`)
+    .text(`${normalizeCohesionCenterName(COHESION_CENTER_NAME)} ${COHESION_CENTER_LOCATION},`)
     .text("validant la ", { continued: true })
     .font(FONT_BOLD)
     .text("phase de cohésion", { continued: true })

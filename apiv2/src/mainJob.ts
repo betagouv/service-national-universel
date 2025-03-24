@@ -1,16 +1,15 @@
 import "./instrument"; // first
 
-import { Logger } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { NestFactory } from "@nestjs/core";
 import { MainJobModule } from "./MainJob.module";
 
 async function bootstrap() {
-    await NestFactory.createApplicationContext(MainJobModule);
-    Logger.log(`Job started`, "bootstrap mainJob");
-    // TODO: handle logs error here ?
-    //     process.on("uncaughtException", (error) => {
-    //         // Use same format as : AllExceptionsFilter.processLog
-    //         logger.error(`UncaughtException: ${error.message}`, error.stack);
-    //     });
+    const app = await NestFactory.create(MainJobModule);
+    const config = app.get(ConfigService);
+
+    const port = config.getOrThrow("httpServer.port");
+
+    await app.listen(port);
 }
 bootstrap();

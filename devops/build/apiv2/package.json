@@ -1,0 +1,14 @@
+{
+  "name": "apiv2",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "node apiv2/main.js",
+    "tasks": "node apiv2/mainJob.js"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}

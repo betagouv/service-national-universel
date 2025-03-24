@@ -1,7 +1,9 @@
 import { ImporterClasses } from "./ImporterClasses";
-import { Logger } from "@nestjs/common";
-import { warn } from "console";
-import { MIME_TYPES, ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+import { ReferentielTaskType, STATUS_CLASSE, STATUS_PHASE1_CLASSE } from "snu-lib";
+
+jest.mock("@nestjs-cls/transactional", () => ({
+    Transactional: () => jest.fn(),
+}));
 
 describe("ImporterClasses", () => {
     let useCase: ImporterClasses;
@@ -35,7 +37,7 @@ describe("ImporterClasses", () => {
             findByMatricule: jest.fn(),
         };
         mockJeuneGateway = {
-            findByClasseId: jest.fn(),
+            findByClasseIdAndSessionId: jest.fn(),
             bulkUpdate: jest.fn(),
         };
         mockSejourGateway = {
@@ -75,7 +77,8 @@ describe("ImporterClasses", () => {
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // import
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // desist
         mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
         mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
 
@@ -96,7 +99,7 @@ describe("ImporterClasses", () => {
         mockPdrGateway.findByMatricule.mockResolvedValue({
             id: "PDR-001",
         });
-        mockJeuneGateway.findByClasseId.mockResolvedValue([]);
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([]);
 
         const result = await useCase.execute({
             fileKey: "test.xlsx",
@@ -130,7 +133,8 @@ describe("ImporterClasses", () => {
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // import
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // desist
         mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
         mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
 
@@ -160,7 +164,8 @@ describe("ImporterClasses", () => {
         ];
 
         mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
-        mockFileGateway.parseXLS.mockResolvedValue(mockXlsxData);
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // import
+        mockFileGateway.parseXLS.mockResolvedValueOnce([]); // desist
         mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
         mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
 
@@ -176,7 +181,7 @@ describe("ImporterClasses", () => {
         mockSejourGateway.findBySejourSnuId.mockResolvedValue({
             id: "SEJOUR-001",
         });
-        mockJeuneGateway.findByClasseId.mockResolvedValue([
+        mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([
             { id: "YOUNG-001", sessionId: "OLD-SESSION", sessionNom: "Old Session" },
         ]);
 
@@ -198,6 +203,43 @@ describe("ImporterClasses", () => {
                 originalSessionNom: "Old Session",
                 sessionChangeReason: "Import SI-SNU",
             }),
+        ]);
+    });
+
+    it("should handle duplicate import and desist classe error", async () => {
+        const mockXlsxData = [
+            {
+                "Session formule": "2024",
+                "Identifiant de la classe engagée": "class-001",
+            },
+        ];
+
+        mockFileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from("") });
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // import
+        mockFileGateway.parseXLS.mockResolvedValueOnce(mockXlsxData); // desist
+        mockFileGateway.generateExcel.mockResolvedValue(Buffer.from(""));
+        mockFileGateway.uploadFile.mockResolvedValue({ Key: "report.xlsx" });
+
+        mockClasseGateway.findById.mockResolvedValue({
+            id: "class-001",
+        });
+
+        const result = await useCase.execute({
+            fileKey: "test.xlsx",
+            folderPath: "/test",
+            auteur: { email: "test@test.com", nom: "Test", prenom: "User" },
+            fileName: "",
+            fileLineCount: 0,
+            type: ReferentielTaskType.IMPORT_CLASSES,
+        });
+
+        expect(result).toEqual([
+            {
+                classeId: "class-001",
+                cohortCode: "2024",
+                error: "Classe existe dans les 2 onglets",
+                sessionCode: "undefined_undefined",
+            },
         ]);
     });
 });

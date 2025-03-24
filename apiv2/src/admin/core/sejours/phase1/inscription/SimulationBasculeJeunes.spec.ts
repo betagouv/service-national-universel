@@ -63,6 +63,7 @@ describe("SimulationBasculeJeunes", () => {
                     provide: ClockGateway,
                     useValue: {
                         now: jest.fn().mockReturnValue(new Date()),
+                        formatSafeDateTime: jest.fn().mockReturnValue("2023-01-01T00:00:00.000Z"),
                         isAfter,
                         isWithinInterval,
                     },

@@ -401,6 +401,13 @@ export const CohortSchema = {
       description: "Fermeture de la validation sur Liste Principale",
     },
   },
+
+  specificSnuIdCohort: {
+    type: Boolean,
+    documentation: {
+      description: "Lors de l'import des centres de sessions considérer cette cohorte comme à part",
+    },
+  },
 };
 
 const schema = new Schema(CohortSchema);
