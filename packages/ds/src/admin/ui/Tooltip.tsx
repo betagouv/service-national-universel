@@ -31,7 +31,7 @@ export default function Tooltip({
   }, [forceRefresh, title]);
 
   return (
-    <div className={cx(className)}>
+    <div className={cx("flex items-center", className)}>
       <button type="button" data-tip={title} data-for={tooltipId}>
         {children}
       </button>
