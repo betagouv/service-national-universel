@@ -63,7 +63,7 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
     <>
       <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
         <div className="flex justify-between">
-          <CentreLabel centre={selectedSession!.cohesionCenter} showLink={user.role !== ROLES.TRANSPORTER} />
+          <CentreLabel centre={selectedSession?.cohesionCenter || ligne.centerDetail} showLink={user.role !== ROLES.TRANSPORTER} />
           {isSuperAdmin(user) && !disabled && (
             <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
               Changer de lieu
