@@ -321,6 +321,13 @@ export const getFilterArray = (user, labels) => {
       translate: translateEquivalenceStatus,
     },
     {
+      title: "Remboursement Code de la Route",
+      name: "roadCodeRefund",
+      parentGroup: "Phase 2",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Statut phase 3",
       name: "statusPhase3",
       parentGroup: "Phase 3",
@@ -534,6 +541,7 @@ export async function transformVolontaires(data, values) {
         "Engagement dans une structure en dehors du SNU": translate(data.engaged),
         "Description engagement ": data.engagedDescription,
         "Souhait MIG": data.desiredLocation,
+        "Remboursement Code de la Route": translate(data?.roadCodeRefund) || "Non renseigné",
       },
       accountDetails: {
         "Créé lé": formatLongDateFR(data.createdAt),

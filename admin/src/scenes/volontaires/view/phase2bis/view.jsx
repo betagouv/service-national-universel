@@ -20,6 +20,7 @@ import Preferences from "./preferences";
 import EquivalenceList from "./EquivalenceList";
 import useApplications from "./lib/useApplications";
 import Loader from "@/components/Loader";
+import Voiture from "../../../../assets/icons/Voiture";
 
 export default function Phase2({ young, onChange }) {
   const [blocOpened, setBlocOpened] = useState("missions");
@@ -318,6 +319,40 @@ export default function Phase2({ young, onChange }) {
             </Col>
           </Row>
         </Box>
+        <div className="flex items-stretch bg-white p-6 rounded-lg shadow w-full mb-4">
+          <div className="flex items-center w-1/2 pr-4">
+            <div className="mr-2 mr-4">
+              <Voiture className="w-12 h-12" />
+            </div>
+            <div>
+              <div className="text-lg leading-6 font-semibold text-gray-900 mb-2">Code de la route</div>
+              <div className="text-sm text-gray-500">
+                La validation de la phase engagement permet aux jeunes de bénéficier d&apos;une première présentation gratuite au code de la route.
+              </div>
+            </div>
+          </div>
+          <div className="w-px bg-gray-200 mx-4 self-stretch" />
+
+          <div className="flex flex-col justify-center w-1/2 pl-4">
+            {young.roadCodeRefund === true ? (
+              <>
+                <div className="flex items-center gap-2 text-sm text-green-600 font-medium mb-1">
+                  <span>✔</span>
+                  <span>Le volontaire a bien bénéficié du remboursement</span>
+                </div>
+                <div className="text-xs text-gray-400">
+                  Renseigné par <b>{young.roadCodeRefundOrganization}</b>, le {new Date(young.roadCodeRefundDate).toLocaleDateString("fr-FR")}
+                </div>
+              </>
+            ) : (
+              <div className="flex items-center gap-2 text-sm text-gray-400 font-medium mb-1">
+                <span>✔</span>
+                <span>Le volontaire n'a pas bénéficié du remboursement</span>
+              </div>
+            )}
+          </div>
+        </div>
+
         <Phase2MilitaryPreparation young={young} applications={applicationsToMilitaryPreparation} />
         <EquivalenceList young={young} />
 

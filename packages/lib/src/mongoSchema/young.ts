@@ -1682,6 +1682,30 @@ export const YoungSchema = {
       description: "Commentaire du status WAITING_CORRECTION consentement de droit à l'image ",
     },
   },
+
+  // Code de la route reboursement
+
+  roadCodeRefund:{
+    type: Boolean,
+    documentation: {
+      description: "Le jeune à-t-il étét rembourser pour son code de la route",
+    },
+  },
+
+  roadCodeRefundDate:{
+    type: Date,
+    documentation: {
+      description: "Date de remboursement du code de la route",
+    },
+  },
+
+  roadCodeRefundOrganization:{
+    type: String,
+    documentation: {
+      description: "Organisme de remboursement du code de la route",
+    },
+  },
+  
   // Legacy to remove ------------------------
   autoTestPCR: {
     type: String,
@@ -2017,6 +2041,7 @@ export const YoungSchema = {
     },
   },
 
+  
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
