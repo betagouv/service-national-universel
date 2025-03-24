@@ -120,6 +120,7 @@ const AffectationService = {
       path: "/affectation/{sessionId}/centre/{centreId}/sync-places",
       method: "POST",
       params: { sessionId, centreId },
+      target: "API_V2",
     })();
   },
 };

@@ -23,6 +23,7 @@ import { capture } from "../../sentry";
 import { validateFirstName } from "../../utils/validator";
 import { serializeYoung } from "../../utils/serializer";
 import passport from "passport";
+import { format } from "date-fns";
 import {
   PHONE_ZONES_NAMES_ARR,
   formatPhoneNumberFromPhoneZone,
@@ -35,15 +36,15 @@ import {
   canEditYoung,
   canAllowSNU,
   YoungType,
-  isAdmin,
-  isReferentReg,
   getPhaseStatusOptions,
+  FUNCTIONAL_ERRORS,
+  YOUNG_SOURCE,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
-import { format, isAfter } from "date-fns";
+
 import { config } from "../../config";
-const { logger } = require("../../logger");
+import { logger } from "../../logger";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
@@ -195,7 +196,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       schoolZip: Joi.string().trim().allow(""),
       schoolDepartment: Joi.string().trim().allow(""),
       schoolRegion: Joi.string().trim().allow(""),
-      grade: Joi.string().valid(...Object.keys(GRADES)),
+      grade: Joi.string().valid(...Object.keys(GRADES), "CAP"),
       sameSchoolCLE: Joi.string().trim(),
 
       parent1Status: Joi.string().trim().allow(""),
@@ -338,6 +339,13 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
           departSejourMotifComment: undefined,
           youngPhase1Agreement: "false",
           hasMeetingInformation: undefined,
+        });
+      }
+    } else if (value.statusPhase1 === "AFFECTED" && young.statusPhase1 !== "AFFECTED") {
+      if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
+        return res.status(400).send({
+          ok: false,
+          code: FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS,
         });
       }
     }

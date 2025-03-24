@@ -89,7 +89,7 @@ export class ValiderAffectationCLEDromCom implements UseCase<ValiderAffectationC
         dateAffectation,
     }: ValiderAffectationCLEDromComTaskParameters): Promise<ValiderAffectationCLEDromComResult> {
         // Récuperation des données de l'affectation pour la session
-        const { session, sejoursList } = await this.affectationService.loadAffectationData(sessionId);
+        const { session, sejoursList } = await this.affectationService.loadAffectationData(sessionId, false);
         // Récupération des données du rapport de simulation
         const simulationJeunesAAffecterList = await this.getSimulationData(simulationTaskId);
 

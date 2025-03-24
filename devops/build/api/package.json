@@ -5,7 +5,8 @@
     "node": "^20.17"
   },
   "scripts": {
-    "start": "RELEASE=$CC_COMMIT_ID node api/src/index.js"
+    "start": "node api/src/index.js",
+    "tasks": "RUN_TASKS=true node api/src/index.js"
   },
   "author": "SNU",
   "license": "ISC",

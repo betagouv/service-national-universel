@@ -601,10 +601,12 @@ router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { sess
     const ligneBus = await LigneBusModel.findById(id);
     if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const cohesionCenter = await CohesionCenterModel.findById(ligneBus.centerId);
-    if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const PDR = await PointDeRassemblementModel.find({ region: cohesionCenter.region, deletedAt: { $exists: false } });
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0])
+    if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const PDR = await PointDeRassemblementModel.find({ region: pointDeRassemblement.region, deletedAt: { $exists: false } });
 
     return res.status(200).send({ ok: true, data: PDR });
   } catch (error) {

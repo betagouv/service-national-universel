@@ -40,6 +40,7 @@ turbo prune $application
 if (( $front )); then
     cp tsconfig.front.json out
 fi
+cp -r patches out
 cd out
 npm ci --no-audit --no-fund
 turbo run build
