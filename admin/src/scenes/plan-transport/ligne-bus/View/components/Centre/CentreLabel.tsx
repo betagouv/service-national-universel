@@ -18,7 +18,7 @@ const CentreLabel: React.FC<CentreLabelProps> = ({ centre, showLink = false, cla
         </p>
         {showLink && (
           <Link
-            to={`/point-de-rassemblement/${centre._id}`}
+            to={`/centre/${centre._id}`}
             onClick={(e) => {
               e.stopPropagation();
             }}>
