@@ -1,27 +1,24 @@
 import React from "react";
 import { FiMail } from "react-icons/fi";
-import { useSelector } from "react-redux";
 import { Modal } from "reactstrap";
 import dayjs from "dayjs";
 import { toastr } from "react-redux-toastr";
-
-import { getParticularitesAcces, getReturnDate, getReturnHour, translate } from "snu-lib";
-
+import { getParticularitesAcces, getReturnHour, translate } from "snu-lib";
+import Loader from "@/components/Loader";
 import api from "@/services/api";
 import { capture } from "@/sentry";
-import { AuthState } from "@/redux/auth/reducer";
+import useAuth from "@/services/useAuth";
 import downloadPDF from "@/utils/download-pdf";
-
+import useAffectationInfo from "../../scenes/affected/utils/useAffectationInfo";
 import Calendar from "@/assets/calendar";
 import ChevronDown from "@/assets/icons/ChevronDown";
 import Download from "@/assets/icons/Download";
 
-export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint, session, center, cohort }) {
-  const young = useSelector((state: AuthState) => state.Auth.young) || {};
-
+export default function InfoConvocation({ isOpen, onCancel, title = "" }) {
+  const { young } = useAuth();
+  const { center, meetingPoint, returnDate, isError, isPending } = useAffectationInfo();
   const [selectOpen, setSelectOpen] = React.useState(false);
   const refSelect = React.useRef<HTMLDivElement>(null);
-  const returnDate = getReturnDate(young, session, cohort, meetingPoint);
   const returnHour = getReturnHour(meetingPoint);
   const [loadingConvocation, setLoadingConvocation] = React.useState(false);
 
@@ -89,6 +86,8 @@ export default function InfoConvocation({ isOpen, onCancel, title, meetingPoint,
       return address.join(", ");
     }
   };
+
+  if (isPending || isError) return <Loader />;
 
   return (
     <Modal centered isOpen={isOpen} onCancel={onCancel} size="">
