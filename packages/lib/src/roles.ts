@@ -704,13 +704,13 @@ function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
     case ROLES.ADMIN:
       return true;
     case ROLES.REFERENT_DEPARTMENT:
-      return cohort.inscriptionOpenForReferentDepartment === true;
+      return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentDepartment === true;
     case ROLES.REFERENT_REGION:
-      return cohort.inscriptionOpenForReferentRegion === true;
+      return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentRegion === true;
     case ROLES.REFERENT_CLASSE:
-      return cohort.type === COHORT_TYPE.CLE && cohort.inscriptionOpenForReferentClasse === true;
+      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentClasse === true);
     case ROLES.ADMINISTRATEUR_CLE:
-      return cohort.type === COHORT_TYPE.CLE && cohort.inscriptionOpenForAdministrateurCle === true;
+      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForAdministrateurCle === true);
     default:
       return false;
   }
