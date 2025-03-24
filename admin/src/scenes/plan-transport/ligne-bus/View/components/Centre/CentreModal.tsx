@@ -48,25 +48,20 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
           </div>
 
           <div className="mt-8 grid grid-cols-2 gap-3">
-            <div>
-              <p className="text-xs font-medium">Ancien centre</p>
-              <CenterCard
-                centerDetail={initialSession?.cohesionCenter}
-                centerArrivalTime={initialData.centerArrivalTime}
-                centerDepartureTime={initialData.centerDepartureTime}
-                icon={<XCircleFull className="text-red-500" />}
-              />
-            </div>
-
-            <div>
-              <p className="text-xs font-medium">Nouveau centre</p>
-              <CenterCard
-                centerDetail={newSession?.cohesionCenter}
-                centerArrivalTime={formData.centerArrivalTime!}
-                centerDepartureTime={formData.centerDepartureTime!}
-                icon={<CheckCircleFull className="text-green-500" />}
-              />
-            </div>
+            <p className="text-xs font-medium">Ancien centre</p>
+            <p className="text-xs font-medium">Nouveau centre</p>
+            <CenterCard
+              centerDetail={initialSession?.cohesionCenter}
+              centerArrivalTime={initialData.centerArrivalTime}
+              centerDepartureTime={initialData.centerDepartureTime}
+              icon={<XCircleFull className="text-red-500" />}
+            />
+            <CenterCard
+              centerDetail={newSession?.cohesionCenter}
+              centerArrivalTime={formData.centerArrivalTime!}
+              centerDepartureTime={formData.centerDepartureTime!}
+              icon={<CheckCircleFull className="text-green-500" />}
+            />
           </div>
 
           <div className="mt-8 border-t border-gray-200 w-full pt-8">
@@ -106,10 +101,10 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
 
 function CenterCard({ centerDetail, centerArrivalTime, centerDepartureTime, icon }) {
   return (
-    <div className="mt-2 bg-gray-50 p-3 rounded-xl">
-      <div className="mb-2">{icon}</div>
+    <div className="bg-gray-50 p-3 rounded-xl flex flex-col gap-2">
+      <div className="">{icon}</div>
       <CentreLabel centre={centerDetail} showLink={false} />
-      <div className="mt-2 font-light text-xs text-gray-500">
+      <div className="mt-auto font-light text-xs text-gray-500">
         <p>Heure d'arrivée : {centerArrivalTime}</p>
         <p>Heure de départ : {centerDepartureTime}</p>
       </div>
