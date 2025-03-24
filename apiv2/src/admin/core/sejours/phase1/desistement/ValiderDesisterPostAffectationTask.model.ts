@@ -14,7 +14,7 @@ export type ValiderDesisterPostAffectationTaskModel = TaskModel<
 export const RAPPORT_SHEETS_TRAITEMENT = {
     RESUME: "Résumé",
     DESISTES: "Jeunes désistés",
-    CONFIRMATION_PARTICIPATION: "ont confirmé leur séjour",
-    CHANGEMENTS_SEJOUR: "ont changé de séjour",
-    DESITEMENT_PREALABLE: "se sont désistés en amont",
+    CONFIRMATION_PARTICIPATION: "Confirmations de participation",
+    CHANGEMENTS_SEJOUR: "Changements de séjour",
+    DESITEMENT_PREALABLE: "Désistements préalables",
 };
