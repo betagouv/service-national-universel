@@ -5,6 +5,7 @@ import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./s
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
 import { mapTrigrammeToRegion } from "../../services/regionService";
 import { updatePlacesSessionPhase1 } from "../../utils";
+import { isInt, isNumeric } from "validator";
 
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
@@ -104,10 +105,15 @@ const createSession = async (
   foundCohort: CohortDocument,
 ): Promise<SessionCohesionCenterImportReport> => {
   let warning = "";
-  if (sessionCenter.sessionPlaces > foundCenter.placesTotal) {
+  if (sessionCenter.sessionPlaces > foundCenter.placesTotal || !foundCenter.placesTotal) {
     logger.warn(`Session with wrong place number (${sessionCenter.sessionPlaces} > ${foundCenter.placesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
-    sessionCenter.sessionPlaces = foundCenter.placesTotal;
-    warning = "session places > center places";
+    if (foundCenter.placesTotal) {
+      sessionCenter.sessionPlaces = foundCenter.placesTotal;
+      warning = "session places > center places";
+    } else {
+      logger.warn(`No capacity max found for session ${sessionCenter.sessionFormule} in center ${foundCenter.matricule}`);
+      warning = "no capacity max found in center";
+    }
   }
 
   const foundSession = await SessionPhase1Model.findOne({ cohesionCenterId: foundCenter._id, cohortId: foundCohort.id });
