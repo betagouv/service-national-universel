@@ -1,0 +1,43 @@
+name: Scaleway - Deploy
+
+on:
+  workflow_dispatch:
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    outputs:
+      deploy_matrix: ${{ steps.config.outputs.deploy }}
+
+    steps:
+      - name: Get matrices configuration
+        id: config
+        run: |
+          # BUILD MATRIX
+          echo "[]" \
+          | jq  '. + [{cpu:2000, ram:2048, min:1, max:5, id:"${{ vars.SCW_APP_ID_PRODUCTION_SNU_APP }}"}]' \
+          | jq  '. + [{cpu:2000, ram:2048, min:1, max:5, id:"${{ vars.SCW_APP_ID_PRODUCTION_SNU_ADMIN }}"}]' \
+          | jq  '. + [{cpu:6000, ram:8192, min:2, max:5, id:"${{ vars.SCW_APP_ID_PRODUCTION_SNU_API }}"}]' \
+          | jq  '. + [{cpu:4000, ram:8192, min:1, max:3, id:"${{ vars.SCW_APP_ID_PRODUCTION_SNU_TASKS }}"}]' > deploy.json
+
+          echo "Deploy matrix"
+          cat deploy.json
+          echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
+
+  deploy:
+    needs: prepare
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}
+
+    steps:
+      - name: Deploy
+        env:
+          SCW_SECRET_KEY: ${{ secrets.SCW_PROD_DEPLOY_SECRET_KEY }}
+        run: |
+          curl --silent -X PATCH \
+            -H "X-Auth-Token: $SCW_SECRET_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{"min_scale":${{ matrix.app.min }},"max_scale":${{ matrix.app.max }},"cpu_limit":${{ matrix.app.cpu }},"memory_limit":${{ matrix.app.ram }}}' \
+            "https://api.scaleway.com/containers/v1beta1/regions/fr-par/containers/${{ matrix.app.id }}" > /dev/null

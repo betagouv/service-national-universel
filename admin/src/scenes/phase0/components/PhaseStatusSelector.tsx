@@ -1,22 +1,27 @@
-import React, { useEffect, useRef, useState } from "react";
-import ChevronDown from "../../../assets/icons/ChevronDown";
-import ChevronRight from "../../../assets/icons/ChevronRight";
-import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1 } from "snu-lib";
-import Check from "../../../assets/icons/Check";
-import { toastr } from "react-redux-toastr";
-import api from "../../../services/api";
-import Warning from "../../../assets/icons/Warning";
-import ConfirmationModal from "./ConfirmationModal";
+import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+
+import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1 } from "snu-lib";
+
+import { AuthState } from "@/redux/auth/reducer";
+import ChevronDown from "@/assets/icons/ChevronDown";
+import ChevronRight from "@/assets/icons/ChevronRight";
+import Check from "@/assets/icons/Check";
+import api from "@/services/api";
+import Warning from "@/assets/icons/Warning";
+
+import ConfirmationModal from "./ConfirmationModal";
 
 export default function PhaseStatusSelector({ young, onChange }) {
   const [phaseChoiceOpened, setPhaseChoiceOpened] = useState(false);
   const [statusOpened, setStatusOpened] = useState(0);
-  const [confirmChangeModal, setConfirmChangeModal] = useState(null);
-  const { user } = useSelector((state) => state.Auth);
+  const [confirmChangeModal, setConfirmChangeModal] = useState<{ phase: number; status: number; message: string | ReactElement } | null>(null);
+  const { user } = useSelector((state: AuthState) => state.Auth);
+
   const statusOptions = getPhaseStatusOptions(user, statusOpened);
 
-  const containerRef = useRef();
+  const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(e) {
@@ -61,14 +66,14 @@ export default function PhaseStatusSelector({ young, onChange }) {
       try {
         const result = await api.put(`/young-edition/${young._id}/phasestatus`, { [`statusPhase${phase}`]: status });
         if (result.ok) {
-          toastr.success("Le nouveau statut a bien été modifié.");
+          toastr.success("Le nouveau statut a bien été modifié.", "", { timeOut: 5000 });
           onChange && onChange();
         } else {
-          toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.");
+          toastr.error("Erreur ! Nous n'avons pas pu enregistrer le changement de statut", translate(result.code), { timeOut: 5000 });
         }
       } catch (err) {
         console.log(err);
-        toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.");
+        toastr.error("Erreur !", "Nous n'avons pas pu enregistrer le changement de statut. Veuillez réessayer dans quelques instants.", { timeOut: 5000 });
       }
     }
   }
@@ -122,7 +127,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
           isOpen={true}
           icon={<Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />}
           title={"Changement de statut"}
-          message={confirmChangeModal.message}
+          message={confirmChangeModal.message as string}
           confirmText="Confirmer le changement"
           onCancel={() => setConfirmChangeModal(null)}
           onConfirm={() => changePhaseStatus(confirmChangeModal.phase, confirmChangeModal.status)}
