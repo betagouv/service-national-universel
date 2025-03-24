@@ -8,6 +8,7 @@ import useSessions from "@/scenes/plan-transport/lib/useSessionsByCohort";
 import { AiOutlineStop } from "react-icons/ai";
 import Loader from "@/components/Loader";
 import { SessionPhase1PopulatedWithCenter } from "@/services/sessionPhase1Service";
+import { MdInfoOutline } from "react-icons/md";
 
 type Props = {
   sessionId: string;
@@ -53,6 +54,7 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
   const selectedSession = sessions?.find((s) => s._id === sessionId);
   const options = sessions.filter((s) => s._id !== sessionId);
   const filteredOptions = filterResults(options, search);
+  const centerData = selectedSession?.cohesionCenter || ligne.centerDetail;
 
   function handleSelect(session: SessionPhase1PopulatedWithCenter) {
     setSessionId(session._id);
@@ -62,14 +64,20 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
   return (
     <>
       <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
-        <div className="flex justify-between">
-          <CentreLabel centre={selectedSession?.cohesionCenter || ligne.centerDetail} showLink={user.role !== ROLES.TRANSPORTER} />
-          {isSuperAdmin(user) && !disabled && (
-            <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
-              Changer de lieu
-            </button>
-          )}
-        </div>
+        {centerData ? (
+          <div className="flex justify-between">
+            <CentreLabel centre={centerData} showLink={user.role !== ROLES.TRANSPORTER} />
+            {isSuperAdmin(user) && !disabled && (
+              <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
+                Changer de lieu
+              </button>
+            )}
+          </div>
+        ) : (
+          <p className="text-xs text-gray-400">
+            <MdInfoOutline className="inline-block mb-0.5" /> Impossible d'afficher les informations du centre de destination.
+          </p>
+        )}
       </div>
 
       {open && (
