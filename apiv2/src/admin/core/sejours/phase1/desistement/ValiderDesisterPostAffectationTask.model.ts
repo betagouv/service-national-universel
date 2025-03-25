@@ -10,3 +10,11 @@ export type ValiderDesisterPostAffectationTaskModel = TaskModel<
     ValiderDesisterPostAffectationTaskParameters,
     DesisterValiderTaskResult
 >;
+
+export const RAPPORT_SHEETS_TRAITEMENT = {
+    RESUME: "Résumé",
+    DESISTES: "Jeunes désistés",
+    CONFIRMATION_PARTICIPATION: "Confirmations de participation",
+    CHANGEMENTS_SEJOUR: "Changements de séjour",
+    DESITEMENT_PREALABLE: "Désistements préalables",
+};
