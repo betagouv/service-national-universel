@@ -2,7 +2,7 @@ import fetch from "node-fetch";
 
 import request from "supertest";
 import jwt from "jsonwebtoken";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
@@ -507,7 +507,7 @@ describe("Young", () => {
 
     it("should create a new young user and send an invitation email", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
-      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true }));
+      const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true, type: COHORT_TYPE.CLE }));
       const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
       const passport = require("passport");
