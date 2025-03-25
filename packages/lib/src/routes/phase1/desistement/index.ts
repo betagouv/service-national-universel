@@ -1,21 +1,37 @@
-import { BasicRoute, DesistementTaskDto, PreviewDesisterTaskResult, RouteResponseBodyV2 } from "../../..";
+import { BasicRoute, DesistementSimulationTaskDto, DesistementValiderTaskDto, RouteResponseBodyV2, TaskStatus } from "../../..";
 
-interface PostDesistement extends BasicRoute {
+interface PostSimulerDesistementRoute extends BasicRoute {
   method: "POST";
-  path: "/desistement/{sessionId}";
+  path: "/desistement/{sessionId}/simulation";
   params: { sessionId: string };
   payload: { affectationTaskId: string };
-  response: RouteResponseBodyV2<DesistementTaskDto>;
+  response: RouteResponseBodyV2<DesistementSimulationTaskDto>;
 }
 
-interface GetPreview extends BasicRoute {
+interface PostValiderDesistementRoute extends BasicRoute {
+  method: "POST";
+  path: "/desistement/{sessionId}/simulation/{taskId}/valider";
+  params: { sessionId: string; taskId: string };
+  response: RouteResponseBodyV2<DesistementValiderTaskDto>;
+}
+
+export interface GetDesistementRoute extends BasicRoute {
   method: "GET";
-  path: "/desistement/{sessionId}/preview/{affectationTaskId}";
-  params: { sessionId: string; affectationTaskId: string };
-  response: RouteResponseBodyV2<PreviewDesisterTaskResult>;
+  path: "/desistement/{sessionId}";
+  params: { sessionId: string };
+  response: RouteResponseBodyV2<{
+    simulation: {
+      status: TaskStatus | "NONE";
+    };
+    traitement: {
+      status: TaskStatus | "NONE";
+      lastCompletedAt: string;
+    };
+  }>;
 }
 
 export type DesistementRoutes = {
-  Post: PostDesistement;
-  GetPreview: GetPreview;
+  GetDesistement: GetDesistementRoute;
+  PostSimuler: PostSimulerDesistementRoute;
+  PostValider: PostValiderDesistementRoute;
 };
