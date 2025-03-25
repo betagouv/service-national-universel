@@ -87,8 +87,8 @@ clever curl -s -X PUT "$cc_endpoint/v2/organisations/$org_id/applications/$app_i
     --data-raw "{\"branch\":\"$branch_name\"}"
 
 clever env --app $ci_app_id | sed \
-    -e "s#ENVIRONMENT=\"ci\"\$#ENVIRONMENT=\"$env_name\"#g" \
-    -e "s#ci.beta-snu.dev\"\$#$env_name.$domain\"#g" \
+    -e "s#ENVIRONMENT=\"ci\"#ENVIRONMENT=\"$env_name\"#g" \
+    -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
     | clever env import --app $app_id
 
 # clever domain add api.$env_name.$domain/
