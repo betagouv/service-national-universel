@@ -9,7 +9,7 @@ import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdate
 import CentreModal from "./CentreModal";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { EditButton } from "@snu/ds/admin";
-import { getAuthorizationToUpdateCenterOnLine } from "../../authorization";
+import { canUpdateCenterId } from "../../authorization";
 
 type Props = {
   bus: LigneBusDto;
@@ -38,7 +38,8 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     },
   });
 
-  const { isAuthorized, message } = getAuthorizationToUpdateCenterOnLine(user, cohort);
+  const { isAuthorized, message } = canUpdateCenterId(user, cohort);
+  console.log("🚀 ~ Centre ~ message:", message);
 
   const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
     if (data.sessionId !== bus.sessionId) {

@@ -5,7 +5,7 @@ import { BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useToggle } from "react-use";
 
-import { CohortType, isSuperAdmin, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { CohortType, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
@@ -20,7 +20,7 @@ import { checkTime } from "snu-lib";
 
 import PointDeRassemblementLabel from "./PointDeRassemblementLabel";
 import ConfirmChangesModal from "./ConfirmChangesModal";
-import { getAuthorizationToUpdatePdrOnLine } from "../authorization";
+import { canUpdatePdrId, canUpdatePdrScheduleAndTransportType } from "../authorization";
 
 const options = [
   { label: "Bus", value: "bus" },
@@ -209,7 +209,8 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     );
   }
 
-  const { isAuthorized, message } = getAuthorizationToUpdatePdrOnLine(user, cohort);
+  const isAuthorized = [ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role);
+  const message = "Vous n'avez pas l'autorisation de modifier le point de rassemblement.";
 
   return (
     <>
@@ -225,7 +226,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
           <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
             <div className="flex justify-between flex-row items-center">
               <PointDeRassemblementLabel pdr={selectedPDR} showLink={user.role !== ROLES.TRANSPORTER} />
-              {isSuperAdmin(user) && editPdr && (
+              {canUpdatePdrId(user) && editPdr && (
                 <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
                   Changer de lieu
                 </button>
@@ -280,7 +281,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
               options={options}
               selected={options.find((e) => e.value === data.transportType)}
               setSelected={(e) => setData({ ...data, transportType: e.value })}
-              readOnly={!editPdr}
+              readOnly={!editPdr || !canUpdatePdrScheduleAndTransportType(user, cohort).isAuthorized}
             />
             <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
             <div className="flex items-center gap-4">
@@ -291,7 +292,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data?.busArrivalHour}
                 error={errors?.busArrivalHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrScheduleAndTransportType(user, cohort).isAuthorized}
               />
               <Field
                 label="Heure de convocation"
@@ -300,6 +301,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.meetingHour}
                 error={errors?.meetingHour}
                 readOnly={!editPdr}
+                disabled={editPdr && !canUpdatePdrScheduleAndTransportType(user, cohort).isAuthorized}
               />
             </div>
             <div className="flex items-center gap-4">
@@ -314,7 +316,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data?.departureHour}
                 error={errors?.departureHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrScheduleAndTransportType(user, cohort).isAuthorized}
               />
               <Field
                 label="Heure d’arrivée"
@@ -323,7 +325,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.returnHour}
                 error={errors?.returnHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrScheduleAndTransportType(user, cohort).isAuthorized}
               />
             </div>
           </div>
