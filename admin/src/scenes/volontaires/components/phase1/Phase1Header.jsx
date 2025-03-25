@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Button } from "@snu/ds/admin";
 import DocumentSelect from "../DocumentSelect";
 import Badge from "../../../../components/Badge";
 import downloadPDF from "../../../../utils/download-pdf";
@@ -10,7 +9,7 @@ import { capture } from "../../../../sentry";
 import ModalDispense from "../ModalDispense";
 import ModalConfirm from "../../../../components/modals/ModalConfirm";
 
-const Phase1Header = ({ setLoading, young = null, setYoung, user }) => {
+const Phase1Header = ({ young = null, setYoung, user }) => {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalDispense, setModalDispense] = useState({ isOpen: false });
 
@@ -20,17 +19,14 @@ const Phase1Header = ({ setLoading, young = null, setYoung, user }) => {
 
   const handleSendConvocationByEmail = async () => {
     try {
-      setLoading(true);
       const { ok, code } = await api.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
       });
-      setLoading(false);
       setModal({ isOpen: false });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`);
     } catch (e) {
       capture(e);
-      setLoading(false);
       toastr.error("Erreur lors de l'envoie du document", e.message);
     }
   };

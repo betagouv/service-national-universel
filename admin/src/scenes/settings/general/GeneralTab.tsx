@@ -23,7 +23,7 @@ import NumberInput from "@/components/ui/forms/NumberInput";
 import { CleSettings } from "./components/CleSettings";
 import { InformationsConvoyage } from "./components/InformationsConvoyage";
 import { ManualInscriptionSettings } from "./phase0/ManualInscriptionSettings";
-import { Select } from "@snu/ds/admin";
+import { Select, Tooltip } from "@snu/ds/admin";
 import CohortGroupSelector from "./components/CohortGroupSelector";
 
 // Define the interface for GeneralTab props
@@ -155,6 +155,25 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                   </div>
                   <CohortGroupSelector cohort={cohort} setCohort={onCohortChange} readOnly={readOnly} />
                 </div>
+                {cohort.type === COHORT_TYPE.CLE && (
+                  <div className="flex flex-col gap-3">
+                    <div className="flex items-center gap-2">
+                      <p className="text-gray-900  text-xs font-medium">Traitement spécifique lié au SI SNU</p>
+                      <Tooltip
+                        title={`Le bouton doit être activé pour que les centres concernés soient rattachés correctement à cette
+cohorte spécifique lors de l’import du fichier des centres de sessions.
+Cette fonctionnalité est à utiliser uniquement pour les séjours CLE spécifiques aux DROM COM`}>
+                        <MdInfoOutline size={20} className="text-gray-400" />
+                      </Tooltip>
+                    </div>
+                    <SimpleToggle
+                      label="Cohorte spécifique DROM-COM"
+                      disabled={isLoading || readOnly}
+                      value={cohort.specificSnuIdCohort}
+                      onChange={() => onCohortChange({ ...cohort, specificSnuIdCohort: !cohort.specificSnuIdCohort })}
+                    />
+                  </div>
+                )}
               </div>
               <div className="flex flex-col gap-3">
                 <div className="flex items-center gap-2">
@@ -306,8 +325,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
                 <SimpleToggle
                   label="Dates spécifiques"
                   disabled={isLoading || readOnly}
-                  // @ts-ignore
-                  value={showSpecificDatesReInscription}
+                  value={!!showSpecificDatesReInscription}
                   onChange={(v) => {
                     if (v == false) onCohortChange({ ...cohort, reInscriptionEndDate: null, reInscriptionStartDate: null });
                     // @ts-ignore

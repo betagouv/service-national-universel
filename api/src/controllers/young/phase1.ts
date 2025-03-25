@@ -292,7 +292,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
     if ((key === "cohesionStayPresence" || key === "presenceJDM" || key === "isTravelingByPlane") && newValue == "") {
       young[key] = undefined;
     } else {
-      young.set({ [key]: newValue });
+      young.set({ [key]: newValue, statusPhase2OpenedAt: new Date() });
     }
 
     await young.save({ fromUser: req.user });
