@@ -159,7 +159,6 @@ type CohortEligible = NonNullable<CohortsRoutes["PostEligibility"]["response"]["
 export default function Create() {
   const history = useHistory();
   const location = useLocation();
-  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [selectedRepresentant, setSelectedRepresentant] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -167,6 +166,7 @@ export default function Create() {
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const classeId = new URLSearchParams(location.search).get("classeId");
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [values, setValues] = useState<FormValues>({

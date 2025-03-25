@@ -124,4 +124,8 @@ export class FileProvider implements FileGateway {
     deleteFile(path: string): Promise<void> {
         throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
     }
+
+    baseName(path: string): string {
+        return path.replace(/^.*[\\/]/, "");
+    }
 }

@@ -31,5 +31,4 @@
             "@analytics/*": ["src/analytics/*"]
         }
     }
-    // "references": [{ "path": "../packages/lib" }]
 }
