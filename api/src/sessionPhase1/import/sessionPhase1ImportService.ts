@@ -123,7 +123,7 @@ const createSession = async (
   let warning = "";
   if (sessionCenter.sessionPlaces > foundCenter.placesTotal!) {
     logger.warn(`Session with wrong place number (${sessionCenter.sessionPlaces} > ${foundCenter.placesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
-    sessionCenter.sessionPlaces = foundCenter.placesTotal as number;
+    sessionCenter.sessionPlaces = foundCenter.placesTotal!;
     warning = "session places > center places";
   }
 
