@@ -167,6 +167,7 @@ export default function Create() {
   const [egibilityError, setEgibilityError] = useState("");
   const [isComplememtaryListModalOpen, setComplememtaryListModalOpen] = useState(false);
   const classeId = new URLSearchParams(location.search).get("classeId");
+  const user = useSelector((state: AuthState) => state.Auth.user);
 
   const [errors, setErrors] = useState<FormErrors>({});
   const [values, setValues] = useState<FormValues>({
