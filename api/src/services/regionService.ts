@@ -39,6 +39,16 @@ export const mapRegionToTrigramme = (region: string | undefined): string | undef
       return "PDL";
     case "Provence-Alpes-Côte d'Azur":
       return "PAC";
+    case "Nouvelle-Calédonie":
+      return "NCA";
+    case "Polynésie française":
+      return "POL";
+    case "Wallis-et-Futuna":
+      return "WAL";
+    case "Saint-Pierre-et-Miquelon":
+      return "SPM";
+    case "Terres australes et antarctiques françaises":
+      return "TAA";
     default:
       logger.warn(`mapRegionToTrigramme() - No matching region for : ${region}`);
       return undefined;
@@ -83,6 +93,16 @@ export const mapTrigrammeToRegion = (region: string | undefined): string | undef
       return "Pays de la Loire";
     case "PAC":
       return "Provence-Alpes-Côte d'Azur";
+    case "NCA":
+      return "Nouvelle-Calédonie";
+    case "POL":
+      return "Polynésie française";
+    case "WAL":
+      return "Wallis-et-Futuna";
+    case "SPM":
+      return "Saint-Pierre-et-Miquelon";
+    case "TAA":
+      return "Terres australes et antarctiques françaises";
     default:
       logger.warn(`mapRegionToTrigramme() - No matching region for : ${region}`);
       return undefined;

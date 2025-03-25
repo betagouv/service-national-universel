@@ -14,7 +14,6 @@ import KeyNumbers from "./KeyNumbers";
 import InfoMessage from "./ui/InfoMessage";
 import Todos from "./Todos";
 import Objective from "../moderator-ref/subscenes/general/components/Objective";
-import BandeauInfo from "./BandeauInfo";
 
 export default function Index() {
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -43,12 +42,9 @@ export default function Index() {
     }
   })();
 
-  const needMoreInfo = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
-
   return (
     <Page>
       {messages?.map((msg) => <InfoMessage key={msg._id} title={msg.title} message={msg.content} priority={msg.priority} className="mb-6" />)}
-      {needMoreInfo && <BandeauInfo />}
       <Header title="Tableau de bord" breadcrumb={[{ title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">

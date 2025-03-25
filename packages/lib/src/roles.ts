@@ -1,7 +1,7 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
 import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
 import { isBefore } from "date-fns";
 
@@ -704,13 +704,13 @@ function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
     case ROLES.ADMIN:
       return true;
     case ROLES.REFERENT_DEPARTMENT:
-      return cohort.inscriptionOpenForReferentDepartment === true;
+      return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentDepartment === true;
     case ROLES.REFERENT_REGION:
-      return cohort.inscriptionOpenForReferentRegion === true;
+      return cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentRegion === true;
     case ROLES.REFERENT_CLASSE:
-      return cohort.inscriptionOpenForReferentClasse === true;
+      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForReferentClasse === true);
     case ROLES.ADMINISTRATEUR_CLE:
-      return cohort.inscriptionOpenForAdministrateurCle === true;
+      return cohort.type === COHORT_TYPE.CLE && (cohort.isInscriptionOpen || cohort.inscriptionOpenForAdministrateurCle === true);
     default:
       return false;
   }
@@ -1090,15 +1090,19 @@ function canValidateMultipleYoungsInClass(actor: UserDto) {
 const phaseStatusOptionsByRole = {
   0: { DEFAULT: [] },
   1: {
-    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
-    DEFAULT: [YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+    [ROLES.ADMIN]: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.EXEMPTED, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
+    DEFAULT: [YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.NOT_DONE],
   },
   2: { DEFAULT: [YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED] },
   3: { DEFAULT: [YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED] },
 };
 
 function getPhaseStatusOptions(actor: UserDto, phase: number) {
-  return phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
+  const phaseStatusOptions = phaseStatusOptionsByRole[phase][actor.role] || phaseStatusOptionsByRole[phase].DEFAULT || [];
+  if (phase === 1 && isSuperAdmin(actor) && !phaseStatusOptions.includes(YOUNG_STATUS_PHASE1.AFFECTED)) {
+    phaseStatusOptions.push(YOUNG_STATUS_PHASE1.AFFECTED);
+  }
+  return phaseStatusOptions;
 }
 
 export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "instructionEndDate" | "youngHTSBasculeLPDisabled">) {

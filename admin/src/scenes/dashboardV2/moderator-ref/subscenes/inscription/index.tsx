@@ -6,7 +6,6 @@ import { Page, Header, DropdownButton, ModalConfirmation } from "@snu/ds/admin";
 import { AuthState } from "@/redux/auth/reducer";
 import plausibleEvent from "@/services/plausible";
 import DashboardContainer from "../../../components/DashboardContainer";
-import BandeauInfo from "../../../components/BandeauInfo";
 import General from "../../../components/inscription/General";
 import ExportReport from "./ExportReport";
 
@@ -54,7 +53,6 @@ export default function Index() {
 
   return (
     <Page>
-      <BandeauInfo />
       <Header
         title="Tableau de bord"
         breadcrumb={[{ title: "Tableau de bord" }]}

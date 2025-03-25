@@ -4,11 +4,13 @@
 import InputText from "./form/InputText";
 import InputNumber from "./form/InputNumber";
 import InputPhone from "./form/InputPhone";
+import InputCheckbox from "./form/InputCheckbox";
 export { default as InputFile } from "./form/InputFile";
 import Label from "./form/Label";
 import Select, { SelectOption } from "./form/Select/Select";
 export { default as CollapsableSelectSwitcher } from "./form/CollapsableSelectSwitcher";
 export { default as SectionSwitcher } from "./form/SectionSwitcher";
+import EditButton from "./form/EditButton";
 
 // Layout
 import Container from "./layout/Container";
@@ -34,9 +36,11 @@ export { default as Tooltip } from "./ui/Tooltip";
 export {
   // Form
   InputText,
+  InputCheckbox,
   InputNumber,
   InputPhone,
   Label,
+  EditButton,
 
   // Layout
   Container,

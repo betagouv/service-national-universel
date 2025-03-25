@@ -14,18 +14,7 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import {
-  ReferentModel,
-  YoungModel,
-  ApplicationModel,
-  SessionPhase1Model,
-  LigneBusModel,
-  ClasseModel,
-  EtablissementModel,
-  CohortModel,
-  ApplicationDocument,
-  ReferentDocument,
-} from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -1179,7 +1168,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     const youngs = await YoungModel.find({ _id: { $in: ids } });
     if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1191,7 +1180,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
         young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
       } else {
-        young.set({ [key]: newValue });
+        young.set({ [key]: newValue, statusPhase2OpenedAt: new Date() });
       }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);

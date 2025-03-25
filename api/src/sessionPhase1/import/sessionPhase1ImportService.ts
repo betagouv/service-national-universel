@@ -1,4 +1,4 @@
-import { region2zone, SessionPhase1Type } from "snu-lib";
+import { CohortType, region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
@@ -24,6 +24,8 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
 
   const report: SessionCohesionCenterImportReport[] = [];
 
+  const specificCohortsSnuids = (await CohortModel.find({ specificSnuIdCohort: true })).map((cohort) => cohort.snuId);
+
   for (const sessionCenter of mappedSessionCenter) {
     let processedSessionReport: SessionCohesionCenterImportReport;
     const foundCenter = await CohesionCenterModel.findOne({ matricule: sessionCenter.cohesionCenterMatricule });
@@ -32,8 +34,14 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
-    const zonedSnuId = getZonedSnuId(sessionCenter);
-    const foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
+    const { snuId: zonedSnuId, isDromCom } = getZonedSnuId(sessionCenter, specificCohortsSnuids);
+    let foundCohort: null | CohortDocument = null;
+    if (isDromCom) {
+      foundCohort = await CohortModel.findOne({ snuId: zonedSnuId });
+    } else {
+      // check la cohort zoné ou la cohort par defaut
+      foundCohort = await CohortModel.findOne({ $or: [{ snuId: zonedSnuId }, { snuId: sessionCenter.sessionFormule }] });
+    }
     if (!foundCohort?._id) {
       processedSessionReport = await processCohortNotFound(sessionCenter, zonedSnuId);
       report.push(processedSessionReport);
@@ -43,7 +51,10 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
     // Somme des effectifs pour une même cohort
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
-      (sc) => sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && getZonedSnuId(sc) === zonedSnuId,
+      (sc) =>
+        sc.sessionFormule === sessionCenter.sessionFormule &&
+        sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule &&
+        getZonedSnuId(sc, specificCohortsSnuids).snuId === zonedSnuId,
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
@@ -165,16 +176,34 @@ const addCohortToCohesionCenter = (foundCenter: CohesionCenterDocument, foundCoh
   return foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
 };
 
-const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped) => {
-  if (sessionCenter.sessionFormule.includes("CLE")) {
-    return sessionCenter.sessionFormule;
-  }
+const getZonedSnuId = (sessionCenter: SessionCohesionCenterImportMapped, specificCohorts: string[]) => {
   let snuId = sessionCenter.sessionFormule;
   const codeRegion = sessionCenter.sejourSnuId.replaceAll(`_${sessionCenter.cohesionCenterMatricule}`, "").replaceAll(`${sessionCenter.sessionFormule}_`, "");
+  const snuIdRegion = `${snuId}_${codeRegion}`;
+
+  // les cohortes CLE n'ont pas de dates spécifiques pour les DROM COM ou les zones académiques
+  if (sessionCenter.sessionFormule.includes("CLE")) {
+    // cas particulier (ex: 2025 CLE 18 - Martinique)
+    if (specificCohorts.includes(snuIdRegion)) {
+      return { snuId: snuIdRegion, isDromCom: true };
+    }
+    return { snuId };
+  }
+
+  // HTS
   const region = mapTrigrammeToRegion(codeRegion);
+  // sans région on ne peux pas faire de distinction
+  if (!region) {
+    return { snuId };
+  }
+  // DROM COM et Corse
+  if (RegionsHorsMetropole.includes(region)) {
+    return { snuId: snuIdRegion, isDromCom: true };
+  }
+  // Sejours zonés (A, B, C)
   const zone = region2zone[region!];
   if (zone?.length === 1) {
-    snuId += `_${zone}`;
+    return { snuId: `${snuId}_${zone}` };
   }
-  return snuId;
+  return { snuId };
 };

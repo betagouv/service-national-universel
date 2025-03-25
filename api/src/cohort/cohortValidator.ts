@@ -83,6 +83,7 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     cleDisplayCohortsForAdminCLEDate: ToFromDateValidator,
     cleDisplayCohortsForReferentClasseDate: ToFromDateValidator,
     youngHTSBasculeLPDisabled: Joi.boolean().default(false),
+    specificSnuIdCohort: Joi.boolean().default(false),
   }).validate(dto, { stripUnknown: true });
 };
 
@@ -103,6 +104,7 @@ const PostEligibilityRouteSchema = {
   }),
   query: Joi.object<CohortsRoutes["PostEligibility"]["query"]>({
     getAllSessions: Joi.boolean().default(false),
+    type: Joi.string().allow("INSCRIPTION_MANUELLE").allow("BASCULE").allow(null),
   }),
   body: Joi.object<CohortsRoutes["PostEligibility"]["payload"]>({
     schoolDepartment: Joi.string().allow("", null),
