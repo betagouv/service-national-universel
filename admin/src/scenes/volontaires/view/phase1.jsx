@@ -86,7 +86,7 @@ export default function Phase1(props) {
             }.`}
           />
         ) : null}
-        <Phase1Header user={user} young={young} setYoung={setYoung} setValues={setValues} />
+        <Phase1Header young={young} setYoung={setYoung} user={user} />
         <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
 
         <Details

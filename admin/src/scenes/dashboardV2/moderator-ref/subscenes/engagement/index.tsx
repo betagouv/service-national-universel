@@ -19,7 +19,6 @@ import plausibleEvent from "../../../../../services/plausible";
 import { orderCohort } from "../../../../../components/filters-system-v2/components/filters/utils";
 import ExportEngagementReport from "./components/ExportEngagementReport";
 import VolontairesEquivalenceMig from "./components/VolontairesEquivalenceMig";
-import BandeauInfo from "../../../components/BandeauInfo";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
@@ -177,7 +176,6 @@ export default function Index() {
 
   return (
     <Page>
-      <BandeauInfo />
       <Header
         title="Tableau de bord"
         breadcrumb={[{ title: "Tableau de bord" }]}
