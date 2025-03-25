@@ -17,7 +17,7 @@ then
 fi
 
 echo "env-$branch_name" |
-tr '[:lower:]' '[:upper:]' | # uppercase
+tr '[:upper:]' '[:lower:]' | # lowercase
 tr "_" "-" | # replace _ by -
 tr -cd '[:alnum:]-' | # remove all except alnum + '-'
 tr -s '-' | # removes duplicated '-'
