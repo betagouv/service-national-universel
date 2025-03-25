@@ -23,6 +23,7 @@ export enum FunctionalExceptionCode {
     TEMPLATE_NOT_FOUND = "TEMPLATE_NOT_FOUND",
     LISTE_DIFFUSION_NOT_FOUND = "LISTE_DIFFUSION_NOT_FOUND",
     RESULT_DIFFERENT_THAN_SIMULATION = "RESULT_DIFFERENT_THAN_SIMULATION",
+    NO_CONTACTS = "NO_CONTACTS",
 }
 
 export class FunctionalException extends HttpException {

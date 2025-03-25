@@ -7,6 +7,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { TaskName, TaskStatus } from "snu-lib";
+import { CryptoGateway } from "@shared/core/Crypto.gateway";
 
 describe("ImporterContacts", () => {
     let useCase: ImporterContacts;
@@ -15,6 +16,7 @@ describe("ImporterContacts", () => {
     let campagneGateway: jest.Mocked<CampagneGateway>;
     let listeDiffusionGateway: jest.Mocked<ListeDiffusionGateway>;
     let configService: jest.Mocked<ConfigService>;
+    let cryptoGateway: jest.Mocked<CryptoGateway>;
 
     beforeEach(async () => {
         const module = await Test.createTestingModule({
@@ -50,6 +52,12 @@ describe("ImporterContacts", () => {
                         get: jest.fn(),
                     },
                 },
+                {
+                    provide: CryptoGateway,
+                    useValue: {
+                        getUuid: jest.fn(),
+                    },
+                },
             ],
         }).compile();
 
@@ -59,6 +67,8 @@ describe("ImporterContacts", () => {
         campagneGateway = module.get(CampagneGateway);
         listeDiffusionGateway = module.get(ListeDiffusionGateway);
         configService = module.get(ConfigService);
+        cryptoGateway = module.get(CryptoGateway);
+        cryptoGateway.getUuid.mockReturnValue("uuid42verylong");
     });
 
     it("should successfully import contacts and create task", async () => {
@@ -89,7 +99,7 @@ describe("ImporterContacts", () => {
         await useCase.execute("campaign-1", 456, "contacts-data");
 
         expect(planMarketingGateway.importerContacts).toHaveBeenCalledWith(
-            "Test Liste",
+            "Test Liste-uuid42ve",
             "contacts-data",
             "folder-123",
             "http://api.test/plan-marketing/import/webhook",
@@ -101,7 +111,7 @@ describe("ImporterContacts", () => {
             metadata: {
                 parameters: {
                     processId: mockProcessId,
-                    nomListe: "Test Liste",
+                    nomListe: "Test Liste-uuid42ve",
                     campagneId: "campaign-1",
                     campagneProviderId: "456",
                 },

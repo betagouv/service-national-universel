@@ -9,6 +9,7 @@ import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
+import { CryptoGateway } from "@shared/core/Crypto.gateway";
 
 Injectable();
 export class ImporterContacts implements UseCase<void> {
@@ -19,6 +20,7 @@ export class ImporterContacts implements UseCase<void> {
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         @Inject(ListeDiffusionGateway) private readonly listeDiffusionGateway: ListeDiffusionGateway,
+        @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
         private readonly config: ConfigService,
     ) {}
     async execute(campagneId: string, campagneFournisseurId: number, contacts: string): Promise<void> {
@@ -28,7 +30,7 @@ export class ImporterContacts implements UseCase<void> {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
         const listeDiffusion = await this.listeDiffusionGateway.findById(campagne.listeDiffusionId);
-        const nomListe = listeDiffusion?.nom!;
+        const nomListe = `${listeDiffusion?.nom!}-${this.cryptoGateway.getUuid().slice(0, 8)}`;
 
         const processId = await this.planMarketingGateway.importerContacts(
             nomListe,

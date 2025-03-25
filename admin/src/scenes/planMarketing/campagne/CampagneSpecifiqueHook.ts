@@ -69,8 +69,10 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       toastr.success("Succès", "Campagne envoyée avec succès", { timeOut: 5000 });
     },
     onError: (error: HttpError) => {
-      toastr.clean();
-      toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de l'envoi de la campagne", { timeOut: 5000 });
+      if (error?.statusCode === 422) {
+        toastr.clean();
+        toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de l'envoi de la campagne", { timeOut: 5000 });
+      }
     },
   });
 

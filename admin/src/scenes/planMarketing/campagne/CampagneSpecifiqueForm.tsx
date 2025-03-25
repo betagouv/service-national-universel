@@ -40,14 +40,6 @@ interface ListeDiffusionOption {
   label: string;
 }
 
-const formatLocalDate = (date: Date) => {
-  return new Date(date).toLocaleDateString("fr-FR", {
-    day: "2-digit",
-    month: "2-digit",
-    year: "numeric",
-  });
-};
-
 export interface CampagneSpecifiqueFormProps {
   campagneData: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined };
   listeDiffusionOptions: ListeDiffusionOption[];
@@ -158,7 +150,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       setIsSendCamapgneModalOpen(true);
     };
 
-    const handleConfirmSendCampagne = (data: CampagneSpecifiqueFormData) => {
+    const handleConfirmSendCampagne = () => {
       setIsSendCamapgneModalOpen(false);
       if (campagneData.id) {
         onSend(campagneData.id);
@@ -207,7 +199,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                         ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
                         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                         .slice(0, 1)
-                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatLocalDate(envoi.date)}`} status={"VALIDATED"} />)}
+                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatDateFRTimezoneUTC(envoi.date)}`} status={"VALIDATED"} />)}
                     </div>
                     <div>
                       {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (

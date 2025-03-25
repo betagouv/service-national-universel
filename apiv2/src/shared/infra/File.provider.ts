@@ -1,6 +1,6 @@
 import { promises as fs } from "fs";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
-import { format, writeToString, FormatterOptionsArgs } from "@fast-csv/format";
+import { writeToString } from "@fast-csv/format";
 import * as XLSX from "xlsx";
 import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
@@ -17,10 +17,13 @@ export class FileProvider implements FileGateway {
     private readonly logger: Logger = new Logger(FileProvider.name);
 
     constructor(private readonly config: ConfigService) {}
-    async generateCSV(recordArray: Record<string, any>[], options: CsvOptions): Promise<string> {
+    async generateCSV(
+        recordArray: Record<string, any>[],
+        options: CsvOptions = { headers: true, delimiter: ";" },
+    ): Promise<string> {
         this.logger.log(`Generating CSV with ${recordArray.length} rows with column names:${options.headers}`);
 
-        return writeToString(recordArray, { headers: true, quote: '"', ...options });
+        return writeToString(recordArray, { ...options, quote: '"', alwaysWriteHeaders: true });
     }
 
     async readFile(filePath: string): Promise<Buffer> {

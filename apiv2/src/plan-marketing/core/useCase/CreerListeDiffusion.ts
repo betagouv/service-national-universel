@@ -295,6 +295,10 @@ export class CreerListeDiffusion implements UseCase<string> {
             );
         }
 
+        if (contactsForListeDiffusion.length === 0) {
+            throw new FunctionalException(FunctionalExceptionCode.NO_CONTACTS);
+        }
+
         const csvContacts = await this.fileGateway.generateCSV(contactsForListeDiffusion, {
             headers: COLUMN_CSV_HEADERS,
             delimiter: ";",
