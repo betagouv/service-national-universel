@@ -1,23 +1,23 @@
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const Joi = require("joi");
-const { getDb } = require("./mongo");
+import jwt from "jsonwebtoken";
+import crypto from "crypto";
+import Joi from "joi";
+import { getDb } from "./mongo";
 
-const { capture, captureMessage } = require("./sentry");
-const { config } = require("./config");
-const { logger } = require("./logger");
-const { sendTemplate } = require("./brevo");
-const {
+import { capture, captureMessage } from "./sentry";
+import { config } from "./config";
+import { logger } from "./logger";
+import { sendTemplate } from "./brevo";
+import {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC,
   JWT_SIGNIN_VERSION,
   JWT_TRUST_TOKEN_VERSION,
   checkJwtTrustTokenVersion,
-} = require("./jwt-options");
-const { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } = require("./cookie-options");
-const { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString, YOUNG_STATUS } = require("./utils");
-const {
+} from "./jwt-options";
+import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } from "./cookie-options";
+import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
+import {
   SENDINBLUE_TEMPLATES,
   PHONE_ZONES_NAMES_ARR,
   isFeatureEnabled,
@@ -29,16 +29,19 @@ const {
   DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS,
   isAdminCle,
   isReferentClasse,
-} = require("snu-lib");
+  YOUNG_STATUS,
+} from "snu-lib";
 
-const { serializeYoung, serializeReferent } = require("./utils/serializer");
-const { validateFirstName } = require("./utils/validator");
-const { getFilteredSessions } = require("./utils/cohort");
+import { serializeYoung, serializeReferent } from "./utils/serializer";
+import { validateFirstName } from "./utils/validator";
+import { getFilteredSessions } from "./utils/cohort";
 
-const { ClasseModel, EtablissementModel, CohortModel } = require("./models");
-const { getFeatureFlagsAvailable } = require("./featureFlag/featureFlagService");
+import { ClasseModel, EtablissementModel, CohortModel } from "./models";
+import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
 
 class Auth {
+  model: any;
+
   constructor(model) {
     this.model = model;
   }
@@ -142,7 +145,7 @@ class Auth {
       const count = await this.countDocumentsInView(normalizedFirstName, normalizedLastName, formatedDate);
       if (count > 0) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       let sessions = await getFilteredSessions(value, req.headers["x-user-timezone"] || null);
-      if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" });
+      if (config.ENVIRONMENT !== "production") sessions.push({ name: "à venir" } as any);
       const session = sessions.find(({ name }) => name === value.cohort);
       if (!session) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
@@ -472,7 +475,7 @@ class Auth {
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
@@ -537,7 +540,7 @@ class Auth {
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       }
 
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
@@ -668,7 +671,7 @@ class Auth {
       user.set({ tokenEmailValidation: null, tokenEmailValidationExpires: null, attemptsEmailValidation: 0, email: user.newEmail, newEmail: null });
       await user.save();
 
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
 
       return res.status(200).send({
@@ -727,7 +730,7 @@ class Auth {
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       }
 
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
@@ -800,7 +803,7 @@ class Auth {
       const { user } = req;
       user.set({ lastActivityAt: Date.now() });
       await user.save();
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
       const token = isYoung(user) ? value.token_young : value.token_ref;
       if (!data || !token) {
@@ -822,7 +825,7 @@ class Auth {
       const { user } = req;
       user.set({ lastActivityAt: Date.now() });
       await user.save();
-      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user);
+      const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
@@ -918,7 +921,7 @@ class Auth {
       if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
 
-      return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user, user) });
+      return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -957,7 +960,7 @@ class Auth {
       .validate(req.body);
 
     if (error) {
-      if (error.details.find((e) => e.path === "password")) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
+      if (error.details.find((e) => e.path === ("password" as any))) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
       return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     }
 
@@ -988,4 +991,4 @@ class Auth {
   }
 }
 
-module.exports = Auth;
+export default Auth;

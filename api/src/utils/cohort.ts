@@ -1,4 +1,4 @@
-import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, UserDto, ROLES } from "snu-lib";
+import { YOUNG_STATUS, regionsListDROMS, COHORT_TYPE, getDepartmentForEligibility, YoungType, COHORT_STATUS, getRegionForEligibility, CohortType, UserDto, ROLES } from "snu-lib";
 import { CohortModel, CohortDocument, InscriptionGoalModel, YoungModel } from "../models";
 
 export type CohortDocumentWithPlaces = CohortDocument<{
@@ -153,7 +153,7 @@ export async function getCohortNamesEndAfter(date) {
   return cohorts.map((cohort) => cohort.name);
 }
 
-export async function getCohortDateInfo(cohortName) {
+export async function getCohortDateInfo(cohortName): Promise<Partial<CohortType> | null> {
   try {
     return CohortModel.findOne({ name: cohortName }, { validationDate: 1, validationDateForTerminaleGrade: 1, daysToValidate: 1, daysToValidateForTerminalGrade: 1, dateStart: 1 });
   } catch (err) {
