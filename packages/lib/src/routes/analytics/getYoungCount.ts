@@ -9,6 +9,7 @@ export interface GetYoungCountRoute extends BasicRoute {
       fields: string[];
     };
     filters?: Record<string, string | string[]>;
+    existingFields?: string[];
   };
   response: RouteResponseBodyV2<{ count: number }>;
 }

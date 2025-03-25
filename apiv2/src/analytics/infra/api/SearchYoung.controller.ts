@@ -17,7 +17,7 @@ export class SearchYoungController {
 
     @Post("/count")
     async countYoung(
-        @Body() query: Pick<SearchYoungDto, "filters" | "searchTerm">,
+        @Body() query: Pick<SearchYoungDto, "filters" | "searchTerm" | "existingFields">,
     ): Promise<AnalyticsRoutes["GetYoungCount"]["response"]> {
         const count = await this.searchYoungGateway.countYoung(query);
         return {

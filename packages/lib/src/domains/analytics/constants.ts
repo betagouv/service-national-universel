@@ -1,6 +1,7 @@
 export interface SearchParams {
   searchTerm?: SearchTerm;
   filters?: Record<string, string | string[]>;
+  existingFields?: string[];
   sourceFields?: string[];
   page?: number;
   size?: number;

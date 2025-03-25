@@ -30,13 +30,14 @@ export interface ESMustQuery {
         fuzziness?: "AUTO";
         operator?: "or" | "and";
     };
-    bool: {
+    bool?: {
         should: Array<any>;
         minimum_should_match: number;
     };
     match_all?: Record<string, never>;
     terms?: Record<string, string[]>;
     match?: Record<string, { query: string; fuzziness?: "AUTO" }>;
+    exists?: { field: string };
 }
 
 export interface ESFilterQuery {

@@ -68,9 +68,10 @@ export class SearchYoungElasticRepository implements SearchYoungGateway {
         };
     }
 
-    async countYoung(params: Pick<SearchParams, "filters" | "searchTerm">): Promise<number> {
+    async countYoung(params: Pick<SearchParams, "filters" | "searchTerm" | "existingFields">): Promise<number> {
         const queryBuilder = new ElasticsearchQueryBuilder<YoungType>("young")
             .setFilters(params.filters)
+            .setExistingFields(params.existingFields)
             .setSearchTerm(params.searchTerm);
         const response = await this.elasticsearchService.count(queryBuilder.buildCountQuery());
         return response.body.count;

@@ -4,7 +4,7 @@ export type SearchYoungResult = SearchResult<YoungType>;
 
 export interface SearchYoungGateway {
     searchYoung(query: SearchParams): Promise<SearchYoungResult>;
-    countYoung(query: Pick<SearchParams, "filters" | "searchTerm">): Promise<number>;
+    countYoung(query: Pick<SearchParams, "filters" | "existingFields" | "searchTerm">): Promise<number>;
 }
 
 export const SearchYoungGateway = Symbol("SearchYoungGateway");

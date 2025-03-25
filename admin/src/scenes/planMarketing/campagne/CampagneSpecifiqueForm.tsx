@@ -67,7 +67,7 @@ export interface CampagneSpecifiqueFormRefMethods {
 
 const recipientOptions = [
   { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes", withCount: true },
-  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux" },
+  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux", withCount: true },
   { value: DestinataireListeDiffusion.REFERENTS_CLASSES, label: "Référents de classes" },
   { value: DestinataireListeDiffusion.CHEFS_ETABLISSEMENT, label: "Chefs d'établissement" },
   { value: DestinataireListeDiffusion.CHEFS_CENTRES, label: "Chefs de centres" },
@@ -326,7 +326,9 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                               />
                               <span>
                                 {option.label}
-                                {option.withCount && <DestinataireCount type={option.value} cohortId={campagneData.cohortId} listeDiffusion={currentListeDiffusion} />}
+                                {option.withCount && field.value?.includes(option.value) && (
+                                  <DestinataireCount type={option.value} cohortId={campagneData.cohortId} listeDiffusion={currentListeDiffusion} />
+                                )}
                               </span>
                             </label>
                           ))}
