@@ -1,19 +1,27 @@
 #!/bin/bash
 
-set -e
+set -ex
 
-if [ "$#" -lt 1 ]; then
+if [ "$#" -lt 2 ]; then
     echo "Create test environment on CleverCloud"
-    echo "Usage $0 <cc_organization_id>"
-    echo "  cc_organization_id: CleverCloud organization ID"
+    echo "Usage $0 <organization_id>"
+    echo "  organization_id: CleverCloud organization ID"
+    echo "  ci_application_id: CI application ID"
     exit 1
 fi
 
 org_id=$1
+ci_app_id=$2
 
 if [[ $org_id == "" ]]
 then
-    echo "You must specify the cc_organization_id"
+    echo "You must specify the organization_id"
+    exit 1
+fi
+
+if [[ $ci_app_id == "" ]]
+then
+    echo "You must specify the ci_application_id"
     exit 1
 fi
 
@@ -39,6 +47,8 @@ echo "env_name: $env_name"
 
 domain=poc.ci.beta-snu.dev
 
+cc_endpoint=https://api.clever-cloud.com
+
 
 result=$(clever applications list \
     --format json \
@@ -52,13 +62,15 @@ if [[ $result != "" ]]; then
 fi
 
 
-clever create \
+result=$(clever create \
     --org $org_id \
     --type node \
     --github betagouv/service-national-universel \
     --region par \
     --format json \
-    $env_name
+    $env_name)
+
+app_id=$(jq -r '.id' <<< $result)
 
 clever config update \
     --description $env_name \
@@ -70,7 +82,16 @@ clever scale \
     --flavor S \
     --build-flavor XL
 
-clever domain add api.$env_name.$domain/
-clever domain add api.$env_name.$domain/v2/
-clever domain add admin.$env_name.$domain/
-clever domain add moncompte.$env_name.$domain/
+clever curl -s -X PUT "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/branch" \
+    -H 'Content-Type: application/json' \
+    --data-raw "{\"branch\":\"$branch_name\"}"
+
+clever env --app $ci_app_id | sed \
+    -e "s#ENVIRONMENT=\"ci\"$#ENVIRONMENT=\"$env_name\"#g"
+    -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
+    | clever env import --app $app_id
+
+# clever domain add api.$env_name.$domain/
+# clever domain add api.$env_name.$domain/v2/
+# clever domain add admin.$env_name.$domain/
+# clever domain add moncompte.$env_name.$domain/
