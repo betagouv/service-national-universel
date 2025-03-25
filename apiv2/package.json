@@ -33,6 +33,7 @@
         "@bull-board/nestjs": "^6.7.10",
         "@elastic/elasticsearch": "^8.17.1",
         "@fast-csv/parse": "^5.0.2",
+        "@fast-csv/format": "^5.0.2",
         "@getbrevo/brevo": "^2.2.0",
         "@nestjs-cls/transactional": "^2.4.3",
         "@nestjs/bullmq": "^10.2.1",
