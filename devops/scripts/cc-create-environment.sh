@@ -45,7 +45,7 @@ echo "branch_name: $branch_name"
 env_name=$($(dirname $0)/cc-environment-name.sh $branch_name)
 echo "env_name: $env_name"
 
-domain=poc.ci.beta-snu.dev
+domain=ci.beta-snu.dev
 
 cc_endpoint=https://api.clever-cloud.com
 
