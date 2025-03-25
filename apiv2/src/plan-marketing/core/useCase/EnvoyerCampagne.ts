@@ -27,8 +27,7 @@ export class EnvoyerCampagne implements UseCase<void> {
             );
         }
         await this.associerListeDiffusionToCampagne.execute(nomListe, campagneProviderId);
-        // TODO: décommenter sendCampagneNow
-        // await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
+        await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
         await this.campagneGateway.addEnvoiToCampagneById(campagneId, {
             date: this.clockGateway.now(),
             statut: EnvoiCampagneStatut.TERMINE,

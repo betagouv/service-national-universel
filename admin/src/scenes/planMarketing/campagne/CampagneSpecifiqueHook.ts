@@ -64,7 +64,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       return PlanMarketingService.envoyer(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId] });
+      queryClient.invalidateQueries();
       toastr.clean();
       toastr.success("Succès", "Campagne envoyée avec succès", { timeOut: 5000 });
     },

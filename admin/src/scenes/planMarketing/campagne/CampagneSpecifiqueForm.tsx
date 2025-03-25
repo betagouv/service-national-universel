@@ -3,7 +3,8 @@ import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, M
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
-import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi } from "snu-lib";
+import { LuSend } from "react-icons/lu";
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi, formatDateFRTimezoneUTC, formatLongDateFR } from "snu-lib";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -206,19 +207,27 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                         ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
                         .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                         .slice(0, 1)
-                        .map((envoi, index) => <Badge key={index} title={`Envoyé le ${formatLocalDate(envoi.date)}`} status={"VALIDATED"} />)}
+                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatLocalDate(envoi.date)}`} status={"VALIDATED"} />)}
                     </div>
                     <div>
                       {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (
                         <div className="text-sm text-gray-500">
                           <span>{(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) - 1} relances</span>
-                          <div>
+                          <div className="flex items-center gap-1">
                             {campagneData?.envois
                               ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
                               .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
                               .slice(1)
-                              ?.map((envoi) => formatLocalDate(envoi.date))
-                              .join(" • ")}
+                              ?.map((envoi, index, array) => (
+                                <React.Fragment key={(campagneData.id ?? "id") + envoi.date}>
+                                  <span>
+                                    <Tooltip id={`id-envoi-campagne-${campagneData.id}-${index}`} title={`Envoyée le ${formatLongDateFR(envoi.date)}`}>
+                                      {formatDateFRTimezoneUTC(envoi.date)}
+                                    </Tooltip>
+                                  </span>
+                                  {index < array.length - 1 && <span>•</span>}
+                                </React.Fragment>
+                              ))}
                           </div>
                         </div>
                       )}
@@ -360,7 +369,13 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   title="Enregistrer pour ce séjour"
                   onClick={handleSubmit(handleConfirmSubmit)}
                 />
-                <Button title="Envoyer la camapgne" className="flex-1 bg-green-700" onClick={handleSubmit(handleSendCampagne)} loading={isSubmitting} />
+                <Button
+                  leftIcon={<LuSend className="w-5 h-5" />}
+                  title={`${campagneData.envois && campagneData.envois.length > 0 ? "Renvoyer la campagne" : "Envoyer la campagne"}`}
+                  className="flex-1 bg-green-700"
+                  onClick={handleSubmit(handleSendCampagne)}
+                  loading={isSubmitting}
+                />
               </div>
             </div>
           </Collapsable>
