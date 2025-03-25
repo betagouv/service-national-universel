@@ -151,7 +151,6 @@ jobs:
         run: git push --force origin HEAD:deploy-production
 
   watch_production_deployment:
-    environment: production
     needs: deploy_production
     runs-on: ubuntu-latest
     strategy:
