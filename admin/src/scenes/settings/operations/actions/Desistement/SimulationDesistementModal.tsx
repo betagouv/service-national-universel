@@ -2,14 +2,15 @@ import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
 import { CohortDto, formatDateFR, TaskName, translateSimulationName } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
-import useTraitements from "../../shared/useTraitements";
+import useTraitements from "../../hooks/useTraitements";
 import dayjs from "dayjs";
-import DesistementButton from "./DesistementButton";
-import DesistementPreview from "./DesistementPreview";
+import SimulationDesistementButton from "./SimulationDesistementButton";
 
-export default function DesistementModal({ session, onClose }: { session: CohortDto; onClose: () => void }) {
+export default function SimulationDesistementModal({ session, onClose }: { session: CohortDto; onClose: () => void }) {
   const { data: traitements, isPending, isError } = useTraitements({ sessionId: session._id!, action: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER, sort: "ASC" });
+
   const [selectedOption, setSelectedOption] = useState<string>();
+
   const options = traitements?.map((t) => ({
     value: t.id,
     label: `${translateSimulationName(t.name)} - ${formatDateFR(dayjs(t.createdAt))}`,
@@ -51,14 +52,12 @@ export default function DesistementModal({ session, onClose }: { session: Cohort
               className="w-full"
             />
           )}
-          <br />
-          {selectedTraitement && <DesistementPreview traitement={selectedTraitement} />}
         </>
       }
       footer={
         <div className="grid grid-cols-2 gap-6">
           <Button title="Annuler" type="secondary" className="w-full" onClick={onClose} />
-          <DesistementButton sessionId={session._id!} taskId={selectedTraitement?.id || ""} onClose={onClose} disabled={!selectedTraitement?.id} />
+          <SimulationDesistementButton sessionId={session._id!} taskId={selectedTraitement?.id || ""} onClose={onClose} disabled={!selectedTraitement?.id} />
         </div>
       }
     />

@@ -46,7 +46,8 @@ export class AdminTaskConsumer extends WorkerHost {
                     case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
                     case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
                     case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
-                    case TaskName.DESISTEMENT_POST_AFFECTATION:
+                    case TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION:
+                    case TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER:
                         results = await this.adminTaskAffectationSelectorService.handleAffectation(job, task);
                         break;
                     case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
@@ -68,7 +69,7 @@ export class AdminTaskConsumer extends WorkerHost {
                 }
             } catch (error: any) {
                 this.logger.error(
-                    `Error processing task "${job.name}" - ${error.message} - ${error.stack}`,
+                    `Error processing task "${job.name}" - ${error.message} - ${error.options?.description} - ${error.stack}`,
                     AdminTaskConsumer.name,
                 );
                 await this.adminTaskRepository.toFailed(job.data.id, error.message, error.options?.description);
