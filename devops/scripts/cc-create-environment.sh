@@ -91,7 +91,7 @@ clever env --app $ci_app_id | sed \
     -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
     | clever env import --app $app_id
 
-# clever domain add api.$env_name.$domain/
-# clever domain add api.$env_name.$domain/v2/
-# clever domain add admin.$env_name.$domain/
-# clever domain add moncompte.$env_name.$domain/
+clever domain add api.$env_name.$domain/
+clever domain add api.$env_name.$domain/v2/
+clever domain add admin.$env_name.$domain/
+clever domain add moncompte.$env_name.$domain/
