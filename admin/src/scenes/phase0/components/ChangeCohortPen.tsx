@@ -27,14 +27,7 @@ export function ChangeCohortPen({ young, onChange }) {
     if (!young) return undefined;
 
     (async function getSessions() {
-      //When inscription is open for youngs, we don't want to display the cohort to come
-      // const isEligibleForCohortToCome = calculateAge(young.birthdateAt, new Date("2023-09-30")) < 18;
-      // const cohortToCome = { name: "à venir", isEligible: isEligibleForCohortToCome };
-      // if (user.role !== ROLES.ADMIN) {
-      //   setOptions(isEligibleForCohortToCome && young.cohort !== "à venir" ? [cohortToCome] : []);
-      //   return;
-      // }
-      const cohortsAvailable = await CohortService.getEligibilityForYoung({ id: young._id });
+      const cohortsAvailable = await CohortService.getEligibilityForYoung({ id: young._id, query: { type: "BASCULE" } });
       if (Array.isArray(cohortsAvailable)) {
         const cohorts: CohortAvailable[] = cohortsAvailable
           .filter((c) => c.name !== young.cohort)
