@@ -128,7 +128,8 @@
             "^@shared/(.*)$": "<rootDir>/src/shared/$1",
             "^@notification/(.*)$": "<rootDir>/src/notification/$1",
             "^@task/(.*)$": "<rootDir>/src/task/$1",
-            "^@plan-marketing/(.*)$": "<rootDir>/src/plan-marketing/$1"
+            "^@plan-marketing/(.*)$": "<rootDir>/src/plan-marketing/$1",
+            "^@analytics/(.*)$": "<rootDir>/src/analytics/$1"
         },
         "modulePathIgnorePatterns": [
             "<rootDir>/packages"

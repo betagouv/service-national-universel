@@ -1,16 +1,14 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { FileGateway } from "@shared/core/File.gateway";
+import { ConfigService } from "@nestjs/config";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
-import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ConfigService } from "@nestjs/config";
-import { TaskName, TaskStatus, isCampagneGenerique } from "snu-lib";
+import { TaskName, TaskStatus } from "snu-lib";
+import { CampagneSpecifiqueModelWithRefAndGeneric } from "../Campagne.model";
 import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
-import { CreerListeDiffusion } from "./CreerListeDiffusion";
-import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
-import { CampagneSpecifiqueModelWithRefAndGeneric, CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";
+import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
+import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 
 Injectable();
 export class ImporterContacts implements UseCase<void> {
