@@ -325,8 +325,7 @@ Cette fonctionnalité est à utiliser uniquement pour les séjours CLE spécifiq
                 <SimpleToggle
                   label="Dates spécifiques"
                   disabled={isLoading || readOnly}
-                  // @ts-ignore
-                  value={showSpecificDatesReInscription}
+                  value={!!showSpecificDatesReInscription}
                   onChange={(v) => {
                     if (v == false) onCohortChange({ ...cohort, reInscriptionEndDate: null, reInscriptionStartDate: null });
                     // @ts-ignore

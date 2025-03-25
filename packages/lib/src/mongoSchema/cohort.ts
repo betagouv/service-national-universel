@@ -359,28 +359,28 @@ export const CohortSchema = {
 
   inscriptionOpenForReferentClasse: {
     type: Boolean,
-    default: true,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les référents de classe",
     },
   },
   inscriptionOpenForReferentRegion: {
     type: Boolean,
-    default: true,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les référents régionaux",
     },
   },
   inscriptionOpenForReferentDepartment: {
     type: Boolean,
-    default: true,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les référents départementaux",
     },
   },
   inscriptionOpenForAdministrateurCle: {
     type: Boolean,
-    default: true,
+    default: false,
     documentation: {
       description: "Ouverture ou fermeture de l'inscription manuelle pour les administrateurs CLE",
     },
