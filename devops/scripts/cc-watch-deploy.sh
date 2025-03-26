@@ -34,7 +34,7 @@ echo "Waiting for deployment to start"
 deployment_started=""
 until [[ $deployment_started ]]; do
     deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
-        | jq '[ .[] | select(.state == "WIP" and .commit == $sha and .cause == "github") ] | .[0] // empty' --arg sha "$sha")
+        | jq '[ .[] | select(.state == "WIP" and .commit == $sha) ] | .[0] // empty' --arg sha "$sha")
     sleep 5
 done
 

@@ -105,6 +105,7 @@ else # Create application
 fi
 
 status=$(clever status --format json --app $app_id | jq -r '.status')
+echo "status: $status"
 if [[ $status == "stopped" ]]; then # Restart application
     clever curl -s -X POST "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/instances"
 fi
