@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 if [ "$#" -lt 2 ]; then
     echo "Create test environment on CleverCloud"
@@ -35,14 +35,11 @@ if ! [[ -x "$(command -v jq)" ]]; then
   exit 1
 fi
 
-if [[ -f .clever.json ]]; then
-    echo ".clever.json file already exists. Aborting"
-    exit 1
-fi
+directory=$(dirname $0)
 
 branch_name=$(git rev-parse --abbrev-ref HEAD)
 echo "branch_name: $branch_name"
-env_name=$($(dirname $0)/cc-environment-name.sh $branch_name)
+env_name=$($directory/cc-environment-name.sh $branch_name)
 echo "env_name: $env_name"
 
 domain=ci.beta-snu.dev
@@ -53,45 +50,56 @@ cc_endpoint=https://api.clever-cloud.com
 result=$(clever applications list \
     --format json \
     --org $CC_ORG_ID \
-| jq '.[0].applications[]|select(.name == $ENV_NAME)' --arg ENV_NAME "$env_name")
+| jq '.[0].applications[]|select(.name == $ENV_NAME)' --arg ENV_NAME "$env_name"
+)
 
 if [[ $result != "" ]]; then
     app_id=$(jq -r '.app_id' <<< $result)
-    echo "Application $env_name already exists (id: $app_id). Aborting"
-    exit 0
+    echo "Application $env_name already exists (id: $app_id)"
+else # Create application
+    if [[ -f .clever.json ]]; then
+        echo ".clever.json file already exists. Aborting"
+        exit 1
+    fi
+
+    result=$(clever create \
+        --org $org_id \
+        --type node \
+        --github betagouv/service-national-universel \
+        --region par \
+        --format json \
+        $env_name)
+
+    app_id=$(jq -r '.id' <<< $result)
+
+    clever config update \
+        --description $env_name \
+        --enable-zero-downtime \
+        --enable-cancel-on-push \
+        --enable-force-https
+
+    clever scale \
+        --flavor S \
+        --build-flavor XL
+
+    clever curl -s -X PUT "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/branch" \
+        -H 'Content-Type: application/json' \
+        --data-raw "{\"branch\":\"$branch_name\"}"
+
+    clever env --app $ci_app_id | sed \
+        -e "s#ENVIRONMENT=\"ci\"#ENVIRONMENT=\"$env_name\"#g" \
+        -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
+        | clever env import --app $app_id
+
+    clever domain add api.$env_name.$domain/
+    clever domain add api.$env_name.$domain/v2/
+    clever domain add admin.$env_name.$domain/
+    clever domain add moncompte.$env_name.$domain/
 fi
 
+status=$(clever status --format json --app $app_id | jq -r '.status')
+if [[ $status == "stopped" ]]; then # Restart application
+    clever curl -s -X POST "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/instances"
+fi
 
-result=$(clever create \
-    --org $org_id \
-    --type node \
-    --github betagouv/service-national-universel \
-    --region par \
-    --format json \
-    $env_name)
-
-app_id=$(jq -r '.id' <<< $result)
-
-clever config update \
-    --description $env_name \
-    --enable-zero-downtime \
-    --enable-cancel-on-push \
-    --enable-force-https
-
-clever scale \
-    --flavor S \
-    --build-flavor XL
-
-clever curl -s -X PUT "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/branch" \
-    -H 'Content-Type: application/json' \
-    --data-raw "{\"branch\":\"$branch_name\"}"
-
-clever env --app $ci_app_id | sed \
-    -e "s#ENVIRONMENT=\"ci\"#ENVIRONMENT=\"$env_name\"#g" \
-    -e "s#ci.beta-snu.dev#$env_name.$domain#g" \
-    | clever env import --app $app_id
-
-clever domain add api.$env_name.$domain/
-clever domain add api.$env_name.$domain/v2/
-clever domain add admin.$env_name.$domain/
-clever domain add moncompte.$env_name.$domain/
+ORGANIZATION_ID=$org_id APPLICATION_ID=$app_id $directory/cc-watch-deploy.sh
