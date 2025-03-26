@@ -10,57 +10,11 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  # prepare:
-  #   if: |
-  #     (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
-  #     (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
-  #   runs-on: ubuntu-latest
-  #   outputs:
-  #     env_name: ${{ steps.config.outputs.env_name }}
-  #     build_matrix: ${{ steps.config.outputs.build }}
-  #     deploy_matrix: ${{ steps.config.outputs.deploy }}
-
-  #   steps:
-  #     - uses: actions/checkout@v4
-
-  #     - name: Use Node.js
-  #       uses: actions/setup-node@v4
-  #       with:
-  #         node-version: "20.17"
-
-  #     - name: Get environment configuration
-  #       env:
-  #         BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
-  #       id: config
-  #       run: |
-  #         # ENV_NAME
-  #         env_name=$(node devops/scripts/get-environment-name.js ${{ env.BRANCH_NAME }})
-  #         echo "env_name: $env_name"
-  #         echo "env_name=$env_name" >> $GITHUB_OUTPUT
-
-  #         git fetch --depth=100 origin ${{ env.BRANCH_NAME }}
-  #         git switch ${{ env.BRANCH_NAME }}
-
-  #         # BUILD MATRIX
-  #         echo "[]" \
-  #         | jq  '. + [{name:"api", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- api packages/lib package-lock.json | cut -d " " -f 1)" \
-  #         | jq  '. + [{name:"apiv2", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- apiv2 packages/lib package-lock.json | cut -d " " -f 1)" \
-  #         | jq  '. + [{name:"app", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- app packages package-lock.json | cut -d " " -f 1)" \
-  #         | jq  '. + [{name:"admin", tag:$tag}]' --arg tag "$(git log --max-count=1 --oneline -- admin packages package-lock.json | cut -d " " -f 1)" > build.json
-
-  #         echo "Build matrix"
-  #         cat build.json
-  #         echo "build=$(jq -c < build.json)" >> $GITHUB_OUTPUT
-
-  #         # DEPLOY MATRIX
-  #         cat build.json > deploy.json
-
-  #         echo "Deploy matrix"
-  #         cat deploy.json
-  #         echo "deploy=$(jq -c < deploy.json)" >> $GITHUB_OUTPUT
-
   deploy:
     runs-on: ubuntu-latest
+    if: |
+      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
+      (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
 
     steps:
       - uses: actions/checkout@v4
@@ -72,4 +26,5 @@ jobs:
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }}
+          BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
+        run: ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.BRANCH_NAME }}

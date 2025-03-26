@@ -2,16 +2,18 @@
 
 set -e
 
-if [ "$#" -lt 2 ]; then
+if [ "$#" -lt 3 ]; then
     echo "Create test environment on CleverCloud"
     echo "Usage $0 <organization_id>"
     echo "  organization_id: CleverCloud organization ID"
     echo "  ci_application_id: CI application ID"
+    echo "  branch_name: Branch name"
     exit 1
 fi
 
 org_id=$1
 ci_app_id=$2
+branch_name=$3
 
 if [[ $org_id == "" ]]
 then
@@ -22,6 +24,12 @@ fi
 if [[ $ci_app_id == "" ]]
 then
     echo "You must specify the ci_application_id"
+    exit 1
+fi
+
+if [[ $branch_name == "" ]]
+then
+    echo "You must specify the branch_name"
     exit 1
 fi
 
@@ -37,7 +45,6 @@ fi
 
 directory=$(dirname $0)
 
-branch_name=$(git rev-parse --abbrev-ref HEAD)
 echo "branch_name: $branch_name"
 env_name=$($directory/cc-environment-name.sh $branch_name)
 echo "env_name: $env_name"
