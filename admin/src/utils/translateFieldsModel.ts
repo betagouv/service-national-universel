@@ -577,6 +577,8 @@ const translateFieldMission = (f) => {
       return "Retour d’expérience (rapport de MIG)";
     case "othersFiles":
       return "Autre";
+    case "status":
+      return "Statut";
     default:
       return f;
   }
