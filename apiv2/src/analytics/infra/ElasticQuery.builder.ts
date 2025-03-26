@@ -88,6 +88,20 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
+    setExistingFields(existingFields?: string[]): this {
+        if (!existingFields) {
+            return this;
+        }
+        existingFields.forEach((field) => {
+            this.query.body.query.bool.must.push({
+                exists: {
+                    field: `${field}.keyword`,
+                },
+            });
+        });
+        return this;
+    }
+
     setSourceFields(fields: string[] | undefined): this {
         if (!fields) {
             return this;

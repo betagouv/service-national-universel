@@ -3,6 +3,7 @@ import { SearchYoungGateway, SearchYoungResult } from "src/analytics/core/Search
 import { SearchYoungDto } from "./dto/SearchYoung.validation";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { AnalyticsRoutes } from "snu-lib";
 
 @Controller("/youngs")
 @UseGuards(SuperAdminGuard, AdminGuard)
@@ -15,7 +16,12 @@ export class SearchYoungController {
     }
 
     @Post("/count")
-    async countYoung(@Body() query: Pick<SearchYoungDto, "filters" | "searchTerm">): Promise<number> {
-        return this.searchYoungGateway.countYoung(query);
+    async countYoung(
+        @Body() query: Pick<SearchYoungDto, "filters" | "searchTerm" | "existingFields">,
+    ): Promise<AnalyticsRoutes["GetYoungCount"]["response"]> {
+        const count = await this.searchYoungGateway.countYoung(query);
+        return {
+            count,
+        };
     }
 }

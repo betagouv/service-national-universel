@@ -1,10 +1,16 @@
-import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
-import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
 import { LuSend } from "react-icons/lu";
+
+import { Checkbox } from "@snu/ds";
+import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
+
 import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi, formatDateFRTimezoneUTC, formatLongDateFR } from "snu-lib";
+
+import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
+import DestinataireCount from "./partials/DestinataireCount";
+import DestinataireLink from "./partials/DestinataireLink";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -53,8 +59,8 @@ export interface CampagneSpecifiqueFormRefMethods {
 }
 
 const recipientOptions = [
-  { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes" },
-  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux" },
+  { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes", withCount: true },
+  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux", withCount: true },
   { value: DestinataireListeDiffusion.REFERENTS_CLASSES, label: "Référents de classes" },
   { value: DestinataireListeDiffusion.CHEFS_ETABLISSEMENT, label: "Chefs d'établissement" },
   { value: DestinataireListeDiffusion.CHEFS_CENTRES, label: "Chefs de centres" },
@@ -78,6 +84,8 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
         ...campagneData,
       },
     });
+    const { listesDiffusion } = useListeDiffusion();
+    const currentListeDiffusion = useMemo(() => listesDiffusion.find((liste) => liste.id === watch("listeDiffusionId")), [listesDiffusion, watch("listeDiffusionId")]);
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isSendCamapgneModalOpen, setIsSendCamapgneModalOpen] = useState(false);
@@ -255,7 +263,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 <div>
                   <div className="flex gap-2">
                     <Label title="ID du template Brevo" name="templateId" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-template-brevo" title="Saisissez l'id du template Brevo">
+                    <Tooltip id="id-template-brevo" title="Saisissez l'id du template Brevo" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
@@ -286,14 +294,14 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
               <div className="grid grid-cols-2 gap-16">
                 <div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Label title="Destinataires" name="destinataires" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-destinataires" title="Sélectionnez les destinataires de cette campagne">
+                    <Tooltip id="id-destinataires" title="Sélectionnez les destinataires de cette campagne" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-5">
                     <Controller
                       name="destinataires"
                       control={control}
@@ -309,7 +317,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                                   field.onChange(field.value?.includes(option.value) ? field.value?.filter((v) => v !== option.value) : [...(field.value || []), option.value])
                                 }
                               />
-                              <span>{option.label}</span>
+                              <span>
+                                {option.label}
+                                {option.withCount && field.value?.includes(option.value) && (
+                                  <DestinataireCount type={option.value} cohortId={campagneData.cohortId} listeDiffusion={currentListeDiffusion} />
+                                )}
+                              </span>
                             </label>
                           ))}
                         </>
@@ -317,12 +330,13 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     />
                   </div>
                   {errors.destinataires && <span className="text-red-500 text-sm mt-1">{errors.destinataires.message}</span>}
+                  {currentListeDiffusion?.filters && <DestinataireLink listeDiffusion={currentListeDiffusion} cohortId={campagneData.cohortId} />}
                 </div>
 
                 <div>
                   <div className="flex gap-2">
                     <Label title="Objet de la campagne" name="objet" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-objet" title="Saisissez l'objet du mail de la campagne">
+                    <Tooltip id="id-objet" title="Saisissez l'objet du mail de la campagne" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
