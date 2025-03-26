@@ -27,6 +27,7 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
           BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
+          SHA: ${{ github.event.pull_request.head.sha || github.sha }}
         run: |
           ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.BRANCH_NAME }}
-          ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ github.sha }}
+          ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.SHA }}
