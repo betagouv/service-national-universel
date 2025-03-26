@@ -2,18 +2,20 @@
 
 set -e
 
-if [ "$#" -lt 3 ]; then
+if [ "$#" -lt 4 ]; then
     echo "Create test environment on CleverCloud"
     echo "Usage $0 <organization_id>"
     echo "  organization_id: CleverCloud organization ID"
     echo "  ci_application_id: CI application ID"
     echo "  branch_name: Branch name"
+    echo "  sha: Commit sha"
     exit 1
 fi
 
 org_id=$1
 ci_app_id=$2
 branch_name=$3
+sha=$4
 
 if [[ $org_id == "" ]]
 then
@@ -30,6 +32,12 @@ fi
 if [[ $branch_name == "" ]]
 then
     echo "You must specify the branch_name"
+    exit 1
+fi
+
+if [[ $sha == "" ]]
+then
+    echo "You must specify the commit sha"
     exit 1
 fi
 
@@ -109,3 +117,5 @@ echo "status: $status"
 if [[ $status == "stopped" ]]; then # Restart application
     clever curl -s -X POST "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/instances"
 fi
+
+$directory/cc-watch-deploy.sh $org_id $app_id $sha
