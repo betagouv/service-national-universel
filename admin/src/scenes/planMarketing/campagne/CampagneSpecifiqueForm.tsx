@@ -10,6 +10,7 @@ import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, 
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
+import DestinataireLink from "./partials/DestinataireLink";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -308,7 +309,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     </Tooltip>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-5">
                     <Controller
                       name="destinataires"
                       control={control}
@@ -337,6 +338,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     />
                   </div>
                   {errors.destinataires && <span className="text-red-500 text-sm mt-1">{errors.destinataires.message}</span>}
+                  {currentListeDiffusion?.filters && <DestinataireLink listeDiffusion={currentListeDiffusion} cohortId={campagneData.cohortId} />}
                 </div>
 
                 <div>
