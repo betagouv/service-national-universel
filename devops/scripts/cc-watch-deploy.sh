@@ -29,6 +29,7 @@ app_id=$APPLICATION_ID
 
 cc_endpoint=https://api.clever-cloud.com
 sha=$(git rev-parse HEAD)
+echo "sha: $sha"
 
 echo "Waiting for deployment to start"
 deployment_started=""
