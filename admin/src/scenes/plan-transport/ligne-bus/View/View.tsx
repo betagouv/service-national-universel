@@ -55,10 +55,6 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
       }
       setData(reponseBus);
 
-      const responseYoungs = await api.post(`/elasticsearch/young/in-bus/${String(id)}/search`, { filters: {} });
-
-      setNbYoung(responseYoungs.responses[0].hits.total.value);
-
       await getCohortDetails(reponseBus.cohort);
     } catch (e) {
       capture(e);
@@ -75,6 +71,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
         return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
       }
       setDataForCheck(reponseCheck);
+      setNbYoung(reponseCheck.youngsCountBus);
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");

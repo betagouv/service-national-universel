@@ -202,7 +202,7 @@ export default function Info({ bus, setBus, dataForCheck, nbYoung, cohort }: Inf
               </div>
             </div>
           </div>
-          <Link to={`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`} className="w-full">
+          <Link target="_blank" to={`/ligne-de-bus/volontaires/bus/${bus._id.toString()}`} className="w-full">
             <Button type="tertiary" title={`Voir les volontaires (${nbYoung})`} className="w-full max-w-none" />
           </Link>
           {bus.classeId && (
