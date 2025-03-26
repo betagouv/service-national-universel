@@ -12,7 +12,7 @@ export default function ListeDiffusion() {
   const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
 
-  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters({});
 
   const allListes = useMemo(() => {
     return draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
