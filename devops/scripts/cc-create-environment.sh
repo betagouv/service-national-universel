@@ -112,11 +112,9 @@ else # Create application
     clever domain add moncompte.$env_name.$domain/
 fi
 
-exit 0 # TODO: remove
-
-status=$(clever status --format json --app $app_id | jq -r '.status')
-echo "status: $status"
-if [[ $status == "stopped" ]]; then # Restart application
+deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
+        | jq '[ .[] | select(.state == "WIP" and .commit == $sha) ] | .[0] // empty' --arg sha "$sha")
+if [[ $deployment_started == "" ]]; then
     clever curl -s -X POST "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/instances"
 fi
 
