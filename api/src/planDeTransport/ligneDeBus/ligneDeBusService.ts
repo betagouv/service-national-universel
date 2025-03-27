@@ -13,7 +13,7 @@ import {
 } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE } from "snu-lib";
+import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, transportActions, CohortType } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
@@ -111,18 +111,18 @@ export const removeTeamByLigneDeBusIds = async ({ busIds, cohort, idTeam, fromUs
   }
 };
 
-export const updatePDRForLine = async (
-  ligneBusId: string,
-  transportType: string,
-  meetingHour: string,
-  busArrivalHour: string,
-  departureHour: string,
-  returnHour: string,
-  meetingPointId: string,
-  newMeetingPointId: string,
-  shouldSendEmailCampaign: boolean,
-  user: UserDto,
-) => {
+type UpdatePDRForLineDto = {
+  transportType: string;
+  meetingHour: string;
+  busArrivalHour: string;
+  departureHour: string;
+  returnHour: string;
+  meetingPointId: string;
+  newMeetingPointId: string;
+  sendEmailCampaign: boolean;
+};
+
+export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRForLineDto, user: UserDto) => {
   const ligneBus = await LigneBusModel.findById(ligneBusId);
   if (!ligneBus) {
     logger.error(`LigneBus not found ${ligneBusId}`);
@@ -135,6 +135,8 @@ export const updatePDRForLine = async (
     throw new Error("NOT_FOUND");
   }
 
+  const { transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = payload;
+
   if (checkTime(departureHour, meetingHour) || checkTime(departureHour, busArrivalHour)) {
     throw new Error("INVALID_BODY");
   }
@@ -143,6 +145,23 @@ export const updatePDRForLine = async (
   if (!ligneToPoint) {
     logger.error(`LigneToPoint not found ${ligneBusId} ${meetingPointId}`);
     throw new Error("NOT_FOUND");
+  }
+
+  const transportTypeHasChanged = transportType && transportType !== ligneToPoint.transportType;
+  const scheduleHasChanged =
+    (meetingHour && meetingHour !== ligneToPoint.meetingHour) ||
+    (busArrivalHour && busArrivalHour !== ligneToPoint.busArrivalHour) ||
+    (departureHour && departureHour !== ligneToPoint.departureHour) ||
+    (returnHour && returnHour !== ligneToPoint.returnHour);
+  const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
+
+  if (
+    (transportTypeHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrTransportType)) ||
+    (scheduleHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrSchedule)) ||
+    (pdrHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrId)) ||
+    (payload.sendEmailCampaign && !hasPermission(user.role, cohort, transportActions.sendNotifications))
+  ) {
+    throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }
 
   const transaction = await startSession();
@@ -209,7 +228,7 @@ export const updatePDRForLine = async (
         { fromUser: user, session: transaction },
       );
 
-      if (shouldSendEmailCampaign) {
+      if (sendEmailCampaign) {
         const updatedYoungs = await YoungModel.find({
           ligneId: ligneBusId,
           meetingPointId: meetingPointId,

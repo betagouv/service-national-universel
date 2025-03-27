@@ -456,50 +456,28 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
 router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      transportType: Joi.string().required(),
-      meetingHour: Joi.string().required(),
-      busArrivalHour: Joi.string().required(),
-      departureHour: Joi.string().required(),
-      returnHour: Joi.string().required(),
-      meetingPointId: Joi.string().required(),
-      newMeetingPointId: Joi.string().required(),
-      sendEmailCampaign: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
+    const { error: errorId, value: lineId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const { error, value } = Joi.object({
+      transportType: Joi.string(),
+      meetingHour: Joi.string(),
+      busArrivalHour: Joi.string(),
+      departureHour: Joi.string(),
+      returnHour: Joi.string(),
+      meetingPointId: Joi.string(),
+      newMeetingPointId: Joi.string(),
+      sendEmailCampaign: Joi.boolean(),
+    }).validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!isSuperAdmin(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
-
-    const transportLine = await LigneBusModel.findById(id);
-    if (!transportLine) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const updatedLigneBus = await updatePDRForLine(
-      id,
-      transportType,
-      meetingHour,
-      busArrivalHour,
-      departureHour,
-      returnHour,
-      meetingPointId,
-      newMeetingPointId,
-      sendEmailCampaign,
-      req.user,
-    );
+    const updatedLigneBus = await updatePDRForLine(lineId, value, req.user);
 
     const infoBus = await getInfoBus(updatedLigneBus);
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
-    if (error.message === ERRORS.NOT_FOUND) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    if (error.message === ERRORS.INVALID_BODY) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    if ([ERRORS.NOT_FOUND, ERRORS.INVALID_PARAMS, ERRORS.INVALID_BODY, ERRORS.OPERATION_UNAUTHORIZED].includes(error.message)) {
+      return res.status(400).send({ ok: false, code: error.message });
     }
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
