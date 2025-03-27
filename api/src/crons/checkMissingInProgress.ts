@@ -1,7 +1,10 @@
+import { subMonths } from "date-fns";
 import { YoungDocument, YoungModel } from "../models";
 import { logger } from "../logger";
 import { capture } from "../sentry";
 import slack from "../slack";
+
+const LAST_MONTHS_FILTER = 3;
 
 export const handler = async () => {
   try {
@@ -9,6 +12,7 @@ export const handler = async () => {
       {
         $match: {
           status: "VALIDATED",
+          createdAt: { $gt: subMonths(new Date(), LAST_MONTHS_FILTER).toISOString() },
         },
       },
       {
