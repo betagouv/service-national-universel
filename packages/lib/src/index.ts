@@ -41,4 +41,4 @@ export * from "./utils/parseEnv";
 export * from "./utils/request";
 export * from "./utils/csvGenerator";
 export * from "./young";
-export * from "./permissions/transportPermissions";
+export * from "./permissions";

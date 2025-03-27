@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { CohortType, hasPermission, LigneBusDto, transportActions } from "snu-lib";
+import { actions, CohortType, hasPermission, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
@@ -57,10 +57,10 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   }
 
   const message = "Vous n'avez pas l'autorisation de modifier la ligne de transport.";
-  const canUpdateTransport = hasPermission(user.role, cohort, transportActions.updateTransport);
-  const canUpdateCenterId = hasPermission(user.role, cohort, transportActions.updateCenterId);
-  const canUpdateCenterSchedule = hasPermission(user.role, cohort, transportActions.updateCenterSchedule);
-  const canSendNotifications = hasPermission(user.role, cohort, transportActions.sendNotifications);
+  const canUpdateTransport = hasPermission(user.role, cohort, actions.transport.updateTransport);
+  const canUpdateCenterId = hasPermission(user.role, cohort, actions.transport.updateCenterId);
+  const canUpdateCenterSchedule = hasPermission(user.role, cohort, actions.transport.updateCenterSchedule);
+  const canSendNotifications = hasPermission(user.role, cohort, actions.transport.sendNotifications);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">

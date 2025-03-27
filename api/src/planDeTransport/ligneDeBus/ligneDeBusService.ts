@@ -13,7 +13,7 @@ import {
 } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, transportActions, CohortType } from "snu-lib";
+import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, actions } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
@@ -156,10 +156,10 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
   const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
 
   if (
-    (transportTypeHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrTransportType)) ||
-    (scheduleHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrSchedule)) ||
-    (pdrHasChanged && !hasPermission(user.role, cohort, transportActions.updatePdrId)) ||
-    (payload.sendEmailCampaign && !hasPermission(user.role, cohort, transportActions.sendNotifications))
+    (transportTypeHasChanged && !hasPermission(user.role, cohort, actions.transport.updatePdrTransportType)) ||
+    (scheduleHasChanged && !hasPermission(user.role, cohort, actions.transport.updatePdrSchedule)) ||
+    (pdrHasChanged && !hasPermission(user.role, cohort, actions.transport.updatePdrId)) ||
+    (payload.sendEmailCampaign && !hasPermission(user.role, cohort, actions.transport.sendNotifications))
   ) {
     throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }

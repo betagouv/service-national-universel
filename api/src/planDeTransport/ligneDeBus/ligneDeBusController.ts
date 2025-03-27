@@ -18,9 +18,8 @@ import {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
-  isSuperAdmin,
   hasPermission,
-  transportActions,
+  actions,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -310,9 +309,9 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
     if (
-      (sessionHasChanged && !hasPermission(req.user.role, cohort, transportActions.updateCenterId)) ||
-      (scheduleHasChanged && !hasPermission(req.user.role, cohort, transportActions.updateCenterSchedule)) ||
-      (sendCampaign && !hasPermission(req.user.role, cohort, transportActions.sendNotifications))
+      (sessionHasChanged && !hasPermission(req.user.role, cohort, actions.transport.updateCenterId)) ||
+      (scheduleHasChanged && !hasPermission(req.user.role, cohort, actions.transport.updateCenterSchedule)) ||
+      (sendCampaign && !hasPermission(req.user.role, cohort, actions.transport.sendNotifications))
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

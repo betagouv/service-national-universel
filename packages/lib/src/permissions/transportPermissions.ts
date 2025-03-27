@@ -1,3 +1,4 @@
+import { actions } from ".";
 import { CohortType } from "../mongoSchema";
 import { ROLES } from "../roles";
 
@@ -11,28 +12,33 @@ export const transportActions = {
   sendNotifications: "sendNotifications",
 };
 
-const transportPermissions = (cohort: CohortType) => ({
-  [ROLES.ADMIN]: {
-    [transportActions.updateTransport]: true,
-    [transportActions.updatePdrId]: true,
-    [transportActions.updatePdrSchedule]: true,
-    [transportActions.updatePdrTransportType]: true,
-    [transportActions.updateCenterId]: true,
-    [transportActions.updateCenterSchedule]: true,
-    [transportActions.sendNotifications]: true,
+export const transportPermissions = (cohort: CohortType): Record<string, Record<string, boolean>> => ({
+  [actions.transport.updateTransport]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: cohort.busEditionOpenForTransporter,
   },
-  [ROLES.TRANSPORTER]: {
-    [transportActions.updateTransport]: cohort.busEditionOpenForTransporter,
-    [transportActions.updatePdrId]: false,
-    [transportActions.updatePdrSchedule]: cohort.busEditionOpenForTransporter,
-    [transportActions.updatePdrTransportType]: cohort.busEditionOpenForTransporter,
-    [transportActions.updateCenterId]: false,
-    [transportActions.updateCenterSchedule]: cohort.busEditionOpenForTransporter,
-    [transportActions.sendNotifications]: false,
+  [actions.transport.updatePdrId]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: false,
+  },
+  [actions.transport.updatePdrSchedule]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: cohort.busEditionOpenForTransporter,
+  },
+  [actions.transport.updatePdrTransportType]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: cohort.busEditionOpenForTransporter,
+  },
+  [actions.transport.updateCenterId]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: false,
+  },
+  [actions.transport.updateCenterSchedule]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: cohort.busEditionOpenForTransporter,
+  },
+  [actions.transport.sendNotifications]: {
+    [ROLES.ADMIN]: true,
+    [ROLES.TRANSPORTER]: false,
   },
 });
-
-export function hasPermission(role: (typeof ROLES)[keyof typeof ROLES], cohort: CohortType, action: string): boolean {
-  if (!transportPermissions(cohort)[role]) return false;
-  return transportPermissions(cohort)[role][action] ?? false;
-}
