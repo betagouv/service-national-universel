@@ -22,6 +22,14 @@ jobs:
       - name: Install clever-tools
         run: npm install -g clever-tools
 
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$CC_SSH_PRIVATE_KEY" > ~/.ssh/id_ed25519
+          sudo chmod 600 ~/.ssh/id_ed25519
+        env:
+          CC_SSH_PRIVATE_KEY: ${{ secrets.CC_SSH_PRIVATE_KEY }}
+
       - name: Create and Start application
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
