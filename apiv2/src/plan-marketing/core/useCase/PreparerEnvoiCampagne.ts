@@ -8,7 +8,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { CreerListeDiffusion } from "./CreerListeDiffusion";
 import { PlanMarketingCampagne, PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 
-Injectable();
+@Injectable()
 export class PreparerEnvoiCampagne implements UseCase<void> {
     constructor(
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,

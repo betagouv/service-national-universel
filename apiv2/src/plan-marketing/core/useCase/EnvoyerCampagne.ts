@@ -6,7 +6,8 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { EnvoiCampagneStatut } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-Injectable();
+
+@Injectable()
 export class EnvoyerCampagne implements UseCase<void> {
     constructor(
         @Inject(AssocierListeDiffusionToCampagne)

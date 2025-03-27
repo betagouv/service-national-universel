@@ -3,7 +3,7 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { UseCase } from "@shared/core/UseCase";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 
-Injectable();
+@Injectable()
 export class AssocierListeDiffusionToCampagne implements UseCase<void> {
     private readonly logger: Logger = new Logger(AssocierListeDiffusionToCampagne.name);
 

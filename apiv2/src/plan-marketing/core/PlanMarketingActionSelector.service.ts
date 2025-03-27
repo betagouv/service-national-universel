@@ -6,7 +6,7 @@ import { AssocierListeDiffusionToCampagne } from "./useCase/AssocierListeDiffusi
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { EnvoyerCampagne } from "./useCase/EnvoyerCampagne";
 
-Injectable();
+@Injectable()
 export class PlanMarketingActionSelectorService {
     private readonly logger: Logger = new Logger(PlanMarketingActionSelectorService.name);
 

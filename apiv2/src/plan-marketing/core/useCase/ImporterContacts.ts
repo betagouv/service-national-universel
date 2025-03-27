@@ -11,7 +11,7 @@ import { ListeDiffusionGateway } from "../gateway/ListeDiffusion.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 
-Injectable();
+@Injectable()
 export class ImporterContacts implements UseCase<void> {
     private readonly logger: Logger = new Logger(ImporterContacts.name);
 
