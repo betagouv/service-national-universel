@@ -1,6 +1,6 @@
 import ListeDiffusionService from "@/services/listeDiffusionService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { PlanMarketingRoutes, translateMarketing } from "snu-lib";
+import { HttpError, PlanMarketingRoutes, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { ListeDiffusionDataProps } from "./ListeDiffusionForm";
 
@@ -35,9 +35,11 @@ export const useListeDiffusion = () => {
       toastr.clean();
       toastr.success("Succès", "Liste de diffusion sauvegardée avec succès", { timeOut: 5000 });
     },
-    onError: (error) => {
-      toastr.clean();
-      toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de la sauvegarde de la liste de diffusion", { timeOut: 5000 });
+    onError: (error: HttpError) => {
+      if (error?.statusCode === 422) {
+        toastr.clean();
+        toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de la sauvegarde de la liste de diffusion", { timeOut: 5000 });
+      }
     },
   });
 

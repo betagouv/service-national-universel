@@ -1,18 +1,17 @@
 const express = require("express");
 const router = express.Router();
 const passport = require("passport");
-const { capture } = require("../sentry");
 
+const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, YOUNG_STATUS, ROLES } = require("snu-lib");
+
+const { capture } = require("../sentry");
 const { YoungModel, CohesionCenterModel, CohortModel, SessionPhase1Model } = require("../models");
-const { ERRORS, updatePlacesBus, sendAutoCancelMeetingPoint, isYoung, YOUNG_STATUS, updateCenterDependencies } = require("../utils");
-const { SENDINBLUE_TEMPLATES, canCreateOrUpdateCohesionCenter, canViewCohesionCenter, canAssignCohesionCenter, canSearchSessionPhase1, ROLES } = require("snu-lib");
+const { ERRORS, isYoung, updateCenterDependencies, getTransporter } = require("../utils");
 const { sendTemplate } = require("../brevo");
 const { config } = require("../config");
 const Joi = require("joi");
-const { serializeCohesionCenter, serializeYoung, serializeSessionPhase1 } = require("../utils/serializer");
+const { serializeCohesionCenter, serializeSessionPhase1 } = require("../utils/serializer");
 const { validateId } = require("../utils/validator");
-const { getReferentManagerPhase2 } = require("../utils");
-const { getTransporter } = require("../utils");
 const { getCohortIdsFromCohortName } = require("../cohort/cohortService");
 
 /**

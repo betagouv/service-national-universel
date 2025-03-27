@@ -2,17 +2,43 @@ import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import PlanMarketingService from "@/services/planMarketingService";
 import { InputText } from "@snu/ds/admin";
 import { useQuery } from "@tanstack/react-query";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState, useRef } from "react";
 import CampagneForm, { CampagneDataProps, DraftCampagneDataProps } from "./CampagneForm";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
+import { useLocation } from "react-router-dom";
+import { useSearchTerm } from "../hooks/useSearchTerm";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
-  const [searchTerm, setSearchTerm] = useState("");
+  const [openCampagneId, setOpenCampagneId] = useState<string | null>(null);
+  const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(campagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
+
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const targetId = searchParams.get("id");
+
   const isNouvelleCampagneDisabled = useMemo(() => {
     return campagnes.some((campagne) => campagne.id === undefined);
   }, [campagnes]);
+
+  useEffect(() => {
+    if (targetId) {
+      setOpenCampagneId(targetId);
+    }
+  }, [targetId]);
+
+  useEffect(() => {
+    if (targetId && campagnes.length > 0) {
+      const element = campagneRefs.current[targetId];
+      if (element) {
+        const yOffset = -50;
+        const y = element.getBoundingClientRect().top + window.pageYOffset + yOffset;
+        window.scrollTo({ top: y, behavior: "smooth" });
+      }
+    }
+  }, [targetId, campagnes]);
 
   const { data: campagnesData, refetch } = useQuery({
     queryKey: ["get-campagnes"],
@@ -31,7 +57,7 @@ export default function CampagnesGeneriques() {
   }, [listesDiffusion]);
 
   useEffect(() => {
-    setCampagnes(campagnesData ?? []);
+    setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
   }, [campagnesData]);
 
   const createNewCampagne = () => {
@@ -52,11 +78,19 @@ export default function CampagnesGeneriques() {
     setCampagnes((prev) => [newCampagne, ...prev]);
   };
 
-  const filteredCampagnes = useMemo(() => {
-    return campagnes
-      .filter((campagne) => campagne.nom?.toLowerCase().includes(searchTerm.toLowerCase()) || !campagne.nom)
-      .sort((a, b) => ((a.createdAt ?? "") > (b.createdAt ?? "") ? 1 : -1));
-  }, [campagnes, searchTerm]);
+  const refCallbacks = useMemo(() => {
+    return filteredCampagnes.reduce(
+      (acc, campagne) => {
+        if (campagne.id) {
+          acc[campagne.id] = (el: HTMLDivElement | null) => {
+            campagneRefs.current[campagne.id!] = el;
+          };
+        }
+        return acc;
+      },
+      {} as Record<string, (el: HTMLDivElement | null) => void>,
+    );
+  }, [filteredCampagnes]);
 
   return (
     <>
@@ -74,14 +108,16 @@ export default function CampagnesGeneriques() {
 
       <div className="flex flex-col gap-0">
         {filteredCampagnes.map((campagne) => (
-          <CampagneForm
-            key={`campagne-${campagne.id}`}
-            campagneData={campagne}
-            isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
-            listeDiffusionOptions={listeDiffusionOptions}
-            onSave={refetch}
-            onDuplicate={(campagneData) => handleDuplicate(campagneData)}
-          />
+          <div key={`campagne-${campagne.id}`} ref={campagne.id ? refCallbacks[campagne.id] : null}>
+            <CampagneForm
+              campagneData={campagne}
+              isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
+              listeDiffusionOptions={listeDiffusionOptions}
+              onSave={refetch}
+              onDuplicate={(campagneData) => handleDuplicate(campagneData)}
+              forceOpen={campagne.id === openCampagneId}
+            />
+          </div>
         ))}
       </div>
     </>
