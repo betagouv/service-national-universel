@@ -1,4 +1,4 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
 import { AssocierListeDiffusionToCampagne } from "./AssocierListeDiffusionToCampagne";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
@@ -9,6 +9,8 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 
 @Injectable()
 export class EnvoyerCampagne implements UseCase<void> {
+    private readonly logger: Logger = new Logger(EnvoyerCampagne.name);
+
     constructor(
         @Inject(AssocierListeDiffusionToCampagne)
         private readonly associerListeDiffusionToCampagne: AssocierListeDiffusionToCampagne,
@@ -28,6 +30,7 @@ export class EnvoyerCampagne implements UseCase<void> {
             );
         }
         await this.associerListeDiffusionToCampagne.execute(nomListe, campagneProviderId);
+        this.logger.log(`Sending campagne ${campagneProviderId} to brevo`);
         await this.planMarketingGateway.sendCampagneNow(campagneProviderId);
         await this.campagneGateway.addEnvoiToCampagneById(campagneId, {
             date: this.clockGateway.now(),

@@ -19,6 +19,7 @@ interface CampagneComplete extends CampagneBase {
   listeDiffusionId: string;
   destinataires: NonNullable<CampagneSpecifiqueFormData["destinataires"]>;
   type: NonNullable<CampagneSpecifiqueFormData["type"]>;
+  envois?: CampagneEnvoi[];
 }
 
 interface CampagneSpecifiqueBase extends CampagneBase {
@@ -86,6 +87,7 @@ export class CampagneSpecifiqueMapper {
       contexte: formData.contexte,
       cohortId: formData.cohortId,
       generic: false,
+      envois: formData.envois,
     };
     return payload;
   }
@@ -108,6 +110,7 @@ export class CampagneSpecifiqueMapper {
       contexte: formData.contexte,
       cohortId: formData.cohortId,
       generic: false,
+      envois: formData.envois,
       createdAt: formData.createdAt || now,
       updatedAt: now,
     };

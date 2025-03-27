@@ -70,6 +70,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         templateId: 0,
         objet: "",
         destinataires: [DestinataireListeDiffusion.JEUNES],
+        envois: [],
       };
       saveCampagne({
         payload: newSpecificCampaign,

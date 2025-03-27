@@ -32,6 +32,7 @@ export interface CampagneSpecifiqueFormData {
   cohortId: string;
   campagneGeneriqueId?: string;
   generic: false;
+  envois: CampagneEnvoi[] | undefined;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   validationErrors?: ValidationErrors;
