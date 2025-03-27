@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -ex
 
 if [ "$#" -lt 4 ]; then
     echo "Create test environment on CleverCloud"
