@@ -115,6 +115,7 @@ fi
 deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
         | jq '[ .[] | select(.state == "WIP" and .commit == $sha) ] | .[0] // empty' --arg sha "$sha")
 if [[ $deployment_started == "" ]]; then
+    echo "Start deployment"
     clever curl -s -X POST "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/instances"
 fi
 
