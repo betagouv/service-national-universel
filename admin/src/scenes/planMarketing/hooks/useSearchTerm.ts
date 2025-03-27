@@ -41,7 +41,7 @@ function sortItems<T>(a: T, b: T, sortBy: keyof T | ((item: T) => SortValue), so
  * @param options - Options de configuration (tri, etc.)
  * @returns Un objet contenant le terme de recherche, la fonction pour le mettre à jour, et les éléments filtrés et triés
  */
-export function useSearchTerm<T>(items: T[], getSearchableText: (item: T) => string | undefined | null, options: UseSearchTermOptions<T> = {}) {
+export function useSearchTerm<T extends Record<string, unknown>>(items: T[], getSearchableText: (item: T) => string | undefined | null, options: UseSearchTermOptions<T> = {}) {
   const [searchTerm, setSearchTerm] = useState("");
   const { sortBy = "createdAt" as keyof T, sortDirection = "desc" } = options;
 
@@ -52,8 +52,11 @@ export function useSearchTerm<T>(items: T[], getSearchableText: (item: T) => str
       return !searchTerm || (searchableText?.toLowerCase().includes(searchTerm.toLowerCase()) ?? false);
     });
 
-    // Trier les éléments
-    return [...filtered].sort((a, b) => sortItems(a, b, sortBy, sortDirection));
+    const draftItems = filtered.filter((item) => !("id" in item));
+    const nonDraftItems = filtered.filter((item) => "id" in item);
+    const sortedNonDraftItems = [...nonDraftItems].sort((a, b) => sortItems(a, b, sortBy, sortDirection));
+
+    return [...draftItems, ...sortedNonDraftItems];
   }, [items, searchTerm, getSearchableText, sortBy, sortDirection]);
 
   return {
