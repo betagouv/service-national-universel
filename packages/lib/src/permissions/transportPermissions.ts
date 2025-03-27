@@ -2,16 +2,6 @@ import { actions } from ".";
 import { CohortType } from "../mongoSchema";
 import { ROLES } from "../roles";
 
-export const transportActions = {
-  updateTransport: "updateTransport",
-  updatePdrId: "updatePdrId",
-  updatePdrSchedule: "updatePdrSchedule",
-  updatePdrTransportType: "updatePdrTransportType",
-  updateCenterId: "updateCenterId",
-  updateCenterSchedule: "updateCenterSchedule",
-  sendNotifications: "sendNotifications",
-};
-
 export const transportPermissions = (cohort: CohortType): Record<string, Record<string, boolean>> => ({
   [actions.transport.updateTransport]: {
     [ROLES.ADMIN]: true,

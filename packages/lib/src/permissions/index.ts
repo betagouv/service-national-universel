@@ -1,9 +1,17 @@
-import { CohortType } from "src/mongoSchema";
-import { transportActions, transportPermissions } from "./transportPermissions";
-import { ROLES } from "src/roles";
+import { CohortType } from "../mongoSchema";
+import { transportPermissions } from "./transportPermissions";
+import { ROLES } from "../roles";
 
 export const actions = {
-  transport: transportActions,
+  transport: {
+    updateTransport: "updateTransport",
+    updatePdrId: "updatePdrId",
+    updatePdrSchedule: "updatePdrSchedule",
+    updatePdrTransportType: "updatePdrTransportType",
+    updateCenterId: "updateCenterId",
+    updateCenterSchedule: "updateCenterSchedule",
+    sendNotifications: "sendNotifications",
+  },
 };
 
 export const permissions = (cohort: CohortType) => ({ ...transportPermissions(cohort) });
