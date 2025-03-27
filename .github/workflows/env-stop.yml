@@ -9,7 +9,7 @@ env:
   BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
 
 jobs:
-  destroy:
+  stop:
     if: |
       (github.event_name=='pull_request' && github.event.label.name == 'deploy') ||
       (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
