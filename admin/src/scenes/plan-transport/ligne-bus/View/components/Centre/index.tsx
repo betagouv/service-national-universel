@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { CohortType, LigneBusDto } from "snu-lib";
+import { CohortType, hasPermission, LigneBusDto, transportActions } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
@@ -9,12 +9,11 @@ import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdate
 import CentreModal from "./CentreModal";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { EditButton } from "@snu/ds/admin";
-import { canUpdateCenterId } from "../../authorization";
 
 type Props = {
   bus: LigneBusDto;
   setBus: (data: LigneBusDto) => void;
-  cohort?: CohortType | null;
+  cohort: CohortType;
 };
 
 export type CentreFormValues = {
@@ -38,9 +37,6 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     },
   });
 
-  const { isAuthorized, message } = canUpdateCenterId(user, cohort);
-  console.log("🚀 ~ Centre ~ message:", message);
-
   const onSubmit: SubmitHandler<CentreFormValues> = (data) => {
     if (data.sessionId !== bus.sessionId) {
       setOpenModal(true);
@@ -60,11 +56,17 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     });
   }
 
+  const message = "Vous n'avez pas l'autorisation de modifier la ligne de transport.";
+  const canUpdateTransport = hasPermission(user.role, cohort, transportActions.updateTransport);
+  const canUpdateCenterId = hasPermission(user.role, cohort, transportActions.updateCenterId);
+  const canUpdateCenterSchedule = hasPermission(user.role, cohort, transportActions.updateCenterSchedule);
+  const canSendNotifications = hasPermission(user.role, cohort, transportActions.sendNotifications);
+
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <p className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</p>
-        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!isAuthorized} onReset={reset} tooltipMessage={message} isLoading={isPending} />
+        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!canUpdateTransport} onReset={reset} tooltipMessage={message} isLoading={isPending} />
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8">
@@ -73,7 +75,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
           control={control}
           render={({ field }) => (
             <div className="col-span-2">
-              <SessionSelector sessionId={field.value} setSessionId={field.onChange} ligne={bus} disabled={!isEditing} />
+              <SessionSelector sessionId={field.value} setSessionId={field.onChange} ligne={bus} readOnly={!isEditing} disabled={!canUpdateCenterId} />
             </div>
           )}
         />
@@ -82,7 +84,15 @@ export default function Centre({ bus, setBus, cohort }: Props) {
           control={control}
           rules={{ required: isEditing && "L'heure d'arrivée est requise", pattern: { value: pattern, message: "Format attendu: hh:mm" } }}
           render={({ field, fieldState }) => (
-            <Field label="Heure d’arrivée" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={fieldState.error?.message} />
+            <Field
+              label="Heure d’arrivée"
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="hh:mm"
+              readOnly={!isEditing}
+              error={fieldState.error?.message}
+              disabled={isEditing && !canUpdateCenterSchedule}
+            />
           )}
         />
         <Controller
@@ -90,7 +100,15 @@ export default function Centre({ bus, setBus, cohort }: Props) {
           control={control}
           rules={{ required: isEditing && "L'heure de départ est requise", pattern: { value: pattern, message: "Format attendu: hh:mm" } }}
           render={({ field, fieldState }) => (
-            <Field label="Heure de départ" value={field.value} onChange={field.onChange} placeholder="hh:mm" readOnly={!isEditing} error={fieldState.error?.message} />
+            <Field
+              label="Heure de départ"
+              value={field.value}
+              onChange={field.onChange}
+              placeholder="hh:mm"
+              readOnly={!isEditing}
+              error={fieldState.error?.message}
+              disabled={isEditing && !canUpdateCenterSchedule}
+            />
           )}
         />
       </div>
@@ -106,6 +124,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
         initialData={bus}
         formData={getValues()}
         count={bus.youngSeatsTaken}
+        areNotificationsEnabled={canSendNotifications}
         isLoading={isPending}
       />
     </form>

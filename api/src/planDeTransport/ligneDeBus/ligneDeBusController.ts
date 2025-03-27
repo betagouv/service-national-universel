@@ -7,7 +7,6 @@ import {
   canViewLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
-  canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
   isBusEditionOpen,
   ROLES,
@@ -20,6 +19,8 @@ import {
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
   isSuperAdmin,
+  hasPermission,
+  transportActions,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -302,36 +303,41 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.findOne({ name: ligne.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
+    const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
+
+    if (
+      (sessionHasChanged && !hasPermission(req.user.role, cohort, transportActions.updateCenterId)) ||
+      (scheduleHasChanged && !hasPermission(req.user.role, cohort, transportActions.updateCenterSchedule)) ||
+      (sendCampaign && !hasPermission(req.user.role, cohort, transportActions.sendNotifications))
+    ) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    //add some checks
+    if (scheduleHasChanged) {
+      ligne.set({
+        centerArrivalTime,
+        centerDepartureTime,
+      });
 
-    ligne.set({
-      centerArrivalTime,
-      centerDepartureTime,
-    });
+      await ligne.save({ fromUser: req.user });
 
-    await ligne.save({ fromUser: req.user });
+      const planDeTransport = await PlanTransportModel.findById(id);
+      if (!planDeTransport) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      planDeTransport.set({
+        centerArrivalTime,
+        centerDepartureTime,
+      });
 
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      await planDeTransport.save({ fromUser: req.user });
     }
-    planDeTransport.set({
-      centerArrivalTime,
-      centerDepartureTime,
-    });
 
-    await planDeTransport.save({ fromUser: req.user });
-
-    if (sessionId && sessionId !== ligne.sessionId) {
+    if (sessionHasChanged) {
       const session = await SessionPhase1Model.findById(sessionId);
       if (!session) throw new Error(ERRORS.NOT_FOUND);
       await updateSessionForLine({
@@ -470,6 +476,9 @@ router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session:
 
     const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
 
+    const transportLine = await LigneBusModel.findById(id);
+    if (!transportLine) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const updatedLigneBus = await updatePDRForLine(
       id,
       transportType,
@@ -603,7 +612,7 @@ router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { sess
 
     if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0])
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0]);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const PDR = await PointDeRassemblementModel.find({ region: pointDeRassemblement.region, deletedAt: { $exists: false } });

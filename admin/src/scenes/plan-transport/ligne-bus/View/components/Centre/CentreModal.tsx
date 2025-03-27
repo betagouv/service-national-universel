@@ -13,6 +13,7 @@ import { CentreFormValues } from ".";
 interface ConfirmChangesModalProps {
   isOpen: boolean;
   count: number;
+  areNotificationsEnabled: boolean;
   initialData: LigneBusDto;
   formData: { sessionId: string; centerArrivalTime: string; centerDepartureTime: string };
   onConfirm: (data: CentreFormValues, emailing: boolean) => void;
@@ -20,7 +21,7 @@ interface ConfirmChangesModalProps {
   isLoading?: boolean;
 }
 
-export default function CentreModal({ isOpen, initialData, formData, count, onConfirm, onCancel, isLoading }: ConfirmChangesModalProps) {
+export default function CentreModal({ isOpen, initialData, formData, count, areNotificationsEnabled, onConfirm, onCancel, isLoading }: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
   const templateId = SENDINBLUE_TEMPLATES.young.PHASE_1_CHANGEMENT_CENTRE;
   const templateIdReferent = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
@@ -64,28 +65,30 @@ export default function CentreModal({ isOpen, initialData, formData, count, onCo
             />
           </div>
 
-          <div className="mt-8 border-t border-gray-200 w-full pt-8">
-            <label className="flex items-start space-x-2">
-              <input type="checkbox" className="mt-1" checked={isEmailing} onChange={toggleEmailing} />
-              <div className="leading-relaxed">
-                <p>Envoyer une campagne d’emailing aux volontaires ({count}) et à leurs représentants légaux.</p>
-                {isCLE && <p>Les référent de classe, chef d’établissement et coordinateurs seront également prévenus.</p>}
-                <div className="mt-2">
-                  <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
-                    Visualiser l'aperçu pour les volontaires
-                    <HiExternalLink className="inline-block w-4 h-4 ml-1" />
-                  </a>
-                  <br />
-                  {isCLE && (
-                    <a href={`/email-preview/${templateIdReferent}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
-                      Visualiser l'aperçu pour les référents CLE
+          {areNotificationsEnabled && (
+            <div className="mt-8 border-t border-gray-200 w-full pt-8">
+              <label className="flex items-start space-x-2">
+                <input type="checkbox" className="mt-1" checked={isEmailing} onChange={toggleEmailing} />
+                <div className="leading-relaxed">
+                  <p>Envoyer une campagne d’emailing aux volontaires ({count}) et à leurs représentants légaux.</p>
+                  {isCLE && <p>Les référent de classe, chef d’établissement et coordinateurs seront également prévenus.</p>}
+                  <div className="mt-2">
+                    <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
+                      Visualiser l'aperçu pour les volontaires
                       <HiExternalLink className="inline-block w-4 h-4 ml-1" />
                     </a>
-                  )}
+                    <br />
+                    {isCLE && (
+                      <a href={`/email-preview/${templateIdReferent}`} target="_blank" rel="noreferrer" className="text-gray-500 hover:text-gray-800 underline underline-offset-2">
+                        Visualiser l'aperçu pour les référents CLE
+                        <HiExternalLink className="inline-block w-4 h-4 ml-1" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-              </div>
-            </label>
-          </div>
+              </label>
+            </div>
+          )}
           <br />
         </div>
       }
