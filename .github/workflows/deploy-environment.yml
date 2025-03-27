@@ -24,14 +24,14 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install clever-tools
-        run: npm install -g clever-tools
+      # - name: Install clever-tools
+      #   run: npm install -g clever-tools
 
-      - name: Create and Start application
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.BRANCH_NAME }} ${{ env.SHA }}
+      # - name: Create and Start application
+      #   env:
+      #     CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+      #     CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+      #   run: ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.BRANCH_NAME }} ${{ env.SHA }}
 
       - name: Find Comment
         uses: peter-evans/find-comment@v3
@@ -48,7 +48,7 @@ jobs:
         run: |
           name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
           echo "name: $env_name"
-          echo "env_name=$name" >> $GITHUB_OUTPUT
+          echo "name=$name" >> $GITHUB_OUTPUT
 
       - name: Create comment
         if: steps.fc.outputs.comment-id == ''
