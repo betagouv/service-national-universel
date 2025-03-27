@@ -518,9 +518,9 @@ const translateFieldMission = (f) => {
     case "domains":
       return "Domaines";
     case "startAt":
-      return "Date début";
+      return "Date de début";
     case "endAt":
-      return "Date fin";
+      return "Date de fin";
     case "frequence":
       return "Fréquence";
     case "format":
@@ -560,7 +560,7 @@ const translateFieldMission = (f) => {
     case "isMilitaryPreparation":
       return "Préparation militaire";
     case "createdAt":
-      return "créé(e) le";
+      return "Créée le";
     case "updatedAt":
       return "mis(e) à jour le";
     case "jvaMissionId":
@@ -577,6 +577,24 @@ const translateFieldMission = (f) => {
       return "Retour d’expérience (rapport de MIG)";
     case "othersFiles":
       return "Autre";
+    case "status":
+      return "Statut";
+    case "pendingApplications":
+      return "Nombre de candidatures en attente";
+    case "applicationStatus":
+      return "Statut de la candidature";
+    case "description":
+      return "Description";
+    case "actions":
+      return "Actions";
+    case "duration":
+      return "Durée";
+    case "mainDomain":
+      return "Domaine principal";
+    case "visibility":
+      return "Visibilité";
+    case "apiEngagementId":
+      return "Id de la mission API Engagement";
     default:
       return f;
   }
