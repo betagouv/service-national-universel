@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -ex
+set -e
 
 if [ "$#" -lt 4 ]; then
     echo "Create test environment on CleverCloud"
@@ -64,7 +64,7 @@ cc_endpoint=https://api.clever-cloud.com
 
 result=$(clever applications list \
     --format json \
-    --org $CC_ORG_ID \
+    --org $org_id \
 | jq '.[0].applications[]|select(.name == $ENV_NAME)' --arg ENV_NAME "$env_name"
 )
 
@@ -111,6 +111,8 @@ else # Create application
     clever domain add admin.$env_name.$domain/
     clever domain add moncompte.$env_name.$domain/
 fi
+
+exit 0 # TODO: remove
 
 status=$(clever status --format json --app $app_id | jq -r '.status')
 echo "status: $status"
