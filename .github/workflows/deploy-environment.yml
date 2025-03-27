@@ -11,6 +11,7 @@ concurrency:
 
 jobs:
   deploy:
+    permissions: write-all
     runs-on: ubuntu-latest
     if: |
       (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
