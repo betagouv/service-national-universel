@@ -1,6 +1,6 @@
-import { actions } from ".";
-import { CohortType } from "../mongoSchema";
-import { ROLES } from "../roles";
+import { actions } from "../";
+import { CohortType } from "../../mongoSchema";
+import { ROLES } from "../../roles";
 
 export const transportPermissions = (cohort: CohortType): Record<string, Record<string, boolean>> => ({
   [actions.transport.updateTransport]: {

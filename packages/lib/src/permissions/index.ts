@@ -1,20 +1,15 @@
-import { CohortType } from "../mongoSchema";
-import { transportPermissions } from "./transportPermissions";
 import { ROLES } from "../roles";
+import { CohortType } from "../mongoSchema";
+import { transportPermissions } from "./transport/transportPermissions";
+import { transportActions } from "./transport/transportActions";
 
 export const actions = {
-  transport: {
-    updateTransport: "updateTransport",
-    updatePdrId: "updatePdrId",
-    updatePdrSchedule: "updatePdrSchedule",
-    updatePdrTransportType: "updatePdrTransportType",
-    updateCenterId: "updateCenterId",
-    updateCenterSchedule: "updateCenterSchedule",
-    sendNotifications: "sendNotifications",
-  },
+  transport: transportActions,
 };
 
-export const permissions = (cohort: CohortType) => ({ ...transportPermissions(cohort) });
+const permissions = (cohort: CohortType) => ({
+  ...transportPermissions(cohort),
+});
 
 export function hasPermission(role: (typeof ROLES)[keyof typeof ROLES], cohort: CohortType, action: string): boolean {
   if (!permissions(cohort)[action]) throw new Error(`Action ${action} not found`);
