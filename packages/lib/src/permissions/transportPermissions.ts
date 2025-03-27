@@ -1,5 +1,5 @@
-import { CohortType } from "src/mongoSchema";
-import { ROLES } from "src/roles";
+import { CohortType } from "../mongoSchema";
+import { ROLES } from "../roles";
 
 export const transportActions = {
   updateTransport: "updateTransport",
