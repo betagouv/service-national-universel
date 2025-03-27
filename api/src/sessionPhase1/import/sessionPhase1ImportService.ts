@@ -1,9 +1,8 @@
-import { CohortType, region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
+import { region2zone, RegionsHorsMetropole, SessionPhase1Type, normalizeDepartmentName } from "snu-lib";
 import { logger } from "../../logger";
 import { CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, SessionPhase1Model } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
 import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMapper";
-import { normalizeDepartmentName } from "snu-lib";
 import { mapTrigrammeToRegion } from "../../services/regionService";
 import { updatePlacesSessionPhase1 } from "../../utils";
 
@@ -29,8 +28,12 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
   for (const sessionCenter of mappedSessionCenter) {
     let processedSessionReport: SessionCohesionCenterImportReport;
     const foundCenter = await CohesionCenterModel.findOne({ matricule: sessionCenter.cohesionCenterMatricule });
-    if (!foundCenter?.id) {
+    if (!foundCenter?._id) {
       processedSessionReport = await processCenterNotFound(sessionCenter);
+      report.push(processedSessionReport);
+      continue;
+    } else if (!foundCenter?.placesTotal) {
+      processedSessionReport = await processCenterWithoutMaxCapacity(sessionCenter, foundCenter);
       report.push(processedSessionReport);
       continue;
     }
@@ -86,6 +89,19 @@ const processCenterNotFound = (sessionCenter: SessionCohesionCenterImportMapped)
   };
 };
 
+const processCenterWithoutMaxCapacity = (sessionCenter: SessionCohesionCenterImportMapped, foundCenter: CohesionCenterDocument): SessionCohesionCenterImportReport => {
+  logger.warn(`Capacity max not found for matricule ${sessionCenter.cohesionCenterMatricule}`);
+  return {
+    sessionId: undefined,
+    sessionFormule: sessionCenter.sessionFormule,
+    cohesionCenterId: foundCenter._id,
+    cohesionCenterMatricule: sessionCenter.cohesionCenterMatricule,
+    placesTotal: undefined,
+    action: "nothing",
+    comment: "capacity max not found",
+  };
+};
+
 const processCohortNotFound = (sessionCenter: SessionCohesionCenterImportMapped, zonedSnuId: string): SessionCohesionCenterImportReport => {
   logger.warn(`Cohort not found for name ${sessionCenter.sessionFormule}`);
   return {
@@ -105,10 +121,9 @@ const createSession = async (
   foundCohort: CohortDocument,
 ): Promise<SessionCohesionCenterImportReport> => {
   let warning = "";
-  if (sessionCenter.sessionPlaces > sessionCenter.cohesionCenterPlacesTotal) {
-    logger.warn(
-      `Session with wrong place number (${sessionCenter.sessionPlaces} > ${sessionCenter.cohesionCenterPlacesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`,
-    );
+  if (sessionCenter.sessionPlaces > foundCenter.placesTotal!) {
+    logger.warn(`Session with wrong place number (${sessionCenter.sessionPlaces} > ${foundCenter.placesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
+    sessionCenter.sessionPlaces = foundCenter.placesTotal!;
     warning = "session places > center places";
   }
 
