@@ -83,9 +83,13 @@ export type CohortDto = {
   inscriptionOpenForReferentDepartment?: boolean;
   inscriptionOpenForAdministrateurCle?: boolean;
   specificSnuIdCohort?: boolean;
+  //virtual
+  isInscriptionOpen?: boolean;
+  isInstructionOpen?: boolean;
+  isReInscriptionOpen?: boolean;
 };
 
-export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility">;
+export type UpdateCohortDto = Omit<CohortDto, "name" | "type" | "snuId" | "eligibility" | "isInscriptionOpen" | "isInstructionOpen" | "isReInscriptionOpen">;
 
 type ToFromDate = {
   from?: string | null;
