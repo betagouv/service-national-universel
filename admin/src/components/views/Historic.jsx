@@ -26,7 +26,11 @@ export default function Historic({ model, value }) {
           {model === "mission" ? (
             <div className="w-fit">
               <ReactTooltip id="filter-modifs" className="bg-white shadow-xl" arrowColor="white">
-                <p className="text-gray-800">Masquer les synchronisations sans modification et les données source, traduire les noms des champs.</p>
+                <ul className="text-gray-800">
+                  <li>Masquer les synchronisations n'ayant pas entraîné de modification</li>
+                  <li>Masquer les données source</li>
+                  <li>Traduire les noms des champs</li>
+                </ul>
               </ReactTooltip>
               <div data-tip data-for="filter-modifs" className="p-3">
                 <input id="filter-modifs" type="checkbox" checked={simpleMode} onChange={setSimpleMode} />
@@ -99,7 +103,7 @@ const Hit = ({ hit, model, simpleMode }) => {
                   {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="italic text-coolGray-400">Vide</span>}
                 </div>
                 <div>
-                  <HiArrowRight className="mx-3 my-1" />
+                  <HiArrowRight className="mx-auto my-1" />
                 </div>
                 <div className="col-span-4">{(isIsoDate(value) ? formatStringLongDate(value) : value) || <span className="italic text-coolGray-400">Vide</span>}</div>
               </div>
