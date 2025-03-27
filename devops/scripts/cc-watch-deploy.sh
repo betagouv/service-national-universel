@@ -2,15 +2,34 @@
 
 set -e
 
-if [[ $ORGANIZATION_ID == "" ]]
-then
-    echo "You must specify the ORGANIZATION_ID"
+if [ "$#" -lt 3 ]; then
+    echo "Create test environment on CleverCloud"
+    echo "Usage $0 <organization_id>"
+    echo "  organization_id: CleverCloud organization ID"
+    echo "  application_id: CleverCloud application ID"
+    echo "  sha: Commit sha"
     exit 1
 fi
 
-if [[ $APPLICATION_ID == "" ]]
+org_id=$1
+app_id=$2
+sha=$3
+
+if [[ $org_id == "" ]]
 then
-    echo "You must specify the APPLICATION_ID"
+    echo "You must specify the organization_id"
+    exit 1
+fi
+
+if [[ $app_id == "" ]]
+then
+    echo "You must specify the app_id"
+    exit 1
+fi
+
+if [[ $sha == "" ]]
+then
+    echo "You must specify the sha"
     exit 1
 fi
 
@@ -24,17 +43,13 @@ if ! [[ -x "$(command -v jq)" ]]; then
   exit 1
 fi
 
-org_id=$ORGANIZATION_ID
-app_id=$APPLICATION_ID
-
 cc_endpoint=https://api.clever-cloud.com
-sha=$(git rev-parse HEAD)
 
 echo "Waiting for deployment to start"
 deployment_started=""
 until [[ $deployment_started ]]; do
     deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
-        | jq '[ .[] | select(.state == "WIP" and .commit == $sha and .cause == "github") ] | .[0] // empty' --arg sha "$sha")
+        | jq '[ .[] | select(.state == "WIP" and .commit == $sha) ] | .[0] // empty' --arg sha "$sha")
     sleep 5
 done
 
