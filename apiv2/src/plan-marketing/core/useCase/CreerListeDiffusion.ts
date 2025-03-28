@@ -172,8 +172,12 @@ export class CreerListeDiffusion implements UseCase<string> {
         const contactsForListeDiffusion: ColumnCsvName[] = [];
         youngs.hits.forEach((young) => {
             const contactRow = buildCsvContactRow(young);
-            contactsForListeDiffusion.push(contactRow);
-            if (young.parent1Email) {
+
+            if (destinataires.includes(DestinataireListeDiffusion.JEUNES)) {
+                contactsForListeDiffusion.push(contactRow);
+            }
+
+            if (destinataires.includes(DestinataireListeDiffusion.REPRESENTANTS_LEGAUX)) {
                 const contactRowParent1 = {
                     ...contactRow,
                     type: ColumnType.representants,
@@ -182,8 +186,6 @@ export class CreerListeDiffusion implements UseCase<string> {
                     EMAIL: young.parent1Email,
                 };
                 contactsForListeDiffusion.push(contactRowParent1);
-            }
-            if (young.parent2Email) {
                 const contactRowParent2 = {
                     ...contactRow,
                     type: ColumnType.representants,
@@ -336,6 +338,8 @@ export class CreerListeDiffusion implements UseCase<string> {
             delimiter: ";",
         });
 
+        console.log(contactsForListeDiffusion.find((contact) => contact.EMAIL === "testxe95rg1742958939109@gmail.com"));
+
         return csvContacts;
     }
 
@@ -359,7 +363,17 @@ export class CreerListeDiffusion implements UseCase<string> {
         // Créer la liste de diffusion
         const contactsQuery: SearchParams = {
             filters: filtreListeDiffusionWithCohortId,
-            sourceFields: ["email", "firstName", "lastName", "meetingPointId", "ligneId", "cohort"],
+            sourceFields: [
+                "email",
+                "firstName",
+                "lastName",
+                "meetingPointId",
+                "ligneId",
+                "cohort",
+                "classeId",
+                "etablissementId",
+                "cohesionCenterId",
+            ],
             full: true,
         };
         if (destinataires.includes(DestinataireListeDiffusion.REPRESENTANTS_LEGAUX)) {
@@ -371,13 +385,6 @@ export class CreerListeDiffusion implements UseCase<string> {
                 "parent2FirstName",
                 "parent2LastName",
             );
-        }
-        if (destinataires.includes(DestinataireListeDiffusion.REFERENTS_CLASSES)) {
-            contactsQuery.sourceFields?.push("classeId", "etablissementId");
-        }
-
-        if (destinataires.includes(DestinataireListeDiffusion.CHEFS_CENTRES)) {
-            contactsQuery.sourceFields?.push("cohesionCenterId");
         }
 
         return contactsQuery;
