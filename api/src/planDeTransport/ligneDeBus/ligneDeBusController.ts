@@ -309,9 +309,9 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
     if (
-      (sessionHasChanged && !hasPermission(req.user.role, cohort, actions.transport.updateCenterId)) ||
-      (scheduleHasChanged && !hasPermission(req.user.role, cohort, actions.transport.updateCenterSchedule)) ||
-      (sendCampaign && !hasPermission(req.user.role, cohort, actions.transport.sendNotifications))
+      (sessionHasChanged && !hasPermission(req.user, cohort, actions.transport.UPDATE_SESSION_ID)) ||
+      (scheduleHasChanged && !hasPermission(req.user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE)) ||
+      (sendCampaign && !hasPermission(req.user, cohort, actions.transport.NOTIFY_AFTER_UPDATE))
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

@@ -209,11 +209,11 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   }
 
   const message = "Vous n'avez pas l'autorisation de modifier le point de rassemblement.";
-  const canUpdateTransport = hasPermission(user.role, cohort, actions.transport.updateTransport);
-  const canUpdatePdrId = hasPermission(user.role, cohort, actions.transport.updatePdrId);
-  const canUpdatePdrSchedule = hasPermission(user.role, cohort, actions.transport.updatePdrSchedule);
-  const canUpdatePdrTransportType = hasPermission(user.role, cohort, actions.transport.updatePdrTransportType);
-  const canSendNotification = hasPermission(user.role, cohort, actions.transport.sendNotifications);
+  const canUpdateTransport = hasPermission(user, cohort, actions.transport.UPDATE);
+  const canUpdatePdrId = hasPermission(user, cohort, actions.transport.UPDATE_PDR_ID);
+  const canUpdatePdrSchedule = hasPermission(user, cohort, actions.transport.UPDATE_PDR_SCHEDULE);
+  const canUpdatePdrTransportType = hasPermission(user, cohort, actions.transport.UPDATE_TYPE);
+  const canSendNotification = hasPermission(user, cohort, actions.transport.NOTIFY_AFTER_UPDATE);
 
   return (
     <>
