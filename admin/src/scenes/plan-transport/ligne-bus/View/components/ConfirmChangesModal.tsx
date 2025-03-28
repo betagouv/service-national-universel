@@ -11,6 +11,7 @@ interface ConfirmChangesModalProps {
   isOpen: boolean;
   cohort: CohortType | null;
   youngsCount: number;
+  areNotificationsEnabled: boolean;
   beforeChangeFormData: PointDeRassemblementFormValueChanges;
   afterChangeFormData: PointDeRassemblementFormValueChanges;
   loading: boolean;
@@ -18,7 +19,17 @@ interface ConfirmChangesModalProps {
   onCancel: () => void;
 }
 
-export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormData, afterChangeFormData, onConfirm, onCancel, youngsCount, loading }: ConfirmChangesModalProps) {
+export default function ConfirmChangesModal({
+  isOpen,
+  cohort,
+  beforeChangeFormData,
+  afterChangeFormData,
+  onConfirm,
+  onCancel,
+  youngsCount,
+  areNotificationsEnabled,
+  loading,
+}: ConfirmChangesModalProps) {
   const [isEmailing, toggleEmailing] = useToggle(false);
 
   const isBeforeDeparture = cohort ? new Date() < new Date(cohort.dateStart) : false;
@@ -114,43 +125,45 @@ export default function ConfirmChangesModal({ isOpen, cohort, beforeChangeFormDa
               </div>
             </div>
 
-            <div className="mt-8 border-t border-gray-200 w-full pt-8">
-              <label className="flex items-start space-x-2">
-                <input type="checkbox" className="my-auto" checked={isEmailing} onChange={toggleEmailing} />
-                <div className="w-full flex flex-col">
-                  <div className="w-full flex justify-between items-start">
-                    {isBeforeDeparture ? (
-                      <span>Envoyer une campagne d’emailing aux volontaires ({youngsCount}) et à leurs représentants légaux.</span>
-                    ) : (
-                      <span>Envoyer une campagne d'emailing aux représentants légaux et aux jeunes.</span>
-                    )}
-                    {templateId ? (
-                      <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                        Visualiser l'aperçu
-                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
+            {areNotificationsEnabled && (
+              <div className="mt-8 border-t border-gray-200 w-full pt-8">
+                <label className="flex items-start space-x-2">
+                  <input type="checkbox" className="my-auto" checked={isEmailing} onChange={toggleEmailing} />
+                  <div className="w-full flex flex-col">
+                    <div className="w-full flex justify-between items-start">
+                      {isBeforeDeparture ? (
+                        <span>Envoyer une campagne d’emailing aux volontaires ({youngsCount}) et à leurs représentants légaux.</span>
+                      ) : (
+                        <span>Envoyer une campagne d'emailing aux représentants légaux et aux jeunes.</span>
+                      )}
+                      {templateId ? (
+                        <a href={`/email-preview/${templateId}`} target="_blank" rel="noreferrer" className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                          Visualiser l'aperçu
+                          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      ) : null}
+                    </div>
+                    {isCohortCLE ? (
+                      <div className="w-full flex justify-between items-start">
+                        <span className="w-3/4">Les référents de classe, chefs d’établissement et coordinateurs seront également prévenus.</span>
+                        <a
+                          href={`/email-preview/${templateIdForCLE}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
+                          Visualiser l'aperçu
+                          <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                          </svg>
+                        </a>
+                      </div>
                     ) : null}
                   </div>
-                  {isCohortCLE ? (
-                    <div className="w-full flex justify-between items-start">
-                      <span className="w-3/4">Les référents de classe, chefs d’établissement et coordinateurs seront également prévenus.</span>
-                      <a
-                        href={`/email-preview/${templateIdForCLE}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-gray-600 hover:text-gray-800 underline inline-flex items-center">
-                        Visualiser l'aperçu
-                        <svg className="w-4 h-4 ml-1" viewBox="0 0 24 24" fill="none" stroke="currentColor">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-                        </svg>
-                      </a>
-                    </div>
-                  ) : null}
-                </div>
-              </label>
-            </div>
+                </label>
+              </div>
+            )}
           </div>
         </div>
       }

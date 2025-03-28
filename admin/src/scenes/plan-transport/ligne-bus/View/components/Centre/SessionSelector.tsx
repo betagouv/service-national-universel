@@ -2,7 +2,7 @@ import { AuthState } from "@/redux/auth/reducer";
 import React from "react";
 import { useSelector } from "react-redux";
 import CentreLabel from "./CentreLabel";
-import { isSuperAdmin, LigneBusDto, ROLES } from "snu-lib";
+import { LigneBusDto, ROLES } from "snu-lib";
 import { BsSearch } from "react-icons/bs";
 import useSessions from "@/scenes/plan-transport/lib/useSessionsByCohort";
 import { AiOutlineStop } from "react-icons/ai";
@@ -15,6 +15,7 @@ type Props = {
   setSessionId: (string) => void;
   ligne: LigneBusDto;
   disabled: boolean;
+  readOnly: boolean;
 };
 
 function filterResults(data: SessionPhase1PopulatedWithCenter[], search: string) {
@@ -25,7 +26,7 @@ function filterResults(data: SessionPhase1PopulatedWithCenter[], search: string)
   });
 }
 
-export default function SessionSelector({ sessionId, setSessionId, ligne, disabled }: Props) {
+export default function SessionSelector({ sessionId, setSessionId, ligne, disabled, readOnly }: Props) {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const [search, setSearch] = React.useState("");
   const { data: sessions, isPending, isError } = useSessions(ligne.cohort);
@@ -67,7 +68,7 @@ export default function SessionSelector({ sessionId, setSessionId, ligne, disabl
         {centerData ? (
           <div className="flex justify-between">
             <CentreLabel centre={centerData} showLink={user.role !== ROLES.TRANSPORTER} />
-            {isSuperAdmin(user) && !disabled && (
+            {!readOnly && !disabled && (
               <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
                 Changer de lieu
               </button>
