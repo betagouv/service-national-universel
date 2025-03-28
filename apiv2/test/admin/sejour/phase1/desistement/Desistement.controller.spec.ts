@@ -4,20 +4,19 @@ import { addHours } from "date-fns";
 import { INestApplication } from "@nestjs/common";
 import { TestingModule } from "@nestjs/testing";
 
-import { departmentList, region2department, RegionsDromComEtCorse, TaskName, TaskStatus } from "snu-lib";
+import { TaskName, TaskStatus } from "snu-lib";
 
-import { AffectationController } from "@admin/infra/sejours/phase1/affectation/api/Affectation.controller";
 import { TaskGateway } from "@task/core/Task.gateway";
-import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 
 import { createTask } from "../../../TaskHelper";
 import { setupAdminTest } from "../../../setUpAdminTest";
-
 import { createSession } from "../helper/SessionHelper";
+import { DesistementController } from "@admin/infra/sejours/phase1/desistement/api/Desistement.controller";
+import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 
-describe("AffectationController - CLE DROMCOM", () => {
+describe("DesistementController", () => {
     let app: INestApplication;
-    let affectationController: AffectationController;
+    let desistementController: DesistementController;
     let phase1Service: Phase1Service;
     let mockedAddUserToRequestMiddleware;
     let module: TestingModule;
@@ -27,7 +26,7 @@ describe("AffectationController - CLE DROMCOM", () => {
         app = appSetup.app;
 
         module = appSetup.adminTestModule;
-        affectationController = module.get<AffectationController>(AffectationController);
+        desistementController = module.get<DesistementController>(DesistementController);
         mockedAddUserToRequestMiddleware = jest.fn((req, res, next) => {
             req.user = {
                 role: "admin",
@@ -45,81 +44,72 @@ describe("AffectationController - CLE DROMCOM", () => {
     });
 
     it("should be defined", () => {
-        expect(affectationController).toBeDefined();
+        expect(desistementController).toBeDefined();
     });
 
-    describe("POST /affectation/:id/simulation/cle-dromcom", () => {
+    describe("POST /desistement/:id/simulation", () => {
         it("should return 400 for invalid params", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/cle-dromcom`,
-            );
+            const response = await request(app.getHttpServer()).post(`/desistement/${session.id}/simulation`);
 
             expect(response.status).toBe(400);
         });
 
-        it("should return 400 for invalid departement (empty)", async () => {
+        it("should return 400 for invalid affectationTaskId", async () => {
             const session = await createSession();
 
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
-                .send({
-                    departements: [],
-                    etranger: true,
-                });
+            const response = await request(app.getHttpServer()).post(`/desistement/${session.id}/simulation`).send({
+                affectationTaskId: "invalid-id",
+            });
 
             expect(response.status).toBe(400);
         });
 
-        it("should return 400 for invalid departement (inexistant)", async () => {
+        it("should return 201", async () => {
             const session = await createSession();
+            const affectationTask = await createTask({
+                name: TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+                status: TaskStatus.COMPLETED,
+                metadata: {
+                    parameters: {
+                        sessionId: session.id,
+                    },
+                    results: {
+                        rapportKey: "rapportKey",
+                    },
+                },
+                createdAt: addHours(new Date(), -1),
+            });
 
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
-                .send({
-                    departements: ["nonInexistant"],
-                    etranger: true,
-                });
+            const response = await request(app.getHttpServer()).post(`/desistement/${session.id}/simulation`).send({
+                affectationTaskId: affectationTask.id,
+            });
 
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 400 for departement hors metropole", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
-                .send({
-                    departements: departmentList,
-                    etranger: true,
-                });
-
-            expect(response.status).toBe(400);
-        });
-
-        it("should return 201 (valid with corse)", async () => {
-            const session = await createSession();
-
-            const response = await request(app.getHttpServer())
-                .post(`/affectation/${session.id}/simulation/cle-dromcom`)
-                .send({
-                    departements: RegionsDromComEtCorse.flatMap((region) => region2department[region]),
-                    etranger: true,
-                });
+            console.log(response.body);
 
             expect(response.status).toBe(201);
-            expect(response.body.name).toBe(TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION);
+            expect(response.body.name).toBe(TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
             expect(response.body.metadata.parameters.sessionId).toBe(session.id);
         });
     });
 
-    describe("POST /affectation/:id/simulation/:taskId/valider/cle-dromcom", () => {
+    describe("POST /desistement/:id/simulation/:taskId/valider", () => {
+        it("should return 400 for invalid params", async () => {
+            const session = await createSession();
+
+            const response = await request(app.getHttpServer()).post(
+                `/desistement/${session.id}/simulation/invalid-id/valider`,
+            );
+
+            expect(response.status).toBe(400);
+        });
+
         it("should return 422 for invalid task (pending)", async () => {
             const session = await createSession();
             const task = await createTask({
-                name: TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
+                name: TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER,
                 status: TaskStatus.PENDING,
                 metadata: {
                     parameters: {
@@ -129,7 +119,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${task.id}/valider/cle-dromcom`,
+                `/desistement/${session.id}/simulation/${task.id}/valider`,
             );
 
             expect(response.status).toBe(422);
@@ -138,7 +128,7 @@ describe("AffectationController - CLE DROMCOM", () => {
         it("should return 422 for invalid task (outdated)", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.AFFECTATION_CLE_SIMULATION,
+                name: TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -155,7 +145,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+                `/desistement/${session.id}/simulation/${simuTask.id}/valider`,
             );
 
             expect(response.status).toBe(422);
@@ -164,7 +154,7 @@ describe("AffectationController - CLE DROMCOM", () => {
         it("should return 201 for valid task", async () => {
             const session = await createSession();
             const simuTask = await createTask({
-                name: TaskName.AFFECTATION_CLE_SIMULATION,
+                name: TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION,
                 status: TaskStatus.COMPLETED,
                 metadata: {
                     parameters: {
@@ -181,7 +171,7 @@ describe("AffectationController - CLE DROMCOM", () => {
             });
 
             const response = await request(app.getHttpServer()).post(
-                `/affectation/${session.id}/simulation/${simuTask.id}/valider/cle-dromcom`,
+                `/desistement/${session.id}/simulation/${simuTask.id}/valider`,
             );
 
             expect(response.status).toBe(201);

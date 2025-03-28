@@ -7,23 +7,13 @@ import { PointDeRassemblementGateway } from "../pointDeRassemblement/PointDeRass
 import { SessionGateway } from "../session/Session.gateway";
 import { LigneDeBusGateway } from "../ligneDeBus/LigneDeBus.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
-import { TaskName, TaskStatus, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { SejourModel } from "../sejour/Sejour.model";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { LigneDeBusModel } from "../ligneDeBus/LigneDeBus.model";
-import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { PlanDeTransportGateway } from "../PlanDeTransport/PlanDeTransport.gateway";
 import { PlanDeTransportModel } from "../PlanDeTransport/PlanDeTransport.model";
 import { PointDeRassemblementModel } from "../pointDeRassemblement/PointDeRassemblement.model";
-
-export type StatusSimulation = {
-    status: TaskStatus | "NONE";
-};
-
-export type StatusValidation = {
-    status: TaskStatus | "NONE";
-    lastCompletedAt: Date;
-};
 
 @Injectable()
 export class AffectationService {
@@ -36,48 +26,6 @@ export class AffectationService {
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly logger: Logger,
     ) {}
-
-    async getStatusSimulation(sessionId: string, taskName: TaskName): Promise<StatusSimulation> {
-        const simulations = await this.taskGateway.findByNames(
-            [taskName],
-            {
-                "metadata.parameters.sessionId": sessionId,
-            },
-            "DESC",
-            1,
-        );
-        return {
-            status: simulations?.[0]?.status || "NONE",
-        };
-    }
-
-    async getStatusValidation(sessionId: string, taskName: TaskName): Promise<StatusValidation> {
-        const lastTraitement = (
-            await this.taskGateway.findByNames(
-                [taskName],
-                {
-                    "metadata.parameters.sessionId": sessionId,
-                },
-                "DESC",
-                1,
-            )
-        )?.[0];
-        const lastTraitementCompleted = (
-            await this.taskGateway.findByNames(
-                [taskName],
-                {
-                    status: TaskStatus.COMPLETED,
-                    "metadata.parameters.sessionId": sessionId,
-                },
-                "DESC",
-                1,
-            )
-        )?.[0];
-        return {
-            status: lastTraitement?.status || "NONE",
-            lastCompletedAt: lastTraitementCompleted?.updatedAt,
-        };
-    }
 
     // Chargement des données associés à la session
     async loadAffectationData(sessionId: string, withTransport = true) {

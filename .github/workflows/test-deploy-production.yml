@@ -141,7 +141,6 @@ jobs:
   
   deploy_production:
     environment: production
-    if: ${{ vars.DEPLOY_ON_CC == 'true' }} # TODO : Remove
     needs: deploy_staging
     runs-on: ubuntu-latest
 
@@ -152,7 +151,6 @@ jobs:
         run: git push --force origin HEAD:deploy-production
 
   watch_production_deployment:
-    environment: production
     needs: deploy_production
     runs-on: ubuntu-latest
     strategy:
@@ -182,6 +180,7 @@ jobs:
         run: ./devops/scripts/cc-watch-deploy.sh
 
   build_production_docker:  # TODO : Remove
+    if: ${{ vars.DEPLOY_ON_CC == 'true' }} # TODO : Remove
     needs: [prepare, test]
     runs-on: ubuntu-latest
     strategy:
