@@ -5,7 +5,8 @@ interface IPermissionService {
   check(user: UserDto, action: string, cohort?: CohortType): boolean;
 }
 
-export type Permissions = Record<string, Record<string, boolean | string>>;
+export type Permissions = Record<string, Permission>;
+type Permission = Record<string, { value?: boolean; setting?: string }>;
 
 export class PermissionService implements IPermissionService {
   private permissions: Permissions = {};
@@ -19,13 +20,17 @@ export class PermissionService implements IPermissionService {
   }
 
   check(user: UserDto, action: string, cohort?: CohortType): boolean {
-    if (!this.permissions[action]) throw new Error(`Action ${action} not found`);
-    const permission = this.permissions[action][user.role];
-    if (!permission) return false;
-    if (typeof permission === "string") {
-      if (!cohort) throw new Error(`Cohort is required for permission ${action}`);
-      return cohort[permission] as boolean;
+    if (!this.permissions[action]) {
+      throw new Error(`Action ${action} not found`);
     }
-    return permission;
+    const permission = this.permissions[action][user.role];
+    if (permission?.setting) {
+      if (!cohort) throw new Error(`Cohort is required for permission ${action}`);
+      return cohort[permission.setting] as boolean;
+    }
+    if (permission?.value) {
+      return permission.value;
+    }
+    return false;
   }
 }

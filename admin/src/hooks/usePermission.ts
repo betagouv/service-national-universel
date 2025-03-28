@@ -3,54 +3,69 @@ import { useSelector } from "react-redux";
 import { CohortType, UserDto } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 
-type Permissions = Record<string, Record<string, boolean | string>>;
+type Permissions = Record<string, Permission>;
+type Permission = Record<string, { value?: boolean; setting?: string }>;
 
 // TODO: replace this with a real API call
 async function getPermissions(): Promise<Permissions> {
   return {
     "TRANSPORT:UPDATE": {
-      admin: true,
-      transporter: "busEditionOpenForTransporter",
+      admin: { value: true },
+      transporter: { setting: "busEditionOpenForTransporter" },
     },
     "TRANSPORT:UPDATE_PDR_ID": {
-      admin: true,
-      transporter: false,
+      admin: { value: true },
     },
     "TRANSPORT:UPDATE_PDR_SCHEDULE": {
-      admin: true,
-      transporter: "busEditionOpenForTransporter",
+      admin: { value: true },
+      transporter: { setting: "busEditionOpenForTransporter" },
     },
     "TRANSPORT:UPDATE_TYPE": {
-      admin: true,
-      transporter: "busEditionOpenForTransporter",
+      admin: { value: true },
+      transporter: { setting: "busEditionOpenForTransporter" },
     },
     "TRANSPORT:UPDATE_SESSION_ID": {
-      admin: true,
-      transporter: false,
+      admin: { value: true },
     },
     "TRANSPORT:UPDATE_CENTER_SCHEDULE": {
-      admin: true,
-      transporter: "busEditionOpenForTransporter",
+      admin: { value: true },
+      transporter: { setting: "busEditionOpenForTransporter" },
     },
     "TRANSPORT:NOTIFY_AFTER_UPDATE": {
-      admin: true,
-      transporter: false,
+      admin: { value: true },
     },
   };
 }
 
-function getPermission(permissions: Permissions, user: UserDto, action: string, cohort?: CohortType): boolean {
-  if (!permissions[action]) throw new Error(`Action ${action} not found`);
-  const permission = permissions[action][user.role];
-  if (!permission) return false;
-  if (typeof permission === "string") {
-    if (!cohort) throw new Error(`Cohort is required for permission ${action}`);
-    return cohort[permission] as boolean;
+function getPermission(permissions: Permissions, user: UserDto, action: string, cohort?: CohortType): { value: boolean; message?: string } {
+  if (!permissions[action]) {
+    throw new Error(`Action ${action} not found`);
   }
-  return permission;
+  const permission = permissions[action][user.role];
+  if (permission?.setting) {
+    if (!cohort) {
+      throw new Error(`Cohort is required for permission ${action}`);
+    }
+    const value = cohort[permission.setting] as boolean;
+    return {
+      value,
+      message: value ? undefined : "Cette opération est désactivée pour ce séjour.",
+    };
+  }
+  if (permission?.value) {
+    const value = permission.value || false;
+    return {
+      value,
+      message: value ? undefined : "Vous n'avez pas l'autorisation de réaliser cette action.",
+    };
+  }
+  return {
+    value: false,
+    message: "Vous n'avez pas l'autorisation de réaliser cette action.",
+  };
 }
 
-export default function usePermission(action: string, cohort?: CohortType): boolean {
+export default function usePermission(action: string, cohort?: CohortType): { value: boolean; message?: string } {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const {
     isPending,
@@ -63,8 +78,7 @@ export default function usePermission(action: string, cohort?: CohortType): bool
     refetchOnMount: false,
     refetchOnWindowFocus: false,
   });
-  if (isPending) return false;
+  if (isPending) return { value: false, message: "Chargement des permissions..." };
   if (isError) throw new Error(error.message);
-  if (!permissions) return false;
   return getPermission(permissions, user, action, cohort);
 }

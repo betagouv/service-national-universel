@@ -200,7 +200,6 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     [toggleConfirmChangesModal],
   );
 
-  const message = "Vous n'avez pas l'autorisation de modifier le point de rassemblement.";
   const canUpdateTransport = usePermission(actions.transport.UPDATE, cohort);
   const canUpdatePdrId = usePermission(actions.transport.UPDATE_PDR_ID, cohort);
   const canUpdatePdrSchedule = usePermission(actions.transport.UPDATE_PDR_SCHEDULE, cohort);
@@ -223,13 +222,20 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
             <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
           </div>
-          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} onReset={handleCancelChanges} disabled={!canUpdateTransport} tooltipMessage={message} />
+          <EditButton
+            isEditing={editPdr}
+            setIsEditing={setEditPdr}
+            isLoading={isLoading}
+            onReset={handleCancelChanges}
+            disabled={!canUpdateTransport.value}
+            tooltipMessage={canUpdateTransport.message}
+          />
         </div>
         <div className="mt-8 flex flex-col">
           <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
             <div className="flex justify-between flex-row items-center">
               <PointDeRassemblementLabel pdr={selectedPDR} showLink={user.role !== ROLES.TRANSPORTER} />
-              {canUpdatePdrId && editPdr && (
+              {canUpdatePdrId.value && editPdr && (
                 <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
                   Changer de lieu
                 </button>
@@ -284,7 +290,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
               options={options}
               selected={options.find((e) => e.value === data.transportType)}
               setSelected={(e) => setData({ ...data, transportType: e.value })}
-              readOnly={!editPdr || !canUpdatePdrTransportType}
+              readOnly={!editPdr || !canUpdatePdrTransportType.value}
             />
             <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
             <div className="flex items-center gap-4">
@@ -295,7 +301,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data?.busArrivalHour}
                 error={errors?.busArrivalHour}
                 readOnly={!editPdr}
-                disabled={editPdr && !canUpdatePdrSchedule}
+                disabled={editPdr && !canUpdatePdrSchedule.value}
               />
               <Field
                 label="Heure de convocation"
@@ -304,7 +310,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.meetingHour}
                 error={errors?.meetingHour}
                 readOnly={!editPdr}
-                disabled={editPdr && !canUpdatePdrSchedule}
+                disabled={editPdr && !canUpdatePdrSchedule.value}
               />
             </div>
             <div className="flex items-center gap-4">
@@ -328,7 +334,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.returnHour}
                 error={errors?.returnHour}
                 readOnly={!editPdr}
-                disabled={editPdr && !canUpdatePdrSchedule}
+                disabled={editPdr && !canUpdatePdrSchedule.value}
               />
             </div>
           </div>
@@ -361,7 +367,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
           returnHour: data.returnHour || "",
         }}
         youngsCount={youngsCount}
-        areNotificationsEnabled={canSendNotification}
+        areNotificationsEnabled={canSendNotification.value}
         loading={isLoading}
       />
     </>
