@@ -1,4 +1,10 @@
-import { CampagneType, isCampagneWithRef, hasCampagneGeneriqueId, isCampagneGenerique } from "snu-lib";
+import {
+    CampagneType,
+    isCampagneWithRef,
+    hasCampagneGeneriqueId,
+    isCampagneGenerique,
+    EnvoiCampagneStatut,
+} from "snu-lib";
 import {
     CampagneModel,
     CampagneSpecifiqueModel,
@@ -22,7 +28,11 @@ export class CampagneMapper {
                 campagneGeneriqueId: document.campagneGeneriqueId,
                 createdAt: document.createdAt,
                 updatedAt: document.updatedAt,
-            } as CampagneSpecifiqueModel;
+                envois: document.envois.map((envoi) => ({
+                    date: envoi.date,
+                    statut: EnvoiCampagneStatut[envoi.statut],
+                })),
+            };
         }
 
         // Champs communs pour les autres cas

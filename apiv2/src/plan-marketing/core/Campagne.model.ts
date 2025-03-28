@@ -57,6 +57,7 @@ export interface CampagneSpecifiqueModelWithRef extends CampagneBase {
     generic: false;
     cohortId: string;
     campagneGeneriqueId: string;
+    envois?: CampagneEnvoi[];
 }
 
 export interface CampagneSpecifiqueModelWithRefAndGeneric extends CampagneComplete {

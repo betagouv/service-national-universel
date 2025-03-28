@@ -379,9 +379,10 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 <Button
                   leftIcon={<LuSend className="w-5 h-5" />}
                   title={`${campagneData.envois && campagneData.envois.length > 0 ? "Renvoyer la campagne" : "Envoyer la campagne"}`}
-                  className="flex-1 bg-green-700"
+                  className={`${isDirty ? "bg-gray-300" : "bg-green-700"} flex-1`}
                   onClick={handleSubmit(handleSendCampagne)}
                   loading={isSubmitting}
+                  disabled={isDirty}
                 />
               </div>
             </div>
