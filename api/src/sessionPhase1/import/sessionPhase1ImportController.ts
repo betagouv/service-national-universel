@@ -11,7 +11,7 @@ import { readCSVBuffer, generateCSVStream, getHeaders, streamToBuffer, XLSXToCSV
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { capture } from "../../sentry";
-import { importSessionsPhase1 } from "./sessionPhase1ImportService";
+import { importSessionsPhase1, removeDeprecatedSessionsPhase1 } from "./sessionPhase1ImportService";
 import { checkColumnHeaders } from "./sessionPhase1ImportValidator";
 import { SessionCohesionCenterCSV } from "./sessionPhase1Import";
 
@@ -53,9 +53,10 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
     const csvBuffer = XLSXToCSVBuffer(filePath);
     const parsedContent: SessionCohesionCenterCSV[] = await readCSVBuffer(csvBuffer);
     const importedSessionCohesionCenter = await importSessionsPhase1(parsedContent);
+    const removedSessionCohesionCenter = await removeDeprecatedSessionsPhase1(parsedContent);
 
     const headers = getHeaders(importedSessionCohesionCenter);
-    const csvDataReponse = generateCSVStream(importedSessionCohesionCenter, headers);
+    const csvDataReponse = generateCSVStream([...importedSessionCohesionCenter, ...removedSessionCohesionCenter], headers);
     const responseFileName = `rapport-sessions-importes-${timestamp}.csv`;
     uploadFile(`file/si-snu/centres-des-sessions/export-${timestamp}/${responseFileName}`, {
       data: csvDataReponse,
