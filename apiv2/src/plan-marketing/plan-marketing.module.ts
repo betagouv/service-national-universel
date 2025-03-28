@@ -31,6 +31,9 @@ import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElasti
 import { AdminModule } from "@admin/Admin.module";
 import { PreparerEnvoiCampagne } from "./core/useCase/PreparerEnvoiCampagne";
 import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
+import { CampagneContactBuilderService } from "./core/service/CampagneContactBuilder.service";
+import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
+import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -71,6 +74,9 @@ import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
         },
         PreparerEnvoiCampagne,
         EnvoyerCampagne,
+        CampagneContactBuilderService,
+        CampagneProcessorService,
+        CampagneDataFetcherService,
     ],
 })
 export class PlanMarketingModule {}

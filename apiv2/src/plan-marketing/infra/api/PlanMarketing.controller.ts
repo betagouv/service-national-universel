@@ -1,5 +1,5 @@
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
-import { Body, Controller, Post, UseGuards } from "@nestjs/common";
+import { Body, Controller, Logger, Post, UseGuards } from "@nestjs/common";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
 import { IsNotEmpty, IsString } from "class-validator";
 import { ImporterEtCreerListeDiffusion } from "../../core/useCase/ImporterEtCreerListeDiffusion";
@@ -21,6 +21,8 @@ class ImporterContactsEtCreerListeDiffusionDto {
 
 @Controller("plan-marketing")
 export class PlanMarketingController {
+    private readonly logger: Logger = new Logger(PlanMarketingController.name);
+
     constructor(
         private readonly importerEtCreerListeDiffusion: ImporterEtCreerListeDiffusion,
         private readonly planMarketingActionSelectorService: PlanMarketingActionSelectorService,
@@ -35,6 +37,7 @@ export class PlanMarketingController {
     @Post("import/webhook")
     @UseGuards(BrevoIpGuard)
     async webhook(@Body("proc_success") processId: string) {
+        this.logger.log(`Webhook received from Brevo for processId: ${processId}`);
         await this.planMarketingActionSelectorService.selectAction(Number(processId));
     }
 }

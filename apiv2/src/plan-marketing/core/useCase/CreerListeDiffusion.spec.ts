@@ -1,290 +1,538 @@
-import { Test } from "@nestjs/testing";
+import { Test, TestingModule } from "@nestjs/testing";
 import { CreerListeDiffusion } from "./CreerListeDiffusion";
-import { CampagneGateway } from "../gateway/Campagne.gateway";
-import { SearchYoungGateway } from "src/analytics/core/SearchYoung.gateway";
-import { ListeDiffusionService } from "../service/ListeDiffusion.service";
-import { ClasseGateway } from "@admin/core/sejours/cle/classe/Classe.gateway";
-import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
-import { PointDeRassemblementGateway } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.gateway";
-import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
-import { CentreGateway } from "@admin/core/sejours/phase1/centre/Centre.gateway";
-import { SegmentDeLigneGateway } from "@admin/core/sejours/phase1/segmentDeLigne/SegmentDeLigne.gateway";
-import { ClockGateway } from "@shared/core/Clock.gateway";
-import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
+import { CampagneContactBuilderService } from "../service/CampagneContactBuilder.service";
+import { CampagneDataFetcherService } from "../service/CampagneDataFetcher.service";
+import { CampagneProcessorService } from "../service/CampagneProcessor.service";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { DestinataireListeDiffusion } from "snu-lib";
-import { EtablissementGateway } from "@admin/core/sejours/cle/etablissement/Etablissement.gateway";
-import { SejourGateway } from "@admin/core/sejours/phase1/sejour/Sejour.gateway";
-import { COLUMN_CSV_HEADERS, ColumnType } from "../ListeDiffusion.model";
-import { CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";
+import { DestinataireListeDiffusion, YoungType } from "snu-lib";
+import { ColumnCsvName, ColumnType } from "../ListeDiffusion.model";
+import { Logger } from "@nestjs/common";
+import { SearchYoungResult } from "src/analytics/core/SearchYoung.gateway";
+import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
+import { CentreModel } from "@admin/core/sejours/phase1/centre/Centre.model";
+import { PointDeRassemblementModel } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.model";
+import { LigneDeBusModel } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.model";
+import { SegmentDeLigneModel } from "@admin/core/sejours/phase1/segmentDeLigne/SegmentDeLigne.model";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { EtablissementModel } from "@admin/core/sejours/cle/etablissement/Etablissement.model";
+import { SejourModel } from "@admin/core/sejours/phase1/sejour/Sejour.model";
+
+interface CampaignProcessorResult {
+    destinataires: DestinataireListeDiffusion[];
+    youngs: SearchYoungResult;
+    contactsQuery: Record<string, any>;
+}
+
+interface RelatedDataResult {
+    classes: ClasseModel[];
+    referentsClasse: ReferentModel[];
+    etablissements: EtablissementModel[];
+    chefsEtablissement: ReferentModel[];
+    coordinateursCle: ReferentModel[];
+    sejours: SejourModel[];
+    chefsDeCentre: ReferentModel[];
+    pointDeRassemblements: PointDeRassemblementModel[];
+    lignes: LigneDeBusModel[];
+    centres: CentreModel[];
+    segmentDeLignes: SegmentDeLigneModel[];
+}
 
 describe("CreerListeDiffusion", () => {
     let useCase: CreerListeDiffusion;
-    let campagneGateway: jest.Mocked<CampagneGateway>;
-    let searchYoungGateway: jest.Mocked<SearchYoungGateway>;
-    let listeDiffusionService: jest.Mocked<ListeDiffusionService>;
-    let ligneDeBusGateway: jest.Mocked<LigneDeBusGateway>;
-    let centreGateway: jest.Mocked<CentreGateway>;
-    let pointDeRassemblementGateway: jest.Mocked<PointDeRassemblementGateway>;
-    let segmentDeLigneGateway: jest.Mocked<SegmentDeLigneGateway>;
-    let fileGateway: jest.Mocked<FileGateway>;
-    let referentGateway: jest.Mocked<ReferentGateway>;
-    let classeGateway: jest.Mocked<ClasseGateway>;
-    let etablissementGateway: jest.Mocked<EtablissementGateway>;
-    let sejourGateway: jest.Mocked<SejourGateway>;
-    let clockGateway: jest.Mocked<ClockGateway>;
+    let mockFileGateway: jest.Mocked<FileGateway>;
+    let mockContactBuilderService: jest.Mocked<CampagneContactBuilderService>;
+    let mockDataFetcherService: jest.Mocked<CampagneDataFetcherService>;
+    let mockCampaignProcessorService: jest.Mocked<CampagneProcessorService>;
 
     beforeEach(async () => {
-        const module = await Test.createTestingModule({
+        mockFileGateway = {
+            generateCSV: jest.fn(),
+        } as unknown as jest.Mocked<FileGateway>;
+
+        mockContactBuilderService = {
+            buildYoungContactRow: jest.fn(),
+            buildParentContactRow: jest.fn(),
+            buildReferentContactRow: jest.fn(),
+            buildChefEtablissementContactRow: jest.fn(),
+            buildChefCentreContactRow: jest.fn(),
+            buildCoordinateurCleContactRow: jest.fn(),
+        } as unknown as jest.Mocked<CampagneContactBuilderService>;
+
+        mockDataFetcherService = {
+            fetchRelatedData: jest.fn(),
+        } as unknown as jest.Mocked<CampagneDataFetcherService>;
+
+        mockCampaignProcessorService = {
+            validateAndProcessCampaign: jest.fn(),
+        } as unknown as jest.Mocked<CampagneProcessorService>;
+
+        const module: TestingModule = await Test.createTestingModule({
             providers: [
                 CreerListeDiffusion,
-                {
-                    provide: PlanMarketingGateway,
-                    useValue: {
-                        findById: jest.fn(),
-                        find: jest.fn().mockResolvedValue([]),
-                    },
-                },
-                {
-                    provide: CampagneGateway,
-                    useValue: {
-                        findById: jest.fn(),
-                        findSpecifiqueWithRefById: jest.fn(),
-                    },
-                },
-                {
-                    provide: SearchYoungGateway,
-                    useValue: { searchYoung: jest.fn() },
-                },
-                {
-                    provide: ListeDiffusionService,
-                    useValue: { getListeDiffusionById: jest.fn() },
-                },
-                {
-                    provide: ClasseGateway,
-                    useValue: {
-                        findByIds: jest.fn(),
-                        findReferentIdsByClasseIds: jest.fn(),
-                    },
-                },
-                {
-                    provide: ReferentGateway,
-                    useValue: {
-                        findByIds: jest.fn(),
-                        findByCohesionCenterIds: jest.fn(),
-                    },
-                },
-                {
-                    provide: FileGateway,
-                    useValue: { generateCSV: jest.fn() },
-                },
-                {
-                    provide: PointDeRassemblementGateway,
-                    useValue: { findByIds: jest.fn() },
-                },
-                {
-                    provide: LigneDeBusGateway,
-                    useValue: { findByIds: jest.fn() },
-                },
-                {
-                    provide: CentreGateway,
-                    useValue: { findByIds: jest.fn() },
-                },
-                {
-                    provide: SegmentDeLigneGateway,
-                    useValue: { findByLigneDeBusIds: jest.fn() },
-                },
-                {
-                    provide: ClockGateway,
-                    useValue: {
-                        isValidDate: jest.fn().mockReturnValue(true),
-                        formatShort: jest.fn().mockReturnValue("2023-01-01"),
-                    },
-                },
-                {
-                    provide: EtablissementGateway,
-                    useValue: {
-                        findByIds: jest.fn(),
-                    },
-                },
-                {
-                    provide: SejourGateway,
-                    useValue: {
-                        findByIds: jest.fn(),
-                    },
-                },
+                { provide: FileGateway, useValue: mockFileGateway },
+                { provide: CampagneContactBuilderService, useValue: mockContactBuilderService },
+                { provide: CampagneDataFetcherService, useValue: mockDataFetcherService },
+                { provide: CampagneProcessorService, useValue: mockCampaignProcessorService },
+                Logger,
             ],
         }).compile();
 
-        useCase = module.get(CreerListeDiffusion);
-        campagneGateway = module.get(CampagneGateway);
-        searchYoungGateway = module.get(SearchYoungGateway);
-        listeDiffusionService = module.get(ListeDiffusionService);
-        ligneDeBusGateway = module.get(LigneDeBusGateway);
-        centreGateway = module.get(CentreGateway);
-        segmentDeLigneGateway = module.get(SegmentDeLigneGateway);
-        pointDeRassemblementGateway = module.get(PointDeRassemblementGateway);
-        referentGateway = module.get(ReferentGateway);
-        fileGateway = module.get(FileGateway);
-        classeGateway = module.get(ClasseGateway);
-        etablissementGateway = module.get(EtablissementGateway);
-        sejourGateway = module.get(SejourGateway);
-        clockGateway = module.get(ClockGateway);
+        useCase = module.get<CreerListeDiffusion>(CreerListeDiffusion);
     });
 
-    it("should throw when campaign is not found", async () => {
-        campagneGateway.findById.mockResolvedValue(null);
+    describe("execute", () => {
+        it("should throw an exception when no contacts are found", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const emptyYoungs = {
+                hits: [],
+                total: 0,
+            };
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES],
+                youngs: emptyYoungs,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
 
-        await expect(useCase.execute("nonexistent-id")).rejects.toThrow(
-            new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND),
-        );
-    });
+            // Execute & Assert
+            await expect(useCase.execute(campaignId)).rejects.toThrow(
+                new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
+            );
+        });
 
-    it("should throw when campaign is generic", async () => {
-        campagneGateway.findById.mockResolvedValue({
-            id: "campaign-1",
-            generic: true,
-        } as any);
+        it("should generate CSV for young contacts only", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [
+                    { id: "young1", firstName: "John", lastName: "Doe" },
+                    { id: "young2", firstName: "Jane", lastName: "Smith" },
+                ],
+                total: 2,
+            };
 
-        await expect(useCase.execute("campaign-1")).rejects.toThrow(
-            new FunctionalException(FunctionalExceptionCode.CAMPAIGN_SHOULD_NOT_BE_GENERIC),
-        );
-    });
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [],
+                referentsClasse: [],
+                etablissements: [],
+                chefsEtablissement: [],
+                coordinateursCle: [],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
 
-    it("should create liste diffusion for specifique campaign without ref", async () => {
-        const mockCampagne = {
-            id: "campaign-1",
-            generic: false,
-            destinataires: [DestinataireListeDiffusion.REPRESENTANTS_LEGAUX],
-            listeDiffusionId: "liste-1",
-            cohortId: "cohort-1",
-        };
+            const youngContact1 = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
 
-        const mockListeDiffusion = {
-            id: "liste-1",
-            filters: {},
-        };
+            const youngContact2 = {
+                type: ColumnType.jeunes,
+                PRENOM: "Jane",
+                NOM: "Smith",
+                EMAIL: "jane.smith@example.com",
+            } as unknown as ColumnCsvName;
 
-        const mockYoung = {
-            id: "young-1",
-            firstName: "John",
-            lastName: "Doe",
-            email: "john@example.com",
-            cohort: "2023",
-            cohesionCenterId: "centre-1",
-            meetingPointId: "point-1",
-            ligneId: "ligne-1",
-            parent1FirstName: "Parent1",
-            parent1LastName: "Doe",
-            parent1Email: "parent1@example.com",
-        };
+            const csvFilePath = "path/to/csv/file.csv";
 
-        campagneGateway.findById.mockResolvedValue(mockCampagne as any);
-        listeDiffusionService.getListeDiffusionById.mockResolvedValue(mockListeDiffusion as any);
-        searchYoungGateway.searchYoung.mockResolvedValue({ hits: [mockYoung] } as any);
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
 
-        ligneDeBusGateway.findByIds.mockResolvedValue([
-            {
-                id: "ligne-1",
-            },
-        ] as any);
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
 
-        centreGateway.findByIds.mockResolvedValue([
-            {
-                id: "centre-1",
-            },
-        ] as any);
+            mockContactBuilderService.buildYoungContactRow
+                .mockReturnValueOnce(youngContact1)
+                .mockReturnValueOnce(youngContact2);
 
-        pointDeRassemblementGateway.findByIds.mockResolvedValue([
-            {
-                id: "point-1",
-            },
-        ] as any);
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
-        segmentDeLigneGateway.findByLigneDeBusIds.mockResolvedValue([
-            {
-                id: "segment-1",
-            },
-        ] as any);
+            // Execute
+            const result = await useCase.execute(campaignId);
 
-        const mockCsvContent = "csv-content";
-        fileGateway.generateCSV.mockResolvedValue(mockCsvContent);
+            // Assert
+            expect(mockCampaignProcessorService.validateAndProcessCampaign).toHaveBeenCalledWith(campaignId);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits);
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact1, youngContact2],
+                expect.objectContaining({
+                    delimiter: ";",
+                }),
+            );
+            expect(result).toBe(csvFilePath);
+        });
 
-        const result = await useCase.execute("campaign-1");
-        expect(result).toBe(mockCsvContent);
-        expect(fileGateway.generateCSV).toHaveBeenCalled();
-    });
+        it("should include parent contacts when REPRESENTANTS_LEGAUX is in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe" }],
+                total: 1,
+            };
 
-    it("should create liste diffusion for specifique campaign with ref", async () => {
-        const mockCampagne = {
-            id: "campaign-with-ref-1",
-            generic: false,
-            campagneGeneriqueId: "generic-campaign-1",
-            destinataires: [DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, DestinataireListeDiffusion.CHEFS_CENTRES],
-            listeDiffusionId: "liste-ref-1",
-            cohortId: "cohort-1",
-        };
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [],
+                referentsClasse: [],
+                etablissements: [],
+                chefsEtablissement: [],
+                coordinateursCle: [],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
 
-        const mockListeDiffusion = {
-            id: "liste-ref-1",
-            filters: { department: ["75", "92"] },
-        };
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
 
-        const mockYoung = {
-            id: "young-ref-1",
-            firstName: "Jane",
-            lastName: "Smith",
-            email: "jane@example.com",
-            cohort: "2023",
-            cohesionCenterId: "centre-ref-1",
-            meetingPointId: "point-ref-1",
-            ligneId: "ligne-ref-1",
-            parent1FirstName: "Parent1",
-            parent1LastName: "Smith",
-            parent1Email: "parent1.smith@example.com",
-        };
+            const parent1Contact = {
+                type: ColumnType.representants,
+                PRENOM_RL1: "Parent1",
+                NOM_RL1: "One",
+                EMAIL: "parent1@example.com",
+            } as unknown as ColumnCsvName;
 
-        campagneGateway.findById.mockResolvedValue(mockCampagne as any);
-        campagneGateway.findSpecifiqueWithRefById.mockResolvedValue(mockCampagne as any);
-        listeDiffusionService.getListeDiffusionById.mockResolvedValue(mockListeDiffusion as any);
-        searchYoungGateway.searchYoung.mockResolvedValue({ hits: [mockYoung] } as any);
+            const parent2Contact = {
+                type: ColumnType.representants,
+                PRENOM_RL2: "Parent2",
+                NOM_RL2: "Two",
+                EMAIL: "parent2@example.com",
+            } as unknown as ColumnCsvName;
 
-        ligneDeBusGateway.findByIds.mockResolvedValue([{ id: "ligne-ref-1" }] as any);
-        centreGateway.findByIds.mockResolvedValue([{ id: "centre-ref-1" }] as any);
-        pointDeRassemblementGateway.findByIds.mockResolvedValue([{ id: "point-ref-1" }] as any);
-        segmentDeLigneGateway.findByLigneDeBusIds.mockResolvedValue([{ id: "segment-ref-1" }] as any);
+            const csvFilePath = "path/to/csv/file.csv";
 
-        const mockCsvContent = "csv-content-with-ref";
-        fileGateway.generateCSV.mockResolvedValue(mockCsvContent);
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES, DestinataireListeDiffusion.REPRESENTANTS_LEGAUX],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
 
-        const result = await useCase.execute("campaign-with-ref-1");
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
 
-        expect(result).toBe(mockCsvContent);
-        expect(campagneGateway.findSpecifiqueWithRefById).toHaveBeenCalledWith("campaign-with-ref-1");
-        expect(fileGateway.generateCSV).toHaveBeenCalled();
-    });
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildParentContactRow
+                .mockReturnValueOnce(parent1Contact)
+                .mockReturnValueOnce(parent2Contact);
 
-    it("should throw when no contacts are found", async () => {
-        const mockCampagne = {
-            id: "campaign-no-contacts",
-            generic: false,
-            destinataires: [DestinataireListeDiffusion.REPRESENTANTS_LEGAUX],
-            listeDiffusionId: "liste-empty",
-            cohortId: "cohort-1",
-        };
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
-        const mockListeDiffusion = {
-            id: "liste-empty",
-            filters: {},
-        };
+            // Execute
+            const result = await useCase.execute(campaignId);
 
-        campagneGateway.findById.mockResolvedValue(mockCampagne as any);
-        listeDiffusionService.getListeDiffusionById.mockResolvedValue(mockListeDiffusion as any);
-        searchYoungGateway.searchYoung.mockResolvedValue({ hits: [] } as any);
+            // Assert
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(1);
+            expect(mockContactBuilderService.buildParentContactRow).toHaveBeenCalledTimes(2);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact, parent1Contact, parent2Contact],
+                expect.any(Object),
+            );
+            expect(result).toBe(csvFilePath);
+        });
 
-        await expect(useCase.execute("campaign-no-contacts")).rejects.toThrow(
-            new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
-        );
+        it("should include referent contacts when REFERENTS_CLASSES is in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
+                total: 1,
+            };
+
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [{ id: "classe1", referentClasseIds: ["referent1"] }],
+                referentsClasse: [{ id: "referent1", prenom: "Ref", nom: "One" }],
+                etablissements: [],
+                chefsEtablissement: [],
+                coordinateursCle: [],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
+
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
+
+            const referentContact = {
+                type: ColumnType.referents,
+                PRENOM: "Ref",
+                NOM: "One",
+                EMAIL: "ref@example.com",
+            } as unknown as ColumnCsvName;
+
+            const csvFilePath = "path/to/csv/file.csv";
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES, DestinataireListeDiffusion.REFERENTS_CLASSES],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
+
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildReferentContactRow.mockReturnValue(referentContact);
+
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
+
+            // Execute
+            const result = await useCase.execute(campaignId);
+
+            // Assert
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for referent
+            expect(mockContactBuilderService.buildReferentContactRow).toHaveBeenCalledTimes(1);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact, referentContact],
+                expect.any(Object),
+            );
+            expect(result).toBe(csvFilePath);
+        });
+
+        it("should include chef establishment contacts when CHEFS_ETABLISSEMENT is in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
+                total: 1,
+            };
+
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [{ id: "classe1", etablissementId: "etab1" }],
+                referentsClasse: [],
+                etablissements: [{ id: "etab1", referentEtablissementIds: ["chef1"] }],
+                chefsEtablissement: [{ id: "chef1", prenom: "Chef", nom: "Etablissement" }],
+                coordinateursCle: [],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
+
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
+
+            const chefEtabContact = {
+                type: ColumnType["chefs-etablissement"],
+                PRENOM: "Chef",
+                NOM: "Etablissement",
+                EMAIL: "chef@example.com",
+            } as unknown as ColumnCsvName;
+
+            const csvFilePath = "path/to/csv/file.csv";
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES, DestinataireListeDiffusion.CHEFS_ETABLISSEMENT],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
+
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildChefEtablissementContactRow.mockReturnValue(chefEtabContact);
+
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
+
+            // Execute
+            const result = await useCase.execute(campaignId);
+
+            // Assert
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for chef
+            expect(mockContactBuilderService.buildChefEtablissementContactRow).toHaveBeenCalledTimes(1);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact, chefEtabContact],
+                expect.any(Object),
+            );
+            expect(result).toBe(csvFilePath);
+        });
+
+        it("should include chef centre contacts when CHEFS_CENTRES is in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
+                total: 1,
+            };
+
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [{ id: "classe1", sejourId: "sejour1" }],
+                referentsClasse: [],
+                etablissements: [],
+                chefsEtablissement: [],
+                coordinateursCle: [],
+                sejours: [{ id: "sejour1", chefDeCentreReferentId: "chef1" }],
+                chefsDeCentre: [{ id: "chef1", prenom: "Chef", nom: "Centre" }],
+            } as unknown as RelatedDataResult;
+
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
+
+            const chefCentreContact = {
+                type: ColumnType["chefs-centres"],
+                PRENOM: "Chef",
+                NOM: "Centre",
+                EMAIL: "chefCentre@example.com",
+            } as unknown as ColumnCsvName;
+
+            const csvFilePath = "path/to/csv/file.csv";
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES, DestinataireListeDiffusion.CHEFS_CENTRES],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
+
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildChefCentreContactRow.mockReturnValue(chefCentreContact);
+
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
+
+            // Execute
+            const result = await useCase.execute(campaignId);
+
+            // Assert
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for chef
+            expect(mockContactBuilderService.buildChefCentreContactRow).toHaveBeenCalledTimes(1);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact, chefCentreContact],
+                expect.any(Object),
+            );
+            expect(result).toBe(csvFilePath);
+        });
+
+        it("should include coordinateur CLE contacts when COORDINATEURS_CLE is in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
+                total: 1,
+            };
+
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [{ id: "classe1", etablissementId: "etab1" }],
+                referentsClasse: [],
+                etablissements: [{ id: "etab1", coordinateurIds: ["coord1"] }],
+                chefsEtablissement: [],
+                coordinateursCle: [{ id: "coord1", prenom: "Coordinateur", nom: "CLE" }],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
+
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
+
+            const coordCleContact = {
+                type: ColumnType.administrateurs,
+                PRENOM: "Coordinateur",
+                NOM: "CLE",
+                EMAIL: "coordinateur@example.com",
+            } as unknown as ColumnCsvName;
+
+            const csvFilePath = "path/to/csv/file.csv";
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.JEUNES, DestinataireListeDiffusion.COORDINATEURS_CLE],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
+
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildCoordinateurCleContactRow.mockReturnValue(coordCleContact);
+
+            mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
+
+            // Execute
+            const result = await useCase.execute(campaignId);
+
+            // Assert
+            expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for coord
+            expect(mockContactBuilderService.buildCoordinateurCleContactRow).toHaveBeenCalledTimes(1);
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                [youngContact, coordCleContact],
+                expect.any(Object),
+            );
+            expect(result).toBe(csvFilePath);
+        });
+
+        it("should throw an exception when no contacts are generated", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe" }],
+                total: 1,
+            };
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [], // No destinataires = no contacts will be generated
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue({
+                centres: [],
+                pointDeRassemblements: [],
+                lignes: [],
+                segmentDeLignes: [],
+                classes: [],
+                referentsClasse: [],
+                etablissements: [],
+                chefsEtablissement: [],
+                coordinateursCle: [],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult);
+
+            // Execute & Assert
+            await expect(useCase.execute(campaignId)).rejects.toThrow(
+                new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
+            );
+        });
     });
 });
