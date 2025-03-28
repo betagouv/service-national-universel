@@ -21,7 +21,7 @@ describe("PermissionService", () => {
 
     const user = { role: "admin" } as UserDto;
     const cohort = {} as CohortType;
-    expect(() => service.check(user, cohort, "nonExistingAction")).toThrow("Action nonExistingAction not found");
+    expect(() => service.check(user, "nonExistingAction", cohort)).toThrow("Action nonExistingAction not found");
   });
 
   it("should return false when permission for the user's role is not defined", async () => {
@@ -35,7 +35,7 @@ describe("PermissionService", () => {
 
     const user = { role: "user" } as UserDto;
     const cohort = {} as CohortType;
-    expect(service.check(user, cohort, "action1")).toBe(false);
+    expect(service.check(user, "action1", cohort)).toBe(false);
   });
 
   it("should return the boolean permission when defined directly", async () => {
@@ -51,8 +51,8 @@ describe("PermissionService", () => {
     const admin = { role: "admin" } as UserDto;
     const user = { role: "user" } as UserDto;
     const cohort = {} as CohortType;
-    expect(service.check(admin, cohort, "action1")).toBe(true);
-    expect(service.check(user, cohort, "action1")).toBe(false);
+    expect(service.check(admin, "action1", cohort)).toBe(true);
+    expect(service.check(user, "action1", cohort)).toBe(false);
   });
 
   it("should return the cohort property when permission is defined as a string", async () => {
@@ -67,7 +67,7 @@ describe("PermissionService", () => {
     const admin = { role: "admin" } as UserDto;
     const activeCohort = { active: true } as unknown as CohortType;
     const inactiveCohort = { active: false } as unknown as CohortType;
-    expect(service.check(admin, activeCohort, "action1")).toBe(true);
-    expect(service.check(admin, inactiveCohort, "action1")).toBe(false);
+    expect(service.check(admin, "action1", activeCohort)).toBe(true);
+    expect(service.check(admin, "action1", inactiveCohort)).toBe(false);
   });
 });
