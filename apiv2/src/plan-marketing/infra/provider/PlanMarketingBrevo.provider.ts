@@ -13,7 +13,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
     private readonly logger = new Logger(PlanMarketingBrevoProvider.name);
 
     constructor(private readonly config: ConfigService) {
-        let apiKey = this.config.getOrThrow("email.apiKey");
+        const apiKey = this.config.getOrThrow("email.apiKey");
 
         this.contactsApi = new brevo.ContactsApi();
         this.campaignsApi = new brevo.EmailCampaignsApi();
@@ -151,7 +151,7 @@ export class PlanMarketingBrevoProvider implements PlanMarketingGateway {
         value: string,
     ) {
         //@ts-ignore
-        let apiKey = apiInstance.authentications["apiKey"];
+        const apiKey = apiInstance.authentications["apiKey"];
         apiKey.apiKey = value;
     }
 }
