@@ -1,7 +1,7 @@
 import { CohortType } from "../mongoSchema";
 import { transportPermissions } from "./transport/transportPermissions";
 import { transportActions } from "./transport/transportActions";
-import { UserDto } from "src/dto";
+import { UserDto } from "../dto";
 
 export const actions = {
   transport: transportActions,
