@@ -10,7 +10,7 @@ import { InviterReferentClasse } from "../../sejours/cle/referent/useCase/Invite
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { Role } from "@shared/core/Role";
 
-Injectable();
+@Injectable()
 export class ReferentService {
     constructor(
         @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,

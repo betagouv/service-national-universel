@@ -157,7 +157,7 @@ export default React.memo(
 
               <div className="grid grid-cols-2 gap-16">
                 <div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <label className="text-sm font-medium text-gray-900">Destinataires *</label>
                     <Tooltip id="id-destinataires-campagne" title="Sélectionnez les destinataires de cette campagne">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />

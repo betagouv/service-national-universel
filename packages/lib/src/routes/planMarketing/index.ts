@@ -1,4 +1,4 @@
-import { BasicRoute, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
+import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
 import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 import { ListeDiffusionRoutes } from "./listeDiffusion";
@@ -18,6 +18,7 @@ interface CampagneComplete extends CampagneBase {
   listeDiffusionId: string;
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
+  envois?: CampagneEnvoi[];
 }
 
 // Types pour les campagnes génériques
@@ -88,6 +89,12 @@ interface SearchPlanMarketingRoute extends BasicRoute {
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }
 
+interface EnvoyerPlanMarketingRoute extends BasicRoute {
+  method: "POST";
+  path: "/campagne/{id}/envoyer";
+  response: RouteResponseBodyV2<void>;
+}
+
 export type PlanMarketingRoutes = {
   GetPlanMarketingRoute: GetPlanMarketingRoute;
   CreatePlanMarketingRoute: CreatePlanMarketingRoute;
@@ -96,4 +103,5 @@ export type PlanMarketingRoutes = {
   ImportContacts: ImportContactsBrevoRoute;
   CreateDistributionList: CreateDistributionListBrevoRoute;
   ListeDiffusionRoutes: ListeDiffusionRoutes;
+  EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
 };

@@ -1,11 +1,13 @@
 export interface SearchParams {
   searchTerm?: SearchTerm;
   filters?: Record<string, string | string[]>;
+  existingFields?: string[];
   sourceFields?: string[];
   page?: number;
   size?: number;
   sortField?: string;
   sortOrder?: "asc" | "desc";
+  full?: boolean;
 }
 
 export interface SearchTerm {

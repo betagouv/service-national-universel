@@ -108,7 +108,7 @@ export const ModalCreationListeBrevo = ({ isOpen, onClose, onConfirm, isLoadingP
             </div>
 
             <div>
-              <div className="flex">
+              <div className="flex items-center">
                 <label id="destinataires-liste-diffusion" className="text-gray-700 mb-2 flex items-center">
                   Destinataires
                 </label>

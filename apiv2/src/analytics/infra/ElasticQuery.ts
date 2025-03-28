@@ -1,17 +1,18 @@
 export interface ESSearchQuery<T> {
-    index: string;
+    index?: string;
     body: {
         from?: number;
         size?: number;
         query: ESQuery;
-        sort?: Array<{ [key in NestedKeys<T>]?: { order: "asc" | "desc" } }>;
+        sort?: Array<{ [key in string]?: { order: "asc" | "desc" } }>;
         _source?: string[] | boolean;
+        pit?: {
+            id: string;
+            keep_alive?: string;
+        };
+        search_after?: any[];
     };
 }
-
-export type NestedKeys<T> = {
-    [K in keyof T]: T[K] extends object ? `${string & K}.${string & keyof T[K]}` | (string & K) : string & K;
-}[keyof T];
 
 export interface ESQuery {
     bool: {
@@ -29,13 +30,14 @@ export interface ESMustQuery {
         fuzziness?: "AUTO";
         operator?: "or" | "and";
     };
-    bool: {
+    bool?: {
         should: Array<any>;
         minimum_should_match: number;
     };
     match_all?: Record<string, never>;
     terms?: Record<string, string[]>;
     match?: Record<string, { query: string; fuzziness?: "AUTO" }>;
+    exists?: { field: string };
 }
 
 export interface ESFilterQuery {
@@ -44,17 +46,21 @@ export interface ESFilterQuery {
 
 export interface ESSearchResponse<T> {
     hits: {
-        hits: Array<{
-            _source: T;
-            _id: string;
-            _index: string;
-            _score: number;
-            _type: string;
-        }>;
+        hits: Array<ESHit<T>>;
         sort: string[];
         total: {
             value: number;
             relation: "eq" | "gte";
         };
     };
+    pit_id?: string;
+}
+
+export interface ESHit<T> {
+    _source: T;
+    _id: string;
+    _index: string;
+    _score: number;
+    _type: string;
+    sort?: any[];
 }

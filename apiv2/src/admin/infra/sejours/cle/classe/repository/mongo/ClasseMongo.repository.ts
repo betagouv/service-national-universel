@@ -15,6 +15,11 @@ export class ClasseRepository implements ClasseGateway {
 
         private readonly cls: ClsService,
     ) {}
+    async findByIds(ids: string[]): Promise<ClasseModel[]> {
+        const classes = await this.classeMongooseEntity.find({ _id: { $in: ids } });
+        return ClasseMapper.toModels(classes);
+    }
+
     async updateStatut(classeId: string, statut: keyof typeof STATUS_CLASSE): Promise<ClasseModel> {
         const classe = await this.classeMongooseEntity.findByIdAndUpdate(classeId, { status: statut });
         if (!classe) {
@@ -26,6 +31,11 @@ export class ClasseRepository implements ClasseGateway {
     async findByReferentId(referentId: string): Promise<ClasseModel[]> {
         const classes = await this.classeMongooseEntity.find({ referentClasseIds: [referentId] });
         return ClasseMapper.toModels(classes);
+    }
+
+    async findReferentIdsByClasseIds(classeIds: string[]): Promise<string[]> {
+        const classes = await this.classeMongooseEntity.find({ _id: { $in: classeIds } });
+        return [...new Set(classes.flatMap((classe) => classe.referentClasseIds))];
     }
 
     async create(classe: ClasseModel): Promise<ClasseModel> {

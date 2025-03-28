@@ -5,6 +5,8 @@ import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
+import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
+import { PlanMarketingRoutes } from "snu-lib";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -13,8 +15,9 @@ export class CampagneController {
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         private readonly campagneService: CampagneService,
         private readonly mettreAJourCampagne: MettreAJourCampagne,
+        private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
     ) {}
-    
+
     @Post()
     async create(@Body() dto: CreateCampagneDto): Promise<CampagneModel> {
         return await this.campagneService.creerCampagne(dto);
@@ -51,4 +54,10 @@ export class CampagneController {
         await this.campagneGateway.delete(id);
     }
 
+    @Post(":id/envoyer")
+    async envoyerCampagne(
+        @Param("id") campagneId: string,
+    ): Promise<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]["response"]> {
+        return await this.preparerEnvoiCampagne.execute(campagneId);
+    }
 }

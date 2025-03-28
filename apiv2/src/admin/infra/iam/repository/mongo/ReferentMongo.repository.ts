@@ -32,6 +32,15 @@ export class ReferentRepository implements ReferentGateway {
         private readonly cls: ClsService,
     ) {}
 
+    /**
+     *
+     * @deprecated cohesionCenterId est déprécié dans le schéma
+     */
+    async findByCohesionCenterIds(cohesionCenterIds: string[]): Promise<ReferentModel[]> {
+        const referents = await this.referentMongooseEntity.find({ cohesionCenterId: { $in: cohesionCenterIds } });
+        return referents.map((referent) => ReferentMapper.toModel(referent));
+    }
+
     async delete(id: string): Promise<void> {
         const referent = await this.referentMongooseEntity.findById(id);
         if (!referent) {

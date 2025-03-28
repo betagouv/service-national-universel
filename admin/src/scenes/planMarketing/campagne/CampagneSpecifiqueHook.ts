@@ -1,6 +1,6 @@
 import PlanMarketingService from "@/services/planMarketingService";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { HttpError, translateMarketing } from "snu-lib";
+import { CampagneEnvoi, HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { CampagneSpecifiqueFormData, ValidationErrors } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
@@ -59,7 +59,24 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     },
   });
 
-  const { data: campagnes, isLoading } = useQuery<CampagneSpecifiqueFormData[]>({
+  const { mutate: sendCampagne } = useMutation({
+    mutationFn: (id: string) => {
+      return PlanMarketingService.envoyer(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries();
+      toastr.clean();
+      toastr.success("Succès", "Campagne envoyée avec succès", { timeOut: 5000 });
+    },
+    onError: (error: HttpError) => {
+      if (error?.statusCode === 422) {
+        toastr.clean();
+        toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de l'envoi de la campagne", { timeOut: 5000 });
+      }
+    },
+  });
+
+  const { data: campagnes, isLoading } = useQuery<(CampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] })[]>({
     queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
     enabled: true,
     refetchOnWindowFocus: false,
@@ -73,5 +90,6 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     campagnes: campagnes || [],
     isLoading,
     saveCampagne,
+    sendCampagne,
   };
 };

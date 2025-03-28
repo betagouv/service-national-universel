@@ -5,7 +5,7 @@
 		"body": [
 			"import { Injectable } from \"@nestjs/common\";",
 			"import { UseCase } from \"@shared/core/UseCase\";",
-			"Injectable()",
+			"@Injectable()",
 			"export class $1 implements UseCase<$2> {",
 			"constructor(){}",
 			" async execute(): Promise<$3>  {",
@@ -20,7 +20,7 @@
 		"prefix": "service",
 		"body": [
 			"import { Injectable } from \"@nestjs/common\";",
-			"Injectable()",
+			"@Injectable()",
 			"export class $1Service {",
 			"constructor(){}",
 			"",

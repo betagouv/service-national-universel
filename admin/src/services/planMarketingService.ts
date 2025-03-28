@@ -29,6 +29,15 @@ const PlanMarketingService = {
       query,
     })();
   },
+
+  envoyer: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]>({
+      path: "/campagne/{id}/envoyer",
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+    })();
+  },
 };
 
 export default PlanMarketingService;

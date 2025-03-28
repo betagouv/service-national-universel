@@ -27,7 +27,8 @@
             "@shared/*": ["src/shared/*"],
             "@notification/*": ["src/notification/*"],
             "@task/*": ["src/task/*"],
-            "@plan-marketing/*": ["src/plan-marketing/*"]
+            "@plan-marketing/*": ["src/plan-marketing/*"],
+            "@analytics/*": ["src/analytics/*"]
         }
     }
 }

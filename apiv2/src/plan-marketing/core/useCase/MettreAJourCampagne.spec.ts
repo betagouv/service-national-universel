@@ -7,7 +7,7 @@ import {
     CampagneSpecifiqueModelWithRef,
     CampagneSpecifiqueModelWithoutRef,
 } from "../Campagne.model";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "snu-lib";
 
 describe("MettreAJourCampagne", () => {
     let useCase: MettreAJourCampagne;
@@ -56,11 +56,14 @@ describe("MettreAJourCampagne", () => {
     });
 
     it("should update and remove ref for specific campaign with reference", async () => {
+        const sentDate = new Date();
+
         const campagneSpecifiqueWithRef: CampagneSpecifiqueModelWithRef = {
             id: "2",
             generic: false,
             cohortId: "cohort1",
             campagneGeneriqueId: "campaign1",
+            envois: [{ date: sentDate, statut: EnvoiCampagneStatut.TERMINE }],
         };
 
         const expectedCampagneWithoutRef: CampagneSpecifiqueModelWithoutRef = {
@@ -74,6 +77,7 @@ describe("MettreAJourCampagne", () => {
             listeDiffusionId: "list1",
             destinataires: [DestinataireListeDiffusion.JEUNES],
             type: CampagneJeuneType.VOLONTAIRE,
+            envois: [{ date: sentDate, statut: EnvoiCampagneStatut.TERMINE }],
         };
 
         campagneService.findById.mockResolvedValue(campagneSpecifiqueWithRef);

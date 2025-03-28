@@ -8,6 +8,8 @@ import { FileProvider } from "./infra/File.provider";
 import { FileController } from "./infra/File.controller";
 import { FileGateway } from "./core/File.gateway";
 import { DatabaseModule } from "@infra/Database.module";
+import { CryptoGateway } from "./core/Crypto.gateway";
+import { CryptoProvider } from "./infra/Crypto.provider";
 
 @Global()
 @Module({
@@ -25,8 +27,12 @@ import { DatabaseModule } from "@infra/Database.module";
             provide: ClockGateway,
             useClass: ClockProvider,
         },
+        {
+            provide: CryptoGateway,
+            useClass: CryptoProvider,
+        },
     ],
     controllers: [FileController],
-    exports: [AllExceptionsFilter, ClockGateway],
+    exports: [AllExceptionsFilter, ClockGateway, CryptoGateway],
 })
 export class SharedModule {}

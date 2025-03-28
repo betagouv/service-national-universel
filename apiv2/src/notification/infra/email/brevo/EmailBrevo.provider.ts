@@ -14,7 +14,7 @@ import { FileGateway } from "@shared/core/File.gateway";
 
 function setApiKey(apiInstance: brevo.TransactionalEmailsApi | brevo.ContactsApi, value: string) {
     //@ts-ignore
-    let apiKey = apiInstance.authentications["apiKey"];
+    const apiKey = apiInstance.authentications["apiKey"];
     apiKey.apiKey = value;
 }
 @Injectable()
@@ -26,7 +26,7 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         private readonly config: ConfigService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
     ) {
-        let apiKey = this.config.getOrThrow("email.apiKey");
+        const apiKey = this.config.getOrThrow("email.apiKey");
 
         this.emailsApi = new brevo.TransactionalEmailsApi();
         setApiKey(this.emailsApi, apiKey);
@@ -37,12 +37,12 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
 
     async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
-        let sendSmtpEmail = new brevo.SendSmtpEmail();
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
 
         const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail };
 
         if (emailParams.attachments && emailParams.attachments.length > 0) {
-            let attachments: SendSmtpEmailAttachmentInner[] = [];
+            const attachments: SendSmtpEmailAttachmentInner[] = [];
             for (const attachment of emailParams.attachments) {
                 const file = await this.fileGateway.downloadFile(attachment.filePath);
                 attachments.push({ content: file.Body.toString("base64"), name: file.FileName });

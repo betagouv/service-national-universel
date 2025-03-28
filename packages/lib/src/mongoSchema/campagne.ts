@@ -1,6 +1,6 @@
 import { InferSchemaType, Schema } from "mongoose";
 import { InterfaceExtended } from ".";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "../domains/planMarketing/constants";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "../domains/planMarketing/constants";
 
 export const CampagneSchema = {
   campagneGeneriqueId: {
@@ -42,6 +42,15 @@ export const CampagneSchema = {
   },
   cohortId: {
     type: String,
+  },
+  envois: {
+    type: [
+      {
+        date: { type: Date, required: true },
+        statut: { type: String, enum: EnvoiCampagneStatut, required: true },
+        _id: false,
+      },
+    ],
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

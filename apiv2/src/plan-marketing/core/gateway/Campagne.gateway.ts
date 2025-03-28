@@ -1,4 +1,10 @@
-import { CampagneModel, CreateCampagneModel } from "../Campagne.model";
+import {
+    CampagneEnvoi,
+    CampagneModel,
+    CampagneSpecifiqueModelWithRefAndGeneric,
+    CampagneSpecifiqueModelWithoutRef,
+    CreateCampagneModel,
+} from "../Campagne.model";
 
 export interface CampagneGateway {
     save(campagne: CreateCampagneModel): Promise<CampagneModel>;
@@ -7,6 +13,9 @@ export interface CampagneGateway {
     update(campagne: CampagneModel): Promise<CampagneModel | null>;
     delete(id: string): Promise<void>;
     updateAndRemoveRef(campagne: CampagneModel): Promise<CampagneModel | null>;
+    findSpecifiqueWithRefById(id: string): Promise<CampagneSpecifiqueModelWithRefAndGeneric | null>;
+    findSpecifiqueWithoutRefById(id: string): Promise<CampagneSpecifiqueModelWithoutRef | null>;
+    addEnvoiToCampagneById(campagneId: string, envoi: CampagneEnvoi): Promise<CampagneModel | null>;
 }
 
 export const CampagneGateway = Symbol("CampagneGateway");
