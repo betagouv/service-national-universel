@@ -2,10 +2,12 @@ import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, InputText, Modal, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useState } from "react";
-import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle, HiOutlinePlusSm } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useCampagneForm } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
+import ProgrammationList from "./ProgrammationList";
+import { ProgrammationProps } from "./ProgrammationForm";
 
 interface ListeDiffusionOption {
   value: string;
@@ -24,6 +26,7 @@ export interface CampagneDataProps {
   contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+  programmations?: ProgrammationProps[];
 }
 
 export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
@@ -55,7 +58,7 @@ export default React.memo(
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     const handleSubmit = () => {
-      if (validateForm()) {
+      if (validateForm() && campagneData.id) {
         setIsConfirmModalOpen(true);
       }
     };
@@ -198,6 +201,17 @@ export default React.memo(
                   />
                   <ErrorMessage message={errors.objet} />
                 </div>
+              </div>
+
+              <hr className="border-t border-gray-200" />
+
+              <div className="gap-16">
+                <ProgrammationList
+                  campagne={campagneData as CampagneDataProps}
+                  programmations={state.programmations || []}
+                  onChange={(programmations) => handleChange("programmations", programmations)}
+                  isCampagneGenerique
+                />
               </div>
             </div>
 
