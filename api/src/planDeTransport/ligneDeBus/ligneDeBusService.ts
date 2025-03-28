@@ -13,11 +13,12 @@ import {
 } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, actions } from "snu-lib";
+import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, actions } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
 import { logger } from "../../logger";
+import { PermissionService } from "../../services/permission/permissionService";
 
 const { ObjectId } = Types;
 
@@ -155,11 +156,13 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
     (returnHour && returnHour !== ligneToPoint.returnHour);
   const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
 
+  const permissionService = new PermissionService();
+
   if (
-    (transportTypeHasChanged && !hasPermission(user, cohort, actions.transport.UPDATE_TYPE)) ||
-    (scheduleHasChanged && !hasPermission(user, cohort, actions.transport.UPDATE_PDR_SCHEDULE)) ||
-    (pdrHasChanged && !hasPermission(user, cohort, actions.transport.UPDATE_PDR_ID)) ||
-    (payload.sendEmailCampaign && !hasPermission(user, cohort, actions.transport.NOTIFY_AFTER_UPDATE))
+    (transportTypeHasChanged && !permissionService.check(user, actions.transport.UPDATE_TYPE, cohort)) ||
+    (scheduleHasChanged && !permissionService.check(user, actions.transport.UPDATE_PDR_SCHEDULE, cohort)) ||
+    (pdrHasChanged && !permissionService.check(user, actions.transport.UPDATE_PDR_ID, cohort)) ||
+    (payload.sendEmailCampaign && !permissionService.check(user, actions.transport.NOTIFY_AFTER_UPDATE, cohort))
   ) {
     throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }

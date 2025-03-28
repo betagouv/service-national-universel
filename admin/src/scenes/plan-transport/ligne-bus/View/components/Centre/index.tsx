@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { actions, CohortType, hasPermission, LigneBusDto } from "snu-lib";
+import { actions, CohortType, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import { AuthState } from "@/redux/auth/reducer";
@@ -9,6 +9,7 @@ import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdate
 import CentreModal from "./CentreModal";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { EditButton } from "@snu/ds/admin";
+import usePermission from "@/hooks/usePermission";
 
 type Props = {
   bus: LigneBusDto;
@@ -25,7 +26,6 @@ export type CentreFormValues = {
 const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
 
 export default function Centre({ bus, setBus, cohort }: Props) {
-  const user = useSelector((state: AuthState) => state.Auth.user);
   const { mutate: updateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
   const [isEditing, setIsEditing] = useState(false);
   const [openModal, setOpenModal] = useState(false);
@@ -56,17 +56,23 @@ export default function Centre({ bus, setBus, cohort }: Props) {
     });
   }
 
-  const message = "Vous n'avez pas l'autorisation de modifier la ligne de transport.";
-  const canUpdateTransport = hasPermission(user, cohort, actions.transport.UPDATE);
-  const canUpdateCenterId = hasPermission(user, cohort, actions.transport.UPDATE_SESSION_ID);
-  const canUpdateCenterSchedule = hasPermission(user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE);
-  const canSendNotifications = hasPermission(user, cohort, actions.transport.NOTIFY_AFTER_UPDATE);
+  const canUpdateTransport = usePermission(actions.transport.UPDATE, cohort);
+  const canUpdateCenterId = usePermission(actions.transport.UPDATE_SESSION_ID, cohort);
+  const canUpdateCenterSchedule = usePermission(actions.transport.UPDATE_CENTER_SCHEDULE, cohort);
+  const canSendNotifications = usePermission(actions.transport.NOTIFY_AFTER_UPDATE, cohort);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">
       <div className="flex items-center justify-between">
         <p className="text-lg leading-7 text-gray-900 font-bold">Centre de cohésion</p>
-        <EditButton isEditing={isEditing} setIsEditing={setIsEditing} disabled={!canUpdateTransport} onReset={reset} tooltipMessage={message} isLoading={isPending} />
+        <EditButton
+          isEditing={isEditing}
+          setIsEditing={setIsEditing}
+          disabled={!canUpdateTransport.value}
+          onReset={reset}
+          tooltipMessage={canUpdateTransport.message}
+          isLoading={isPending}
+        />
       </div>
 
       <div className="mt-8 grid grid-cols-2 gap-x-4 gap-y-8">
@@ -75,7 +81,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
           control={control}
           render={({ field }) => (
             <div className="col-span-2">
-              <SessionSelector sessionId={field.value} setSessionId={field.onChange} ligne={bus} readOnly={!isEditing} disabled={!canUpdateCenterId} />
+              <SessionSelector sessionId={field.value} setSessionId={field.onChange} ligne={bus} readOnly={!isEditing} disabled={!canUpdateCenterId.value} />
             </div>
           )}
         />
@@ -91,7 +97,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
               placeholder="hh:mm"
               readOnly={!isEditing}
               error={fieldState.error?.message}
-              disabled={isEditing && !canUpdateCenterSchedule}
+              disabled={isEditing && !canUpdateCenterSchedule.value}
             />
           )}
         />
@@ -107,7 +113,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
               placeholder="hh:mm"
               readOnly={!isEditing}
               error={fieldState.error?.message}
-              disabled={isEditing && !canUpdateCenterSchedule}
+              disabled={isEditing && !canUpdateCenterSchedule.value}
             />
           )}
         />
@@ -124,7 +130,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
         initialData={bus}
         formData={getValues()}
         count={bus.youngSeatsTaken}
-        areNotificationsEnabled={canSendNotifications}
+        areNotificationsEnabled={canSendNotifications.value}
         isLoading={isPending}
       />
     </form>
