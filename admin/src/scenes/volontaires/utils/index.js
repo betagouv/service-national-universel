@@ -321,6 +321,13 @@ export const getFilterArray = (user, labels) => {
       translate: translateEquivalenceStatus,
     },
     {
+      title: "Remboursement Code de la Route",
+      name: "roadCodeRefund",
+      parentGroup: "Phase 2",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
       title: "Statut phase 3",
       name: "statusPhase3",
       parentGroup: "Phase 3",
@@ -534,6 +541,7 @@ export async function transformVolontaires(data, values) {
         "Engagement dans une structure en dehors du SNU": translate(data.engaged),
         "Description engagement ": data.engagedDescription,
         "Souhait MIG": data.desiredLocation,
+        "Remboursement Code de la Route": translate(data?.roadCodeRefund) || "Non renseigné",
       },
       accountDetails: {
         "Créé lé": formatLongDateFR(data.createdAt),
@@ -643,6 +651,7 @@ export async function transformInscription(data) {
       "Règlement intérieur": translate(data.rulesYoung),
       "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
       PSC1: translate(data.psc1Info) || "Non Renseigné",
+      "Remboursement Code de la Route": translate(data.roadCodeRefund) || "Non renseigné",
       "Statut représentant légal 1": translate(data.parent1Status),
       "Prénom représentant légal 1": data.parent1FirstName,
       "Nom représentant légal 1": data.parent1LastName,
