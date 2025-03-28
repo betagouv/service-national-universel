@@ -109,6 +109,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneSpecifiqueModel);
