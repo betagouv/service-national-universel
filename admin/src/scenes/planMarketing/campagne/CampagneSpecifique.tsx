@@ -47,7 +47,11 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     return campagnesArray;
   }, [campagnes, draftCampagne]);
 
-  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(allCampagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredCampagnes,
+  } = useSearchTerm<CampagneSpecifiqueFormData>(allCampagnes as CampagneSpecifiqueFormData[], (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const createNewCampagne = () => {
     const newCampagne: DraftCampagneSpecifiqueFormData = {

@@ -18,7 +18,13 @@ export default function ListeDiffusion() {
     return draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
   }, [listesDiffusion, draftListe]);
 
-  const { searchTerm, setSearchTerm, filteredItems: filteredListes } = useSearchTerm(allListes, (liste) => liste.nom, { sortBy: "createdAt" });
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredListes,
+  } = useSearchTerm<ListeDiffusionDataProps>(allListes as ListeDiffusionDataProps[], (liste) => liste.nom, {
+    sortBy: "createdAt",
+  });
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {
