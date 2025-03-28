@@ -1,0 +1,30 @@
+{
+  "TRANSPORT:UPDATE": {
+    "ADMIN": true,
+    "TRANSPORTER": "busEditionOpenForTransporter"
+  },
+  "TRANSPORT:UPDATE_PDR_ID": {
+    "ADMIN": true,
+    "TRANSPORTER": false
+  },
+  "TRANSPORT:UPDATE_PDR_SCHEDULE": {
+    "ADMIN": true,
+    "TRANSPORTER": "busEditionOpenForTransporter"
+  },
+  "TRANSPORT:UPDATE_TYPE": {
+    "ADMIN": true,
+    "TRANSPORTER": "busEditionOpenForTransporter"
+  },
+  "TRANSPORT:UPDATE_SESSION_ID": {
+    "ADMIN": true,
+    "TRANSPORTER": false
+  },
+  "TRANSPORT:UPDATE_CENTER_SCHEDULE": {
+    "ADMIN": true,
+    "TRANSPORTER": "busEditionOpenForTransporter"
+  },
+  "TRANSPORT:NOTIFY_AFTER_UPDATE": {
+    "ADMIN": true,
+    "TRANSPORTER": false
+  }
+}

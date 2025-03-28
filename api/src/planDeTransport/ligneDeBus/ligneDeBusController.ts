@@ -18,7 +18,6 @@ import {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
-  hasPermission,
   actions,
 } from "snu-lib";
 import {
@@ -39,6 +38,7 @@ import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBusService";
 import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
+import { PermissionService } from "../../services/permissions/permissionService";
 
 const router = express.Router();
 
@@ -308,10 +308,12 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
+    const permissionService = new PermissionService();
+
     if (
-      (sessionHasChanged && !hasPermission(req.user, cohort, actions.transport.UPDATE_SESSION_ID)) ||
-      (scheduleHasChanged && !hasPermission(req.user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE)) ||
-      (sendCampaign && !hasPermission(req.user, cohort, actions.transport.NOTIFY_AFTER_UPDATE))
+      (sessionHasChanged && !permissionService.check(req.user, cohort, actions.transport.UPDATE_SESSION_ID)) ||
+      (scheduleHasChanged && !permissionService.check(req.user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE)) ||
+      (sendCampaign && !permissionService.check(req.user, cohort, actions.transport.NOTIFY_AFTER_UPDATE))
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
