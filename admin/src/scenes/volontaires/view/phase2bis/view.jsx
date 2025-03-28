@@ -334,7 +334,7 @@ export default function Phase2({ young, onChange }) {
           <div className="w-px bg-gray-200 mx-4 self-stretch" />
 
           <div className="flex flex-col justify-center w-1/2 pl-4">
-            {young.roadCodeRefund === true ? (
+            {young.roadCodeRefund === "true" ? (
               <>
                 <div className="flex items-center gap-2 text-sm text-green-600 font-medium mb-1">
                   <span>✔</span>

@@ -1686,7 +1686,8 @@ export const YoungSchema = {
   // Code de la route reboursement
 
   roadCodeRefund:{
-    type: Boolean,
+    type: String,
+    enum: ["true", "false"],
     documentation: {
       description: "Le jeune à-t-il étét rembourser pour son code de la route",
     },
