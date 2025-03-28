@@ -475,8 +475,17 @@ router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session:
     const infoBus = await getInfoBus(updatedLigneBus);
     return res.status(200).send({ ok: true, data: infoBus });
   } catch (error) {
-    if ([ERRORS.NOT_FOUND, ERRORS.INVALID_PARAMS, ERRORS.INVALID_BODY, ERRORS.OPERATION_UNAUTHORIZED].includes(error.message)) {
+    if (error.message === ERRORS.NOT_FOUND) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (error.message === ERRORS.INVALID_BODY) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    if (error.message === ERRORS.INVALID_PARAMS) {
       return res.status(400).send({ ok: false, code: error.message });
+    }
+    if (error.message === ERRORS.OPERATION_UNAUTHORIZED) {
+      return res.status(403).send({ ok: false, code: error.message });
     }
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
