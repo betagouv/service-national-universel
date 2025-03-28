@@ -311,9 +311,9 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const permissionService = new PermissionService();
 
     if (
-      (sessionHasChanged && !permissionService.check(req.user, cohort, actions.transport.UPDATE_SESSION_ID)) ||
-      (scheduleHasChanged && !permissionService.check(req.user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE)) ||
-      (sendCampaign && !permissionService.check(req.user, cohort, actions.transport.NOTIFY_AFTER_UPDATE))
+      (sessionHasChanged && !permissionService.check(req.user, actions.transport.UPDATE_SESSION_ID, cohort)) ||
+      (scheduleHasChanged && !permissionService.check(req.user, actions.transport.UPDATE_CENTER_SCHEDULE, cohort)) ||
+      (sendCampaign && !permissionService.check(req.user, actions.transport.NOTIFY_AFTER_UPDATE, cohort))
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
