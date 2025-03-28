@@ -1,9 +1,7 @@
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
 import { actions, CohortType, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
-import { AuthState } from "@/redux/auth/reducer";
 import SessionSelector from "./SessionSelector";
 import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateSessionSurLigneDeBus";
 import CentreModal from "./CentreModal";

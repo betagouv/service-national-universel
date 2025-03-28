@@ -302,19 +302,19 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
     const cohort = await CohortModel.findOne({ name: ligne.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
+    const sessionIdHasChanged = sessionId && sessionId !== ligne.sessionId;
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
-    const permissionService = new PermissionService();
+    const permissions = new PermissionService(req.user);
+    const canUpdateSessionId = permissions.check(actions.transport.UPDATE_SESSION_ID, cohort);
+    const canUpdateCenterSchedule = permissions.check(actions.transport.UPDATE_CENTER_SCHEDULE, cohort);
+    const canSendNotification = permissions.check(actions.transport.NOTIFY_AFTER_UPDATE, cohort);
 
-    if (
-      (sessionHasChanged && !permissionService.check(req.user, actions.transport.UPDATE_SESSION_ID, cohort)) ||
-      (scheduleHasChanged && !permissionService.check(req.user, actions.transport.UPDATE_CENTER_SCHEDULE, cohort)) ||
-      (sendCampaign && !permissionService.check(req.user, actions.transport.NOTIFY_AFTER_UPDATE, cohort))
-    ) {
+    if ((sessionIdHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotification)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -338,7 +338,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       await planDeTransport.save({ fromUser: req.user });
     }
 
-    if (sessionHasChanged) {
+    if (sessionIdHasChanged) {
       const session = await SessionPhase1Model.findById(sessionId);
       if (!session) throw new Error(ERRORS.NOT_FOUND);
       await updateSessionForLine({

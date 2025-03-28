@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, getAge, canViewContract, ROLES, actions } = require("snu-lib");
 const { capture } = require("../sentry");
 const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
 const { ERRORS, isYoung, isReferent } = require("../utils");
@@ -18,6 +18,7 @@ const { generatePdfIntoStream } = require("../utils/pdf-renderer");
 const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
 const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
 const { authMiddleware } = require("../middlewares/authMiddleware");
+const { PermissionService } = require("../services/permission/permissionService");
 
 async function createContract(data, fromUser) {
   const { sendMessage } = data;
@@ -210,7 +211,9 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
 
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
-    if (!canCreateOrUpdateContract(req.user)) {
+    const permissions = new PermissionService(req.user);
+    const canCreateOrUpdateContract = permissions.check(actions.contract.CREATE);
+    if (!canCreateOrUpdateContract) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     let previousStructureId, currentStructureId;
@@ -277,6 +280,8 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
 
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
+    const permissions = new PermissionService(req.user);
+    const canCreateOrUpdateContract = permissions.check(actions.contract.CREATE);
     if (!canCreateOrUpdateContract(req.user, contract)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -457,6 +462,8 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
+    const permissions = new PermissionService(req.user);
+    const canCreateOrUpdateContract = permissions.check(actions.contract.create);
     if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, contract)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
