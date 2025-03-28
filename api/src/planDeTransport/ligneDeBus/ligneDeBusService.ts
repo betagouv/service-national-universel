@@ -18,7 +18,7 @@ import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
 import { logger } from "../../logger";
-import { PermissionService } from "../../services/permissions/permissionService";
+import { PermissionService } from "../../services/permission/permissionService";
 
 const { ObjectId } = Types;
 

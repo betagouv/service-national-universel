@@ -38,7 +38,7 @@ import { validateId } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBusService";
 import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
-import { PermissionService } from "../../services/permissions/permissionService";
+import { PermissionService } from "../../services/permission/permissionService";
 
 const router = express.Router();
 

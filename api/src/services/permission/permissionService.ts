@@ -1,10 +1,11 @@
 import { CohortType, UserDto } from "snu-lib";
+import { getPermissions } from "./permissionRepository";
 
 interface IPermissionService {
   check(user: UserDto, cohort: CohortType, action: string): boolean;
 }
 
-type Permissions = Record<string, Record<string, boolean | string>>;
+export type Permissions = Record<string, Record<string, boolean | string>>;
 
 export class PermissionService implements IPermissionService {
   private permissions: Permissions = {};
@@ -26,10 +27,4 @@ export class PermissionService implements IPermissionService {
     }
     return permission;
   }
-}
-
-async function getPermissions(): Promise<Permissions> {
-  // TODO: Move to DB
-  const json = await import("./permissions.json");
-  return json.default;
 }
