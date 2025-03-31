@@ -178,7 +178,7 @@ async function runAPI() {
 
   initPassport();
 
-  // * Use Terminus for graceful shutdown when using Docker
+  // * Use Terminus for graceful shutdown
   const server = http.createServer(app);
 
   function onSignal() {
