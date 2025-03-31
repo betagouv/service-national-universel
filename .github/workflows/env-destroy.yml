@@ -4,10 +4,6 @@ on:
   workflow_dispatch:
   delete:
 
-defaults:
-  run:
-    working-directory: devops/scripts
-
 jobs:
   destroy:
     if: github.event.ref != 'production' && github.event.ref != 'main'
