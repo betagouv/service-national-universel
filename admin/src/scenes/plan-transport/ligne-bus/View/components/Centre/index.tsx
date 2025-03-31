@@ -57,10 +57,10 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   }
 
   const message = "Vous n'avez pas l'autorisation de modifier la ligne de transport.";
-  const canUpdateTransport = hasPermission(user, cohort, actions.transport.UPDATE);
-  const canUpdateCenterId = hasPermission(user, cohort, actions.transport.UPDATE_SESSION_ID);
-  const canUpdateCenterSchedule = hasPermission(user, cohort, actions.transport.UPDATE_CENTER_SCHEDULE);
-  const canSendNotifications = hasPermission(user, cohort, actions.transport.NOTIFY_AFTER_UPDATE);
+  const canUpdateTransport = hasPermission(user, actions.transport.UPDATE, cohort);
+  const canUpdateCenterId = hasPermission(user, actions.transport.UPDATE_SESSION_ID, cohort);
+  const canUpdateCenterSchedule = hasPermission(user, actions.transport.UPDATE_CENTER_SCHEDULE, cohort);
+  const canSendNotifications = hasPermission(user, actions.transport.NOTIFY_AFTER_UPDATE, cohort);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">

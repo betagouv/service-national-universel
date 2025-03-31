@@ -4,7 +4,7 @@ import { ROLES } from "../roles";
 import { actions } from "../actions";
 
 // TODO: Move to DB
-const roleDocuments = (cohort: CohortType) => [
+const roleDocuments = (cohort?: CohortType) => [
   {
     role: ROLES.ADMIN,
     permissions: {
@@ -15,21 +15,22 @@ const roleDocuments = (cohort: CohortType) => [
       [actions.transport.UPDATE_SESSION_ID]: true,
       [actions.transport.UPDATE_CENTER_SCHEDULE]: true,
       [actions.transport.NOTIFY_AFTER_UPDATE]: true,
+      [actions.transport.PREVIEW_NOTIFICATION]: true,
     },
   },
   {
     role: ROLES.TRANSPORTER,
     permissions: {
-      [actions.transport.UPDATE]: cohort.busEditionOpenForTransporter,
-      [actions.transport.UPDATE_PDR_SCHEDULE]: cohort.busEditionOpenForTransporter,
-      [actions.transport.UPDATE_TYPE]: cohort.busEditionOpenForTransporter,
-      [actions.transport.UPDATE_CENTER_SCHEDULE]: cohort.busEditionOpenForTransporter,
+      [actions.transport.UPDATE]: cohort?.busEditionOpenForTransporter,
+      [actions.transport.UPDATE_PDR_SCHEDULE]: cohort?.busEditionOpenForTransporter,
+      [actions.transport.UPDATE_TYPE]: cohort?.busEditionOpenForTransporter,
+      [actions.transport.UPDATE_CENTER_SCHEDULE]: cohort?.busEditionOpenForTransporter,
     },
   },
 ];
 
-export function hasPermission(user: UserDto, cohort: CohortType, action: string): boolean {
+export function hasPermission(user: UserDto, action: string, cohort?: CohortType): boolean {
   const permissions = roleDocuments(cohort).find((doc) => doc.role === user.role)?.permissions;
   if (!permissions || !permissions[action]) return false;
-  return permissions[action];
+  return permissions[action] || false;
 }

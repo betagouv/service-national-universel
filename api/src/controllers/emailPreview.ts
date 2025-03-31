@@ -6,7 +6,7 @@ import { capture } from "../sentry";
 import { BrevoApiError, BrevoEmailTemplate, getPreviewTemplate } from "../brevo";
 import { ERRORS } from "../utils";
 import { UserRequest } from "./request";
-import { isSuperAdmin } from "snu-lib";
+import { actions, hasPermission } from "snu-lib";
 
 const router = express.Router();
 
@@ -22,7 +22,7 @@ router.get("/template/:id?", passport.authenticate("referent", { session: false,
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // TODO At the moment, only the super admin can access this route.
     // You need to add a new condition to allow another role, enabling other users to access this route.
-    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!hasPermission(req.user, actions.transport.PREVIEW_NOTIFICATION)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id: templateId } = value;
 
