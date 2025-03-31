@@ -1,9 +1,18 @@
-import { contractActions } from "./contractActions";
-import { phase1Actions } from "./phase1Actions";
-import { transportActions } from "./transportActions";
-
 export const actions = {
-  transport: transportActions,
-  phase1: phase1Actions,
-  contract: contractActions,
+  transport: {
+    UPDATE: "TRANSPORT:UPDATE",
+    UPDATE_PDR_ID: "TRANSPORT:UPDATE_PDR_ID",
+    UPDATE_PDR_SCHEDULE: "TRANSPORT:UPDATE_PDR_SCHEDULE",
+    UPDATE_TYPE: "TRANSPORT:UPDATE_TYPE",
+    UPDATE_SESSION_ID: "TRANSPORT:UPDATE_SESSION_ID",
+    UPDATE_CENTER_SCHEDULE: "TRANSPORT:UPDATE_CENTER_SCHEDULE",
+    NOTIFY_AFTER_UPDATE: "TRANSPORT:NOTIFY_AFTER_UPDATE",
+  },
+  phase1: {
+    POINTAGE: "PHASE_1:POINTAGE",
+  },
+  contract: {
+    CREATE: "CONTRACT:CREATE",
+    UPDATE: "CONTRACT:UPDATE",
+  },
 };

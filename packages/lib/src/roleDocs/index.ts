@@ -1,12 +1,12 @@
 export type RolePermission = { value?: boolean; setting?: string; startAt?: string; endAt?: string };
 
-type Role = {
+type RoleDocument = {
   name: string;
   desc?: string;
   permissions: Record<string, RolePermission>;
 };
 
-export const roleDocs: Role[] = [
+export const roleDocs: RoleDocument[] = [
   {
     name: "admin",
     desc: "Modérateur",
@@ -48,6 +48,7 @@ export const roleDocs: Role[] = [
   },
   {
     name: "transporter",
+    desc: "Transporteur",
     permissions: {
       "TRANSPORT:UPDATE": {
         setting: "busEditionOpenForTransporter",
@@ -65,7 +66,7 @@ export const roleDocs: Role[] = [
   },
   {
     name: "head_center",
-    desc: "Chef de centre",
+    desc: "Chef de centre de cohésion",
     permissions: {
       "PHASE_1:POINTAGE": {
         setting: "youngCheckinForHeadOfCenter",

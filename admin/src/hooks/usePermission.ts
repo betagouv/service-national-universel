@@ -44,26 +44,28 @@ function getPermissionValueAndMessage(permission: RolePermission, cohort?: Cohor
       message: value ? undefined : "Votre rôle ne permet pas de réaliser cette action.",
     };
   }
-  if ((permission?.setting || permission?.startAt || permission?.endAt) && !cohort) {
-    return { value: false, message: "Paramètres du séjour non chargés pour cette action." };
-  }
-  if (permission?.setting) {
-    const value = cohort![permission.setting] as boolean;
-    return {
-      value,
-      message: value ? undefined : "Cette opération est désactivée pour ce séjour.",
-    };
-  }
-  if (permission?.startAt && permission?.endAt) {
-    const startAt = new Date(cohort![permission.startAt]);
-    const endAt = new Date(cohort![permission.endAt]);
-    if (dayjs().isBefore(dayjs(startAt))) {
-      return { value: false, message: `Cette opération sera disponible pour ce séjour à partir du ${dayjs(startAt).format("DD/MM/YYYY")} à ${dayjs(startAt).format("HH:mm")}` };
+  if (permission?.setting || permission?.startAt || permission?.endAt) {
+    if (!cohort) {
+      return { value: false, message: "Paramètres du séjour non chargés pour cette action." };
     }
-    if (dayjs().isAfter(dayjs(endAt))) {
-      return { value: false, message: `Cette opération n'est plus disponible pour ce séjour depuis le ${dayjs(endAt).format("DD/MM/YYYY")} à ${dayjs(endAt).format("HH:mm")}` };
+    if (permission?.setting) {
+      const value = cohort![permission.setting] as boolean;
+      return {
+        value,
+        message: value ? undefined : "Cette opération est désactivée pour ce séjour.",
+      };
     }
-    return { value: true };
+    if (permission?.startAt && permission?.endAt) {
+      const startAt = new Date(cohort![permission.startAt]);
+      const endAt = new Date(cohort![permission.endAt]);
+      if (dayjs().isBefore(dayjs(startAt))) {
+        return { value: false, message: `Cette opération sera disponible pour ce séjour à partir du ${dayjs(startAt).format("DD/MM/YYYY")} à ${dayjs(startAt).format("HH:mm")}` };
+      }
+      if (dayjs().isAfter(dayjs(endAt))) {
+        return { value: false, message: `Cette opération n'est plus disponible pour ce séjour depuis le ${dayjs(endAt).format("DD/MM/YYYY")} à ${dayjs(endAt).format("HH:mm")}` };
+      }
+      return { value: true };
+    }
   }
   return { value: false };
 }

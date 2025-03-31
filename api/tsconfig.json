@@ -1,9 +1,6 @@
 {
   "extends": "./tsconfig.build.json",
   "compilerOptions": {
-    "allowJs": true,
-    "moduleDetection": "force",
-    "resolveJsonModule": true,
-    "esModuleInterop": true
+    "allowJs": true
   }
 }
