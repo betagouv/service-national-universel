@@ -1,12 +1,12 @@
 import { useQuery } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { CohortType, roles, RolePermission } from "snu-lib";
+import { CohortType, RolePermission, roleDocs } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import dayjs from "dayjs";
 
 // TODO: replace this with a real API call
 async function getPermissionsByRole(role: string): Promise<Record<string, RolePermission>> {
-  const doc = roles.find((roleDoc) => roleDoc.name === role);
+  const doc = roleDocs.find((roleDoc) => roleDoc.name === role);
   if (!doc) throw new Error(`Role ${role} not found`);
   return new Promise((resolve) => {
     setTimeout(() => resolve(doc.permissions), 2000);

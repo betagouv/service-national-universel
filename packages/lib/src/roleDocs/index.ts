@@ -6,7 +6,7 @@ type Role = {
   permissions: Record<string, RolePermission>;
 };
 
-export const roles: Role[] = [
+export const roleDocs: Role[] = [
   {
     name: "admin",
     desc: "Modérateur",
@@ -65,6 +65,7 @@ export const roles: Role[] = [
   },
   {
     name: "head_center",
+    desc: "Chef de centre",
     permissions: {
       "PHASE_1:POINTAGE": {
         setting: "youngCheckinForHeadOfCenter",
@@ -89,6 +90,7 @@ export const roles: Role[] = [
   },
   {
     name: "responsible",
+    desc: "Responsable de structure",
     permissions: {
       "CONTRACT:CREATE": {
         value: true,
@@ -103,6 +105,7 @@ export const roles: Role[] = [
   },
   {
     name: "supervisor",
+    desc: "Superviseur de MIG",
     permissions: {
       "CONTRACT:CREATE": {
         value: true,
