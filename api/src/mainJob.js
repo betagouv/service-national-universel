@@ -35,7 +35,7 @@ async function runTasks() {
   app.use("/", initMonitor());
   setupExpressErrorHandler(app);
 
-  // * Use Terminus for graceful shutdown when using Docker
+  // * Use Terminus for graceful shutdown
   const server = http.createServer(app);
 
   function onSignal() {

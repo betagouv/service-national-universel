@@ -13,9 +13,14 @@ if ! [[ -x "$(command -v jq)" ]]; then
   exit 1
 fi
 
+if [[ $MONGO_URL == "" ]]
+then
+    echo "You must specify the MONGO_URL environment variable"
+    exit 1
+fi
+
 dirname=$(dirname $0)
 
-MONGO_STAGING_URL=$(node $dirname/../scripts/get-secrets.js snu-ci ci-api-run -f "json" | jq -r ".MONGO_URL")
 DUMP_DIRECTORY="$dirname/dump"
 
-mongodump --gzip --out=$DUMP_DIRECTORY $MONGO_STAGING_URL
+mongodump --gzip --out=$DUMP_DIRECTORY $MONGO_URL
