@@ -17,7 +17,7 @@ jobs:
       - name: Get environment name
         id: env
         run: |
-          name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
+          name=$(./devops/scripts/cc-environment-name.sh ${{ github.event.ref }})
           echo "name: $env_name"
           echo "name=$name" >> $GITHUB_OUTPUT
 
