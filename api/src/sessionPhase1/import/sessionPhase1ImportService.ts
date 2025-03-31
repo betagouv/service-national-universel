@@ -1,4 +1,4 @@
-import { region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
+import { FeatureFlagName, region2zone, RegionsHorsMetropole, SessionPhase1Type } from "snu-lib";
 import { logger } from "../../logger";
 import { ClasseModel, CohesionCenterDocument, CohesionCenterModel, CohortDocument, CohortModel, LigneBusModel, SessionPhase1Model, YoungModel } from "../../models";
 import { SessionCohesionCenterCSV, SessionCohesionCenterImportMapped } from "./sessionPhase1Import";
@@ -6,6 +6,7 @@ import { mapSessionCohesionCentersForSept2024 } from "./sessionPhase1ImportMappe
 import { normalizeDepartmentName } from "snu-lib";
 import { mapTrigrammeToRegion } from "../../services/regionService";
 import { updatePlacesSessionPhase1 } from "../../utils";
+import { isFeatureAvailable } from "../../featureFlag/featureFlagService";
 
 export interface SessionCohesionCenterImportReport {
   sessionId?: string;
@@ -129,14 +130,18 @@ export const removeDeprecatedSessionsPhase1 = async (SessionsFromCSV: SessionCoh
           warning: `lignes: ${lignes.map((ligne) => ligne._id).join(",")}`,
         });
       } else {
-        // await sessionPhase1.deleteOne();
+        const isDeleteEnabled = await isFeatureAvailable(FeatureFlagName.IMPORT_SISNU_CENTRESESSIONS_DELETE);
+        if (isDeleteEnabled) {
+          await sessionPhase1.deleteOne();
+        }
+
         report.push({
           sessionId: sessionPhase1._id,
           sessionFormule: sessionPhase1.cohort,
           sessionSnuId: sessionPhase1.sejourSnuIds.join(","),
           cohesionCenterId: sessionPhase1.cohesionCenterId,
           cohesionCenterMatricule: undefined,
-          action: "deleted",
+          action: isDeleteEnabled ? "deleted" : "to be deleted (feature flag disabled)",
           comment: "session not found in file",
         });
       }
