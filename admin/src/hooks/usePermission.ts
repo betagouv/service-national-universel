@@ -5,7 +5,7 @@ import { AuthState } from "@/redux/auth/reducer";
 import dayjs from "dayjs";
 
 // TODO: replace this with a real API call
-async function getPermissionsByRole(role: string): Promise<Record<string, RolePermission>> {
+async function getPermissionsByRole(role: string): Promise<RolePermission[]> {
   const doc = roleDocs.find((roleDoc) => roleDoc.name === role);
   if (!doc) throw new Error(`Role ${role} not found`);
   return new Promise((resolve) => {
@@ -29,7 +29,7 @@ export default function usePermission(action: string, cohort?: CohortType): { va
   });
   if (isPending) return { value: false, message: "Chargement des permissions..." };
   if (isError) throw new Error(error.message);
-  const permission = permissions[action];
+  const permission = permissions.find((p) => p.name === action);
   if (!permission) {
     return { value: false, message: "Votre rôle ne permet pas de réaliser cette action." };
   }

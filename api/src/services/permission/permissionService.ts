@@ -7,7 +7,7 @@ interface IPermissionService {
 }
 
 export class PermissionService implements IPermissionService {
-  private permissions: Record<string, RolePermission> = {};
+  private permissions: RolePermission[] = [];
 
   constructor(user: UserDto) {
     this.init(user);
@@ -19,7 +19,7 @@ export class PermissionService implements IPermissionService {
 
   check(action: string, cohort?: CohortType): boolean {
     // if (this.user.subRole === "god") return true;
-    const permission = this.permissions[action];
+    const permission = this.permissions.find((p) => p.name === action);
     if (!permission) {
       return false;
     }
