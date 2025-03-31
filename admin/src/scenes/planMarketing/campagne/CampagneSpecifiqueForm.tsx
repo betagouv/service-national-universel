@@ -132,8 +132,8 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       }
     }, [campagneData, reset, setApiErrors]);
 
-    // Le formulaire est ouvert s'il est nouveau, modifié ou s'il contient des erreurs
-    const isOpen = campagneData.id === undefined || isDirty || Object.keys(errors).length > 0;
+    // Le formulaire est ouvert s'il est nouveau ou s'il contient des erreurs
+    const isOpen = campagneData.id === undefined || Object.keys(errors).length > 0;
 
     const handleOnCancel = () => {
       reset();
