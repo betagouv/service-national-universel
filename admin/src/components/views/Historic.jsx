@@ -1,166 +1,114 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useSelector } from "react-redux";
-
-import { formatStringLongDate, translateModelFields, translate, translatePhase1, translatePhase2, translateApplication, translateEngagement, ROLES } from "../../utils";
+import { formatStringLongDate, translate, ROLES } from "../../utils";
 import Loader from "../../components/Loader";
-import api from "../../services/api";
-import { HiOutlineChevronUp, HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
-import { useHistory } from "react-router-dom";
+import { HiOutlineChevronDown, HiArrowRight } from "react-icons/hi";
+import { useToggle } from "@uidotdev/usehooks";
+import { filterResult, getFieldName, translator } from "./lib/patchesUtils";
+import { isIsoDate } from "snu-lib";
+import { usePatches } from "./lib/usePatches";
+import ReactTooltip from "react-tooltip";
 
 export default function Historic({ model, value }) {
-  const [data, setData] = useState();
-  const [filter, setFilter] = useState("");
+  const { data: patches, isPending } = usePatches(model, value);
+  const [simpleMode, setSimpleMode] = useToggle(true);
+  const [search, setSearch] = useState("");
+  const filteredPatches = patches?.filter((hit) => filterResult(model, hit, search, simpleMode));
   const user = useSelector((state) => state.Auth.user);
 
-  const getPatches = async () => {
-    try {
-      const { ok, data } = await api.get(`/${model}/${value._id}/patches`);
-      if (!ok) return;
-      setData(data);
-    } catch (error) {
-      console.log(error);
-    }
-  };
-
-  useEffect(() => {
-    getPatches();
-  }, []);
-
-  return !data ? (
+  return isPending ? (
     <Loader />
   ) : (
-    <div className="flex w-full flex-col gap-3">
-      {data.length === 0 ? <div className="p-1 italic">Aucune données</div> : null}
+    <>
       {user?.role === ROLES.ADMIN ? (
-        <input onChange={(e) => setFilter(e.target.value)} value={filter} className="w-[350px] rounded-lg bg-white p-2" placeholder="Rechercher..." />
+        <>
+          <input onChange={(e) => setSearch(e.target.value)} value={search} className="w-full rounded-lg bg-white p-3 shadow-md" placeholder="Rechercher..." />
+          {model === "mission" ? (
+            <div className="w-fit">
+              <ReactTooltip id="filter-modifs" className="bg-white shadow-xl" arrowColor="white">
+                <ul className="text-gray-800">
+                  <li>Masquer les synchronisations n'ayant pas entraîné de modification</li>
+                  <li>Masquer les données source</li>
+                  <li>Traduire les noms des champs</li>
+                </ul>
+              </ReactTooltip>
+              <div data-tip data-for="filter-modifs" className="p-3">
+                <input id="filter-modifs" type="checkbox" checked={simpleMode} onChange={setSimpleMode} />
+                <label htmlFor="filter-modifs" className="m-0 ml-2 text-coolGray-500">
+                  Mode simplifié
+                </label>
+              </div>
+            </div>
+          ) : (
+            <div className="p-3"></div>
+          )}
+        </>
       ) : null}
-      {data.map((hit) => (
-        <Hit model={model} key={hit._id} hit={hit} filter={filter} />
-      ))}
-    </div>
+      <div className="grid gap-3">
+        {filteredPatches.length === 0 ? <p>Aucune donnée.</p> : filteredPatches.map((hit) => <Hit model={model} key={hit._id} hit={hit} simpleMode={simpleMode} />)}
+      </div>
+    </>
   );
 }
 
-const Hit = ({ hit, model, filter }) => {
-  const [viewDetails, setViewDetails] = useState(true);
+const Hit = ({ hit, model, simpleMode }) => {
+  const [viewModifs, setViewModifs] = useToggle(true);
   const user = useSelector((state) => state.Auth.user);
-  const history = useHistory();
-  function isIsoDate(str) {
-    if (!Date.parse(str)) return false;
-    var d = new Date(str);
-    return d.toISOString() === str;
-  }
-
-  const splitElementArray = (v) => {
-    // si on modifie la valeur d'un element d'un champs array
-    // on doit le parser car il est affiché sous la forme : field/index
-    const elementOfArry = v.match(/(\w*)\/(\d)/);
-    if (elementOfArry?.length) {
-      //console.log("✍️ ~ elementOfArry", elementOfArry);
-      return `${translateModelFields(model, elementOfArry[1])} (nº${Number(elementOfArry[2]) + 1})`;
-    }
-    return v;
-  };
-
-  const translator = (path, value) => {
-    if (path === "/statusPhase1") {
-      return translatePhase1(value);
-    } else if (path === "/statusPhase2") {
-      return translatePhase2(value);
-    } else if (path === "/phase2ApplicationStatus") {
-      return translateApplication(value);
-    } else if (path === "/statusPhase2Contract") {
-      return translateEngagement(value);
-    } else {
-      return translate(value);
-    }
-  };
-
-  if (
-    !hit ||
-    (filter &&
-      !hit.ops?.some((e) => {
-        const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-        const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
-
-        const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
-        const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
-        const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
-
-        return matchFieldName || matchOriginalValue || matchFromValue;
-      }))
-  )
-    return null;
+  const modifications = simpleMode ? hit.ops.filter((op) => !op.path.includes("/jvaRawData") && !op.path.includes("/lastSyncAt")) : hit.ops;
 
   return (
     <div className="rounded-lg bg-white shadow-md">
-      <div className="flex cursor-pointer items-center justify-between border-b p-3" onClick={() => setViewDetails((e) => !e)}>
-        <div>
-          <span className="font-bold">
+      <div className="border-b p-3 flex justify-between">
+        <p>
+          <strong>
             {hit.user && hit.user.email ? (
               hit.user.role ? (
                 // * Referent
-                <a onClick={() => history.push(`/user/${hit.user._id}`)} className="cursor-pointer text-snu-purple-300 hover:text-snu-purple-300 hover:underline">
+                <a href={`/user/${hit.user._id}`} target="_blank" rel="noreferrer" className="text-blue-600 underline-offset-2 hover:text-blue-600 hover:underline">
                   {`${hit.user.firstName} ${hit.user.lastName} (${translate(hit.user.role)})`}
                 </a>
               ) : (
                 // * Young
-                <a onClick={() => history.push(`/volontaire/${hit.user._id}`)} className="cursor-pointer text-snu-purple-300 hover:text-snu-purple-300 hover:underline">
+                <a href={`/volontaire/${hit.user._id}`} target="_blank" rel="noreferrer" className="text-blue-600 underline-offset-2 hover:text-blue-600 hover:underline">
                   {`${hit.user.firstName} ${hit.user.lastName} (Volontaire)`}
                 </a>
               )
             ) : hit.user && hit.user.firstName ? (
               // * Scripts / Cron
               user?.role === ROLES.ADMIN ? (
-                [hit.user.firstName, hit.user.lastName].join(" ")
+                hit.user.firstName
               ) : (
                 "Modification automatique"
               )
             ) : (
               "Acteur non renseigné"
             )}
-          </span>
+          </strong>
           ,&nbsp;{formatStringLongDate(hit.date)}
-        </div>
-
-        <div className="flex items-center gap-2 text-coolGray-500">
-          <span className="italic">
-            {hit.ops.length} action{hit.ops.length > 1 ? "s" : ""}
-          </span>
-          {viewDetails ? <HiOutlineChevronUp /> : <HiOutlineChevronDown />}
-        </div>
+        </p>
+        <button className="text-gray-500" onClick={setViewModifs}>
+          {modifications.length} modification{hit.ops.length > 1 ? "s" : ""}
+          <HiOutlineChevronDown className={`inline-block ml-2 transition-all duration-300 ease-in-out ${viewModifs && "rotate-180"}`} />
+        </button>
       </div>
-      {viewDetails
-        ? hit.ops
-            ?.filter((e) => {
-              if (filter) {
-                const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-                const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
 
-                const matchFieldName = translateModelFields(model, e.path.substring(1)).toLowerCase().includes(filter.toLowerCase().trim());
-                const matchOriginalValue = (isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue)?.toLowerCase().includes(filter.toLowerCase().trim());
-                const matchFromValue = (isIsoDate(value) ? formatStringLongDate(value) : value)?.toLowerCase().includes(filter.toLowerCase().trim());
-
-                return matchFieldName || matchOriginalValue || matchFromValue;
-              } else return true;
-            })
-            ?.map((e, i) => {
-              const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
-              const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
-              if (["/jvaRawData"].some((blackfield) => e.path.includes(blackfield))) return null;
-              return (
-                <div className="flex justify-between border-b border-[#f3f3f3] p-3" key={`${hit.date}-${i}`}>
-                  <div className="flex-1 ">{`${splitElementArray(translateModelFields(model, e.path.substring(1)))}`}&nbsp;:</div>
-                  <div className="flex-1 text-center">
-                    {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="italic text-coolGray-400">Vide</span>}
-                  </div>
-                  <div className="text-center">
-                    <HiArrowRight />
-                  </div>
-                  <div className="flex-1 text-center">{(isIsoDate(value) ? formatStringLongDate(value) : value) || <span className="italic text-coolGray-400">Vide</span>}</div>
+      {viewModifs
+        ? modifications.map((e, i) => {
+            const originalValue = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.originalValue)?.replace(/"/g, ""));
+            const value = translator(JSON.stringify(e.path)?.replace(/"/g, ""), JSON.stringify(e.value)?.replace(/"/g, ""));
+            return (
+              <div className="grid grid-cols-12 border-b border-gray-100 p-3" key={`${hit.date}-${i}`}>
+                <div className="col-span-3">{simpleMode ? getFieldName(model, e.path) : e.path}&nbsp;:</div>
+                <div className="col-span-4">
+                  {(isIsoDate(originalValue) ? formatStringLongDate(originalValue) : originalValue) || <span className="italic text-coolGray-400">Vide</span>}
                 </div>
-              );
-            })
+                <div>
+                  <HiArrowRight className="mx-auto my-1" />
+                </div>
+                <div className="col-span-4">{(isIsoDate(value) ? formatStringLongDate(value) : value) || <span className="italic text-coolGray-400">Vide</span>}</div>
+              </div>
+            );
+          })
         : null}
     </div>
   );
