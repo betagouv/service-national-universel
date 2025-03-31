@@ -1,10 +1,10 @@
-import { permissions, RolePermissions } from "snu-lib";
+import { roles, RolePermission } from "snu-lib";
 
-export async function getPermissionsByRole(role: string): Promise<RolePermissions> {
+export async function getPermissionsByRole(role: string): Promise<Record<string, RolePermission>> {
   // TODO: Move to DB
-  const permission = permissions.find((p) => p.role === role)?.permissions;
-  if (!permission) {
+  const permissions = roles.find((roleDoc) => roleDoc.name === role)?.permissions;
+  if (!permissions) {
     throw new Error(`Permissions not found for role ${role}`);
   }
-  return permission;
+  return permissions;
 }

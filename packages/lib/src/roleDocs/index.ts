@@ -1,15 +1,15 @@
-export type RolePermissions = {
-  [key: string]: { value?: boolean; setting?: string } | undefined;
+export type RolePermission = { value?: boolean; setting?: string; startAt?: string; endAt?: string };
+
+type Role = {
+  name: string;
+  desc?: string;
+  permissions: Record<string, RolePermission>;
 };
 
-type PermissionDocument = {
-  role: string;
-  permissions: RolePermissions;
-};
-
-export const permissions: PermissionDocument[] = [
+export const roles: Role[] = [
   {
-    role: "admin",
+    name: "admin",
+    desc: "Modérateur",
     permissions: {
       "TRANSPORT:UPDATE": {
         value: true,
@@ -47,7 +47,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "transporter",
+    name: "transporter",
     permissions: {
       "TRANSPORT:UPDATE": {
         setting: "busEditionOpenForTransporter",
@@ -64,7 +64,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "head_center",
+    name: "head_center",
     permissions: {
       "PHASE_1:POINTAGE": {
         setting: "youngCheckinForHeadOfCenter",
@@ -72,7 +72,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "referent_region",
+    name: "referent_region",
     permissions: {
       "PHASE_1:POINTAGE": {
         setting: "youngCheckinForRegionReferent",
@@ -80,7 +80,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "referent_department",
+    name: "referent_department",
     permissions: {
       "PHASE_1:POINTAGE": {
         setting: "youngCheckinForDepartmentReferent",
@@ -88,7 +88,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "responsible",
+    name: "responsible",
     permissions: {
       "CONTRACT:CREATE": {
         value: true,
@@ -102,7 +102,7 @@ export const permissions: PermissionDocument[] = [
     },
   },
   {
-    role: "supervisor",
+    name: "supervisor",
     permissions: {
       "CONTRACT:CREATE": {
         value: true,
