@@ -1,7 +1,7 @@
 import { CohortType } from "../mongoSchema";
 import { UserDto } from "../dto";
-import { ROLES } from "src/roles";
-import { actions } from "src/actions";
+import { ROLES } from "../roles";
+import { actions } from "../actions";
 
 // TODO: Move to DB
 const roleDocuments = (cohort: CohortType) => [
