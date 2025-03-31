@@ -1,5 +1,5 @@
-export const actions = {
-  transport: {
+export const ACTIONS = {
+  TRANSPORT: {
     UPDATE: "TRANSPORT:UPDATE",
     UPDATE_PDR_ID: "TRANSPORT:UPDATE_PDR_ID",
     UPDATE_PDR_SCHEDULE: "TRANSPORT:UPDATE_PDR_SCHEDULE",

@@ -19,7 +19,7 @@ import {
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
   hasPermission,
-  actions,
+  ACTIONS,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -308,9 +308,9 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
-    const canUpdateSessionId = hasPermission(req.user, actions.transport.UPDATE_SESSION_ID, cohort);
-    const canUpdateCenterSchedule = hasPermission(req.user, actions.transport.UPDATE_CENTER_SCHEDULE, cohort);
-    const canSendNotifications = hasPermission(req.user, actions.transport.NOTIFY_AFTER_UPDATE, cohort);
+    const canUpdateSessionId = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_SESSION_ID, { cohort });
+    const canUpdateCenterSchedule = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE, { cohort });
+    const canSendNotifications = hasPermission(req.user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
 
     if ((sessionHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotifications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

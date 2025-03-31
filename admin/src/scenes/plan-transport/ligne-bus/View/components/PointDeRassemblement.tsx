@@ -5,7 +5,7 @@ import { BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useToggle } from "react-use";
 
-import { actions, CohortType, hasPermission, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { ACTIONS, CohortType, hasPermission, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
@@ -209,11 +209,11 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   }
 
   const message = "Vous n'avez pas l'autorisation de modifier le point de rassemblement.";
-  const canUpdateTransport = hasPermission(user, actions.transport.UPDATE, cohort);
-  const canUpdatePdrId = hasPermission(user, actions.transport.UPDATE_PDR_ID, cohort);
-  const canUpdatePdrSchedule = hasPermission(user, actions.transport.UPDATE_PDR_SCHEDULE, cohort);
-  const canUpdatePdrTransportType = hasPermission(user, actions.transport.UPDATE_TYPE, cohort);
-  const canSendNotification = hasPermission(user, actions.transport.NOTIFY_AFTER_UPDATE, cohort);
+  const canUpdateTransport = hasPermission(user, ACTIONS.TRANSPORT.UPDATE, { cohort });
+  const canUpdatePdrId = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_ID, { cohort });
+  const canUpdatePdrSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE, { cohort });
+  const canUpdatePdrTransportType = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_TYPE, { cohort });
+  const canSendNotification = hasPermission(user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
 
   return (
     <>
