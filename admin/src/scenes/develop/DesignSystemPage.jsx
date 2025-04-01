@@ -13,6 +13,7 @@ import ModalExamples from "./components/Modal";
 import ProfilePicExamples from "./components/ProfilePic";
 import Colors from "./components/Colors";
 import TreeFilterExample from "./TreeFilterExample";
+import { TreeFilterPerformanceTest } from "@/components/filters-system-v2/tree-filter/PerformanceTest";
 
 export default function DesignSystemPage() {
   const [values, setValues] = React.useState({
@@ -219,6 +220,9 @@ export default function DesignSystemPage() {
       />
       <Container title="Filtres de type Tree WIP">
         <TreeFilterExample />
+      </Container>
+      <Container title="Filtres de type Tree Performance Test">
+        <TreeFilterPerformanceTest />
       </Container>
       <Container title="Champs simples (InputText)">
         <div className="grid grid-cols-3 gap-4 w-full">
