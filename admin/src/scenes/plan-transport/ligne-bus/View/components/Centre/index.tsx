@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { actions, CohortType, LigneBusDto } from "snu-lib";
+import { ACTIONS, CohortType, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
 import SessionSelector from "./SessionSelector";
@@ -27,6 +27,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   const { mutate: updateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
   const [isEditing, setIsEditing] = useState(false);
   const [openModal, setOpenModal] = useState(false);
+  const { hasPermission } = usePermission({ cohort });
   const { control, handleSubmit, reset, getValues } = useForm({
     defaultValues: {
       centerArrivalTime: bus.centerArrivalTime,
@@ -53,11 +54,10 @@ export default function Centre({ bus, setBus, cohort }: Props) {
       },
     });
   }
-
-  const canUpdateTransport = usePermission(actions.transport.UPDATE, cohort);
-  const canUpdateCenterId = usePermission(actions.transport.UPDATE_SESSION_ID, cohort);
-  const canUpdateCenterSchedule = usePermission(actions.transport.UPDATE_CENTER_SCHEDULE, cohort);
-  const canSendNotifications = usePermission(actions.transport.NOTIFY_AFTER_UPDATE, cohort);
+  const canUpdateTransport = hasPermission(ACTIONS.TRANSPORT.UPDATE);
+  const canUpdateCenterId = hasPermission(ACTIONS.TRANSPORT.UPDATE_SESSION_ID);
+  const canUpdateCenterSchedule = hasPermission(ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE);
+  const canSendNotifications = hasPermission(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">

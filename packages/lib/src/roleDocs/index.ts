@@ -17,7 +17,7 @@ export const roleDocs: RoleDocument[] = [
       { name: "TRANSPORT:UPDATE_TYPE", value: true },
       { name: "TRANSPORT:UPDATE_SESSION_ID", value: true },
       { name: "TRANSPORT:UPDATE_CENTER_SCHEDULE", value: true },
-      { name: "TRANSPORT:NOTIFY_AFTER_UPDATE", value: true },
+      { name: "TRANSPORT:SEND_NOTIFICATION", value: true },
 
       { name: "PHASE_1:POINTAGE", setting: "youngCheckinForAdmin" },
 

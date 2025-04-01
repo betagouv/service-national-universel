@@ -2,7 +2,7 @@ const express = require("express");
 const router = express.Router();
 const passport = require("passport");
 const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, getAge, canViewContract, ROLES, actions } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, getAge, canViewContract, ROLES, ACTIONS } = require("snu-lib");
 const { capture } = require("../sentry");
 const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
 const { ERRORS, isYoung, isReferent } = require("../utils");
@@ -212,7 +212,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
     const permissions = new PermissionService(req.user);
-    const canCreateOrUpdateContract = permissions.check(actions.contract.CREATE);
+    const canCreateOrUpdateContract = permissions.has(ACTIONS.CONTRACT.CREATE);
     if (!canCreateOrUpdateContract) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -281,8 +281,8 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     // - admin and referent can send contract to everybody
     // - responsible and supervisor can send contract in their structures
     const permissions = new PermissionService(req.user);
-    const canCreateOrUpdateContract = permissions.check(actions.contract.CREATE);
-    if (!canCreateOrUpdateContract(req.user, contract)) {
+    const canCreateOrUpdateContract = permissions.has(ACTIONS.CONTRACT.CREATE);
+    if (!canCreateOrUpdateContract) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     if (req.user.role === ROLES.RESPONSIBLE) {
@@ -463,7 +463,7 @@ router.post("/:id/download", passport.authenticate(["young", "referent"], { sess
     }
 
     const permissions = new PermissionService(req.user);
-    const canCreateOrUpdateContract = permissions.check(actions.contract.create);
+    const canCreateOrUpdateContract = permissions.check(ACTIONS.CONTRACT.CREATE);
     if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, contract)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }

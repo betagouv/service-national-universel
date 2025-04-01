@@ -13,7 +13,7 @@ async function getPermissionsByRole(role: string): Promise<RolePermission[]> {
   });
 }
 
-export default function usePermission(action: string, cohort?: CohortType): { value: boolean; message?: string } {
+export default function usePermission(context?: { cohort?: CohortType }): { hasPermission: (action: string) => { value: boolean; message?: string } } {
   const user = useSelector((state: AuthState) => state.Auth.user);
   const {
     isPending,
@@ -23,20 +23,26 @@ export default function usePermission(action: string, cohort?: CohortType): { va
   } = useQuery({
     queryKey: ["permissions", user.role],
     queryFn: () => getPermissionsByRole(user.role),
-    refetchOnMount: false,
     refetchOnWindowFocus: false,
-    staleTime: Infinity,
   });
-  if (isPending) return { value: false, message: "Chargement des permissions..." };
-  if (isError) throw new Error(error.message);
-  const permission = permissions.find((p) => p.name === action);
-  if (!permission) {
-    return { value: false, message: "Votre rôle ne permet pas de réaliser cette action." };
+  if (isPending) {
+    return { hasPermission: (_action: string) => ({ value: false, message: "Chargement des permissions..." }) };
   }
-  return getPermissionValueAndMessage(permission, cohort);
+  if (isError) {
+    return { hasPermission: (_action: string) => ({ value: false, message: `Erreur lors du chargement des permissions: ${error.message}` }) };
+  }
+  return {
+    hasPermission: (action: string) => {
+      const permission = permissions.find((p) => p.name === action);
+      if (!permission) {
+        return { value: false, message: "Votre rôle ne permet pas de réaliser cette action." };
+      }
+      return getPermissionValueAndMessage(permission, context);
+    },
+  };
 }
 
-function getPermissionValueAndMessage(permission: RolePermission, cohort?: CohortType): { value: boolean; message?: string } {
+function getPermissionValueAndMessage(permission: RolePermission, context?: { cohort?: CohortType }): { value: boolean; message?: string } {
   if (permission?.value) {
     const value = permission.value || false;
     return {
@@ -45,19 +51,19 @@ function getPermissionValueAndMessage(permission: RolePermission, cohort?: Cohor
     };
   }
   if (permission?.setting || permission?.startAt || permission?.endAt) {
-    if (!cohort) {
+    if (!context?.cohort) {
       return { value: false, message: "Paramètres du séjour non chargés pour cette action." };
     }
     if (permission?.setting) {
-      const value = cohort![permission.setting] as boolean;
+      const value = context.cohort[permission.setting] as boolean;
       return {
         value,
         message: value ? undefined : "Cette opération est désactivée pour ce séjour.",
       };
     }
     if (permission?.startAt && permission?.endAt) {
-      const startAt = new Date(cohort![permission.startAt]);
-      const endAt = new Date(cohort![permission.endAt]);
+      const startAt = new Date(context.cohort[permission.startAt]);
+      const endAt = new Date(context.cohort[permission.endAt]);
       if (dayjs().isBefore(dayjs(startAt))) {
         return { value: false, message: `Cette opération sera disponible pour ce séjour à partir du ${dayjs(startAt).format("DD/MM/YYYY")} à ${dayjs(startAt).format("HH:mm")}` };
       }
