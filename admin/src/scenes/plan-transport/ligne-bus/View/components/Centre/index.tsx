@@ -2,12 +2,12 @@ import React, { useState } from "react";
 import { ACTIONS, CohortType, LigneBusDto } from "snu-lib";
 import Field from "../../../components/Field";
 import Iceberg from "../../../components/Icons/Iceberg";
+import usePermission from "@/hooks/usePermission";
 import SessionSelector from "./SessionSelector";
 import useUpdateSessionSurLigneDeBus from "@/scenes/plan-transport/lib/useUpdateSessionSurLigneDeBus";
 import CentreModal from "./CentreModal";
 import { Controller, SubmitHandler, useForm } from "react-hook-form";
 import { EditButton } from "@snu/ds/admin";
-import usePermission from "@/hooks/usePermission";
 
 type Props = {
   bus: LigneBusDto;
@@ -24,10 +24,10 @@ export type CentreFormValues = {
 const pattern = new RegExp("^(0[0-9]|1[0-9]|2[0-3]):[0-5][0-9]$");
 
 export default function Centre({ bus, setBus, cohort }: Props) {
+  const { hasPermission } = usePermission({ cohort });
   const { mutate: updateSessionSurLigneDeBus, isPending } = useUpdateSessionSurLigneDeBus(bus._id);
   const [isEditing, setIsEditing] = useState(false);
   const [openModal, setOpenModal] = useState(false);
-  const { hasPermission } = usePermission({ cohort });
   const { control, handleSubmit, reset, getValues } = useForm({
     defaultValues: {
       centerArrivalTime: bus.centerArrivalTime,
@@ -54,6 +54,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
       },
     });
   }
+
   const canUpdateTransport = hasPermission(ACTIONS.TRANSPORT.UPDATE);
   const canUpdateCenterId = hasPermission(ACTIONS.TRANSPORT.UPDATE_SESSION_ID);
   const canUpdateCenterSchedule = hasPermission(ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE);

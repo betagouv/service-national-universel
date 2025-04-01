@@ -28,7 +28,7 @@ export * from "./phone-number";
 export * from "./plandetransport";
 export * from "./region-and-departments";
 export * from "./roles";
-export * from "./roleDocs";
+export * from "./rolesConfig";
 export * from "./routes";
 export * from "./sessions";
 export * from "./SNUpport";

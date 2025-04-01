@@ -302,7 +302,6 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
     const cohort = await CohortModel.findOne({ name: ligne.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

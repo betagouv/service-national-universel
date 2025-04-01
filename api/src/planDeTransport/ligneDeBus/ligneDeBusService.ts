@@ -157,12 +157,16 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
   const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
 
   const permissions = new PermissionService(user, { cohort });
+  const canUpdateTransportType = permissions.has(ACTIONS.TRANSPORT.UPDATE_TYPE);
+  const canUpdateSchedule = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE);
+  const canUpdatePDR = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_ID);
+  const canSendEmailCampaign = permissions.has(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
 
   if (
-    (transportTypeHasChanged && !permissions.has(ACTIONS.TRANSPORT.UPDATE_TYPE)) ||
-    (scheduleHasChanged && !permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE)) ||
-    (pdrHasChanged && !permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_ID)) ||
-    (payload.sendEmailCampaign && !permissions.has(ACTIONS.TRANSPORT.SEND_NOTIFICATION))
+    (transportTypeHasChanged && !canUpdateTransportType) ||
+    (scheduleHasChanged && !canUpdateSchedule) ||
+    (pdrHasChanged && !canUpdatePDR) ||
+    (payload.sendEmailCampaign && !canSendEmailCampaign)
   ) {
     throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
   }
