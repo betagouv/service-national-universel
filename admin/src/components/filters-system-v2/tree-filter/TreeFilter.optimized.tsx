@@ -1,6 +1,6 @@
+import React, { memo } from "react";
 import cx from "classnames";
-import React from "react";
-import { useTreeFilter } from "./TreeFilterContext";
+import { useTreeFilter } from "./TreeFilterContext.optimized";
 
 export interface TreeFilterProps {
   id: string;
@@ -24,7 +24,8 @@ export interface TreeNodeFilterProps {
   item: TreeNodeFilterType;
   className?: string;
 }
-export function TreeNodeFilter({ nodeId }: { nodeId: string }) {
+
+export const TreeNodeFilter = memo(({ nodeId }: { nodeId: string }) => {
   const { onCheckboxClick, getItemState, isIndeterminate, getSelectedChildrenCount, id, getNode, showSelectedValuesCount } = useTreeFilter();
   const item = getNode(nodeId);
   if (!item) return null;
@@ -69,4 +70,6 @@ export function TreeNodeFilter({ nodeId }: { nodeId: string }) {
       </div>
     </div>
   );
-}
+});
+
+TreeNodeFilter.displayName = "TreeNodeFilter";

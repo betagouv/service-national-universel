@@ -5,6 +5,7 @@ import React from "react";
 import { useListeDiffusionFilters } from "../planMarketing/listeDiffusion/filters/ListeDiffusionFiltersHook";
 import Loader from "@/components/Loader";
 import { TreeNodeFilterType } from "@/components/filters-system-v2/tree-filter/TreeFilter";
+import { TreeFilterWithoutHeadlessUi as TreeFilterWithoutHeadlessUiOptimized } from "@/components/filters-system-v2/tree-filter/TreeFilterWithoutHeadlessUi.optimized";
 
 export type TempFilters = Record<string, { key: string }[]>;
 export default function TreeFilterExample() {
@@ -92,6 +93,7 @@ export default function TreeFilterExample() {
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"d"} /> */}
       <TreeFilterWithoutHeadlessUi treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
+      <TreeFilterWithoutHeadlessUiOptimized treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
       <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-2"} showSelectedValues={true} />
       <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-3"} showSelectedValues={true} />
     </>
