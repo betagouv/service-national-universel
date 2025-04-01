@@ -10,6 +10,13 @@ export const mapSessionCohesionCentersForSept2024 = (sessionsCcohesionCenters: S
       sessionPlaces: getSessionPlaces(sessionCohesionCenter),
       sejourSnuId: sessionCohesionCenter["Code du centre pour la session"],
     };
+    if (sessionCohesionCenterWithoutId.sejourSnuId && sessionCohesionCenterWithoutId.cohesionCenterMatricule && sessionCohesionCenterWithoutId.sessionFormule) {
+      const codeRegion = sessionCohesionCenterWithoutId.sejourSnuId
+        .replaceAll(`_${sessionCohesionCenterWithoutId.cohesionCenterMatricule}`, "")
+        .replaceAll(`${sessionCohesionCenterWithoutId.sessionFormule}_`, "");
+      sessionCohesionCenterWithoutId.codeRegion = codeRegion;
+      sessionCohesionCenterWithoutId.sejourSnuIdRegion = `${sessionCohesionCenterWithoutId.sessionFormule}_${codeRegion}`;
+    }
     return sessionCohesionCenterWithoutId;
   });
 };
