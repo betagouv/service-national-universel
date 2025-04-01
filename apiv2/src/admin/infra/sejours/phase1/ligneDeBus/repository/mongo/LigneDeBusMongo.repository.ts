@@ -1,6 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import mongoose, { Model } from "mongoose";
+import mongoose, { Model, Types } from "mongoose";
 import { ClsService } from "nestjs-cls";
 import { LigneDeBusGateway } from "@admin/core/sejours/phase1/ligneDeBus/LigneDeBus.gateway";
 import {
@@ -33,7 +33,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
     async findById(id: string): Promise<LigneDeBusModel> {
         const ligneDeBus = await this.ligneDeBusMongooseEntity.findById(id);
         if (!ligneDeBus) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "ligne de bus non trouvée");
         }
         return LigneDeBusMapper.toModel(ligneDeBus);
     }
@@ -41,11 +41,21 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         const ligneDeBusEntity = LigneDeBusMapper.toEntity(ligneDeBus);
         const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
         if (!retrievedLigneDeBus) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "ligne de bus non trouvée");
         }
-        retrievedLigneDeBus.set(ligneDeBusEntity);
         const user = this.cls.get("user");
 
+        const history = HistoryMapper.toUpdateHistory(
+            LigneDeBusMapper.toEntity(LigneDeBusMapper.toModel(retrievedLigneDeBus)),
+            ligneDeBusEntity,
+            LIGNEDEBUS_PATCHHISTORY_OPTIONS,
+            user,
+        );
+        if (history) {
+            await this.historyGateway.create(HistoryType.LIGNEDEBUS, history);
+        }
+
+        retrievedLigneDeBus.set(ligneDeBusEntity);
         //@ts-expect-error fromUser unknown
         await retrievedLigneDeBus.save({ fromUser: user });
         return LigneDeBusMapper.toModel(retrievedLigneDeBus);
@@ -77,6 +87,14 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
             return null;
         }
         return LigneDeBusMapper.toModel(ligneDeBus);
+    }
+
+    async findByNumerosLignesAndSessionId(numerosLignes: string[], sessionId: string): Promise<LigneDeBusModel[]> {
+        const lignesDeBus = await this.ligneDeBusMongooseEntity.find({
+            busId: { $in: numerosLignes },
+            cohortId: sessionId,
+        });
+        return LigneDeBusMapper.toModels(lignesDeBus);
     }
 
     async bulkUpdate(lignesUpdated: LigneDeBusModel[]): Promise<number> {
@@ -113,8 +131,18 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
     async delete(ligneDeBus: LigneDeBusModel): Promise<void> {
         const retrievedLigneDeBus = await this.ligneDeBusMongooseEntity.findById(ligneDeBus.id);
         if (!retrievedLigneDeBus) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "ligne de bus non trouvée");
         }
+
+        const user = this.cls.get("user");
+        const history = HistoryMapper.toDeleteHistory({
+            original: { _id: new Types.ObjectId(retrievedLigneDeBus._id), cohortId: retrievedLigneDeBus.cohortId },
+            originalValue: retrievedLigneDeBus.busId,
+            options: LIGNEDEBUS_PATCHHISTORY_OPTIONS,
+            user,
+        });
+        await this.historyGateway.create(HistoryType.LIGNEDEBUS, history);
+
         await retrievedLigneDeBus.deleteOne();
     }
 
