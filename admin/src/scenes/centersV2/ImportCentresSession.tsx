@@ -74,9 +74,11 @@ export default function ImportCentresSessions() {
     <Container>
       <div className="mt-8 flex w-full flex-col items-center justify-center bg-white rounded-xl px-8 pt-12 pb-24">
         <div className="bg-gray-50 w-full flex-col pb-5">
-          <h1 className="text-lg leading-6 font-medium text-gray-900 text-center mt-12 mb-2">Mettre à jour les sessions</h1>
+          <h1 className="text-lg leading-6 font-medium text-gray-900 text-center mt-12 mb-2">Mettre à jour les centres de sessions</h1>
           <p className="text-sm leading-5 font-normal text-gray-500 text-center mb-12">Importez votre fichier (au format .xlsx jusqu’à 5Mo)</p>
-
+          <div className="text-sm leading-5 font-normal text-gray-500 text-center mb-12">
+            ⚠️ Importez le fichier intégral des centres de sessions. Un import partiel du fichier supprime le lien entre les centres et les sessions manquantes.
+          </div>
           {!isUploading ? (
             <>
               <Button

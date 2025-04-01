@@ -10,7 +10,7 @@
     "lint": "turbo run lint --continue --filter=$APP_NAME",
     "check-types": "turbo run check-types --continue --filter=$APP_NAME",
     "clean": "turbo run clean",
-    "endpoints": "node devops/scripts/get-applications-endpoints $(git rev-parse --abbrev-ref HEAD) | jq"
+    "endpoints": "export env_name=$(devops/scripts/cc-environment-name.sh $(git rev-parse --abbrev-ref HEAD)) && echo \"https://api.$env_name.ci.beta-snu.dev\nhttps://admin.$env_name.ci.beta-snu.dev\nhttps://moncompte.$env_name.ci.beta-snu.dev\""
   },
   "dependencies": {
     "classnames": "^2.5.1",
