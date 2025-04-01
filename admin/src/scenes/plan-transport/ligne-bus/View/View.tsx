@@ -142,7 +142,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   React.useEffect(() => {
     setAddOpen(false);
   }, [data]);
-  if (!data) return <Loader />;
+  if (!data || !cohort) return <Loader />;
 
   const leader = data.team.filter((item) => item.role === "leader")[0]?._id?.toString() || null;
 
