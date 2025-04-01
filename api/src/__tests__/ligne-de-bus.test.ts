@@ -56,10 +56,6 @@ const userSuperAdmin = {
   subRole: "god",
 };
 
-const userAdmin = {
-  role: ROLES.ADMIN,
-};
-
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 afterEach(resetAppAuth);
@@ -708,7 +704,6 @@ describe("LigneDeBus", () => {
       });
       await planDeTransport.save();
       payload = {
-        id: ligneBus._id,
         transportType: "bus",
         meetingHour: "08:00",
         busArrivalHour: "07:30",
@@ -720,8 +715,10 @@ describe("LigneDeBus", () => {
       };
     });
 
-    it("should return 403 if user is not a super admin", async () => {
-      const res = await request(getAppHelper(userAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send(payload);
+    it("should return 403 if user is not an admin or a transporter", async () => {
+      const res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT }))
+        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
+        .send(payload);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -730,9 +727,7 @@ describe("LigneDeBus", () => {
 
     it("should return 404 if ligne bus is not found", async () => {
       const fakeLigneBus = new LigneBusModel(getNewLigneBusFixture());
-      const res = await request(getAppHelper(userSuperAdmin))
-        .put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`)
-        .send({ ...payload, id: fakeLigneBus._id });
+      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`).send(payload);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -741,7 +736,7 @@ describe("LigneDeBus", () => {
 
     it("should return 400 if meeting hour is after departure hour", async () => {
       const res = await request(getAppHelper(userSuperAdmin))
-        .put(`/ligne-de-bus/${new ObjectId()}/updatePDRForLine`)
+        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
         .send({ ...payload, meetingHour: "09:00", departureHour: "08:30" });
 
       expect(res.status).toBe(400);
@@ -777,18 +772,7 @@ describe("LigneDeBus", () => {
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
-      expect(updatePDRForLineSpy).toHaveBeenCalledWith(
-        ligneBus._id.toString(),
-        "bus",
-        "08:00",
-        "07:30",
-        "08:30",
-        "18:00",
-        meetingPoint1._id.toString(),
-        meetingPoint2._id.toString(),
-        true,
-        expect.objectContaining(userSuperAdmin),
-      );
+      expect(updatePDRForLineSpy).toHaveBeenCalledWith(ligneBus._id.toString(), expect.objectContaining({ sendEmailCampaign: true }), expect.objectContaining(userSuperAdmin));
       updatePDRForLineSpy.mockRestore();
     });
   });

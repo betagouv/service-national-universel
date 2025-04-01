@@ -23,8 +23,8 @@ describe("Email Preview Controller", () => {
       expect(res.body.code).toBe(ERRORS.INVALID_PARAMS);
     });
 
-    it("should return 403 if user is not a super admin", async () => {
-      const res = await request(getAppHelper(userAdmin)).get("/email-preview/template/123");
+    it("should return 403 if user is not an admin", async () => {
+      const res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT })).get("/email-preview/template/123");
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
       expect(res.body.code).toBe(ERRORS.OPERATION_UNAUTHORIZED);
