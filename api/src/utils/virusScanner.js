@@ -1,4 +1,3 @@
-// virusScanner.js
 const { config } = require("../config");
 const { captureMessage } = require("../sentry");
 const NodeClam = require("clamscan");
@@ -6,7 +5,6 @@ const NodeClam = require("clamscan");
 const CLAMSCAN_CONFIG = {
   removeInfected: true,
   clamdscan: {
-    // timeout: 30000,
     socket: "/run/clamav/clamd.ctl",
   },
 };
