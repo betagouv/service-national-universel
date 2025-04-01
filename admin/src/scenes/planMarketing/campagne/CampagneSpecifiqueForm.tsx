@@ -86,10 +86,11 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       },
     });
     const { listesDiffusion } = useListeDiffusion();
-    const currentListeDiffusion = useMemo(() => listesDiffusion.find((liste) => liste.id === watch("listeDiffusionId")), [listesDiffusion, watch("listeDiffusionId")]);
+    const listeDiffusionId = watch("listeDiffusionId");
+    const currentListeDiffusion = useMemo(() => listesDiffusion.find((liste) => liste.id === listeDiffusionId), [listesDiffusion, listeDiffusionId]);
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
-    const [isSendCamapgneModalOpen, setIsSendCamapgneModalOpen] = useState(false);
+    const [isSendCampagneModalOpen, setIsSendCampagneModalOpen] = useState(false);
 
     const setApiErrors = useCallback(
       (validationErrors?: ValidationErrors) => {
@@ -139,7 +140,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       reset();
       onCancel();
       setIsConfirmModalOpen(false);
-      setIsSendCamapgneModalOpen(false);
+      setIsSendCampagneModalOpen(false);
     };
 
     const handleOnSave = (data: CampagneSpecifiqueFormData) => {
@@ -156,11 +157,11 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
     };
 
     const handleSendCampagne = () => {
-      setIsSendCamapgneModalOpen(true);
+      setIsSendCampagneModalOpen(true);
     };
 
     const handleConfirmSendCampagne = () => {
-      setIsSendCamapgneModalOpen(false);
+      setIsSendCampagneModalOpen(false);
       if (campagneData.id) {
         onSend(campagneData.id);
       }
@@ -411,7 +412,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
           }
         />
         <Modal
-          isOpen={isSendCamapgneModalOpen}
+          isOpen={isSendCampagneModalOpen}
           onClose={handleOnCancel}
           className="max-w-lg"
           header={
@@ -427,7 +428,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
           }
           footer={
             <div className="flex items-center justify-between gap-6">
-              <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsSendCamapgneModalOpen(false)} disabled={isSubmitting} />
+              <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsSendCampagneModalOpen(false)} disabled={isSubmitting} />
               <Button title="Confirmer l'envoi" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
             </div>
           }

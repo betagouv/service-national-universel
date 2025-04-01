@@ -4,6 +4,7 @@ import { CreerListeDiffusion } from "./CreerListeDiffusion";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { ImporterContacts } from "./ImporterContacts";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { ConfigService } from "@nestjs/config";
 
 describe("PreparerEnvoiCampagne", () => {
     let useCase: PreparerEnvoiCampagne;
@@ -11,6 +12,10 @@ describe("PreparerEnvoiCampagne", () => {
     let creerListeDiffusion: jest.Mocked<CreerListeDiffusion>;
     let planMarketingGateway: jest.Mocked<PlanMarketingGateway>;
     let importerContacts: jest.Mocked<ImporterContacts>;
+    let configService: jest.Mocked<ConfigService>;
+
+    const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
+    const SENDER_NAME = "Service National Universel";
 
     beforeEach(() => {
         campagneGateway = {
@@ -30,11 +35,24 @@ describe("PreparerEnvoiCampagne", () => {
             execute: jest.fn(),
         } as any;
 
+        configService = {
+            getOrThrow: jest.fn((key) => {
+                if (key === "email.sender.noreply.email") {
+                    return SENDER_EMAIL;
+                }
+                if (key === "email.sender.noreply.name") {
+                    return SENDER_NAME;
+                }
+                return undefined;
+            }),
+        } as any;
+
         useCase = new PreparerEnvoiCampagne(
             campagneGateway,
             creerListeDiffusion,
             planMarketingGateway,
             importerContacts,
+            configService,
         );
     });
 
@@ -60,8 +78,8 @@ describe("PreparerEnvoiCampagne", () => {
         expect(planMarketingGateway.createCampagne).toHaveBeenCalledWith({
             name: mockCampagne.nom,
             sender: {
-                email: "no_reply-mailauto@snu.gouv.fr",
-                name: "Service National Universel",
+                email: SENDER_EMAIL,
+                name: SENDER_NAME,
             },
             templateId: mockCampagne.templateId,
             subject: mockCampagne.objet,

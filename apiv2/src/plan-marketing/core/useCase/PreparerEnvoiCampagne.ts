@@ -7,6 +7,7 @@ import { isCampagneGenerique } from "snu-lib";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { CreerListeDiffusion } from "./CreerListeDiffusion";
 import { PlanMarketingCampagne, PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
+import { ConfigService } from "@nestjs/config";
 
 @Injectable()
 export class PreparerEnvoiCampagne implements UseCase<void> {
@@ -14,8 +15,8 @@ export class PreparerEnvoiCampagne implements UseCase<void> {
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         private readonly creerListeDiffusion: CreerListeDiffusion,
         @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
-
         private readonly importerContacts: ImporterContacts,
+        private readonly configService: ConfigService,
     ) {}
     async execute(campagneId: string): Promise<void> {
         const campagne = (await this.campagneGateway.findById(campagneId)) as CampagneSpecifiqueModelWithRefAndGeneric;
@@ -31,8 +32,8 @@ export class PreparerEnvoiCampagne implements UseCase<void> {
         const campagneFournisseurToCreate: PlanMarketingCampagne = {
             name: campagne.nom,
             sender: {
-                email: "no_reply-mailauto@snu.gouv.fr",
-                name: "Service National Universel",
+                email: this.configService.getOrThrow("email.sender.noreply.email"),
+                name: this.configService.getOrThrow("email.sender.noreply.name"),
             },
             templateId: campagne.templateId,
             subject: campagne.objet,
