@@ -22,7 +22,7 @@ router.get("/template/:id?", passport.authenticate("referent", { session: false,
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     // TODO At the moment, only the super admin can access this route.
     // You need to add a new condition to allow another role, enabling other users to access this route.
-    if (!hasPermission(req.user, ACTIONS.TRANSPORT.PREVIEW_NOTIFICATION)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!hasPermission(req.user, ACTIONS.TRANSPORT.SEND_NOTIFICATION)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { id: templateId } = value;
 

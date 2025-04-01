@@ -14,8 +14,7 @@ const roleDocuments = (context?: { cohort?: CohortType }) => [
       [ACTIONS.TRANSPORT.UPDATE_TYPE]: true,
       [ACTIONS.TRANSPORT.UPDATE_SESSION_ID]: true,
       [ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE]: true,
-      [ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE]: true,
-      [ACTIONS.TRANSPORT.PREVIEW_NOTIFICATION]: true,
+      [ACTIONS.TRANSPORT.SEND_NOTIFICATION]: true,
     },
   },
   {
