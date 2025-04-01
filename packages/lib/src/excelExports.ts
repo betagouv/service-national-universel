@@ -225,6 +225,7 @@ const youngExportFields = [
       "Format de mission",
       "Engagement hors SNU",
       "Souhait MIG",
+      "Remboursement du code de la route",
     ],
     fields: [
       "domains",
@@ -244,6 +245,7 @@ const youngExportFields = [
       "engaged",
       "engagedDescription",
       "desiredLocation",
+      "roadCodeRefund"
     ],
   },
   {

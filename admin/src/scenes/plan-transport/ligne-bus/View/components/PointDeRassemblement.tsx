@@ -5,7 +5,7 @@ import { BsSearch } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 import { useToggle } from "react-use";
 
-import { CohortType, isSuperAdmin, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
+import { ACTIONS, CohortType, hasPermission, LigneBusDto, PointDeRassemblementType, ROLES, translate } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import api from "@/services/api";
@@ -20,7 +20,6 @@ import { checkTime } from "snu-lib";
 
 import PointDeRassemblementLabel from "./PointDeRassemblementLabel";
 import ConfirmChangesModal from "./ConfirmChangesModal";
-import { getAuthorizationToUpdatePdrOnLine } from "../authorization";
 
 const options = [
   { label: "Bus", value: "bus" },
@@ -54,7 +53,7 @@ interface PointDeRassemblementProps {
   pdr: PointDeRassemblementFormValueChanges;
   volume?: { youngsCount: number; meetingPointId: string }[];
   getVolume?: () => void;
-  cohort?: CohortType | null;
+  cohort: CohortType;
 }
 
 export default function PointDeRassemblement({ bus, onBusChange, index, pdr, volume, getVolume, cohort }: PointDeRassemblementProps) {
@@ -209,7 +208,12 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
     );
   }
 
-  const { isAuthorized, message } = getAuthorizationToUpdatePdrOnLine(user, cohort);
+  const message = "Vous n'avez pas l'autorisation de modifier le point de rassemblement.";
+  const canUpdateTransport = hasPermission(user, ACTIONS.TRANSPORT.UPDATE, { cohort });
+  const canUpdatePdrId = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_ID, { cohort });
+  const canUpdatePdrSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE, { cohort });
+  const canUpdatePdrTransportType = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_TYPE, { cohort });
+  const canSendNotification = hasPermission(user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
 
   return (
     <>
@@ -219,13 +223,13 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
             <div className="text-xl leading-6 text-[#242526]">Point de rassemblement</div>
             <div className="flex h-7 w-7 items-center justify-center rounded-full bg-gray-200 text-sm">{index}</div>
           </div>
-          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} onReset={handleCancelChanges} disabled={!isAuthorized} tooltipMessage={message} />
+          <EditButton isEditing={editPdr} setIsEditing={setEditPdr} isLoading={isLoading} onReset={handleCancelChanges} disabled={!canUpdateTransport} tooltipMessage={message} />
         </div>
         <div className="mt-8 flex flex-col">
           <div className="flex flex-col border border-gray-300 rounded-lg py-2 px-2.5">
             <div className="flex justify-between flex-row items-center">
               <PointDeRassemblementLabel pdr={selectedPDR} showLink={user.role !== ROLES.TRANSPORTER} />
-              {isSuperAdmin(user) && editPdr && (
+              {canUpdatePdrId && editPdr && (
                 <button type="button" ref={refButtonChangesPDR} className="text-xs font-normal leading-6 text-blue-500">
                   Changer de lieu
                 </button>
@@ -280,7 +284,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
               options={options}
               selected={options.find((e) => e.value === data.transportType)}
               setSelected={(e) => setData({ ...data, transportType: e.value })}
-              readOnly={!editPdr}
+              readOnly={!editPdr || !canUpdatePdrTransportType}
             />
             <div className="text-xs font-medium leading-4 text-gray-900">Aller</div>
             <div className="flex items-center gap-4">
@@ -291,7 +295,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data?.busArrivalHour}
                 error={errors?.busArrivalHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrSchedule}
               />
               <Field
                 label="Heure de convocation"
@@ -300,6 +304,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.meetingHour}
                 error={errors?.meetingHour}
                 readOnly={!editPdr}
+                disabled={editPdr && !canUpdatePdrSchedule}
               />
             </div>
             <div className="flex items-center gap-4">
@@ -314,7 +319,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data?.departureHour}
                 error={errors?.departureHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrSchedule}
               />
               <Field
                 label="Heure d’arrivée"
@@ -323,7 +328,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
                 value={data.returnHour}
                 error={errors?.returnHour}
                 readOnly={!editPdr}
-                disabled={editPdr && ![ROLES.TRANSPORTER, ROLES.ADMIN].includes(user.role)}
+                disabled={editPdr && !canUpdatePdrSchedule}
               />
             </div>
           </div>
@@ -356,6 +361,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
           returnHour: data.returnHour || "",
         }}
         youngsCount={youngsCount}
+        areNotificationsEnabled={canSendNotification}
         loading={isLoading}
       />
     </>

@@ -1,4 +1,4 @@
-name: Destroy environment (CRON)
+name: Test Environment - Stop (CRON)
 
 on:
   workflow_dispatch:
@@ -6,7 +6,7 @@ on:
     - cron: "33 20 * * *" # Every day at 20:33
 
 jobs:
-  destroy:
+  stop:
     runs-on: ubuntu-latest
     steps:
       - name: Unlabel open PRs with deploy label
@@ -23,13 +23,14 @@ jobs:
 
       - uses: actions/checkout@v4
 
-      - name: Use Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.17"
+      - name: Install clever-tools
+        run: npm install -g clever-tools
 
-      - name: Destroy environment
+      - name: Stop all environments prefixed by "env-"
         env:
-          SCW_SECRET_KEY: ${{ secrets.SCW_CI_DEPLOY_SECRET_KEY }}
-          SCW_ORGANIZATION_ID: ${{ secrets.SCW_ORGANIZATION_ID }}
-        run: node devops/scripts/destroy-all-environments.js --apply-changes
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          clever applications list --format json --org ${{ vars.CC_ORGANIZATION_ID }} \
+          | jq -r '.[0].applications[] | select(.name | startswith("env-") ) | .name' \
+          | xargs -n 1 --verbose clever stop --app
