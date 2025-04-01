@@ -213,7 +213,7 @@ export default function PointDeRassemblement({ bus, onBusChange, index, pdr, vol
   const canUpdatePdrId = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_ID, { cohort });
   const canUpdatePdrSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE, { cohort });
   const canUpdatePdrTransportType = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_TYPE, { cohort });
-  const canSendNotification = hasPermission(user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
+  const canSendNotification = hasPermission(user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
 
   return (
     <>

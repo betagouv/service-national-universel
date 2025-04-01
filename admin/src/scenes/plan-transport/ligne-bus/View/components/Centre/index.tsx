@@ -60,7 +60,7 @@ export default function Centre({ bus, setBus, cohort }: Props) {
   const canUpdateTransport = hasPermission(user, ACTIONS.TRANSPORT.UPDATE, { cohort });
   const canUpdateCenterId = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_SESSION_ID, { cohort });
   const canUpdateCenterSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE, { cohort });
-  const canSendNotifications = hasPermission(user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
+  const canSendNotifications = hasPermission(user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="w-1/2 rounded-xl bg-white p-8">

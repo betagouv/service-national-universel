@@ -310,7 +310,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     const canUpdateSessionId = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_SESSION_ID, { cohort });
     const canUpdateCenterSchedule = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE, { cohort });
-    const canSendNotifications = hasPermission(req.user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
+    const canSendNotifications = hasPermission(req.user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
 
     if ((sessionHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotifications)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

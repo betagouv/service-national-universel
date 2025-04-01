@@ -158,7 +158,7 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
   const canUpdateTransportType = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_TYPE, { cohort });
   const canUpdateSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE, { cohort });
   const canUpdatePDR = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_ID, { cohort });
-  const canSendEmailCampaign = hasPermission(user, ACTIONS.TRANSPORT.NOTIFY_AFTER_UPDATE, { cohort });
+  const canSendEmailCampaign = hasPermission(user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
 
   if (
     (transportTypeHasChanged && !canUpdateTransportType) ||
