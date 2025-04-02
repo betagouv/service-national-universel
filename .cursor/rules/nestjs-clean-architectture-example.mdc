@@ -1,0 +1,483 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+You will always start a response with the name of the current rule : **RULE : nestjs-clean-architectture-example.mdc**
+# NestJS Integration with Clean Architecture
+
+This rule applies to: `src/**/*.module.ts, src/**/*.controller.ts, src/**/*provider.ts`
+
+You are an expert in integrating NestJS with Clean Architecture principles. When working with NestJS components:
+
+## Module Design
+- Modules should maintain Clean Architecture boundaries
+- Use providers array to bind infrastructure implementations to core interfaces
+- JobModule should include appropriate consumers
+
+## Controller Design
+- Controllers should be in the infrastructure layer
+- Controllers should delegate to use cases or services
+- Keep HTTP concerns separate from business logic
+- Use appropriate NestJS decorators for HTTP methods and parameters
+
+## Dependency Injection
+- Use symbols from gateways as injection tokens
+- Provide repository implementations for gateway interfaces
+- Use constructor injection for dependencies
+- Configure providers with appropriate `useClass` bindings
+
+## Error Handling
+- Use FunctionalException for business/validation errors
+- Use TechnicalException for system/infrastructure errors
+- Do not use generic Error class directly
+
+## NestJS with TypeScript
+- Use proper decorator typing for NestJS components
+- Ensure dependency injection is properly typed
+- Use DTOs with validation decorators for input validation
+- Maintain consistent return types for controllers and services 
+
+## Examples Implementation
+
+### Core Layer Components
+
+#### 1. Model Example (src/feature/core/Feature.model.ts)
+```typescript
+export interface FeatureModel {
+    id: string;
+    name: string;
+    description: string;
+    createdAt: Date;
+    updatedAt: Date;
+    isActive: boolean;
+}
+
+export interface CreateFeatureModel {
+    name: string;
+    description: string;
+    isActive?: boolean;
+}
+
+export interface UpdateFeatureModel {
+    id: string;
+    name?: string;
+    description?: string;
+    isActive?: boolean;
+}
+```
+
+#### 2. Gateway Example (src/feature/core/gateway/Feature.gateway.ts)
+```typescript
+import { CreateFeatureModel, FeatureModel, UpdateFeatureModel } from '../Feature.model';
+
+export interface FeatureGateway {
+    save(feature: CreateFeatureModel): Promise<FeatureModel>;
+    findById(id: string): Promise<FeatureModel | null>;
+    search(filter?: Record<string, any>): Promise<FeatureModel[]>;
+    update(feature: UpdateFeatureModel): Promise<FeatureModel | null>;
+    delete(id: string): Promise<void>;
+}
+
+export const FeatureGateway = Symbol('FeatureGateway');
+```
+
+#### 3. UseCase Example (src/feature/core/usecase/CreateFeature.usecase.ts)
+```typescript
+import { UseCase } from "@shared/core/UseCase";
+import { FunctionalException } from "@shared/core";
+import { Injectable } from '@nestjs/common';
+import { CreateFeatureModel, FeatureModel } from '../Feature.model';
+import { FeatureGateway } from '../gateway/Feature.gateway';
+
+@Injectable()
+export class CreateFeatureUseCase implements UseCase<FeatureModel | null> {
+    constructor(
+        @Inject(FeatureGateway)
+        private readonly featureGateway: FeatureGateway
+    ) {}
+
+    async execute(feature: CreateFeatureModel): Promise<FeatureModel> {
+        if (!feature.name) {
+            throw new FunctionalException('FEATURE_NAME_REQUIRED', 'Feature name is required');
+        }
+        
+        const featureToCreate: CreateFeatureModel = {
+            ...feature,
+            isActive: feature.isActive ?? true,
+        };
+
+        return this.featureGateway.save(featureToCreate);
+    }
+}
+```
+
+#### 4. Service Example (src/feature/core/service/Feature.service.ts)
+```typescript
+import { Injectable, Inject } from '@nestjs/common';
+import { FeatureModel } from '../Feature.model';
+import { FeatureGateway } from '../gateway/Feature.gateway';
+
+@Injectable()
+export class FeatureService {
+    constructor(
+        @Inject(FeatureGateway)
+        private readonly featureGateway: FeatureGateway
+    ) {}
+
+    async getActiveFeatures(): Promise<FeatureModel[]> {
+        const features = await this.featureGateway.search({ isActive: true });
+        return features;
+    }
+
+    async toggleFeatureStatus(id: string): Promise<FeatureModel | null> {
+        const feature = await this.featureGateway.findById(id);
+        if (!feature) {
+            return null;
+        }
+
+        return this.featureGateway.update({
+            id,
+            isActive: !feature.isActive,
+        });
+    }
+}
+```
+
+### Infrastructure Layer Components
+
+#### 1. Repository Example (src/feature/infra/repository/Feature.repository.ts)
+```typescript
+import { Injectable } from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { FeatureGateway } from '../../core/gateway/Feature.gateway';
+import { CreateFeatureModel, FeatureModel, UpdateFeatureModel } from '../../core/Feature.model';
+import { FeatureEntity } from '../entity/Feature.entity';
+import { FeatureMapper } from '../mapper/Feature.mapper';
+
+@Injectable()
+export class FeatureRepository implements FeatureGateway {
+    constructor(
+        @InjectRepository(FeatureEntity)
+        private readonly repository: Repository<FeatureEntity>,
+        private readonly mapper: FeatureMapper,
+    ) {}
+
+    async save(feature: CreateFeatureModel): Promise<FeatureModel> {
+        const entity = this.mapper.toEntity(feature);
+        const savedEntity = await this.repository.save(entity);
+        return this.mapper.toDomain(savedEntity);
+    }
+
+    async findById(id: string): Promise<FeatureModel | null> {
+        const entity = await this.repository.findOne({ where: { id } });
+        if (!entity) {
+            return null;
+        }
+        return this.mapper.toDomain(entity);
+    }
+
+    async search(filter?: Record<string, any>): Promise<FeatureModel[]> {
+        const entities = await this.repository.find({ where: filter });
+        return entities.map(entity => this.mapper.toDomain(entity));
+    }
+
+    async update(feature: UpdateFeatureModel): Promise<FeatureModel | null> {
+        const entity = await this.repository.findOne({ where: { id: feature.id } });
+        if (!entity) {
+            return null;
+        }
+        
+        const updatedEntity = { ...entity, ...this.mapper.toEntity(feature) };
+        const savedEntity = await this.repository.save(updatedEntity);
+        return this.mapper.toDomain(savedEntity);
+    }
+
+    async delete(id: string): Promise<void> {
+        await this.repository.delete(id);
+    }
+}
+```
+
+#### 2. Controller Example (src/feature/infra/controller/Feature.controller.ts)
+```typescript
+import { Body, Controller, Delete, Get, Param, Post, Put, Query, NotFoundException } from '@nestjs/common';
+import { CreateFeatureUseCase } from '../../core/usecase/CreateFeature.usecase';
+import { FeatureService } from '../../core/service/Feature.service';
+import { CreateFeatureDto } from '../dto/CreateFeature.dto';
+import { UpdateFeatureDto } from '../dto/UpdateFeature.dto';
+import { FeatureResponseDto } from '../dto/FeatureResponse.dto';
+import { DtoMapper } from '../mapper/Dto.mapper';
+
+@Controller('features')
+export class FeatureController {
+    constructor(
+        private readonly createFeatureUseCase: CreateFeatureUseCase,
+        private readonly featureService: FeatureService,
+        private readonly dtoMapper: DtoMapper,
+    ) {}
+
+    @Post()
+    async create(@Body() dto: CreateFeatureDto): Promise<FeatureResponseDto> {
+        const feature = await this.createFeatureUseCase.execute(dto);
+        return this.dtoMapper.toResponse(feature);
+    }
+
+    @Get(':id')
+    async findOne(@Param('id') id: string): Promise<FeatureResponseDto> {
+        const feature = await this.featureService.getFeatureById(id);
+        if (!feature) {
+            throw new NotFoundException(`Feature with ID ${id} not found`);
+        }
+        return this.dtoMapper.toResponse(feature);
+    }
+
+    @Get()
+    async findAll(@Query() query): Promise<FeatureResponseDto[]> {
+        const features = await this.featureService.getFeatures(query);
+        return features.map(feature => this.dtoMapper.toResponse(feature));
+    }
+
+    @Put(':id')
+    async update(
+        @Param('id') id: string,
+        @Body() dto: UpdateFeatureDto,
+    ): Promise<FeatureResponseDto> {
+        const feature = await this.featureService.updateFeature({ id, ...dto });
+        if (!feature) {
+            throw new NotFoundException(`Feature with ID ${id} not found`);
+        }
+        return this.dtoMapper.toResponse(feature);
+    }
+
+    @Delete(':id')
+    async remove(@Param('id') id: string): Promise<void> {
+        await this.featureService.deleteFeature(id);
+    }
+}
+```
+
+#### 3. DTO Validation Example (src/feature/infra/dto/CreateFeature.dto.ts)
+```typescript
+import { IsBoolean, IsNotEmpty, IsOptional, IsString, MaxLength } from 'class-validator';
+import { CreateFeatureModel } from '../../core/Feature.model';
+
+export class CreateFeatureDto implements CreateFeatureModel {
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(100)
+    name: string;
+
+    @IsString()
+    @MaxLength(500)
+    description: string;
+
+    @IsOptional()
+    @IsBoolean()
+    isActive?: boolean;
+}
+```
+
+#### 4. Mapper Example (src/feature/infra/mapper/Feature.mapper.ts)
+```typescript
+import { Injectable } from '@nestjs/common';
+import { FeatureModel, CreateFeatureModel, UpdateFeatureModel } from '../../core/Feature.model';
+import { FeatureEntity } from '../entity/Feature.entity';
+
+@Injectable()
+export class FeatureMapper {
+    toDomain(entity: FeatureEntity): FeatureModel {
+        return {
+            id: entity.id,
+            name: entity.name,
+            description: entity.description,
+            createdAt: entity.createdAt,
+            updatedAt: entity.updatedAt,
+            isActive: entity.isActive,
+        };
+    }
+
+    toEntity(model: CreateFeatureModel | UpdateFeatureModel): Partial<FeatureEntity> {
+        const entity: Partial<FeatureEntity> = {};
+        
+        if ('id' in model) {
+            entity.id = model.id;
+        }
+        
+        if (model.name !== undefined) {
+            entity.name = model.name;
+        }
+        
+        if (model.description !== undefined) {
+            entity.description = model.description;
+        }
+        
+        if (model.isActive !== undefined) {
+            entity.isActive = model.isActive;
+        }
+        
+        return entity;
+    }
+}
+```
+
+#### 5. Module Example with Integration
+```typescript
+import { Module } from '@nestjs/common';
+import { TypeOrmModule } from '@nestjs/typeorm';
+import { CreateFeatureUseCase } from '../core/usecase/CreateFeature.usecase';
+import { FeatureService } from '../core/service/Feature.service';
+import { FeatureGateway } from '../core/gateway/Feature.gateway';
+import { FeatureController } from './controller/Feature.controller';
+import { FeatureRepository } from './repository/Feature.repository';
+import { FeatureEntity } from './entity/Feature.entity';
+import { FeatureMapper } from './mapper/Feature.mapper';
+import { DtoMapper } from './mapper/Dto.mapper';
+
+@Module({
+  imports: [
+    TypeOrmModule.forFeature([FeatureEntity]),
+  ],
+  controllers: [FeatureController],
+  providers: [
+    CreateFeatureUseCase,
+    FeatureService,
+    FeatureMapper,
+    DtoMapper,
+    {
+      provide: FeatureGateway,
+      useClass: FeatureRepository,
+    },
+  ],
+  exports: [FeatureService, FeatureGateway],
+})
+export class FeatureModule {}
+```
+
+#### 6. Provider Example (src/feature/infra/provider/ExternalService.provider.ts)
+```typescript
+import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import { HttpService } from '@nestjs/axios';
+import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
+import { ExternalServiceGateway } from '../../core/gateway/ExternalService.gateway';
+import { ExternalDataModel } from '../../core/ExternalData.model';
+
+@Injectable()
+export class ExternalServiceProvider implements ExternalServiceGateway {
+    constructor(
+        private readonly httpService: HttpService,
+        private readonly configService: ConfigService,
+    ) {}
+
+    async fetchExternalData(params: Record<string, any>): Promise<ExternalDataModel[]> {
+        const apiUrl = this.configService.get<string>('EXTERNAL_API_URL');
+        const apiKey = this.configService.get<string>('EXTERNAL_API_KEY');
+        
+        try {
+            const response = await this.httpService.axiosRef.get(apiUrl, {
+                params,
+                headers: {
+                    'Authorization': `Bearer ${apiKey}`,
+                },
+            });
+            
+            return response.data.map(item => ({
+                id: item.id,
+                name: item.name,
+                value: item.value,
+                timestamp: new Date(item.timestamp),
+            }));
+        } catch (error) {
+            throw new TechnicalException(TechnicalExceptionType.EXTERNAL_SERVICE_ERROR, error.message);
+        }
+    }
+```
+
+#### 7. Mock Provider Example (src/feature/infra/provider/ExternalServiceMock.provider.ts)
+```typescript
+import { Injectable, Logger } from '@nestjs/common';
+import { ExternalServiceGateway } from '../../core/gateway/ExternalService.gateway';
+import { ExternalDataModel } from '../../core/ExternalData.model';
+
+@Injectable()
+export class ExternalServiceMockProvider implements ExternalServiceGateway {
+    constructor() {}
+
+    async fetchExternalData(params: Record<string, any>): Promise<ExternalDataModel[]> {
+        Logger.log('Mock fetching external data with params: ' + JSON.stringify(params), 'ExternalServiceMockProvider');
+        
+        return [
+            {
+                id: '1',
+                name: 'Mock Data 1',
+                value: 'Sample Value 1',
+                timestamp: new Date(),
+            },
+            {
+                id: '2',
+                name: 'Mock Data 2',
+                value: 'Sample Value 2',
+                timestamp: new Date(),
+            },
+        ];
+    }
+}
+```
+
+#### 8. Factory Example (src/feature/infra/provider/ExternalService.factory.ts)
+```typescript
+import { ConfigService } from '@nestjs/config';
+import { Logger } from '@nestjs/common';
+import { HttpService } from '@nestjs/axios';
+import { TechnicalException, TechnicalExceptionType } from '@shared/core';
+import { ExternalServiceGateway } from '../../core/gateway/ExternalService.gateway';
+import { ExternalServiceProvider } from './ExternalService.provider';
+import { ExternalServiceMockProvider } from './ExternalServiceMock.provider';
+
+export const externalServiceFactory = {
+    provide: ExternalServiceGateway,
+    inject: [ConfigService, HttpService],
+    useFactory: (configService: ConfigService, httpService: HttpService) => {
+        const provider = configService.get<string>('externalService.provider');
+        Logger.log(`External Service Provider used: ${provider}`, 'ExternalServiceFactory');
+        
+        switch (provider) {
+            case 'production':
+                return new ExternalServiceProvider(httpService, configService);
+            case 'mock':
+                return new ExternalServiceMockProvider();
+            default:
+                throw new TechnicalException(
+                    TechnicalExceptionType.CONFIGURATION_ERROR,
+                    `Invalid external service provider: ${provider}`
+                );
+        }
+    }
+};
+```
+
+#### 9. Module Integration with Factory
+```typescript
+import { Module } from '@nestjs/common';
+import { HttpModule } from '@nestjs/axios';
+import { ConfigModule } from '@nestjs/config';
+import { FeatureController } from './controller/Feature.controller';
+import { externalServiceFactory } from './provider/ExternalService.factory';
+import { FeatureService } from '../core/service/Feature.service';
+
+@Module({
+    imports: [
+        HttpModule,
+        ConfigModule,
+    ],
+    controllers: [FeatureController],
+    providers: [
+        FeatureService,
+        externalServiceFactory,
+    ],
+    exports: [ExternalServiceGateway],
+})
+export class FeatureModule {}
+```
