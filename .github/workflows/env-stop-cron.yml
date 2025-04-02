@@ -31,6 +31,5 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          clever applications list --format json --org ${{ vars.CC_ORGANIZATION_ID }} \
-          | jq -r '.[0].applications[] | select(.name | startswith("env-") ) | .name' \
+          .devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
           | xargs -r -n 1 --verbose clever stop --app
