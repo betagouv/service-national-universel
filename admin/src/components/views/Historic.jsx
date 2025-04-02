@@ -13,7 +13,7 @@ export default function Historic({ model, value }) {
   const { data: patches, isPending } = usePatches(model, value);
   const [simpleMode, setSimpleMode] = useToggle(true);
   const [search, setSearch] = useState("");
-  const filteredPatches = patches?.filter((hit) => filterResult(model, hit, search, simpleMode));
+  const filteredPatches = patches?.filter((hit) => filterResult(model, hit, search, simpleMode)) || [];
   const user = useSelector((state) => state.Auth.user);
 
   return isPending ? (
@@ -44,10 +44,18 @@ export default function Historic({ model, value }) {
           )}
         </>
       ) : null}
-      <div className="grid gap-3">
-        {filteredPatches.length === 0 ? <p>Aucune donnée.</p> : filteredPatches.map((hit) => <Hit model={model} key={hit._id} hit={hit} simpleMode={simpleMode} />)}
-      </div>
+      {filteredPatches ? <List model={model} patches={filteredPatches} simpleMode={simpleMode} /> : <p>Aucune donnée.</p>}
     </>
+  );
+}
+
+function List({ model, patches, simpleMode }) {
+  return (
+    <div className="grid gap-3">
+      {patches.map((hit) => (
+        <Hit model={model} key={hit._id} hit={hit} simpleMode={simpleMode} />
+      ))}
+    </div>
   );
 }
 
