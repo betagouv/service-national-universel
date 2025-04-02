@@ -47,7 +47,7 @@ jobs:
         if: steps.fc.outputs.comment-id == ''
         run: |
           name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
-          echo "name: $env_name"
+          echo "name: $name"
           echo "name=$name" >> $GITHUB_OUTPUT
 
       - name: Create comment
