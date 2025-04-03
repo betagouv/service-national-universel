@@ -2,7 +2,7 @@
   "name": "service-national-universel",
   "scripts": {
     "postinstall": "patch-package",
-    "dev": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter=!antivirus --filter=!analytics || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
+    "dev": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter=!analytics || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
     "dev:app": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
@@ -30,8 +30,7 @@
     "admin",
     "api",
     "apiv2",
-    "devops/analytics",
-    "devops/antivirus"
+    "devops/analytics"
   ],
   "engines": {
     "node": "^20.17",

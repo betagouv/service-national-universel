@@ -19,6 +19,7 @@ const { setupExpressErrorHandler } = require("@sentry/node");
 
 const { initDB, closeDB } = require("./mongo");
 const { initRedisClient, closeRedisClient } = require("./redis");
+const { initVirusScanner } = require("./utils/virusScanner");
 const { getAllPdfTemplates } = require("./utils/pdf-renderer");
 const { initPassport } = require("./passport");
 const { injectRoutes } = require("./routes");
@@ -37,7 +38,7 @@ async function runAPI() {
     logger.info(`ANALYTICS_URL ${config.API_ANALYTICS_ENDPOINT}`);
   }
 
-  await Promise.all([initDB(), initRedisClient()]);
+  await Promise.all([initDB(), initRedisClient(), initVirusScanner()]);
 
   /*
     Download all certificate templates when instance is starting,
