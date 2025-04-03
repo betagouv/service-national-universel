@@ -24,11 +24,14 @@ jobs:
         id: env
         run: |
           name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
-          echo "name: $env_name"
+          echo "name: $name"
           echo "name=$name" >> $GITHUB_OUTPUT
 
       - name: Stop environment
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: clever stop --app ${{ steps.env.outputs.name }}
+        run: |
+          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
+          | grep -w "${{ steps.env.outputs.name }}" \
+          | xargs -r -n 1 --verbose clever stop --app

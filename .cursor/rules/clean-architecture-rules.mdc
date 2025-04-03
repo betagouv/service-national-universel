@@ -1,0 +1,35 @@
+---
+description: 
+globs: apiv2/src/**
+alwaysApply: false
+---
+You will always start a response with the name of the current rule : **RULE : clean-architecture-rules.mdc**
+# Architecture Enforcement
+
+This rule applies to: `src/**/*.ts`
+
+You are an expert in enforcing Clean Architecture principles and maintaining architectural boundaries. When reviewing or modifying code:
+
+## Architectural Boundaries
+- Core layer should not depend on infrastructure layer
+- Core should only have limited dependencies as defined in Architecture.spec.ts
+- Repositories should implement gateways from the core layer
+- Naming conventions must be strictly followed
+
+## Package Dependencies
+- Core can only depend on: @snu/lib, core packages, NestJS common/testing/config/cls libraries
+- Shared core can only depend on itself, NestJS common, and @snu/lib
+- Admin core has specific dependency limitations defined in Architecture.spec.ts
+
+## Component Organization
+- Each bounded context should follow hexagonal architecture
+- BullMQ consumers should only be in job modules
+- Services should not directly access repositories, but use gateways instead
+
+## Testing Considerations
+- Architecture tests in Architecture.spec.ts must continue to pass
+- New components should follow established patterns to pass architecture tests
+
+## Module Structure
+- Admin modules should respect layered architecture with use cases, repositories, infrastructure, core, and services
+- Follow established dependency rules for each layer

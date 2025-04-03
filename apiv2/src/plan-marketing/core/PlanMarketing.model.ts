@@ -4,6 +4,7 @@ export interface PlanMarketingTaskParameters {
     processId: number;
     nomListe: string;
     campagneId: string;
+    campagneProviderId: string;
 }
 
 export interface PlanMarketingTaskResults {

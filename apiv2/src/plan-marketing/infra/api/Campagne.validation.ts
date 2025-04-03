@@ -1,4 +1,9 @@
-import { CreateCampagneGeneriqueModel, CampagneGeneriqueModel, CreateCampagneSpecifiqueModelWithRef, CreateCampagneSpecifiqueModelWithoutRef } from "@plan-marketing/core/Campagne.model";
+import {
+    CreateCampagneGeneriqueModel,
+    CampagneGeneriqueModel,
+    CreateCampagneSpecifiqueModelWithRef,
+    CreateCampagneSpecifiqueModelWithoutRef,
+} from "@plan-marketing/core/Campagne.model";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
 
@@ -38,7 +43,10 @@ export class CreateCampagneGeneriqueDto extends BaseCampagneDto implements Creat
     generic: true = true;
 }
 
-export class CreateCampagneSpecifiqueWithoutRefDto extends BaseCampagneDto implements CreateCampagneSpecifiqueModelWithoutRef {
+export class CreateCampagneSpecifiqueWithoutRefDto
+    extends BaseCampagneDto
+    implements CreateCampagneSpecifiqueModelWithoutRef
+{
     @IsBoolean()
     @IsNotEmpty()
     generic: false = false;
@@ -62,7 +70,10 @@ export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifi
     campagneGeneriqueId: string;
 }
 
-export class UpdateCampagneGeneriqueDto extends CreateCampagneGeneriqueDto implements CampagneGeneriqueModel {
+export class UpdateCampagneGeneriqueDto
+    extends CreateCampagneGeneriqueDto
+    implements Omit<CampagneGeneriqueModel, "envois">
+{
     @IsString()
     @IsNotEmpty()
     id: string;
@@ -80,5 +91,11 @@ export class UpdateCampagneSpecifiqueWithRefDto extends CreateCampagneSpecifique
     id: string;
 }
 
-export type CreateCampagneDto = CreateCampagneGeneriqueDto | CreateCampagneSpecifiqueWithoutRefDto | CreateCampagneSpecifiqueWithRefDto;
-export type UpdateCampagneDto = UpdateCampagneGeneriqueDto | UpdateCampagneSpecifiqueWithoutRefDto | UpdateCampagneSpecifiqueWithRefDto;
+export type CreateCampagneDto =
+    | CreateCampagneGeneriqueDto
+    | CreateCampagneSpecifiqueWithoutRefDto
+    | CreateCampagneSpecifiqueWithRefDto;
+export type UpdateCampagneDto =
+    | UpdateCampagneGeneriqueDto
+    | UpdateCampagneSpecifiqueWithoutRefDto
+    | UpdateCampagneSpecifiqueWithRefDto;
