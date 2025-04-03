@@ -8,6 +8,7 @@ interface FormErrors {
   templateId?: string;
   objet?: string;
   recipients?: string;
+  programmations?: string;
 }
 
 export const useCampagneError = (formData: CampagneFormProps["campagneData"]) => {
@@ -39,6 +40,10 @@ export const useCampagneError = (formData: CampagneFormProps["campagneData"]) =>
     const hasSelectedRecipient = Object.values(formData.destinataires || {}).some((value) => value);
     if (!hasSelectedRecipient) {
       newErrors.recipients = "Au moins un destinataire doit être sélectionné";
+    }
+
+    if (formData.programmations?.some((prog) => !prog.typeEvenement || !prog.dateEnvoi)) {
+      newErrors.programmations = "Tous les champs de programmation sont requis";
     }
 
     setErrors(newErrors);

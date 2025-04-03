@@ -6,6 +6,8 @@ import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutli
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useCampagneForm } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
+import ProgrammationList from "./ProgrammationList";
+import { ProgrammationProps } from "./ProgrammationForm";
 
 interface ListeDiffusionOption {
   value: string;
@@ -24,6 +26,7 @@ export interface CampagneDataProps {
   contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+  programmations?: ProgrammationProps[];
 }
 
 export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
@@ -55,12 +58,8 @@ export default React.memo(
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
     const handleSubmit = () => {
-      if (validateForm()) {
-        if (!campagneData.id) {
-          confirmSubmit();
-        } else {
-          setIsConfirmModalOpen(true);
-        }
+      if (validateForm() && campagneData.id) {
+        setIsConfirmModalOpen(true);
       }
     };
 
@@ -202,6 +201,17 @@ export default React.memo(
                   />
                   <ErrorMessage message={errors.objet} />
                 </div>
+              </div>
+
+              <hr className="border-t border-gray-200" />
+
+              <div className="gap-16">
+                <ProgrammationList
+                  campagne={campagneData as CampagneDataProps}
+                  programmations={state.programmations || []}
+                  onChange={(programmations) => handleChange("programmations", programmations)}
+                  isCampagneGenerique
+                />
               </div>
             </div>
 
