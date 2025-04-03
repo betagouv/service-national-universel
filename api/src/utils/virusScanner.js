@@ -9,12 +9,18 @@ const CLAMSCAN_CONFIG = {
   },
 };
 
+let clamscan = null;
+
+async function initVirusScanner() {
+  if (config.ENABLE_ANTIVIRUS) {
+    clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
+  }
+}
+
 async function scanFile(tempFilePath, name, userId = "anonymous") {
   if (!config.ENABLE_ANTIVIRUS) {
     return { infected: false };
   }
-
-  const clamscan = await new NodeClam().init(CLAMSCAN_CONFIG);
 
   const { isInfected } = await clamscan.isInfected(tempFilePath);
 
@@ -25,4 +31,7 @@ async function scanFile(tempFilePath, name, userId = "anonymous") {
   return { infected: isInfected };
 }
 
-module.exports = scanFile;
+module.exports = {
+  initVirusScanner,
+  scanFile,
+};

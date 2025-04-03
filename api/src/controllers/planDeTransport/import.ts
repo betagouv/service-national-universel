@@ -20,7 +20,7 @@ import {
   type PlanTransportModesType,
 } from "../../models";
 
-import scanFile from "../../utils/virusScanner";
+import { scanFile } from "../../utils/virusScanner";
 import { getMimeFromFile } from "../../utils/file";
 import { validateId } from "../../utils/validator";
 import { validatePdtFile, computeImportSummary } from "../../planDeTransport/planDeTransport/import/pdtImportService";
