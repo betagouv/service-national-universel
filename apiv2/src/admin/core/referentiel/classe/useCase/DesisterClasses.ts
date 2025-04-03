@@ -17,7 +17,7 @@ import {
     ImportClasseFileValidation,
 } from "../ReferentielClasse.model";
 import { Transactional } from "@nestjs-cls/transactional";
-Injectable();
+@Injectable()
 export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
     constructor(
         @Inject(FileGateway) private readonly fileGateway: FileGateway,

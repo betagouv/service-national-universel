@@ -43,5 +43,6 @@ export type { ReferentsRoutes } from "./cle/referent";
 export type { FilterLabelRoutes } from "./filterLabel";
 export type { DepartmentServiceRoutes } from "./departmentService";
 export type { PlanMarketingRoutes } from "./planMarketing";
+export type { AnalyticsRoutes } from "./analytics";
 
 export * from "./phase1";
