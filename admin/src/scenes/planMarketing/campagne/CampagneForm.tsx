@@ -160,7 +160,7 @@ export default React.memo(
 
               <div className="grid grid-cols-2 gap-16">
                 <div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <label className="text-sm font-medium text-gray-900">Destinataires *</label>
                     <Tooltip id="id-destinataires-campagne" title="Sélectionnez les destinataires de cette campagne">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
@@ -223,13 +223,18 @@ export default React.memo(
                   <span>Non enregistrée</span>
                 </div>
               )}
+              {isDirty() && <Button type="secondary" className="flex items-center gap-2" title="Annuler" onClick={() => handleChange("reset")} disabled={isPending} />}
               <button
                 disabled={isDupliquerCampagneDisabled || isPending}
                 className={`border-[1px] border-blue-600 rounded-md p-2.5 ${isDupliquerCampagneDisabled || isPending ? "border-gray-400" : ""}`}
                 onClick={() => onDuplicate({ ...state, createdAt: campagneData.createdAt } as CampagneDataProps)}>
                 <HiOutlineDocumentDuplicate className={`w-5 h-5 text-blue-600 ${isDupliquerCampagneDisabled || isPending ? "text-gray-400" : ""}`} />
               </button>
-              <Button disabled={isPending} className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md" title="Enregistrer" onClick={handleSubmit}></Button>
+              <Button
+                disabled={isPending || !isDirty()}
+                className="flex items-center gap-2 bg-blue-600 text-white px-6 py-2 rounded-md"
+                title="Enregistrer"
+                onClick={handleSubmit}></Button>
             </div>
           </Collapsable>
         </Container>

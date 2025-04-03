@@ -20,7 +20,21 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => 
   });
 
   const handleChange = (field: string, value: string | DestinataireListeDiffusion[] | number | ProgrammationProps[]) => {
-    setState({ [field]: value });
+    if (field === "reset") {
+      setState({
+        nom: formData.nom,
+        type: formData.type,
+        listeDiffusionId: formData.listeDiffusionId,
+        templateId: formData.templateId,
+        objet: formData.objet,
+        generic: formData.generic,
+        destinataires: formData.destinataires,
+        isTemplateOnError: false,
+        programmations: formData.programmations,
+      });
+    } else {
+      setState({ [field]: value });
+    }
   };
 
   const { mutate: saveCampagne, isPending } = useMutation({

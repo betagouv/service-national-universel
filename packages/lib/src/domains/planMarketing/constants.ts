@@ -21,6 +21,16 @@ export interface ListeDiffusionFiltres {
   [key: string]: string[];
 }
 
+export enum EnvoiCampagneStatut {
+  EN_COURS = "EN_COURS",
+  TERMINE = "TERMINE",
+}
+
+export interface CampagneEnvoi {
+  date: Date;
+  statut: string;
+}
+
 export enum TypeEvenement {
   DATE_DEBUT_SEJOUR = "DATE_DEBUT_SEJOUR",
   DATE_FIN_SEJOUR = "DATE_FIN_SEJOUR",
@@ -81,4 +91,3 @@ export const EVENEMENT_TYPE_MAP: Record<TypeEvenement, TypeRegleEnvoi> = {
   [TypeEvenement.ENVOI_PRECEDENT]: TypeRegleEnvoi.ACTION,
   [TypeEvenement.AUCUN]: TypeRegleEnvoi.PERSONNALISE
 } as const;
-

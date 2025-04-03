@@ -1,6 +1,13 @@
 import { CampagneJeuneType } from "snu-lib";
 import { CampagneMapper } from "./Campagne.mapper";
-import { CampagneGeneriqueModel, CampagneModel, CampagneSpecifiqueModel, CreateCampagneGeneriqueModel, CreateCampagneModel, CreateCampagneSpecifiqueModel } from "../core/Campagne.model";
+import {
+    CampagneGeneriqueModel,
+    CampagneModel,
+    CampagneSpecifiqueModel,
+    CreateCampagneGeneriqueModel,
+    CreateCampagneModel,
+    CreateCampagneSpecifiqueModel,
+} from "../core/Campagne.model";
 
 describe("CampagneMapper", () => {
     const mockId = "123";
@@ -18,6 +25,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -34,6 +42,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneGeneriqueModel);
@@ -51,6 +60,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false,
                 cohortId: "cohort-1",
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -68,6 +78,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false as const,
                 cohortId: "cohort-1",
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneSpecifiqueModel);
@@ -86,6 +97,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -97,6 +109,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneSpecifiqueModel);
@@ -130,6 +143,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 cohortId: undefined,
+                envois: [],
                 campagneGeneriqueId: undefined,
             });
         });
@@ -162,6 +176,8 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: undefined,
+                originalCampagneGeneriqueId: undefined,
+                envois: [],
             });
         });
 
