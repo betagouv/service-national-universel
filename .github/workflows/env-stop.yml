@@ -32,6 +32,6 @@ jobs:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
-          .devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
+          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
           | grep -w "${{ steps.env.outputs.name }}" \
           | xargs -r -n 1 --verbose clever stop --app
