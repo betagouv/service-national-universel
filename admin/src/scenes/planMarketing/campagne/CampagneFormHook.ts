@@ -6,6 +6,9 @@ import { DestinataireListeDiffusion, PlanMarketingRoutes, translateMarketing } f
 import { DraftCampagneDataProps } from "./CampagneForm";
 import { ProgrammationProps } from "./ProgrammationForm";
 
+type CampagneFormField = keyof Omit<DraftCampagneDataProps, "id"> | "reset";
+type CampagneFormValue = string | DestinataireListeDiffusion[] | number | ProgrammationProps[] | undefined;
+
 export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => void) => {
   const [state, setState] = useSetState<DraftCampagneDataProps & { isTemplateOnError: boolean }>({
     nom: formData.nom,
@@ -19,7 +22,7 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => 
     programmations: formData.programmations,
   });
 
-  const handleChange = (field: string, value: string | DestinataireListeDiffusion[] | number | ProgrammationProps[]) => {
+  const handleChange = (field: CampagneFormField, value?: CampagneFormValue) => {
     if (field === "reset") {
       setState({
         nom: formData.nom,

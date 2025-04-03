@@ -2,7 +2,7 @@ import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, InputText, Modal, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useState } from "react";
-import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle, HiOutlinePlusSm } from "react-icons/hi";
+import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useCampagneForm } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
