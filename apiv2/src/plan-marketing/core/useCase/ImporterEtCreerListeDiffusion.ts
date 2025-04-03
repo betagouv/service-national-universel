@@ -8,7 +8,6 @@ import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
-// TODO: finir usecase
 @Injectable()
 export class ImporterEtCreerListeDiffusion implements UseCase<void> {
     private readonly logger: Logger = new Logger(ImporterEtCreerListeDiffusion.name);
@@ -20,6 +19,9 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
         private readonly config: ConfigService,
     ) {}
 
+    /**
+     * @deprecated Utiliser CreerListeDiffusion et ImporterContacts
+     */
     async execute(nomListe: string, campagneId: string, pathFile: string): Promise<void> {
         this.logger.log(`nomListe: ${nomListe}, campagneId: ${campagneId}, pathFile: ${pathFile}`);
         const campagne = await this.planMarketingGateway.findCampagneById(campagneId);
@@ -48,6 +50,7 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
                     processId: processId,
                     nomListe: nomListe,
                     campagneId: campagneId,
+                    campagneProviderId: campagneId,
                 },
             },
         };

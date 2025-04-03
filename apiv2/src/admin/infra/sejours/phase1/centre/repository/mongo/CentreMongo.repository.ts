@@ -14,6 +14,10 @@ export class CentreRepository implements CentreGateway {
 
         private readonly cls: ClsService,
     ) {}
+    async findByIds(ids: string[]): Promise<CentreModel[]> {
+        const centres = await this.centreMongooseEntity.find({ _id: { $in: ids } });
+        return CentreMapper.toModels(centres);
+    }
     async findByMatricule(matricule: string): Promise<CentreModel | null> {
         const centre = await this.centreMongooseEntity.findOne({ matricule });
         if (!centre) {

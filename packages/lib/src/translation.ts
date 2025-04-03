@@ -1245,6 +1245,8 @@ export const translateMarketing = (name: string) => {
       return "Le template est introuvable";
     case "LISTE_DIFFUSION_NOT_FOUND":
       return "La liste de diffusion est introuvable";
+    case "NO_CONTACTS":
+      return "La liste de diffusion est vide";
     default:
       return name;
   }

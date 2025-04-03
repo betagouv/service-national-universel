@@ -4,14 +4,16 @@ import { PlanMarketingTaskParameters, PlanMarketingTaskResults } from "./PlanMar
 import { TaskName } from "snu-lib";
 import { AssocierListeDiffusionToCampagne } from "./useCase/AssocierListeDiffusionToCampagne";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { EnvoyerCampagne } from "./useCase/EnvoyerCampagne";
 
-Injectable();
+@Injectable()
 export class PlanMarketingActionSelectorService {
     private readonly logger: Logger = new Logger(PlanMarketingActionSelectorService.name);
 
     constructor(
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         private readonly associerListeDiffusionToCampagne: AssocierListeDiffusionToCampagne,
+        private readonly envoyerCampagne: EnvoyerCampagne,
     ) {}
 
     async selectAction(processId: number) {
@@ -35,10 +37,20 @@ export class PlanMarketingActionSelectorService {
                 case TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE:
                     await this.associerListeDiffusionToCampagne.execute(
                         task.metadata?.parameters?.nomListe,
-                        task.metadata?.parameters?.campagneId,
+                        task.metadata?.parameters?.campagneProviderId,
                     );
                     await this.taskGateway.toSuccess(task.id, {
                         description: "Liste de diffusion créée et associée à la campagne",
+                    });
+                    break;
+                case TaskName.PLAN_MARKETING_IMPORT_CONTACTS_ET_CREER_LISTE_PUIS_ENVOYER_CAMPAGNE:
+                    await this.envoyerCampagne.execute(
+                        task.metadata?.parameters?.nomListe,
+                        task.metadata?.parameters?.campagneId,
+                        task.metadata?.parameters?.campagneProviderId,
+                    );
+                    await this.taskGateway.toSuccess(task.id, {
+                        description: "Campagne et liste envoyées au provider",
                     });
                     break;
                 default: {

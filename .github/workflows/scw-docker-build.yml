@@ -7,14 +7,23 @@ on:
 
 env:
   DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
-  RELEASE: ${{ github.sha }}
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Git checkout
+        uses: actions/checkout@v4
+        with:
+          ref: production
+
+      - name: Get release
+        id: release
+        run: |
+          sha=$(git rev-parse HEAD)
+          echo "sha: $sha"
+          echo "sha=$sha" >> $GITHUB_OUTPUT
 
       - name: Login to Docker Container Registry
         uses: docker/login-action@v3
@@ -46,10 +55,10 @@ jobs:
           file: devops/build/docker/Dockerfile.front
           tags: |
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.release.outputs.sha }}"
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
-            "RELEASE=${{ env.RELEASE }}"
+            "RELEASE=${{ steps.release.outputs.sha }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/app.env"
 
@@ -70,10 +79,10 @@ jobs:
           file: devops/build/docker/Dockerfile.front
           tags: |
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.release.outputs.sha }}"
           build-args: |
             "APP_NAME=${{ env.APP_NAME }}"
-            "RELEASE=${{ env.RELEASE }}"
+            "RELEASE=${{ steps.release.outputs.sha }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/admin.env"
 
@@ -96,9 +105,9 @@ jobs:
           file: devops/build/docker/Dockerfile.back
           tags: |
             "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:latest"
-            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ env.RELEASE }}"
+            "${{ env.DOCKER_REGISTRY }}/${{ env.APP_NAME }}:${{ steps.release.outputs.sha }}"
           build-args: |
-            "RELEASE=${{ env.RELEASE }}"
+            "RELEASE=${{ steps.release.outputs.sha }}"
           secret-files: |
             "BUILD_SECRETS=${{ runner.temp }}/back.env"
 

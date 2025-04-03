@@ -1,9 +1,16 @@
-import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal } from "@snu/ds/admin";
-import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback } from "react";
+import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
-import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId } from "snu-lib";
+import { LuSend } from "react-icons/lu";
+
+import { Checkbox } from "@snu/ds";
+import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
+
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi, formatDateFRTimezoneUTC, formatLongDateFR } from "snu-lib";
+
+import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
+import DestinataireCount from "./partials/DestinataireCount";
+import DestinataireLink from "./partials/DestinataireLink";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -25,6 +32,7 @@ export interface CampagneSpecifiqueFormData {
   cohortId: string;
   campagneGeneriqueId?: string;
   generic: false;
+  envois: CampagneEnvoi[] | undefined;
   readonly createdAt?: string;
   readonly updatedAt?: string;
   validationErrors?: ValidationErrors;
@@ -40,10 +48,11 @@ interface ListeDiffusionOption {
 }
 
 export interface CampagneSpecifiqueFormProps {
-  campagneData: DraftCampagneSpecifiqueFormData;
+  campagneData: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined };
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
+  onSend: (id: string) => void;
 }
 
 export interface CampagneSpecifiqueFormRefMethods {
@@ -51,8 +60,8 @@ export interface CampagneSpecifiqueFormRefMethods {
 }
 
 const recipientOptions = [
-  { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes" },
-  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux" },
+  { value: DestinataireListeDiffusion.JEUNES, label: "Jeunes", withCount: true },
+  { value: DestinataireListeDiffusion.REPRESENTANTS_LEGAUX, label: "Représentants légaux", withCount: true },
   { value: DestinataireListeDiffusion.REFERENTS_CLASSES, label: "Référents de classes" },
   { value: DestinataireListeDiffusion.CHEFS_ETABLISSEMENT, label: "Chefs d'établissement" },
   { value: DestinataireListeDiffusion.CHEFS_CENTRES, label: "Chefs de centres" },
@@ -60,7 +69,7 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend }, ref) => {
     const {
       control,
       handleSubmit,
@@ -76,8 +85,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
         ...campagneData,
       },
     });
+    const { listesDiffusion } = useListeDiffusion();
+    const listeDiffusionId = watch("listeDiffusionId");
+    const currentListeDiffusion = useMemo(() => listesDiffusion.find((liste) => liste.id === listeDiffusionId), [listesDiffusion, listeDiffusionId]);
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+    const [isSendCampagneModalOpen, setIsSendCampagneModalOpen] = useState(false);
 
     const setApiErrors = useCallback(
       (validationErrors?: ValidationErrors) => {
@@ -120,13 +133,14 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       }
     }, [campagneData, reset, setApiErrors]);
 
-    // Le formulaire est ouvert s'il est nouveau, modifié ou s'il contient des erreurs
-    const isOpen = campagneData.id === undefined || isDirty || Object.keys(errors).length > 0;
+    // Le formulaire est ouvert s'il est nouveau ou s'il contient des erreurs
+    const isOpen = campagneData.id === undefined || Object.keys(errors).length > 0;
 
     const handleOnCancel = () => {
       reset();
       onCancel();
       setIsConfirmModalOpen(false);
+      setIsSendCampagneModalOpen(false);
     };
 
     const handleOnSave = (data: CampagneSpecifiqueFormData) => {
@@ -139,6 +153,17 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
         setIsConfirmModalOpen(true);
       } else {
         handleOnSave(data);
+      }
+    };
+
+    const handleSendCampagne = () => {
+      setIsSendCampagneModalOpen(true);
+    };
+
+    const handleConfirmSendCampagne = () => {
+      setIsSendCampagneModalOpen(false);
+      if (campagneData.id) {
+        onSend(campagneData.id);
       }
     };
 
@@ -177,7 +202,40 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     </a>
                   ) : null}
                 </div>
-                <div className="flex-1">{/* TODO: wrapper pour les labels des dates d'envoie et relances */}</div>
+                <div className="flex-1">
+                  <div className="flex-1 flex flex-row gap-4">
+                    <div>
+                      {campagneData.envois
+                        ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
+                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                        .slice(0, 1)
+                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatDateFRTimezoneUTC(envoi.date)}`} status={"VALIDATED"} />)}
+                    </div>
+                    <div>
+                      {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (
+                        <div className="text-sm text-gray-500">
+                          <span>{(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) - 1} relances</span>
+                          <div className="flex items-center gap-1">
+                            {campagneData?.envois
+                              ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
+                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+                              .slice(1)
+                              ?.map((envoi, index, array) => (
+                                <React.Fragment key={(campagneData.id ?? "id") + envoi.date}>
+                                  <span>
+                                    <Tooltip id={`id-envoi-campagne-${campagneData.id}-${index}`} title={`Envoyée le ${formatLongDateFR(envoi.date)}`}>
+                                      {formatDateFRTimezoneUTC(envoi.date)}
+                                    </Tooltip>
+                                  </span>
+                                  {index < array.length - 1 && <span>•</span>}
+                                </React.Fragment>
+                              ))}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
               </div>
             }>
             <div className="flex flex-col gap-6 p-2">
@@ -207,7 +265,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 <div>
                   <div className="flex gap-2">
                     <Label title="ID du template Brevo" name="templateId" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-template-brevo" title="Saisissez l'id du template Brevo">
+                    <Tooltip id="id-template-brevo" title="Saisissez l'id du template Brevo" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
@@ -238,14 +296,14 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
               <div className="grid grid-cols-2 gap-16">
                 <div>
-                  <div className="flex gap-2">
+                  <div className="flex items-center gap-2">
                     <Label title="Destinataires" name="destinataires" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-destinataires" title="Sélectionnez les destinataires de cette campagne">
+                    <Tooltip id="id-destinataires" title="Sélectionnez les destinataires de cette campagne" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
 
-                  <div className="grid grid-cols-2 gap-x-8 gap-y-3">
+                  <div className="grid grid-cols-2 gap-x-8 gap-y-3 mb-5">
                     <Controller
                       name="destinataires"
                       control={control}
@@ -261,7 +319,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                                   field.onChange(field.value?.includes(option.value) ? field.value?.filter((v) => v !== option.value) : [...(field.value || []), option.value])
                                 }
                               />
-                              <span>{option.label}</span>
+                              <span>
+                                {option.label}
+                                {option.withCount && field.value?.includes(option.value) && (
+                                  <DestinataireCount type={option.value} cohortId={campagneData.cohortId} listeDiffusion={currentListeDiffusion} />
+                                )}
+                              </span>
                             </label>
                           ))}
                         </>
@@ -269,12 +332,13 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     />
                   </div>
                   {errors.destinataires && <span className="text-red-500 text-sm mt-1">{errors.destinataires.message}</span>}
+                  {currentListeDiffusion?.filters && <DestinataireLink listeDiffusion={currentListeDiffusion} cohortId={campagneData.cohortId} />}
                 </div>
 
                 <div>
                   <div className="flex gap-2">
                     <Label title="Objet de la campagne" name="objet" className="mb-2 flex items-center font-medium !text-sm" />
-                    <Tooltip id="id-objet" title="Saisissez l'objet du mail de la campagne">
+                    <Tooltip id="id-objet" title="Saisissez l'objet du mail de la campagne" className="mb-1.5">
                       <HiOutlineInformationCircle className="text-gray-400" size={20} />
                     </Tooltip>
                   </div>
@@ -305,13 +369,23 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 </div>
               )}
               {isDirty ? <Button title="Annuler" type="secondary" className="flex justify-center" onClick={handleOnCancel} disabled={isSubmitting} /> : null}
-              <Button
-                disabled={isSubmitting || !isDirty}
-                type="wired"
-                className="flex items-center gap-2 px-6 py-2 rounded-md"
-                title="Enregistrer pour ce séjour"
-                onClick={handleSubmit(handleConfirmSubmit)}
-              />
+              <div className="flex flex-row gap-4">
+                <Button
+                  disabled={isSubmitting || !isDirty}
+                  type="wired"
+                  className="flex items-center gap-2 px-6 py-2 rounded-md"
+                  title="Enregistrer pour ce séjour"
+                  onClick={handleSubmit(handleConfirmSubmit)}
+                />
+                <Button
+                  leftIcon={<LuSend className="w-5 h-5" />}
+                  title={`${campagneData.envois && campagneData.envois.length > 0 ? "Renvoyer la campagne" : "Envoyer la campagne"}`}
+                  className={`${isDirty ? "bg-gray-300" : "bg-green-700"} flex-1`}
+                  onClick={handleSubmit(handleSendCampagne)}
+                  loading={isSubmitting}
+                  disabled={isDirty}
+                />
+              </div>
             </div>
           </Collapsable>
         </Container>
@@ -334,6 +408,28 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
             <div className="flex items-center justify-between gap-6">
               <Button title="Fermer" type="secondary" className="flex-1 justify-center" onClick={() => setIsConfirmModalOpen(false)} disabled={isSubmitting} />
               <Button title="Enregistrer pour ce séjour" className="flex-1" onClick={handleSubmit(handleOnSave)} loading={isSubmitting} />
+            </div>
+          }
+        />
+        <Modal
+          isOpen={isSendCampagneModalOpen}
+          onClose={handleOnCancel}
+          className="max-w-lg"
+          header={
+            <div className="text-center">
+              <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
+              <h3 className="text-xl font-medium">Confirmez l'envoi de la campagne</h3>
+            </div>
+          }
+          content={
+            <div className="text-center my-4">
+              <p>Vous êtes sur le point d'envoyer la campagne {campagneData.nom}</p>
+            </div>
+          }
+          footer={
+            <div className="flex items-center justify-between gap-6">
+              <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsSendCampagneModalOpen(false)} disabled={isSubmitting} />
+              <Button title="Confirmer l'envoi" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
             </div>
           }
         />

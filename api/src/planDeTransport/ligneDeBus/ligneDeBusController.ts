@@ -7,7 +7,6 @@ import {
   canViewLigneBus,
   canEditLigneBusTeam,
   canEditLigneBusGeneralInfo,
-  canEditLigneBusCenter,
   canEditLigneBusPointDeRassemblement,
   isBusEditionOpen,
   ROLES,
@@ -19,7 +18,8 @@ import {
   isAdmin,
   SENDINBLUE_TEMPLATES,
   isTeamLeaderOrSupervisorEditable,
-  isSuperAdmin,
+  hasPermission,
+  ACTIONS,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -302,36 +302,41 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
 
     const ligne = await LigneBusModel.findById(id);
     if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const cohort = await CohortModel.find({ name: ligne.cohort });
-    if (!cohort.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const cohort = await CohortModel.findOne({ name: ligne.cohort });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role === ROLES.TRANSPORTER) {
-      if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    } else {
-      if (!canEditLigneBusCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
+    const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
+
+    const canUpdateSessionId = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_SESSION_ID, { cohort });
+    const canUpdateCenterSchedule = hasPermission(req.user, ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE, { cohort });
+    const canSendNotifications = hasPermission(req.user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
+
+    if ((sessionHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotifications)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    //add some checks
+    if (scheduleHasChanged) {
+      ligne.set({
+        centerArrivalTime,
+        centerDepartureTime,
+      });
 
-    ligne.set({
-      centerArrivalTime,
-      centerDepartureTime,
-    });
+      await ligne.save({ fromUser: req.user });
 
-    await ligne.save({ fromUser: req.user });
+      const planDeTransport = await PlanTransportModel.findById(id);
+      if (!planDeTransport) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+      planDeTransport.set({
+        centerArrivalTime,
+        centerDepartureTime,
+      });
 
-    const planDeTransport = await PlanTransportModel.findById(id);
-    if (!planDeTransport) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      await planDeTransport.save({ fromUser: req.user });
     }
-    planDeTransport.set({
-      centerArrivalTime,
-      centerDepartureTime,
-    });
 
-    await planDeTransport.save({ fromUser: req.user });
-
-    if (sessionId && sessionId !== ligne.sessionId) {
+    if (sessionHasChanged) {
       const session = await SessionPhase1Model.findById(sessionId);
       if (!session) throw new Error(ERRORS.NOT_FOUND);
       await updateSessionForLine({
@@ -450,38 +455,22 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
 
 router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const { error, value } = Joi.object({
-      id: Joi.string().required(),
-      transportType: Joi.string().required(),
-      meetingHour: Joi.string().required(),
-      busArrivalHour: Joi.string().required(),
-      departureHour: Joi.string().required(),
-      returnHour: Joi.string().required(),
-      meetingPointId: Joi.string().required(),
-      newMeetingPointId: Joi.string().required(),
-      sendEmailCampaign: Joi.boolean().required(),
-    }).validate({ ...req.params, ...req.body });
+    const { error: errorId, value: lineId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
+    const { error, value } = Joi.object({
+      transportType: Joi.string(),
+      meetingHour: Joi.string(),
+      busArrivalHour: Joi.string(),
+      departureHour: Joi.string(),
+      returnHour: Joi.string(),
+      meetingPointId: Joi.string(),
+      newMeetingPointId: Joi.string(),
+      sendEmailCampaign: Joi.boolean(),
+    }).validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    if (!isSuperAdmin(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { id, transportType, meetingHour, busArrivalHour, departureHour, returnHour, meetingPointId, newMeetingPointId, sendEmailCampaign } = value;
-
-    const updatedLigneBus = await updatePDRForLine(
-      id,
-      transportType,
-      meetingHour,
-      busArrivalHour,
-      departureHour,
-      returnHour,
-      meetingPointId,
-      newMeetingPointId,
-      sendEmailCampaign,
-      req.user,
-    );
+    const updatedLigneBus = await updatePDRForLine(lineId, value, req.user);
 
     const infoBus = await getInfoBus(updatedLigneBus);
     return res.status(200).send({ ok: true, data: infoBus });
@@ -491,6 +480,12 @@ router.put("/:id/updatePDRForLine", passport.authenticate("referent", { session:
     }
     if (error.message === ERRORS.INVALID_BODY) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+    if (error.message === ERRORS.INVALID_PARAMS) {
+      return res.status(400).send({ ok: false, code: error.message });
+    }
+    if (error.message === ERRORS.OPERATION_UNAUTHORIZED) {
+      return res.status(403).send({ ok: false, code: error.message });
     }
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -603,7 +598,7 @@ router.get("/:id/availablePDRByRegion", passport.authenticate("referent", { sess
 
     if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0])
+    const pointDeRassemblement = await PointDeRassemblementModel.findById(ligneBus.meetingPointsIds[0]);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const PDR = await PointDeRassemblementModel.find({ region: pointDeRassemblement.region, deletedAt: { $exists: false } });

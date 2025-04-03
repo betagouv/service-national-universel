@@ -30,7 +30,6 @@ afterAll(dbClose);
 
 // disable transaction for this test
 mockTransaction();
-jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfected: false }));
 
 describe("POST /plan-de-transport/import/:cohort", () => {
   beforeEach(async () => {

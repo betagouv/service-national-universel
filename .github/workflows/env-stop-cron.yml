@@ -1,0 +1,35 @@
+name: Test Environment - Stop (CRON)
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: "33 20 * * *" # Every day at 20:33
+
+jobs:
+  stop:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Unlabel open PRs with deploy label
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -s \
+            -H "Content-Type: application/json" \
+            -H "Authorization: token $GITHUB_TOKEN" \
+            "https://api.github.com/search/issues?q=is:open+is:pr+label:deploy+repo:betagouv/service-national-universel" \
+          | jq -r '.items[].labels_url' | sed 's#{/name}#/deploy#g' \
+          | xargs -r -n 1 curl -X DELETE -H "Authorization: token $GITHUB_TOKEN"
+
+
+      - uses: actions/checkout@v4
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
+      - name: Stop all environments prefixed by "env-"
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
+          | xargs -r -n 1 --verbose clever stop --app
