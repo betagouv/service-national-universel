@@ -51,12 +51,15 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
+    const isDefaultCohort = foundCohort.snuId === sessionCenter.sessionFormule;
 
     // Somme des effectifs pour une même cohort
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
       (sc) =>
-        sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && sc.zonedSnuId === sessionCenter.zonedSnuId,
+        sc.sessionFormule === sessionCenter.sessionFormule &&
+        sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule &&
+        (sc.zonedSnuId === sessionCenter.zonedSnuId || (isDefaultCohort && sc.sessionFormule === sessionCenter.sessionFormule)),
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
