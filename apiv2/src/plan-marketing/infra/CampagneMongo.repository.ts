@@ -45,6 +45,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type!,
                     envois: [],
+                    programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
                 };
             }
         }
@@ -79,6 +80,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                             listeDiffusionId: campagneGenerique.listeDiffusionId,
                             destinataires: campagneGenerique.destinataires,
                             type: campagneGenerique.type,
+                            programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
                         };
                     }
                 }
@@ -114,6 +116,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     listeDiffusionId: campagneGenerique.listeDiffusionId,
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type,
+                    programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
                 };
             }
             return campagneModel;
