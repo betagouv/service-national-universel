@@ -13,11 +13,12 @@ import {
 } from "../../models";
 import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
-import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, ACTIONS } from "snu-lib";
+import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, ACTIONS } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
 import { logger } from "../../logger";
+import { PermissionService } from "../../services/permission/permissionService";
 
 const { ObjectId } = Types;
 
@@ -155,10 +156,11 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
     (returnHour && returnHour !== ligneToPoint.returnHour);
   const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
 
-  const canUpdateTransportType = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_TYPE, { cohort });
-  const canUpdateSchedule = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE, { cohort });
-  const canUpdatePDR = hasPermission(user, ACTIONS.TRANSPORT.UPDATE_PDR_ID, { cohort });
-  const canSendEmailCampaign = hasPermission(user, ACTIONS.TRANSPORT.SEND_NOTIFICATION, { cohort });
+  const permissions = new PermissionService(user, { cohort });
+  const canUpdateTransportType = permissions.has(ACTIONS.TRANSPORT.UPDATE_TYPE);
+  const canUpdateSchedule = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE);
+  const canUpdatePDR = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_ID);
+  const canSendEmailCampaign = permissions.has(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
 
   if (
     (transportTypeHasChanged && !canUpdateTransportType) ||
