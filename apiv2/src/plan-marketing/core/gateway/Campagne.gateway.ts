@@ -1,10 +1,10 @@
 import {
-    CampagneEnvoi,
     CampagneModel,
     CampagneSpecifiqueModelWithRefAndGeneric,
     CampagneSpecifiqueModelWithoutRef,
     CreateCampagneModel,
 } from "../Campagne.model";
+import { CampagneEnvoi } from "../Campagne.model";
 
 export interface CampagneGateway {
     save(campagne: CreateCampagneModel): Promise<CampagneModel>;

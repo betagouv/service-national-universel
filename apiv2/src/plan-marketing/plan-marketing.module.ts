@@ -34,6 +34,7 @@ import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
 import { CampagneContactBuilderService } from "./core/service/CampagneContactBuilder.service";
 import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
 import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
+import { ProgrammationService } from "./core/service/Programmation.service";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -77,6 +78,7 @@ import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.s
         CampagneContactBuilderService,
         CampagneProcessorService,
         CampagneDataFetcherService,
+        ProgrammationService,
     ],
 })
 export class PlanMarketingModule {}

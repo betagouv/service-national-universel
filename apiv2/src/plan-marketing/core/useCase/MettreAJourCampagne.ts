@@ -33,6 +33,7 @@ export class MettreAJourCampagne implements UseCase<CampagneModel | null> {
                 destinataires: (campagne as CampagneSpecifiqueModelWithoutRef).destinataires,
                 type: (campagne as CampagneSpecifiqueModelWithoutRef).type,
                 envois: campagne.envois,
+                programmations: (campagne as CampagneSpecifiqueModelWithoutRef).programmations,
             };
             return await this.campagneService.updateAndRemoveRef(
                 campagneSpecifiqueWithRefToCampagneSpecifiqueWithouRef,

@@ -4,6 +4,7 @@ import {
     hasCampagneGeneriqueId,
     isCampagneGenerique,
     EnvoiCampagneStatut,
+    TypeEvenement,
 } from "snu-lib";
 import {
     CampagneModel,
@@ -11,6 +12,7 @@ import {
     CampagneGeneriqueModel,
     CreateCampagneModel,
 } from "../core/Campagne.model";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
 
 export class CampagneMapper {
     /**
@@ -46,6 +48,7 @@ export class CampagneMapper {
             destinataires: document.destinataires,
             type: document.type,
             envois: document.envois,
+            programmations: document.programmations.map(this.toModelProgrammation),
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
@@ -63,6 +66,7 @@ export class CampagneMapper {
             ...baseModel,
             generic: false,
             cohortId: document.cohortId!,
+            originalCampagneGeneriqueId: document.originalCampagneGeneriqueId,
         } as CampagneSpecifiqueModel;
     }
 
@@ -94,6 +98,7 @@ export class CampagneMapper {
             type: model.type,
             generic: model.generic,
             envois: model.envois || [],
+            programmations: model.programmations.map((programmation) => this.toEntityProgrammation(programmation)),
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -141,6 +146,7 @@ export class CampagneMapper {
             destinataires: model.destinataires,
             type: model.type,
             generic: model.generic,
+            programmations: model.programmations.map((programmation) => this.toEntityProgrammation(programmation)),
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -157,6 +163,24 @@ export class CampagneMapper {
             ...baseEntity,
             cohortId: model.cohortId,
             campagneGeneriqueId: undefined,
+        };
+    }
+
+    static toEntityProgrammation(programmation: CampagneProgrammation): CampagneType["programmations"][number] {
+        return {
+            joursDecalage: programmation.joursDecalage,
+            type: programmation.type,
+            envoiDate: programmation.envoiDate,
+            createdAt: programmation.createdAt,
+        };
+    }
+
+    static toModelProgrammation(programmation: CampagneType["programmations"][number]): CampagneProgrammation {
+        return {
+            joursDecalage: programmation.joursDecalage,
+            type: TypeEvenement[programmation.type],
+            envoiDate: programmation.envoiDate,
+            createdAt: programmation.createdAt,
         };
     }
 }
