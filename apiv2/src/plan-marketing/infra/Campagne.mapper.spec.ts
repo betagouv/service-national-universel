@@ -7,8 +7,8 @@ import {
     CreateCampagneGeneriqueModel,
     CreateCampagneModel,
     CreateCampagneSpecifiqueModel,
-    CampagneProgrammation,
 } from "../core/Campagne.model";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
 
 describe("CampagneMapper", () => {
     const mockId = "123";

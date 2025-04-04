@@ -1,4 +1,5 @@
-import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut, TypeEvenement } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "snu-lib";
+import { CampagneProgrammation } from "./Programmation.model";
 
 /**
  * Interface de base pour toutes les campagnes
@@ -10,12 +11,6 @@ interface CampagneBase {
     updatedAt?: Date;
 }
 
-export interface CampagneProgrammation {
-    joursDecalage: number;
-    type: TypeEvenement;
-    envoiDate?: Date;
-    createdAt: Date;
-}
 export interface CampagneEnvoi {
     date: Date;
     statut: EnvoiCampagneStatut;

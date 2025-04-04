@@ -2,12 +2,12 @@ import { Inject, Injectable } from "@nestjs/common";
 import { Model } from "mongoose";
 import { CampagneGateway } from "../core/gateway/Campagne.gateway";
 import {
-    CampagneEnvoi,
     CampagneModel,
     CampagneSpecifiqueModelWithRefAndGeneric,
     CampagneSpecifiqueModelWithoutRef,
     CreateCampagneModel,
 } from "../core/Campagne.model";
+import { CampagneEnvoi } from "@plan-marketing/core/Campagne.model";
 import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "./CampagneMongo.provider";
 import { CampagneMapper } from "./Campagne.mapper";
 import { isCampagneSansRef, isCampagneWithRef } from "snu-lib";

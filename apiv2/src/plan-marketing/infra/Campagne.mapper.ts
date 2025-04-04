@@ -11,8 +11,8 @@ import {
     CampagneSpecifiqueModel,
     CampagneGeneriqueModel,
     CreateCampagneModel,
-    CampagneProgrammation,
 } from "../core/Campagne.model";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
 
 export class CampagneMapper {
     /**
