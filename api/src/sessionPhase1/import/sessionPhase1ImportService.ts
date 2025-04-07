@@ -54,12 +54,15 @@ export const importSessionsPhase1 = async (SessionsFromCSV: SessionCohesionCente
       report.push(processedSessionReport);
       continue;
     }
+    const isDefaultCohort = foundCohort.snuId === sessionCenter.sessionFormule;
 
     // Somme des effectifs pour une même cohort
     const sessionCenterUpdated = { ...sessionCenter }; // clone to not update other rows
     const multiSessions = mappedSessionCenter.filter(
       (sc) =>
-        sc.sessionFormule === sessionCenter.sessionFormule && sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule && sc.zonedSnuId === sessionCenter.zonedSnuId,
+        sc.sessionFormule === sessionCenter.sessionFormule &&
+        sc.cohesionCenterMatricule === sessionCenter.cohesionCenterMatricule &&
+        (sc.zonedSnuId === sessionCenter.zonedSnuId || (isDefaultCohort && sc.sessionFormule === sessionCenter.sessionFormule)),
     );
     if (multiSessions.length > 1) {
       const sessionPlaces = multiSessions.reduce((acc, sc) => acc + sc.sessionPlaces, 0);
@@ -135,6 +138,15 @@ export const removeDeprecatedSessionsPhase1 = async (SessionsFromCSV: SessionCoh
       } else {
         const isDeleteEnabled = await isFeatureAvailable(FeatureFlagName.IMPORT_SISNU_CENTRESESSIONS_DELETE);
         if (isDeleteEnabled) {
+          // On supprime la référence de la cohort dans le centre vu qu'il n'y a plus de sejour (cohortIds et cohorts)
+          const foundCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
+          if (foundCenter) {
+            foundCenter.cohortIds = foundCenter.cohortIds.filter((cohortId) => cohortId !== sessionPhase1.cohortId);
+            foundCenter.cohorts = foundCenter.cohorts.filter((cohort) => cohort !== sessionPhase1.cohort);
+            await foundCenter.save({ fromUser: { firstName: "IMPORT_SESSION_COHESION_CENTER" } });
+          } else {
+            logger.warn(`Cohesion center not found for session ${sessionPhase1._id}`);
+          }
           await sessionPhase1.deleteOne();
         }
 
