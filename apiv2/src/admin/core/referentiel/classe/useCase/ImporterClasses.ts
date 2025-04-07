@@ -38,7 +38,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         @Inject(AnnulerClasseDesistee) private readonly annulerClasseDesistee: AnnulerClasseDesistee,
         private readonly logger: Logger,
-    ) {}
+    ) { }
 
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseRapport[]> {
         const report: ClasseImportRapport[] = [];
@@ -188,19 +188,20 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             originalSessionNom: jeune.sessionNom,
             sessionChangeReason: "Import SI-SNU",
             statutPhase1: jeune.statutPhase1 === "AFFECTED" ? "WAITING_AFFECTATION" : jeune.statutPhase1,
-            ligneDeBusId: undefined,
-            meetingPointId: undefined,
             centreId: undefined,
+            sejourId: undefined,
             pointDeRassemblementId: undefined,
-            hasMeetingInformation: undefined,
+            ligneDeBusId: undefined,
+            hasPDR: undefined,
             transportInfoGivenByLocal: undefined,
             deplacementPhase1Autonomous: undefined,
-            cohesionStayPresence: undefined,
+            presenceArrivee: undefined,
             presenceJDM: undefined,
             departInform: undefined,
             departSejourAt: undefined,
             departSejourMotif: undefined,
             departSejourMotifComment: undefined,
+            youngPhase1Agreement: "false",
         }));
 
         await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
@@ -211,15 +212,13 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
     }
 
     private async resetAffectation(classe: ClasseModel): Promise<void> {
-        if(classe){
-            classe.pointDeRassemblementId = undefined;
-            classe.centreCohesionId = undefined;
-            classe.statutPhase1 = STATUS_PHASE1_CLASSE.WAITING_AFFECTATION;
-        }
-        
+        classe.pointDeRassemblementId = undefined;
+        classe.centreCohesionId = undefined;
+        classe.ligneId = undefined;
+        classe.statutPhase1 = STATUS_PHASE1_CLASSE.WAITING_AFFECTATION;
+
         await this.classeGateway.update(classe);
-        
-      }
+    }
 
     private async addCenterAndPdrUpdates(classe: ClasseModel, classeImport: ClasseImportModel): Promise<string[]> {
         const updatedFields: string[] = [];
