@@ -12,6 +12,7 @@ import { useSearchTerm } from "../hooks/useSearchTerm";
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
   const [openCampagneId, setOpenCampagneId] = useState<string | null>(null);
+  const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const {
     searchTerm,
@@ -120,9 +121,14 @@ export default function CampagnesGeneriques() {
               campagneData={campagne}
               isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
               listeDiffusionOptions={listeDiffusionOptions}
-              onSave={refetchCampagnes}
+              onSave={(campagneId) => {
+                if (campagneId) {
+                  setKeepOpenCampagneIds((prev) => new Set([...prev, campagneId]));
+                }
+                refetchCampagnes();
+              }}
               onDuplicate={(campagneData) => handleDuplicate(campagneData)}
-              forceOpen={campagne.id === openCampagneId}
+              forceOpen={campagne.id === openCampagneId || (campagne.id ? keepOpenCampagneIds.has(campagne.id) : false)}
             />
           </div>
         ))}
