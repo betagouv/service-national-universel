@@ -52,7 +52,7 @@ export default function DeleteLigneButton({ cohort, ligneDeBus }: DeleteLigneBut
                 </div>
                 <h1 className="font-bold text-xl m-0">Supprimer la ligne de bus {ligneDeBus?.busId}</h1>
                 <p className="text-red-600 text-lg">
-                  Êtes-vous certain de vouloir supprimer la ligne de bus ? Toute suppression sera définitive. Pensez à exporter la ligne de bus actuelle afin de ne pas la perdre
+                  Êtes-vous certain de vouloir supprimer la ligne de bus ? Toute suppression sera définitive. Pensez à exporter le PDT actuel afin de ne pas le perdre.
                 </p>
               </div>
               {!!ligneDeBus.mergedBusIds?.length && (
