@@ -1,6 +1,7 @@
 const { initDB } = require("../../../db");
 const { MissionModel, ApplicationModel } = require("../../../models");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
+const { logger } = require("../src/logger");
 
 const fromUser = { firstName: "Script de rattrapage des statuts de missions JVA" };
 
@@ -21,7 +22,7 @@ module.exports = {
     });
     const missionIds = missionsToUpdate.map((mission) => mission._id);
     const updateMissionsResult = await MissionModel.updateMany({ _id: { $in: missionIds } }, { status: MISSION_STATUS.VALIDATED }, { fromUser });
-    console.log("🚀 ~ updateMissionsResult:", updateMissionsResult);
+    logger.info("Missions mises à jout", updateMissionsResult.modifiedCount);
 
     const applicationPatches = await db.collection("application_patches").find(query(APPLICATION_STATUS.WAITING_VALIDATION)).toArray();
     const applicationsToUpdate = await ApplicationModel.find({
@@ -35,7 +36,7 @@ module.exports = {
       { status: APPLICATION_STATUS.WAITING_VALIDATION, statusComment: "" },
       { fromUser },
     );
-    console.log("🚀 ~ updateApplicationsResult:", updateApplicationsResult);
+    logger.info("Candidatures mises à jour", updateApplicationsResult.modifiedCount);
   },
 
   async down() {
