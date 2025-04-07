@@ -211,6 +211,8 @@ export default function Contract({ young }) {
     ((isYoungAdult && contract.youngContractStatus === "VALIDATED") ||
       (!isYoungAdult && contract.parent1Status === "VALIDATED" && (!young.parent2Email || contract.parent2Status === "VALIDATED")));
 
+  const canReadContractHistory = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+
   return (
     <>
       <BackLink
@@ -812,7 +814,7 @@ export default function Contract({ young }) {
           }}
         </Formik>
       )}
-      {contract ? (
+      {contract && canReadContractHistory ? (
         <div className="mt-4">
           <h3 className="my-2 mx-4 text-sm uppercase italic text-snu-purple-600">Historique des modifications du contrat d&apos;engagement</h3>
           <HistoricComponent model="contract" value={contract} />
