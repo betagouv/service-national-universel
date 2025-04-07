@@ -118,6 +118,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
 
         if (session.id !== classe.sessionId) {
             await this.updateYoungCohorts(classe.id, session);
+            await this.resetAffectation(classe);
             updatedFields.push("jeune.sessionId", "jeune.sessionNom");
         }
         updatedFields.push("sessionId", "sessionNom", "placesTotal");
@@ -186,6 +187,20 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             originalSessionId: jeune.sessionId,
             originalSessionNom: jeune.sessionNom,
             sessionChangeReason: "Import SI-SNU",
+            statutPhase1: jeune.statutPhase1 === "AFFECTED" ? "WAITING_AFFECTATION" : jeune.statutPhase1,
+            ligneDeBusId: undefined,
+            meetingPointId: undefined,
+            centreId: undefined,
+            pointDeRassemblementId: undefined,
+            hasMeetingInformation: undefined,
+            transportInfoGivenByLocal: undefined,
+            deplacementPhase1Autonomous: undefined,
+            cohesionStayPresence: undefined,
+            presenceJDM: undefined,
+            departInform: undefined,
+            departSejourAt: undefined,
+            departSejourMotif: undefined,
+            departSejourMotifComment: undefined,
         }));
 
         await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
@@ -194,6 +209,17 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             ImporterClasses.name,
         );
     }
+
+    private async resetAffectation(classe: ClasseModel): Promise<void> {
+        if(classe){
+            classe.pointDeRassemblementId = undefined;
+            classe.centreCohesionId = undefined;
+            classe.statutPhase1 = STATUS_PHASE1_CLASSE.WAITING_AFFECTATION;
+        }
+        
+        await this.classeGateway.update(classe);
+        
+      }
 
     private async addCenterAndPdrUpdates(classe: ClasseModel, classeImport: ClasseImportModel): Promise<string[]> {
         const updatedFields: string[] = [];
@@ -215,4 +241,5 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         }
         return updatedFields;
     }
+
 }
