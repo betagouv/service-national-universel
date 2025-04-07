@@ -157,10 +157,10 @@ export const updatePDRForLine = async (ligneBusId: string, payload: UpdatePDRFor
   const pdrHasChanged = newMeetingPointId && newMeetingPointId !== ligneToPoint.meetingPointId;
 
   const permissions = new PermissionService(user, { cohort });
-  const canUpdateTransportType = permissions.has(ACTIONS.TRANSPORT.UPDATE_TYPE);
-  const canUpdateSchedule = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE);
-  const canUpdatePDR = permissions.has(ACTIONS.TRANSPORT.UPDATE_PDR_ID);
-  const canSendEmailCampaign = permissions.has(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
+  const canUpdateTransportType = permissions.validate(ACTIONS.TRANSPORT.UPDATE_TYPE);
+  const canUpdateSchedule = permissions.validate(ACTIONS.TRANSPORT.UPDATE_PDR_SCHEDULE);
+  const canUpdatePDR = permissions.validate(ACTIONS.TRANSPORT.UPDATE_PDR_ID);
+  const canSendEmailCampaign = permissions.validate(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
 
   if (
     (transportTypeHasChanged && !canUpdateTransportType) ||

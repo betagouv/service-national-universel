@@ -305,15 +305,15 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
     const cohort = await CohortModel.findOne({ name: ligne.cohort });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const sessionIdHasChanged = sessionId && sessionId !== ligne.sessionId;
+    const sessionHasChanged = sessionId && sessionId !== ligne.sessionId;
     const scheduleHasChanged = (centerArrivalTime && centerArrivalTime !== ligne.centerArrivalTime) || (centerDepartureTime && centerDepartureTime !== ligne.centerDepartureTime);
 
     const permissions = new PermissionService(req.user, { cohort });
-    const canUpdateSessionId = permissions.has(ACTIONS.TRANSPORT.UPDATE_SESSION_ID);
-    const canUpdateCenterSchedule = permissions.has(ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE);
-    const canSendNotification = permissions.has(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
+    const canUpdateSessionId = permissions.validate(ACTIONS.TRANSPORT.UPDATE_SESSION_ID);
+    const canUpdateCenterSchedule = permissions.validate(ACTIONS.TRANSPORT.UPDATE_CENTER_SCHEDULE);
+    const canSendNotification = permissions.validate(ACTIONS.TRANSPORT.SEND_NOTIFICATION);
 
-    if ((sessionIdHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotification)) {
+    if ((sessionHasChanged && !canUpdateSessionId) || (scheduleHasChanged && !canUpdateCenterSchedule) || (sendCampaign && !canSendNotification)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -337,7 +337,7 @@ router.put("/:id/centre", passport.authenticate("referent", { session: false, fa
       await planDeTransport.save({ fromUser: req.user });
     }
 
-    if (sessionIdHasChanged) {
+    if (sessionHasChanged) {
       const session = await SessionPhase1Model.findById(sessionId);
       if (!session) throw new Error(ERRORS.NOT_FOUND);
       await updateSessionForLine({
