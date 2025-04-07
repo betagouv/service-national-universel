@@ -1180,7 +1180,10 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
         young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
       } else {
-        young.set({ [key]: newValue, statusPhase2OpenedAt: new Date() });
+        young.set({ [key]: newValue });
+      }
+      if (key === "cohesionStayPresence" && newValue === "true") {
+        young.set({ statusPhase2OpenedAt: new Date() });
       }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
