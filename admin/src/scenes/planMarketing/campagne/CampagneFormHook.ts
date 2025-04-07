@@ -17,8 +17,21 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => 
     isTemplateOnError: false,
   });
 
-  const handleChange = (field: string, value: string | DestinataireListeDiffusion[] | number) => {
-    setState({ [field]: value });
+  const handleChange = (field: string, value?: string | DestinataireListeDiffusion[] | number) => {
+    if (field === "reset") {
+      setState({
+        nom: formData.nom,
+        type: formData.type,
+        listeDiffusionId: formData.listeDiffusionId,
+        templateId: formData.templateId,
+        objet: formData.objet,
+        generic: formData.generic,
+        destinataires: formData.destinataires,
+        isTemplateOnError: false,
+      });
+    } else {
+      setState({ [field]: value });
+    }
   };
 
   const { mutate: saveCampagne, isPending } = useMutation({

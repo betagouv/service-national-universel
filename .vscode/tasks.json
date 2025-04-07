@@ -42,7 +42,7 @@
     },
     {
       "label": "Build dependencies",
-      "command": "APP_NAME=\\!antivirus npm run build",
+      "command": "npm run build",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -170,15 +170,6 @@
       "problemMatcher": [],
       "options": {
         "cwd": "./apiv2"
-      }
-    },
-    {
-      "label": "Start Antivirus",
-      "command": "npm run dev:app antivirus",
-      "type": "shell",
-      "problemMatcher": [],
-      "options": {
-        "cwd": "./"
       }
     },
     {

@@ -1,0 +1,36 @@
+---
+description: 
+globs: apiv2/src/**/core/**
+alwaysApply: false
+---
+You will always start a response with the name of the current rule : **RULE : clean-architecture-core.mdc**
+# Clean Architecture - Core Layer
+
+This rule applies to: `src/**/core/**/*.ts`
+
+You are an expert in Clean Architecture principles as defined by Robert C. Martin. When working with core layer components:
+
+## Core Layer Principles
+- The core layer contains business rules, use cases, and domain models
+- Core should not depend on infrastructure or frameworks (dependency inversion)
+- Core defines interfaces (gateways) that infrastructure implements
+- Core should be framework-agnostic and testable in isolation
+
+## Structure Guidelines
+- Models define the domain entities and value objects
+- Services implement business logic independent of delivery mechanism
+- UseCases orchestrate the execution of business rules
+- Gateways are interfaces that infrastructure components will implement
+
+## Implementation Rules
+- No references to infrastructure components (controllers, repositories) allowed
+- No use of framework-specific annotations in domain models
+- Gateways should follow the naming convention `.gateway.ts` (e.g., Campagne.gateway.ts)
+- Core can only depend on other core components or standard libraries
+- No direct database access, HTTP requests, or third-party services
+
+## Gateway Design
+- Define clear interfaces that repositories will implement
+- Follow the pattern established in Campagne.gateway.ts
+- Use Symbol exports for dependency injection
+- Keep gateway methods focused on domain operations

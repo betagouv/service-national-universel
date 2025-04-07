@@ -19,7 +19,7 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
+  const { campagnes, saveCampagne, sendCampagne, isLoading } = useCampagneSpecifique({ sessionId });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
 
@@ -74,6 +74,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         templateId: 0,
         objet: "",
         destinataires: [DestinataireListeDiffusion.JEUNES],
+        envois: [],
       };
       saveCampagne({
         payload: newSpecificCampaign,
@@ -102,6 +103,10 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         }
       },
     });
+  };
+
+  const handleSend = (id: string) => {
+    sendCampagne(id);
   };
 
   const isNouvelleCampagneDisabled = useMemo(() => {
@@ -144,6 +149,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             onCancel={() => {
               setDraftCampagne(null);
             }}
+            onSend={handleSend}
           />
         ))}
       </div>

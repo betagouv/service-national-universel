@@ -49,7 +49,7 @@ import { validateSessionPhase1, validateId } from "../utils/validator";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
 import { encrypt, decrypt } from "../cryptoUtils";
-import scanFile from "../utils/virusScanner";
+import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 
@@ -321,7 +321,10 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     if (!cohesionCenter) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    cohesionCenter.set({ cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort) });
+    cohesionCenter.set({
+      cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort),
+      cohortIds: cohesionCenter.cohortIds.filter((c) => c !== sessionPhase1.cohortId),
+    });
     cohesionCenter.save({ fromUser: req.user });
 
     await sessionPhase1.deleteOne();

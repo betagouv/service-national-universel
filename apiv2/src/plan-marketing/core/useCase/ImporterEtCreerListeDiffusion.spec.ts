@@ -51,7 +51,7 @@ describe("ImporterEtCreerListeDiffusion", () => {
 
     it("should successfully import contacts, delete oldest list and create task", async () => {
         const nomListe = "testList";
-        const campagneId = "123";
+        const campagneProviderId = "123";
         const pathFile = "path/to/file";
         const processId = 42;
         const fileContent = "contact1,contact2";
@@ -64,10 +64,10 @@ describe("ImporterEtCreerListeDiffusion", () => {
 
         fileGateway.downloadFile.mockResolvedValue({ Body: Buffer.from(fileContent) } as any);
         planMarketingGateway.importerContacts.mockResolvedValue(processId);
-        planMarketingGateway.findCampagneById.mockResolvedValue({ id: campagneId });
+        planMarketingGateway.findCampagneById.mockResolvedValue({ id: campagneProviderId });
         planMarketingGateway.deleteOldestListeDiffusion.mockResolvedValue();
 
-        await useCase.execute(nomListe, campagneId, pathFile);
+        await useCase.execute(nomListe, campagneProviderId, pathFile);
 
         expect(planMarketingGateway.deleteOldestListeDiffusion).toHaveBeenCalled();
         expect(fileGateway.downloadFile).toHaveBeenCalledWith(pathFile);
@@ -84,7 +84,8 @@ describe("ImporterEtCreerListeDiffusion", () => {
                 parameters: {
                     processId,
                     nomListe,
-                    campagneId,
+                    campagneId: campagneProviderId,
+                    campagneProviderId,
                 },
             },
         });

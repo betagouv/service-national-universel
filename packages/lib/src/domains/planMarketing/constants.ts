@@ -20,3 +20,13 @@ export enum ListeDiffusionEnum {
 export interface ListeDiffusionFiltres {
   [key: string]: string[];
 }
+
+export enum EnvoiCampagneStatut {
+  EN_COURS = "EN_COURS",
+  TERMINE = "TERMINE",
+}
+
+export interface CampagneEnvoi {
+  date: Date;
+  statut: string;
+}

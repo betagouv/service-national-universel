@@ -35,7 +35,7 @@ import {
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } from "../utils";
-import scanFile from "../utils/virusScanner";
+import { scanFile } from "../utils/virusScanner";
 import { canUpdateApplication, getAuthorizationToApply, updateMission } from "../application/applicationService";
 import { apiEngagement } from "../services/gouv.fr/api-engagement";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
