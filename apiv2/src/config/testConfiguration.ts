@@ -26,4 +26,7 @@ export default () => ({
     auth: {
         jwtSecret: "my-secret",
     },
+    elastic: {
+        url: "local_url",
+    },
 });

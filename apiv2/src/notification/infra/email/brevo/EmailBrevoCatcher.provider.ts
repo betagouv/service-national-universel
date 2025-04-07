@@ -24,10 +24,10 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
         private readonly config: ConfigService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
     ) {
-        let apiKeyConfig = this.config.getOrThrow("email.apiKey");
+        const apiKeyConfig = this.config.getOrThrow("email.apiKey");
         this.emailsApi = new brevo.TransactionalEmailsApi();
         //@ts-ignore
-        let apiKey = this.emailsApi.authentications["apiKey"];
+        const apiKey = this.emailsApi.authentications["apiKey"];
         apiKey.apiKey = apiKeyConfig;
     }
 
@@ -41,7 +41,7 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
             port: Number(this.config.get("email.smtpPort")),
             secure: false,
         });
-        let attachments: Mail.Attachment[] = [];
+        const attachments: Mail.Attachment[] = [];
         if (emailParams.attachments && emailParams.attachments.length > 0) {
             for (const attachment of emailParams.attachments) {
                 const file = await this.fileGateway.downloadFile(attachment.filePath);

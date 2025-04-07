@@ -54,7 +54,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
 
   const isEditing = listeDiffusionData.id !== undefined;
-  const isOpen = listeDiffusionData.id === undefined || isDirty;
+  const isOpen = listeDiffusionData.id === undefined;
 
   const handleOnCancel = () => {
     reset();

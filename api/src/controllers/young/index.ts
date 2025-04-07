@@ -68,7 +68,7 @@ import { anonymizeApplicationsFromYoungId } from "../../application/applicationS
 import { anonymizeContractsFromYoungId } from "../../services/contract";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
-import scanFile from "../../utils/virusScanner";
+import { scanFile } from "../../utils/virusScanner";
 import emailsEmitter from "../../emails";
 import { UserRequest } from "../request";
 import { FileTypeResult } from "file-type";
