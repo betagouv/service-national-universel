@@ -32,6 +32,17 @@ const FaqAffected = () => {
 
         <a
           className="flex w-full items-center justify-between rounded-lg border-[1px] border-gray-200 py-[22px] px-6 hover:text-inherit"
+          href="https://support.snu.gouv.fr/base-de-connaissance/lexemption-de-stage-en-2nde-generale-et-technologique-au-titre-du-snu"
+          target="_blank"
+          rel="noreferrer">
+          <span className="font-bold">J&apos;ai des questions sur l'exemption du stage de seconde</span>
+          <span className="text-gray-400">
+            <ArrowUpRight />
+          </span>
+        </a>
+
+        <a
+          className="flex w-full items-center justify-between rounded-lg border-[1px] border-gray-200 py-[22px] px-6 hover:text-inherit"
           href="https://support.snu.gouv.fr/base-de-connaissance/phase-1-le-sejour-de-cohesion"
           target="_blank"
           rel="noreferrer">
