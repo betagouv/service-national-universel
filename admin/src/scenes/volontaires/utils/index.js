@@ -564,29 +564,6 @@ export async function transformVolontaires(data, values) {
   });
 }
 
-export async function transformVolontairesSchool(data) {
-  let all = data;
-  return all.map((data) => {
-    return {
-      _id: data._id,
-      Cohorte: data.cohort,
-      Prénom: data.firstName,
-      Nom: data.lastName,
-      Département: data.department,
-      Situation: translate(data.situation),
-      Niveau: translate(data.grade),
-      "Type d'établissement": translate(data.school?.type || data.schoolType),
-      "Nom de l'établissement": data.school?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.school?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.school?.uai,
-      "Statut général": translate(data.status),
-      "Statut Phase 1": translate(data.statusPhase1),
-    };
-  });
-}
-
 export async function transformInscription(data) {
   let all = data;
   return all.map((data) => {
