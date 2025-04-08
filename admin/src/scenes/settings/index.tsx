@@ -24,6 +24,7 @@ import EligibilityTab from "./eligibility/EligibilityTab";
 import GeneralTab from "./general/GeneralTab";
 import OperationsTab from "./operations/OperationsTab";
 import MarketingTab from "./marketing/MarketingTab";
+import ExportContactConvocation from "./operations/actions/Inscription/ExportContactSimulation/ExportContactConvocation";
 
 export default function Settings() {
   const history = useHistory();
@@ -123,7 +124,10 @@ export default function Settings() {
       <div className="flex w-full flex-col px-8 pb-8">
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
-          <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
+          <div className="flex items-center">
+            <ExportContactConvocation session={cohort} />
+            <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} />
+          </div>
         </div>
         <NavbarControlled tabs={tabs} active={currentTab} onTabChange={(id: typeof currentTab) => history.push(`/settings/${id}?cohort=${currentCohortName}`)} />
 
