@@ -18,6 +18,7 @@ import {
   ClasseModel,
   CohortModel,
   type PlanTransportModesType,
+  PatchLigneBusModel,
 } from "../../models";
 
 import { scanFile } from "../../utils/virusScanner";
@@ -200,6 +201,16 @@ router.post("/:importId/execute", passport.authenticate("referent", { session: f
 
         const newBusLine = new LigneBusModel(busLineData);
         const busLine = await newBusLine.save({ session: transaction });
+        // ADD PATCH HISTORY
+        const patch = new PatchLigneBusModel({
+          ops: [{ op: "create", path: "/", value: busLine.busId }],
+          ref: busLine._id,
+          modelName: "lignebus",
+          cohortId: newBusLine.cohortId,
+          user: req.user,
+          date: new Date(),
+        });
+        await patch.save({ session: transaction });
 
         // Mise à jour des lignes fusionnées existantes
         await syncMergedBus({

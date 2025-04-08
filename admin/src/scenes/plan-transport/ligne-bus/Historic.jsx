@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import HistoryComponent from "../../../components/views/HistoricServerDriven";
+import HistoricServerDriven from "../../../components/views/HistoricServerDriven";
 import API from "../../../services/api";
 import { createEvent } from "../../../utils";
 import Loader from "../../../components/Loader";
@@ -148,7 +148,7 @@ export default function Historic() {
     ) : null;
 
   return (
-    <HistoryComponent
+    <HistoricServerDriven
       loading={loading}
       data={formattedData}
       refName="Ligne"
