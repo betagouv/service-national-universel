@@ -16,7 +16,7 @@ module.exports = {
     await ligneBFC250717.save({ fromUser });
 
     const ligneBFC580250 = await LigneBusModel.findOne({ busId: "BFC580250", cohort });
-    ligneBFC580250.unset("mergedBusIds");
+    ligneBFC580250.set({ mergedBusIds: undefined });
     await ligneBFC580250.save({ fromUser });
 
     // 2. Fusion BFC710717-BFC710250 à la place de BFC710717-BFC580717
@@ -29,7 +29,7 @@ module.exports = {
     await ligneBFC710250.save({ fromUser });
 
     const ligneBFC580717 = await LigneBusModel.findOne({ busId: "BFC580717", cohort });
-    ligneBFC580717.unset("mergedBusIds");
+    ligneBFC580717.set({ mergedBusIds: undefined });
     await ligneBFC580717.save({ fromUser });
   },
 
@@ -44,7 +44,7 @@ module.exports = {
     await ligneBFC580250.save({ fromUser });
 
     const ligneBFC250717 = await LigneBusModel.findOne({ busId: "BFC250717", cohort });
-    ligneBFC250717.unset("mergedBusIds");
+    ligneBFC250717.set({ mergedBusIds: undefined });
     await ligneBFC250717.save({ fromUser });
 
     // 2.
@@ -57,7 +57,7 @@ module.exports = {
     await ligneBFC580717.save({ fromUser });
 
     const ligneBFC710250 = await LigneBusModel.findOne({ busId: "BFC710250", cohort });
-    ligneBFC710250.set({ mergedBusIds: ["BFC710250", "BFC580717"] });
+    ligneBFC710250.set({ mergedBusIds: undefined });
     await ligneBFC710250.save({ fromUser });
   },
 };
