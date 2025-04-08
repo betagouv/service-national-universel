@@ -1045,7 +1045,7 @@ const translateApplicationFileType = (type) => {
   }
 };
 
-const translateAction = (action) => {
+const translateAction = (action: string): string => {
   switch (action) {
     case "add":
       return "Ajout";
@@ -1053,6 +1053,10 @@ const translateAction = (action) => {
       return "Modification";
     case "remove":
       return "Suppression";
+    case "create":
+      return "Création enregistrement";
+    case "destroy":
+      return "Suppression enregistrement";
     default:
       return action;
   }
@@ -1245,6 +1249,8 @@ export const translateMarketing = (name: string) => {
       return "Le template est introuvable";
     case "LISTE_DIFFUSION_NOT_FOUND":
       return "La liste de diffusion est introuvable";
+    case "NO_CONTACTS":
+      return "La liste de diffusion est vide";
     default:
       return name;
   }

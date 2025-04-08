@@ -26,7 +26,13 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         }
         req.user = user;
 
-        this.cls.set("user", { id: user?.id, firstName: user?.prenom, lastName: user?.nom });
+        this.cls.set("user", {
+            id: user?.id,
+            firstName: user?.prenom,
+            lastName: user?.nom,
+            role: user?.role,
+            subRole: user?.sousRole,
+        });
         next();
     }
 }

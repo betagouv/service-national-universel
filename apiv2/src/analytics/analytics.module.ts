@@ -22,5 +22,6 @@ import { SearchYoungController } from "./infra/api/SearchYoung.controller";
         },
     ],
     controllers: [SearchYoungController],
+    exports: [ElasticsearchModule],
 })
 export class AnalyticsModule {}

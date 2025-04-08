@@ -4,6 +4,8 @@ export const PatchUserSchema = {
   email: { type: String },
   firstName: { type: String, required: true },
   lastName: { type: String },
+  role: { type: String },
+  subRole: { type: String },
 };
 
 export const PatchOperationSchema = {
@@ -17,6 +19,7 @@ export const PatchSchema = {
   ops: { type: [PatchOperationSchema], required: true },
   ref: { type: mongoose.Schema.Types.ObjectId, required: true, index: true },
   modelName: { type: String, required: true },
+  cohortId: { type: mongoose.Schema.Types.ObjectId },
   user: { type: PatchUserSchema },
   date: { type: Date, required: true, default: Date.now },
 };

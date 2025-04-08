@@ -7,7 +7,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
 import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
 
-Injectable();
+@Injectable()
 export class AnnulerClasseDesistee implements UseCase<AnnulerClasseDesisteeModel> {
     constructor(
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,

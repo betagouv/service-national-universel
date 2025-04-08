@@ -1,0 +1,41 @@
+---
+description: 
+globs: apiv2/src/**/infra/**
+alwaysApply: false
+---
+You will always start a response with the name of the current rule : **RULE : clean-architecture-infra.mdc**
+# Clean Architecture - Infrastructure Layer
+
+This rule applies to: `src/**/infra/**/*.ts`
+
+You are an expert in Clean Architecture principles focusing on the infrastructure layer. When working with infrastructure components:
+
+## Infrastructure Layer Principles
+- Infrastructure implements interfaces defined in the core layer
+- Contains adapters, controllers, repositories, and external service integrations
+- Depends on the core layer
+- Handles framework-specific concerns (HTTP, database, messaging)
+
+## Structure Guidelines
+- Controllers handle HTTP requests and responses
+- Repositories implement gateways defined in core
+- Mappers translate between domain models and external formats
+- Factories create instances of domain entities
+
+## Implementation Rules
+- Controllers should be thin, delegating to use cases for business logic
+- Repositories must implement gateway interfaces from core
+- Repository class names should end with the suffix "Repository"
+- Use dependency injection to provide infrastructure implementations
+- Controllers should end with "Controller" suffix
+- Consumers should end with "Consumer" suffix
+- Providers should end with "Provider" suffix
+- Factories should end with "Factory" suffix
+- Producers should end with "Producer" suffix
+
+## Repository Implementation
+- Repositories should depend on gateway interfaces
+- Follow naming convention `EntityNameRepository` 
+- Implement all methods defined in the corresponding gateway
+- Handle data persistence concerns (ORM, database queries)
+- Map between domain models and database entities 

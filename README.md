@@ -39,13 +39,10 @@ chore(lib): Updating human rights package version to 2.0.
 ## Branches
 
 Le nom des branches doit toujours etre précédé par `feat` ou `fix` suivi de l'ID tu ticket Notion (si existant), il est possible d'ajouter une breve description.
-Si vous voulez qu'un environnement de test soit déployé avec la branche, il suffit de rajouter le suffixe `-ci`
 
 Exemples:
 ```
 feat-1789-chopping-heads-off
-fix-1794-corrected-error-with-human-rights-ci
-fix-1792-ci
 fix-1792
 fix-saving-the-day
 ```
@@ -54,16 +51,18 @@ fix-saving-the-day
 
 ### Main
 
-La branche `main` ne doit contenir que des incréments qui ont été testés et validés, a chaque push, l'environnement d'intégration continue`CI` est redéployé.
+La branche `main` ne doit contenir que des incréments qui ont été testés et validés, a chaque push, l'environnement d'intégration continue `CI` est redéployé.
 
 ### Customs Envs
 
-Il est possible et conseillé de déployer un environnement de test pour une Pull Request donnée, pour cela, le nom de la Pull Request doit etre suffixé avec `-ci`
+Il est possible et conseillé de déployer un environnement de test pour une Pull Request donnée, pour cela, appliquer à la Pull Request le label `deploy`. Chaque push sur la branche associée mettra ensuite a jour l'environnement concerné.
+Les environnements de test sont stoppés par un cron chaque soir ou lorsque l'on enlève le label `deploy`.
+Les environnements de tests sont supprimés lorsque la branche associée est supprimée. (Par exemple, lors du merge de la PR)
 
 
 ### Livraison
 
-Les déploiements sont effectués de maniere hebdomadaire. Pour lancer un déploiement, créer une branche `release-candidate` via l'interface github. Sa création lancera le pipeline de déploiement basé sur les Github Actions.
+Les déploiements sont effectués de maniere hebdomadaire. Pour lancer un déploiement, merger la branche `main` dans la branche `production`, ce qui lancera le pipeline de déploiement basé sur les Github Actions.
 
 
 

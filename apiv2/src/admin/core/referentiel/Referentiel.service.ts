@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 
-Injectable();
+@Injectable()
 export class ReferentielService {
     constructor() {}
     getMissingColumns(requiredColumns: string[], columns: Record<string, any>): string[] {

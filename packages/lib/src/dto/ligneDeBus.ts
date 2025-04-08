@@ -34,6 +34,7 @@ export type LigneBusDto = {
   mergedBusIds?: string[];
   _id: string;
   cohort: string;
+  cohortId: string;
   busId: string;
   codeCourtDeRoute?: string;
   departuredDate: string;

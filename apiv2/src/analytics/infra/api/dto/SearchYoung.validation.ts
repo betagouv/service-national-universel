@@ -1,4 +1,4 @@
-import { IsOptional, IsString, IsInt, Min, IsObject, IsIn, ValidateNested } from "class-validator";
+import { IsOptional, IsString, IsInt, Min, IsObject, IsIn, ValidateNested, isArray, IsArray } from "class-validator";
 import { Transform, Type } from "class-transformer";
 import { SearchParams, SearchTerm } from "snu-lib";
 
@@ -34,6 +34,10 @@ export class SearchYoungDto implements SearchParams {
     @ValidateNested()
     @Type(() => Object)
     filters?: Record<string, string | string[]>;
+
+    @IsOptional()
+    @IsArray()
+    existingFields?: string[];
 
     @IsOptional()
     @IsString({ each: true })

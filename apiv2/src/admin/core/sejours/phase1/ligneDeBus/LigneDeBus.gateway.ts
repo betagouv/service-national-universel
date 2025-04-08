@@ -6,6 +6,7 @@ export interface LigneDeBusGateway {
     findBySessionIdAndClasseId(sessionId: string, classeId: string): Promise<LigneDeBusModel | null>;
     findBySessionId(sessionId: string): Promise<LigneDeBusModel[]>;
     findBySessionNom(sessionNom: string): Promise<LigneDeBusModel[]>;
+    findByNumerosLignesAndSessionId(numerosLignes: string[], sessionId: string): Promise<LigneDeBusModel[]>;
     update(ligneDeBus: LigneDeBusModel): Promise<LigneDeBusModel>;
     bulkUpdate(ligneDeBusList: LigneDeBusModel[]): Promise<number>;
     delete(ligneDeBus: LigneDeBusModel): Promise<void>;

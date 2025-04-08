@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { useMutation, useQuery } from "@tanstack/react-query";
 
 import { CohortDto, HttpError, translate, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { Button, Modal, Tooltip } from "@snu/ds/admin";
+import { Button, Modal } from "@snu/ds/admin";
 
 import { getYoungCountByCohort } from "@/services/young.service";
 import { Link } from "react-router-dom";
