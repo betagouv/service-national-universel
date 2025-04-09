@@ -61,7 +61,7 @@ export class DesistementService {
             affectationFile.Body,
         );
         return parsedAffectationFile
-            .filter((row) => row.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED)
+            .filter((row) => !row.erreur && row.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED)
             .map((row) => row.id);
     }
 
