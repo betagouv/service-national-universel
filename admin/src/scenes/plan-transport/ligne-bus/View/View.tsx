@@ -3,8 +3,19 @@ import { RouteComponentProps } from "react-router-dom";
 import { HiOutlineBell, HiOutlineChatAlt } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
+import { useMount, useUpdateEffect } from "react-use";
 
-import { CohortType, LigneBusDto, ROLES, canExportLigneBus, getZonedDate, isLigneBusDemandeDeModificationOpen, ligneBusCanCreateDemandeDeModification, translate } from "snu-lib";
+import {
+  CohortType,
+  LigneBusDto,
+  ROLES,
+  canExportLigneBus,
+  getZonedDate,
+  isLigneBusDemandeDeModificationOpen,
+  isSuperAdmin,
+  ligneBusCanCreateDemandeDeModification,
+  translate,
+} from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import Bus from "@/assets/icons/Bus";
@@ -13,6 +24,7 @@ import Loader from "@/components/Loader";
 import SelectAction from "@/components/SelectAction";
 import { capture } from "@/sentry";
 import api from "@/services/api";
+import { Phase1Service } from "@/services/phase1Service";
 
 import InfoMessage from "../../../dashboardV2/components/ui/InfoMessage";
 import { Title } from "../../components/commons";
@@ -24,7 +36,7 @@ import Info from "./components/Info";
 import Itineraire from "./components/Itineraire";
 import Modification from "./components/Modification";
 import PointDeRassemblement from "./components/PointDeRassemblement";
-import { useMount, useUpdateEffect } from "react-use";
+import DeleteLigneButton from "./components/Partials/DeleteLigneButton";
 
 export interface DataForCheck {
   meetingPoints: { youngsCount: number; meetingPointId: string }[];
@@ -40,7 +52,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   const [dataForCheck, setDataForCheck] = React.useState<DataForCheck | null>(null);
   const [demandeDeModification, setDemandeDeModification] = React.useState(null);
   const [panelOpen, setPanelOpen] = React.useState(false);
-  const [nbYoung, setNbYoung] = React.useState();
+  const [nbYoung, setNbYoung] = React.useState<number>();
   const [addOpen, setAddOpen] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
 
@@ -65,16 +77,13 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   const getDataForCheck = async () => {
     try {
       const id = props.match && props.match.params && props.match.params.id;
-      if (!id) return <div />;
-      const { ok, code, data: reponseCheck } = await api.get(`/ligne-de-bus/${id}/data-for-check`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(code));
-      }
-      setDataForCheck(reponseCheck);
-      setNbYoung(reponseCheck.youngsCountBus);
+      if (!id) return;
+      const ligneDeBusStats = await Phase1Service.getLigneBusStats(id);
+      setDataForCheck(ligneDeBusStats);
+      setNbYoung(ligneDeBusStats.youngsCountBus!);
     } catch (e) {
       capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
+      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", translate(e.message));
     }
   };
 
@@ -142,7 +151,7 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
   React.useEffect(() => {
     setAddOpen(false);
   }, [data]);
-  if (!data) return <Loader />;
+  if (!data || !cohort) return <Loader />;
 
   const leader = data.team.filter((item) => item.role === "leader")[0]?._id?.toString() || null;
 
@@ -189,22 +198,25 @@ export default function View(props: RouteComponentProps<{ id: string }>) {
     <>
       <div className="flex justify-between mr-8 items-center">
         <Breadcrumbs items={[{ title: "Séjours" }, { label: "Plan de transport", to: `/ligne-de-bus?cohort=${data.cohort}` }, { label: "Fiche de la ligne" }]} />
-        {canExportLigneBus(user) && data.team.length > 0 ? (
-          <SelectAction
-            title="Exporter la ligne"
-            alignItems="right"
-            buttonClassNames="bg-blue-600 mt-8"
-            textClassNames="text-white font-medium text-sm"
-            rightIconClassNames="text-blue-300"
-            optionsGroup={[
-              {
-                key: "export",
-                title: "Télécharger",
-                items: exportItems,
-              },
-            ]}
-          />
-        ) : null}
+        <div className="flex items-center gap-2 mt-8">
+          {isSuperAdmin(user) && <DeleteLigneButton cohort={cohort} ligneDeBus={data} />}
+          {canExportLigneBus(user) && data.team.length > 0 ? (
+            <SelectAction
+              title="Exporter la ligne"
+              alignItems="right"
+              buttonClassNames="bg-blue-600"
+              textClassNames="text-white font-medium text-sm"
+              rightIconClassNames="text-blue-300"
+              optionsGroup={[
+                {
+                  key: "export",
+                  title: "Télécharger",
+                  items: exportItems,
+                },
+              ]}
+            />
+          ) : null}
+        </div>
       </div>
       <div className="mx-8 mb-8 mt-3 flex flex-col gap-8">
         <div className="flex items-center justify-between">

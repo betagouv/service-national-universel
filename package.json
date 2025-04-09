@@ -2,7 +2,7 @@
   "name": "service-national-universel",
   "scripts": {
     "postinstall": "patch-package",
-    "dev": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter=!antivirus --filter=!analytics || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
+    "dev": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter=!analytics || echo 'Follow Procedure here : https://www.notion.so/jeveuxaider/Gitguardian-1b6d580a315f4f7c8440fde951aa42c9?pvs=4'",
     "dev:app": "[[ -e .git/hooks/pre-commit ]] && dotenv -- turbo run dev --filter",
     "build": "turbo run build --filter=$APP_NAME",
     "start": "turbo run start --filter=$APP_NAME",
@@ -10,7 +10,7 @@
     "lint": "turbo run lint --continue --filter=$APP_NAME",
     "check-types": "turbo run check-types --continue --filter=$APP_NAME",
     "clean": "turbo run clean",
-    "endpoints": "node devops/scripts/get-applications-endpoints $(git rev-parse --abbrev-ref HEAD) | jq"
+    "endpoints": "export env_name=$(devops/scripts/cc-environment-name.sh $(git rev-parse --abbrev-ref HEAD)) && echo \"https://api.$env_name.ci.beta-snu.dev\nhttps://admin.$env_name.ci.beta-snu.dev\nhttps://moncompte.$env_name.ci.beta-snu.dev\""
   },
   "dependencies": {
     "classnames": "^2.5.1",
@@ -30,8 +30,7 @@
     "admin",
     "api",
     "apiv2",
-    "devops/analytics",
-    "devops/antivirus"
+    "devops/analytics"
   ],
   "engines": {
     "node": "^20.17",

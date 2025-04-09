@@ -1,0 +1,31 @@
+name: Test Environment - Destroy
+
+on:
+  workflow_dispatch:
+  delete:
+
+jobs:
+  destroy:
+    if: github.event.ref != 'production' && github.event.ref != 'main'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
+      - name: Get environment name
+        id: env
+        run: |
+          name=$(./devops/scripts/cc-environment-name.sh ${{ github.event.ref }})
+          echo "name: $name"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+      - name: Destroy environment
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
+          | grep -w "${{ steps.env.outputs.name }}" \
+          | xargs -r -n 1 --verbose clever delete --yes --app

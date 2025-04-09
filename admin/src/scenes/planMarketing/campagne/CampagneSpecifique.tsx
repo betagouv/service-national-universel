@@ -19,9 +19,10 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, isLoading } = useCampagneSpecifique({ sessionId });
+  const { campagnes, saveCampagne, sendCampagne, isLoading } = useCampagneSpecifique({ sessionId });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
+  const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
 
   const { listesDiffusion } = useListeDiffusion();
 
@@ -47,7 +48,11 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     return campagnesArray;
   }, [campagnes, draftCampagne]);
 
-  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(allCampagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredCampagnes,
+  } = useSearchTerm<CampagneSpecifiqueFormData>(allCampagnes as CampagneSpecifiqueFormData[], (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const createNewCampagne = () => {
     const newCampagne: DraftCampagneSpecifiqueFormData = {
@@ -70,6 +75,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         templateId: 0,
         objet: "",
         destinataires: [DestinataireListeDiffusion.JEUNES],
+        envois: [],
       };
       saveCampagne({
         payload: newSpecificCampaign,
@@ -80,13 +86,19 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
   const handleOnSave = (campagne: CampagneSpecifiqueFormData & { generic: false }) => {
     const formId = campagne.id || "draft";
     const formRef = formRefs.current[formId];
+    const isNewCampaign = !campagne.id;
 
     saveCampagne({
       id: campagne.id,
       payload: campagne,
-      onSuccess: (success, errors) => {
+      onSuccess: (success, errors, savedId) => {
         if (success) {
           setDraftCampagne(null);
+          
+          if (isNewCampaign && savedId) {
+            setKeepOpenCampagneIds(prev => new Set([...prev, savedId]));
+          }
+          
           if (formRef && formRef.current) {
             formRef.current.resetForm(campagne);
           }
@@ -98,6 +110,10 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         }
       },
     });
+  };
+
+  const handleSend = (id: string) => {
+    sendCampagne(id);
   };
 
   const isNouvelleCampagneDisabled = useMemo(() => {
@@ -140,6 +156,8 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             onCancel={() => {
               setDraftCampagne(null);
             }}
+            onSend={handleSend}
+            forceOpen={campagne.id ? keepOpenCampagneIds.has(campagne.id) : false}
           />
         ))}
       </div>

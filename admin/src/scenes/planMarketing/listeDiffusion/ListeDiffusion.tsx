@@ -11,6 +11,7 @@ import { useSearchTerm } from "../hooks/useSearchTerm";
 export default function ListeDiffusion() {
   const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
+  const [keepOpenListeIds, setKeepOpenListeIds] = useState<Set<string>>(new Set());
 
   const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters();
 
@@ -18,7 +19,13 @@ export default function ListeDiffusion() {
     return draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
   }, [listesDiffusion, draftListe]);
 
-  const { searchTerm, setSearchTerm, filteredItems: filteredListes } = useSearchTerm(allListes, (liste) => liste.nom, { sortBy: "createdAt" });
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredListes,
+  } = useSearchTerm<ListeDiffusionDataProps>(allListes as ListeDiffusionDataProps[], (liste) => liste.nom, {
+    sortBy: "createdAt",
+  });
 
   const createNewListeDiffusion = () => {
     const newListe: DraftListeDiffusionDataProps = {
@@ -35,8 +42,12 @@ export default function ListeDiffusion() {
         payload: liste,
       },
       {
-        onSuccess: () => {
+        onSuccess: (listeDiffusion) => {
+          const listeId = listeDiffusion.id;
           setDraftListe(null);
+          if (listeId) {
+            setKeepOpenListeIds((prev) => new Set([...prev, listeId]));
+          }
         },
       },
     );
@@ -83,6 +94,7 @@ export default function ListeDiffusion() {
             }}
             onSave={handleOnSave}
             onCancel={handleOnCancel}
+            forceOpen={liste.id ? keepOpenListeIds.has(liste.id) : false}
           />
         ))}
       </div>

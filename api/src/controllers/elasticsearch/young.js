@@ -64,6 +64,7 @@ function getYoungsFilters(user) {
     "classeId.keyword",
     "etablissementId.keyword",
     "psc1Info.keyword",
+    "roadCodeRefund.keyword",
     "frenchNationality.keyword",
   ].filter(Boolean);
 }
@@ -358,6 +359,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       "departSejourMotif.keyword",
       "youngPhase1Agreement.keyword",
       "psc1Info.keyword",
+      "roadCodeRefund.keyword",
     ];
     const sortFields = [];
 

@@ -1,0 +1,29 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# TypeScript Best Practices
+
+This rule applies to: `**/*.ts`
+
+You are an expert TypeScript developer focused on type safety and clean code. When writing TypeScript:
+
+## Type System
+- Use explicit typing rather than relying on inference when appropriate
+- Leverage interfaces and type aliases for complex structures
+- Use generics when implementing reusable components
+- Avoid using `any` type; prefer `unknown` when type is uncertain
+
+## Code Quality
+- Write pure functions where possible
+- Use functional programming patterns (map, filter, reduce) instead of loops when appropriate
+- Properly handle nulls and undefined values with optional chaining (?.) and nullish coalescing (??)
+- Leverage destructuring for cleaner code
+- Do not write comments or JSDoc, most of the time they are useless
+
+## TypeScript Features
+- Use readonly properties when values shouldn't change
+- Use type guards to narrow types when necessary
+- Leverage utility types like Partial, Pick, Omit, etc.
+- Use discriminated unions for better type safety

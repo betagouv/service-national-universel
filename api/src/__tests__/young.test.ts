@@ -63,7 +63,6 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 jest.mock("node-fetch");
-jest.mock("../utils/virusScanner", () => jest.fn().mockResolvedValue({ isInfected: false }));
 
 const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 

@@ -12,8 +12,13 @@ import { useSearchTerm } from "../hooks/useSearchTerm";
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
   const [openCampagneId, setOpenCampagneId] = useState<string | null>(null);
+  const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const { searchTerm, setSearchTerm, filteredItems: filteredCampagnes } = useSearchTerm(campagnes, (campagne) => campagne.nom, { sortBy: "createdAt" });
+  const {
+    searchTerm,
+    setSearchTerm,
+    filteredItems: filteredCampagnes,
+  } = useSearchTerm<CampagneDataProps>(campagnes as CampagneDataProps[], (campagne) => campagne.nom, { sortBy: "createdAt" });
 
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -40,14 +45,15 @@ export default function CampagnesGeneriques() {
     }
   }, [targetId, campagnes]);
 
-  const { data: campagnesData, refetch } = useQuery({
+  const { listesDiffusion, isLoading: isLoadingListesDiffusion } = useListeDiffusion();
+
+  const { data: campagnesData, refetch: refetchCampagnes } = useQuery({
     queryKey: ["get-campagnes"],
     queryFn: async () => {
       return await PlanMarketingService.search({ generic: true });
     },
+    enabled: !isLoadingListesDiffusion,
   });
-
-  const { listesDiffusion } = useListeDiffusion();
 
   const listeDiffusionOptions = useMemo(() => {
     return listesDiffusion.map((liste) => ({
@@ -57,7 +63,9 @@ export default function CampagnesGeneriques() {
   }, [listesDiffusion]);
 
   useEffect(() => {
-    setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
+    if (campagnesData) {
+      setCampagnes((campagnesData as CampagneDataProps[]) ?? []);
+    }
   }, [campagnesData]);
 
   const createNewCampagne = () => {
@@ -82,8 +90,8 @@ export default function CampagnesGeneriques() {
     return filteredCampagnes.reduce(
       (acc, campagne) => {
         if (campagne.id) {
-          acc[campagne.id] = (el: HTMLDivElement | null) => {
-            campagneRefs.current[campagne.id!] = el;
+          acc[campagne.id as string] = (el: HTMLDivElement | null) => {
+            campagneRefs.current[campagne.id as string] = el;
           };
         }
         return acc;
@@ -113,9 +121,14 @@ export default function CampagnesGeneriques() {
               campagneData={campagne}
               isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
               listeDiffusionOptions={listeDiffusionOptions}
-              onSave={refetch}
+              onSave={(campagneId) => {
+                if (campagneId) {
+                  setKeepOpenCampagneIds((prev) => new Set([...prev, campagneId]));
+                }
+                refetchCampagnes();
+              }}
               onDuplicate={(campagneData) => handleDuplicate(campagneData)}
-              forceOpen={campagne.id === openCampagneId}
+              forceOpen={campagne.id === openCampagneId || (campagne.id ? keepOpenCampagneIds.has(campagne.id) : false)}
             />
           </div>
         ))}

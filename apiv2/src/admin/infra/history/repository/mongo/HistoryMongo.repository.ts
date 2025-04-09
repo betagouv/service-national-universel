@@ -62,4 +62,9 @@ export class HistoryRepository implements HistoryGateway {
         );
         return updatePatches.insertedCount;
     }
+
+    async create(history: HistoryType, patch: PatchType): Promise<PatchType> {
+        const instance = this.getInstance(history);
+        return instance.create(patch);
+    }
 }

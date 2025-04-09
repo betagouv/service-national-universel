@@ -1,0 +1,65 @@
+name: Test Environment - Deploy
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ labeled, synchronize ]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref_name }}
+  cancel-in-progress: true
+
+env:
+  BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
+  SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+
+jobs:
+  deploy:
+    permissions: write-all
+    runs-on: ubuntu-latest
+    if: |
+      (github.event_name=='pull_request' && contains(github.event.pull_request.labels.*.name, 'deploy')) ||
+      (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
+      - name: Create and Start application
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: ./devops/scripts/cc-create-environment.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_CI_SNU_ALL }} ${{ env.BRANCH_NAME }} ${{ env.SHA }}
+
+      - name: Find Comment
+        uses: peter-evans/find-comment@v3
+        id: fc
+        if: github.event_name=='pull_request'
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          comment-author: 'github-actions[bot]'
+          body-includes: Application endpoints
+      
+      - name: Get environment name
+        id: env
+        if: steps.fc.outputs.comment-id == ''
+        run: |
+          name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
+          echo "name: $name"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+      - name: Create comment
+        if: steps.fc.outputs.comment-id == ''
+        uses: peter-evans/create-or-update-comment@v4
+        with:
+          issue-number: ${{ github.event.pull_request.number }}
+          body: |
+            Application endpoints :
+
+            - api : https://api.${{ steps.env.outputs.name }}.ci.beta-snu.dev
+            - admin : https://admin.${{ steps.env.outputs.name }}.ci.beta-snu.dev
+            - moncompte : https://moncompte.${{ steps.env.outputs.name }}.ci.beta-snu.dev
+          
+          reactions: rocket

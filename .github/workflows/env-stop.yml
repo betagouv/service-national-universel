@@ -1,0 +1,37 @@
+name: Test Environment - Stop
+
+on:
+  workflow_dispatch:
+  pull_request:
+    types: [ unlabeled ]
+
+env:
+  BRANCH_NAME: ${{ github.event.pull_request.head.ref || github.event.ref }}
+
+jobs:
+  stop:
+    if: |
+      (github.event_name=='pull_request' && github.event.label.name == 'deploy') ||
+      (github.event_name=='workflow_dispatch' && github.event.ref != 'production' && github.event.ref != 'main')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
+      - name: Get environment name
+        id: env
+        run: |
+          name=$(./devops/scripts/cc-environment-name.sh ${{ env.BRANCH_NAME }})
+          echo "name: $name"
+          echo "name=$name" >> $GITHUB_OUTPUT
+
+      - name: Stop environment
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+        run: |
+          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
+          | grep -w "${{ steps.env.outputs.name }}" \
+          | xargs -r -n 1 --verbose clever stop --app

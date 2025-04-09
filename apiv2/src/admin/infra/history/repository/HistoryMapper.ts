@@ -46,4 +46,40 @@ export class HistoryMapper {
             return acc;
         }, [] as PatchType[]);
     }
+
+    static toDeleteHistory({
+        original,
+        originalValue,
+        options,
+        user,
+    }: {
+        original: object & { _id: PatchType["ref"]; cohortId?: string };
+        originalValue?: string;
+        options: {
+            includes: {
+                modelName: {
+                    default: string;
+                };
+            };
+        };
+        user: PatchType["user"];
+    }): PatchType {
+        const history = {
+            ops: [
+                {
+                    op: "destroy",
+                    path: "/",
+                    value: "deleted",
+                    originalValue: originalValue || original._id.toString(),
+                },
+            ],
+            ref: original._id,
+            cohortId: original.cohortId,
+            modelName: options.includes.modelName.default,
+            user: user,
+            date: new Date(),
+        } as PatchType;
+
+        return history;
+    }
 }
