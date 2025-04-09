@@ -53,6 +53,7 @@ export interface CampagneSpecifiqueFormProps {
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
   onSend: (id: string) => void;
+  forceOpen?: boolean;
 }
 
 export interface CampagneSpecifiqueFormRefMethods {
@@ -69,7 +70,7 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false }, ref) => {
     const {
       control,
       handleSubmit,
@@ -133,8 +134,8 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       }
     }, [campagneData, reset, setApiErrors]);
 
-    // Le formulaire est ouvert s'il est nouveau ou s'il contient des erreurs
-    const isOpen = campagneData.id === undefined || Object.keys(errors).length > 0;
+    // Le formulaire est ouvert s'il est nouveau ou s'il contient des erreurs ou si forceOpen est true
+    const isOpen = campagneData.id === undefined || Object.keys(errors).length > 0 || forceOpen;
 
     const handleOnCancel = () => {
       reset();

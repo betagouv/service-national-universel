@@ -26,9 +26,10 @@ interface ListeDiffusionFormProps {
   filter: { volontaires: ListeDiffusionFiltersView; inscriptions: ListeDiffusionFiltersView };
   onSave: (data: ListeDiffusionDataProps) => void;
   onCancel: () => void;
+  forceOpen?: boolean;
 }
 
-export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel }: ListeDiffusionFormProps) => {
+export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel, forceOpen = false }: ListeDiffusionFormProps) => {
   const {
     control,
     handleSubmit,
@@ -54,7 +55,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
 
   const isEditing = listeDiffusionData.id !== undefined;
-  const isOpen = listeDiffusionData.id === undefined;
+  const isOpen = listeDiffusionData.id === undefined || forceOpen;
 
   const handleOnCancel = () => {
     reset();
@@ -76,8 +77,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
       handleSelectedFiltersChange({});
     }
   });
-
-  console.log("watch filters", watch("filters"));
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
