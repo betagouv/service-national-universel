@@ -1045,7 +1045,7 @@ const translateApplicationFileType = (type) => {
   }
 };
 
-const translateAction = (action) => {
+const translateAction = (action: string): string => {
   switch (action) {
     case "add":
       return "Ajout";
@@ -1053,6 +1053,10 @@ const translateAction = (action) => {
       return "Modification";
     case "remove":
       return "Suppression";
+    case "create":
+      return "Création enregistrement";
+    case "destroy":
+      return "Suppression enregistrement";
     default:
       return action;
   }

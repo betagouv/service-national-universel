@@ -79,10 +79,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const currentRoute = this.getCurrentRoute(request);
         // @ts-expect-error TODO: typer exception pour les erreur de validation
         let log = `Unhandled - ${request.correlationId} - ${currentRoute} - ${exception.response?.message} ${stack}`;
-        if (exception instanceof TechnicalException && exception.description) {
-            log = `${request.correlationId} - ${currentRoute} -  ${exception.message} ${exception.description} - ${stack}`;
-        } else if (exception instanceof FunctionalException) {
-            log = `${request.correlationId} - ${currentRoute} -  ${stack}`;
+        if (exception instanceof TechnicalException || exception instanceof FunctionalException) {
+            log = `${request.correlationId} - ${currentRoute} -  ${exception.message} ${
+                exception.description || ""
+            } - ${stack}`;
         }
         this.logger.error(log, caller);
     }

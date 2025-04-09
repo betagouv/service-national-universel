@@ -866,8 +866,10 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
 
     // --- query
     // ------ find all patches ids
-    const { cohort } = value;
-    const lines = await LigneBusModel.find({ cohort });
+    const { cohort: cohortName } = value;
+    const cohort = await CohortModel.findOne({ name: cohortName });
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const lines = await LigneBusModel.find({ cohort: cohort.name });
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
       const lineSet = {};
@@ -911,17 +913,22 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
       let patches: any[] = [];
 
       // --- lignebus patches...
-      let cursor = db.collection("lignebus_patches").find({ ref: { $in: lineIds } });
+      let cursor = db.collection("lignebus_patches").find({ $or: [{ ref: { $in: lineIds } }, { cohortId: cohort._id }] });
       for await (const doc of cursor) {
         if (doc.ops && filterUserFunction(doc)) {
           const bus = lineSet[doc.ref];
           for (const op of doc.ops) {
-            if (filterOpFunction(op) && !HIDDEN_FIELDS.includes(op.path) && !IGNORED_VALUES.includes(op.value) && !IGNORED_VALUES.includes(op.originalValue)) {
+            if (
+              filterOpFunction(op) &&
+              !HIDDEN_FIELDS.includes(op.path) &&
+              (!IGNORED_VALUES.includes(op.value) || op.path.match(/\/[0-9]+$/)) &&
+              (!IGNORED_VALUES.includes(op.originalValue) || op.op === "create")
+            ) {
               patches.push({
                 modelName: doc.modelName,
                 date: doc.date,
                 ref: bus?._id,
-                refName: bus?.busId,
+                refName: bus?.busId || op.originalValue,
                 op: op.op,
                 path: op.path,
                 value: op.value,

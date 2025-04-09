@@ -38,7 +38,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
         @Inject(AnnulerClasseDesistee) private readonly annulerClasseDesistee: AnnulerClasseDesistee,
         private readonly logger: Logger,
-    ) {}
+    ) { }
 
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseRapport[]> {
         const report: ClasseImportRapport[] = [];
@@ -118,6 +118,7 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
 
         if (session.id !== classe.sessionId) {
             await this.updateYoungCohorts(classe.id, session);
+            await this.resetAffectation(classe);
             updatedFields.push("jeune.sessionId", "jeune.sessionNom");
         }
         updatedFields.push("sessionId", "sessionNom", "placesTotal");
@@ -186,6 +187,21 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             originalSessionId: jeune.sessionId,
             originalSessionNom: jeune.sessionNom,
             sessionChangeReason: "Import SI-SNU",
+            statutPhase1: jeune.statutPhase1 === "AFFECTED" ? "WAITING_AFFECTATION" : jeune.statutPhase1,
+            centreId: undefined,
+            sejourId: undefined,
+            pointDeRassemblementId: undefined,
+            ligneDeBusId: undefined,
+            hasPDR: undefined,
+            transportInfoGivenByLocal: undefined,
+            deplacementPhase1Autonomous: undefined,
+            presenceArrivee: undefined,
+            presenceJDM: undefined,
+            departInform: undefined,
+            departSejourAt: undefined,
+            departSejourMotif: undefined,
+            departSejourMotifComment: undefined,
+            youngPhase1Agreement: "false",
         }));
 
         await this.jeuneGateway.bulkUpdate(jeunesUpdatedList);
@@ -193,6 +209,15 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
             `Updated ${jeunesUpdatedList.length} jeunes with new session ${newSession.nom}`,
             ImporterClasses.name,
         );
+    }
+
+    private async resetAffectation(classe: ClasseModel): Promise<void> {
+        classe.pointDeRassemblementId = undefined;
+        classe.centreCohesionId = undefined;
+        classe.ligneId = undefined;
+        classe.statutPhase1 = STATUS_PHASE1_CLASSE.WAITING_AFFECTATION;
+
+        await this.classeGateway.update(classe);
     }
 
     private async addCenterAndPdrUpdates(classe: ClasseModel, classeImport: ClasseImportModel): Promise<string[]> {
@@ -215,4 +240,5 @@ export class ImporterClasses implements UseCase<ClasseRapport[]> {
         }
         return updatedFields;
     }
+
 }

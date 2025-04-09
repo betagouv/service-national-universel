@@ -20,11 +20,11 @@ export type LigneDeBusModel = {
     tempsRetardRetour: any;
     dateDepart: any;
     dateRetour: any;
-    ligneFusionneeIds: string[];
-    ligneMirroirId?: string;
+    ligneFusionneeNumerosLignes: string[];
+    ligneMiroirNumeroLigne?: string;
 };
 
 export type CreateLigneDeBusModel = Omit<
     LigneDeBusModel,
-    "id" | "tempsRetardDepart" | "tempsRetardRetour" | "ligneFusionneeIds"
+    "id" | "tempsRetardDepart" | "tempsRetardRetour" | "ligneFusionneeNumerosLignes"
 >;
