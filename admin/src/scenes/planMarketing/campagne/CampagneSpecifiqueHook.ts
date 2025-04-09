@@ -11,7 +11,7 @@ const DEFAULT_SORT = "DESC";
 interface SaveCampagneParams {
   id?: string;
   payload: CampagneSpecifiqueFormData & { generic: false };
-  onSuccess?: (success: boolean, errors?: ValidationErrors) => void;
+  onSuccess?: (success: boolean, errors?: ValidationErrors, savedId?: string) => void;
 }
 
 const mapErrorCodeToValidationErrors = (errorCode: string): ValidationErrors => {
@@ -34,7 +34,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       }
       return PlanMarketingService.create(CampagneSpecifiqueMapper.toCreatePayload(payload));
     },
-    onSuccess: (_, variables) => {
+    onSuccess: (campagne, variables) => {
       // Force la récupération des campagnes spécifiques
       // pour mettre à jour la liste des campagnes spécifiques avec la référence à la campagne générique
       queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId] });
@@ -42,7 +42,8 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       toastr.success("Succès", "Campagne sauvegardée avec succès", { timeOut: 5000 });
 
       if (variables.onSuccess) {
-        variables.onSuccess(true);
+        const savedId = campagne?.id || variables.id;
+        variables.onSuccess(true, undefined, savedId);
       }
     },
     onError: (error: HttpError, variables) => {

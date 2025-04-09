@@ -34,7 +34,7 @@ export interface CampagneFormProps {
   campagneData: DraftCampagneDataProps;
   isDupliquerCampagneDisabled: boolean;
   listeDiffusionOptions: ListeDiffusionOption[];
-  onSave: () => void;
+  onSave: (campagneId: string) => void;
   onDuplicate: (campagneData: CampagneDataProps) => void;
   forceOpen?: boolean;
 }
