@@ -449,31 +449,35 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
         }
 
         // Chefs de centre adjoint
-        if (selectedTypes.includes("chefs-centres-adjoint") && young.sessionPhase1?.headCenterId) {
-          const headCenterAdjoint = referentsMap.get(young.sessionPhase1.headCenterId!);
-          if (headCenterAdjoint && isHeadCenterAdjoint(headCenterAdjoint)) {
-            recipientsMap.set(headCenterAdjoint._id, {
-              PRENOM: headCenterAdjoint.firstName!,
-              NOM: headCenterAdjoint.lastName!,
-              EMAIL: headCenterAdjoint.email,
-              type: "chefs-centres-adjoint",
-              ...fillCommonFields(young),
-            });
-          }
+        if (selectedTypes.includes("chefs-centres-adjoint") && young.sessionPhase1?.adjointsIds) {
+          young.sessionPhase1.adjointsIds.forEach((adjointId) => {
+            const headCenterAdjoint = referentsMap.get(adjointId);
+            if (headCenterAdjoint && isHeadCenterAdjoint(headCenterAdjoint)) {
+              recipientsMap.set(headCenterAdjoint._id, {
+                PRENOM: headCenterAdjoint.firstName!,
+                NOM: headCenterAdjoint.lastName!,
+                EMAIL: headCenterAdjoint.email,
+                type: "chefs-centres-adjoint",
+                ...fillCommonFields(young),
+              });
+            }
+          });
         }
 
         // Referents Sanitaires
-        if (selectedTypes.includes("referents-sanitaires") && young.sessionPhase1?.headCenterId) {
-          const referentSanitaire = referentsMap.get(young.sessionPhase1.headCenterId!);
-          if (referentSanitaire && isReferentSanitaire(referentSanitaire)) {
-            recipientsMap.set(referentSanitaire._id, {
-              PRENOM: referentSanitaire.firstName!,
-              NOM: referentSanitaire.lastName!,
-              EMAIL: referentSanitaire.email,
-              type: "referents-sanitaires",
-              ...fillCommonFields(young),
-            });
-          }
+        if (selectedTypes.includes("referents-sanitaires") && young.sessionPhase1?.adjointsIds) {
+          young.sessionPhase1.adjointsIds.forEach((adjointId) => {
+            const referentSanitaire = referentsMap.get(adjointId);
+            if (referentSanitaire && isReferentSanitaire(referentSanitaire)) {
+              recipientsMap.set(referentSanitaire._id, {
+                PRENOM: referentSanitaire.firstName!,
+                NOM: referentSanitaire.lastName!,
+                EMAIL: referentSanitaire.email,
+                type: "referents-sanitaires",
+                ...fillCommonFields(young),
+              });
+            }
+          });
         }
       });
 
