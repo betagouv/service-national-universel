@@ -60,7 +60,9 @@ export class DesistementService {
         const parsedAffectationFile = await this.fileGateway.parseXLS<ValiderAffectationRapportData[0]>(
             affectationFile.Body,
         );
-        return parsedAffectationFile.map((row) => row.id);
+        return parsedAffectationFile
+            .filter((row) => !row.erreur && row.statutPhase1 === YOUNG_STATUS_PHASE1.AFFECTED)
+            .map((row) => row.id);
     }
 
     @Transactional()
