@@ -27,7 +27,7 @@ export default function List() {
   }, []);
 
   const getTitle = () => {
-    if (user.role === ROLES.HEAD_CENTER) return <Title>Outils pour les professionnels d&apos;État</Title>;
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) return <Title>Outils pour les professionnels d&apos;État</Title>;
     return <Title>Les grands programmes d&apos;engagement</Title>;
   };
 

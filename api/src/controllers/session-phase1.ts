@@ -21,6 +21,7 @@ import {
   LigneBusModel,
   SessionPhase1TokenModel,
   SchemaDeRepartitionModel,
+  SessionPhase1Document,
 } from "../models";
 import { ERRORS, updatePlacesSessionPhase1, isYoung, uploadFile, deleteFile, getFile, updateHeadCenter } from "../utils";
 import {
@@ -43,6 +44,7 @@ import {
   YoungDto,
   SessionPhase1Type,
   YOUNG_STATUS,
+  canModifyDirectionCenterTeam,
 } from "snu-lib";
 import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
 import { validateSessionPhase1, validateId } from "../utils/validator";
@@ -141,12 +143,46 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    return res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
+    const populatedSession = await populateSessionPhase1(session);
+
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(populatedSession) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
+
+const populateSessionPhase1 = async (session: SessionPhase1Document): Promise<SessionPhase1Type> => {
+  const headCenterId = session.headCenterId;
+  const adjointsIds = session.adjointsIds;
+
+  const headCenter = await ReferentModel.findById(headCenterId);
+  const adjoints = await ReferentModel.find({ _id: { $in: adjointsIds } });
+
+  let populatedSession = session.toObject();
+
+  if (headCenter) {
+    const sessionHeadCenter = {
+      _id: headCenter._id.toString(),
+      firstName: headCenter.firstName,
+      lastName: headCenter.lastName,
+      email: headCenter.email,
+      phone: headCenter.phone,
+      mobile: headCenter.mobile,
+      role: headCenter.role,
+    };
+    populatedSession.headCenter = sessionHeadCenter;
+  }
+  const sessionAdjoints = adjoints.map((adjoint) => ({
+    _id: adjoint._id.toString(),
+    firstName: adjoint.firstName,
+    lastName: adjoint.lastName,
+    email: adjoint.email,
+    role: adjoint.role,
+  }));
+  populatedSession.adjoints = sessionAdjoints;
+  return populatedSession;
+};
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -220,6 +256,55 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
+router.put("/:id/directionTeam", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: errorId, value: checkedId } = validateId(req.params.id);
+    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!canModifyDirectionCenterTeam(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const { error, value: newReferent } = Joi.object({
+      referentId: Joi.string(),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (error) {
+      capture(error);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const referent = await ReferentModel.findById(newReferent.referentId);
+    if (!referent) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+
+    if (referent.role === ROLES.HEAD_CENTER) {
+      let oldHeadCenterId = sessionPhase1.headCenterId;
+      sessionPhase1.set({ headCenterId: referent._id });
+      await updateHeadCenter(sessionPhase1.headCenterId, req.user);
+      await updateHeadCenter(oldHeadCenterId, req.user);
+    } else if (referent.role === ROLES.HEAD_CENTER_ADJOINT || referent.role === ROLES.REFERENT_SANITAIRE) {
+      if (sessionPhase1.adjointsIds.includes(referent._id)) {
+        return res.status(403).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
+      }
+      sessionPhase1.set({ adjointsIds: [...sessionPhase1.adjointsIds, referent._id] });
+      referent.set({ cohorts: [...referent.cohorts, sessionPhase1.cohort], cohortIds: [...referent.cohortIds, sessionPhase1.cohortId] });
+      await referent.save({ fromUser: req.user });
+    }
+
+    await sessionPhase1.save({ fromUser: req.user });
+    const populatedSession = await populateSessionPhase1(sessionPhase1);
+    res.status(200).send({ ok: true, data: serializeSessionPhase1(populatedSession) });
+  } catch (error) {
+    capture(error);
+    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:id/team", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -228,12 +313,11 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER].includes(req.user.role)) {
+    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     const { error, value } = Joi.object({
-      headCenterId: Joi.string().allow(null, ""),
       team: Joi.array().items(Joi.any().allow(null, "")),
     }).validate(req.body, { stripUnknown: true });
 
@@ -242,16 +326,10 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    let oldHeadCenterId = sessionPhase1.headCenterId;
-    const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
-
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
-    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
-    if (hasHeadCenterChanged) {
-      await updateHeadCenter(oldHeadCenterId, req.user);
-    }
-    res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
+    const populatedSession = await populateSessionPhase1(sessionPhase1);
+    res.status(200).send({ ok: true, data: serializeSessionPhase1(populatedSession) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -482,7 +560,8 @@ router.post("/check-token/:token", async (req: UserRequest, res: Response) => {
 
 router.put("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if ((!isReferentOrAdmin(req.user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) || req.user.role === ROLES.TRANSPORTER)
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -501,7 +580,9 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
     if (!referent) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (referent.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!referent.role || ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(referent.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     // Cannot be head of center in more than one centers for the same cohort
     const overlappingSessionPhase1 = await SessionPhase1Model.find({ cohortId: sessionPhase1.cohortId, headCenterId: checkedIdHeadCenter });
@@ -520,7 +601,8 @@ router.put("/:id/headCenter", passport.authenticate("referent", { session: false
 
 router.delete("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (!isReferentOrAdmin(req.user) && req.user.role !== ROLES.HEAD_CENTER) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if ((!isReferentOrAdmin(req.user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) || req.user.role === ROLES.TRANSPORTER)
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });

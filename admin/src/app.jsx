@@ -132,14 +132,14 @@ const Home = () => {
   const renderDashboardV2 = () => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsibleV2 />;
-    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenterV2 />;
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) return <DashboardHeadCenterV2 />;
     if (user?.role === ROLES.VISITOR) return <DashboardVisitorV2 />;
     return null;
   };
 
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
-    if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) return <VolontairesHeadCenter />;
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user?.role)) return <Volontaires />;
     return null;
   };
@@ -159,7 +159,7 @@ const Home = () => {
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
-        if (res.user?.role !== ROLES.HEAD_CENTER) setLoading(false);
+        if (![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(res.user.role)) setLoading(false);
       } catch (e) {
         console.log(e);
         setLoading(false);
@@ -173,7 +173,7 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
 
-    if (user.role === ROLES.HEAD_CENTER) {
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
       (async () => {
         try {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);

@@ -29,14 +29,13 @@ function serializeCohesionCenter(center, user) {
 }
 
 function serializeSessionPhase1(session, user) {
-  return session.toObject({
-    transform: (_doc, ret) => {
-      if (isYoung(user)) {
-        delete ret.waitingList;
-      }
-      return ret;
-    },
-  });
+  const raw = typeof session.toObject === "function" ? session.toObject() : session;
+
+  if (isYoung(user)) {
+    delete raw.waitingList;
+  }
+
+  return raw;
 }
 
 function serializeYoung(young, user) {

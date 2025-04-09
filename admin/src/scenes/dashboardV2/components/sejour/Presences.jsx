@@ -7,7 +7,7 @@ import { ROLES, COHORTS_WITH_JDM_COUNT } from "snu-lib";
 
 export default function Presences({ presence, JDM, depart, departTotal, departMotif, filter, role, sessionId, centerId, cohortHeadCenter = null }) {
   const departPercentage = departTotal ? depart?.true / departTotal : 0;
-  const base = role === ROLES.HEAD_CENTER ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
+  const base = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(role) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
   return (
     <div className="flex flex-col gap-10 rounded-lg bg-white px-6 pt-8 pb-16 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <p className="text-base font-bold leading-5 text-gray-900">La présence en chiffres</p>

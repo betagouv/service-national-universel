@@ -1,0 +1,436 @@
+import React, { useState, useEffect, ReactNode } from "react";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { Link, useParams } from "react-router-dom";
+import { Formik, Field } from "formik";
+import validator from "validator";
+import { AuthState } from "@/redux/auth/reducer";
+
+import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES, SessionPhase1Type } from "snu-lib";
+import api from "@/services/api";
+import Trash from "@/assets/icons/Trash";
+import ModalConfirm from "@/components/modals/ModalConfirm";
+import { capture } from "@/sentry";
+import Loader from "@/components/Loader";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import { Page, Container } from "@snu/ds/admin";
+import { User } from "@/types";
+
+interface TeamMate {
+  firstName: string;
+  lastName: string;
+  email: string;
+  role: string;
+}
+type ChefCenterBlockProps = {
+  headCenter: SessionPhase1Type["headCenter"];
+};
+
+type TeamBlockProps = {
+  team: SessionPhase1Type["team"];
+  deleteTeamate: (user) => void;
+  adjoints: SessionPhase1Type["adjoints"];
+};
+
+type GroupAdjointsProps = {
+  adjoints: SessionPhase1Type["adjoints"];
+  role: string;
+};
+
+type GroupTeamProps = {
+  team: SessionPhase1Type["team"];
+  role: string;
+  deleteTeamate: (user) => void;
+};
+
+type AddBlockProps = {
+  onConfirm: (teamate: TeamMate) => Promise<void>;
+  user: User;
+};
+
+export default function Team({ focusedSession: focusedSessionfromProps }) {
+  const { id, sessionId } = useParams<{ id: string; sessionId: string }>();
+  const [focusedSession, setFocusedSession] = useState<SessionPhase1Type>(focusedSessionfromProps);
+  const [modal, setModal] = useState<{
+    isOpen: boolean;
+    onConfirm: () => void;
+    title: string;
+    message: ReactNode;
+  }>({
+    isOpen: false,
+    onConfirm: () => {},
+    title: "",
+    message: "",
+  });
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
+  const addTeamate = async (teamate: TeamMate) => {
+    if ([CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire].includes(teamate.role)) {
+      setDirectionCenter(teamate);
+    } else {
+      setCenterTeam(teamate);
+    }
+  };
+
+  const setCenterTeam = async (teamate: TeamMate) => {
+    const obj = { team: focusedSession.team };
+    obj.team.push(teamate);
+    if (!Object.keys(obj).length) return;
+
+    try {
+      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/team`, obj);
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    } catch (e) {
+      console.log(e);
+      capture(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  const setDirectionCenter = async (teamate: TeamMate) => {
+    try {
+      const { data: referent } = await api.get(`/referent?email=${encodeURIComponent(teamate.email)}`);
+
+      if (!referent) {
+        setModal({
+          title: `Inviter ${teamate.firstName} ${teamate.lastName}`,
+          message: (
+            <div>
+              Aucun compte n&apos;a été trouvé pour l&apos;email&nbsp;:
+              <br />
+              <span className="text-snu-purple-300 underline">{teamate.email}</span>
+              <br />
+              Êtes-vous sûr de vouloir l&apos;inviter&nbsp;?
+            </div>
+          ),
+          isOpen: true,
+          onConfirm: () => inviteDirectionCenter(teamate),
+        });
+        return {};
+      }
+
+      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId: referent._id });
+      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    } catch (e) {
+      console.log(e);
+      capture(e);
+      toastr.error("Erreur !", translate(e));
+    }
+  };
+
+  const inviteDirectionCenter = async (user: TeamMate) => {
+    try {
+      let newRole = "";
+      switch (user.role) {
+        case CENTER_ROLES.chef:
+          newRole = ROLES.HEAD_CENTER;
+          break;
+        case CENTER_ROLES.adjoint:
+          newRole = ROLES.HEAD_CENTER_ADJOINT;
+          break;
+        case CENTER_ROLES.referent_sanitaire:
+          newRole = ROLES.REFERENT_SANITAIRE;
+          break;
+      }
+      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[newRole]}`, {
+        ...user,
+        role: newRole,
+        cohorts: [focusedSession?.cohort],
+        cohesionCenterId: focusedSession?.cohesionCenterId,
+        cohesionCenterName: focusedSession?.nameCentre,
+      });
+      if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
+      const responseSession = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId: responseInvitation?.data?._id });
+      if (!responseSession?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
+      setFocusedSession(responseSession?.data);
+      toastr.success("Succès", `${user.firstName} ${user.lastName} a reçu une invitation pour rejoindre l'équipe`);
+    } catch (e) {
+      console.log(e);
+      capture(e);
+      toastr.error("Erreur !", translate(e));
+    }
+  };
+
+  const deleteTeamate = async (user) => {
+    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
+    focusedSession.team.splice(index, 1);
+
+    try {
+      const r = await api.put(`/session-phase1/${focusedSession._id}/team`, { team: focusedSession.team });
+      const { ok, data } = r;
+      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
+      setFocusedSession(data);
+      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
+    } catch (e) {
+      console.log(e);
+      capture(e);
+      toastr.error("Erreur !", translate(e.code));
+    }
+  };
+
+  useEffect(() => {
+    if (!sessionId) return;
+    (async () => {
+      const { data } = await api.get(`/session-phase1/${sessionId}`);
+      setFocusedSession(data);
+    })();
+  }, [sessionId]);
+
+  if (!focusedSession) return <Loader />;
+
+  return (
+    <Page>
+      <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Equipe" }]} />
+      <Container className="mt-2">
+        <div className="flex px-6 py-4">
+          <div className="flex flex-col w-1/2">
+            <ChefCenterBlock headCenter={focusedSession.headCenter} />
+            <TeamBlock team={focusedSession.team} deleteTeamate={deleteTeamate} adjoints={focusedSession.adjoints} />
+          </div>
+          <div className="mx-14 w-[1px] bg-gray-200 shrink-0">&nbsp;</div>
+          <AddBlock onConfirm={addTeamate} user={user} />
+        </div>
+        <ModalConfirm
+          isOpen={modal?.isOpen}
+          title={modal?.title}
+          message={modal?.message}
+          onChange={null}
+          onCancel={() => setModal({ isOpen: false, onConfirm: () => {}, title: "", message: "" })}
+          onConfirm={async () => {
+            await modal?.onConfirm();
+            setModal({ isOpen: false, onConfirm: () => {}, title: "", message: "" });
+          }}
+        />
+      </Container>
+    </Page>
+  );
+}
+
+const ChefCenterBlock = ({ headCenter }: ChefCenterBlockProps) => {
+  if (!headCenter)
+    return (
+      <div className="mb-8">
+        <h4 className="mb-0">Aucun Chef de centre</h4>
+      </div>
+    );
+  return (
+    <div className="mb-8">
+      <h4 className="mb-0">Chef de centre</h4>
+      <Link to={`/user/${headCenter._id}`} target="_blank" className="cursor-pointer text-blue-600 hover:text-blue-600 hover:underline">
+        {headCenter.firstName} {headCenter.lastName}&nbsp;›
+      </Link>
+      <div className="flex flex-col gap-4 mt-2 w-3/4">
+        <div className="flex items-center justify-between">
+          <b>E-mail :</b>
+          <p style={{ margin: 0 }}>{headCenter?.email}</p>
+        </div>
+        {headCenter.phone && (
+          <div className="flex items-center justify-between">
+            <b>Téléphone fixe :</b>
+            <p style={{ margin: 0 }}>{headCenter.phone}</p>
+          </div>
+        )}
+        {headCenter.mobile && (
+          <div className="flex items-center justify-between">
+            <b>Mobile :</b>
+            <p style={{ margin: 0 }}>{headCenter.mobile}</p>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
+const TeamBlock = ({ team, deleteTeamate, adjoints }: TeamBlockProps) => {
+  return (
+    <div>
+      <h4>Équipe ({team.length + (adjoints?.length || 0)})</h4>
+      {team.length === 0 && adjoints?.length === 0 && <p className="italic">Aucun membre</p>}
+
+      {Object.values(CENTER_ROLES)
+        .filter((e) => e === CENTER_ROLES.adjoint || e === CENTER_ROLES.referent_sanitaire)
+        .map((role, index) => {
+          return <GroupAdjoints key={index} adjoints={adjoints} role={role} />;
+        })}
+
+      {Object.values(CENTER_ROLES)
+        .filter((e) => e !== CENTER_ROLES.chef && e !== CENTER_ROLES.adjoint && e !== CENTER_ROLES.referent_sanitaire)
+        .map((role, index) => {
+          return <GroupTeam key={index} team={team} role={role} deleteTeamate={deleteTeamate} />;
+        })}
+    </div>
+  );
+};
+
+const GroupAdjoints = ({ adjoints, role }: GroupAdjointsProps) => {
+  if (!adjoints) {
+    return (
+      <div className="mt-2 mb-4">
+        <h6>{role}&nbsp;(0)</h6>
+      </div>
+    );
+  }
+  const adjointsFiltered =
+    role === CENTER_ROLES.adjoint ? adjoints.filter((e) => e.role === ROLES.HEAD_CENTER_ADJOINT) : adjoints.filter((e) => e.role === ROLES.REFERENT_SANITAIRE);
+
+  return (
+    <div className="mt-2 mb-4">
+      <h6>
+        {role}&nbsp;({adjointsFiltered.length})
+      </h6>
+      {adjointsFiltered.map((user, index) => (
+        <Link to={`/user/${user._id}`} target="_blank" key={index} className="hover:text-blue-600">
+          <div className="flex items-center justify-between rounded-lg p-2 hover:bg-gray-50">
+            <div className="flex items-center">
+              <div key={index} className="mr-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600">
+                {user.firstName?.[0]?.toUpperCase()}
+                {user.lastName?.[0]?.toUpperCase()}
+              </div>
+              <div>
+                <p className="m-0">
+                  {user.firstName} {user.lastName}
+                </p>
+              </div>
+            </div>
+          </div>
+        </Link>
+      ))}
+    </div>
+  );
+};
+
+const GroupTeam = ({ team, role, deleteTeamate }: GroupTeamProps) => {
+  const teamFiltered = team.filter((member) => member.role === role);
+
+  return (
+    <div className="mt-2 mb-4">
+      <h6>
+        {role}&nbsp;({teamFiltered.length})
+      </h6>
+      {teamFiltered.map((user, index) => (
+        <div className="flex items-center justify-between rounded-lg p-2 hover:bg-gray-50" key={index}>
+          <div className="flex items-center">
+            <div key={index} className="mr-2 flex h-8 w-8 items-center justify-center rounded-full border-2 border-white bg-gray-100 text-xs text-indigo-600">
+              {user.firstName?.[0]?.toUpperCase()}
+              {user.lastName?.[0]?.toUpperCase()}
+            </div>
+            <div>
+              <p className="m-0">
+                {user.firstName} {user.lastName}
+              </p>
+            </div>
+          </div>
+
+          <div
+            className="flex h-8 w-8 cursor-pointer items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white"
+            onClick={() => deleteTeamate(user)}>
+            <Trash width={16} height={16} />
+          </div>
+        </div>
+      ))}
+    </div>
+  );
+};
+
+const AddBlock = ({ onConfirm, user }: AddBlockProps) => {
+  const limitedRoles = [CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire];
+
+  const listRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
+    ? Object.values(CENTER_ROLES)
+    : Object.values(CENTER_ROLES).filter((role) => !limitedRoles.includes(role));
+
+  return (
+    <div>
+      <h4>Ajouter un nouveau membre à l’équipe</h4>
+      <p className="text-gray-500">Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
+      <h6 className="uppercase text-gray-600">
+        informations <span className="text-red-500">*</span>
+      </h6>
+      <Formik
+        validateOnChange={false}
+        validateOnBlur={false}
+        initialValues={{
+          firstName: "",
+          lastName: "",
+          role: "",
+          email: "",
+          phone: "",
+        }}
+        onSubmit={async (values, { resetForm }) => {
+          await onConfirm(values);
+          resetForm();
+        }}>
+        {({ values, handleChange, handleSubmit, errors, isSubmitting }) => (
+          <form onSubmit={handleSubmit}>
+            <React.Fragment>
+              <div className="flex gap-2">
+                <div className="flex-1">
+                  <Field
+                    disabled={isSubmitting}
+                    placeholder="Prénom"
+                    validate={(v) => !v}
+                    name="firstName"
+                    value={values.firstName}
+                    onChange={handleChange}
+                    className="form-control"
+                    style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}
+                  />
+                </div>
+                <div className="flex-1">
+                  <Field
+                    disabled={isSubmitting}
+                    placeholder="Nom"
+                    validate={(v) => !v}
+                    name="lastName"
+                    value={values.lastName}
+                    onChange={handleChange}
+                    className="form-control"
+                    style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}
+                  />
+                </div>
+              </div>
+              <Field
+                disabled={isSubmitting}
+                placeholder="Adresse e-mail"
+                validate={(v) => (!v && "Ce champ est obligatoire") || (!validator.isEmail(v) && "Format email incorrect")}
+                name="email"
+                value={values.email}
+                onChange={handleChange}
+                className="form-control"
+                style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}
+              />
+              <p className="mt-2 text-center text-xs text-red-500">{errors.email}</p>
+              <Field
+                disabled={isSubmitting}
+                as="select"
+                validate={(v) => !v}
+                className="form-control"
+                name="role"
+                value={values.role}
+                onChange={handleChange}
+                style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}>
+                <option disabled value="" label="Rôle" />
+                {listRoles.map((e) => (
+                  <option value={e} key={e} label={e} />
+                ))}
+              </Field>
+              <div className="flex items-center justify-center">
+                <button
+                  className="mt-4 cursor-pointer rounded-lg border-[1px] border-gray-400 bg-white py-2 px-8 disabled:cursor-not-allowed disabled:opacity-50"
+                  type="submit"
+                  disabled={isSubmitting}>
+                  Ajouter le membre
+                </button>
+              </div>
+              {!!Object.keys(errors).length && <p className="mt-2 text-center text-xs text-red-500">Merci de remplir tous les champs</p>}
+            </React.Fragment>
+          </form>
+        )}
+      </Formik>
+    </div>
+  );
+};

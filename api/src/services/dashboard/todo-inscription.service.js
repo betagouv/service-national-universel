@@ -67,7 +67,7 @@ service[DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT] = async (user, { assi
     { terms: { "status.keyword": ["VALIDATED", "WAITING_LIST"] } },
     { bool: { should: [{ term: { imageRight: "N/A" } }, { bool: { must_not: { exists: { field: "imageRight" } } } }], minimum_should_match: 1 } },
   ];
-  if (user.role === ROLES.HEAD_CENTER) {
+  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
     let contextFilters = await buildFilterContext(user, cohorts, "young");
     if (!contextFilters) return { [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: [] };
     filters.push(contextFilters);

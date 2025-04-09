@@ -80,8 +80,14 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
   if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) contextFilters[0].terms["status.keyword"].push("IN_PROGRESS");
 
   // A head center can only see youngs of their session.
-  if (user.role === ROLES.HEAD_CENTER) {
-    const sessionPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
+  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    let field = "";
+    if (user.role === ROLES.HEAD_CENTER) {
+      field = "headCenterId";
+    } else if (user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE) {
+      field = "adjointsIds";
+    }
+    const sessionPhase1 = await SessionPhase1Model.find({ [field]: user._id });
     if (!sessionPhase1.length) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push(
       { terms: { "status.keyword": ["VALIDATED", "WITHDRAWN"] } },
@@ -364,8 +370,14 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
       req.params.action === "exportBus" ? { bool: { must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }] } } : null,
     ].filter(Boolean);
 
-    if (user.role === ROLES.HEAD_CENTER) {
-      const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+      let field = "";
+      if (user.role === ROLES.HEAD_CENTER) {
+        field = "headCenterId";
+      } else if (user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE) {
+        field = "adjointsIds";
+      }
+      const sessionsPhase1 = await SessionPhase1Model.find({ [field]: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
       if (visibleCohorts.length > 0) {
@@ -640,7 +652,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     // Context filters
     const contextFilters = [];
 
-    if (user.role === ROLES.HEAD_CENTER) {
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
       const sessionsPhase1 = await SessionPhase1Model.find({ headCenterId: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));

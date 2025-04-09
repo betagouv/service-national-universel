@@ -6,6 +6,8 @@ import {
   isCoordinateurEtablissement,
   isReferentClasse,
   isHeadCenter,
+  isHeadCenterAdjoint,
+  isReferentSanitaire,
   ClasseType,
   EtablissementType,
   CohesionCenterType,
@@ -18,7 +20,15 @@ import {
 } from "snu-lib";
 import { BrevoRecipientsService, FiltersYoungsForExport } from "@/services/brevoRecipientsService";
 
-export type RecipientType = "jeunes" | "referents" | "chefs-etablissement" | "representants" | "chefs-centres" | "administrateurs";
+export type RecipientType =
+  | "jeunes"
+  | "referents"
+  | "chefs-etablissement"
+  | "representants"
+  | "chefs-centres"
+  | "chefs-centres-adjoint"
+  | "referents-sanitaires"
+  | "administrateurs";
 
 export interface BrevoRecipient {
   type: RecipientType;
@@ -433,6 +443,34 @@ export const useBrevoRecipients = (tab: "volontaire" | "inscription") => {
               NOM: headCenter.lastName!,
               EMAIL: headCenter.email,
               type: "chefs-centres",
+              ...fillCommonFields(young),
+            });
+          }
+        }
+
+        // Chefs de centre adjoint
+        if (selectedTypes.includes("chefs-centres-adjoint") && young.sessionPhase1?.headCenterId) {
+          const headCenterAdjoint = referentsMap.get(young.sessionPhase1.headCenterId!);
+          if (headCenterAdjoint && isHeadCenterAdjoint(headCenterAdjoint)) {
+            recipientsMap.set(headCenterAdjoint._id, {
+              PRENOM: headCenterAdjoint.firstName!,
+              NOM: headCenterAdjoint.lastName!,
+              EMAIL: headCenterAdjoint.email,
+              type: "chefs-centres-adjoint",
+              ...fillCommonFields(young),
+            });
+          }
+        }
+
+        // Referents Sanitaires
+        if (selectedTypes.includes("referents-sanitaires") && young.sessionPhase1?.headCenterId) {
+          const referentSanitaire = referentsMap.get(young.sessionPhase1.headCenterId!);
+          if (referentSanitaire && isReferentSanitaire(referentSanitaire)) {
+            recipientsMap.set(referentSanitaire._id, {
+              PRENOM: referentSanitaire.firstName!,
+              NOM: referentSanitaire.lastName!,
+              EMAIL: referentSanitaire.email,
+              type: "referents-sanitaires",
               ...fillCommonFields(young),
             });
           }

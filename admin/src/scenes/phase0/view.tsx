@@ -251,7 +251,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
-          readonly={user.role === ROLES.HEAD_CENTER}
+          readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
           user={user}
         />
         <SectionParents
@@ -263,12 +263,17 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
-          readonly={user.role === ROLES.HEAD_CENTER}
+          readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
         />
         {oldCohort ? (
           <SectionOldConsentements young={young} />
         ) : (
-          <SectionConsentements young={young} onChange={onChange} readonly={user.role === ROLES.HEAD_CENTER} cohort={cohort} />
+          <SectionConsentements
+            young={young}
+            onChange={onChange}
+            readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
+            cohort={cohort}
+          />
         )}
       </div>
       {globalMode === "correction" && (

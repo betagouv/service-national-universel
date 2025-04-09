@@ -262,6 +262,8 @@ const SideBar = ({ sessionsList }) => {
       case ROLES.ADMIN:
         return user.subRole === SUB_ROLE_GOD ? godItems : adminItems;
       case ROLES.HEAD_CENTER:
+      case ROLES.HEAD_CENTER_ADJOINT:
+      case ROLES.REFERENT_SANITAIRE:
         return headCenterItems;
       case ROLES.TRANSPORTER:
         return transporteurItems;
@@ -300,7 +302,7 @@ const SideBar = ({ sessionsList }) => {
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} onDemoChange={toggleDemo} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
-        {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
+        {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user?.role) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
           <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>
             <div className="flex flex-col items-center !mt-1">
