@@ -1,5 +1,5 @@
 import { getFilterArray } from "@/scenes/volontaires/utils";
-import { TreeNodeFilterType } from "./TreeFilter";
+import { TreeNodeFilterType } from "./TreeNodeFilter";
 
 export interface FilterDefinition {
   title: string;

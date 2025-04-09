@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useMemo, useState } from "react";
-import { TreeNodeFilterType } from "./TreeFilter";
+import { TreeNodeFilterType } from "./TreeNodeFilter";
 
 interface TreeFilterContextType {
   onCheckboxClick: (nodeId: string) => void;

@@ -1,11 +1,10 @@
+import Loader from "@/components/Loader";
+import { TreeFilter } from "@/components/filters-system-v2/tree-filter/TreeFilter";
 import { mapAvailableFiltersToTreeFilter } from "@/components/filters-system-v2/tree-filter/TreeFilterService";
-import { TreeFilterWithoutHeadlessUi } from "@/components/filters-system-v2/tree-filter/TreeFilterWithoutHeadlessUi";
 import { getCohortGroups } from "@/services/cohort.service";
 import React from "react";
 import { useListeDiffusionFilters } from "../planMarketing/listeDiffusion/filters/ListeDiffusionFiltersHook";
-import Loader from "@/components/Loader";
-import { TreeNodeFilterType } from "@/components/filters-system-v2/tree-filter/TreeFilter";
-import { TreeFilterWithoutHeadlessUi as TreeFilterWithoutHeadlessUiOptimized } from "@/components/filters-system-v2/tree-filter/TreeFilterWithoutHeadlessUi.optimized";
+import { TreeNodeFilterType } from "@/components/filters-system-v2/tree-filter/TreeNodeFilter";
 
 export type TempFilters = Record<string, { key: string }[]>;
 export default function TreeFilterExample() {
@@ -92,10 +91,9 @@ export default function TreeFilterExample() {
       {/* <TreeFilter treeFilter={tempDecoupledFilterData} id={"b"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"c"} />
       <TreeFilter treeFilter={tempDecoupledFilterData} id={"d"} /> */}
-      <TreeFilterWithoutHeadlessUi treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
-      <TreeFilterWithoutHeadlessUiOptimized treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
-      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-2"} showSelectedValues={true} />
-      <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-3"} showSelectedValues={true} />
+      <TreeFilter treeFilter={tempDecoupledFilterData} id={"a-1"} showSelectedValues={true} showSelectedValuesCount={true} />
+      <TreeFilter treeFilter={simpleTreeFilterValues} id={"pref-2"} showSelectedValues={true} />
+      {/* <TreeFilterWithoutHeadlessUi treeFilter={simpleTreeFilterValues} id={"pref-3"} showSelectedValues={true} /> */}
     </>
   );
 }
