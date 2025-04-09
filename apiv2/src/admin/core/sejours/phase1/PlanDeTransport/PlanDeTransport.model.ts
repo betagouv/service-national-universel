@@ -26,8 +26,8 @@ export type PlanDeTransportModel = {
     classeId?: string;
     tempsRetardDepart: string;
     tempsRetardRetour: string;
-    ligneFusionneeIds: string[];
-    ligneMirroirId?: string;
+    ligneFusionneeNumerosLignes: string[];
+    ligneMiroirNumeroLigne?: string;
 };
 
 export type CreatePlanDeTransportModel = Omit<PlanDeTransportModel, "id" | "tempsRetardDepart" | "tempsRetardRetour">;

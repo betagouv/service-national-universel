@@ -11,7 +11,44 @@ import { HiOutlineArrowRight } from "react-icons/hi";
 import PaginationServerDriven from "../PaginationServerDriven";
 import Loader from "../Loader";
 
-export default function HistoricServerDriven({ data, refName, path, pagination, changePage, filters, changeFilters, filterOptions, loading = false, extraTool }) {
+interface Event {
+  path: string;
+  user: string;
+  author: string;
+  authorId: string;
+  op: string;
+  date: string;
+  value: string;
+  originalValue: string;
+  ref: string;
+  refName: string;
+}
+
+type HistoricServerDrivenProps = {
+  data: Event[];
+  refName: string;
+  path: string;
+  pagination: any;
+  changePage: (page: number) => void;
+  filters: any;
+  changeFilters: (filters: any) => void;
+  filterOptions: any;
+  loading: boolean;
+  extraTool: React.ReactNode;
+};
+
+export default function HistoricServerDriven({
+  data,
+  refName,
+  path,
+  pagination,
+  changePage,
+  filters,
+  changeFilters,
+  filterOptions,
+  loading = false,
+  extraTool,
+}: HistoricServerDrivenProps) {
   const [query, setQuery] = useState(filters?.query ? filters.query : "");
   const [isOpen, setIsOpen] = useState(
     filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
@@ -75,8 +112,8 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
               </tr>
             </thead>
             <tbody>
-              {data.map((e, index) => (
-                <Event key={index} e={e} index={index} refName={refName} path={path} />
+              {data.map((event, index) => (
+                <Event key={index} event={event} refName={refName} path={path} />
               ))}
             </tbody>
           </table>
@@ -89,27 +126,27 @@ export default function HistoricServerDriven({ data, refName, path, pagination, 
   );
 }
 
-function Event({ e, index, refName, path }) {
+function Event({ event, refName, path }: { event: Event; refName: string; path: string }) {
   return (
-    <tr key={index} className="cursor-default border-t border-t-slate-100 hover:bg-slate-50">
+    <tr className="cursor-default border-t border-t-slate-100 hover:bg-slate-50">
       {refName && (
         <td className="cursor-pointer overflow-hidden px-4 py-3">
-          <a href={`/${path}/${e.ref}`}>{e.refName}</a>
+          <a href={`/${path}/${event.ref}`}>{event.refName}</a>
         </td>
       )}
       <td className="overflow-hidden px-4 py-3">
-        <p className="truncate text-gray-400">
-          {translateAction(e.op)} • {formatLongDateFR(e.date)}
+        <p className="truncate text-gray-400" title={`${translateAction(event.op)} • ${formatLongDateFR(event.date)}`}>
+          {translateAction(event.op)} • {formatLongDateFR(event.date)}
         </p>
-        <p>{translateBusPatchesField(e.path)}</p>
+        <p>{translateBusPatchesField(event.path)}</p>
       </td>
-      <td className="truncate px-4 py-3 text-gray-400">{translateHistory(e.path, e.originalValue)}</td>
+      <td className="truncate px-4 py-3 text-gray-400">{translateHistory(event.path, event.originalValue)}</td>
       <td className="px-4 py-3">
         <HiOutlineArrowRight />
       </td>
-      <td className="truncate px-4 py-3">{translateHistory(e.path, e.value)}</td>
+      <td className="truncate px-4 py-3">{translateHistory(event.path, event.value)}</td>
       <td className="overflow-hidden px-4 py-3">
-        <UserCard user={e.user} />
+        <UserCard user={event.user} />
       </td>
     </tr>
   );
@@ -122,18 +159,21 @@ function FilterDrawer({ filters, changeFilters, filterOptions }) {
 
   return (
     <div className="flex flex-wrap gap-4 bg-slate-50 p-4">
+      {/* @ts-ignore */}
       <MultiSelect
         options={filterOptions ? filterOptions.path.map((e) => ({ label: translateBusPatchesField(e), value: e })) : []}
         value={filters.path}
         onChange={(path) => changeFilters((f) => ({ ...f, ...{ path } }))}
         label="Donnée modifiée"
       />
+      {/* @ts-ignore */}
       <MultiSelect
         options={filterOptions ? filterOptions.op.map((e) => ({ label: translateAction(e), value: e })) : []}
         value={filters.op}
         onChange={(op) => changeFilters((f) => ({ ...f, ...{ op } }))}
         label="Type d'action"
       />
+      {/* @ts-ignore */}
       <MultiSelect options={getAuthorOptions()} value={filters.author} onChange={(author) => changeFilters((f) => ({ ...f, ...{ author } }))} label="Auteur de la modification" />
     </div>
   );

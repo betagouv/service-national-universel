@@ -2,6 +2,8 @@ import { Phase1Routes } from "snu-lib";
 
 import { buildRequest } from "@/utils/buildRequest";
 
+import API from "./api";
+
 const Phase1Service = {
   getSimulation: async (id: string) => {
     return await buildRequest<Phase1Routes["GetSimulationRoute"]>({
@@ -36,6 +38,30 @@ const Phase1Service = {
       params: { sessionId },
       target: "API_V2",
     })();
+  },
+  deleteLigneBus: async (sessionId: string, busId: string) => {
+    return await buildRequest<Phase1Routes["DeleteLigneBus"]>({
+      path: "/phase1/{sessionId}/ligne-de-bus/{busId}",
+      method: "DELETE",
+      params: { sessionId, busId },
+      target: "API_V2",
+    })();
+  },
+  getLigneBusStats: async (
+    ligneDeBusId: string,
+  ): Promise<{
+    meetingPoints: [
+      {
+        youngsCount: number;
+        meetingPointId: string;
+      },
+    ];
+    youngsCountBus: number;
+    busVolume: number;
+  }> => {
+    const { ok, code, data } = await API.get(`/ligne-de-bus/${ligneDeBusId}/data-for-check`);
+    if (!ok) throw new Error(code);
+    return data;
   },
 };
 

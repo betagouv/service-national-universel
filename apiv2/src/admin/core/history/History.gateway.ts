@@ -7,6 +7,7 @@ export interface HistoryGateway {
     findLastByReferenceIdAndPath(history: HistoryType, referenceId: string, path: string): Promise<PatchType | null>;
 
     bulkCreate(history: HistoryType, patches: PatchType[]): Promise<number>;
+    create(history: HistoryType, patch: PatchType): Promise<PatchType>;
 }
 
 export const HistoryGateway = Symbol("HistoryGateway");

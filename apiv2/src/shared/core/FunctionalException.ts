@@ -24,11 +24,13 @@ export enum FunctionalExceptionCode {
     LISTE_DIFFUSION_NOT_FOUND = "LISTE_DIFFUSION_NOT_FOUND",
     RESULT_DIFFERENT_THAN_SIMULATION = "RESULT_DIFFERENT_THAN_SIMULATION",
     NO_CONTACTS = "NO_CONTACTS",
+    PROGRAMMATION_TYPE_REGLE_ENVOI_NON_TROUVE = "PROGRAMMATION_TYPE_REGLE_ENVOI_NON_TROUVE",
 }
 
 export class FunctionalException extends HttpException {
     description?: string;
     constructor(message: FunctionalExceptionCode, description?: string) {
         super(message, HttpStatus.UNPROCESSABLE_ENTITY, { description });
+        this.description = description;
     }
 }

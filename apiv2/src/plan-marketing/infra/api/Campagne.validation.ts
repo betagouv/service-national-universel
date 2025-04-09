@@ -6,6 +6,7 @@ import {
 } from "@plan-marketing/core/Campagne.model";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
 
 class BaseCampagneDto {
     @IsString()
@@ -41,6 +42,10 @@ export class CreateCampagneGeneriqueDto extends BaseCampagneDto implements Creat
     @IsBoolean()
     @IsNotEmpty()
     generic: true = true;
+
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class CreateCampagneSpecifiqueWithoutRefDto
@@ -54,6 +59,10 @@ export class CreateCampagneSpecifiqueWithoutRefDto
     @IsString()
     @IsNotEmpty()
     cohortId: string;
+
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifiqueModelWithRef {

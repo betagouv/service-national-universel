@@ -39,3 +39,5 @@ export { SchemaDeRepartitionModel, SchemaDeRepartitionDocument } from "./PlanDeT
 export { TableDeRepartitionModel, TableDeRepartitionDocument } from "./PlanDeTransport/tableDeRepartition";
 
 export { FeatureFlagModel, FeatureFlagDocument } from "./featureFlag";
+
+export { PatchLigneBusModel, PatchDocument } from "./patch";
