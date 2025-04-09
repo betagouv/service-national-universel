@@ -33,7 +33,7 @@ export type SejourModel = {
     // emploiDuTempsFiles: SejourFile[];
     hasTimeSchedule: string;
     hasPedagoProject: string;
-    adjointsIds: string[];
+    adjointsIds?: string[];
 };
 
 interface SejourFile {

@@ -50,7 +50,7 @@ export class SejourMapper {
             cohort: sejourModel.sessionNom,
             cohortId: sejourModel.sessionId,
             sejourSnuIds: sejourModel.sejourSnuIds,
-            adjointsIds: sejourModel.adjointsIds,
+            adjointsIds: sejourModel.adjointsIds ? sejourModel.adjointsIds : [],
         };
     }
 }
