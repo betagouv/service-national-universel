@@ -1,7 +1,6 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { Model } from "mongoose";
-import { ClsService } from "nestjs-cls";
 import { DemandeModificationLigneDeBusGateway } from "@admin/core/sejours/phase1/demandeModificationLigneDeBus/DemandeModificationLigneDeBus.gateway";
 import {
     DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY,
@@ -15,8 +14,14 @@ export class DemandeModificationLigneDeBusRepository implements DemandeModificat
     constructor(
         @Inject(DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY)
         private demandeModificationLigneDeBusMongooseEntity: Model<DemandeModificationLigneDeBusDocument>,
-        private readonly cls: ClsService,
     ) {}
+
+    async findByLigneDeBusIds(ligneDeBusIds: string[]): Promise<DemandeModificationLigneDeBusModel[]> {
+        const demandeModificationLigneDeBuss = await this.demandeModificationLigneDeBusMongooseEntity.find({
+            lineId: { $in: ligneDeBusIds },
+        });
+        return DemandeModificationLigneDeBusMapper.toModels(demandeModificationLigneDeBuss);
+    }
 
     async findBySessionNom(sessionNom: string): Promise<DemandeModificationLigneDeBusModel[]> {
         const demandeModificationLigneDeBuss = await this.demandeModificationLigneDeBusMongooseEntity.find({

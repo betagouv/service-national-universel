@@ -31,5 +31,6 @@ export class FunctionalException extends HttpException {
     description?: string;
     constructor(message: FunctionalExceptionCode, description?: string) {
         super(message, HttpStatus.UNPROCESSABLE_ENTITY, { description });
+        this.description = description;
     }
 }
