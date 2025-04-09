@@ -127,13 +127,15 @@ describe("Architecture test", () => {
     });
 
     describe("BullMQ", () => {
-        it("Consumer should be in jobModule", () => {
+        it("Consumer should be in jobModule or in CronModule", () => {
             classes()
                 .that()
                 .haveSimpleNameEndingWith(MatchingPattern.CONSUMER_SUFFIX)
                 .should()
                 .onlyHaveDependentClassesThat()
                 .haveSimpleNameEndingWith(MatchingPattern.JOB_MODULE_SUFFIX)
+                .orShould()
+                .haveSimpleNameEndingWith(MatchingPattern.CRON_CONSUMER_SUFFIX)
                 .andShould()
                 .dependOnClassesThat()
                 .resideInAPackage(MatchingPattern.NESTJS_BULLMQ)
