@@ -1,4 +1,4 @@
-import { CampagneJeuneType } from "snu-lib";
+import { CampagneJeuneType, TypeEvenement } from "snu-lib";
 import { CampagneMapper } from "./Campagne.mapper";
 import {
     CampagneGeneriqueModel,
@@ -8,10 +8,14 @@ import {
     CreateCampagneModel,
     CreateCampagneSpecifiqueModel,
 } from "../core/Campagne.model";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
 
 describe("CampagneMapper", () => {
     const mockId = "123";
     const mockDate = new Date();
+    const mockProgrammations: CampagneProgrammation[] = [
+        { type: TypeEvenement.AUCUN, createdAt: mockDate, joursDecalage: 0 },
+    ];
 
     describe("toModel", () => {
         it("devrait mapper une campagne générique avec tous les champs", () => {
@@ -26,6 +30,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 envois: [],
+                programmations: mockProgrammations,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -43,6 +48,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 envois: [],
+                programmations: mockProgrammations,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneGeneriqueModel);
@@ -61,6 +67,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 envois: [],
+                programmations: mockProgrammations,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -79,6 +86,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 envois: [],
+                programmations: mockProgrammations,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneSpecifiqueModel);
@@ -97,6 +105,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                programmations: mockProgrammations,
                 envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
@@ -128,6 +137,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
+                programmations: mockProgrammations,
             };
 
             const result = CampagneMapper.toEntity(model);
@@ -144,6 +154,7 @@ describe("CampagneMapper", () => {
                 generic: true,
                 cohortId: undefined,
                 envois: [],
+                programmations: mockProgrammations,
                 campagneGeneriqueId: undefined,
             });
         });
@@ -160,6 +171,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false as const,
                 cohortId: "cohort-1",
+                programmations: mockProgrammations,
             };
 
             const result = CampagneMapper.toEntity(model);
@@ -175,6 +187,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false,
                 cohortId: "cohort-1",
+                programmations: mockProgrammations,
                 campagneGeneriqueId: undefined,
                 originalCampagneGeneriqueId: undefined,
                 envois: [],
@@ -211,6 +224,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
+                programmations: mockProgrammations,
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -225,6 +239,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 cohortId: undefined,
+                programmations: mockProgrammations,
                 campagneGeneriqueId: undefined,
             });
         });
@@ -240,6 +255,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false as const,
                 cohortId: "cohort-1",
+                programmations: mockProgrammations,
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -254,6 +270,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false,
                 cohortId: "cohort-1",
+                programmations: mockProgrammations,
                 campagneGeneriqueId: undefined,
             });
         });
