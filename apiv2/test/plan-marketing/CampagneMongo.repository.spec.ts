@@ -7,7 +7,6 @@ import { setUpPlanMarketingTest } from "./setUpPlanMarketingTest";
 import { CampagneJeuneType, DestinataireListeDiffusion, ListeDiffusionEnum, TypeEvenement } from "snu-lib";
 import {
     CampagneGeneriqueModel,
-    CampagneModel,
     CampagneSpecifiqueModelWithRef,
     CampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
@@ -28,6 +27,10 @@ describe("CampagneGateway", () => {
     afterAll(async () => {
         await app.close();
         mongoose.disconnect();
+    });
+
+    beforeEach(async () => {
+        await campagneMongoose.deleteMany({});
     });
 
     describe("update", () => {
@@ -161,6 +164,179 @@ describe("CampagneGateway", () => {
             await campagneGateway.delete(campagne.id);
             const found = await campagneGateway.findById(campagne.id);
             expect(found).toBeNull();
+        });
+    });
+
+    describe("findById", () => {
+        it("should return null when a campagne does not exist", async () => {
+            const nonExistentId = new mongoose.Types.ObjectId().toString();
+            const found = await campagneGateway.findById(nonExistentId);
+            expect(found).toBeNull();
+        });
+
+        it("should return a campagne without reference when it exists", async () => {
+            const campagne = (await createCampagne({
+                nom: "Campagne Sans Ref",
+                generic: false,
+                objet: "Test Object",
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.DATE_DEBUT_SEJOUR,
+                        createdAt: new Date(),
+                    },
+                ],
+            })) as CampagneSpecifiqueModelWithoutRef;
+
+            const found = await campagneGateway.findById(campagne.id);
+            expect(found).toBeDefined();
+            expect(found?.id).toBe(campagne.id);
+            expect((found as CampagneSpecifiqueModelWithoutRef)?.nom).toBe("Campagne Sans Ref");
+            expect((found as CampagneSpecifiqueModelWithoutRef)?.objet).toBe("Test Object");
+        });
+
+        it("should return a campagne with reference including generic campaign data", async () => {
+            const genericCampagne = (await createCampagne({
+                nom: "Generic Test Campaign",
+                objet: "Generic Subject",
+                type: CampagneJeuneType.CLE,
+                destinataires: [DestinataireListeDiffusion.CHEFS_CENTRES],
+                generic: true,
+                templateId: 456,
+                listeDiffusionId: "JEUNES",
+                programmations: [
+                    {
+                        joursDecalage: 5,
+                        type: TypeEvenement.DATE_FIN_SEJOUR,
+                        createdAt: new Date(),
+                    },
+                ],
+            })) as CampagneGeneriqueModel;
+
+            const specificCampagne = (await createCampagne({
+                generic: false,
+                campagneGeneriqueId: genericCampagne.id,
+                cohortId: "cohort-test-findById",
+            })) as CampagneSpecifiqueModelWithRef;
+
+            const found = await campagneGateway.findById(specificCampagne.id);
+
+            expect(found).toBeDefined();
+            expect(found?.id).toBe(specificCampagne.id);
+            expect((found as any)?.nom).toBe("Generic Test Campaign");
+            expect((found as any)?.objet).toBe("Generic Subject");
+            expect((found as any)?.type).toBe(CampagneJeuneType.CLE);
+            expect((found as any)?.destinataires).toEqual([DestinataireListeDiffusion.CHEFS_CENTRES]);
+            expect((found as any)?.templateId).toBe(456);
+            expect((found as any)?.listeDiffusionId).toBe("JEUNES");
+            expect((found as any)?.generic).toBe(false);
+            expect(JSON.stringify((found as any)?.programmations)).toEqual(
+                JSON.stringify(genericCampagne.programmations),
+            );
+        });
+    });
+
+    describe("findCampagnesWithProgrammationBetweenDates", () => {
+        it("should find campagnes without ref that have programmation dates in the range", async () => {
+            const now = new Date();
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() - 1);
+            const endDate = new Date(now);
+            endDate.setDate(now.getDate() + 1);
+            const inRangeDate = new Date(now);
+
+            const campagneInRange = await createCampagne({
+                nom: "Campagne In Range",
+                generic: false,
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.AUCUN,
+                        createdAt: new Date(),
+                        envoiDate: inRangeDate,
+                    },
+                ],
+            });
+
+            const beforeStartDate = new Date(startDate);
+            beforeStartDate.setDate(startDate.getDate() - 2);
+            await createCampagne({
+                nom: "Campagne Outside Range",
+                generic: false,
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.AUCUN,
+                        createdAt: new Date(),
+                        envoiDate: beforeStartDate,
+                    },
+                ],
+            });
+
+            const results = await campagneGateway.findCampagnesWithProgrammationBetweenDates(startDate, endDate);
+
+            expect(results.some((campagne) => campagne.id === campagneInRange.id)).toBeTruthy();
+            expect(results.length).toBeGreaterThanOrEqual(1);
+            //@ts-expect-error has a nom property
+            expect(results[0].nom).toBe("Campagne In Range");
+        });
+
+        it("should find campagnes with ref that have programmation dates in the range", async () => {
+            const now = new Date();
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() - 1);
+            const endDate = new Date(now);
+            endDate.setDate(now.getDate() + 1);
+            const inRangeDate = new Date(now);
+
+            const genericCampagne = await createCampagne({
+                nom: "Generic With In Range Programmation",
+                generic: true,
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.AUCUN,
+                        createdAt: new Date(),
+                        envoiDate: inRangeDate,
+                    },
+                ],
+            });
+
+            const specificCampagne = await createCampagne({
+                generic: false,
+                campagneGeneriqueId: genericCampagne.id,
+                cohortId: "cohort-test",
+            });
+
+            const results = await campagneGateway.findCampagnesWithProgrammationBetweenDates(startDate, endDate);
+            expect(results.some((campagne) => campagne.id === specificCampagne.id)).toBeTruthy();
+            //@ts-expect-error has a nom property
+            expect(results[0].nom).toBe("Generic With In Range Programmation");
+        });
+
+        it("should not find campagnes that have programmation dates outside the range", async () => {
+            const now = new Date();
+            const startDate = new Date(now);
+            startDate.setDate(now.getDate() + 10);
+            const endDate = new Date(now);
+            endDate.setDate(now.getDate() + 20);
+
+            const campagneOutsideRange = await createCampagne({
+                nom: "Campagne Outside Future Range",
+                generic: true,
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.DATE_DEBUT_SEJOUR,
+                        createdAt: new Date(),
+                        envoiDate: now,
+                    },
+                ],
+            });
+
+            const results = await campagneGateway.findCampagnesWithProgrammationBetweenDates(startDate, endDate);
+
+            expect(results.some((c) => c.id === campagneOutsideRange.id)).toBeFalsy();
         });
     });
 });

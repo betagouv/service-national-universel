@@ -137,4 +137,57 @@ export class CampagneMongoRepository implements CampagneGateway {
     async delete(id: string): Promise<void> {
         await this.campagneModel.findByIdAndDelete(id);
     }
+
+    async findCampagnesWithProgrammationBetweenDates(startDate: Date, endDate: Date): Promise<CampagneModel[]> {
+        const campagnesSpecifiquesWithoutRef = await this.campagneModel
+            .find({
+                $and: [
+                    {
+                        "programmations.envoiDate": {
+                            $gte: startDate,
+                            $lte: endDate,
+                        },
+                    },
+                    { generic: false },
+                ],
+            })
+            .lean();
+        const campagnesWithProgrammation = campagnesSpecifiquesWithoutRef.map(CampagneMapper.toModel);
+
+        const campagnesSpecifiquesWithRef = await this.campagneModel
+            .find({
+                generic: false,
+                campagneGeneriqueId: { $ne: null },
+            })
+            .lean();
+
+        for (const campagneSpecifiqueWithRef of campagnesSpecifiquesWithRef) {
+            const campagneGenerique = await this.campagneModel.findById(campagneSpecifiqueWithRef.campagneGeneriqueId);
+            const hasSomeProgrammationBetweenDates = campagneGenerique?.programmations?.some(
+                (programmation) =>
+                    programmation.envoiDate &&
+                    programmation.envoiDate >= startDate &&
+                    programmation.envoiDate <= endDate,
+            );
+            if (campagneGenerique && hasSomeProgrammationBetweenDates) {
+                const campagneModel = CampagneMapper.toModel({
+                    _id: campagneSpecifiqueWithRef._id,
+                    createdAt: campagneSpecifiqueWithRef.createdAt,
+                    updatedAt: campagneSpecifiqueWithRef.updatedAt,
+                    generic: campagneSpecifiqueWithRef.generic,
+                    envois: campagneSpecifiqueWithRef.envois,
+                    nom: campagneGenerique.nom,
+                    objet: campagneGenerique.objet,
+                    contexte: campagneGenerique.contexte,
+                    templateId: campagneGenerique.templateId,
+                    listeDiffusionId: campagneGenerique.listeDiffusionId,
+                    destinataires: campagneGenerique.destinataires,
+                    programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
+                });
+                campagnesWithProgrammation.push(campagneModel);
+            }
+        }
+
+        return campagnesWithProgrammation;
+    }
 }
