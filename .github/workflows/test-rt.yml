@@ -13,11 +13,18 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      - uses: actions/checkout@v4
+
+      - name: Install clever-tools
+        run: npm install -g clever-tools
+
       - name: Test
+        env:
+          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
+          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
         run: |
           while read row; do
-              echo "$row started"
-              duration=$((RANDOM / 1000)) && echo "$row $duration" && sleep $duration && echo "$row ended" &
+            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} $row ${{ github.sha }} &
           done <<EOF
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }}
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }}
