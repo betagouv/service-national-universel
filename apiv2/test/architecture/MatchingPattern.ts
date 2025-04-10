@@ -9,6 +9,7 @@ export enum MatchingPattern {
     FACTORY_SUFFIX = ".factory.ts",
     PRODUCER_SUFFIX = ".producer.ts",
     JOB_MODULE_SUFFIX = "Job.module.ts",
+    CRON_CONSUMER_SUFFIX = "CronJob.consumer.ts",
 
     ADMIN_CORE = "src.admin.core..",
     ADMIN_USECASE = "src.admin..core..useCase..",
