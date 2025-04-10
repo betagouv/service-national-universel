@@ -1,0 +1,28 @@
+name: Test RT
+
+on:
+  push:
+    branches:
+      - watch-prod-deploy
+
+env:
+  PROD_ENV_NAME: production
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Test
+        run: |
+          while read row; do
+              echo "$row started"
+              duration=$((RANDOM / 1000)) && echo "$row $duration" && sleep $duration && echo "$row ended" &
+          done <<EOF
+          app_1
+          app_2
+          app_3
+          app_4
+          EOF
+
+          wait
