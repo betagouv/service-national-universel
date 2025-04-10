@@ -109,29 +109,23 @@ jobs:
       - name: Merge production in deploy-production
         run: git push --force origin HEAD:deploy-production
 
-  watch_production_deployment:
-    needs: deploy_production
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app_id:
-          [
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_API }}",
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }}",
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }}",
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }}",
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKS }}",
-            "${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }}",
-          ]
-
-    steps:
-      - uses: actions/checkout@v4
-
       - name: Install clever-tools
         run: npm install -g clever-tools
 
-      - name: Watch deployment
+      - name: Watch deployments
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} ${{ matrix.app_id }} ${{ github.sha }}
+        run: |
+          while read row; do
+            ./devops/scripts/cc-watch-deploy.sh  ${{ vars.CC_ORGANIZATION_ID }} $row ${{ github.sha }} &
+          done <<EOF
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_API }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_APIV2 }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_APP }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKS }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }}
+          EOF
+
+          wait
