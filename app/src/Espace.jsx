@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import useAuth from "./services/useAuth";
 import useCohort from "./services/useCohort";
 import API from "./services/api";
-import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, permissionPhase2, shouldReAcceptRI } from "./utils";
+import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, shouldReAcceptRI } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
@@ -80,7 +80,7 @@ const Espace = () => {
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
-          {permissionPhase2(young) && <SentryRoute path="/phase2" component={Phase2} />}
+          <SentryRoute path="/phase2" component={Phase2} />
           <SentryRoute path="/phase3" component={Phase3} />
           <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />

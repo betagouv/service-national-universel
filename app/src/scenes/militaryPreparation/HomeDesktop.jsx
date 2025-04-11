@@ -1,19 +1,20 @@
 import Img2 from "../../assets/militaryPrep.png";
 import React from "react";
 import { HiArrowLeft, HiOutlineSearch } from "react-icons/hi";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import { Link, useHistory } from "react-router-dom";
 import CheckCircle from "../../assets/icons/CheckCircle";
 import plausibleEvent from "../../services/plausible";
-import { permissionPhase2 } from "../../utils";
+import usePermissions from "@/hooks/usePermissions";
 import DocumentsPM from "./components/DocumentsPM";
 
 export default function HomeDesktop() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
+  const { canViewPhase2 } = usePermissions();
   const history = useHistory();
   const [readMore, setReadMore] = React.useState(false);
 
-  if (!young || !permissionPhase2(young)) history.push("/");
+  if (!young || !canViewPhase2) history.push("/");
 
   return (
     <div className="flex w-full flex-col bg-gray-100 px-12 pt-8">
