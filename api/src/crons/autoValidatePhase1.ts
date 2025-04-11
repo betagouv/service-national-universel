@@ -50,7 +50,7 @@ export const handler = async (): Promise<void> => {
 
         const difference = differenceInDays(now, dateStart);
         const daysToValidate = cohort.daysToValidate;
-        logger.info(`Jeune ${young._id} - jours depuis le départ : ${differenceInDays} - nb de jours dans les paramètres du séjour : ${daysToValidate}`);
+        logger.info(`Jeune ${young._id} - jours depuis le départ : ${difference} - nb de jours dans les paramètres du séjour : ${daysToValidate}`);
         if (difference !== daysToValidate) {
           logger.info(`Jeune ${young._id} - pas de validation automatique, le nombre de jours ne correspond pas`);
           return;
