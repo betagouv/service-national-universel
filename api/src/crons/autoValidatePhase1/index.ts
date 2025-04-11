@@ -14,10 +14,7 @@ export const handler = async (): Promise<void> => {
       return;
     }
 
-    slack.info({
-      title: "Autovalidation de la phase 1",
-      text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}`,
-    });
+    slack.info({ title, text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}` });
 
     for (const cohort of cohortesEnCours) {
       const count = await processCohort(cohort);
@@ -26,6 +23,7 @@ export const handler = async (): Promise<void> => {
         slack.info({ title, text: `Aucun jeune n'a été modifié pour la cohorte ${cohort.name}` });
         return;
       }
+
       slack.success({ title, text: `${count} jeunes ont été modifiés pour la cohorte ${cohort.name}` });
     }
   } catch (e) {
