@@ -9,7 +9,7 @@ export default function OccupationBarVertical({ percentage, nbDepart, departMoti
   let height = `h-0`;
   let bgColor = "bg-blue-700";
   let occupationPercentage = percentage * 100;
-  const base = role === ROLES.HEAD_CENTER ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
+  const base = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(role) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
 
   const exclusion = departMotif?.Exclusion || 0;
   const forceMajeure = departMotif && "Cas de force majeure pour le volontaire" in departMotif ? departMotif["Cas de force majeure pour le volontaire"] : 0;

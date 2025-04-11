@@ -35,7 +35,7 @@ export default function List() {
   const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = user.role === ROLES.HEAD_CENTER && sessionPhase1 ? sessionPhase1.cohort : undefined;
+  const defaultCohort = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && sessionPhase1 ? sessionPhase1.cohort : undefined;
   const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
   const [isLoading, setIsLoading] = React.useState(true);
   const [hasValue, setHasValue] = React.useState(false);
@@ -162,7 +162,7 @@ export default function List() {
   };
 
   useEffect(() => {
-    if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && sessionPhase1) {
       history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
       setCohort(sessionPhase1.cohort);
     }
@@ -172,21 +172,27 @@ export default function List() {
 
   if (isLoading) return <Loader />;
 
+  const cannotSelectSEssion = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
+
   return (
     <Page>
       <Header
         title="Plan de transport"
         breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
-        actions={[
-          <SelectCohort
-            key="select-cohort"
-            cohort={cohort}
-            onChange={(cohortName) => {
-              setCohort(cohortName);
-              history.replace({ search: `?cohort=${cohortName}` });
-            }}
-          />,
-        ]}
+        actions={
+          !cannotSelectSEssion
+            ? [
+                <SelectCohort
+                  key="select-cohort"
+                  cohort={cohort}
+                  onChange={(cohortName) => {
+                    setCohort(cohortName);
+                    history.replace({ search: `?cohort=${cohortName}` });
+                  }}
+                />,
+              ]
+            : []
+        }
       />
       <div className="flex gap-2 items-center">
         {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
@@ -215,7 +221,7 @@ export default function List() {
                 setShowModifications(false);
               },
             },
-            ...(user.role !== ROLES.HEAD_CENTER
+            ...(![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)
               ? [
                   {
                     title: "Historique",
@@ -242,16 +248,20 @@ export default function List() {
                 ]
               : []),
           ]}
-          button={[
-            <Button
-              title="Importer des lignes supplémentaires"
-              leftIcon={<GoPlus size={20} className="mt-0.5" />}
-              key={"btn-2"}
-              type="wired"
-              onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
-            />,
-            returnSelect(cohort, selectedFilters, user),
-          ]}
+          button={
+            ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)
+              ? [
+                  <Button
+                    title="Importer des lignes supplémentaires"
+                    leftIcon={<GoPlus size={20} className="mt-0.5" />}
+                    key={"btn-2"}
+                    type="wired"
+                    onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
+                  />,
+                  returnSelect(cohort, selectedFilters, user),
+                ]
+              : []
+          }
         />
       )}
 

@@ -165,7 +165,9 @@ export default function List() {
             key={0}
             title="Exporter"
             exportTitle="Utilisateurs"
-            route={`/elasticsearch/referent/export${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+            route={`/elasticsearch/referent/export${
+              [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) ? "?cohort=" + sessionPhase1?.cohort : ""
+            }`}
             filters={filterArray}
             selectedFilters={selectedFilters}
             setIsOpen={() => true}
@@ -211,7 +213,9 @@ export default function List() {
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
               pageId={pageId}
-              route={`/elasticsearch/referent/search${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+              route={`/elasticsearch/referent/search${
+                [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) ? "?cohort=" + sessionPhase1?.cohort : ""
+              }`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email..."
