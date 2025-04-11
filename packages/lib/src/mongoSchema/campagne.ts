@@ -1,6 +1,6 @@
 import { InferSchemaType, Schema } from "mongoose";
 import { InterfaceExtended } from ".";
-import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "../domains/planMarketing/constants";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut, TypeEvenement } from "../domains/planMarketing/constants";
 
 export const CampagneSchema = {
   campagneGeneriqueId: {
@@ -51,6 +51,18 @@ export const CampagneSchema = {
         _id: false,
       },
     ],
+  },
+  programmations: {
+    type: [
+      {
+        joursDecalage: { type: Number, required: true },
+        type: { type: String, enum: TypeEvenement, required: true },
+        createdAt: { type: Date, required: true },
+        envoiDate: { type: Date },
+        _id: false,
+      },
+    ],
+    required: false,
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },

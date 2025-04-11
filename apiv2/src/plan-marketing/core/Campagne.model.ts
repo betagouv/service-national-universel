@@ -1,4 +1,5 @@
 import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "snu-lib";
+import { CampagneProgrammation } from "./Programmation.model";
 
 /**
  * Interface de base pour toutes les campagnes
@@ -27,6 +28,7 @@ interface CampagneComplete extends CampagneBase {
     destinataires: DestinataireListeDiffusion[];
     type: CampagneJeuneType;
     envois?: CampagneEnvoi[];
+    programmations: CampagneProgrammation[];
 }
 
 /**

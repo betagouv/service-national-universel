@@ -34,6 +34,7 @@ import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
 import { CampagneContactBuilderService } from "./core/service/CampagneContactBuilder.service";
 import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
 import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
+import { ProgrammationService } from "./core/service/Programmation.service";
 import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
 
 @Module({
@@ -78,6 +79,7 @@ import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagnePr
         CampagneContactBuilderService,
         CampagneProcessorService,
         CampagneDataFetcherService,
+        ProgrammationService,
         EnvoyerCampagneProgrammee,
     ],
     exports: [

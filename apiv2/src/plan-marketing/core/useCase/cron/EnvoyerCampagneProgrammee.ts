@@ -1,14 +1,28 @@
-import { Injectable } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 import { UseCase } from "@shared/core/UseCase";
+import { CampagneGateway } from "../../gateway/Campagne.gateway";
 import { PreparerEnvoiCampagne } from "../PreparerEnvoiCampagne";
+
 @Injectable()
 export class EnvoyerCampagneProgrammee implements UseCase<void> {
-    constructor(private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne) {}
+    constructor(
+        private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
+        @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
+    ) {}
+
     async execute(): Promise<void> {
-        // Lister toutes les programmations de campagnes
-        // Pour chaque campagne programmée, vérifier si la date d'envoi est passée
-        // TODO: Récupérer les campagnes programmées
-        const campagnesProgrammeesIds: string[] = [];
+        const now = this.clockGateway.now();
+        const yesterday = this.clockGateway.addDays(now, -1);
+
+        const campagnesWithProgrammation = await this.campagneGateway.findCampagnesWithProgrammationBetweenDates(
+            yesterday,
+            now,
+        );
+
+        const campagnesProgrammeesIds = campagnesWithProgrammation.map((campagne) => campagne.id);
+
         for (const campagneProgrammeeId of campagnesProgrammeesIds) {
             await this.preparerEnvoiCampagne.execute(campagneProgrammeeId);
         }
