@@ -19,6 +19,7 @@ module.exports = {
     const missionsToUpdate = await MissionModel.find({
       _id: { $in: missionPatches.map((patch) => patch.ref) },
       status: MISSION_STATUS.WAITING_VALIDATION,
+      endAt: { $gte: Date.now() },
     });
     const missionIds = missionsToUpdate.map((mission) => mission._id);
     const updateMissionsResult = await MissionModel.updateMany({ _id: { $in: missionIds } }, { status: MISSION_STATUS.VALIDATED }, { fromUser });
