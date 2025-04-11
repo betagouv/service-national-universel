@@ -34,6 +34,7 @@ import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
 import { CampagneContactBuilderService } from "./core/service/CampagneContactBuilder.service";
 import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
 import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
+import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -77,6 +78,22 @@ import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.s
         CampagneContactBuilderService,
         CampagneProcessorService,
         CampagneDataFetcherService,
+        EnvoyerCampagneProgrammee,
+    ],
+    exports: [
+        EnvoyerCampagneProgrammee,
+        PreparerEnvoiCampagne,
+        CreerListeDiffusion,
+        ImporterContacts,
+        {
+            provide: CampagneGateway,
+            useClass: CampagneMongoRepository,
+        },
+        {
+            provide: ListeDiffusionGateway,
+            useClass: ListeDiffusionMongoRepository,
+        },
+        planMarketingFactory,
     ],
 })
 export class PlanMarketingModule {}
