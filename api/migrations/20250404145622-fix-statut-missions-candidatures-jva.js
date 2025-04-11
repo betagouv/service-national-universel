@@ -1,5 +1,5 @@
-const { initDB } = require("../../../db");
-const { MissionModel, ApplicationModel } = require("../../../models");
+const { initDB } = require("../src/mongo");
+const { MissionModel, ApplicationModel } = require("../src/models");
 const { MISSION_STATUS, APPLICATION_STATUS } = require("snu-lib");
 const { logger } = require("../src/logger");
 
@@ -23,7 +23,7 @@ module.exports = {
     });
     const missionIds = missionsToUpdate.map((mission) => mission._id);
     const updateMissionsResult = await MissionModel.updateMany({ _id: { $in: missionIds } }, { status: MISSION_STATUS.VALIDATED }, { fromUser });
-    logger.info("Missions mises à jout", updateMissionsResult.modifiedCount);
+    logger.info(`Nombre de missions mises à jour : ${updateMissionsResult.modifiedCount}`);
 
     const applicationPatches = await db.collection("application_patches").find(query(APPLICATION_STATUS.WAITING_VALIDATION)).toArray();
     const applicationsToUpdate = await ApplicationModel.find({
@@ -37,7 +37,7 @@ module.exports = {
       { status: APPLICATION_STATUS.WAITING_VALIDATION, statusComment: "" },
       { fromUser },
     );
-    logger.info("Candidatures mises à jour", updateApplicationsResult.modifiedCount);
+    logger.info(`Nombre de candidatures mises à jour : ${updateApplicationsResult.modifiedCount}`);
   },
 
   async down() {
