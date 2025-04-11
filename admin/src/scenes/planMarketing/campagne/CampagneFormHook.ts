@@ -4,6 +4,10 @@ import { toastr } from "react-redux-toastr";
 import { useSetState } from "react-use";
 import { DestinataireListeDiffusion, PlanMarketingRoutes, translateMarketing } from "snu-lib";
 import { DraftCampagneDataProps } from "./CampagneForm";
+import { ProgrammationProps } from "./ProgrammationForm";
+
+type CampagneFormField = keyof Omit<DraftCampagneDataProps, "id"> | "reset";
+type CampagneFormValue = string | DestinataireListeDiffusion[] | number | ProgrammationProps[] | undefined;
 
 export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campagneId: string) => void) => {
   const [state, setState] = useSetState<DraftCampagneDataProps & { isTemplateOnError: boolean }>({
@@ -15,9 +19,10 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
     generic: formData.generic,
     destinataires: formData.destinataires,
     isTemplateOnError: false,
+    programmations: formData.programmations,
   });
 
-  const handleChange = (field: string, value?: string | DestinataireListeDiffusion[] | number) => {
+  const handleChange = (field: CampagneFormField, value?: CampagneFormValue) => {
     if (field === "reset") {
       setState({
         nom: formData.nom,
@@ -28,6 +33,7 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
         generic: formData.generic,
         destinataires: formData.destinataires,
         isTemplateOnError: false,
+        programmations: formData.programmations,
       });
     } else {
       setState({ [field]: value });
