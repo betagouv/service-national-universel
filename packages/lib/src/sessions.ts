@@ -143,6 +143,7 @@ function hasAccessToReinscription(young: YoungType) {
 function canApplyToPhase2(young: YoungType, cohort: CohortType) {
   if (cohort.status === COHORT_STATUS.ARCHIVED) return false;
   if (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) return true;
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)) return true;
   return false;
 }
 
@@ -157,7 +158,6 @@ function canViewPhase2(young: YoungType, cohort: CohortType) {
   if (estActifEnPhase2(young)) return true;
   if (canApplyToPhase2(young, cohort)) return true;
   if (young.cohesionStayPresence === "true") return true;
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)) return true;
   return false;
 }
 
