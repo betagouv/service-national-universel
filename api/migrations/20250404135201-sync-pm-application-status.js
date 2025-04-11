@@ -20,7 +20,7 @@ const aggregation = [
 
 module.exports = {
   async up(db, client) {
-    const applicationsToUpdate = await db.aggregate(aggregation).toArray();
+    const applicationsToUpdate = await db.collection("applications").aggregate(aggregation).toArray();
     const ids = applicationsToUpdate.map((application) => application._id);
     const updatedApplications = await ApplicationModel.updateMany(
       { _id: { $in: ids } },
