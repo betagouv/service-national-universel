@@ -323,4 +323,9 @@ export interface YoungDto {
   deletedAt?: Date;
   createdAt?: Date;
   updatedAt?: Date;
+  // legacy
+  cohesionStayPresence?: string;
+  presenceJDM?: string;
+  departSejourAt?: string;
+  cohesionStayMedicalFileReceived?: string;
 }
