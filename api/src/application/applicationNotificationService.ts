@@ -14,12 +14,17 @@ export async function notifyReferentMilitaryPreparationFilesSubmitted(user: Youn
   return await sendTemplate(template, { emailTo, params });
 }
 
-export async function notifyReferentNewApplication(application: ApplicationType) {
+export async function notifyReferentNewApplication(application: ApplicationType, young: YoungType) {
   const referent = await ReferentModel.findById(application.tutorId);
   if (!referent) return;
   const emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
   const template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
-  const params = { cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
+  const params = {
+    cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`,
+    missionName: application.missionName,
+    youngFirstName: young.firstName,
+    youngLastName: young.lastName,
+  };
   return await sendTemplate(template, { emailTo, params });
 }
 
