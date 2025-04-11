@@ -655,6 +655,8 @@ export async function transformInscription(data) {
       "Mis à jour le": formatLongDateFR(data.updatedAt),
       "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
       "Statut général": translate(data.status),
+      "Statut Phase 1": translatePhase1(data.statusPhase1),
+      "Statut Phase 2": translatePhase2(data.statusPhase2),
       "Dernier statut le": formatLongDateFR(data.lastStatusAt),
     };
   });
