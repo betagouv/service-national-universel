@@ -20,7 +20,7 @@ import {
 import { sendEmail, sendTemplate } from "../brevo";
 import path from "path";
 import fs from "fs";
-import { addDays } from "date-fns";
+import { addDays, isBefore, isToday } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
 import {
@@ -32,7 +32,7 @@ import {
   ROLES,
   SUB_ROLES,
   EQUIVALENCE_STATUS,
-  DEPART_SEJOUR_MOTIFS_NOT_DONE,
+  YOUNG_STATUS_PHASE1,
   UserDto,
 } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
@@ -769,64 +769,37 @@ export async function autoValidationSessionPhase1Young({ young, sessionPhase1, u
   return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
 }
 
-type DepartSejourMotif =
-  | "Exclusion"
-  | "Autre"
-  | "Cas de force majeure pour le volontaire"
-  | "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)";
-
-export async function updateStatusPhase1(young: YoungDocument, validationDateWithDays: string, user: Partial<UserDto>) {
-  const initialState = young.statusPhase1;
+export async function updateStatusPhase1(young: YoungDocument, validationDate: string | Date, user: Partial<UserDto>) {
   try {
-    const now = new Date();
-    const validationDate = new Date(validationDateWithDays);
-    // due to a bug the timezone may vary between french and UTC time
-    validationDate.setHours(validationDate.getHours() - 2);
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    logger.debug(`Validation date: ${validationDate}, now: ${now}`);
-    const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
-    // ! Si null, on considère que le statut de pointage n'est pas encore connu (présent/absent)
-    const isCohesionStayValid = young.cohesionStayPresence === "true";
-    // Cette constante pour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
-    // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    logger.debug(`isValidationDatePassed: ${isValidationDatePassed}, isCohesionStayValid: ${isCohesionStayValid}, isDepartureDateValid: ${isDepartureDateValid}`);
-    if (isValidationDatePassed) {
-      if (isCohesionStayValid && isDepartureDateValid) {
-        if (young?.departSejourMotif === "Exclusion") {
-          logger.debug("Young excluded");
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          logger.debug("Young done");
-          young.set({ statusPhase1: "DONE" });
-        }
-      } else if (!isDepartureDateValid) {
-        if (young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as DepartSejourMotif)) {
-          logger.debug("Young not done b/c of departSejourMotif");
-          young.set({ statusPhase1: "NOT_DONE" });
-        }
-      } else {
-        // Sinon on ne valide pas sa phase 1.
-        // Inclut les jeunes avec départs séjour motifs avant le 8ème jour de présence
-        if (young.cohesionStayPresence === "false") {
-          logger.debug("Young not done b/c of cohesionStayPresence");
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          logger.debug("Young stays affected");
-          young.set({ statusPhase1: "AFFECTED" });
-        }
-      }
+    if (!isToday(validationDate)) {
+      logger.debug("Date de validation non atteinte, aucune modification");
+      return false;
     }
-    if (initialState !== young.statusPhase1) {
-      await young.save({ fromUser: user });
-      return true;
-    }
-    return false;
+    const statusPhase1 = shouldValidatePhase1(young, validationDate) ? YOUNG_STATUS_PHASE1.DONE : YOUNG_STATUS_PHASE1.NOT_DONE;
+    young.set({ statusPhase1 });
+    await young.save({ fromUser: user });
+    return true;
   } catch (e) {
     capture(e);
     return false;
   }
+}
+
+function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): boolean {
+  if (young.cohesionStayPresence !== "true") {
+    logger.debug("Le volontaire n'a pas été pointé présent");
+    return false;
+  }
+  if (young.departSejourMotif === "Exclusion") {
+    logger.debug("Le volontaire a été exclu");
+    return false;
+  }
+  if (young.departSejourAt && isBefore(young.departSejourAt, validationDate)) {
+    logger.debug("Le volontaire est parti avant la date de validation");
+    return false;
+  }
+  logger.debug("Le volontaire a été validé");
+  return true;
 }
 
 export const getReferentManagerPhase2 = async (department) => {
