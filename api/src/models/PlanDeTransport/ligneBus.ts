@@ -1,12 +1,12 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, LigneBusSchema, LigneBusTeamSchema } from "snu-lib";
+import { InterfaceExtended, LigneBusSchema, LigneBusTeamSchema, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../../anonymization/PlanDeTransport/ligneBus";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
-const MODELNAME = "lignebus";
+const MODELNAME = MONGO_COLLECTION.LIGNE_BUS;
 
 const schema = new Schema({
   ...LigneBusSchema,

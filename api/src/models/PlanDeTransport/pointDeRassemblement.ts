@@ -2,9 +2,9 @@ import mongoose, { InferSchemaType, Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
-import { InterfaceExtended, PointDeRassemblementSchema } from "snu-lib";
+import { InterfaceExtended, PointDeRassemblementSchema, MONGO_COLLECTION } from "snu-lib";
 
-const MODELNAME = "pointderassemblement";
+const MODELNAME = MONGO_COLLECTION.POINT_DE_RASSEMBLEMENT;
 
 const schema = new Schema(PointDeRassemblementSchema);
 

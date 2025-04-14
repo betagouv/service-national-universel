@@ -1,13 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, TagsSchema, MONGO_COLLECTION } from "snu-lib";
+import { InterfaceExtended, MONGO_COLLECTION, RoleSchema } from "snu-lib";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import { CustomSaveParams, DocumentExtended, UserExtension, UserSaved } from "../types";
 
-const MODELNAME = MONGO_COLLECTION.SNU_TAG;
-
-const schema = new Schema(TagsSchema);
+const schema = new Schema(RoleSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
@@ -24,17 +22,19 @@ schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
 
 schema.plugin(patchHistory, {
   mongoose,
-  name: `${MODELNAME}Patches`,
+  name: `${MONGO_COLLECTION.ROLE}Patches`,
   trackOriginalValue: true,
   includes: {
-    modelName: { type: String, required: true, default: MODELNAME },
+    modelName: { type: String, required: true, default: MONGO_COLLECTION.ROLE },
     user: { type: Object, required: false, from: "_user" },
   },
   excludes: ["/updatedAt"],
 });
 
-type TagsType = InterfaceExtended<InferSchemaType<typeof schema>>;
-export type TagsDocument<T = {}> = DocumentExtended<TagsType & T>;
-type SchemaExtended = TagsDocument & UserExtension;
+// schema.index({ code: 1 });
 
-export const TagsModel = mongoose.model<TagsDocument>(MODELNAME, schema);
+type RoleType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type RoleDocument<T = {}> = DocumentExtended<RoleType & T>;
+type SchemaExtended = RoleDocument & UserExtension;
+
+export const RoleModel = mongoose.model<RoleDocument>(MONGO_COLLECTION.ROLE, schema);
