@@ -17,14 +17,19 @@ import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../../../assets/hero/phase1.png";
+import { isPast, subDays } from "date-fns";
+import useContactsConvocation from "./utils/useContactsConvocation";
+import ContactConvocation from "./components/ContactsConvocation";
 
 export default function Affected() {
   const { young, isCLE } = useAuth();
   const { cohort } = useCohort();
   const { center, meetingPoint, isPending: loading, isError } = useAffectationInfo();
+  const { data: contacts } = useContactsConvocation();
   const { areAllStepsDone } = useSteps();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
+  const shouldDisplayContactConvocation = isPast(subDays(cohort.dateStart, 1)) && contacts?.length;
 
   if (areAllStepsDone) {
     window.scrollTo(0, 0);
@@ -60,7 +65,6 @@ export default function Affected() {
           )}
         </div>
       </HomeHeader>
-
       {areAllStepsDone && (
         <div className="mt-8 gap-12 grid grid-cols-1 md:grid-cols-3">
           <div>
@@ -68,6 +72,8 @@ export default function Affected() {
           </div>
           <div className="col-span-2">
             <TodoBackpack />
+            <br />
+            {shouldDisplayContactConvocation && <ContactConvocation contacts={contacts} />}
           </div>
         </div>
       )}
