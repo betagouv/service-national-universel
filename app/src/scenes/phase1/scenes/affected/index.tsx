@@ -75,7 +75,9 @@ export default function Affected() {
       <div className="mt-8 grid grid-cols-1 gap-12">
         <StepsAffected />
 
-        <div className={areAllStepsDone ? "-order-1" : ""}>{!isCLE && <FaqAffected />}</div>
+        <div className={areAllStepsDone ? "-order-1" : ""}>
+          <FaqAffected />
+        </div>
 
         <div className="flex justify-end py-4 pr-8">
           <JDMA id="3504" />
