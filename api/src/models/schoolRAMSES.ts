@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, SchoolRAMSESchema } from "snu-lib";
+import { InterfaceExtended, SchoolRAMSESchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "schoolramses";
+const MODELNAME = MONGO_COLLECTION.SCHOOL_RAMSES;
 
 const schema = new Schema(SchoolRAMSESchema, { timestamps: true });
 

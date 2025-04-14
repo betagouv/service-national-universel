@@ -115,6 +115,8 @@ const translate = (value) => {
       return "Inscrit(e) nulle part";
     case "admin":
       return "Modérateur";
+    case "god":
+      return "Super administrateur";
     case "dsnj":
       return "DSNJ";
     case "injep":

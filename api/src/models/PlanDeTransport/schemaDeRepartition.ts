@@ -2,9 +2,9 @@ import mongoose, { InferSchemaType, Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
-import { InterfaceExtended, SchemaDeRepartitionSchema } from "snu-lib";
+import { InterfaceExtended, SchemaDeRepartitionSchema, MONGO_COLLECTION } from "snu-lib";
 
-const MODELNAME = "schemaderepartition";
+const MODELNAME = MONGO_COLLECTION.SCHEMA_DE_REPARTITION;
 
 const schema = new Schema(SchemaDeRepartitionSchema);
 

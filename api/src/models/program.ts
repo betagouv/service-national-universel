@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, ProgramSchema } from "snu-lib";
+import { InterfaceExtended, ProgramSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "program";
+const MODELNAME = MONGO_COLLECTION.PROGRAM;
 
 const schema = new Schema(ProgramSchema);
 

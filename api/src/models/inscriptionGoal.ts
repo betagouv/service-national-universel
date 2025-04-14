@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InscriptionGoalSchema, InterfaceExtended } from "snu-lib";
+import { InscriptionGoalSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "inscriptiongoal";
+const MODELNAME = MONGO_COLLECTION.INSCRIPTION_GOAL;
 
 const schema = new Schema(InscriptionGoalSchema);
 

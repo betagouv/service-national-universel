@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ClasseType, ClasseSchema } from "snu-lib";
+import { ClasseType, ClasseSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 import { EtablissementDocument } from "./etablissement";
@@ -12,7 +12,7 @@ import { PointDeRassemblementDocument } from "../PlanDeTransport/pointDeRassembl
 import { LigneBusDocument } from "../PlanDeTransport/ligneBus";
 import { CohortDocument } from "../cohort";
 
-const MODELNAME = "classe";
+const MODELNAME = MONGO_COLLECTION.CLASSE;
 
 const schema = new mongoose.Schema(ClasseSchema);
 
