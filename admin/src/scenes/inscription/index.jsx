@@ -18,7 +18,7 @@ import { appURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
-import { transformInscription, transformVolontairesSchool } from "../volontaires/utils";
+import { transformInscription } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
@@ -279,7 +279,7 @@ export default function Inscription() {
                   button: `group flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                   loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                 }}
-                transform={async (data) => transformVolontairesSchool(data)}
+                transform={async (data) => transformInscription(data)}
               />
             )}
           </div>
