@@ -1,3 +1,4 @@
+import plausibleEvent from "@/services/plausible";
 import React from "react";
 import { HiOutlineInformationCircle } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
@@ -21,16 +22,44 @@ export default function ContactConvocation({ contacts }: { contacts: ContactConv
               <div>
                 <p className="font-semibold">Mon point de contact</p>
                 <p className="text-gray-400">{contact.contactName}</p>
-                <div className="text-gray-400 underline underline-offset-2 md:hidden">
-                  <p>{contact.contactMail}</p>
-                  <p>{contact.contactPhone}</p>
+                <div className="text-gray-400 hover:text-gray-600 underline underline-offset-2 md:hidden">
+                  <p>
+                    <a
+                      href={`mailto:${contact.contactMail}`}
+                      onClick={() => plausibleEvent("Phase1/Contact convocation - email")}
+                      className="text-gray-400 underline underline-offset-2 hover:text-gray-600 hover:underline">
+                      {contact.contactMail}
+                    </a>
+                  </p>
+                  <p>
+                    <a
+                      href={`tel:${contact.contactPhone}`}
+                      onClick={() => plausibleEvent("Phase1/Contact convocation - téléphone")}
+                      className="text-gray-400 underline underline-offset-2 hover:text-gray-600 hover:underline">
+                      {contact.contactPhone}
+                    </a>
+                  </p>
                 </div>
               </div>
             </div>
           </div>
-          <div className="text-right text-gray-400 underline underline-offset-2 hidden md:block">
-            <p>{contact.contactMail}</p>
-            <p>{contact.contactPhone}</p>
+          <div className="text-right hidden md:block">
+            <p>
+              <a
+                href={`mailto:${contact.contactMail}`}
+                onClick={() => plausibleEvent("Phase1/Contact convocation - email")}
+                className="text-gray-400 underline underline-offset-2 hover:text-gray-600 hover:underline">
+                {contact.contactMail}
+              </a>
+            </p>
+            <p>
+              <a
+                href={`tel:${contact.contactPhone}`}
+                onClick={() => plausibleEvent("Phase1/Contact convocation - téléphone")}
+                className="text-gray-400 underline underline-offset-2 hover:text-gray-600 hover:underline">
+                {contact.contactPhone}
+              </a>
+            </p>
           </div>
         </div>
       ))}
