@@ -1,7 +1,7 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 import { EnvoiCampagneStatut, EVENEMENT_TYPE_MAP, TypeEvenement, TypeRegleEnvoi } from "snu-lib";
 import { CampagneSpecifiqueModelWithoutRef, CampagneSpecifiqueModelWithRefAndGeneric } from "../Campagne.model";
-import { DatesSession, TYPE_EVENEMENT_TO_DATE_KEY } from "../Programmation.model";
+import { CampagneProgrammation, DatesSession, TYPE_EVENEMENT_TO_DATE_KEY } from "../Programmation.model";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
@@ -9,12 +9,15 @@ type CampagneSpecifique = CampagneSpecifiqueModelWithoutRef | CampagneSpecifique
 
 @Injectable()
 export class ProgrammationService {
+    private readonly logger: Logger = new Logger(ProgrammationService.name);
+
     constructor(@Inject(ClockGateway) private readonly clockGateway: ClockGateway) {}
 
     computeDateEnvoi(campagne: CampagneSpecifique, datesSession: DatesSession): CampagneSpecifique {
         if (!campagne.programmations?.length) {
             return campagne;
         }
+        this.logger.log(`Computation of date for campagne ${campagne.id}`);
 
         const programmationsWithDate = campagne.programmations.map((programmation) => {
             const typeRegle = EVENEMENT_TYPE_MAP[programmation.type];
@@ -36,14 +39,22 @@ export class ProgrammationService {
             };
         });
 
+        this.logger.log(`Computed dates for campagne ${campagne.id}, ${JSON.stringify(programmationsWithDate)}`);
         return {
             ...campagne,
             programmations: programmationsWithDate,
         };
     }
 
+    shouldProgrammationBeSent(programmation: CampagneProgrammation, startDate: Date, endDate: Date): boolean {
+        if (!programmation.envoiDate) {
+            return false;
+        }
+        return programmation.envoiDate >= startDate && programmation.envoiDate <= endDate && !programmation.sentAt;
+    }
+
     private calculateDateBasedOnSessionDate(
-        programmation: { type: TypeEvenement; joursDecalage: number },
+        programmation: { type: TypeEvenement; joursDecalage?: number },
         datesSession: DatesSession,
     ): Date | undefined {
         const propertyName = TYPE_EVENEMENT_TO_DATE_KEY[programmation.type];
@@ -51,10 +62,13 @@ export class ProgrammationService {
 
         if (!dateCible) return undefined;
 
-        return this.clockGateway.addDays(new Date(dateCible), programmation.joursDecalage);
+        return this.clockGateway.addDays(new Date(dateCible), programmation.joursDecalage || 0);
     }
 
-    private calculateDateBasedOnPreviousSending(campagne: CampagneSpecifique, joursDecalage: number): Date | undefined {
+    private calculateDateBasedOnPreviousSending(
+        campagne: CampagneSpecifique,
+        joursDecalage?: number,
+    ): Date | undefined {
         if (!campagne.envois?.length) return undefined;
 
         const lastCompletedSending = [...campagne.envois]
@@ -63,6 +77,6 @@ export class ProgrammationService {
 
         if (!lastCompletedSending) return undefined;
 
-        return this.clockGateway.addDays(new Date(lastCompletedSending.date), joursDecalage);
+        return this.clockGateway.addDays(new Date(lastCompletedSending.date), joursDecalage || 0);
     }
 }

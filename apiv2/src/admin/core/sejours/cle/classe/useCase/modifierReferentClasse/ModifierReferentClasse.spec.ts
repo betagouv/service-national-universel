@@ -9,8 +9,7 @@ import { InvitationType, ROLES } from "snu-lib";
 import { InviterReferentClasse } from "../../../referent/useCase/InviteReferentClasse";
 import { ClasseGateway } from "../../Classe.gateway";
 import { ClasseModel } from "../../Classe.model";
-import { ConfigService } from "aws-sdk";
-import { ConfigModule } from "@nestjs/config";
+import { ConfigModule, ConfigService } from "@nestjs/config";
 import configuration from "@config/testConfiguration";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
@@ -70,7 +69,7 @@ describe("ModifierReferentClasse", () => {
                 {
                     provide: ConfigService,
                     useValue: {
-                        get: jest.fn(),
+                        getOrThrow: jest.fn(),
                     },
                 },
             ],

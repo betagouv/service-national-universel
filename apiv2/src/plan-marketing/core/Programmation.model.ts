@@ -2,11 +2,15 @@ import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
 import { TypeEvenement } from "snu-lib";
 
 export interface CampagneProgrammation {
-    joursDecalage: number;
+    id: string;
+    joursDecalage?: number;
     type: TypeEvenement;
     envoiDate?: Date;
     createdAt: Date;
+    sentAt?: Date;
 }
+
+export type CreateCampagneProgrammation = Omit<CampagneProgrammation, "id" | "createdAt">;
 
 export type DatesSession = Pick<
     SessionModel,

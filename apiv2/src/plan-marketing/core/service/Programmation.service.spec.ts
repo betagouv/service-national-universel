@@ -72,6 +72,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: -3,
                         type: TypeEvenement.DATE_DEBUT_SEJOUR,
                         createdAt: new Date(),
@@ -84,7 +85,7 @@ describe("ProgrammationService", () => {
             const expectedDate = new Date(dateStart);
             expectedDate.setDate(expectedDate.getDate() - 3);
 
-            expect(result.programmations[0].envoiDate).toEqual(expectedDate);
+            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
         });
 
         it("should compute date for DATE_FERMETURE_INSCRIPTIONS type", () => {
@@ -106,6 +107,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 2,
                         type: TypeEvenement.DATE_FERMETURE_INSCRIPTIONS,
                         createdAt: new Date(),
@@ -118,7 +120,7 @@ describe("ProgrammationService", () => {
             const expectedDate = new Date(inscriptionEndDate);
             expectedDate.setDate(expectedDate.getDate() + 2);
 
-            expect(result.programmations[0].envoiDate).toEqual(expectedDate);
+            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
         });
 
         it("should compute date for ENVOI_PRECEDENT type", () => {
@@ -137,6 +139,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 7,
                         type: TypeEvenement.ENVOI_PRECEDENT,
                         createdAt: new Date(),
@@ -163,7 +166,7 @@ describe("ProgrammationService", () => {
             const expectedDate = new Date(lastSentDate);
             expectedDate.setDate(expectedDate.getDate() + 7);
 
-            expect(result.programmations[0].envoiDate).toEqual(expectedDate);
+            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
         });
 
         it("should use ClockGateway.addDays for ENVOI_PRECEDENT calculation", () => {
@@ -182,6 +185,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 7,
                         type: TypeEvenement.ENVOI_PRECEDENT,
                         createdAt: new Date(),
@@ -206,7 +210,7 @@ describe("ProgrammationService", () => {
             // Verify the expected date
             const expectedDate = new Date(lastSentDate);
             expectedDate.setDate(expectedDate.getDate() + 7);
-            expect(result.programmations[0].envoiDate).toEqual(expectedDate);
+            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
         });
 
         it("should handle multiple programmations", () => {
@@ -230,11 +234,13 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: -3,
                         type: TypeEvenement.DATE_DEBUT_SEJOUR,
                         createdAt: new Date(),
                     },
                     {
+                        id: "2",
                         joursDecalage: 2,
                         type: TypeEvenement.DATE_FERMETURE_INSCRIPTIONS,
                         createdAt: new Date(),
@@ -250,8 +256,8 @@ describe("ProgrammationService", () => {
             const expectedDate2 = new Date(inscriptionEndDate);
             expectedDate2.setDate(expectedDate2.getDate() + 2);
 
-            expect(result.programmations[0].envoiDate).toEqual(expectedDate1);
-            expect(result.programmations[1].envoiDate).toEqual(expectedDate2);
+            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate1);
+            expect(result.programmations?.[1].envoiDate).toEqual(expectedDate2);
         });
 
         it("should return undefined envoiDate if date property not found in datesSession", () => {
@@ -272,6 +278,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 2,
                         type: TypeEvenement.DATE_FERMETURE_INSCRIPTIONS,
                         createdAt: new Date(),
@@ -280,7 +287,7 @@ describe("ProgrammationService", () => {
             };
 
             const result = service.computeDateEnvoi(campagne, datesSession as DatesSession);
-            expect(result.programmations[0].envoiDate).toBeUndefined();
+            expect(result.programmations?.[0].envoiDate).toBeUndefined();
         });
 
         it("should throw FunctionalException when typeRegle is not found", () => {
@@ -297,6 +304,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 0,
                         type: "INVALID_TYPE" as unknown as TypeEvenement,
                         createdAt: new Date(),
@@ -323,6 +331,7 @@ describe("ProgrammationService", () => {
                 isProgrammationActive: true,
                 programmations: [
                     {
+                        id: "1",
                         joursDecalage: 0,
                         type: TypeEvenement.AUCUN,
                         createdAt: new Date(),
@@ -335,8 +344,105 @@ describe("ProgrammationService", () => {
 
             const result = service.computeDateEnvoi(campagne, {} as DatesSession);
 
-            expect(result.programmations[0].envoiDate).toEqual(customDate);
+            expect(result.programmations?.[0].envoiDate).toEqual(customDate);
             expect(clockGateway.addDays).not.toHaveBeenCalled();
+        });
+    });
+
+    describe("shouldProgrammationBeSent", () => {
+        const startDate = new Date("2023-08-01");
+        const endDate = new Date("2023-08-10");
+
+        it("should return false if envoiDate is undefined", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: undefined,
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(false);
+        });
+
+        it("should return false if envoiDate is before startDate", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-07-31"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(false);
+        });
+
+        it("should return false if envoiDate is after endDate", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-08-11"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(false);
+        });
+
+        it("should return true if envoiDate equals startDate and sentAt is not defined", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-08-01"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(true);
+        });
+
+        it("should return true if envoiDate equals endDate and sentAt is not defined", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-08-10"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(true);
+        });
+
+        it("should return true if envoiDate is between startDate and endDate and sentAt is not defined", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-08-05"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(true);
+        });
+
+        it("should return false if sentAt is defined, even if date conditions are met", () => {
+            const programmation = {
+                id: "1",
+                joursDecalage: 0,
+                type: TypeEvenement.AUCUN,
+                createdAt: new Date(),
+                envoiDate: new Date("2023-08-05"),
+                sentAt: new Date("2023-08-05"),
+            };
+
+            const result = service.shouldProgrammationBeSent(programmation, startDate, endDate);
+            expect(result).toBe(false);
         });
     });
 });
