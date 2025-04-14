@@ -86,8 +86,6 @@ describe("DesistementController", () => {
                 affectationTaskId: affectationTask.id,
             });
 
-            console.log(response.body);
-
             expect(response.status).toBe(201);
             expect(response.body.name).toBe(TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION);
             expect(response.body.status).toBe(TaskStatus.PENDING);
