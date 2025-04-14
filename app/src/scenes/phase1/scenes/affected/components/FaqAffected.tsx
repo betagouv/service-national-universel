@@ -1,12 +1,18 @@
 import React from "react";
 import ArrowUpRight from "../../../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "../../../components/QuestionBlock";
+import useAuth from "@/services/useAuth";
 
 const FaqAffected = () => {
+  const { isCLE } = useAuth();
   return (
     <section id="faq">
       <h2 className="my-4 text-xl font-bold">Questions fréquentes</h2>
       <div className="flex flex-col gap-4">
+        <QuestionBlock
+          questionText="Qui contacter en cas d’urgence pendant que mon enfant est en séjour de cohésion ?"
+          answerText={isCLE ? "Le point de contact est l’établissement scolaire de votre enfant." : "Le contact figure sur la convocation et sur le compte SNU de votre enfant."}
+        />
         <QuestionBlock
           questionText="Comment se passe le transport ?"
           answerText={

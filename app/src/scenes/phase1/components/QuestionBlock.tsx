@@ -3,7 +3,13 @@ import { Disclosure } from "@headlessui/react";
 import ChevronDown from "../../../assets/icons/ChevronDown";
 import ChevronRight from "../../../assets/icons/ChevronRight";
 
-const QuestionBlock = ({ questionText = "", answerText = "", readMoreLink = null }) => {
+type Props = {
+  questionText: string | React.ReactNode;
+  answerText: string | React.ReactNode;
+  readMoreLink?: string | null;
+};
+
+const QuestionBlock = ({ questionText = "", answerText = "", readMoreLink = null }: Props) => {
   return (
     <div className="rounded-lg border-[1px] border-gray-200">
       <Disclosure>
