@@ -38,6 +38,15 @@ const PlanMarketingService = {
       target: "API_V2",
     })();
   },
+
+  toggleArchivage: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["ToggleArchivagePlanMarketingRoute"]>({
+      path: "/campagne/{id}/toggle-archivage",
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+    })();
+  },
 };
 
 export default PlanMarketingService;

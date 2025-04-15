@@ -46,6 +46,8 @@ export class CampagneMongoRepository implements CampagneGateway {
                     type: campagneGenerique.type!,
                     envois: [],
                     programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                    isProgrammationActive: campagneGenerique.isProgrammationActive || false,
+                    isArchived: campagneGenerique.isArchived || false,
                 };
             }
         }
@@ -64,7 +66,13 @@ export class CampagneMongoRepository implements CampagneGateway {
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]> {
-        const campagnes = await this.campagneModel.find({ ...filter }).sort({ createdAt: sort === "ASC" ? 1 : -1 });
+        const searchFilter = { ...filter };
+
+        if (searchFilter && searchFilter.isArchived === undefined) {
+            delete searchFilter.isArchived;
+        }
+
+        const campagnes = await this.campagneModel.find(searchFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
         return Promise.all(
             campagnes.map(async (campagne) => {
                 const campagneModel = CampagneMapper.toModel(campagne);
@@ -81,6 +89,8 @@ export class CampagneMongoRepository implements CampagneGateway {
                             destinataires: campagneGenerique.destinataires,
                             type: campagneGenerique.type,
                             programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                            isProgrammationActive: campagneGenerique.isProgrammationActive || false,
+                            isArchived: campagneGenerique.isArchived || false,
                         };
                     }
                 }
@@ -117,6 +127,8 @@ export class CampagneMongoRepository implements CampagneGateway {
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type,
                     programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                    isProgrammationActive: campagneGenerique.isProgrammationActive || false,
+                    isArchived: campagneGenerique.isArchived || false,
                 };
             }
             return campagneModel;

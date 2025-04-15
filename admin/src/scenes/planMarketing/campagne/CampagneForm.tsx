@@ -2,7 +2,7 @@ import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, InputText, Modal, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useState } from "react";
-import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useCampagneForm } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
@@ -26,11 +26,16 @@ export interface CampagneDataProps {
   contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
-  programmations?: ProgrammationProps[];
+  programmations: ProgrammationProps[];
+  isProgrammationActive: boolean;
+  isArchived?: boolean;
 }
 
-export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
+export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic" | "isProgrammationActive" | "programmations">> {
   generic: boolean;
+  isProgrammationActive: boolean;
+  programmations?: ProgrammationProps[];
+  isArchived?: boolean;
 }
 
 export interface CampagneFormProps {
@@ -40,6 +45,7 @@ export interface CampagneFormProps {
   onSave: (campagneId: string) => void;
   onDuplicate: (campagneData: CampagneDataProps) => void;
   forceOpen?: boolean;
+  onToggleArchive?: (campagne: DraftCampagneDataProps) => void;
 }
 
 const recipientOptions = [
@@ -52,10 +58,17 @@ const recipientOptions = [
 ];
 
 export default React.memo(
-  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false }: CampagneFormProps) {
+  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false, onToggleArchive }: CampagneFormProps) {
     const { state, handleChange, saveCampagne, isPending, isDirty } = useCampagneForm(campagneData, onSave);
     const { errors, validateForm } = useCampagneError(state);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
+
+    React.useEffect(() => {
+      if (campagneData.id) {
+        handleChange("reset");
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [campagneData.isArchived, campagneData.isProgrammationActive]);
 
     const handleSubmit = () => {
       if (validateForm() && campagneData.id) {
@@ -68,13 +81,28 @@ export default React.memo(
       const payload = {
         ...stateWithoutErrorTemplate,
         id: campagneData.id,
+        isProgrammationActive: state.isProgrammationActive ?? false,
       } as CampagneDataProps;
       saveCampagne({ id: campagneData.id, payload });
       setIsConfirmModalOpen(false);
     };
 
+    const handleToggleArchive = () => {
+      if (campagneData.id && onToggleArchive) {
+        onToggleArchive(campagneData);
+      }
+    };
+
     const closeModal = () => {
       setIsConfirmModalOpen(false);
+    };
+
+    const handleProgrammationChange = (value: ProgrammationProps[] | { isProgrammationActive: boolean }) => {
+      if (Array.isArray(value)) {
+        handleChange("programmations", value);
+      } else {
+        handleChange("isProgrammationActive", value.isProgrammationActive);
+      }
     };
 
     const ErrorMessage = ({ message }: { message?: string }) => {
@@ -207,16 +235,32 @@ export default React.memo(
 
               <div className="gap-16">
                 <ProgrammationList
-                  campagne={campagneData as CampagneDataProps}
-                  programmations={state.programmations || []}
-                  onChange={(programmations) => handleChange("programmations", programmations)}
-                  isCampagneGenerique
+                  campagne={
+                    {
+                      ...state,
+                      programmations: state.programmations || [],
+                    } as CampagneDataProps
+                  }
+                  onChange={handleProgrammationChange}
+                  isCampagneGenerique={campagneData.generic}
                 />
               </div>
             </div>
 
             <hr className="border-t border-gray-200" />
             <div className="flex justify-end mt-4 gap-2">
+              <div className="flex-1 flex">
+                {campagneData.id && onToggleArchive && (
+                  <Button
+                    leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                    onClick={handleToggleArchive}
+                    type="secondary"
+                    className="mr-auto"
+                    title={campagneData.isArchived ? "Désarchiver" : "Archiver"}
+                    disabled={isPending}
+                  />
+                )}
+              </div>
               {isNotSaved && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <HiOutlineExclamation className="w-5 h-5" />
@@ -260,8 +304,21 @@ export default React.memo(
       </>
     );
   },
-
   (prevProps, nextProps) => {
+    if (prevProps.campagneData.isArchived !== nextProps.campagneData.isArchived) {
+      return false;
+    }
+
+    if (prevProps.campagneData.isProgrammationActive !== nextProps.campagneData.isProgrammationActive) {
+      return false;
+    }
+
+    const prevLength = prevProps.campagneData.programmations?.length || 0;
+    const nextLength = nextProps.campagneData.programmations?.length || 0;
+    if (prevLength !== nextLength) {
+      return false;
+    }
+
     return prevProps.campagneData === nextProps.campagneData && prevProps.isDupliquerCampagneDisabled === nextProps.isDupliquerCampagneDisabled;
   },
 );

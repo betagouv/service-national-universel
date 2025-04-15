@@ -1,4 +1,4 @@
-import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
+import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, Programmation, RouteResponseBodyV2 } from "../..";
 import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 import { ListeDiffusionRoutes } from "./listeDiffusion";
@@ -19,6 +19,9 @@ interface CampagneComplete extends CampagneBase {
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
   envois?: CampagneEnvoi[];
+  isProgrammationActive: boolean;
+  programmations?: Programmation[];
+  isArchived?: boolean;
 }
 
 // Types pour les campagnes génériques
@@ -85,6 +88,7 @@ interface SearchPlanMarketingRoute extends BasicRoute {
     generic?: boolean;
     sort?: "ASC" | "DESC";
     cohortId?: string;
+    isArchived?: boolean;
   };
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }
@@ -93,6 +97,15 @@ interface EnvoyerPlanMarketingRoute extends BasicRoute {
   method: "POST";
   path: "/campagne/{id}/envoyer";
   response: RouteResponseBodyV2<void>;
+}
+
+interface ToggleArchivagePlanMarketingRoute extends BasicRoute {
+  method: "POST";
+  path: "/campagne/{id}/toggle-archivage";
+  params: {
+    id: string;
+  };
+  response: RouteResponseBodyV2<CampagneResponse>;
 }
 
 export type PlanMarketingRoutes = {
@@ -104,4 +117,5 @@ export type PlanMarketingRoutes = {
   CreateDistributionList: CreateDistributionListBrevoRoute;
   ListeDiffusionRoutes: ListeDiffusionRoutes;
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
+  ToggleArchivagePlanMarketingRoute: ToggleArchivagePlanMarketingRoute;
 };

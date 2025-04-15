@@ -2,38 +2,33 @@ import React from "react";
 import { HiOutlinePlusSm } from "react-icons/hi";
 import ProgrammationForm, { ProgrammationProps } from "./ProgrammationForm";
 import { Button, Switcher } from "@snu/ds/admin";
-import { TypeEvenement, TypeRegleEnvoi } from "snu-lib";
+import { TypeEvenement } from "snu-lib";
 import { CampagneDataProps } from "./CampagneForm";
-import { useToggle } from "react-use";
 
 type ProgrammationListProps = {
   campagne: CampagneDataProps;
-  programmations: ProgrammationProps[];
-  onChange: (programmations: ProgrammationProps[]) => void;
+  onChange: (value: ProgrammationProps[] | { isProgrammationActive: boolean }) => void;
   isCampagneGenerique?: boolean;
 };
 
-export default function ProgrammationList({ campagne, programmations, onChange, isCampagneGenerique = false }: ProgrammationListProps) {
-  const [isProgrammationActive, setIsProgrammationActive] = useToggle(false);
-
-  const handleDelete = (id: string) => {
-    const newProgrammations = programmations.filter((prog) => prog.id !== id);
+export default function ProgrammationList({ campagne, onChange, isCampagneGenerique = false }: ProgrammationListProps) {
+  const handleDelete = (index: number) => {
+    const newProgrammations = [...campagne.programmations];
+    newProgrammations.splice(index, 1);
     onChange(newProgrammations);
   };
 
   const handleAdd = () => {
     const newProgrammation: ProgrammationProps = {
-      id: Math.random().toString(36).substr(2, 9),
-      label: "",
-      typeEvenement: TypeEvenement.AUCUN,
-      typeRegleEnvoi: TypeRegleEnvoi.DATE,
       joursDecalage: 0,
+      type: TypeEvenement.AUCUN,
     };
-    onChange([...programmations, newProgrammation]);
+    onChange([...campagne.programmations, newProgrammation]);
   };
 
-  const handleChange = (id: string, data: Partial<ProgrammationProps>) => {
-    const newProgrammations = programmations.map((prog) => (prog.id === id ? { ...prog, ...data } : prog));
+  const handleChange = (index: number, data: Partial<ProgrammationProps>) => {
+    const newProgrammations = [...campagne.programmations];
+    newProgrammations[index] = { ...newProgrammations[index], ...data };
     onChange(newProgrammations);
   };
 
@@ -42,20 +37,27 @@ export default function ProgrammationList({ campagne, programmations, onChange, 
       <div className="flex justify-between items-center mb-4">
         <h3 className="text-lg font-medium text-gray-900">Programmation</h3>
         <div className="flex items-center gap-2">
-          <Switcher label={isProgrammationActive ? "Active" : "Inactive"} value={isProgrammationActive} onChange={setIsProgrammationActive} />
-          <Button type="icon" leftIcon={<HiOutlinePlusSm size={20} />} onClick={handleAdd} />
+          <Switcher
+            label={campagne.isProgrammationActive ? "Active" : "Inactive"}
+            value={campagne.isProgrammationActive}
+            onChange={(value) => onChange({ isProgrammationActive: value })}
+            disabled={campagne.isArchived}
+          />
+          <Button type="icon" leftIcon={<HiOutlinePlusSm size={20} />} onClick={handleAdd} disabled={campagne.isArchived} />
         </div>
       </div>
       <div className="space-y-4">
-        {programmations.map((prog, index) => (
+        {campagne.programmations.map((prog, index) => (
           <ProgrammationForm
-            isEnabled={isProgrammationActive}
-            key={prog.id}
-            {...prog}
-            label={index === 0 ? "Premier envoi" : `Relance n°${index}`}
+            key={index}
+            programmation={{
+              ...prog,
+              label: index === 0 ? "Premier envoi" : `Relance n°${index}`,
+            }}
+            isEnabled={campagne.isProgrammationActive}
             isCampagneGenerique={isCampagneGenerique}
-            onDelete={() => handleDelete(prog.id)}
-            onChange={(data) => handleChange(prog.id, data)}
+            onDelete={() => handleDelete(index)}
+            onChange={(data) => handleChange(index, data)}
           />
         ))}
       </div>

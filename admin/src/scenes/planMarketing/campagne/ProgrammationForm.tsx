@@ -1,15 +1,18 @@
 import React, { useMemo } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import { Select, InputText, Button } from "@snu/ds/admin";
-import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, EVENEMENT_TYPE_MAP, REGLE_ENVOI_CONFIG } from "snu-lib";
+import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG } from "snu-lib";
 
 export type ProgrammationProps = {
-  id: string;
-  label: string;
-  typeEvenement: TypeEvenement;
-  typeRegleEnvoi: TypeRegleEnvoi;
-  dateEnvoi?: string;
-  joursDecalage?: number;
+  joursDecalage: number;
+  type: TypeEvenement;
+  createdAt?: Date;
+  envoiDate?: Date;
+  label?: string;
+};
+
+type ProgrammationFormProps = {
+  programmation: ProgrammationProps;
   onDelete?: () => void;
   onChange?: (data: Partial<ProgrammationProps>) => void;
   isCampagneGenerique?: boolean;
@@ -21,31 +24,9 @@ type DelaiOption = {
   label: string;
 };
 
-export default function ProgrammationForm({
-  id,
-  label,
-  typeEvenement,
-  typeRegleEnvoi,
-  dateEnvoi,
-  joursDecalage = 0,
-  isEnabled = true,
-  onDelete,
-  onChange,
-  isCampagneGenerique = false,
-}: ProgrammationProps) {
-  const handleChange = (field: string, value: any) => {
-    if (field === "typeEvenement") {
-      const eventType = value as TypeEvenement;
-      const newRegleEnvoi = EVENEMENT_TYPE_MAP[eventType];
-
-      onChange?.({
-        [field]: value,
-        typeRegleEnvoi: newRegleEnvoi,
-        joursDecalage: 0,
-      });
-    } else {
-      onChange?.({ [field]: value });
-    }
+export default function ProgrammationForm({ programmation, isEnabled = true, onDelete, onChange, isCampagneGenerique = false }: ProgrammationFormProps) {
+  const handleChange = (field: keyof ProgrammationProps, value: any) => {
+    onChange?.({ [field]: value });
   };
 
   const typeEvenementOptions = useMemo(() => {
@@ -55,7 +36,7 @@ export default function ProgrammationForm({
     }));
   }, []);
 
-  const config = REGLE_ENVOI_CONFIG[typeRegleEnvoi];
+  const config = REGLE_ENVOI_CONFIG[TypeRegleEnvoi.DATE];
 
   const getDelaiOptions = (min: number, max: number): DelaiOption[] => {
     const options: DelaiOption[] = [];
@@ -69,20 +50,19 @@ export default function ProgrammationForm({
   };
 
   const delaiOptions = useMemo(() => {
-    if (typeRegleEnvoi === TypeRegleEnvoi.PERSONNALISE) return [];
     const min = config.joursMin ?? 0;
     const max = config.joursMax ?? 0;
     return getDelaiOptions(min, max);
-  }, [typeRegleEnvoi, config.joursMin, config.joursMax]);
+  }, [config.joursMin, config.joursMax]);
 
   const selectedDelaiOption = useMemo(() => {
-    return delaiOptions.find((option) => option.value === joursDecalage);
-  }, [delaiOptions, joursDecalage]);
+    return delaiOptions.find((option) => option.value === programmation.joursDecalage);
+  }, [delaiOptions, programmation.joursDecalage]);
 
   return (
     <>
       <div className="flex-1">
-        <span className="text-sm font-medium text-gray-900">{label}</span>
+        <span className="text-sm font-medium text-gray-900">{programmation.label}</span>
       </div>
 
       <div className="flex items-center gap-4 mb-4">
@@ -99,8 +79,8 @@ export default function ProgrammationForm({
         </div>
         <div className="flex-1">
           <Select
-            value={typeEvenementOptions.find((option) => option.value === typeEvenement)}
-            onChange={(option) => handleChange("typeEvenement", option.value)}
+            value={typeEvenementOptions.find((option) => option.value === programmation.type)}
+            onChange={(option) => handleChange("type", option.value)}
             options={typeEvenementOptions}
             placeholder="Type d'événement"
             className="w-full"
@@ -112,9 +92,9 @@ export default function ProgrammationForm({
         {!isCampagneGenerique && (
           <div className="flex-1">
             <InputText
-              name="dateEnvoi"
-              value={dateEnvoi || ""}
-              onChange={(e) => handleChange("dateEnvoi", e.target.value)}
+              name="envoiDate"
+              value={programmation.envoiDate?.toISOString().slice(0, 16) || ""}
+              onChange={(e) => handleChange("envoiDate", new Date(e.target.value))}
               type="datetime-local"
               className="w-full"
               placeholder="Date d'envoi"

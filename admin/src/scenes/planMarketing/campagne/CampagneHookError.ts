@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { CampagneFormProps } from "./CampagneForm";
+import { ProgrammationProps } from "./ProgrammationForm";
 
 interface FormErrors {
   nom?: string;
@@ -42,7 +43,7 @@ export const useCampagneError = (formData: CampagneFormProps["campagneData"]) =>
       newErrors.recipients = "Au moins un destinataire doit être sélectionné";
     }
 
-    if (formData.programmations?.some((prog) => !prog.typeEvenement || !prog.dateEnvoi)) {
+    if (formData.programmations?.some((programmation: ProgrammationProps) => !programmation.type || programmation.joursDecalage === undefined)) {
       newErrors.programmations = "Tous les champs de programmation sont requis";
     }
 
