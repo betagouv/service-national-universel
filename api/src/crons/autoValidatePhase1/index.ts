@@ -26,6 +26,7 @@ export const handler = async (): Promise<void> => {
 
       slack.success({ title, text: `${count} jeunes ont été modifiés pour la cohorte ${cohort.name}` });
     }
+    slack.info({ title, text: "Autovalidation de la phase 1 terminée" });
   } catch (e) {
     capture(e);
     slack.error({ title: "Erreur lors de l'autovalidation de la phase 1", text: JSON.stringify(e) });

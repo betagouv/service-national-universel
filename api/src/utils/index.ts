@@ -15,6 +15,7 @@ import {
   CohortModel,
   MissionEquivalenceModel,
   YoungDocument,
+  CohortDocument,
 } from "../models";
 
 import { sendEmail, sendTemplate } from "../brevo";
@@ -763,43 +764,33 @@ export async function autoValidationSessionPhase1Young({ young, sessionPhase1, u
     await updateStatusPhase1WithSpecificCase(young, validationDate, user);
   } else if (cohortWithOldRules.includes(young.cohort)) {
     await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
-  } else {
+  } else if (isToday(validationDate)) {
     await updateStatusPhase1(young, validationDateWithDays, user);
   }
   return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
 }
 
-export async function updateStatusPhase1(young: YoungDocument, validationDate: string | Date, user: Partial<UserDto>) {
-  try {
-    if (!isToday(validationDate)) {
-      logger.debug("Date de validation non atteinte, aucune modification");
-      return false;
-    }
-    const statusPhase1 = shouldValidatePhase1(young, validationDate) ? YOUNG_STATUS_PHASE1.DONE : YOUNG_STATUS_PHASE1.NOT_DONE;
-    young.set({ statusPhase1 });
-    await young.save({ fromUser: user });
-    return true;
-  } catch (e) {
-    capture(e);
-    return false;
-  }
+export async function updateStatusPhase1(young: YoungDocument, validationDate: string | Date, user: Partial<UserDto>): Promise<YoungDocument> {
+  const statusPhase1 = shouldValidatePhase1(young, validationDate) ? YOUNG_STATUS_PHASE1.DONE : YOUNG_STATUS_PHASE1.NOT_DONE;
+  young.set({ statusPhase1 });
+  return await young.save({ fromUser: user });
 }
 
 function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): boolean {
-  if (young.cohesionStayPresence !== "true") {
-    logger.debug("Le volontaire n'a pas été pointé présent");
+  const estAbsent = young.cohesionStayPresence !== "true";
+  const estExclu = young.departSejourMotif === "Exclusion";
+  const estPartiAvantDate = young.departSejourAt && isBefore(young.departSejourAt, validationDate);
+  if (estAbsent || estExclu || estPartiAvantDate) {
     return false;
   }
-  if (young.departSejourMotif === "Exclusion") {
-    logger.debug("Le volontaire a été exclu");
-    return false;
-  }
-  if (young.departSejourAt && isBefore(young.departSejourAt, validationDate)) {
-    logger.debug("Le volontaire est parti avant la date de validation");
-    return false;
-  }
-  logger.debug("Le volontaire a été validé");
   return true;
+}
+
+export async function getDateDebutSejour(young: YoungDocument, cohort: CohortDocument): Promise<Date> {
+  const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  const bus = await LigneBusModel.findById(young.ligneId);
+  const meetingPoint = { bus };
+  return getDepartureDate(young, sessionPhase1, cohort, meetingPoint);
 }
 
 export const getReferentManagerPhase2 = async (department) => {
