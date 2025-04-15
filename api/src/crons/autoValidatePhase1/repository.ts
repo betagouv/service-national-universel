@@ -13,5 +13,10 @@ export async function getSejoursEnCoursDeRealisation(date: Date): Promise<Cohort
 }
 
 export function getYoungCursorByCohortId(cohortId: string) {
-  return YoungModel.find({ cohortId, status: YOUNG_STATUS.VALIDATED, statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED }).cursor();
+  return YoungModel.find({
+    cohortId,
+    status: YOUNG_STATUS.VALIDATED,
+    statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+    cohesionStayPresence: { $in: ["true", "false"] },
+  }).cursor();
 }
