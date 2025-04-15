@@ -36,7 +36,7 @@ export default function DestinataireLink({ cohortId, listeDiffusion }: Destinata
       to={`/volontaire${buildRequestQueryString({ ...listeDiffusion.filters, cohort: cohort.name, page: 1 })}${listeDiffusion.filters.status.length ? "" : "&status="}`}
       target="_blank"
       className="text-blue-500 flex items-center gap-1">
-      Consulter les {analytic?.count ?? "..."} jeunes destinataires <HiOutlineExternalLink size={20} />
+      Consulter les {analytic?.count ?? "..."} jeunes <HiOutlineExternalLink size={20} />
     </Link>
   );
 }

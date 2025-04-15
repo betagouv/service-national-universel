@@ -5,7 +5,7 @@ import { useSetState } from "react-use";
 import { DestinataireListeDiffusion, PlanMarketingRoutes, translateMarketing } from "snu-lib";
 import { DraftCampagneDataProps } from "./CampagneForm";
 
-export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => void) => {
+export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campagneId: string) => void) => {
   const [state, setState] = useSetState<DraftCampagneDataProps & { isTemplateOnError: boolean }>({
     nom: formData.nom,
     type: formData.type,
@@ -50,7 +50,8 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: () => 
     },
     onSuccess: (data, variables) => {
       setState({ isTemplateOnError: false });
-      onSave();
+      const campagneId = variables.id || data.id;
+      onSave(campagneId);
       toastr.clean();
 
       if (variables.id) {

@@ -1,22 +1,36 @@
 import React, { useEffect, useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
-import ArrowCircleRight from "../../../assets/icons/ArrowCircleRight";
-import None from "../../../assets/icons/None";
-import Badge from "../../../components/Badge";
-import { Filters, ResultTable, Save, SelectedFilters } from "../../../components/filters-system-v2";
-import api from "../../../services/api";
-import { YOUNG_STATUS_COLORS, formatDateFR, getAge, translatePhase1 } from "../../../utils";
-import Panel from "../../volontaires/panel";
-import { COHORTS_WITH_JDM_COUNT } from "../../../utils";
-import { captureMessage } from "../../../sentry";
 
-export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }) {
-  const [young, setYoung] = useState();
+import { SessionPhase1Type, COHORTS_WITH_JDM_COUNT, YOUNG_STATUS_COLORS, YOUNG_STATUS_PHASE1, YoungDto, formatDateFR, getAge, translatePhase1 } from "snu-lib";
+
+import { captureMessage } from "@/sentry";
+import ArrowCircleRight from "@/assets/icons/ArrowCircleRight";
+import None from "@/assets/icons/None";
+import Badge from "@/components/Badge";
+import { Filters, ResultTable, Save, SelectedFilters } from "@/components/filters-system-v2";
+import api from "@/services/api";
+
+import Panel from "../../volontaires/panel";
+
+interface GeneralProps {
+  updateFilter: (filters: Record<string, any>) => void;
+  focusedSession: SessionPhase1Type | null;
+  filterArray: Array<{
+    id: string;
+    label: string;
+    type: string;
+    options?: Array<{ value: string; label: string }>;
+  }>;
+  setHasYoungValidated: (value: boolean) => void;
+}
+
+export default function General({ updateFilter, focusedSession, filterArray, setHasYoungValidated }: GeneralProps) {
+  const [young, setYoung] = useState<YoungDto | null>(null);
 
   //List state
   const pageId = "pointage-list";
-  const [data, setData] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({});
+  const [data, setData] = useState<YoungDto[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>({});
   const [paramData, setParamData] = useState({
     page: 0,
   });
@@ -26,7 +40,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
     updateFilter(selectedFilters);
   }, [selectedFilters]);
 
-  const handleClick = async (young) => {
+  const handleClick = async (young: YoungDto) => {
     if (!young?._id) {
       captureMessage("Error with young :", { extra: { young } });
       return;
@@ -54,9 +68,9 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                 <Filters
                   pageId={pageId}
                   route={`/elasticsearch/young/by-session/${focusedSession._id}/search`}
-                  setData={(value) => {
+                  setData={(value: YoungDto[]) => {
                     setData(value);
-                    setHasYoungValidated(value.some((e) => e.statusPhase1 === "DONE"));
+                    setHasYoungValidated(value.some((e) => e.statusPhase1 === YOUNG_STATUS_PHASE1.DONE));
                   }}
                   filters={filterArray}
                   searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
@@ -90,7 +104,7 @@ export default function General({ updateFilter, focusedSession, filterArray, set
                     <tr className="border-y-[1px] border-gray-100 text-xs uppercase text-gray-400">
                       <th className="py-3 pl-4">Volontaire</th>
                       <th className="">Présence à l&apos;arrivée</th>
-                      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? <th className="">Présence JDM</th> : null}
+                      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort || "") ? <th className="">Présence JDM</th> : null}
                       <th className="">Départ Anticipé</th>
                       <th className="">Fiche Sanitaire</th>
                       <th className="">Statut phase 1</th>
@@ -117,8 +131,15 @@ export default function General({ updateFilter, focusedSession, filterArray, set
   );
 }
 
-const Line = ({ hit, onClick, selected, focusedSession }) => {
-  const [value, setValue] = useState(null);
+interface LineProps {
+  hit: YoungDto;
+  onClick: () => void;
+  selected: boolean;
+  focusedSession: SessionPhase1Type;
+}
+
+const Line = ({ hit, onClick, selected, focusedSession }: LineProps) => {
+  const [value, setValue] = useState<YoungDto | null>(null);
 
   useEffect(() => {
     setValue(hit);
@@ -147,7 +168,7 @@ const Line = ({ hit, onClick, selected, focusedSession }) => {
           {value.cohesionStayPresence === "false" && "Absent"}
         </div>
       </td>
-      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort) ? (
+      {COHORTS_WITH_JDM_COUNT.includes(focusedSession?.cohort || "") ? (
         <td className={`${bgColor}`}>
           <div className={`text-xs font-normal ${mainTextColor}`}>
             {!value.presenceJDM && <span className="italic text-gray-400">Non renseignée</span>}
@@ -177,7 +198,13 @@ const Line = ({ hit, onClick, selected, focusedSession }) => {
       </td>
       <td className={`${bgColor} rounded-r-lg`}>
         <div>
-          <Badge text={translatePhase1(value.statusPhase1)} color={YOUNG_STATUS_COLORS[value.statusPhase1]} />
+          <Badge
+            text={translatePhase1(value.statusPhase1)}
+            color={YOUNG_STATUS_COLORS[value.statusPhase1 || ""]}
+            tooltipText={translatePhase1(value.statusPhase1)}
+            minTooltipText={translatePhase1(value.statusPhase1)}
+            icon={null}
+          />
         </div>
       </td>
     </tr>
