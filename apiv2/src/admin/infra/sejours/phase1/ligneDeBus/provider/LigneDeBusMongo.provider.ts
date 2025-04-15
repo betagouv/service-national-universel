@@ -2,10 +2,10 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
+import { MONGO_COLLECTION, LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
-export const LigneDeBusName = "lignebus";
+export const LigneDeBusName = MONGO_COLLECTION.LIGNE_BUS;
 export const LIGNEDEBUS_MONGOOSE_ENTITY = "LIGNEDEBUS_MONGOOSE_ENTITY";
 
 const LigneDeBusSchemaRef = new mongoose.Schema({
