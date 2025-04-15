@@ -1,8 +1,9 @@
 import { logger } from "../../logger";
-import { CohortDocument, YoungDocument } from "../../models";
+import { CohortDocument, SessionPhase1Model, YoungDocument } from "../../models";
 import { addDays, isSameDay } from "date-fns";
-import { getDateDebutSejour, updateStatusPhase1 } from "../../utils";
 import { getYoungCursorByCohortId } from "./repository";
+import { getDepartureDate } from "snu-lib";
+import { updateStatusPhase1 } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 
 const user = { firstName: "[CRON] Autovalidation de la phase 1" };
 
@@ -19,7 +20,8 @@ export async function processCohort(cohort: CohortDocument, date: Date): Promise
 }
 
 export async function processYoung(young: YoungDocument, cohort: CohortDocument, date: Date): Promise<boolean> {
-  const dateDebut = await getDateDebutSejour(young, cohort);
+  const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
+  const dateDebut = getDepartureDate(young, sessionPhase1, cohort);
   logger.debug(`Jeune ${young._id} - date de début de séjour : ${dateDebut}`);
 
   const daysToValidate = cohort.daysToValidate || 8;
@@ -31,8 +33,13 @@ export async function processYoung(young: YoungDocument, cohort: CohortDocument,
     logger.debug(`Jeune ${young._id} - date de validation non atteinte, aucune modification`);
     return false;
   }
-  logger.debug(`Jeune ${young._id} - date de validation atteinte, mise à jour du statut`);
 
+  if (!young.cohesionStayPresence) {
+    logger.debug(`Jeune ${young._id} - présence au séjour non renseignée, aucune modification`);
+    return false;
+  }
+
+  logger.debug(`Jeune ${young._id} - date de validation atteinte, mise à jour du statut`);
   const updatedYoung = await updateStatusPhase1(young, dateValidation, user);
   logger.debug(`Jeune ${young._id} - statut de la phase 1 mis à jour : ${updatedYoung.statusPhase1}`);
   return true;

@@ -3,44 +3,18 @@ import https from "https";
 import http from "http";
 import passwordValidator from "password-validator";
 import sanitizeHtml from "sanitize-html";
-import {
-  YoungModel,
-  ReferentModel,
-  ContractModel,
-  PlanTransportModel,
-  LigneBusModel,
-  MeetingPointModel,
-  ApplicationModel,
-  SessionPhase1Model,
-  CohortModel,
-  MissionEquivalenceModel,
-  YoungDocument,
-  CohortDocument,
-} from "../models";
+import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, SessionPhase1Model, MissionEquivalenceModel } from "../models";
 
 import { sendEmail, sendTemplate } from "../brevo";
 import path from "path";
 import fs from "fs";
-import { addDays, isBefore, isToday, startOfDay } from "date-fns";
+import { addDays } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
-import {
-  getDepartureDate,
-  YOUNG_STATUS_PHASE2,
-  SENDINBLUE_TEMPLATES,
-  YOUNG_STATUS,
-  APPLICATION_STATUS,
-  ROLES,
-  SUB_ROLES,
-  EQUIVALENCE_STATUS,
-  YOUNG_STATUS_PHASE1,
-  UserDto,
-} from "snu-lib";
+import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
-import { getCohortDateInfo } from "./cohort";
 import dayjs from "dayjs";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { updateStatusPhase1WithOldRules, updateStatusPhase1WithSpecificCase } from "./old_cohorts_logic";
 
 // Timeout a promise in ms
 export const timeout = (prom, time) => {
@@ -739,75 +713,6 @@ export async function addingDayToDate(days, dateStart) {
   const formattedValidationDate = newDate.toISOString();
 
   return formattedValidationDate;
-}
-
-export async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const youngCohort = await CohortModel.findOne({ name: young.cohort });
-  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
-
-  const {
-    daysToValidate: daysToValidate,
-    validationDate: dateDeValidation,
-    validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: dateStartCohort,
-  } = (await getCohortDateInfo(sessionPhase1.cohort)) as any;
-
-  // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
-  const bus = await LigneBusModel.findById(young.ligneId);
-  const dateStart = getDepartureDate(young, sessionPhase1, youngCohort, { bus });
-  const isTerminale = young?.grade === "Terminale";
-  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
-  const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  const validationDateWithDays = await addingDayToDate(daysToValidate, dateStart);
-
-  if (young.cohort === "Juin 2023") {
-    await updateStatusPhase1WithSpecificCase(young, validationDate, user);
-  } else if (cohortWithOldRules.includes(young.cohort)) {
-    await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
-  } else if (isToday(validationDate)) {
-    await updateStatusPhase1(young, validationDateWithDays, user);
-  }
-  return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
-}
-
-export async function updateStatusPhase1(young: YoungDocument, validationDate: string | Date, user: Partial<UserDto>): Promise<YoungDocument> {
-  const { shouldValidate, message } = shouldValidatePhase1(young, validationDate);
-
-  if (shouldValidate) {
-    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.DONE });
-  } else {
-    const note = {
-      note: `Phase 1 non validée pour la raison suivante : ${message}.`,
-      phase: "PHASE_1",
-      referent: user,
-    };
-    young.set({
-      statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE,
-      notes: young.notes ? [...young.notes, note] : [note],
-      hasNotes: "true",
-    });
-  }
-
-  return await young.save({ fromUser: user });
-}
-
-function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): { shouldValidate: boolean; message?: string } {
-  if (young.cohesionStayPresence !== "true") {
-    return { shouldValidate: false, message: "Le volontaire n'a pas été pointé présent au séjour" };
-  }
-  if (young.departSejourMotif === "Exclusion") {
-    return { shouldValidate: false, message: "Le volontaire a été exclu du séjour" };
-  }
-  if (young.departSejourAt && isBefore(young.departSejourAt, startOfDay(validationDate))) {
-    return { shouldValidate: false, message: "Le volontaire est parti avant la date de validation" };
-  }
-  return { shouldValidate: true };
-}
-
-export async function getDateDebutSejour(young: YoungDocument, cohort: CohortDocument): Promise<Date> {
-  // Certaines sessions phase 1 ont des dates différentes de celles de la cohorte.
-  const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-  return getDepartureDate(young, sessionPhase1, cohort);
 }
 
 export const getReferentManagerPhase2 = async (department) => {

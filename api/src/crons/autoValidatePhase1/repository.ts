@@ -1,7 +1,7 @@
 import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { CohortDocument, CohortModel, YoungModel } from "../../models";
 
-export async function getCurrentCohorts(date: Date): Promise<CohortDocument[]> {
+export async function getSejoursEnCoursDeRealisation(date: Date): Promise<CohortDocument[]> {
   const now = date.toISOString();
   const cohortsAVenir = ["CLE 23-24", "2025 CLE Globale"];
   return await CohortModel.find({
