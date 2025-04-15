@@ -12,12 +12,14 @@ export const PermissionPolicyWhereSchema = {
   },
   value: {
     type: String,
+    optional: true,
     documentation: {
       description: "Static value of the field to filter on (ex: 'Loire-Atlantique')",
     },
   },
   source: {
     type: String,
+    optional: true,
     documentation: {
       description: "Dynamic field of referent to filter on (ex: '_id')",
     },
@@ -33,6 +35,7 @@ export const PermissionPolicySchema = {
   },
   blacklist: {
     type: [String],
+    optional: true,
     default: [],
     documentation: {
       description: "List of ressources to exclude from the policy (ex: { blackList: ['Provence-Alpes-Côte d'Azur'] }",
@@ -40,6 +43,7 @@ export const PermissionPolicySchema = {
   },
   whitelist: {
     type: [String],
+    optional: true,
     default: [],
     documentation: {
       description: "List of ressources to include in the policy (ex: { whiteList: ['Loire-Atlantique'] }",
@@ -95,7 +99,7 @@ export const PermissionSchema = {
   },
   description: {
     type: String,
-    required: true,
+    optional: true,
     documentation: {
       description: "Décrit l’utilisation de la permission (ex : La liste de l’intégralité des centres, y compris les centres archivés) ",
     },
@@ -105,18 +109,5 @@ export const PermissionSchema = {
   deletedAt: { type: Date },
 };
 
-const schema = new Schema({
-  ...PermissionSchema,
-  policy: {
-    ...PermissionSchema.policy,
-    type: [
-      new Schema({
-        ...PermissionPolicySchema,
-        where: {
-          type: [PermissionPolicyWhereSchema],
-        },
-      }),
-    ],
-  },
-});
+const schema = new Schema(PermissionSchema);
 export type PermissionType = InterfaceExtended<InferSchemaType<typeof schema>>;

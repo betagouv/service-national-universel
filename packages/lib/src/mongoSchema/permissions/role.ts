@@ -12,7 +12,7 @@ export const RoleSchema = {
   },
   parent: {
     type: String,
-    default: null,
+    optional: true,
     documentation: {
       description: "Code du rôle parent (pour les sous-rôles/fonctions)",
     },
@@ -20,14 +20,13 @@ export const RoleSchema = {
   titre: {
     type: String,
     required: true,
-    default: null,
     documentation: {
       description: "Nom du rôle (ex: Administrateur CLE",
     },
   },
   description: {
     type: String,
-    default: null,
+    optional: true,
     documentation: {
       description: "Description du rôle",
     },

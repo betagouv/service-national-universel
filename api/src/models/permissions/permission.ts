@@ -1,24 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MONGO_COLLECTION, PermissionPolicySchema, PermissionPolicyWhereSchema, PermissionSchema } from "snu-lib";
+import { InterfaceExtended, MONGO_COLLECTION, PermissionSchema } from "snu-lib";
 
 import { DocumentExtended, UserExtension, UserSaved, CustomSaveParams } from "../types";
 
-const schema = new Schema({
-  ...PermissionSchema,
-  policy: {
-    ...PermissionSchema.policy,
-    type: [
-      new Schema({
-        ...PermissionPolicySchema,
-        where: {
-          type: [PermissionPolicyWhereSchema],
-        },
-      }),
-    ],
-  },
-});
+const schema = new Schema(PermissionSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
