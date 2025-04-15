@@ -1,6 +1,5 @@
 import { MONGO_COLLECTION } from "../../mongoSchema";
 
-// Mongo collection from MODELNAME of api/src/models/*
 export const PERMISSION_RESOURCES_COLLECTION = MONGO_COLLECTION;
 
 export const PERMISSION_RESOURCES_SCRIPT = {
