@@ -49,6 +49,7 @@ export default function HistoricServerDriven({
   loading = false,
   extraTool,
 }: HistoricServerDrivenProps) {
+  const url = new URL(window.location.href);
   const [query, setQuery] = useState(filters?.query ? filters.query : "");
   const [isOpen, setIsOpen] = useState(
     filters && ((filters.op && filters.op.length > 0) || (filters.path && filters.path.length > 0) || (filters.author && filters.author.length > 0)),
@@ -63,6 +64,8 @@ export default function HistoricServerDriven({
 
   function changeQuery(value) {
     setQuery(value);
+    url.searchParams.set("search", value);
+    window.history.pushState({}, "", url);
     debouncedChangeFilter({ query: value });
   }
 

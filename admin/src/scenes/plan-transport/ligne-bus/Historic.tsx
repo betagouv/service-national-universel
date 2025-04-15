@@ -1,25 +1,28 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import * as XLSX from "xlsx";
+import * as FileSaver from "file-saver";
+import { BsDownload } from "react-icons/bs";
+
 import HistoricServerDriven from "../../../components/views/HistoricServerDriven";
 import API from "../../../services/api";
 import { createEvent } from "../../../utils";
 import Loader from "../../../components/Loader";
 import { ROLES } from "snu-lib";
-import * as XLSX from "xlsx";
-import * as FileSaver from "file-saver";
-import { BsDownload } from "react-icons/bs";
+import { AuthState } from "@/redux/auth/reducer";
 
 let filterOptionsCache = null;
 
 export default function Historic() {
   const [loading, setLoading] = useState(false);
-  const user = useSelector((state) => state.Auth.user);
+  const { user } = useSelector((state: AuthState) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
   const [cohort, setCohort] = useState(urlParams.get("cohort"));
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = useState(0);
-  const [filters, setFilters] = useState({ op: [], userId: [], path: [], query: "" });
+  const searchFromUrl = urlParams.get("search");
+  const [filters, setFilters] = useState({ op: [], userId: [], path: [], query: searchFromUrl, author: [] });
   const [options, setOptions] = useState(filterOptionsCache);
   const [exporting, setExporting] = useState(false);
 
@@ -64,7 +67,7 @@ export default function Historic() {
       setLoading(true);
     }
     try {
-      let query = { page: currentPage };
+      const query = { page: currentPage, op: "", userId: "", path: "", query: "", nopagination: "" };
       if (filters.op && filters.op.length > 0) {
         query.op = filters.op.join(",");
       }
