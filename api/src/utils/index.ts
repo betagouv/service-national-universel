@@ -777,7 +777,7 @@ export async function updateStatusPhase1(young: YoungDocument, validationDate: s
     young.set({ statusPhase1: YOUNG_STATUS_PHASE1.DONE });
   } else {
     const note = {
-      note: `Phase 1 non validée pour la raison suivante: ${message}.`,
+      note: `Phase 1 non validée pour la raison suivante : ${message}.`,
       phase: "PHASE_1",
       referent: user,
     };
@@ -805,6 +805,7 @@ function shouldValidatePhase1(young: YoungDocument, validationDate: Date | strin
 }
 
 export async function getDateDebutSejour(young: YoungDocument, cohort: CohortDocument): Promise<Date> {
+  // Certaines sessions phase 1 ont des dates différentes de celles de la cohorte.
   const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
   return getDepartureDate(young, sessionPhase1, cohort);
 }

@@ -108,7 +108,7 @@ export const YoungSchemaNote = {
   referent: {
     _id: { type: mongoose.Schema.Types.ObjectId },
     firstName: { type: String, required: true },
-    lastName: { type: String, required: true },
+    lastName: { type: String },
     role: {
       type: String,
       enum: ROLES_LIST,

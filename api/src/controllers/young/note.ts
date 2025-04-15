@@ -113,7 +113,7 @@ router.put("/:youngId/:noteId", passport.authenticate("referent", { session: fal
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (updatedNote.referent?._id.toString() !== req.user._id.toString()) {
+    if (updatedNote.referent?._id && updatedNote.referent._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -158,7 +158,7 @@ router.delete("/:youngId/:noteId", passport.authenticate("referent", { session: 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (deletedNote.referent?._id.toString() !== req.user._id.toString()) {
+    if (deletedNote.referent?._id && deletedNote.referent._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

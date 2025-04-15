@@ -20,13 +20,20 @@ export async function processCohort(cohort: CohortDocument, date: Date): Promise
 
 export async function processYoung(young: YoungDocument, cohort: CohortDocument, date: Date): Promise<boolean> {
   const dateDebut = await getDateDebutSejour(young, cohort);
+  logger.debug(`Jeune ${young._id} - date de début de séjour : ${dateDebut}`);
+
   const daysToValidate = cohort.daysToValidate || 8;
   const dateValidation = addDays(dateDebut, daysToValidate);
+  logger.debug(`Jeune ${young._id} - date de validation : ${dateValidation}`);
+
+  logger.debug(`Jeune ${young._id} - date actuelle : ${date}`);
   if (!isSameDay(date, dateValidation)) {
-    logger.info(`Jeune ${young._id} - date de validation non atteinte, aucune modification`);
+    logger.debug(`Jeune ${young._id} - date de validation non atteinte, aucune modification`);
     return false;
   }
+  logger.debug(`Jeune ${young._id} - date de validation atteinte, mise à jour du statut`);
+
   const updatedYoung = await updateStatusPhase1(young, dateValidation, user);
-  logger.info(`Jeune ${young._id} - statut de la phase 1 mis à jour : ${updatedYoung.statusPhase1}`);
+  logger.debug(`Jeune ${young._id} - statut de la phase 1 mis à jour : ${updatedYoung.statusPhase1}`);
   return true;
 }
