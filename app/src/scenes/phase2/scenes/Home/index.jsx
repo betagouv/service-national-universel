@@ -12,15 +12,15 @@ import { RiAttachmentLine } from "react-icons/ri";
 import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
 import { knowledgebaseURL } from "@/config";
-import useCohort from "@/services/useCohort";
 import Voiture from "@/assets/Voiture";
-import { canApplyToPhase2 } from "snu-lib";
 import { RiInformationLine } from "react-icons/ri";
 import ReactTooltip from "react-tooltip";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function HomePhase2() {
   const { young } = useAuth();
-  const { cohort } = useCohort();
+
+  const { canApplyToPhase2 } = usePermissions();
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -98,7 +98,7 @@ export default function HomePhase2() {
           <>
             <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
-              {canApplyToPhase2(young, cohort) ? (
+              {canApplyToPhase2 ? (
                 <>
                   <div className="flex bg-gray-400 text-white rounded-md px-3 py-2.5 text-center line-clamp-1 cursor-not-allowed">
                     <div className="mr-2">
