@@ -26,7 +26,6 @@ import {
   updatePlacesSessionPhase1,
   getCcOfYoung,
   getFile,
-  autoValidationSessionPhase1Young,
   deleteFile,
   updateSeatsTakenInBusLine,
 } from "../../utils";
@@ -76,6 +75,7 @@ import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMi
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
+import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);

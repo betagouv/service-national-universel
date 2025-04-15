@@ -10,11 +10,11 @@ import DocumentsPM from "./components/DocumentsPM";
 
 export default function HomeMobile() {
   const { young } = useAuth();
-  const { canApplyToPhase2 } = usePermissions();
+  const { canViewPhase2 } = usePermissions();
   const history = useHistory();
   const [readMore, setReadMore] = React.useState(false);
 
-  if (!young || !canApplyToPhase2) history.push("/");
+  if (!canViewPhase2) history.push("/");
   return (
     <div className="mb-4 w-full flex-col rounded-lg bg-white pb-4 shadow-nina">
       <div className="pl-4">
