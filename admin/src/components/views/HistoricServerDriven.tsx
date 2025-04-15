@@ -73,7 +73,12 @@ export default function HistoricServerDriven({
     <div className="w-full rounded-xl bg-white text-slate-700 shadow-md">
       <div className="flex w-full items-center justify-between gap-4 p-4">
         <div className="flex items-center gap-4 py-4">
-          <input onChange={(e) => changeQuery(e.target.value)} value={query} className="w-64 rounded-lg border p-2 text-xs" placeholder="Rechercher..." />
+          <input
+            onChange={(e) => changeQuery(e.target.value)}
+            value={query}
+            className={`w-64 rounded-lg border p-2 text-xs ${query !== "" && "!border-2 !border-blue-600"}`}
+            placeholder="Rechercher..."
+          />
           <button
             onClick={() => setIsOpen(!isOpen)}
             className={`group flex items-center gap-2 rounded-lg py-2 px-3 ${isOpen ? "bg-gray-500 hover:bg-gray-100" : "bg-gray-100 hover:bg-gray-500"}`}>
