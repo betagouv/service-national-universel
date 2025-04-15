@@ -8,12 +8,6 @@ const title = "Autovalidation de la phase 1";
 export const handler = async (date = new Date()): Promise<void> => {
   try {
     const cohortesEnCours = await getSejoursEnCoursDeRealisation(date);
-    if (!cohortesEnCours.length) {
-      slack.info({ title, text: "Aucune cohorte en cours" });
-      return;
-    }
-    slack.info({ title, text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}` });
-
     const cohortesAValider = cohortesEnCours.filter((c) => isCohortValidationDateToday(c, date));
     if (!cohortesAValider.length) {
       slack.info({ title, text: "Aucune cohorte à valider aujourd'hui" });
