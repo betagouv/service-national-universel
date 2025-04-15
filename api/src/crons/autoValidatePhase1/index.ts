@@ -15,6 +15,7 @@ export const handler = async (date = new Date()): Promise<void> => {
       return;
     }
     slack.info({ title, text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}` });
+    logger.info(`Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}`);
 
     for (const cohort of cohortesEnCours) {
       const count = await processCohort(cohort, date);
