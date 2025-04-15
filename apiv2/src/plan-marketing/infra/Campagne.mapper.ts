@@ -139,6 +139,7 @@ export class CampagneMapper {
                 generic: false,
                 cohortId: model.cohortId,
                 campagneGeneriqueId: model.campagneGeneriqueId,
+                isProgrammationActive: model.isProgrammationActive,
             } as Omit<CampagneType, "_id" | "createdAt" | "updatedAt">;
         }
 
