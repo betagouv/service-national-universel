@@ -21,7 +21,7 @@ import {
 import { sendEmail, sendTemplate } from "../brevo";
 import path from "path";
 import fs from "fs";
-import { addDays, isBefore, isToday } from "date-fns";
+import { addDays, isBefore, isToday, startOfDay } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
 import {
@@ -771,26 +771,42 @@ export async function autoValidationSessionPhase1Young({ young, sessionPhase1, u
 }
 
 export async function updateStatusPhase1(young: YoungDocument, validationDate: string | Date, user: Partial<UserDto>): Promise<YoungDocument> {
-  const statusPhase1 = shouldValidatePhase1(young, validationDate) ? YOUNG_STATUS_PHASE1.DONE : YOUNG_STATUS_PHASE1.NOT_DONE;
-  young.set({ statusPhase1 });
+  const { shouldValidate, message } = shouldValidatePhase1(young, validationDate);
+
+  if (shouldValidate) {
+    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.DONE });
+  } else {
+    const note = {
+      note: `Phase 1 non validée pour la raison suivante: ${message}.`,
+      phase: "PHASE_1",
+      referent: user,
+    };
+    young.set({
+      statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE,
+      notes: young.notes ? [...young.notes, note] : [note],
+      hasNotes: "true",
+    });
+  }
+
   return await young.save({ fromUser: user });
 }
 
-function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): boolean {
-  const estAbsent = young.cohesionStayPresence !== "true";
-  const estExclu = young.departSejourMotif === "Exclusion";
-  const estPartiAvantDate = young.departSejourAt && isBefore(young.departSejourAt, validationDate);
-  if (estAbsent || estExclu || estPartiAvantDate) {
-    return false;
+function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): { shouldValidate: boolean; message?: string } {
+  if (young.cohesionStayPresence !== "true") {
+    return { shouldValidate: false, message: "Le volontaire n'a pas été pointé présent au séjour" };
   }
-  return true;
+  if (young.departSejourMotif === "Exclusion") {
+    return { shouldValidate: false, message: "Le volontaire a été exclu du séjour" };
+  }
+  if (young.departSejourAt && isBefore(young.departSejourAt, startOfDay(validationDate))) {
+    return { shouldValidate: false, message: "Le volontaire est parti avant la date de validation" };
+  }
+  return { shouldValidate: true };
 }
 
 export async function getDateDebutSejour(young: YoungDocument, cohort: CohortDocument): Promise<Date> {
   const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-  const bus = await LigneBusModel.findById(young.ligneId);
-  const meetingPoint = { bus };
-  return getDepartureDate(young, sessionPhase1, cohort, meetingPoint);
+  return getDepartureDate(young, sessionPhase1, cohort);
 }
 
 export const getReferentManagerPhase2 = async (department) => {

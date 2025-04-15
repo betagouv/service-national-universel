@@ -5,7 +5,7 @@ import { getCurrentCohorts } from "./repository";
 
 const title = "Autovalidation de la phase 1";
 
-export const handler = async (): Promise<void> => {
+export const handler = async (date = new Date()): Promise<void> => {
   try {
     const cohortesEnCours = await getCurrentCohorts();
 
@@ -17,7 +17,7 @@ export const handler = async (): Promise<void> => {
     slack.info({ title, text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}` });
 
     for (const cohort of cohortesEnCours) {
-      const count = await processCohort(cohort);
+      const count = await processCohort(cohort, date);
 
       if (count === 0) {
         slack.info({ title, text: `Aucun jeune n'a été modifié pour la cohorte ${cohort.name}` });

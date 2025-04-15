@@ -106,17 +106,16 @@ export const YoungSchemaNote = {
   },
   note: { type: String, required: true },
   referent: {
-    _id: { type: mongoose.Schema.Types.ObjectId, required: true },
+    _id: { type: mongoose.Schema.Types.ObjectId },
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     role: {
       type: String,
       enum: ROLES_LIST,
-      required: true,
     },
   },
-  createdAt: { type: Date, required: true },
-  updatedAt: { type: Date, required: true },
+  createdAt: { type: Date, default: Date.now },
+  updatedAt: { type: Date, default: Date.now },
 };
 
 export const YoungSchema = {
@@ -1685,7 +1684,7 @@ export const YoungSchema = {
 
   // Code de la route reboursement
 
-  roadCodeRefund:{
+  roadCodeRefund: {
     type: String,
     enum: ["true", "false"],
     documentation: {
@@ -1693,20 +1692,20 @@ export const YoungSchema = {
     },
   },
 
-  roadCodeRefundDate:{
+  roadCodeRefundDate: {
     type: Date,
     documentation: {
       description: "Date de remboursement du code de la route",
     },
   },
 
-  roadCodeRefundOrganization:{
+  roadCodeRefundOrganization: {
     type: String,
     documentation: {
       description: "Organisme de remboursement du code de la route",
     },
   },
-  
+
   // Legacy to remove ------------------------
   autoTestPCR: {
     type: String,
@@ -2042,7 +2041,6 @@ export const YoungSchema = {
     },
   },
 
-  
   // TODO : clean interests
   defenseInterest: { type: String },
   defenseTypeInterest: { type: String },
