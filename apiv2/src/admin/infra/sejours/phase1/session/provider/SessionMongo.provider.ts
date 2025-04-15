@@ -7,12 +7,13 @@ import {
     YoungDSNJExportDatesSchema,
     YoungINJEPExportDatesSchema,
     YoungEligibilitySchema,
+    MONGO_COLLECTION,
 } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type SessionDocument = HydratedDocument<CohortType>;
-export const SessionName = "cohort";
+export const SessionName = MONGO_COLLECTION.COHORT;
 export const SESSION_MONGOOSE_ENTITY = "SESSION_MONGOOSE_ENTITY";
 
 const SessionSchemaRef = new mongoose.Schema({
