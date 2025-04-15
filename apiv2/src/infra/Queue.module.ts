@@ -31,6 +31,9 @@ import * as basicAuth from "express-basic-auth";
         BullModule.registerQueue({
             name: QueueName.ADMIN_TASK,
         }),
+        BullModule.registerQueue({
+            name: QueueName.CRON,
+        }),
         BullBoardModule.forRootAsync({
             imports: [ConfigModule],
             inject: [ConfigService],
@@ -55,6 +58,10 @@ import * as basicAuth from "express-basic-auth";
         }),
         BullBoardModule.forFeature({
             name: QueueName.ADMIN_TASK,
+            adapter: BullMQAdapter,
+        }),
+        BullBoardModule.forFeature({
+            name: QueueName.CRON,
             adapter: BullMQAdapter,
         }),
     ],
