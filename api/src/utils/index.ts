@@ -3,19 +3,7 @@ import https from "https";
 import http from "http";
 import passwordValidator from "password-validator";
 import sanitizeHtml from "sanitize-html";
-import {
-  YoungModel,
-  ReferentModel,
-  ContractModel,
-  PlanTransportModel,
-  LigneBusModel,
-  MeetingPointModel,
-  ApplicationModel,
-  SessionPhase1Model,
-  CohortModel,
-  MissionEquivalenceModel,
-  YoungDocument,
-} from "../models";
+import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, SessionPhase1Model, MissionEquivalenceModel } from "../models";
 
 import { sendEmail, sendTemplate } from "../brevo";
 import path from "path";
@@ -23,23 +11,10 @@ import fs from "fs";
 import { addDays } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
-import {
-  getDepartureDate,
-  YOUNG_STATUS_PHASE2,
-  SENDINBLUE_TEMPLATES,
-  YOUNG_STATUS,
-  APPLICATION_STATUS,
-  ROLES,
-  SUB_ROLES,
-  EQUIVALENCE_STATUS,
-  DEPART_SEJOUR_MOTIFS_NOT_DONE,
-  UserDto,
-} from "snu-lib";
+import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
-import { getCohortDateInfo } from "./cohort";
 import dayjs from "dayjs";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
-import { updateStatusPhase1WithOldRules, updateStatusPhase1WithSpecificCase } from "./old_cohorts_logic";
 
 // Timeout a promise in ms
 export const timeout = (prom, time) => {
@@ -738,95 +713,6 @@ export async function addingDayToDate(days, dateStart) {
   const formattedValidationDate = newDate.toISOString();
 
   return formattedValidationDate;
-}
-
-export async function autoValidationSessionPhase1Young({ young, sessionPhase1, user }) {
-  const youngCohort = await CohortModel.findOne({ name: young.cohort });
-  let cohortWithOldRules = ["2021", "2022", "Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B"];
-
-  const {
-    daysToValidate: daysToValidate,
-    validationDate: dateDeValidation,
-    validationDateForTerminaleGrade: dateDeValidationTerminale,
-    dateStart: dateStartCohort,
-  } = (await getCohortDateInfo(sessionPhase1.cohort)) as any;
-
-  // Ici on regarde si la session à des date spécifique sinon on garde la date de la cohort
-  const bus = await LigneBusModel.findById(young.ligneId);
-  const dateStart = getDepartureDate(young, sessionPhase1, youngCohort, { bus });
-  const isTerminale = young?.grade === "Terminale";
-  // cette constante nous permet d'avoir la date de validation d'un séjour en fonction du grade d'un Young
-  const validationDate = isTerminale ? dateDeValidationTerminale : dateDeValidation;
-  const validationDateWithDays = await addingDayToDate(daysToValidate, dateStart);
-
-  if (young.cohort === "Juin 2023") {
-    await updateStatusPhase1WithSpecificCase(young, validationDate, user);
-  } else if (cohortWithOldRules.includes(young.cohort)) {
-    await updateStatusPhase1WithOldRules(young, validationDate, isTerminale, user);
-  } else {
-    await updateStatusPhase1(young, validationDateWithDays, user);
-  }
-  return { dateStart, daysToValidate, validationDateWithDays, dateStartCohort };
-}
-
-type DepartSejourMotif =
-  | "Exclusion"
-  | "Autre"
-  | "Cas de force majeure pour le volontaire"
-  | "Cas de force majeure (Fermeture du centre, éviction pour raison sanitaitre, rapatriement médical, convocation judiciaire, etc.)";
-
-export async function updateStatusPhase1(young: YoungDocument, validationDateWithDays: string, user: Partial<UserDto>) {
-  const initialState = young.statusPhase1;
-  try {
-    const now = new Date();
-    const validationDate = new Date(validationDateWithDays);
-    // due to a bug the timezone may vary between french and UTC time
-    validationDate.setHours(validationDate.getHours() - 2);
-    // Cette constante nous permet de vérifier si un jeune a passé sa date de validation (basé sur son grade)
-    logger.debug(`Validation date: ${validationDate}, now: ${now}`);
-    const isValidationDatePassed = now >= validationDate;
-    // Cette constante nous permet de vérifier si un jeune était présent au début du séjour (exception pour cette cohorte : pas besoin de JDM)(basé sur son grade)
-    // ! Si null, on considère que le statut de pointage n'est pas encore connu (présent/absent)
-    const isCohesionStayValid = young.cohesionStayPresence === "true";
-    // Cette constante pour permet de vérifier si la date de départ d'un jeune permet de valider sa phase 1 (basé sur son grade)
-    const isDepartureDateValid = now >= validationDate && (!young?.departSejourAt || young?.departSejourAt >= validationDate);
-    // On valide la phase 1 si toutes les condition sont réunis. Une exception : le jeune a été exclu.
-    logger.debug(`isValidationDatePassed: ${isValidationDatePassed}, isCohesionStayValid: ${isCohesionStayValid}, isDepartureDateValid: ${isDepartureDateValid}`);
-    if (isValidationDatePassed) {
-      if (isCohesionStayValid && isDepartureDateValid) {
-        if (young?.departSejourMotif === "Exclusion") {
-          logger.debug("Young excluded");
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          logger.debug("Young done");
-          young.set({ statusPhase1: "DONE" });
-        }
-      } else if (!isDepartureDateValid) {
-        if (young.departSejourMotif && DEPART_SEJOUR_MOTIFS_NOT_DONE.includes(young.departSejourMotif as DepartSejourMotif)) {
-          logger.debug("Young not done b/c of departSejourMotif");
-          young.set({ statusPhase1: "NOT_DONE" });
-        }
-      } else {
-        // Sinon on ne valide pas sa phase 1.
-        // Inclut les jeunes avec départs séjour motifs avant le 8ème jour de présence
-        if (young.cohesionStayPresence === "false") {
-          logger.debug("Young not done b/c of cohesionStayPresence");
-          young.set({ statusPhase1: "NOT_DONE" });
-        } else {
-          logger.debug("Young stays affected");
-          young.set({ statusPhase1: "AFFECTED" });
-        }
-      }
-    }
-    if (initialState !== young.statusPhase1) {
-      await young.save({ fromUser: user });
-      return true;
-    }
-    return false;
-  } catch (e) {
-    capture(e);
-    return false;
-  }
 }
 
 export const getReferentManagerPhase2 = async (department) => {
