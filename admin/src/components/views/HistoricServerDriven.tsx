@@ -105,7 +105,7 @@ export default function HistoricServerDriven({
           <Loader />
         </div>
       ) : data.length === 0 ? (
-        <div className="p-4 italic">Aucune donnée</div>
+        <div className="p-4 italic">Aucun historique disponible</div>
       ) : (
         <>
           <table className="w-full table-fixed">
