@@ -195,6 +195,8 @@ export class CampagneMongoRepository implements CampagneGateway {
                     listeDiffusionId: campagneGenerique.listeDiffusionId,
                     destinataires: campagneGenerique.destinataires,
                     programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
+                    isProgrammationActive: campagneGenerique.isProgrammationActive,
+                    isArchived: campagneGenerique.isArchived,
                 });
                 campagnesWithProgrammation.push(campagneModel);
             }

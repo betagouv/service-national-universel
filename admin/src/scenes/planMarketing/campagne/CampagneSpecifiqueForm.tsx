@@ -6,7 +6,16 @@ import { LuSend } from "react-icons/lu";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
 
-import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi, formatDateFRTimezoneUTC, formatLongDateFR } from "snu-lib";
+import {
+  CampagneJeuneType,
+  DestinataireListeDiffusion,
+  hasCampagneGeneriqueId,
+  EnvoiCampagneStatut,
+  CampagneEnvoi,
+  formatDateFRTimezoneUTC,
+  formatLongDateFR,
+  Programmation,
+} from "snu-lib";
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
@@ -36,6 +45,9 @@ export interface CampagneSpecifiqueFormData {
   readonly createdAt?: string;
   readonly updatedAt?: string;
   validationErrors?: ValidationErrors;
+  isProgrammationActive?: boolean;
+  programmations?: Programmation[];
+  isArchived?: boolean;
 }
 
 export type DraftCampagneSpecifiqueFormData = Partial<CampagneSpecifiqueFormData> & {
