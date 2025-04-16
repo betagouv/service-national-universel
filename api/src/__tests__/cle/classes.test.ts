@@ -16,13 +16,15 @@ import getNewReferentFixture from "../fixtures/referent";
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
-jest.spyOn(emailsEmitter, "emit").mockImplementation(() => {});
+jest.spyOn(emailsEmitter, "emit").mockImplementation(() => true);
 let newReferent;
 beforeEach(async () => {
   await ClasseModel.deleteMany({});
   await EtablissementModel.deleteMany({});
   await ReferentModel.deleteMany({});
+  // @ts-ignore
   passport.user.role = ROLES.ADMIN;
+  // @ts-ignore
   passport.user.subRole = SUB_ROLE_GOD;
   newReferent = {
     firstName: "New",
@@ -38,6 +40,7 @@ describe("PUT /classes/update-referents", () => {
   });
 
   it("should return 403 when user cannot update classes", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.RESPONSIBLE;
     const res = await request(getAppHelper()).put(`/cle/classes/update-referents`);
     expect(res.status).toBe(403);
@@ -146,6 +149,7 @@ describe("PUT /update-referents-by-csv", () => {
   });
 
   it("should return 403 when user is not a super admin", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.RESPONSIBLE;
     const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv");
     expect(res.status).toBe(403);
@@ -153,7 +157,9 @@ describe("PUT /update-referents-by-csv", () => {
   });
 
   it("should return 400 when the CSV file is invalid", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subRole = SUB_ROLE_GOD;
     const res = await request(getAppHelper()).put("/cle/classes/update-referents-by-csv").attach("file", Buffer.from("invalid csv data"), "invalid.csv");
     expect(res.status).toBe(400);
@@ -161,7 +167,9 @@ describe("PUT /update-referents-by-csv", () => {
   });
 
   it("should return 200 and update referents when the CSV file is valid", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
+    // @ts-ignore
     passport.user.subRole = SUB_ROLE_GOD;
     const classe = await createClasse(createFixtureClasse());
     const newReferent = { firstName: "New", lastName: "Referent", email: "new.referent@example.com" };
