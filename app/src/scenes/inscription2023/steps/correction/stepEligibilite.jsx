@@ -1,4 +1,3 @@
-
 import React from "react";
 import { toastr } from "react-redux-toastr";
 import { Redirect, useHistory, useParams } from "react-router-dom";
@@ -7,7 +6,7 @@ import IconFrance from "../../../../assets/IconFrance";
 import Toggle from "../../../../components/dsfr/forms/toggle";
 import plausibleEvent from "../../../../services/plausible";
 import { getCorrectionByStep } from "../../../../utils/navigation";
-import SchoolInFrance from "../../components/ShoolInFrance";
+import SchoolInFrance from "../../components/SchoolInFrance";
 import SchoolOutOfFrance from "../../components/ShoolOutOfFrance";
 import Input from "../../components/Input";
 import Select from "../../../../components/dsfr/forms/Select";
