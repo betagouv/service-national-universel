@@ -34,7 +34,7 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <Button title="Export les contacts" onClick={() => mutate()} loading={isPending} disabled={isPending || isCLE} />
+        <Button title="Exporter les contacts" onClick={() => mutate()} loading={isPending} disabled={isPending || isCLE} />
         {isPending && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
       </div>
     </div>
