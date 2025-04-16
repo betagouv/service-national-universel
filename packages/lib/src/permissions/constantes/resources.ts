@@ -2,6 +2,7 @@ import { MONGO_COLLECTION } from "../../mongoSchema";
 
 const PERMISSION_RESOURCES_SCRIPT = {
   EXPORT_INJEP: "EXPORT_INJEP",
+  EXPORT_DSNJ: "EXPORT_DSNJ",
   AFFECTER_HTS: "AFFECTER_HTS",
 } as const;
 

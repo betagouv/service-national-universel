@@ -1647,7 +1647,10 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
-    res.status(200).send({ ok: true, data: user });
+
+    const userSerialized = serializeReferent(user);
+    userSerialized.acl = await getAcl(user);
+    res.status(200).send({ ok: true, data: userSerialized });
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });

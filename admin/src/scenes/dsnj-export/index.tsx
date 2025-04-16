@@ -6,7 +6,7 @@ import { HiOutlineCalendar } from "react-icons/hi";
 import plausibleEvent from "@/services/plausible";
 import cx from "classnames";
 
-import { translate } from "snu-lib";
+import { COHORT_STATUS, translate } from "snu-lib";
 import dayjs from "dayjs";
 import api from "@/services/api";
 import { COHORTS_ACTIONS } from "@/redux/cohorts/actions";
@@ -24,7 +24,7 @@ const DSNJExport = () => {
   const dispatch = useDispatch();
   const cohortList = useSelector((state: CohortState) => state.Cohorts);
 
-  const [currentCohort, setCurrentCohort] = useState<any>(cohortList[0]);
+  const [currentCohort, setCurrentCohort] = useState<any>(cohortList?.find((c) => c.status !== COHORT_STATUS.ARCHIVED));
 
   const [isLDownloadingByKey, setDownloadingByKey] = useState({});
   const [isModalConfirmOpenByKey, setIsModalConfirmOpenByKey] = useState({});
@@ -112,15 +112,15 @@ const DSNJExport = () => {
         <Header
           title="Données centres & volontaires (DSNJ)"
           breadcrumb={[{ title: "Séjours" }, { title: "Export DSNJ" }]}
-          // @ts-ignore
-          actions={
+          actions={[
             <SelectCohort
+              key={currentCohort.name}
               cohort={currentCohort.name}
               onChange={(cohort) => {
                 setCurrentCohort(cohortList.find((c) => c.name === cohort));
               }}
-            />
-          }
+            />,
+          ]}
         />
         <div className="flex gap-4">
           <ExportBox
