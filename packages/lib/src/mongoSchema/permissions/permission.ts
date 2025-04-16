@@ -85,7 +85,7 @@ export const PermissionSchema = {
   },
   policy: {
     type: [PermissionPolicySchema],
-    required: true,
+    optional: true,
     documentation: {
       description: "Policy for a specific ressource or a script",
     },
