@@ -8,7 +8,15 @@ import { toastr } from "react-redux-toastr";
 
 import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
 
-import { canCreateOrUpdateCohesionCenter, canPutSpecificDateOnSessionPhase1, CohesionCenterType, isSessionEditionOpen, isSuperAdmin, validateEmailAcademique } from "snu-lib";
+import {
+  canCreateOrUpdateCohesionCenter,
+  canPutSpecificDateOnSessionPhase1,
+  CohesionCenterType,
+  isAdmin,
+  isSessionEditionOpen,
+  isSuperAdmin,
+  validateEmailAcademique,
+} from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
@@ -264,7 +272,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
                     readOnly={!values}
-                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    disabled={!isAdmin(user) && cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>
