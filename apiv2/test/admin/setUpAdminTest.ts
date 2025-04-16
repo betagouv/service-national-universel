@@ -153,11 +153,13 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .useValue(mockQueue)
         .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
         .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.CRON))
+        .useValue(mockQueue)
         .overrideProvider(DATABASE_CONNECTION)
         .useFactory({ factory: testDatabaseProviders(setupOptions.newContainer).useFactory })
         .compile();
 
-    const app = adminTestModule.createNestApplication({ logger: ["error"] });
+    const app = adminTestModule.createNestApplication({ logger: false });
     app.useGlobalPipes(new ValidationPipe());
 
     return { app, adminTestModule };
