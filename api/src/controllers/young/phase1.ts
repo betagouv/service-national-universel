@@ -25,11 +25,12 @@ import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
-import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, autoValidationSessionPhase1Young, getCcOfYoung } from "../../utils";
+import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, getCcOfYoung } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
 import { UserRequest } from "../request";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { handleNotificationForDeparture } from "../../young/youngService";
+import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 
 const router = express.Router({ mergeParams: true });
 
