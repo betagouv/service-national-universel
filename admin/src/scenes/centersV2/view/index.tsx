@@ -59,7 +59,9 @@ export default function Index() {
   if (!center || !sessions) return <div />;
   return (
     <>
-      {user.role !== ROLES.HEAD_CENTER && <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
+      {![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && (
+        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
+      )}
       <CenterInformations center={center} />
       <SessionList center={center} onCenterChange={setCenter} sessions={sessions} onSessionsChange={setSessions} onRefetchSessions={() => loadSessions(center._id)} />
     </>
@@ -71,6 +73,8 @@ function filterSessions(sessions, user) {
     return sessions;
   } else if (user.role === ROLES.HEAD_CENTER) {
     return sessions.filter((session) => session?.headCenterId === user._id);
+  } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    return sessions.filter((session) => session?.adjointsIds.includes(user._id));
   }
   return [];
 }

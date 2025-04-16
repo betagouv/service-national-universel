@@ -14,6 +14,7 @@ import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewCohortFixture from "./fixtures/cohort";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
+import { ReferentAuthFacade } from "../../../apiv2/src/admin/infra/iam/auth/ReferentAuth.facade";
 
 mockEsClient({
   sessionphase1: [{ _id: "sessionId" }],

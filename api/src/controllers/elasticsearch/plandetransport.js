@@ -48,8 +48,14 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
 
     // A head center can only see bus line rattached to his center.
-    if (user.role === ROLES.HEAD_CENTER) {
-      const centers = await SessionPhase1Model.find({ headCenterId: user._id, cohort: queryFilters.cohort[0] });
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+      let field = "";
+      if (user.role === ROLES.HEAD_CENTER) {
+        field = "headCenterId";
+      } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+        field = "adjointsIds";
+      }
+      const centers = await SessionPhase1Model.find({ [field]: user._id, cohort: queryFilters.cohort[0] });
       if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
       if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

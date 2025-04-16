@@ -57,7 +57,7 @@ export default function ProgramCard({ program, image, enableToggle = true, onDel
 
   return (
     <Card>
-      <a href={urlWithScheme(program.url)} className="thumb" rel="noreferrer">
+      <a href={urlWithScheme(program.url)} target="_blank" className="thumb" rel="noreferrer">
         <img src={image} />
         <Badge>{program.type}</Badge>
       </a>
@@ -181,7 +181,9 @@ const Card = styled.div`
       width: 100%;
       height: 200px;
       object-fit: cover;
-      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      box-shadow:
+        0 10px 15px -3px rgba(0, 0, 0, 0.1),
+        0 4px 6px -2px rgba(0, 0, 0, 0.05);
     }
   }
 `;
@@ -204,5 +206,7 @@ const Badge = styled.div`
   top: 0;
   right: 0;
   margin: 0.5rem 1.5rem;
-  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  box-shadow:
+    0 10px 15px -3px rgba(0, 0, 0, 0.1),
+    0 4px 6px -2px rgba(0, 0, 0, 0.05);
 `;

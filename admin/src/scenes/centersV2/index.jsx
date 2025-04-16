@@ -7,7 +7,7 @@ import Create from "./Create";
 import List from "./list";
 import View from "./view";
 import Youngs from "./youngs";
-import Team from "./view/team";
+import Team from "./view/Team.tsx";
 import ListPresence from "./ListPresence";
 import Import from "./Import";
 

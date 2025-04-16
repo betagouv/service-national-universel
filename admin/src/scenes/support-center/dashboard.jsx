@@ -30,7 +30,7 @@ const Dashboard = (props) => {
     } else if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
       setArticles(referentArticles);
       setKbRole("referent");
-    } else if (user.role === ROLES.HEAD_CENTER) {
+    } else if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
       setArticles(headCenterArticles);
       setKbRole("head_center");
     } else if (user.role === ROLES.VISITOR) {
