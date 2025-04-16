@@ -1,6 +1,5 @@
 import React from "react";
-import { HiOutlineInformationCircle } from "react-icons/hi";
-import { Button, Tooltip } from "@snu/ds/admin";
+import { Button } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
 import { DepartmentService } from "@/services/departmentService";
 import { translate } from "snu-lib";
@@ -8,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { downloadFileFrombase64 } from "@/services/file.service";
+
 interface ContactSimulationProps {
   session: CohortDto;
 }
