@@ -30,6 +30,7 @@ import {
   isAdminCle,
   isReferentClasse,
   YOUNG_STATUS,
+  ROLE_JEUNE,
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
@@ -38,6 +39,7 @@ import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
+import { getAcl } from "./services/iam/Permission.service";
 
 class Auth {
   model: any;
@@ -477,6 +479,12 @@ class Auth {
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
+      }
+
       return res.status(200).send({
         ok: true,
         token,
@@ -813,6 +821,11 @@ class Auth {
       if (!data || !token) {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
       }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {

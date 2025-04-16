@@ -109,6 +109,9 @@ import {
   canValidateYoungToLP,
   FILE_STATUS_PHASE1,
   ERRORS as ERRORS_LIB,
+  ReferentType,
+  PermissionDto,
+  ROLE_JEUNE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -123,6 +126,7 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
+import { getAcl } from "../services/iam/Permission.service";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -268,10 +272,13 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const { id, type } = params;
 
     let user: ReferentDocument | YoungDocument | null = null;
+    let acl: PermissionDto[] | null = null;
     if (type === "referent") {
       user = await ReferentModel.findById(id);
+      acl = await getAcl(user as any);
     } else if (type === "young") {
       user = await YoungModel.findById(id);
+      acl = await getAcl({ roles: [ROLE_JEUNE] } as any);
     }
     if (!user) {
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
@@ -296,6 +303,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
     userToReturn.impersonateId = req.user._id;
+    userToReturn.acl = acl;
 
     return res.status(200).json({ ok: true, token, data: userToReturn });
   } catch (error) {
@@ -361,12 +369,18 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
-    const referentProperties: any = {};
+    const referentProperties: Partial<ReferentType> = { roles: [] };
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
     if (lastName) referentProperties.lastName = lastName.toUpperCase();
-    if (role) referentProperties.role = role;
-    if (subRole) referentProperties.subRole = subRole;
+    if (role) {
+      referentProperties.role = role;
+      referentProperties.roles = [role];
+    }
+    if (subRole) {
+      referentProperties.subRole = subRole;
+      referentProperties.roles = [...referentProperties.roles!, subRole];
+    }
     if (region) referentProperties.region = region;
     if (department) referentProperties.department = department;
     if (structureId) referentProperties.structureId = structureId;
@@ -383,15 +397,19 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
+    // @ts-ignore
     referentProperties.invitationExpires = inSevenDays();
 
-    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) referentProperties.subRole = SUB_ROLES.referent_etablissement;
+    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
+      referentProperties.subRole = SUB_ROLES.referent_etablissement;
+      referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
+    }
 
     const referent = await ReferentModel.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role)) {
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
       // fixme: update url
       cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
     }
@@ -1599,6 +1617,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     referent.set(value);
     referent.set(cleanReferentData(referent));
+    referent.set({ roles: [referent.role, referent.subRole] });
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
