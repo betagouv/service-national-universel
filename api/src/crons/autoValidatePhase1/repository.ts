@@ -12,11 +12,11 @@ export async function getSejoursEnCoursDeRealisation(date: Date): Promise<Cohort
   });
 }
 
-export function getYoungCursorByCohortId(cohortId: string) {
+export function getCursorPourJeunesAValiderByCohortId(cohortId: string) {
   return YoungModel.find({
     cohortId,
     status: YOUNG_STATUS.VALIDATED,
     statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
-    cohesionStayPresence: { $in: ["true", "false"] },
+    cohesionStayPresence: { $in: ["true", "false"] }, // On ne prend pas les volontaires qui n'ont pas encore été pointés, ils seront validés manuellement par le chef de centre.
   }).cursor();
 }
