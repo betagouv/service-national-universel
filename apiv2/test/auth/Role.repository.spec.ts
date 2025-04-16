@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 
 import { setUpAuthTest } from "./setUpAuthTest";
 import { INestApplication } from "@nestjs/common";
-import { RoleGateway } from "src/auth/core/Role.gateway";
+import { RoleGateway } from "@auth/core/Role.gateway";
 import { createRole } from "./RoleHelper";
 import { ROLES } from "snu-lib";
 

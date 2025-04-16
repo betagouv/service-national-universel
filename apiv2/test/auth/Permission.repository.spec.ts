@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { setUpAuthTest } from "./setUpAuthTest";
 import { INestApplication } from "@nestjs/common";
 import { createPermission } from "./PermissionHelper";
-import { PermissionGateway } from "src/auth/core/Permission.gateway";
+import { PermissionGateway } from "@auth/core/Permission.gateway";
 
 describe("PermissionGateway", () => {
     let permissionGateway: PermissionGateway;

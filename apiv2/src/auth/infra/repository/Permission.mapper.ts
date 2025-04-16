@@ -1,6 +1,6 @@
 import { PermissionType } from "snu-lib";
 import { PermissionDocument } from "../provider/Permission.provider";
-import { PermissionModel } from "src/auth/core/Permission.model";
+import { PermissionModel } from "@auth/core/Permission.model";
 
 export class PermissionMapper {
     static toModels(permissionDocuments: PermissionDocument[]): PermissionModel[] {

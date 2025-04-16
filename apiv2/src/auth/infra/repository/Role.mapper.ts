@@ -1,4 +1,4 @@
-import { RoleModel } from "src/auth/core/Role.model";
+import { RoleModel } from "@auth/core/Role.model";
 import { RoleDocument } from "../provider/Role.provider";
 import { RoleType } from "snu-lib";
 
