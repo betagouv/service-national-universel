@@ -6,6 +6,7 @@ import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
+import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
 
 @Controller("campagne")
@@ -16,6 +17,7 @@ export class CampagneController {
         private readonly campagneService: CampagneService,
         private readonly mettreAJourCampagne: MettreAJourCampagne,
         private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
+        private readonly basculerArchivageCampagne: BasculerArchivageCampagne,
     ) {}
 
     @Post()
@@ -40,8 +42,10 @@ export class CampagneController {
         sort?: "ASC" | "DESC",
         @Query("cohortId")
         cohortId?: string,
+        @Query("isArchived")
+        isArchived?: boolean,
     ): Promise<CampagneModel[]> {
-        return await this.campagneGateway.search({ generic, cohortId }, sort);
+        return await this.campagneGateway.search({ generic, cohortId, isArchived }, sort);
     }
 
     @Put(":id")
@@ -59,5 +63,12 @@ export class CampagneController {
         @Param("id") campagneId: string,
     ): Promise<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]["response"]> {
         return await this.preparerEnvoiCampagne.execute(campagneId);
+    }
+
+    @Post(":id/toggle-archivage")
+    async toggleArchivage(
+        @Param("id") id: string,
+    ): Promise<CampagneModel | null> {
+        return await this.basculerArchivageCampagne.execute(id);
     }
 }

@@ -96,7 +96,6 @@ describe("CampagneGateway", () => {
                 nom: "Updated Without Ref",
                 programmations: programmations,
             } as CampagneSpecifiqueModelWithoutRef)) as CampagneSpecifiqueModelWithoutRef;
-            console.log(result);
             expect(result).toBeDefined();
             expect(result?.campagneGeneriqueId).toBeUndefined();
             expect(result?.nom).toBe("Updated Without Ref");

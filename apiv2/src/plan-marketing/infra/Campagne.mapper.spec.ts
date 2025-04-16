@@ -31,6 +31,8 @@ describe("CampagneMapper", () => {
                 generic: true,
                 envois: [],
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -49,6 +51,8 @@ describe("CampagneMapper", () => {
                 generic: true,
                 envois: [],
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneGeneriqueModel);
@@ -68,6 +72,8 @@ describe("CampagneMapper", () => {
                 cohortId: "cohort-1",
                 envois: [],
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             };
@@ -87,6 +93,8 @@ describe("CampagneMapper", () => {
                 cohortId: "cohort-1",
                 envois: [],
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 createdAt: mockDate,
                 updatedAt: mockDate,
             } as CampagneSpecifiqueModel);
@@ -106,6 +114,8 @@ describe("CampagneMapper", () => {
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 envois: [],
                 createdAt: mockDate,
                 updatedAt: mockDate,
@@ -138,6 +148,8 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
             };
 
             const result = CampagneMapper.toEntity(model);
@@ -155,6 +167,8 @@ describe("CampagneMapper", () => {
                 cohortId: undefined,
                 envois: [],
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 campagneGeneriqueId: undefined,
             });
         });
@@ -172,6 +186,8 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
             };
 
             const result = CampagneMapper.toEntity(model);
@@ -191,6 +207,8 @@ describe("CampagneMapper", () => {
                 campagneGeneriqueId: undefined,
                 originalCampagneGeneriqueId: undefined,
                 envois: [],
+                isProgrammationActive: false,
+                isArchived: false,
             });
         });
 
@@ -225,6 +243,8 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -240,6 +260,8 @@ describe("CampagneMapper", () => {
                 generic: true,
                 cohortId: undefined,
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 campagneGeneriqueId: undefined,
             });
         });
@@ -256,6 +278,8 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -271,6 +295,8 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 programmations: mockProgrammations,
+                isProgrammationActive: false,
+                isArchived: false,
                 campagneGeneriqueId: undefined,
             });
         });
@@ -280,6 +306,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                isProgrammationActive: false,
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -288,6 +315,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
+                isProgrammationActive: false,
             });
         });
     });

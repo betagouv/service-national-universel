@@ -36,6 +36,14 @@ class BaseCampagneDto {
     @IsEnum(CampagneJeuneType)
     @IsNotEmpty()
     type: CampagneJeuneType;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isProgrammationActive: boolean = false;
+
+    @IsBoolean()
+    @IsOptional()
+    isArchived?: boolean = false;
 }
 
 export class CreateCampagneGeneriqueDto extends BaseCampagneDto implements CreateCampagneGeneriqueModel {
@@ -77,6 +85,10 @@ export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifi
     @IsString()
     @IsNotEmpty()
     campagneGeneriqueId: string;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isProgrammationActive: boolean = false;
 }
 
 export class UpdateCampagneGeneriqueDto

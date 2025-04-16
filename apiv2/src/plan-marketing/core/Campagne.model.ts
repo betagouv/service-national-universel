@@ -29,6 +29,8 @@ interface CampagneComplete extends CampagneBase {
     type: CampagneJeuneType;
     envois?: CampagneEnvoi[];
     programmations: CampagneProgrammation[];
+    isProgrammationActive: boolean;
+    isArchived?: boolean;
 }
 
 /**
@@ -81,7 +83,7 @@ export type CreateCampagneSpecifiqueModelWithoutRef = Omit<
 export type CreateCampagneSpecifiqueModelWithRef = Omit<
     CampagneSpecifiqueModelWithRef,
     "id" | "createdAt" | "updatedAt"
->;
+> & { isProgrammationActive: boolean };
 export type CreateCampagneSpecifiqueModel =
     | CreateCampagneSpecifiqueModelWithoutRef
     | CreateCampagneSpecifiqueModelWithRef;

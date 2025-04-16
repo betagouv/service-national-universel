@@ -31,6 +31,13 @@ export interface CampagneEnvoi {
   statut: string;
 }
 
+export interface Programmation {
+  joursDecalage: number;
+  type: TypeEvenement;
+  createdAt?: Date;
+  envoiDate?: Date;
+}
+
 export enum TypeEvenement {
   DATE_DEBUT_SEJOUR = "DATE_DEBUT_SEJOUR",
   DATE_FIN_SEJOUR = "DATE_FIN_SEJOUR",

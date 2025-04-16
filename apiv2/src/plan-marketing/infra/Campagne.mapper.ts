@@ -49,6 +49,8 @@ export class CampagneMapper {
             type: document.type,
             envois: document.envois,
             programmations: document.programmations.map(CampagneMapper.toModelProgrammation),
+            isProgrammationActive: document.isProgrammationActive || false,
+            isArchived: document.isArchived || false,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
@@ -101,6 +103,8 @@ export class CampagneMapper {
             programmations: model.programmations.map((programmation) =>
                 CampagneMapper.toEntityProgrammation(programmation),
             ),
+            isProgrammationActive: model.isProgrammationActive,
+            isArchived: model.isArchived || false,
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -135,6 +139,7 @@ export class CampagneMapper {
                 generic: false,
                 cohortId: model.cohortId,
                 campagneGeneriqueId: model.campagneGeneriqueId,
+                isProgrammationActive: model.isProgrammationActive,
             } as Omit<CampagneType, "_id" | "createdAt" | "updatedAt">;
         }
 
@@ -151,6 +156,8 @@ export class CampagneMapper {
             programmations: model.programmations.map((programmation) =>
                 CampagneMapper.toEntityProgrammation(programmation),
             ),
+            isProgrammationActive: model.isProgrammationActive || false,
+            isArchived: model.isArchived || false,
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence

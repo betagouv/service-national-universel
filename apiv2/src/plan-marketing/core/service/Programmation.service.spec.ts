@@ -46,6 +46,7 @@ describe("ProgrammationService", () => {
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
                 programmations: [],
+                isProgrammationActive: false,
             };
 
             const result = service.computeDateEnvoi(campagne, {} as DatesSession);
@@ -68,6 +69,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: -3,
@@ -101,6 +103,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 2,
@@ -131,6 +134,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 7,
@@ -175,6 +179,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 7,
@@ -222,6 +227,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: -3,
@@ -263,6 +269,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 2,
@@ -287,6 +294,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 0,
@@ -312,6 +320,7 @@ describe("ProgrammationService", () => {
                 listeDiffusionId: "liste-1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
                 programmations: [
                     {
                         joursDecalage: 0,

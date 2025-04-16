@@ -44,6 +44,7 @@ describe("MettreAJourCampagne", () => {
             destinataires: [DestinataireListeDiffusion.JEUNES],
             type: CampagneJeuneType.VOLONTAIRE,
             programmations: [],
+            isProgrammationActive: false,
         };
 
         campagneService.findById.mockResolvedValue(campagneGenerique);
@@ -80,6 +81,7 @@ describe("MettreAJourCampagne", () => {
             type: CampagneJeuneType.VOLONTAIRE,
             envois: [{ date: sentDate, statut: EnvoiCampagneStatut.TERMINE }],
             programmations: [],
+            isProgrammationActive: false,
         };
 
         campagneService.findById.mockResolvedValue(campagneSpecifiqueWithRef);
@@ -105,6 +107,7 @@ describe("MettreAJourCampagne", () => {
             destinataires: [DestinataireListeDiffusion.JEUNES],
             type: CampagneJeuneType.VOLONTAIRE,
             programmations: [],
+            isProgrammationActive: false,
         };
 
         campagneService.findById.mockResolvedValue(campagneSpecifique);
