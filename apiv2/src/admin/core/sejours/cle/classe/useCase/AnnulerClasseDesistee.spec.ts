@@ -40,7 +40,7 @@ describe("AnnulerClasseDesistee", () => {
             ops: [{ path: "/status", value: STATUS_CLASSE.VERIFIED }],
         });
         mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValue({
-            ops: [{ path: "/status", value: YOUNG_STATUS.VALIDATED }],
+            ops: [{ path: "/status", value: YOUNG_STATUS.WITHDRAWN, originalValue: YOUNG_STATUS.VALIDATED }],
         });
 
         mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([mockYoung]);
