@@ -1182,9 +1182,6 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       } else {
         young.set({ [key]: newValue });
       }
-      if (key === "cohesionStayPresence" && newValue === "true") {
-        young.set({ statusPhase2OpenedAt: new Date() });
-      }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
