@@ -56,6 +56,12 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
         .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.CONTACT))
+        .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.ADMIN_TASK))
+        .useValue(mockQueue)
+        .overrideProvider(getQueueToken(QueueName.CRON))
+        .useValue(mockQueue)
         .overrideProvider(DATABASE_CONNECTION)
         .useFactory({ factory: testDatabaseProviders(setupOptions.newContainer).useFactory })
         .compile();

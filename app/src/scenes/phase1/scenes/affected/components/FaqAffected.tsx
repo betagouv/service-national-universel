@@ -1,23 +1,35 @@
 import React from "react";
 import ArrowUpRight from "../../../../../assets/icons/ArrowUpRight";
 import QuestionBlock from "../../../components/QuestionBlock";
+import useAuth from "@/services/useAuth";
 
 const FaqAffected = () => {
+  const { isCLE, isHTS } = useAuth();
   return (
     <section id="faq">
       <h2 className="my-4 text-xl font-bold">Questions fréquentes</h2>
       <div className="flex flex-col gap-4">
         <QuestionBlock
-          questionText="Comment se passe le transport ?"
+          questionText="Qui contacter en cas d’urgence pendant que mon enfant est en séjour de cohésion ?"
           answerText={
             <p className="text-sm">
-              Vous serez pris en charge d&apos;un point de rassemblement situé au sein de votre département jusqu&apos;à votre centre du séjour de cohésion à l&apos;aller et au
-              retour. Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres
-              moyens.
+              {isCLE ? "Le point de contact est l’établissement scolaire de votre enfant." : "Le contact figure sur la convocation de votre enfant et dans le cadre ci-dessus."}
             </p>
           }
-          readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/le-transport"
         />
+        {isHTS && (
+          <QuestionBlock
+            questionText="Comment se passe le transport ?"
+            answerText={
+              <p className="text-sm">
+                Vous serez pris en charge d&apos;un point de rassemblement situé au sein de votre département jusqu&apos;à votre centre du séjour de cohésion à l&apos;aller et au
+                retour. Si exceptionnellement vous êtes affecté au sein de votre département, vous devrez vous rendre au centre du séjour de cohésion et en revenir par vos propres
+                moyens.
+              </p>
+            }
+            readMoreLink="https://support.snu.gouv.fr/base-de-connaissance/le-transport"
+          />
+        )}
 
         <QuestionBlock
           questionText="Que prendre dans ma valise ?"

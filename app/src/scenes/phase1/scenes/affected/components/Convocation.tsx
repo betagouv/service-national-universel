@@ -1,10 +1,8 @@
 import React from "react";
 import styled from "styled-components";
-import { useHistory } from "react-router-dom";
 import dayjs from "dayjs";
 import { knowledgebaseURL } from "../../../../../config";
-import { useQuery } from "@tanstack/react-query";
-import { getDepartmentService } from "../utils/affectationRepository";
+import useContactsConvocation from "../utils/useContactsConvocation";
 import { getMeetingHour, getReturnHour, transportDatesToString, htmlCleaner, getParticularitesAcces } from "snu-lib";
 import useAuth from "@/services/useAuth";
 import useAffectationInfo from "../utils/useAffectationInfo";
@@ -12,14 +10,9 @@ import Loader from "../../../../../components/Loader";
 import { Hero, Content } from "../../../../../components/Content";
 
 export default function Convocation() {
-  const history = useHistory();
   const { young, isCLE } = useAuth();
   const { center, meetingPoint, departureDate, returnDate } = useAffectationInfo();
-  const { data: service } = useQuery({
-    queryKey: ["department-service", young?.department],
-    queryFn: () => getDepartmentService(young.department!),
-    enabled: !!young?.department,
-  });
+  const { data: contacts } = useContactsConvocation();
 
   const getMeetingAddress = () => {
     if (!center) throw new Error("Center is missing");
@@ -32,13 +25,16 @@ export default function Convocation() {
   if (!young.meetingPointId && young.deplacementPhase1Autonomous !== "true" && young.transportInfoGivenByLocal !== "true") {
     return (
       <Warning>
-        ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le <a onClick={() => history.push("/besoin-d-aide")}>support</a>.
+        ⚠️ Impossible d&apos;afficher votre convocation, merci de contacter le{" "}
+        <a href="/besoin-d-aide" className="underline" target="_blank" rel="noreferrer">
+          support
+        </a>
+        .
       </Warning>
     );
   }
-  if ((young.meetingPointId && !meetingPoint) || !center || !service) return <Loader />;
+  if ((young.meetingPointId && !meetingPoint) || !center) return <Loader />;
 
-  const contacts = service?.contacts.filter((c) => c.cohort === young.cohort) || [];
   return (
     <Hero>
       <Content style={{ width: "100%" }}>
@@ -49,7 +45,7 @@ export default function Convocation() {
               dangerouslySetInnerHTML={{
                 __html: htmlCleaner(
                   contacts
-                    .map((contact) => {
+                    ?.map((contact) => {
                       return `<li>${contact.contactName} - ${contact.contactPhone} - ${contact.contactMail}</li>`;
                     })
                     .join(""),

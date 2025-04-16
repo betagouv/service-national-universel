@@ -156,3 +156,6 @@ export const DepartmentServiceSchema = {
 
 const schema = new Schema(DepartmentServiceSchema);
 export type DepartmentServiceType = InterfaceExtended<InferSchemaType<typeof schema>>;
+
+const contactConvocationSchema = new Schema(ContactSchema);
+export type ContactConvocationType = InferSchemaType<typeof contactConvocationSchema>;
