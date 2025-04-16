@@ -1,6 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from "../..";
-import { PERMISSION_ACTIONS_LIST } from "../../permissions/constantes/actions";
+import { PERMISSION_ACTIONS_LIST } from "../../permissions";
 
 export const PermissionPolicyWhereSchema = {
   field: {
@@ -85,7 +85,7 @@ export const PermissionSchema = {
   },
   policy: {
     type: [PermissionPolicySchema],
-    required: true,
+    optional: true,
     documentation: {
       description: "Policy for a specific ressource or a script",
     },

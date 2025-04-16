@@ -73,7 +73,11 @@ router.post("/invite-coordonnateur", passport.authenticate("referent", { session
     await etablissement.save({ fromUser: req.user });
 
     if (referent.role === ROLES.REFERENT_CLASSE) {
-      referent.set({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.coordinateur_cle });
+      referent.set({
+        role: ROLES.ADMINISTRATEUR_CLE,
+        subRole: SUB_ROLES.coordinateur_cle,
+        roles: [ROLES.ADMINISTRATEUR_CLE, SUB_ROLES.coordinateur_cle],
+      });
       await referent.save({ fromUser: req.user });
       await inviteReferentClasseAsCoordinator(referent, { from: req.user }, etablissement);
     } else {

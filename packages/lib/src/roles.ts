@@ -504,6 +504,7 @@ function canSendPlanDeTransport(user) {
 interface UserRoles {
   role?: ReferentType["role"];
   subRole?: ReferentType["subRole"];
+  roles?: ReferentType["roles"];
 }
 
 function isAdmin(user: UserRoles) {

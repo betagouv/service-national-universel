@@ -48,6 +48,7 @@ export class AppelAProjetReferentService {
       ...appelAProjet.referentEtablissement,
       role: ROLES.ADMINISTRATEUR_CLE,
       subRole: SUB_ROLES.referent_etablissement,
+      roles: [ROLES.ADMINISTRATEUR_CLE, SUB_ROLES.referent_etablissement],
       metadata: { ...referentMetadata, invitationType: InvitationType.INSCRIPTION },
     };
     let createdReferent;

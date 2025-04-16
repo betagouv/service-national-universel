@@ -1,4 +1,5 @@
 import { ROLES, SUB_ROLES, SUB_ROLE_GOD, SUPPORT_ROLES, VISITOR_SUBROLES } from "../roles";
+import { PermissionDto } from "./PermissionDto";
 
 export type UserDto = {
   _id: string;
@@ -15,4 +16,5 @@ export type UserDto = {
   meetingPointId?: string;
   cohortId?: string;
   cohort?: string;
+  acl?: PermissionDto[];
 };

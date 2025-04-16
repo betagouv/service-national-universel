@@ -1,4 +1,7 @@
 import { faker } from "@faker-js/faker";
+
+import { PERMISSION_ACTIONS } from "snu-lib";
+
 import { PermissionGateway } from "@auth/core/Permission.gateway";
 import { PermissionModel } from "@auth/core/Permission.model";
 import { getAuthTestModuleRef } from "./setUpAuthTest";
@@ -9,7 +12,7 @@ export const createPermission = async (permission: Partial<PermissionModel>) => 
         code: faker.lorem.word(),
         ressource: faker.lorem.word(),
         titre: faker.lorem.word(),
-        action: "full",
+        action: PERMISSION_ACTIONS.FULL,
         roles: [],
         policy: [],
         ...permission,

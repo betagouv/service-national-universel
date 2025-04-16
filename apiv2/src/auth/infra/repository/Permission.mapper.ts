@@ -30,7 +30,7 @@ export class PermissionMapper {
             roles: permissionModel.roles,
             ressource: permissionModel.ressource,
             action: permissionModel.action,
-            policy: permissionModel.policy,
+            policy: permissionModel.policy || [],
             titre: permissionModel.titre,
             description: permissionModel.description || "",
             deletedAt: permissionModel.deletedAt,

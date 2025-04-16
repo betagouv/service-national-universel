@@ -18,7 +18,7 @@ const { YoungModel, ClasseModel, ReferentModel } = require("../models");
 const { validateId } = require("../utils/validator");
 const { encrypt, decrypt } = require("../cryptoUtils");
 const { getUserAttributes } = require("../services/support");
-const optionalAuth = require("../middlewares/optionalAuth");
+const optionalAuth = require("../middlewares/optionalAuth").default;
 const { scanFile } = require("../utils/virusScanner");
 const { getMimeFromFile } = require("../utils/file");
 
