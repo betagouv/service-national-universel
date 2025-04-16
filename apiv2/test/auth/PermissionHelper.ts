@@ -1,6 +1,6 @@
 import { faker } from "@faker-js/faker";
-import { PermissionGateway } from "src/auth/core/Permission.gateway";
-import { PermissionModel } from "src/auth/core/Permission.model";
+import { PermissionGateway } from "@auth/core/Permission.gateway";
+import { PermissionModel } from "@auth/core/Permission.model";
 import { getAuthTestModuleRef } from "./setUpAuthTest";
 
 export const createPermission = async (permission: Partial<PermissionModel>) => {

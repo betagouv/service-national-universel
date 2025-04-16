@@ -8,12 +8,12 @@ import { QueueModule } from "@infra/Queue.module";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 import { campagneMongoProviders } from "@plan-marketing/infra/CampagneMongo.provider";
-import { PermissionRepository } from "src/auth/infra/repository/Permission.repository";
-import { PermissionGateway } from "src/auth/core/Permission.gateway";
-import { RoleRepository } from "src/auth/infra/repository/Role.repository";
-import { RoleGateway } from "src/auth/core/Role.gateway";
-import { roleMongoProviders } from "src/auth/infra/provider/Role.provider";
-import { permissionMongoProviders } from "src/auth/infra/provider/Permission.provider";
+import { PermissionRepository } from "@auth/infra/repository/Permission.repository";
+import { PermissionGateway } from "@auth/core/Permission.gateway";
+import { RoleRepository } from "@auth/infra/repository/Role.repository";
+import { RoleGateway } from "@auth/core/Role.gateway";
+import { roleMongoProviders } from "@auth/infra/provider/Role.provider";
+import { permissionMongoProviders } from "@auth/infra/provider/Permission.provider";
 
 export interface SetupOptions {
     newContainer: boolean;
