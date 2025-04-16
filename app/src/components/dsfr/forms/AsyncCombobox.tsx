@@ -22,12 +22,12 @@ const Dropdown = ({ loading, options, handleSelect, hint }) => (
   </div>
 );
 
-export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeholder = null, getOptions, value, onChange, errorMessage }) {
+export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeholder = "", getOptions, value, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
-  const [options, setOptions] = useState([]);
+  const [options, setOptions] = useState<{ label: string; value: any }[]>([]);
   const [loading, setLoading] = useState(false);
-  const dropdownRef = useRef(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     function handleClickOutside(event) {
@@ -49,7 +49,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const debouncedOptions = useCallback(
+  const getOptionsDebounced = useCallback(
     debounce(async (query) => {
       try {
         setLoading(true);
@@ -77,13 +77,13 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
     const newQuery = e.target.value;
     setQuery(newQuery);
     if (newQuery.length > 1) {
-      debouncedOptions(newQuery);
+      getOptionsDebounced(newQuery);
     }
   };
 
   const handleSelect = (option) => {
     onChange(option);
-    setQuery("");
+    setQuery(option.label);
     setOpen(false);
   };
 
@@ -95,9 +95,9 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
           state={errorMessage && "error"}
           stateRelatedMessage={errorMessage}
           nativeInputProps={{
-            value: query || value?.label || "",
+            value: query || "",
             placeholder,
-            onChange: (e) => handleChangeQuery(e),
+            onChange: handleChangeQuery,
             onFocus: handleFocus,
           }}
         />
