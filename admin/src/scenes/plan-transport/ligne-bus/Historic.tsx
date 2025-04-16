@@ -86,6 +86,7 @@ export default function Historic() {
       }
 
       const queryString = Object.keys(query)
+        .filter((key) => query[key] && query[key].length > 0)
         .map((key) => key + "=" + query[key])
         .join("&");
       const { ok, data, pagination } = await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`);
