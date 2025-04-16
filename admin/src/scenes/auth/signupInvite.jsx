@@ -7,7 +7,7 @@ import { toastr } from "react-redux-toastr";
 
 import { setUser } from "../../redux/auth/actions";
 
-import api from "../../services/api";
+import api, { setJwtToken } from "../../services/api";
 import LoadingButton from "../../components/buttons/LoadingButton";
 import PasswordEye from "../../components/PasswordEye";
 import Header from "./components/header";
@@ -29,7 +29,7 @@ export default function SignupInvite() {
       try {
         if (!invitationToken) return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
         const { data, token } = await api.post(`/referent/signup_verify`, { invitationToken });
-        if (token) api.setToken(token);
+        if (token) setJwtToken(token);
         setNewUser(data);
       } catch (error) {
         if (error?.code === "INVITATION_TOKEN_EXPIRED_OR_INVALID") return setInvitation("INVITATION_TOKEN_EXPIRED_OR_INVALID");
@@ -68,7 +68,7 @@ export default function SignupInvite() {
               try {
                 const { data: user, token, ok } = await api.post(`/referent/signup_invite`, { ...values, invitationToken, acceptCGU: values.acceptCGU });
                 actions.setSubmitting(false);
-                if (ok && token) api.setToken(token);
+                if (ok && token) setJwtToken(token);
                 if (ok && user) dispatch(setUser(user));
               } catch (e) {
                 actions.setSubmitting(false);

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { ReactElement, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import cx from "classnames";
@@ -6,7 +6,7 @@ import { HiOutlineOfficeBuilding } from "react-icons/hi";
 import { HiOutlineCommandLine } from "react-icons/hi2";
 import { useToggle } from "react-use";
 
-import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled } from "snu-lib";
+import { FEATURES_NAME, ROLES, SUB_ROLE_GOD, isFeatureEnabled, PERMISSION_RESOURCES, isExecuteAuthorized, isReadAuthorized } from "snu-lib";
 
 import api from "@/services/api";
 import useDevice from "@/hooks/useDevice";
@@ -80,7 +80,6 @@ const SideBar = ({ sessionsList }) => {
 
   //Fetch tickets count
   useEffect(() => {
-    if (!user || ![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role)) return;
     const getTickets = async () => {
       try {
         const { data: tickets } = await api.get("/SNUpport/ticketscount");
@@ -91,7 +90,9 @@ const SideBar = ({ sessionsList }) => {
         console.log(error);
       }
     };
-    getTickets();
+    if (isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT })) {
+      getTickets();
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user]);
 
@@ -250,37 +251,49 @@ const SideBar = ({ sessionsList }) => {
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
-  const dsnjItems = [ExportDsnj];
-  const injepItems = [ExportInjep];
   const institutionItems = [Accueil, Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
+    let items: (() => ReactElement)[] = [];
     switch (user?.role) {
       case ROLES.REFERENT_DEPARTMENT:
       case ROLES.REFERENT_REGION:
-        return refItems;
+        items = [...refItems];
+        break;
       case ROLES.ADMIN:
-        return user.subRole === SUB_ROLE_GOD ? godItems : adminItems;
+        items = [...(user.subRole === SUB_ROLE_GOD ? godItems : adminItems)];
+        break;
       case ROLES.HEAD_CENTER:
-        return headCenterItems;
+        items = [...headCenterItems];
+        break;
       case ROLES.TRANSPORTER:
-        return transporteurItems;
+        items = [...transporteurItems];
+        break;
       case ROLES.RESPONSIBLE:
-        return responsableItems;
+        items = [...responsableItems];
+        break;
       case ROLES.SUPERVISOR:
-        return supervisorItems;
+        items = [...supervisorItems];
+        break;
       case ROLES.VISITOR:
-        return visitorItems;
-      case ROLES.DSNJ:
-        return dsnjItems;
-      case ROLES.INJEP:
-        return injepItems;
+        items = [...visitorItems];
+        break;
       case ROLES.ADMINISTRATEUR_CLE:
       case ROLES.REFERENT_CLASSE:
-        return institutionItems;
-      default:
-        return [];
+        items = [...institutionItems];
+        break;
     }
+
+    // clean la construction du menu qui est différente en fonction du rôle
+    if (!items.includes(SejoursAdmin) && !items.includes(SejoursGod)) {
+      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
+        items.push(ExportInjep);
+      }
+      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_DSNJ })) {
+        items.push(ExportDsnj);
+      }
+    }
+    return items;
   };
 
   return (
@@ -299,7 +312,7 @@ const SideBar = ({ sessionsList }) => {
       )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} onDemoChange={toggleDemo} />
-        {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
+        {isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT }) && <Tickets />}
         {[ROLES.HEAD_CENTER].includes(user?.role) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
           <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>

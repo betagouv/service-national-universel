@@ -113,7 +113,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
     try {
       const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, dataToSend);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code);
+        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code || "");
         setLoading(false);
         return;
       }
@@ -134,7 +134,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
       setLoading(true);
       const { ok, code } = await api.remove(`/session-phase1/${session._id}`);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code);
+        toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code || "");
         setLoading(false);
         return;
       }

@@ -9,7 +9,9 @@ const app = getAppHelper();
 app.use("/fake-endpoint", require("./fakeEndpoint").default);
 
 beforeEach(() => {
+  // @ts-ignore
   passport.user = { _id: "123" };
+  // @ts-ignore
   passport.user.role = ROLES.VISITOR;
 });
 
@@ -20,6 +22,7 @@ describe("GET /fake-endpoint/admin", () => {
   });
 
   it("should return 200 when called with authorized user", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
     const response = await request(app).get("/fake-endpoint/admin").send();
     expect(response.status).toBe(200);
@@ -33,6 +36,7 @@ describe("GET /fake-endpoint/referent-classe", () => {
   });
 
   it("should return 200 when called with authorized user", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.REFERENT_CLASSE;
     const response = await request(app).get("/fake-endpoint/referent-classe").send();
     expect(response.status).toBe(200);
@@ -46,6 +50,7 @@ describe("GET /fake-endpoint/unprotected", () => {
   });
 
   it("should return 200 when called with authorized user", async () => {
+    // @ts-ignore
     passport.user.role = ROLES.REFERENT_CLASSE;
     const response = await request(app).get("/fake-endpoint/referent-classe").send();
     expect(response.status).toBe(200);

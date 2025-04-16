@@ -85,7 +85,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
 
       const { ok, code } = await api.put(`/cohort/${encodeURIComponent(cohort!.name)}`, cohort);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code);
+        toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", code || "");
         await getCohort();
         return onLoadingChange(false);
       }

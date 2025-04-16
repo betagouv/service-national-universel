@@ -7,7 +7,7 @@ import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
-import api from "../../services/api";
+import api, { setJwtToken } from "../../services/api";
 import Header from "./components/header";
 import { GoTools } from "react-icons/go";
 import { BsShieldCheck } from "react-icons/bs";
@@ -35,7 +35,7 @@ export default function Signin() {
       setLoading(true);
       const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
       setLoading(false);
-      if (response.token) api.setToken(response.token);
+      if (response.token) setJwtToken(response.token);
       if (response.user) {
         plausibleEvent("2FA / Connexion réussie");
         dispatch(setUser(response.user));

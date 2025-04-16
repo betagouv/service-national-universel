@@ -68,6 +68,7 @@ import { SimulationAffectationHTSDromCom } from "./core/sejours/phase1/affectati
 import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/ValiderAffectationHTS.service";
 import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
+import { AuthModule } from "@auth/Auth.module";
 
 @Module({
     imports: [
@@ -85,6 +86,7 @@ import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desiste
         TaskModule,
         DatabaseModule,
         ReferentielModule,
+        AuthModule,
     ],
     providers: [
         Logger,

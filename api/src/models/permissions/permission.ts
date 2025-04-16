@@ -24,7 +24,7 @@ schema.plugin(patchHistory, {
   trackOriginalValue: true,
   includes: {
     modelName: { type: String, required: true, default: MONGO_COLLECTION.PERMISSION },
-    user: { type: Object, required: true, from: "_user" },
+    user: { type: Object, required: false, from: "_user" },
   },
   excludes: ["/updatedAt"],
 });
