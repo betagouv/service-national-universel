@@ -53,7 +53,7 @@ export class AnnulerClasseDesistee implements UseCase<AnnulerClasseDesisteeModel
         const jeunes = await this.jeuneGateway.findByClasseIdAndSessionId(classe.id, classe.sessionId!);
         for (const jeune of jeunes) {
             // // Récupérer le statut de chaque jeune
-            const jeuneHistory = await this.historyGateway.findByReferenceIdAndPathAndValue(
+            const jeuneHistory = await this.historyGateway.findLastByReferenceIdAndPathAndValue(
                 HistoryType.JEUNE,
                 jeune.id,
                 "/status",

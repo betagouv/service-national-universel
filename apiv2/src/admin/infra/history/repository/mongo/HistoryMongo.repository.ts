@@ -30,7 +30,7 @@ export class HistoryRepository implements HistoryGateway {
         const instance = this.getInstance(history);
         return instance.findOne({ ref: referenceId }).sort({ date: -1 }).lean();
     }
-    async findByReferenceIdAndPathAndValue(
+    async findLastByReferenceIdAndPathAndValue(
         history: HistoryType,
         referenceId: string,
         path: string,
