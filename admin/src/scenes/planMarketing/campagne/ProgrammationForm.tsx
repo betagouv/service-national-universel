@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import { Select, InputText, Button } from "@snu/ds/admin";
-import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG } from "snu-lib";
+import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG, formatDateForInput } from "snu-lib";
 
 export type ProgrammationProps = {
   joursDecalage: number;
@@ -59,6 +59,10 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
     return delaiOptions.find((option) => option.value === programmation.joursDecalage);
   }, [delaiOptions, programmation.joursDecalage]);
 
+  const isDelaiOptionDisabled = useMemo(() => {
+    return programmation.type === TypeEvenement.AUCUN;
+  }, [programmation.type]);
+
   return (
     <>
       <div className="flex-1">
@@ -74,7 +78,7 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
             placeholder="Sélectionner un délai"
             className="w-full"
             closeMenuOnSelect
-            disabled={!isEnabled}
+            disabled={!isEnabled || isDelaiOptionDisabled}
           />
         </div>
         <div className="flex-1">
@@ -93,7 +97,7 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
           <div className="flex-1">
             <InputText
               name="envoiDate"
-              value={programmation.envoiDate?.toISOString().slice(0, 16) || ""}
+              value={formatDateForInput(programmation.envoiDate)}
               onChange={(e) => handleChange("envoiDate", new Date(e.target.value))}
               type="datetime-local"
               className="w-full"
