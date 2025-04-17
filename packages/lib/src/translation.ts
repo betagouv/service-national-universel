@@ -113,64 +113,6 @@ const translate = (value) => {
       return "Inscrit(e) à Cap emploi";
     case "NOTHING":
       return "Inscrit(e) nulle part";
-    case "admin":
-      return "Modérateur";
-    case "god":
-      return "Super administrateur";
-    case "dsnj":
-      return "DSNJ";
-    case "injep":
-      return "INJEP";
-    case "transporter":
-      return "Transporteur";
-    case "referent_department":
-      return "Référent départemental";
-    case "referent_region":
-      return "Référent régional";
-    case "responsible":
-      return "Responsable";
-    case "head_center":
-      return "Chef de centre";
-    case "administrateur_cle":
-      return "Administrateur CLE";
-    case "referent_classe":
-      return "Référent de classe";
-    case "visitor":
-      return "Visiteur";
-    case "supervisor":
-      return "Superviseur";
-    case "manager_department":
-      return "Chef de projet départemental";
-    case "assistant_manager_department":
-      return "Chef de projet départemental adjoint";
-    case "manager_department_phase2":
-      return "Référent départemental phase 2";
-    case "manager_phase2":
-      return "Référent phase 2";
-    case "secretariat":
-      return "Secrétariat";
-    case "coordinator":
-      return "Coordinateur régional";
-    case "assistant_coordinator":
-      return "Coordinateur régional adjoint";
-    case "recteur_region":
-      return "Recteur de région académique";
-    case "recteur":
-      return "Recteur d'académie";
-    case "vice_recteur":
-      return "Vice-recteur d'académie";
-    case "dasen":
-      return "Directeur académique des services de l'éducation nationale (DASEN)";
-    case "sgra":
-      return "Secrétaire général de région académique (SGRA)";
-    case "sga":
-      return "Secrétaire général d'académie (SGA)";
-    case "drajes":
-      return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
-    case "referent_etablissement":
-      return "Chef d'établissement";
-    case "coordinateur_cle":
-      return "Coordinateur d'établissement";
     case "INSCRIPTION":
       return "Inscription";
     case "COHESION_STAY":
@@ -392,7 +334,72 @@ const translate = (value) => {
     case "ERR_NETWORK":
       return "Impossible de se connecter au serveur, vérifier votre connexion internet avant d'actualiser";
     default:
-      return value;
+      return translateRoles(value);
+  }
+};
+
+const translateRoles = (role) => {
+  switch (role) {
+    case "admin":
+      return "Modérateur";
+    case "god":
+      return "Super administrateur";
+    case "dsnj":
+      return "DSNJ";
+    case "injep":
+      return "INJEP";
+    case "transporter":
+      return "Transporteur";
+    case "referent_department":
+      return "Référent départemental";
+    case "referent_region":
+      return "Référent régional";
+    case "responsible":
+      return "Responsable";
+    case "head_center":
+      return "Chef de centre";
+    case "administrateur_cle":
+      return "Administrateur CLE";
+    case "referent_classe":
+      return "Référent de classe";
+    case "visitor":
+      return "Visiteur";
+    case "supervisor":
+      return "Superviseur";
+    case "manager_department":
+      return "Chef de projet départemental";
+    case "assistant_manager_department":
+      return "Chef de projet départemental adjoint";
+    case "manager_department_phase2":
+      return "Référent départemental phase 2";
+    case "manager_phase2":
+      return "Référent phase 2";
+    case "secretariat":
+      return "Secrétariat";
+    case "coordinator":
+      return "Coordinateur régional";
+    case "assistant_coordinator":
+      return "Coordinateur régional adjoint";
+    case "recteur_region":
+      return "Recteur de région académique";
+    case "recteur":
+      return "Recteur d'académie";
+    case "vice_recteur":
+      return "Vice-recteur d'académie";
+    case "dasen":
+      return "Directeur académique des services de l'éducation nationale (DASEN)";
+    case "sgra":
+      return "Secrétaire général de région académique (SGRA)";
+    case "sga":
+      return "Secrétaire général d'académie (SGA)";
+    case "drajes":
+      return "Délégué régional académique à la jeunesse, à l'engagement et aux sports (DRAJES)";
+    case "referent_etablissement":
+      return "Chef d'établissement";
+    case "coordinateur_cle":
+      return "Coordinateur d'établissement";
+    default:
+      return role;
   }
 };
 
@@ -1388,6 +1395,7 @@ export {
   translateColoration,
   translateYoungSource,
   translateStatusClasse,
+  translateRoles,
   formatNameAndAddress,
 };
 export default {
@@ -1424,5 +1432,6 @@ export default {
   translateColoration,
   translateYoungSource,
   translateStatusClasse,
+  translateRoles,
   formatNameAndAddress,
 };
