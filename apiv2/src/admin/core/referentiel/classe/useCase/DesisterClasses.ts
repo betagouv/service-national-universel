@@ -99,7 +99,8 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
         // Filtrer les jeunes ayant le même cohortId que la classe
         const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => ({
             ...jeune,
-            statut: YOUNG_STATUS.ABANDONED,
+            statut: YOUNG_STATUS.WITHDRAWN,
+            lastStatusAt: new Date(),
         }));
 
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
