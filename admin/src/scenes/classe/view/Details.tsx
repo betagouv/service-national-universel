@@ -135,7 +135,7 @@ export default function Details(props) {
       }
       setClasse(data);
       handleModiferReferent({ nom: classe.referents[0].lastName, prenom: classe.referents[0].firstName, email: classe.referents[0].email });
-      handleCancel();
+      closeForm();
       toastr.success("Succès", "La classe a bien été modifié");
     } catch (e) {
       capture(e);
@@ -145,12 +145,17 @@ export default function Details(props) {
     }
   };
 
-  const handleCancel = () => {
+  const closeForm = () => {
     setEdit(false);
     setEditRef(false);
     setEditStay(false);
     setIsLoading(false);
     setErrors({});
+  };
+
+  const reset = () => {
+    setClasse(props.classe);
+    closeForm();
   };
 
   if (!classe) return <Loader />;
@@ -167,7 +172,7 @@ export default function Details(props) {
         rights={rights}
         cohorts={cohorts}
         user={user}
-        onCancel={handleCancel}
+        onCancel={reset}
         onCheckInfo={checkInfo}
         isLoading={isLoading}
         setIsLoading={setIsLoading}
@@ -186,7 +191,7 @@ export default function Details(props) {
           errors={errors}
           user={user}
           infoBus={infoBus}
-          onCancel={handleCancel}
+          onCancel={reset}
           isLoading={isLoading}
           onSendInfo={sendInfo}
         />
