@@ -13,9 +13,14 @@ import DownloadMenu from "./components/DownloadMenu";
 import { Popover, PopoverButton } from "@headlessui/react";
 import { knowledgebaseURL } from "@/config";
 import Voiture from "@/assets/Voiture";
+import { RiInformationLine } from "react-icons/ri";
+import ReactTooltip from "react-tooltip";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function HomePhase2() {
   const { young } = useAuth();
+
+  const { canApplyToPhase2 } = usePermissions();
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -93,13 +98,32 @@ export default function HomePhase2() {
           <>
             <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
-              <Link
-                to="/mission"
-                onClick={() => plausibleEvent("Phase2/CTA - Trouver un engagement")}
-                className="bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center line-clamp-1">
-                <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
-                Trouver un engagement
-              </Link>
+              {canApplyToPhase2 ? (
+                <>
+                  <div className="flex bg-gray-400 text-white rounded-md px-3 py-2.5 text-center line-clamp-1 cursor-not-allowed">
+                    <div className="mr-2">
+                      <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
+                      Trouver un engagement
+                    </div>
+                    <div data-tip data-for="tooltip-nationalite">
+                      <RiInformationLine className="mt-1.5 text-white" />
+                    </div>
+                    <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                      <span className="text-gray-800">
+                        Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
+                      </span>
+                    </ReactTooltip>
+                  </div>
+                </>
+              ) : (
+                <Link
+                  to="/mission"
+                  onClick={() => plausibleEvent("Phase2/CTA - Trouver un engagement")}
+                  className="bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center line-clamp-1">
+                  <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
+                  Trouver un engagement
+                </Link>
+              )}
               <Link
                 to="/phase2/equivalence"
                 onClick={() => plausibleEvent("Phase2/CTA - Ajouter un engagement")}
