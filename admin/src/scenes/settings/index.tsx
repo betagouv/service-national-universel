@@ -126,7 +126,7 @@ export default function Settings() {
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
           <div className="flex items-center">
             <ExportContactConvocation session={cohort} />
-            <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} showArchived={true} />
+            <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} showArchived />
           </div>
         </div>
         <NavbarControlled tabs={tabs} active={currentTab} onTabChange={(id: typeof currentTab) => history.push(`/settings/${id}?cohort=${currentCohortName}`)} />
