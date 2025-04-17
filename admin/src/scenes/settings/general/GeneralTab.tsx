@@ -7,6 +7,9 @@ import { MdInfoOutline } from "react-icons/md";
 import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import { COHORT_STATUS, COHORT_TYPE, CohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
+import { useDispatch } from "react-redux";
+import { useSelector } from "react-redux";
+import { COHORTS_ACTIONS } from "@/redux/cohorts/actions";
 
 import api from "@/services/api";
 
@@ -38,6 +41,8 @@ interface GeneralTabProps {
 
 // Use the interface for the props object
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
+  const cohorts = useSelector((state: any) => state.Cohorts);
+  const dispatch = useDispatch();
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
 
@@ -87,6 +92,7 @@ export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort
       }
       toastr.success("La session a bien été mise à jour", "");
       await getCohort();
+      dispatch({ type: COHORTS_ACTIONS.UPDATE_COHORT, payload: cohort });
       onLoadingChange(false);
     } catch (e) {
       capture(e);

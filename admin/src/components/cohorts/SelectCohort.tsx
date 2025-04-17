@@ -26,7 +26,9 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
-  const options = useMemo(() => {
+  const options = getOptions();
+
+  function getOptions() {
     let updatedCohorts = cohorts || [];
     if (filterFn) {
       updatedCohorts = updatedCohorts.filter(filterFn);
@@ -58,7 +60,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
         ),
       };
     });
-  }, [cohorts, filterFn, sort]);
+  }
 
   const currentCohortName = cohort ?? options?.[0]?.value;
 
