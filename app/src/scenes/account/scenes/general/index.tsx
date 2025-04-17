@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 import { useLocation } from "react-router-dom";
+import { useForm, Controller } from "react-hook-form";
 import { isPhoneNumberWellFormated, PHONE_ZONES, YoungType } from "snu-lib";
+import useUpdateAccount from "../../lib/useUpdateAccount";
 import Input from "@/components/forms/inputs/Input";
 import Select from "@/components/forms/inputs/Select";
 import InputPhone from "@/components/forms/inputs/InputPhone";
@@ -15,8 +17,6 @@ import ChangeEmailModal from "./components/ChangeEmailModal";
 import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import usePermissions from "@/hooks/usePermissions";
 import useAuth from "@/services/useAuth";
-import { useForm, Controller } from "react-hook-form";
-import useUpdateAccount from "../../lib/useUpdateAccount";
 
 type FormValues = {
   lastName: string;
@@ -53,21 +53,18 @@ const AccountGeneralPage = () => {
   const shouldValidateEmail = newEmailValidationToken && young.newEmail;
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
   const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(shouldValidateEmail ? true : false);
-  const { mutate, isPending: isSubmitting } = useUpdateAccount("profile");
-  const { handleSubmit, reset, control, formState } = useForm<FormValues>({ defaultValues: getInitialFormValues(young) });
-  console.log("🚀 ~ AccountGeneralPage ~ formState:", formState.errors);
-
+  const { mutate: updateProfile, isPending: isSubmitting } = useUpdateAccount("profile");
+  const { handleSubmit, reset, control } = useForm<FormValues>({ defaultValues: getInitialFormValues(young) });
   const [formValues, setFormValues] = useState(getInitialFormValues(young));
 
-  const handleSubmitGeneralForm = (values: FormValues) => {
+  const handleSubmitGeneralForm = (formValues: FormValues) => {
     const youngDataToUpdate = {
-      gender: values.gender,
-      phone: values.phone.phoneNumber.trim(),
-      phoneZone: values.phone.phoneZone,
-      psc1Info: values.psc1Info,
+      gender: formValues.gender,
+      phone: formValues.phone.phoneNumber.trim(),
+      phoneZone: formValues.phone.phoneZone,
+      psc1Info: formValues.psc1Info,
     };
-    console.log("🚀 ~ handleSubmitGeneralForm ~ youngDataToUpdate:", youngDataToUpdate);
-    mutate(youngDataToUpdate);
+    updateProfile(youngDataToUpdate);
   };
 
   const handleChangeValue = (inputName) => (value) => {
@@ -115,7 +112,7 @@ const AccountGeneralPage = () => {
                   value={formValues.birthdateAt ? new Date(formValues.birthdateAt).toLocaleDateString("fr-fr") : undefined}
                   disabled
                 />
-                <Input type="email" label="Adresse email" name="email" value={young.email} disabled />
+                <Input type="email" label="Adresse email" name="email" value={formValues.email} disabled />
                 <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
                   Modifier mon adresse email
                 </InlineButton>
