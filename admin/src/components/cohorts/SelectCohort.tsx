@@ -18,9 +18,10 @@ interface Props {
   filterFn?: (cohort: CohortState["Cohorts"][0]) => boolean;
   onChange?: (cohortName: string) => void;
   isSearchable?: boolean;
+  showArchived?: boolean;
 }
 
-export default function SelectCohort({ cohort, withBadge, sort = "dateStart", filterFn, onChange, disabled, className, isSearchable }: Props) {
+export default function SelectCohort({ cohort, withBadge, sort = "dateStart", filterFn, onChange, disabled, className, isSearchable, showArchived = false }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
@@ -33,6 +34,10 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
     if (sort) {
       updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
+    if (showArchived === false) {
+      updatedCohorts = updatedCohorts.filter((cohort) => cohort.status !== "ARCHIVED");
+    }
+
     return updatedCohorts.map((cohort) => {
       const isOldCohort = cohort.name !== COHORTS.AVENIR && isBefore(addDays(cohort.dateEnd, 15), new Date());
       return {
