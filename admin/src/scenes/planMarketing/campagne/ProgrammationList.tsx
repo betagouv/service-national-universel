@@ -14,7 +14,7 @@ type ProgrammationListProps = {
 export default function ProgrammationList({ campagne, onChange, isCampagneGenerique = false }: ProgrammationListProps) {
   const handleDelete = (index: number) => {
     const newProgrammations = [...campagne.programmations];
-    newProgrammations.splice(index, 1);
+    newProgrammations.splice(index, campagne.programmations.length - index);
     onChange(newProgrammations);
   };
 
@@ -47,19 +47,22 @@ export default function ProgrammationList({ campagne, onChange, isCampagneGeneri
         </div>
       </div>
       <div className="space-y-4">
-        {campagne.programmations.map((prog, index) => (
-          <ProgrammationForm
-            key={index}
-            programmation={{
-              ...prog,
-              label: index === 0 ? "Premier envoi" : `Relance n°${index}`,
-            }}
-            isEnabled={campagne.isProgrammationActive}
-            isCampagneGenerique={isCampagneGenerique}
-            onDelete={() => handleDelete(index)}
-            onChange={(data) => handleChange(index, data)}
-          />
-        ))}
+        {campagne.programmations.map((prog, index) => {
+          return (
+            <ProgrammationForm
+              key={index}
+              programmation={{
+                ...prog,
+                label: index === 0 ? "Premier envoi" : `Relance n°${index}`,
+              }}
+              isEnabled={campagne.isProgrammationActive && !prog.sentAt}
+              isCampagneGenerique={isCampagneGenerique}
+              isRemovable={!prog.sentAt}
+              onDelete={() => handleDelete(index)}
+              onChange={(data) => handleChange(index, data)}
+            />
+          );
+        })}
       </div>
     </div>
   );

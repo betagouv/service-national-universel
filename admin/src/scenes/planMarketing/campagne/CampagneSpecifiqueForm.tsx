@@ -20,6 +20,7 @@ import {
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
 import DestinataireLink from "./partials/DestinataireLink";
+import ProgrammationList from "./ProgrammationList";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -89,6 +90,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       formState: { errors, isDirty, isSubmitting },
       reset,
       watch,
+      setValue,
       setError,
       clearErrors,
     } = useForm<CampagneSpecifiqueFormData>({
@@ -370,6 +372,25 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   />
                   {errors.objet && <span className="text-red-500 text-sm mt-1">{errors.objet.message}</span>}
                 </div>
+              </div>
+
+              {/* ADD programmations HERE */}
+              <div className="col-span-2 mt-6">
+                <ProgrammationList
+                  campagne={{
+                    ...watch(),
+                    id: campagneData.id || "",
+                    programmations: watch("programmations") || [],
+                    isProgrammationActive: watch("isProgrammationActive") || false,
+                  }}
+                  onChange={(value) => {
+                    if (Array.isArray(value)) {
+                      setValue("programmations", value, { shouldDirty: true });
+                    } else {
+                      setValue("isProgrammationActive", value.isProgrammationActive, { shouldDirty: true });
+                    }
+                  }}
+                />
               </div>
             </div>
 
