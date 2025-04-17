@@ -1,4 +1,3 @@
-import { PHONE_ZONES, isPhoneNumberWellFormated } from "snu-lib";
 import validator from "validator";
 
 const requiredErrorMessage = "Ce champ est obligatoire.";
@@ -16,11 +15,6 @@ export const validatePassword = ({ value }) => {
 export const validateEmail = ({ value }) => {
   if (!value) return requiredErrorMessage;
   return !validator.isEmail(value.trim()) && "Veuillez saisir une adresse email valide.";
-};
-
-export const validatePhoneNumber = ({ value }) => {
-  if (!value.phoneNumber || !value.phoneZone) return requiredErrorMessage;
-  return !isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) && PHONE_ZONES[value.phoneZone].errorMessage;
 };
 
 export const validateVerifyPassword = ({ value, valueToCompare }) => {

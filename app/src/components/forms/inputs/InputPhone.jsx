@@ -9,9 +9,9 @@ const InputPhone = ({
     phoneZone: "",
   },
   label = "",
-  onChange = () => null,
+  onChange,
   placeholder = "",
-  error = null,
+  error,
   className = "",
 }) => {
   if (value.phoneZone) {
