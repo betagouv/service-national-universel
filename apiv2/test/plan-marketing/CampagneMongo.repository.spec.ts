@@ -1,15 +1,16 @@
 import { INestApplication } from "@nestjs/common";
-import { CampagneGateway } from "@plan-marketing/core/gateway/Campagne.gateway";
-import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "@plan-marketing/infra/CampagneMongo.provider";
-import mongoose, { Model } from "mongoose";
-import { createCampagne } from "./CampagneHelper";
-import { setUpPlanMarketingTest } from "./setUpPlanMarketingTest";
-import { CampagneJeuneType, DestinataireListeDiffusion, ListeDiffusionEnum, TypeEvenement } from "snu-lib";
 import {
+    CampagneComplete,
     CampagneGeneriqueModel,
     CampagneSpecifiqueModelWithRef,
     CampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
+import { CampagneGateway } from "@plan-marketing/core/gateway/Campagne.gateway";
+import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "@plan-marketing/infra/CampagneMongo.provider";
+import mongoose, { Model } from "mongoose";
+import { CampagneJeuneType, DestinataireListeDiffusion, TypeEvenement } from "snu-lib";
+import { createCampagne } from "./CampagneHelper";
+import { setUpPlanMarketingTest } from "./setUpPlanMarketingTest";
 
 describe("CampagneGateway", () => {
     let campagneGateway: CampagneGateway;
@@ -34,61 +35,72 @@ describe("CampagneGateway", () => {
     });
 
     describe("update", () => {
-        it("should update a campagne", async () => {
+        it("should update a campagne and add a programmation", async () => {
             const createdAt = new Date();
             const createdCampagne = (await createCampagne({
                 nom: "Campagne Test",
-                generic: true,
+                generic: false,
                 programmations: [
                     {
                         joursDecalage: 2,
                         type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
-                        createdAt,
                     },
                 ],
-            })) as CampagneSpecifiqueModelWithoutRef;
+            })) as CampagneComplete;
 
             const newProgrammation = {
                 joursDecalage: 3,
                 type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
-                createdAt: new Date(),
             };
-            const result = await campagneGateway.update({
+            const result = (await campagneGateway.update({
                 ...createdCampagne,
                 nom: "Updated Test Campaign",
-                programmations: [...createdCampagne.programmations, newProgrammation],
-            } as CampagneSpecifiqueModelWithoutRef);
+                programmations: [...(createdCampagne?.programmations || []), newProgrammation],
+            } as CampagneSpecifiqueModelWithoutRef)) as CampagneSpecifiqueModelWithoutRef;
 
             const expectedCampagne = {
                 ...createdCampagne,
                 nom: "Updated Test Campaign",
-                programmations: [...createdCampagne.programmations, newProgrammation],
             };
 
-            const resultForComparison = JSON.stringify(result);
-            const expectedForComparison = JSON.stringify(expectedCampagne);
+            expect(result.id).toEqual(expectedCampagne.id);
+            expect(result.nom).toEqual(expectedCampagne.nom);
+            expect(result.objet).toEqual(expectedCampagne.objet);
+            expect(result.templateId).toEqual(expectedCampagne.templateId);
+            expect(result.type).toEqual(expectedCampagne.type);
+            expect(result.listeDiffusionId).toEqual(expectedCampagne.listeDiffusionId);
 
-            expect(resultForComparison).toEqual(expectedForComparison);
+            expect(result.programmations?.length).toEqual(
+                createdCampagne.programmations && createdCampagne.programmations.length + 1,
+            );
+            expect(result.programmations?.[0].joursDecalage).toEqual(createdCampagne.programmations?.[0].joursDecalage);
+            expect(result.programmations?.[0].type).toEqual(createdCampagne.programmations?.[0].type);
+            expect(result.programmations?.[0].id).toBeDefined();
+
+            expect(result.programmations?.[1].joursDecalage).toEqual(newProgrammation.joursDecalage);
+            expect(result.programmations?.[1].type).toEqual(newProgrammation.type);
+            expect(result.programmations?.[1].id).toBeDefined();
         });
     });
 
     describe("updateAndRemoveRef", () => {
         it("should update a campagne and remove reference", async () => {
             const generiqueCampagneId = new mongoose.Types.ObjectId().toString();
-            const specificCampagne = (await createCampagne({
-                nom: "Campagne Test",
-                generic: false,
-                campagneGeneriqueId: generiqueCampagneId,
-            } as any)) as any;
             const envoiDate = new Date();
             const programmations = [
                 {
                     joursDecalage: 1,
                     type: TypeEvenement.DATE_VALIDATION_PHASE1,
-                    createdAt: new Date(),
                     envoiDate: envoiDate,
                 },
             ];
+            const specificCampagne = (await createCampagne({
+                nom: "Campagne Test",
+                generic: false,
+                campagneGeneriqueId: generiqueCampagneId,
+                programmations: programmations,
+            } as any)) as any;
+
             const result = (await campagneGateway.updateAndRemoveRef({
                 id: specificCampagne.id,
                 generic: false,
@@ -96,11 +108,16 @@ describe("CampagneGateway", () => {
                 nom: "Updated Without Ref",
                 programmations: programmations,
             } as CampagneSpecifiqueModelWithoutRef)) as CampagneSpecifiqueModelWithoutRef;
+
             expect(result).toBeDefined();
             expect(result?.campagneGeneriqueId).toBeUndefined();
             expect(result?.nom).toBe("Updated Without Ref");
             expect(result?.originalCampagneGeneriqueId).toBe(generiqueCampagneId);
-            expect(result?.programmations).toEqual(programmations);
+            expect(result?.programmations?.[0].id).toBeDefined();
+            expect(result?.programmations?.[0].joursDecalage).toEqual(programmations[0].joursDecalage);
+            expect(result?.programmations?.[0].type).toEqual(programmations[0].type);
+            expect(result?.programmations?.[0].createdAt).toBeDefined();
+            expect(result?.programmations?.[0].envoiDate).toEqual(programmations[0].envoiDate);
         });
     });
 
@@ -117,12 +134,10 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 3,
                         type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
-                        createdAt: new Date(),
                     },
                     {
                         joursDecalage: 5,
                         type: TypeEvenement.DATE_FIN_SEJOUR,
-                        createdAt: new Date(),
                     },
                 ],
             })) as CampagneGeneriqueModel;
@@ -155,7 +170,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.DATE_DEBUT_SEJOUR,
-                        createdAt: new Date(),
                     },
                 ],
             });
@@ -182,7 +196,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.DATE_DEBUT_SEJOUR,
-                        createdAt: new Date(),
                     },
                 ],
             })) as CampagneSpecifiqueModelWithoutRef;
@@ -207,7 +220,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 5,
                         type: TypeEvenement.DATE_FIN_SEJOUR,
-                        createdAt: new Date(),
                     },
                 ],
             })) as CampagneGeneriqueModel;
@@ -251,7 +263,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.AUCUN,
-                        createdAt: new Date(),
                         envoiDate: inRangeDate,
                     },
                 ],
@@ -266,7 +277,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.AUCUN,
-                        createdAt: new Date(),
                         envoiDate: beforeStartDate,
                     },
                 ],
@@ -295,7 +305,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.AUCUN,
-                        createdAt: new Date(),
                         envoiDate: inRangeDate,
                     },
                 ],
@@ -327,7 +336,6 @@ describe("CampagneGateway", () => {
                     {
                         joursDecalage: 1,
                         type: TypeEvenement.DATE_DEBUT_SEJOUR,
-                        createdAt: new Date(),
                         envoiDate: now,
                     },
                 ],

@@ -17,6 +17,11 @@ export interface CampagneGateway {
     findSpecifiqueWithRefById(id: string): Promise<CampagneSpecifiqueModelWithRefAndGeneric | null>;
     findSpecifiqueWithoutRefById(id: string): Promise<CampagneSpecifiqueModelWithoutRef | null>;
     addEnvoiToCampagneById(campagneId: string, envoi: CampagneEnvoi): Promise<CampagneModel | null>;
+    updateProgrammationSentDate(
+        campagneId: string,
+        programmationId: string,
+        sentDate: Date,
+    ): Promise<CampagneModel | null>;
 }
 
 export const CampagneGateway = Symbol("CampagneGateway");

@@ -73,6 +73,8 @@ export default React.memo(
     const handleSubmit = () => {
       if (validateForm() && campagneData.id) {
         setIsConfirmModalOpen(true);
+      } else if (validateForm()) {
+        confirmSubmit();
       }
     };
 

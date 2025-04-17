@@ -89,6 +89,9 @@ export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifi
     @IsBoolean()
     @IsNotEmpty()
     isProgrammationActive: boolean = false;
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class UpdateCampagneGeneriqueDto

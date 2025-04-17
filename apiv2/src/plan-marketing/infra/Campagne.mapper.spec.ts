@@ -8,14 +8,12 @@ import {
     CreateCampagneModel,
     CreateCampagneSpecifiqueModel,
 } from "../core/Campagne.model";
-import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
+import { CampagneProgrammation, CreateCampagneProgrammation } from "@plan-marketing/core/Programmation.model";
+import mongoose from "mongoose";
 
 describe("CampagneMapper", () => {
     const mockId = "123";
     const mockDate = new Date();
-    const mockProgrammations: CampagneProgrammation[] = [
-        { type: TypeEvenement.AUCUN, createdAt: mockDate, joursDecalage: 0 },
-    ];
 
     describe("toModel", () => {
         it("devrait mapper une campagne générique avec tous les champs", () => {
@@ -30,7 +28,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 envois: [],
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 createdAt: mockDate,
@@ -50,7 +48,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 envois: [],
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 createdAt: mockDate,
@@ -71,7 +69,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 envois: [],
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 createdAt: mockDate,
@@ -92,7 +90,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 envois: [],
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 createdAt: mockDate,
@@ -113,7 +111,7 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 envois: [],
@@ -147,7 +145,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
             };
@@ -166,7 +164,7 @@ describe("CampagneMapper", () => {
                 generic: true,
                 cohortId: undefined,
                 envois: [],
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 campagneGeneriqueId: undefined,
@@ -185,7 +183,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false as const,
                 cohortId: "cohort-1",
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
             };
@@ -203,10 +201,10 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false,
                 cohortId: "cohort-1",
-                programmations: mockProgrammations,
                 campagneGeneriqueId: undefined,
                 originalCampagneGeneriqueId: undefined,
                 envois: [],
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
             });
@@ -242,7 +240,7 @@ describe("CampagneMapper", () => {
                 destinataires: [],
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
             };
@@ -259,7 +257,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: true,
                 cohortId: undefined,
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 campagneGeneriqueId: undefined,
@@ -277,7 +275,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false as const,
                 cohortId: "cohort-1",
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
             };
@@ -294,7 +292,7 @@ describe("CampagneMapper", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 generic: false,
                 cohortId: "cohort-1",
-                programmations: mockProgrammations,
+                programmations: [],
                 isProgrammationActive: false,
                 isArchived: false,
                 campagneGeneriqueId: undefined,
@@ -306,7 +304,7 @@ describe("CampagneMapper", () => {
                 generic: false as const,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
-                isProgrammationActive: false,
+                programmations: [],
             };
 
             const result = CampagneMapper.toEntityCreate(model);
@@ -315,7 +313,141 @@ describe("CampagneMapper", () => {
                 generic: false,
                 cohortId: "cohort-1",
                 campagneGeneriqueId: "campagne-1",
-                isProgrammationActive: false,
+            });
+        });
+    });
+
+    describe("Programmation Mapper Methods", () => {
+        const mockProgrammationObjectId = new mongoose.Types.ObjectId();
+        const mockProgrammationId = mockProgrammationObjectId.toString();
+        const mockProgrammationDate = new Date();
+
+        describe("toModelProgrammation", () => {
+            it("should convert a CampagneProgrammationType to a CampagneProgrammation model", () => {
+                const programmationType = {
+                    _id: mockProgrammationObjectId,
+                    joursDecalage: 5,
+                    type: TypeEvenement.DATE_DEBUT_SEJOUR,
+                    envoiDate: mockProgrammationDate,
+                    createdAt: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                };
+
+                const result = CampagneMapper.toModelProgrammation(programmationType);
+
+                expect(result).toEqual({
+                    id: mockProgrammationId,
+                    joursDecalage: 5,
+                    type: TypeEvenement[TypeEvenement.DATE_DEBUT_SEJOUR],
+                    envoiDate: mockProgrammationDate,
+                    createdAt: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                });
+            });
+
+            it("should handle undefined optional fields", () => {
+                const programmationType = {
+                    _id: mockProgrammationObjectId,
+                    joursDecalage: 5,
+                    type: TypeEvenement.ENVOI_PRECEDENT,
+                    createdAt: mockProgrammationDate,
+                };
+
+                const result = CampagneMapper.toModelProgrammation(programmationType);
+
+                expect(result).toEqual({
+                    id: mockProgrammationId,
+                    joursDecalage: 5,
+                    type: TypeEvenement[TypeEvenement.ENVOI_PRECEDENT],
+                    envoiDate: undefined,
+                    createdAt: mockProgrammationDate,
+                    sentAt: undefined,
+                });
+            });
+        });
+
+        describe("toEntityProgrammation", () => {
+            it("should convert a CampagneProgrammation model to a CampagneProgrammationType entity", () => {
+                const mockProgrammationObjectId = new mongoose.Types.ObjectId();
+                const mockProgrammationId = mockProgrammationObjectId.toString();
+
+                const programmation: CampagneProgrammation = {
+                    id: mockProgrammationId,
+                    joursDecalage: 3,
+                    type: TypeEvenement.DATE_FIN_SEJOUR,
+                    envoiDate: mockProgrammationDate,
+                    createdAt: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                };
+
+                const result = CampagneMapper.toEntityProgrammation(programmation);
+
+                expect(result).toEqual({
+                    _id: mockProgrammationObjectId,
+                    joursDecalage: 3,
+                    type: TypeEvenement.DATE_FIN_SEJOUR,
+                    envoiDate: mockProgrammationDate,
+                    createdAt: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                });
+            });
+
+            it("should handle undefined optional fields", () => {
+                const mockProgrammationObjectId = new mongoose.Types.ObjectId();
+                const mockProgrammationId = mockProgrammationObjectId.toString();
+                const programmation: CampagneProgrammation = {
+                    id: mockProgrammationId,
+                    joursDecalage: 3,
+                    type: TypeEvenement.AUCUN,
+                    createdAt: mockProgrammationDate,
+                };
+
+                const result = CampagneMapper.toEntityProgrammation(programmation);
+
+                expect(result).toEqual({
+                    _id: mockProgrammationObjectId,
+                    joursDecalage: 3,
+                    type: TypeEvenement.AUCUN,
+                    envoiDate: undefined,
+                    createdAt: mockProgrammationDate,
+                    sentAt: undefined,
+                });
+            });
+        });
+
+        describe("toEntityProgrammationCreate", () => {
+            it("should convert a CreateCampagneProgrammation model to a CampagneProgrammationType entity for creation", () => {
+                const createProgrammation: CreateCampagneProgrammation = {
+                    joursDecalage: 7,
+                    type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
+                    envoiDate: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                };
+
+                const result = CampagneMapper.toEntityProgrammationCreate(createProgrammation);
+
+                expect(result).toEqual({
+                    joursDecalage: 7,
+                    type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
+                    envoiDate: mockProgrammationDate,
+                    sentAt: mockProgrammationDate,
+                });
+            });
+
+            it("should handle undefined optional fields", () => {
+                const createProgrammation: CreateCampagneProgrammation = {
+                    joursDecalage: 7,
+                    type: TypeEvenement.DATE_FERMETURE_INSCRIPTIONS,
+                };
+
+                const result = CampagneMapper.toEntityProgrammationCreate(createProgrammation);
+
+                expect(result).toEqual({
+                    joursDecalage: 7,
+                    type: TypeEvenement.DATE_FERMETURE_INSCRIPTIONS,
+                    envoiDate: undefined,
+                    sentAt: undefined,
+                });
             });
         });
     });

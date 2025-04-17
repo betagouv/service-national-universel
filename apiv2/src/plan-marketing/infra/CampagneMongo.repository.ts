@@ -45,7 +45,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type!,
                     envois: [],
-                    programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                    programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
                     isProgrammationActive: campagneGenerique.isProgrammationActive || false,
                     isArchived: campagneGenerique.isArchived || false,
                 };
@@ -88,7 +88,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                             listeDiffusionId: campagneGenerique.listeDiffusionId,
                             destinataires: campagneGenerique.destinataires,
                             type: campagneGenerique.type,
-                            programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                            programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
                             isProgrammationActive: campagneGenerique.isProgrammationActive || false,
                             isArchived: campagneGenerique.isArchived || false,
                         };
@@ -126,7 +126,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     listeDiffusionId: campagneGenerique.listeDiffusionId,
                     destinataires: campagneGenerique.destinataires,
                     type: campagneGenerique.type,
-                    programmations: campagneGenerique.programmations.map(CampagneMapper.toModelProgrammation),
+                    programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
                     isProgrammationActive: campagneGenerique.isProgrammationActive || false,
                     isArchived: campagneGenerique.isArchived || false,
                 };
@@ -148,6 +148,27 @@ export class CampagneMongoRepository implements CampagneGateway {
 
     async delete(id: string): Promise<void> {
         await this.campagneModel.findByIdAndDelete(id);
+    }
+
+    async updateProgrammationSentDate(
+        campagneId: string,
+        programmationId: string,
+        sentDate: Date,
+    ): Promise<CampagneModel | null> {
+        const campagne = await this.campagneModel.findById(campagneId);
+        if (!campagne || !campagne.programmations || campagne.programmations.length === 0) {
+            return null;
+        }
+        const programmation = campagne.programmations.find(
+            (programmation) => programmation._id.toString() === programmationId,
+        );
+        if (!programmation) {
+            return null;
+        }
+        programmation.sentAt = sentDate;
+
+        const updated = await campagne.save();
+        return updated ? CampagneMapper.toModel(updated) : null;
     }
 
     async findCampagnesWithProgrammationBetweenDates(startDate: Date, endDate: Date): Promise<CampagneModel[]> {
@@ -182,7 +203,7 @@ export class CampagneMongoRepository implements CampagneGateway {
                     programmation.envoiDate <= endDate,
             );
             if (campagneGenerique && hasSomeProgrammationBetweenDates) {
-                const campagneModel = CampagneMapper.toModel({
+                const campagneModel: CampagneModel = CampagneMapper.toModel({
                     _id: campagneSpecifiqueWithRef._id,
                     createdAt: campagneSpecifiqueWithRef.createdAt,
                     updatedAt: campagneSpecifiqueWithRef.updatedAt,
@@ -194,9 +215,9 @@ export class CampagneMongoRepository implements CampagneGateway {
                     templateId: campagneGenerique.templateId,
                     listeDiffusionId: campagneGenerique.listeDiffusionId,
                     destinataires: campagneGenerique.destinataires,
-                    programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
                     isProgrammationActive: campagneGenerique.isProgrammationActive,
                     isArchived: campagneGenerique.isArchived,
+                    programmations: campagneGenerique.programmations,
                 });
                 campagnesWithProgrammation.push(campagneModel);
             }

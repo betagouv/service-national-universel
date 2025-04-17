@@ -1,7 +1,11 @@
 import { Test } from "@nestjs/testing";
 import { BasculerArchivageCampagne } from "./BasculerArchivageCampagne";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
-import { CampagneGeneriqueModel, CampagneSpecifiqueModelWithRef, CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";
+import {
+    CampagneGeneriqueModel,
+    CampagneSpecifiqueModelWithRef,
+    CampagneSpecifiqueModelWithoutRef,
+} from "../Campagne.model";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
@@ -34,7 +38,7 @@ describe("BasculerArchivageCampagne", () => {
             campagneGateway.findById.mockResolvedValue(null);
 
             await expect(useCase.execute("nonexistent-id")).rejects.toThrow(
-                new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND)
+                new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND),
             );
             expect(campagneGateway.findById).toHaveBeenCalledWith("nonexistent-id");
         });
@@ -57,7 +61,7 @@ describe("BasculerArchivageCampagne", () => {
             campagneGateway.findById.mockResolvedValue(campagneSpecifique);
 
             await expect(useCase.execute("specific-id")).rejects.toThrow(
-                new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_GENERIC)
+                new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_GENERIC),
             );
             expect(campagneGateway.findById).toHaveBeenCalledWith("specific-id");
         });
@@ -150,10 +154,7 @@ describe("BasculerArchivageCampagne", () => {
 
             campagneGateway.findById.mockResolvedValue(campagneGenerique);
             campagneGateway.update.mockResolvedValueOnce(campagneGeneriqueUpdated);
-            campagneGateway.search.mockResolvedValue([
-                campagneSpecifiqueWithRef,
-                campagneSpecifiqueWithoutRef,
-            ]);
+            campagneGateway.search.mockResolvedValue([campagneSpecifiqueWithRef, campagneSpecifiqueWithoutRef]);
 
             await useCase.execute("generic-id");
 
