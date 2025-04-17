@@ -38,7 +38,8 @@ export async function updateStatusPhase1(young: YoungDocument, validationDate: s
   const { shouldValidate, message } = shouldValidatePhase1(young, validationDate);
 
   if (shouldValidate) {
-    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.DONE, statusPhase2OpenedAt: new Date() });
+    young.set({ statusPhase1: YOUNG_STATUS_PHASE1.DONE });
+    if (!young.statusPhase2OpenedAt) young.set({ statusPhase2OpenedAt: new Date() });
   } else {
     const note = {
       note: `Phase 1 non validée pour la raison suivante : ${message}.`,
@@ -56,6 +57,9 @@ export async function updateStatusPhase1(young: YoungDocument, validationDate: s
 }
 
 export function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): { shouldValidate: boolean; message?: string } {
+  if (!young.cohesionStayPresence) {
+    throw new Error(`La présence au séjour n'est pas définie pour le jeune ${young._id}`);
+  }
   if (young.cohesionStayPresence === "false") {
     return { shouldValidate: false, message: "Le volontaire a été pointé absent au séjour" };
   }
