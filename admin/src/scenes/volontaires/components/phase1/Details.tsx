@@ -1,9 +1,10 @@
 import React, { useState } from "react";
 import { Container, Button } from "@snu/ds/admin";
-import { COHORT_TYPE, CohesionCenterType, CohortType, YoungType, LigneBusType, LigneToPointType, PointDeRassemblementType } from "snu-lib";
+import { ROLES, COHORT_TYPE, CohesionCenterType, CohortType, YoungType, LigneBusType, LigneToPointType, PointDeRassemblementType } from "snu-lib";
 import { isCohortOpenForAffectation } from "../../utils";
 import { User } from "@/types";
 import Loader from "@/components/Loader";
+import { Link } from "react-router-dom";
 
 import ModalAffectations from "../ModalAffectation";
 import ModalAffectationsForCLE from "../ModalAffectationsForCLE";
@@ -43,16 +44,24 @@ export default function Details({ cohesionCenter, meetingPoint, pointDeRassemble
   const [modalChangePdrSameLine, setModalChangePdrSameLine] = useState({ isOpen: false });
   const isOpenForAffectation = isCohortOpenForAffectation(user, young, cohort);
   const isYoungAffected = young.cohesionCenterId ? true : false;
+  const isLigneAffected = young.ligneId ? true : false;
 
   const containerActionList = () => {
     if (young.hasMeetingInformation === "true") {
       return [
-        <Button
-          key="affectation"
-          title={cohort.type === COHORT_TYPE.VOLONTAIRE ? "Affecter dans un centre" : "Affecter comme sa classe"}
-          disabled
-          tooltip="Ce volontaire est déjà affecté."
-        />,
+        <div className="flex gap-2" key="container-actions">
+          <Button
+            key="affectation"
+            title={cohort.type === COHORT_TYPE.VOLONTAIRE ? "Affecter dans un centre" : "Affecter comme sa classe"}
+            disabled
+            tooltip="Ce volontaire est déjà affecté."
+          />
+          {isLigneAffected && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+            <Link to={`/ligne-de-bus/historique?cohort=${encodeURIComponent(young.cohort!)}&page=1&search=${meetingPoint?.bus?.busId}`} key="historique" target="_blank">
+              <Button title="Voir l'historique du bus" />
+            </Link>
+          )}
+        </div>,
       ];
     }
     if (isOpenForAffectation) {
