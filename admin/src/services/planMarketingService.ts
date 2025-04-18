@@ -30,12 +30,13 @@ const PlanMarketingService = {
     })();
   },
 
-  envoyer: async (id: string) => {
+  envoyer: async (id: string, isProgrammationActive?: boolean) => {
     return await buildRequest<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]>({
       path: "/campagne/{id}/envoyer",
       params: { id },
       method: "POST",
       target: "API_V2",
+      payload: { isProgrammationActive },
     })();
   },
 

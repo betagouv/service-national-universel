@@ -115,8 +115,8 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     });
   };
 
-  const handleSend = (id: string) => {
-    sendCampagne(id);
+  const handleSend = (id: string, isProgrammationActive?: boolean) => {
+    sendCampagne({ id, isProgrammationActive });
   };
 
   const isNouvelleCampagneDisabled = useMemo(() => {

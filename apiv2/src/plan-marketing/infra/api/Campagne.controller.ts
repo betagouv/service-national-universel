@@ -15,11 +15,12 @@ import {
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
-import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
+import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
+import { MettreAJourActivationProgrammationSpecifique } from "@plan-marketing/core/useCase/MettreAJourActivationProgrammationSpecifique";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -30,6 +31,7 @@ export class CampagneController {
         private readonly mettreAJourCampagne: MettreAJourCampagne,
         private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
         private readonly basculerArchivageCampagne: BasculerArchivageCampagne,
+        private readonly mettreAJourActivationProgrammationSpecifique: MettreAJourActivationProgrammationSpecifique,
     ) {}
 
     @Post()
@@ -73,7 +75,9 @@ export class CampagneController {
     @Post(":id/envoyer")
     async envoyerCampagne(
         @Param("id") campagneId: string,
+        @Body() dto: EnvoyerCampagneDto,
     ): Promise<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]["response"]> {
+        await this.mettreAJourActivationProgrammationSpecifique.execute(campagneId, dto.isProgrammationActive);
         return await this.preparerEnvoiCampagne.execute(campagneId);
     }
 

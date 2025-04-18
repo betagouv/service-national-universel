@@ -97,6 +97,9 @@ interface EnvoyerPlanMarketingRoute extends BasicRoute {
   method: "POST";
   path: "/campagne/{id}/envoyer";
   response: RouteResponseBodyV2<void>;
+  payload: {
+    isProgrammationActive?: boolean;
+  };
 }
 
 interface ToggleArchivagePlanMarketingRoute extends BasicRoute {
