@@ -1,5 +1,17 @@
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Inject,
+    Param,
+    Post,
+    Put,
+    Query,
+    UseGuards,
+    ParseBoolPipe,
+} from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
@@ -36,16 +48,16 @@ export class CampagneController {
 
     @Get()
     async search(
-        @Query("generic")
+        @Query("generic", new ParseBoolPipe({ optional: true }))
         generic?: boolean,
         @Query("sort")
         sort?: "ASC" | "DESC",
         @Query("cohortId")
         cohortId?: string,
-        @Query("isArchived")
+        @Query("isArchived", new ParseBoolPipe({ optional: true }))
         isArchived?: boolean,
     ): Promise<CampagneModel[]> {
-        return await this.campagneGateway.search({ generic, cohortId, isArchived }, sort);
+        return await this.campagneService.search({ generic, cohortId, isArchived }, sort);
     }
 
     @Put(":id")
@@ -66,9 +78,7 @@ export class CampagneController {
     }
 
     @Post(":id/toggle-archivage")
-    async toggleArchivage(
-        @Param("id") id: string,
-    ): Promise<CampagneModel | null> {
+    async toggleArchivage(@Param("id") id: string): Promise<CampagneModel | null> {
         return await this.basculerArchivageCampagne.execute(id);
     }
 }

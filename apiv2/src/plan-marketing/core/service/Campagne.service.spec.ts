@@ -94,7 +94,7 @@ describe("CampagneService", () => {
         expect(mockCampagneGateway.update).not.toHaveBeenCalled();
     });
 
-    describe("findCampagnesWithProgrammationBetweenDatesBySessionId", () => {
+    describe("findActivesCampagnesWithProgrammationBetweenDatesBySessionId", () => {
         const sessionId = "SESSION-001";
         const startDate = new Date("2023-01-01");
         const endDate = new Date("2023-01-31");
@@ -126,13 +126,17 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
             );
 
-            expect(mockCampagneGateway.search).toHaveBeenCalledWith({ generic: false, cohortId: sessionId });
+            expect(mockCampagneGateway.search).toHaveBeenCalledWith({
+                generic: false,
+                cohortId: sessionId,
+                isProgrammationActive: true,
+            });
             expect(mockSessionGateway.findById).toHaveBeenCalledWith(sessionId);
             expect(mockProgrammationService.computeDateEnvoi).toHaveBeenCalledWith(mockCampagnes[0], {
                 dateStart: sessionDates.dateStart,
@@ -165,7 +169,7 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
@@ -188,7 +192,7 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             // computeDateEnvoi won't be called for this campaign
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
@@ -212,7 +216,7 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             // computeDateEnvoi won't be called for generic campaigns
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
@@ -246,7 +250,7 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
@@ -311,7 +315,7 @@ describe("CampagneService", () => {
                 .mockReturnValueOnce(processedCampagnes[1])
                 .mockReturnValueOnce(processedCampagnes[2]);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,

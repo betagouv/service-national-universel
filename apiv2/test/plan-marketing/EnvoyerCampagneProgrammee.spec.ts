@@ -104,6 +104,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.CLE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -121,6 +122,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.CLE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -130,7 +132,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "findCampagnesWithProgrammationBetweenDates");
+        jest.spyOn(campagneService, "findActivesCampagnesWithProgrammationBetweenDates");
         jest.spyOn(campagneService, "updateProgrammationSentDate");
 
         await envoyerCampagneProgrammee.execute();
@@ -139,7 +141,7 @@ describe("EnvoyerCampagneProgrammee", () => {
 
         expect(clockGateway.addDays).toHaveBeenCalledWith(fixedDate, -1);
 
-        expect(campagneService.findCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(
+        expect(campagneService.findActivesCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(
             expect.any(Date),
             fixedDate,
         );
@@ -195,6 +197,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.VOLONTAIRE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -237,6 +240,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.VOLONTAIRE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -271,6 +275,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.CLE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -329,6 +334,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.VOLONTAIRE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -372,6 +378,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             type: CampagneJeuneType.VOLONTAIRE,
             generic: false,
             cohortId: session.id,
+            isProgrammationActive: true,
             programmations: [
                 {
                     joursDecalage: 0,
@@ -405,6 +412,78 @@ describe("EnvoyerCampagneProgrammee", () => {
         expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalledWith(
             campagne.id,
             campagne.programmations?.[0].id,
+            expect.any(Date),
+        );
+    });
+
+    it("should not call preparerEnvoiCampagne when campagne.isProgrammationActive === false with programmations dates in range", async () => {
+        const session = await createSession({
+            dateStart: fixedDate,
+            dateEnd: fixedDate,
+            inscriptionStartDate: fixedDate,
+            inscriptionEndDate: fixedDate,
+            inscriptionModificationEndDate: fixedDate,
+            instructionEndDate: fixedDate,
+            validationDate: fixedDate,
+        });
+
+        // Create an active campaign
+        const activeCampagne = (await createCampagne({
+            nom: "Test Active Campagne",
+            objet: "Test Active Campagne Subject",
+            templateId: 888,
+            destinataires: [DestinataireListeDiffusion.JEUNES],
+            type: CampagneJeuneType.VOLONTAIRE,
+            generic: false,
+            cohortId: session.id,
+            isProgrammationActive: true,
+            programmations: [
+                {
+                    joursDecalage: 0,
+                    type: TypeEvenement.AUCUN,
+                    envoiDate: fixedDate,
+                },
+            ],
+        })) as CampagneComplete;
+
+        // Create an inactive campaign with the same programmation setup
+        const inactiveCampagne = (await createCampagne({
+            nom: "Test Inactive Campagne",
+            objet: "Test Inactive Campagne Subject",
+            templateId: 999,
+            destinataires: [DestinataireListeDiffusion.JEUNES],
+            type: CampagneJeuneType.VOLONTAIRE,
+            generic: false,
+            cohortId: session.id,
+            isProgrammationActive: false,
+            programmations: [
+                {
+                    joursDecalage: 0,
+                    type: TypeEvenement.AUCUN,
+                    envoiDate: fixedDate,
+                },
+            ],
+        })) as CampagneComplete;
+
+        jest.spyOn(campagneService, "updateProgrammationSentDate");
+
+        await envoyerCampagneProgrammee.execute();
+
+        // Verify preparerEnvoiCampagne is called only for the active campaign
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(1);
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(activeCampagne.id);
+        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(inactiveCampagne.id);
+
+        // Verify updateProgrammationSentDate is only called for the active campaign
+        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(1);
+        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
+            activeCampagne.id,
+            activeCampagne.programmations?.[0].id,
+            fixedDate,
+        );
+        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalledWith(
+            inactiveCampagne.id,
+            inactiveCampagne.programmations?.[0].id,
             expect.any(Date),
         );
     });

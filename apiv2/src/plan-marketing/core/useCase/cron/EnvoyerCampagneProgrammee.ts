@@ -21,7 +21,7 @@ export class EnvoyerCampagneProgrammee implements UseCase<void> {
         const now = this.clockGateway.now();
         const yesterday = this.clockGateway.addDays(now, -1);
         this.logger.log(`Recherche des campagnes avec programmation entre ${yesterday} et ${now}`);
-        const campagnesWithProgrammation = await this.campagneService.findCampagnesWithProgrammationBetweenDates(
+        const campagnesWithProgrammation = await this.campagneService.findActivesCampagnesWithProgrammationBetweenDates(
             yesterday,
             now,
         );

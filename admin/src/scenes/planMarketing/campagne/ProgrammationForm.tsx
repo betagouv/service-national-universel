@@ -30,6 +30,8 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
   const handleChange = (field: keyof ProgrammationProps, value: any) => {
     if (field === "type" && value === TypeEvenement.AUCUN) {
       onChange?.({ [field]: value, joursDecalage: 0, envoiDate: undefined });
+    } else if (field === "type") {
+      onChange?.({ [field]: value, envoiDate: undefined });
     } else {
       onChange?.({ [field]: value });
     }
