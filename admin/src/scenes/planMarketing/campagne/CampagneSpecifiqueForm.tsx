@@ -6,22 +6,13 @@ import { LuSend } from "react-icons/lu";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge, Switcher } from "@snu/ds/admin";
 
-import {
-  CampagneJeuneType,
-  DestinataireListeDiffusion,
-  hasCampagneGeneriqueId,
-  EnvoiCampagneStatut,
-  CampagneEnvoi,
-  formatDateFRTimezoneUTC,
-  formatLongDateFR,
-  Programmation,
-  CAMPAGNE_TYPE_COLORS,
-} from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, CampagneEnvoi, Programmation, CAMPAGNE_TYPE_COLORS } from "snu-lib";
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
 import DestinataireLink from "./partials/DestinataireLink";
 import ProgrammationList from "./ProgrammationList";
+import { CampagneEnvoiStatus } from "./partials/CampagneEnvoiStatus";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -245,38 +236,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex-1 flex flex-row gap-4">
-                    <div>
-                      {campagneData.envois
-                        ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
-                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                        .slice(0, 1)
-                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatDateFRTimezoneUTC(envoi.date)}`} status={"VALIDATED"} />)}
-                    </div>
-                    <div>
-                      {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (
-                        <div className="text-sm text-gray-500">
-                          <span>{(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) - 1} relances</span>
-                          <div className="flex items-center gap-1">
-                            {campagneData?.envois
-                              ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
-                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                              .slice(1)
-                              ?.map((envoi, index, array) => (
-                                <React.Fragment key={(campagneData.id ?? "id") + envoi.date}>
-                                  <span>
-                                    <Tooltip id={`id-envoi-campagne-${campagneData.id}-${index}`} title={`Envoyée le ${formatLongDateFR(envoi.date)}`}>
-                                      {formatDateFRTimezoneUTC(envoi.date)}
-                                    </Tooltip>
-                                  </span>
-                                  {index < array.length - 1 && <span>•</span>}
-                                </React.Fragment>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <CampagneEnvoiStatus envois={campagneData.envois} campagneId={campagneData.id} />
                 </div>
               </div>
             }>
@@ -401,7 +361,6 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                 </div>
               </div>
 
-              {/* ADD programmations HERE */}
               <div className="col-span-2 mt-6">
                 <ProgrammationList
                   campagne={{
