@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { AlerteMessageSchema, AlerteMessageType } from "snu-lib";
+import { AlerteMessageSchema, AlerteMessageType, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "alerteMessage";
+const MODELNAME = MONGO_COLLECTION.ALERTE_MESSAGE;
 
 const schema = new Schema(AlerteMessageSchema);
 

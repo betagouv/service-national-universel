@@ -1,9 +1,9 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { TaskSchema, TaskType } from "snu-lib";
+import { MONGO_COLLECTION, TaskSchema, TaskType } from "snu-lib";
 
 export type TaskDocument = HydratedDocument<TaskType>;
-export const TaskName = "task";
+export const TaskName = MONGO_COLLECTION.TASK;
 export const TASK_MONGOOSE_ENTITY = "TASK_MONGOOSE_ENTITY";
 
 const TaskSchemaRef = new mongoose.Schema(TaskSchema);

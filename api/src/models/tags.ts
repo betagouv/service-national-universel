@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, TagsSchema } from "snu-lib";
+import { InterfaceExtended, TagsSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "snutag";
+const MODELNAME = MONGO_COLLECTION.SNU_TAG;
 
 const schema = new Schema(TagsSchema);
 

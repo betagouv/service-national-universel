@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MissionAPISchema } from "snu-lib";
+import { InterfaceExtended, MissionAPISchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "missionapi";
+const MODELNAME = MONGO_COLLECTION.MISSION_API;
 
 const schema = new Schema(MissionAPISchema);
 

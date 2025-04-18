@@ -1,12 +1,12 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, ModificationBusSchema } from "snu-lib";
+import { InterfaceExtended, ModificationBusSchema, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../../anonymization/PlanDeTransport/modificationBus";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
-const MODELNAME = "modificationbus";
+const MODELNAME = MONGO_COLLECTION.MODIFICATION_BUS;
 
 const schema = new Schema(ModificationBusSchema);
 

@@ -1,13 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, ModificationBusSchema, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema, TRANSPORT_MODES_LIST } from "snu-lib";
+import { InterfaceExtended, ModificationBusSchema, MONGO_COLLECTION, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema, TRANSPORT_MODES_LIST } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
 import { PointDeRassemblementModel } from "./pointDeRassemblement";
 
-const MODELNAME = "plandetransport";
+const MODELNAME = MONGO_COLLECTION.PLAN_TRANSPORT;
 
 const EnrichedPointDeRassemblementSchema = PointDeRassemblementModel.discriminator("Enriched", new Schema(PlanTransportPointDeRassemblementEnrichedSchema)).schema;
 

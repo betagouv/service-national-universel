@@ -1,9 +1,9 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { CampagneType, CampagneSchema } from "snu-lib";
+import { CampagneType, CampagneSchema, MONGO_COLLECTION } from "snu-lib";
 
 export type CampagneDocument = HydratedDocument<CampagneType>;
-export const CampagneName = "campagne";
+export const CampagneName = MONGO_COLLECTION.CAMPAIGN;
 export const CAMPAGNE_MONGOOSE_ENTITY = "CAMPAGNE_MONGOOSE_ENTITY";
 
 const CampagneSchemaRef = new mongoose.Schema(CampagneSchema);

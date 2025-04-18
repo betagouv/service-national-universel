@@ -1,12 +1,12 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MissionEquivalenceSchema } from "snu-lib";
+import { InterfaceExtended, MissionEquivalenceSchema, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/missionEquivalence";
 import { DocumentExtended, CustomSaveParams, UserExtension } from "./types";
 
-const MODELNAME = "missionequivalence";
+const MODELNAME = MONGO_COLLECTION.MISSION_EQUIVALENCE;
 
 const schema = new Schema(MissionEquivalenceSchema);
 

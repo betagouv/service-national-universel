@@ -2,11 +2,11 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import anonymize from "../anonymization/contract";
 
-import { ContractSchema, InterfaceExtended } from "snu-lib";
+import { ContractSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "contract";
+const MODELNAME = MONGO_COLLECTION.CONTRACT;
 
 const schema = new Schema(ContractSchema);
 
