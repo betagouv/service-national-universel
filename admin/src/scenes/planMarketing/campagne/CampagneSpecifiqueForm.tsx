@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { LuSend } from "react-icons/lu";
 
 import { Checkbox } from "@snu/ds";
@@ -67,6 +67,7 @@ export interface CampagneSpecifiqueFormProps {
   onCancel: () => void;
   onSend: (id: string) => void;
   forceOpen?: boolean;
+  onToggleArchive?: (campagne: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined }) => void;
 }
 
 export interface CampagneSpecifiqueFormRefMethods {
@@ -83,7 +84,7 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false, onToggleArchive }, ref) => {
     const {
       control,
       handleSubmit,
@@ -179,6 +180,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       setIsSendCampagneModalOpen(false);
       if (campagneData.id) {
         onSend(campagneData.id);
+      }
+    };
+
+    const handleToggleArchive = () => {
+      if (campagneData.id && onToggleArchive) {
+        onToggleArchive(campagneData);
       }
     };
 
@@ -396,6 +403,18 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
             <hr className="border-t border-gray-200" />
             <div className="flex justify-end mt-4 gap-2">
+              <div className="flex-1 flex">
+                {campagneData.id && onToggleArchive && (
+                  <Button
+                    leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                    onClick={handleToggleArchive}
+                    type="secondary"
+                    className="mr-auto"
+                    title={campagneData.isArchived ? "Désarchiver" : "Archiver"}
+                    disabled={isSubmitting}
+                  />
+                )}
+              </div>
               {isNotSaved && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <HiOutlineExclamation className="w-5 h-5" />

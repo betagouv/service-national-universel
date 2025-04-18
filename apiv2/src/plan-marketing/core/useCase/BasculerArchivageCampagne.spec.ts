@@ -43,7 +43,7 @@ describe("BasculerArchivageCampagne", () => {
             expect(campagneGateway.findById).toHaveBeenCalledWith("nonexistent-id");
         });
 
-        it("should fail if campaign is not generic", async () => {
+        it("should archive a specific campaign without reference", async () => {
             const campagneSpecifique: CampagneSpecifiqueModelWithoutRef = {
                 id: "specific-id",
                 generic: false,
@@ -60,10 +60,14 @@ describe("BasculerArchivageCampagne", () => {
 
             campagneGateway.findById.mockResolvedValue(campagneSpecifique);
 
-            await expect(useCase.execute("specific-id")).rejects.toThrow(
-                new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_GENERIC),
-            );
+            await useCase.execute("specific-id");
+
             expect(campagneGateway.findById).toHaveBeenCalledWith("specific-id");
+            expect(campagneGateway.update).toHaveBeenCalledWith({
+                ...campagneSpecifique,
+                isArchived: true,
+                isProgrammationActive: false,
+            });
         });
 
         it("should archive a generic campaign and disable its programming", async () => {
