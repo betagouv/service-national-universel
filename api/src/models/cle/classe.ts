@@ -17,48 +17,48 @@ const MODELNAME = MONGO_COLLECTION.CLASSE;
 const schema = new mongoose.Schema(ClasseSchema);
 
 schema.virtual("etablissement", {
-  ref: "etablissement",
+  ref: MONGO_COLLECTION.ETABLISSEMENT,
   localField: "etablissementId",
   foreignField: "_id",
   justOne: true,
 });
 
 schema.virtual("referents", {
-  ref: "referent",
+  ref: MONGO_COLLECTION.REFERENT,
   localField: "referentClasseIds",
   foreignField: "_id",
 });
 
 schema.virtual("cohesionCenter", {
-  ref: "cohesioncenter",
+  ref: MONGO_COLLECTION.COHESION_CENTER,
   localField: "cohesionCenterId",
   foreignField: "_id",
   justOne: true,
 });
 
 schema.virtual("session", {
-  ref: "sessionphase1",
+  ref: MONGO_COLLECTION.SESSION_PHASE1,
   localField: "sessionId",
   foreignField: "_id",
   justOne: true,
 });
 
 schema.virtual("pointDeRassemblement", {
-  ref: "pointderassemblement",
+  ref: MONGO_COLLECTION.POINT_DE_RASSEMBLEMENT,
   localField: "pointDeRassemblementId",
   foreignField: "_id",
   justOne: true,
 });
 
 schema.virtual("ligne", {
-  ref: "lignebus",
+  ref: MONGO_COLLECTION.LIGNE_BUS,
   localField: "ligneId",
   foreignField: "_id",
   justOne: true,
 });
 
 schema.virtual("cohortDetails", {
-  ref: "cohort",
+  ref: MONGO_COLLECTION.COHORT,
   localField: "cohort",
   foreignField: "name",
   justOne: true,
