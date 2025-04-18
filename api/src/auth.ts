@@ -38,6 +38,7 @@ import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
+import { getAcl } from "./services/iam/ACL.service";
 
 class Auth {
   model: any;
@@ -477,6 +478,8 @@ class Auth {
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
+      data.acl = await getAcl(user);
+
       return res.status(200).send({
         ok: true,
         token,

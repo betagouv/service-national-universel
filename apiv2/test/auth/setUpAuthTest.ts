@@ -14,6 +14,7 @@ import { RoleRepository } from "@auth/infra/repository/Role.repository";
 import { RoleGateway } from "@auth/core/Role.gateway";
 import { roleMongoProviders } from "@auth/infra/provider/Role.provider";
 import { permissionMongoProviders } from "@auth/infra/provider/Permission.provider";
+import { PermissionService } from "@auth/core/Permission.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -46,13 +47,14 @@ export const setUpAuthTest = async (setupOptions: SetupOptions = { newContainer:
             QueueModule,
         ],
         providers: [
-            Logger,
+            PermissionService,
             ...campagneMongoProviders,
             testDatabaseProviders(setupOptions.newContainer),
             { provide: RoleGateway, useClass: RoleRepository },
             { provide: PermissionGateway, useClass: PermissionRepository },
             ...roleMongoProviders,
             ...permissionMongoProviders,
+            Logger,
         ],
     })
         .overrideProvider(DATABASE_CONNECTION)

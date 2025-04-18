@@ -6,7 +6,7 @@ export type PermissionModel = {
     roles: string[];
     ressource: string;
     action: (typeof PERMISSION_ACTIONS_LIST)[number];
-    policy: PermissionPolicy[];
+    policy?: PermissionPolicy[];
     titre: string;
     description?: string;
     createdAt: Date;
