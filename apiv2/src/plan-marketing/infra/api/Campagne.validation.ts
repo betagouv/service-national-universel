@@ -4,9 +4,10 @@ import {
     CreateCampagneSpecifiqueModelWithRef,
     CreateCampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, PlanMarketingRoutes } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
 import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
+import { ParseBoolPipe } from "@nestjs/common";
 
 class BaseCampagneDto {
     @IsString()
@@ -113,6 +114,12 @@ export class UpdateCampagneSpecifiqueWithRefDto extends CreateCampagneSpecifique
     @IsString()
     @IsNotEmpty()
     id: string;
+}
+
+export class EnvoyerCampagneDto {
+    @IsBoolean()
+    @IsOptional()
+    isProgrammationActive?: boolean;
 }
 
 export type CreateCampagneDto =

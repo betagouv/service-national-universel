@@ -41,7 +41,6 @@ export class MettreAJourCampagne implements UseCase<CampagneModel | null> {
                 campagneSpecifiqueWithRefToCampagneSpecifiqueWithouRef,
             );
         }
-
         // Cas campagne spécifique non liée
         return await this.campagneService.updateCampagne(campagne);
     }

@@ -37,6 +37,7 @@ import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.s
 import { ProgrammationService } from "./core/service/Programmation.service";
 import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
 import { BasculerArchivageCampagne } from "./core/useCase/BasculerArchivageCampagne";
+import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/MettreAJourActivationProgrammationSpecifique";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -83,6 +84,7 @@ import { BasculerArchivageCampagne } from "./core/useCase/BasculerArchivageCampa
         ProgrammationService,
         EnvoyerCampagneProgrammee,
         BasculerArchivageCampagne,
+        MettreAJourActivationProgrammationSpecifique,
     ],
     exports: [
         EnvoyerCampagneProgrammee,

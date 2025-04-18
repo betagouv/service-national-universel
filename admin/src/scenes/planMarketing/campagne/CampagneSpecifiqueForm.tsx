@@ -4,7 +4,7 @@ import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircl
 import { LuSend } from "react-icons/lu";
 
 import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
+import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge, Switcher } from "@snu/ds/admin";
 
 import {
   CampagneJeuneType,
@@ -66,7 +66,7 @@ export interface CampagneSpecifiqueFormProps {
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
-  onSend: (id: string) => void;
+  onSend: (id: string, disableProgrammation?: boolean) => void;
   forceOpen?: boolean;
   onToggleArchive?: (campagne: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined }) => void;
 }
@@ -108,6 +108,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isSendCampagneModalOpen, setIsSendCampagneModalOpen] = useState(false);
+    const [keepProgrammationActive, setKeepProgrammationActive] = useState(campagneData.isProgrammationActive);
 
     const setApiErrors = useCallback(
       (validationErrors?: ValidationErrors) => {
@@ -179,8 +180,11 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const handleConfirmSendCampagne = () => {
       setIsSendCampagneModalOpen(false);
-      if (campagneData.id) {
-        onSend(campagneData.id);
+      if (campagneData.id && campagneData.programmations && campagneData.programmations.length > 0) {
+        onSend(campagneData.id, keepProgrammationActive);
+      }
+      if (campagneData.id && campagneData.programmations && campagneData.programmations.length === 0) {
+        onSend(campagneData.id, undefined);
       }
     };
 
@@ -487,18 +491,28 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
           header={
             <div className="text-center">
               <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
-              <h3 className="text-xl font-medium">Confirmez l'envoi de la campagne</h3>
+              <h3 className="text-xl font-medium">Envoi manuel de la campagne spécifique</h3>
             </div>
           }
           content={
             <div className="text-center my-4">
               <p>Vous êtes sur le point d'envoyer la campagne {campagneData.nom}</p>
+              {campagneData.programmations && campagneData.programmations.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-4">
+                    {campagneData.isProgrammationActive ? "La programmation de la campagne doit-elle rester active ?" : "La programmation de la campagne doit-elle être activée ?"}
+                  </p>
+                  <div className="flex justify-center">
+                    <Switcher label="Active" value={campagneData.isProgrammationActive} onChange={(value) => setKeepProgrammationActive(value)} />
+                  </div>
+                </div>
+              )}
             </div>
           }
           footer={
             <div className="flex items-center justify-between gap-6">
               <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsSendCampagneModalOpen(false)} disabled={isSubmitting} />
-              <Button title="Confirmer l'envoi" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
+              <Button title="Envoyer la campagne" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
             </div>
           }
         />

@@ -61,8 +61,8 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
   });
 
   const { mutate: sendCampagne } = useMutation({
-    mutationFn: (id: string) => {
-      return PlanMarketingService.envoyer(id);
+    mutationFn: (params: { id: string; isProgrammationActive?: boolean }) => {
+      return PlanMarketingService.envoyer(params.id, params.isProgrammationActive);
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
