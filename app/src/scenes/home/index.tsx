@@ -53,6 +53,9 @@ export default function Home() {
     if (hasWithdrawn) {
       return <Withdrawn />;
     }
+    if (hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
+      return <Default />;
+    }
     return <HomePhase2 />;
   }
 
