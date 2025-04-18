@@ -30,7 +30,7 @@ export const MONGO_COLLECTION = {
   PATCH: "patche",
   PERMISSION: "permission",
   PLAN_TRANSPORT: "plandetransport",
-  POINT_DE_RASSEMBLEMENT: "pointDeRassemblement",
+  POINT_DE_RASSEMBLEMENT: "pointderassemblement",
   PROGRAM: "program",
   REFERENT: "referent",
   REGION_ACADEMIQUE: "regionAcademique",
