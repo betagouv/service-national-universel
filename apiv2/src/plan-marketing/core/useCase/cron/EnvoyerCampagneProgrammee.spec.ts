@@ -28,7 +28,7 @@ describe("EnvoyerCampagneProgrammee", () => {
                 {
                     provide: CampagneService,
                     useValue: {
-                        findCampagnesWithProgrammationBetweenDates: jest.fn(),
+                        findActivesCampagnesWithProgrammationBetweenDates: jest.fn(),
                         updateProgrammationSentDate: jest.fn(),
                     },
                 },
@@ -101,7 +101,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             },
         ];
 
-        campagneService.findCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
+        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
         programmationService.shouldProgrammationBeSent.mockImplementation((prog) => {
             return prog.id === "prog-1" || prog.id === "prog-2";
         });
@@ -112,7 +112,7 @@ describe("EnvoyerCampagneProgrammee", () => {
 
         expect(clockGateway.now).toHaveBeenCalled();
         expect(clockGateway.addDays).toHaveBeenCalledWith(now, -1);
-        expect(campagneService.findCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
+        expect(campagneService.findActivesCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
         expect(programmationService.shouldProgrammationBeSent).toHaveBeenCalledTimes(2);
         expect(preparerEnvoiCampagne.execute).toHaveBeenCalledTimes(2);
         expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1");
@@ -129,11 +129,11 @@ describe("EnvoyerCampagneProgrammee", () => {
         clockGateway.now.mockReturnValue(now);
         clockGateway.addDays.mockReturnValue(yesterday);
 
-        campagneService.findCampagnesWithProgrammationBetweenDates.mockResolvedValue([]);
+        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue([]);
 
         await useCase.execute();
 
-        expect(campagneService.findCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
+        expect(campagneService.findActivesCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
         expect(preparerEnvoiCampagne.execute).not.toHaveBeenCalled();
         expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalled();
     });
@@ -166,7 +166,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             },
         ];
 
-        campagneService.findCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
+        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
         programmationService.shouldProgrammationBeSent.mockReturnValue(false);
 
         await useCase.execute();
@@ -204,7 +204,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             },
         ];
 
-        campagneService.findCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
+        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
         programmationService.shouldProgrammationBeSent.mockReturnValue(true);
 
         const expectedError = new Error("Test error");
@@ -245,7 +245,7 @@ describe("EnvoyerCampagneProgrammee", () => {
             },
         ];
 
-        campagneService.findCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
+        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
         programmationService.shouldProgrammationBeSent.mockReturnValue(true);
         preparerEnvoiCampagne.execute.mockResolvedValue(undefined);
 

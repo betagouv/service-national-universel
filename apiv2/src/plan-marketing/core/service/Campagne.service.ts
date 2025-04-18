@@ -3,11 +3,11 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { CampagneModel, CreateCampagneModel, CampagneComplete } from "@plan-marketing/core/Campagne.model";
 import { DatesSession } from "@plan-marketing/core/Programmation.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { isCampagneGenerique, isCampagneWithRef } from "snu-lib";
+import { isCampagneGenerique, isCampagneWithRef, TypeEvenement } from "snu-lib";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { ProgrammationService } from "./Programmation.service";
-
+import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
 @Injectable()
 export class CampagneService {
     private readonly logger: Logger = new Logger(CampagneService.name);
@@ -26,6 +26,39 @@ export class CampagneService {
         }
 
         return campagne;
+    }
+
+    async search(options: { generic?: boolean; cohortId?: string; isArchived?: boolean }, sort?: "ASC" | "DESC") {
+        const campagnes = await this.campagneGateway.search(
+            { generic: options.generic, cohortId: options.cohortId, isArchived: options.isArchived },
+            sort,
+        );
+
+        if (options.generic === true) {
+            return campagnes;
+        }
+
+        const sessionIdsInCampagnes = this.extractSessionIds(campagnes);
+
+        const sessionsMap = new Map<string, SessionModel>();
+        await Promise.all(
+            // sessionIdsInCampagnes length should be 1 most of the time => no performance issue
+            Array.from(sessionIdsInCampagnes).map(async (id) => {
+                const session = await this.sessionGateway.findById(id);
+                if (session) sessionsMap.set(id, session);
+            }),
+        );
+
+        return campagnes.map((campagne) => {
+            if ("cohortId" in campagne && "programmations" in campagne) {
+                const session = sessionsMap.get(campagne.cohortId);
+                if (session) {
+                    const datesSession = this.createDatesSessionFromSession(session);
+                    return this.programmationService.computeDateEnvoi(campagne, datesSession);
+                }
+            }
+            return campagne;
+        });
     }
 
     async creerCampagne(campagne: CreateCampagneModel) {
@@ -49,7 +82,14 @@ export class CampagneService {
         if (!template) {
             throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
         }
-        return this.campagneGateway.update(campagne);
+        const campagneProgrammationsWithoutEnvoiDate = campagne.programmations?.map((programmation) => ({
+            ...programmation,
+            envoiDate: programmation.type === TypeEvenement.AUCUN ? programmation.envoiDate : undefined,
+        }));
+        return this.campagneGateway.update({
+            ...campagne,
+            programmations: campagneProgrammationsWithoutEnvoiDate,
+        });
     }
 
     async updateAndRemoveRef(campagne: CampagneModel) {
@@ -62,22 +102,20 @@ export class CampagneService {
         return this.campagneGateway.updateAndRemoveRef(campagne);
     }
 
-    async findCampagnesWithProgrammationBetweenDates(startDate: Date, endDate: Date): Promise<CampagneComplete[]> {
-        const campagnes = await this.campagneGateway.search({ generic: false });
-
-        const sessionIds = new Set<string>();
-        campagnes.forEach((campagne) => {
-            if ("cohortId" in campagne) {
-                sessionIds.add(campagne.cohortId);
-            }
-        });
+    async findActivesCampagnesWithProgrammationBetweenDates(
+        startDate: Date,
+        endDate: Date,
+    ): Promise<CampagneComplete[]> {
+        const campagnes = await this.campagneGateway.search({ generic: false, isProgrammationActive: true });
+        const sessionIds = this.extractSessionIds(campagnes);
 
         const filteredCampagnes: CampagneComplete[] = [];
         for (const sessionId of sessionIds) {
-            const sessionSpecificCampagnes = await this.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const sessionSpecificCampagnes = await this.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                campagnes.filter((campagne) => "cohortId" in campagne && campagne.cohortId === sessionId),
             );
             filteredCampagnes.push(...sessionSpecificCampagnes);
         }
@@ -85,30 +123,19 @@ export class CampagneService {
         return filteredCampagnes;
     }
 
-    async findCampagnesWithProgrammationBetweenDatesBySessionId(
+    async findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
         startDate: Date,
         endDate: Date,
         sessionId: string,
+        campagnes: CampagneModel[],
     ): Promise<CampagneComplete[]> {
         this.logger.log(`Recherche des campagnes avec programmation pour la session ${sessionId}`);
-        const [campagnes, session] = await Promise.all([
-            this.campagneGateway.search({ generic: false, cohortId: sessionId }),
-            this.sessionGateway.findById(sessionId),
-        ]);
+        const session = await this.sessionGateway.findById(sessionId);
         if (!session) {
             return [];
         }
 
-        const datesSession: DatesSession = {
-            dateStart: session.dateStart,
-            dateEnd: session.dateEnd,
-            inscriptionStartDate: session.inscriptionStartDate,
-            inscriptionEndDate: session.inscriptionEndDate,
-            inscriptionModificationEndDate: session.inscriptionModificationEndDate,
-            instructionEndDate: session.instructionEndDate,
-            validationDate: session.validationDate,
-        };
-
+        const datesSession = this.createDatesSessionFromSession(session);
         const campagnesWithProgrammation: CampagneComplete[] = [];
 
         for (const campagne of campagnes) {
@@ -116,7 +143,7 @@ export class CampagneService {
                 continue;
             }
 
-            let campagneWithComputedEnvoiDate = this.programmationService.computeDateEnvoi(campagne, datesSession);
+            const campagneWithComputedEnvoiDate = this.programmationService.computeDateEnvoi(campagne, datesSession);
 
             const hasMatchingDate = campagneWithComputedEnvoiDate.programmations?.some(
                 (prog) => prog.envoiDate && prog.envoiDate >= startDate && prog.envoiDate <= endDate,
@@ -137,5 +164,33 @@ export class CampagneService {
     ): Promise<CampagneModel | null> {
         this.logger.log(`Mise à jour de la date d'envoi pour la campagne ${campagneId}`);
         return this.campagneGateway.updateProgrammationSentDate(campagneId, programmationId, sentDate);
+    }
+
+    private extractSessionIds(campagnes: CampagneModel[]): Set<string> {
+        const sessionIds = new Set<string>();
+        campagnes.forEach((campagne) => {
+            if ("cohortId" in campagne) {
+                sessionIds.add(campagne.cohortId);
+            }
+        });
+        return sessionIds;
+    }
+
+    private createDatesSessionFromSession(session: unknown): DatesSession {
+        if (!session || typeof session !== "object") {
+            throw new Error("Invalid session object");
+        }
+
+        const sessionObj = session as Record<string, unknown>;
+
+        return {
+            dateStart: sessionObj.dateStart as Date,
+            dateEnd: sessionObj.dateEnd as Date,
+            inscriptionStartDate: sessionObj.inscriptionStartDate as Date,
+            inscriptionEndDate: sessionObj.inscriptionEndDate as Date,
+            inscriptionModificationEndDate: sessionObj.inscriptionModificationEndDate as Date,
+            instructionEndDate: sessionObj.instructionEndDate as Date,
+            validationDate: sessionObj.validationDate as Date,
+        };
     }
 }

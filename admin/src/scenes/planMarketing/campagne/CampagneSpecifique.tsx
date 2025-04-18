@@ -1,5 +1,5 @@
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
-import { InputText } from "@snu/ds/admin";
+import { InputText, Modal, Button } from "@snu/ds/admin";
 import React, { useMemo, useState, useRef, createRef } from "react";
 import { CampagneJeuneType, CohortDto, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
@@ -8,6 +8,7 @@ import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecif
 import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
+import { HiOutlineExclamation } from "react-icons/hi";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -19,10 +20,12 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, sendCampagne, isLoading } = useCampagneSpecifique({ sessionId });
+  const { campagnes, saveCampagne, sendCampagne, isLoading, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({ sessionId });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
   const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
+  const [isArchiveToggleModalOpen, setIsArchiveToggleModalOpen] = useState<boolean>(false);
+  const [selectedCampagne, setSelectedCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
 
   const { listesDiffusion } = useListeDiffusion();
 
@@ -94,11 +97,11 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       onSuccess: (success, errors, savedId) => {
         if (success) {
           setDraftCampagne(null);
-          
+
           if (isNewCampaign && savedId) {
-            setKeepOpenCampagneIds(prev => new Set([...prev, savedId]));
+            setKeepOpenCampagneIds((prev) => new Set([...prev, savedId]));
           }
-          
+
           if (formRef && formRef.current) {
             formRef.current.resetForm(campagne);
           }
@@ -119,6 +122,19 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
   const isNouvelleCampagneDisabled = useMemo(() => {
     return draftCampagne !== null;
   }, [draftCampagne]);
+
+  const handleToggleArchivageCampagne = (campagne: DraftCampagneSpecifiqueFormData) => {
+    setSelectedCampagne(campagne);
+    setIsArchiveToggleModalOpen(true);
+  };
+
+  const confirmToggleArchivage = () => {
+    if (selectedCampagne && selectedCampagne.id) {
+      toggleArchivageCampagne(selectedCampagne.id);
+      setIsArchiveToggleModalOpen(false);
+      setSelectedCampagne(null);
+    }
+  };
 
   if (isLoading) {
     return (
@@ -158,6 +174,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             }}
             onSend={handleSend}
             forceOpen={campagne.id ? keepOpenCampagneIds.has(campagne.id) : false}
+            onToggleArchive={handleToggleArchivageCampagne}
           />
         ))}
       </div>
@@ -168,6 +185,41 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         onConfirm={handleImportCampagneGenerique}
         cohort={session}
         campagnesSpecifiques={campagnes}
+      />
+
+      <Modal
+        isOpen={isArchiveToggleModalOpen}
+        onClose={() => setIsArchiveToggleModalOpen(false)}
+        className="md:max-w-[600px] text-center"
+        header={
+          <div className="text-center">
+            <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
+            <h3 className="text-xl font-medium">{selectedCampagne?.isArchived ? "Désarchivage de la campagne" : "Archivage de la campagne"}</h3>
+          </div>
+        }
+        content={
+          <div className="text-gray-700">
+            {selectedCampagne?.isArchived ? (
+              <div>
+                <p>
+                  La campagne spécifique sera désarchivée. <br />
+                  La programmation de cette campagne spécifique ne sera pas réactivée. <br />
+                  Pensez à le faire si nécessaire.
+                </p>
+              </div>
+            ) : (
+              <div>
+                <p>La campagne spécifique sera archivée et la programmation sera désactivée.</p>
+              </div>
+            )}
+          </div>
+        }
+        footer={
+          <div className="flex items-center justify-between gap-6">
+            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsArchiveToggleModalOpen(false)} disabled={isToggleArchivagePending} />
+            <Button title={selectedCampagne?.isArchived ? "Désarchiver" : "Archiver"} onClick={confirmToggleArchivage} className="flex-1" loading={isToggleArchivagePending} />
+          </div>
+        }
       />
     </>
   );

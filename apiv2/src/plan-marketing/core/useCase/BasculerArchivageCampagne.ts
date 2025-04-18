@@ -7,9 +7,7 @@ import { isCampagneGenerique, isCampagneWithRef } from "snu-lib";
 
 @Injectable()
 export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> {
-    constructor(
-        @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway
-    ) {}
+    constructor(@Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway) {}
 
     async execute(id: string): Promise<CampagneModel | null> {
         const campagne = await this.campagneGateway.findById(id);
@@ -17,8 +15,8 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
 
-        if (!isCampagneGenerique(campagne)) {
-            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_GENERIC);
+        if (isCampagneWithRef(campagne)) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_WITH_REF_CANNOT_BE_ARCHIVED);
         }
 
         if (campagne.isArchived) {
@@ -27,28 +25,29 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
                 isArchived: false,
             });
             return campagneUpdated;
-        }
-        else {
+        } else {
             const campagneUpdated = await this.campagneGateway.update({
                 ...campagne,
                 isArchived: true,
                 isProgrammationActive: false,
             });
 
-            const campagnesSpecifiques = await this.campagneGateway.search({
-                generic: false,
-                campagneGeneriqueId: id
-            });
-
-            for (const campagneSpecifique of campagnesSpecifiques) {
-                if (isCampagneWithRef(campagneSpecifique)) {
-                    continue;
-                }
-
-                await this.campagneGateway.update({
-                    ...campagneSpecifique,
-                    isProgrammationActive: false,
+            if (isCampagneGenerique(campagne)) {
+                const campagnesSpecifiques = await this.campagneGateway.search({
+                    generic: false,
+                    campagneGeneriqueId: id,
                 });
+
+                for (const campagneSpecifique of campagnesSpecifiques) {
+                    if (isCampagneWithRef(campagneSpecifique)) {
+                        continue;
+                    }
+
+                    await this.campagneGateway.update({
+                        ...campagneSpecifique,
+                        isProgrammationActive: false,
+                    });
+                }
             }
 
             return campagneUpdated;

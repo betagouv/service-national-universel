@@ -63,6 +63,7 @@ export class CampagneSpecifiqueMapper {
       updatedAt: campagne.updatedAt,
       isProgrammationActive: campagne.isProgrammationActive,
       programmations: campagne.programmations,
+      isArchived: campagne.isArchived,
     };
   }
 

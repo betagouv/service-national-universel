@@ -77,6 +77,21 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     },
   });
 
+  const { mutate: toggleArchivageCampagne, isPending: isToggleArchivagePending } = useMutation({
+    mutationFn: (id: string) => {
+      return PlanMarketingService.toggleArchivage(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId] });
+      toastr.clean();
+      toastr.success("Succès", "Statut d'archivage de la campagne modifié avec succès", { timeOut: 5000 });
+    },
+    onError: () => {
+      toastr.clean();
+      toastr.error("Erreur", "Une erreur est survenue lors de l'archivage ou du désarchivage de la campagne", { timeOut: 5000 });
+    },
+  });
+
   const { data: campagnes, isLoading } = useQuery<(CampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] })[]>({
     queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
     enabled: true,
@@ -92,5 +107,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     isLoading,
     saveCampagne,
     sendCampagne,
+    toggleArchivageCampagne,
+    isToggleArchivagePending,
   };
 };

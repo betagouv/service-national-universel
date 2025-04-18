@@ -1,7 +1,7 @@
 import React, { useMemo } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
 import { Select, InputText, Button } from "@snu/ds/admin";
-import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG } from "snu-lib";
+import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG, formatDateForInput } from "snu-lib";
 
 export type ProgrammationProps = {
   joursDecalage: number;
@@ -9,6 +9,7 @@ export type ProgrammationProps = {
   createdAt?: Date;
   envoiDate?: Date;
   label?: string;
+  sentAt?: Date;
 };
 
 type ProgrammationFormProps = {
@@ -17,6 +18,7 @@ type ProgrammationFormProps = {
   onChange?: (data: Partial<ProgrammationProps>) => void;
   isCampagneGenerique?: boolean;
   isEnabled?: boolean;
+  isRemovable?: boolean;
 };
 
 type DelaiOption = {
@@ -24,9 +26,15 @@ type DelaiOption = {
   label: string;
 };
 
-export default function ProgrammationForm({ programmation, isEnabled = true, onDelete, onChange, isCampagneGenerique = false }: ProgrammationFormProps) {
+export default function ProgrammationForm({ programmation, isEnabled = true, onDelete, onChange, isCampagneGenerique = false, isRemovable }: ProgrammationFormProps) {
   const handleChange = (field: keyof ProgrammationProps, value: any) => {
-    onChange?.({ [field]: value });
+    if (field === "type" && value === TypeEvenement.AUCUN) {
+      onChange?.({ [field]: value, joursDecalage: 0, envoiDate: undefined });
+    } else if (field === "type") {
+      onChange?.({ [field]: value, envoiDate: undefined });
+    } else {
+      onChange?.({ [field]: value });
+    }
   };
 
   const typeEvenementOptions = useMemo(() => {
@@ -59,6 +67,14 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
     return delaiOptions.find((option) => option.value === programmation.joursDecalage);
   }, [delaiOptions, programmation.joursDecalage]);
 
+  const isDelaiOptionDisabled = useMemo(() => {
+    return programmation.type === TypeEvenement.AUCUN;
+  }, [programmation.type]);
+
+  const isEnvoiDateDisabled = useMemo(() => {
+    return programmation.type !== TypeEvenement.AUCUN;
+  }, [programmation.type]);
+
   return (
     <>
       <div className="flex-1">
@@ -74,7 +90,7 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
             placeholder="Sélectionner un délai"
             className="w-full"
             closeMenuOnSelect
-            disabled={!isEnabled}
+            disabled={!isEnabled || isDelaiOptionDisabled}
           />
         </div>
         <div className="flex-1">
@@ -93,16 +109,16 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
           <div className="flex-1">
             <InputText
               name="envoiDate"
-              value={programmation.envoiDate?.toISOString().slice(0, 16) || ""}
+              value={formatDateForInput(programmation.envoiDate)}
               onChange={(e) => handleChange("envoiDate", new Date(e.target.value))}
               type="datetime-local"
               className="w-full"
               placeholder="Date d'envoi"
-              disabled={!isEnabled}
+              disabled={!isEnabled || isEnvoiDateDisabled}
             />
           </div>
         )}
-        <Button type="icon" leftIcon={<HiOutlineTrash size={20} className="text-red-500" />} onClick={onDelete} />
+        <Button disabled={!isRemovable} type="icon" leftIcon={<HiOutlineTrash size={20} className={`text-red-500 ${!isRemovable ? "opacity-50" : ""}`} />} onClick={onDelete} />
       </div>
     </>
   );

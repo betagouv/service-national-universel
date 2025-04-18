@@ -159,6 +159,41 @@ describe("CampagneGateway", () => {
             expect(found?.templateId).toBe(123);
             expect(JSON.stringify(found?.programmations)).toEqual(JSON.stringify(genericCampagne.programmations));
         });
+
+        it("should only return campagnes with isProgrammationActive === true", async () => {
+            const activeCampagne = (await createCampagne({
+                nom: "Active Campaign",
+                generic: true,
+                isProgrammationActive: true,
+                programmations: [
+                    {
+                        joursDecalage: 3,
+                        type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
+                    },
+                ],
+            })) as CampagneGeneriqueModel;
+
+            const inactiveCampagne = (await createCampagne({
+                nom: "Inactive Campaign",
+                generic: true,
+                isProgrammationActive: false,
+                programmations: [
+                    {
+                        joursDecalage: 3,
+                        type: TypeEvenement.DATE_OUVERTURE_INSCRIPTIONS,
+                    },
+                ],
+            })) as CampagneGeneriqueModel;
+
+            const results = await campagneGateway.search({ isProgrammationActive: true });
+
+            const foundActive = results.some((campagne) => campagne.id === activeCampagne.id);
+            const foundInactive = results.some((campagne) => campagne.id === inactiveCampagne.id);
+
+            expect(results.length).toBe(1);
+            expect(foundActive).toBeTruthy();
+            expect(foundInactive).toBeFalsy();
+        });
     });
 
     describe("delete", () => {

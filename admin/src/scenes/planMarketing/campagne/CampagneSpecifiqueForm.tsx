@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { LuSend } from "react-icons/lu";
 
 import { Checkbox } from "@snu/ds";
@@ -15,11 +15,13 @@ import {
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   Programmation,
+  CAMPAGNE_TYPE_COLORS,
 } from "snu-lib";
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
 import DestinataireLink from "./partials/DestinataireLink";
+import ProgrammationList from "./ProgrammationList";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -66,6 +68,7 @@ export interface CampagneSpecifiqueFormProps {
   onCancel: () => void;
   onSend: (id: string) => void;
   forceOpen?: boolean;
+  onToggleArchive?: (campagne: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined }) => void;
 }
 
 export interface CampagneSpecifiqueFormRefMethods {
@@ -82,13 +85,14 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false, onToggleArchive }, ref) => {
     const {
       control,
       handleSubmit,
       formState: { errors, isDirty, isSubmitting },
       reset,
       watch,
+      setValue,
       setError,
       clearErrors,
     } = useForm<CampagneSpecifiqueFormData>({
@@ -180,6 +184,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       }
     };
 
+    const handleToggleArchive = () => {
+      if (campagneData.id && onToggleArchive) {
+        onToggleArchive(campagneData);
+      }
+    };
+
     const isNotSaved = isDirty && !isSubmitting;
     const hasCampagneGenerique = hasCampagneGeneriqueId(campagneData);
     const templateErrorMessage = errors.templateId?.type === "api" ? errors.templateId.message : undefined;
@@ -207,13 +217,28 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   />
                   {errors.nom && <span className="text-red-500 text-sm mt-1">{errors.nom.message}</span>}
                   {hasCampagneGenerique ? (
-                    <a
-                      href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
-                      className="text-blue-600 hover:underline text-sm flex items-center gap-1">
-                      Editer la campagne globale
-                      <HiPencil className="my-2 w-4 h-4" />
-                    </a>
-                  ) : null}
+                    <div className="flex items-center mt-2 gap-2">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.GENERIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.GENERIQUE.TEXT }}>
+                        GÉNÉRIQUE
+                      </div>
+                      <a
+                        href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
+                        className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                        Editer la campagne globale
+                        <HiPencil className="my-2 w-4 h-4" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex items-center mt-2 ">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.TEXT }}>
+                        SPECIFIQUE
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex-1 flex flex-row gap-4">
@@ -371,10 +396,41 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   {errors.objet && <span className="text-red-500 text-sm mt-1">{errors.objet.message}</span>}
                 </div>
               </div>
+
+              {/* ADD programmations HERE */}
+              <div className="col-span-2 mt-6">
+                <ProgrammationList
+                  campagne={{
+                    ...watch(),
+                    id: campagneData.id || "",
+                    programmations: watch("programmations") || [],
+                    isProgrammationActive: watch("isProgrammationActive") || false,
+                  }}
+                  onChange={(value) => {
+                    if (Array.isArray(value)) {
+                      setValue("programmations", value, { shouldDirty: true });
+                    } else {
+                      setValue("isProgrammationActive", value.isProgrammationActive, { shouldDirty: true });
+                    }
+                  }}
+                />
+              </div>
             </div>
 
             <hr className="border-t border-gray-200" />
             <div className="flex justify-end mt-4 gap-2">
+              <div className="flex-1 flex">
+                {campagneData.id && onToggleArchive && (
+                  <Button
+                    leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                    onClick={handleToggleArchive}
+                    type="secondary"
+                    className="mr-auto"
+                    title={campagneData.isArchived ? "Désarchiver" : "Archiver"}
+                    disabled={isSubmitting}
+                  />
+                )}
+              </div>
               {isNotSaved && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <HiOutlineExclamation className="w-5 h-5" />

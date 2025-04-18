@@ -1,6 +1,7 @@
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneService } from "./Campagne.service";
 import { Logger } from "@nestjs/common";
+import { CampagneModel } from "@plan-marketing/core/Campagne.model";
 
 describe("CampagneService", () => {
     let service: CampagneService;
@@ -94,7 +95,7 @@ describe("CampagneService", () => {
         expect(mockCampagneGateway.update).not.toHaveBeenCalled();
     });
 
-    describe("findCampagnesWithProgrammationBetweenDatesBySessionId", () => {
+    describe("findActivesCampagnesWithProgrammationBetweenDatesBySessionId", () => {
         const sessionId = "SESSION-001";
         const startDate = new Date("2023-01-01");
         const endDate = new Date("2023-01-31");
@@ -126,13 +127,13 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
-            expect(mockCampagneGateway.search).toHaveBeenCalledWith({ generic: false, cohortId: sessionId });
             expect(mockSessionGateway.findById).toHaveBeenCalledWith(sessionId);
             expect(mockProgrammationService.computeDateEnvoi).toHaveBeenCalledWith(mockCampagnes[0], {
                 dateStart: sessionDates.dateStart,
@@ -165,10 +166,11 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -188,10 +190,11 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             // computeDateEnvoi won't be called for this campaign
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -212,10 +215,11 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             // computeDateEnvoi won't be called for generic campaigns
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -246,10 +250,11 @@ describe("CampagneService", () => {
             mockSessionGateway.findById.mockResolvedValue(sessionDates);
             mockProgrammationService.computeDateEnvoi.mockReturnValue(processedCampagne);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(1);
@@ -311,10 +316,11 @@ describe("CampagneService", () => {
                 .mockReturnValueOnce(processedCampagnes[1])
                 .mockReturnValueOnce(processedCampagnes[2]);
 
-            const result = await service.findCampagnesWithProgrammationBetweenDatesBySessionId(
+            const result = await service.findActivesCampagnesWithProgrammationBetweenDatesBySessionId(
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(2);
