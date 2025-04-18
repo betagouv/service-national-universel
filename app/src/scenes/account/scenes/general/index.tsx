@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
-import { useLocation } from "react-router-dom";
 import { useForm, Controller } from "react-hook-form";
-import { isPhoneNumberWellFormated, PHONE_ZONES, YoungType } from "snu-lib";
+import { isPhoneNumberWellFormated } from "snu-lib";
 import useUpdateAccount from "../../lib/useUpdateAccount";
 import Input from "@/components/forms/inputs/Input";
 import Select from "@/components/forms/inputs/Select";
@@ -19,10 +18,7 @@ import usePermissions from "@/hooks/usePermissions";
 import useAuth from "@/services/useAuth";
 
 type FormValues = {
-  lastName: string;
-  firstName: string;
   gender: string;
-  birthdateAt: Date | string;
   email: string;
   phone: {
     phoneNumber: string;
@@ -31,31 +27,26 @@ type FormValues = {
   psc1Info: string | null;
 };
 
-const getInitialFormValues = (young: YoungType) => ({
-  lastName: young.lastName || "",
-  firstName: young.firstName || "",
-  gender: young.gender || "male",
-  birthdateAt: (young.birthdateAt && new Date(young.birthdateAt)) || "",
-  email: young.email || "",
-  phone: {
-    phoneNumber: young.phone || "",
-    phoneZone: young.phoneZone || "",
-  },
-  psc1Info: young.psc1Info || null,
-});
-
 const AccountGeneralPage = () => {
   const { young } = useAuth();
   const { canUpdatePSC1 } = usePermissions();
-  const { search } = useLocation();
-  const searchParams = new URLSearchParams(search);
+  const searchParams = new URLSearchParams(window.location.search);
   const newEmailValidationToken = searchParams.get("newEmailValidationToken");
   const shouldValidateEmail = newEmailValidationToken && young.newEmail;
+  const { mutate: updateProfile, isPending: isSubmitting } = useUpdateAccount("profile");
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
   const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(shouldValidateEmail ? true : false);
-  const { mutate: updateProfile, isPending: isSubmitting } = useUpdateAccount("profile");
-  const { handleSubmit, reset, control } = useForm<FormValues>({ defaultValues: getInitialFormValues(young) });
-  const [formValues, setFormValues] = useState(getInitialFormValues(young));
+  const { handleSubmit, reset, control } = useForm<FormValues>({
+    defaultValues: {
+      gender: young.gender || "male",
+      email: young.email,
+      phone: {
+        phoneNumber: young.phone,
+        phoneZone: young.phoneZone,
+      },
+      psc1Info: young.psc1Info,
+    },
+  });
 
   const handleSubmitGeneralForm = (formValues: FormValues) => {
     const youngDataToUpdate = {
@@ -65,13 +56,6 @@ const AccountGeneralPage = () => {
       psc1Info: formValues.psc1Info,
     };
     updateProfile(youngDataToUpdate);
-  };
-
-  const handleChangeValue = (inputName) => (value) => {
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [inputName]: value,
-    }));
   };
 
   return (
@@ -93,8 +77,8 @@ const AccountGeneralPage = () => {
               <section className="mb-4">
                 <SectionTitle>Identité et contact</SectionTitle>
                 <FormRow>
-                  <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={formValues.lastName} disabled />
-                  <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={formValues.firstName} disabled />
+                  <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={young.lastName} disabled />
+                  <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={young.firstName} disabled />
                 </FormRow>
                 <Controller
                   name="gender"
@@ -106,13 +90,8 @@ const AccountGeneralPage = () => {
                     </Select>
                   )}
                 />
-                <Input
-                  label="Date de naissance"
-                  name="birthdateAt"
-                  value={formValues.birthdateAt ? new Date(formValues.birthdateAt).toLocaleDateString("fr-fr") : undefined}
-                  disabled
-                />
-                <Input type="email" label="Adresse email" name="email" value={formValues.email} disabled />
+                <Input label="Date de naissance" name="birthdateAt" value={young.birthdateAt ? new Date(young.birthdateAt).toLocaleDateString("fr-fr") : undefined} disabled />
+                <Input type="email" label="Adresse email" name="email" value={young.email} disabled />
                 <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
                   Modifier mon adresse email
                 </InlineButton>
@@ -123,15 +102,7 @@ const AccountGeneralPage = () => {
                     required: "Le numéro de téléphone est requis",
                     validate: (value) => isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) || "Le numéro de téléphone est invalide",
                   }}
-                  render={({ field, fieldState }) => (
-                    <InputPhone
-                      label="Téléphone"
-                      value={field.value}
-                      error={fieldState.error?.message}
-                      onChange={field.onChange}
-                      placeholder={PHONE_ZONES[formValues.phone.phoneZone]?.example}
-                    />
-                  )}
+                  render={({ field, fieldState }) => <InputPhone label="Téléphone" value={field.value} error={fieldState.error?.message} onChange={field.onChange} />}
                 />
               </section>
               <section className="mb-4">
@@ -167,27 +138,11 @@ const AccountGeneralPage = () => {
                 </div>
                 <div className="flex flex-col gap-1">
                   <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="psc1Info"
-                      value="true"
-                      checked={formValues.psc1Info === "true"}
-                      onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
-                      className="form-radio text-blue-600"
-                      disabled={!canUpdatePSC1}
-                    />
+                    <input type="radio" name="psc1Info" value="true" defaultChecked={young.psc1Info === "true"} className="form-radio text-blue-600" disabled={!canUpdatePSC1} />
                     <span className="text-base font-normal">Oui</span>
                   </label>
                   <label className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="psc1Info"
-                      value="false"
-                      checked={formValues.psc1Info === "false"}
-                      onChange={(e) => handleChangeValue("psc1Info")(e.target.value)}
-                      className="form-radio text-blue-600"
-                      disabled={!canUpdatePSC1}
-                    />
+                    <input type="radio" name="psc1Info" value="false" defaultChecked={young.psc1Info === "false"} className="form-radio text-blue-600" disabled={!canUpdatePSC1} />
                     <span className="text-base font-normal">Non</span>
                   </label>
                 </div>
