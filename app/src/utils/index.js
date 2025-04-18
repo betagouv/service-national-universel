@@ -2,7 +2,6 @@ import PasswordValidator from "password-validator";
 import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld, EQUIVALENCE_STATUS } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { isCohortDone } from "./cohorts";
 import { toastr } from "react-redux-toastr";
 import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
 import store from "@/redux/store";
@@ -113,19 +112,6 @@ export function hasAccessToPhase2(young) {
   return true;
 }
 
-export function permissionPhase2(y) {
-  if (wasYoungExcluded(y)) return false;
-  if (!hasAccessToPhase2(y)) return false;
-  if (y.statusPhase2OpenedAt && new Date(y.statusPhase2OpenedAt) < new Date()) return true;
-
-  // If young has validated phase 2
-  if (y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) return true;
-  // If young has done phase 1 or was exempted.
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(y.statusPhase1)) return true;
-
-  return false;
-}
-
 export function permissionPhase3(y) {
   if (!permissionApp(y)) return false;
   return (y.status !== YOUNG_STATUS.WITHDRAWN && y.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) || y.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED;
@@ -137,13 +123,6 @@ export const hasAccessToPhase3 = (young) => {
   if ([WAITING_VALIDATION, VALIDATED].includes(young.statusPhase3)) return true;
   return false;
 };
-
-// from the end of the cohort's last day
-export function isYoungCanApplyToPhase2Missions(young) {
-  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
-  const hasYoungPhase1DoneOrExempted = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
-  return isCohortDone(young.cohort, 1) && hasYoungPhase1DoneOrExempted;
-}
 
 export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 

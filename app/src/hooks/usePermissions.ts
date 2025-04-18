@@ -1,6 +1,6 @@
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
-import { hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { canViewPhase2, hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 export default function usePermissions() {
   const { young } = useAuth();
@@ -12,5 +12,6 @@ export default function usePermissions() {
     canModifyInscription: cohort.inscriptionModificationEndDate ? new Date() < new Date(cohort.inscriptionModificationEndDate) : false,
     hasAccessToReinscription: hasAccessToReinscription(young),
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status as any),
+    canViewPhase2: canViewPhase2(young, cohort),
   };
 }

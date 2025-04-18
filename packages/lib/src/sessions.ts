@@ -1,8 +1,8 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS } from "./constants/constants";
+import { APPLICATION_STATUS, COHORT_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
-import { format } from "date-fns";
+import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 import { CohortType } from "./mongoSchema/cohort";
@@ -140,12 +140,25 @@ function hasAccessToReinscription(young: YoungType) {
   return young.cohort === "à venir";
 }
 
-//@todo : for browser apps better logic in app isYoungCanApplyToPhase2Missions (also takes into account timezone)
-function canApplyToPhase2(young, cohort) {
-  if (young.statusPhase2OpenedAt && new Date(young.statusPhase2OpenedAt) < new Date()) return true;
-  const now = new Date();
-  const dateEnd = getCohortEndDate(cohort);
-  return ["DONE", "EXEMPTED"].includes(young.statusPhase1) && now >= dateEnd;
+function canApplyToPhase2(young: YoungType, cohort: CohortType) {
+  if (cohort.status === COHORT_STATUS.ARCHIVED) return false;
+  if (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) return true;
+  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)) return true;
+  return false;
+}
+
+function estActifEnPhase2(young: YoungType) {
+  const isDoingAMission = young.phase2ApplicationStatus.some((status) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status as any));
+  const isWaitingForEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence as any);
+  return isDoingAMission || isWaitingForEquivalence;
+}
+
+function canViewPhase2(young: YoungType, cohort: CohortType) {
+  if (cohort.status === COHORT_STATUS.ARCHIVED) return false;
+  if (estActifEnPhase2(young)) return true;
+  if (canApplyToPhase2(young, cohort)) return true;
+  if (young.cohesionStayPresence === "true") return true;
+  return false;
 }
 
 export {
@@ -158,6 +171,7 @@ export {
   hasAccessToReinscription,
   isCohortTooOld,
   canApplyToPhase2,
+  canViewPhase2,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

@@ -147,7 +147,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const cohort = await CohortModel.findById(young.cohortId);
-
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.COHORT_NOT_FOUND });
     if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
