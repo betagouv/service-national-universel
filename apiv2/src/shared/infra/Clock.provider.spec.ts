@@ -36,4 +36,14 @@ describe("ClockProvider", () => {
             expect(clockProvider.formatDateTime(date)).toBe("2024-05-25T20:00:00");
         });
     });
+
+    describe("addDays", () => {
+        it("should add the specified number of days to the date", () => {
+            const date = new Date("2024-10-01");
+            const daysToAdd = 5;
+            const expectedDate = add(date, { days: daysToAdd });
+            const resultDate = clockProvider.addDays(date, daysToAdd);
+            expect(resultDate.toUTCString()).toEqual(expectedDate.toUTCString());
+        });
+    });
 });

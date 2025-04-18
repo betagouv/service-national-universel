@@ -163,6 +163,12 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+const formatDateForInput = (dateString: string | Date | null | undefined): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 16);
+};
+
 function checkTime(time1, time2) {
   const time1Split = time1.split(":");
   const time2Split = time2.split(":");
@@ -206,5 +212,6 @@ export {
   formatDateForPostGre,
   isNowBetweenDates,
   formatDateTimeZone,
+  formatDateForInput,
   checkTime,
 };
