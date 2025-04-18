@@ -115,6 +115,7 @@ export class CampagneService {
                 startDate,
                 endDate,
                 sessionId,
+                campagnes.filter((campagne) => "cohortId" in campagne && campagne.cohortId === sessionId),
             );
             filteredCampagnes.push(...sessionSpecificCampagnes);
         }
@@ -126,12 +127,10 @@ export class CampagneService {
         startDate: Date,
         endDate: Date,
         sessionId: string,
+        campagnes: CampagneModel[],
     ): Promise<CampagneComplete[]> {
         this.logger.log(`Recherche des campagnes avec programmation pour la session ${sessionId}`);
-        const [campagnes, session] = await Promise.all([
-            this.campagneGateway.search({ generic: false, cohortId: sessionId, isProgrammationActive: true }),
-            this.sessionGateway.findById(sessionId),
-        ]);
+        const session = await this.sessionGateway.findById(sessionId);
         if (!session) {
             return [];
         }

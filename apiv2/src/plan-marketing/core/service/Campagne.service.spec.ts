@@ -1,6 +1,7 @@
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneService } from "./Campagne.service";
 import { Logger } from "@nestjs/common";
+import { CampagneModel } from "@plan-marketing/core/Campagne.model";
 
 describe("CampagneService", () => {
     let service: CampagneService;
@@ -130,13 +131,9 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
-            expect(mockCampagneGateway.search).toHaveBeenCalledWith({
-                generic: false,
-                cohortId: sessionId,
-                isProgrammationActive: true,
-            });
             expect(mockSessionGateway.findById).toHaveBeenCalledWith(sessionId);
             expect(mockProgrammationService.computeDateEnvoi).toHaveBeenCalledWith(mockCampagnes[0], {
                 dateStart: sessionDates.dateStart,
@@ -173,6 +170,7 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -196,6 +194,7 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -220,6 +219,7 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(0);
@@ -254,6 +254,7 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(1);
@@ -319,6 +320,7 @@ describe("CampagneService", () => {
                 startDate,
                 endDate,
                 sessionId,
+                mockCampagnes as CampagneModel[],
             );
 
             expect(result).toHaveLength(2);
