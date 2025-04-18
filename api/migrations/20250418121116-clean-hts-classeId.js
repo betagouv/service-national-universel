@@ -12,6 +12,10 @@ module.exports = {
     console.log("Migration nettoyage bascule CLE vers HTS, found youngs", youngs.length);
     for (const young of youngs) {
       console.log("young", young._id.toString(), "classeId", young.classeId.toString(), "cohort", young.cohort.toString(), "cohortId", young.cohortId.toString());
+      if (young.cohort.includes("CLE")) {
+        console.warn("Cohort CLE avec young source VOLONTAIRE, skipping");
+        continue;
+      }
       young.classeId = null;
       await young.save({ fromUser: { firstName: "Nettoyage bascule CLE vers HTS" } });
     }
