@@ -201,11 +201,15 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
           <div className="text-gray-700">
             {selectedCampagne?.isArchived ? (
               <div>
-                <p>La campagne sera désarchivée, mais la programmation restera désactivée.</p>
+                <p>
+                  La campagne spécifique sera désarchivée. <br />
+                  La programmation de cette campagne spécifique ne sera pas réactivée. <br />
+                  Pensez à le faire si nécessaire.
+                </p>
               </div>
             ) : (
               <div>
-                <p>La campagne sera archivée et la programmation sera désactivée.</p>
+                <p>La campagne spécifique sera archivée et la programmation sera désactivée.</p>
               </div>
             )}
           </div>

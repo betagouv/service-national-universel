@@ -15,6 +15,7 @@ import {
   formatDateFRTimezoneUTC,
   formatLongDateFR,
   Programmation,
+  CAMPAGNE_TYPE_COLORS,
 } from "snu-lib";
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
@@ -216,13 +217,28 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   />
                   {errors.nom && <span className="text-red-500 text-sm mt-1">{errors.nom.message}</span>}
                   {hasCampagneGenerique ? (
-                    <a
-                      href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
-                      className="text-blue-600 hover:underline text-sm flex items-center gap-1">
-                      Editer la campagne globale
-                      <HiPencil className="my-2 w-4 h-4" />
-                    </a>
-                  ) : null}
+                    <div className="flex items-center mt-2 gap-2">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.GENERIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.GENERIQUE.TEXT }}>
+                        GÉNÉRIQUE
+                      </div>
+                      <a
+                        href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
+                        className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                        Editer la campagne globale
+                        <HiPencil className="my-2 w-4 h-4" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex items-center mt-2 ">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.TEXT }}>
+                        SPECIFIQUE
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
                   <div className="flex-1 flex flex-row gap-4">
