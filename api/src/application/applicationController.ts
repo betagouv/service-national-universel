@@ -205,7 +205,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
 
     if (mission.isMilitaryPreparation !== "true") {
-      await notifyReferentNewApplication(data);
+      await notifyReferentNewApplication(data, young);
     }
 
     return res.status(200).send({ ok: true, data: serializeApplication(data) });
