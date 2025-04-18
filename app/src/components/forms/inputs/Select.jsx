@@ -2,9 +2,7 @@ import React from "react";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 
-const DEFAULT_OPTION = <option>Set options as children</option>;
-
-const Select = ({ label = "", className = "", name = "", value = "", onChange = () => null, error = null, children = DEFAULT_OPTION, ...rest }) => {
+const Select = ({ label = "", className = "", name = "", value = "", onChange, error = null, children, ...rest }) => {
   const handleChange = (event) => {
     onChange(event.target.value);
   };

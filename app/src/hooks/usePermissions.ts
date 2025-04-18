@@ -1,5 +1,6 @@
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "@/utils/cohorts";
 import { hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 export default function usePermissions() {
@@ -12,5 +13,6 @@ export default function usePermissions() {
     canModifyInscription: cohort.inscriptionModificationEndDate ? new Date() < new Date(cohort.inscriptionModificationEndDate) : false,
     hasAccessToReinscription: hasAccessToReinscription(young),
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status as any),
+    canUpdatePSC1: !cohortAssignmentAnnouncementsIsOpenForYoung(cohort),
   };
 }
