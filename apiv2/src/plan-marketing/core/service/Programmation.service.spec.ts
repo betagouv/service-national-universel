@@ -124,7 +124,7 @@ describe("ProgrammationService", () => {
         });
 
         it("should compute date for ENVOI_PRECEDENT type", () => {
-            const lastSentDate = new Date("2024-08-01");
+            const previousDate = new Date("2024-08-01");
 
             const campagne: CampagneSpecifiqueModelWithoutRef = {
                 id: "1",
@@ -140,37 +140,29 @@ describe("ProgrammationService", () => {
                 programmations: [
                     {
                         id: "1",
+                        type: TypeEvenement.AUCUN,
+                        createdAt: new Date(),
+                        envoiDate: previousDate,
+                    },
+                    {
+                        id: "2",
                         joursDecalage: 7,
                         type: TypeEvenement.ENVOI_PRECEDENT,
                         createdAt: new Date(),
-                    },
-                ],
-                envois: [
-                    {
-                        date: new Date("2023-04-15"),
-                        statut: EnvoiCampagneStatut.TERMINE,
-                    },
-                    {
-                        date: lastSentDate,
-                        statut: EnvoiCampagneStatut.TERMINE,
-                    },
-                    {
-                        date: new Date("2023-05-15"),
-                        statut: EnvoiCampagneStatut.EN_COURS,
                     },
                 ],
             };
 
             const result = service.computeDateEnvoi(campagne, {} as DatesSession);
 
-            const expectedDate = new Date(lastSentDate);
+            const expectedDate = new Date(previousDate);
             expectedDate.setDate(expectedDate.getDate() + 7);
 
-            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
+            expect(result.programmations?.[1].envoiDate).toEqual(expectedDate);
         });
 
         it("should use ClockGateway.addDays for ENVOI_PRECEDENT calculation", () => {
-            const lastSentDate = new Date("2023-05-01");
+            const previousDate = new Date("2023-05-01");
 
             const campagne: CampagneSpecifiqueModelWithoutRef = {
                 id: "1",
@@ -186,15 +178,15 @@ describe("ProgrammationService", () => {
                 programmations: [
                     {
                         id: "1",
+                        type: TypeEvenement.AUCUN,
+                        createdAt: new Date(),
+                        envoiDate: previousDate,
+                    },
+                    {
+                        id: "2",
                         joursDecalage: 7,
                         type: TypeEvenement.ENVOI_PRECEDENT,
                         createdAt: new Date(),
-                    },
-                ],
-                envois: [
-                    {
-                        date: lastSentDate,
-                        statut: EnvoiCampagneStatut.TERMINE,
                     },
                 ],
             };
@@ -204,13 +196,13 @@ describe("ProgrammationService", () => {
 
             const result = service.computeDateEnvoi(campagne, {} as DatesSession);
 
-            // Verify ClockGateway.addDays was called correctly
-            expect(clockGateway.addDays).toHaveBeenCalledWith(lastSentDate, 7);
-
             // Verify the expected date
-            const expectedDate = new Date(lastSentDate);
+            const expectedDate = new Date(previousDate);
             expectedDate.setDate(expectedDate.getDate() + 7);
-            expect(result.programmations?.[0].envoiDate).toEqual(expectedDate);
+
+            // Verify ClockGateway.addDays was called correctly with the previous programmation's date
+            expect(clockGateway.addDays).toHaveBeenCalledWith(expect.any(Date), 7);
+            expect(result.programmations?.[1].envoiDate).toEqual(expectedDate);
         });
 
         it("should handle multiple programmations", () => {

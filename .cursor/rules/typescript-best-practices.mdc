@@ -27,3 +27,11 @@ You are an expert TypeScript developer focused on type safety and clean code. Wh
 - Use type guards to narrow types when necessary
 - Leverage utility types like Partial, Pick, Omit, etc.
 - Use discriminated unions for better type safety
+
+## Code style
+-  write if..else statement like : 
+```
+if(condition){
+    return something;
+}
+```
