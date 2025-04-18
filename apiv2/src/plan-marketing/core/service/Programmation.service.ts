@@ -19,6 +19,7 @@ export class ProgrammationService {
         }
         this.logger.log(`Computation of date for campagne ${campagne.id}`);
 
+        // First pass: Calculate dates that don't depend on previous programmations
         const programmationsWithDate = campagne.programmations.map((programmation) => {
             const typeRegle = EVENEMENT_TYPE_MAP[programmation.type];
             if (!typeRegle) {
@@ -29,8 +30,6 @@ export class ProgrammationService {
 
             if (typeRegle === TypeRegleEnvoi.DATE) {
                 dateEnvoi = this.calculateDateBasedOnSessionDate(programmation, datesSession);
-            } else if (typeRegle === TypeRegleEnvoi.ACTION && programmation.type === TypeEvenement.ENVOI_PRECEDENT) {
-                dateEnvoi = this.calculateDateBasedOnPreviousSending(campagne, programmation.joursDecalage);
             }
 
             return {
@@ -38,6 +37,19 @@ export class ProgrammationService {
                 envoiDate: dateEnvoi,
             };
         });
+
+        // Second pass: Calculate dates that depend on previous programmations
+        for (const [index, programmation] of programmationsWithDate.entries()) {
+            const typeRegle = EVENEMENT_TYPE_MAP[programmation.type];
+
+            if (typeRegle === TypeRegleEnvoi.ACTION && programmation.type === TypeEvenement.ENVOI_PRECEDENT) {
+                programmation.envoiDate = this.calculateDateBasedOnPreviousSending(
+                    programmationsWithDate,
+                    index,
+                    programmation.joursDecalage,
+                );
+            }
+        }
 
         this.logger.log(`Computed dates for campagne ${campagne.id}, ${JSON.stringify(programmationsWithDate)}`);
         return {
@@ -66,17 +78,19 @@ export class ProgrammationService {
     }
 
     private calculateDateBasedOnPreviousSending(
-        campagne: CampagneSpecifique,
+        programmationsWithDate: CampagneProgrammation[],
+        currentIndex: number,
         joursDecalage?: number,
     ): Date | undefined {
-        if (!campagne.envois?.length) return undefined;
+        if (currentIndex <= 0) {
+            return undefined;
+        }
 
-        const lastCompletedSending = [...campagne.envois]
-            .filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
-            .sort((a, b) => b.date.getTime() - a.date.getTime())[0];
+        const previousProgrammation = programmationsWithDate[currentIndex - 1];
+        if (!previousProgrammation || !previousProgrammation.envoiDate) {
+            return undefined;
+        }
 
-        if (!lastCompletedSending) return undefined;
-
-        return this.clockGateway.addDays(new Date(lastCompletedSending.date), joursDecalage || 0);
+        return this.clockGateway.addDays(new Date(previousProgrammation.envoiDate), joursDecalage ?? 0);
     }
 }
