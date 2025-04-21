@@ -350,6 +350,10 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       }
     }
 
+    if (value.statusPhase1 === "DONE" && young.statusPhase1 !== "DONE") {
+      value.statusPhase2OpenedAt = now;
+    }
+
     if (value.statusPhase2) {
       value.statusPhase2UpdatedAt = now;
       if (value.statusPhase2 === "VALIDATED") {

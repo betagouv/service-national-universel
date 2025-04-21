@@ -21,7 +21,6 @@ import {
   getCohortPeriod,
 } from "snu-lib";
 
-import { config } from "../../config";
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
 import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
@@ -31,6 +30,7 @@ import { UserRequest } from "../request";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { handleNotificationForDeparture } from "../../young/youngService";
 import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
+import { notifyJeuneConfirmationParticipationWasUpdated, notifyParentsPresenceArriveeWasValidated } from "../../sessionPhase1/notification/sessionPhase1NotificationService";
 
 const router = express.Router({ mergeParams: true });
 
@@ -221,8 +221,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
     young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
     await young.save({ fromUser: req.user });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+    await autoValidationSessionPhase1Young({ young, user: req.user });
 
     await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
 
@@ -253,8 +252,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     young.set({ departSejourAt: undefined, departSejourMotif: undefined, departSejourMotifComment: undefined, departInform: undefined });
     await young.save({ fromUser: req.user });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-    await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+    await autoValidationSessionPhase1Young({ young, user: req.user });
 
     res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
@@ -263,9 +261,17 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
   }
 });
 
+const PHASE_1_KEYS = {
+  COHESION_STAY_PRESENCE: "cohesionStayPresence",
+  PRESENCE_JDM: "presenceJDM",
+  COHESION_STAY_MEDICAL_FILE_RECEIVED: "cohesionStayMedicalFileReceived",
+  YOUNG_PHASE_1_AGREEMENT: "youngPhase1Agreement",
+  IS_TRAVELING_BY_PLANE: "isTravelingByPlane",
+};
+
 router.post("/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived", "youngPhase1Agreement", "isTravelingByPlane"];
+    const allowedKeys = Object.values(PHASE_1_KEYS);
     const { error, value } = Joi.object({
       value: Joi.string().trim().valid("true", "false", "").required(),
       key: Joi.string()
@@ -290,55 +296,36 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    if ((key === "cohesionStayPresence" || key === "presenceJDM" || key === "isTravelingByPlane") && newValue == "") {
+    if ((key === PHASE_1_KEYS.COHESION_STAY_PRESENCE || key === PHASE_1_KEYS.PRESENCE_JDM || key === PHASE_1_KEYS.IS_TRAVELING_BY_PLANE) && newValue == "") {
       young[key] = undefined;
     } else {
       young.set({ [key]: newValue });
     }
 
-    if (key === "cohesionStayPresence" && newValue === "true") {
-      young.set({ statusPhase2OpenedAt: new Date() });
-    }
+    const data = await young.save({ fromUser: req.user });
 
-    await young.save({ fromUser: req.user });
+    // Side effects
 
-    if (!["youngPhase1Agreement", "isTravelingByPlane"].includes(key)) {
+    const wasPresenceArriveeUpdated = key === PHASE_1_KEYS.COHESION_STAY_PRESENCE && (newValue === "true" || newValue === "false");
+
+    const wasConfirmationParticipationValidated = key === PHASE_1_KEYS.YOUNG_PHASE_1_AGREEMENT && newValue === "true";
+
+    if (wasPresenceArriveeUpdated) {
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
       if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+      await autoValidationSessionPhase1Young({ young, user: req.user });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
-    }
-
-    if (key === "cohesionStayPresence" && newValue === "true") {
-      let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
-      if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email });
-      await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
-        emailTo,
-        params: {
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-      });
+      if (newValue === "true") {
+        await notifyParentsPresenceArriveeWasValidated(young);
+      }
     }
 
     // uniquement post affectation
-    if (key === "youngPhase1Agreement" && newValue === "true") {
-      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
-      let cc = getCcOfYoung({ template, young });
-      const cohort = await CohortModel.findOne({ name: young.cohort });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}`,
-          date_cohorte: cohort ? getCohortPeriod(cohort) : "",
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-        cc,
-      });
+    if (wasConfirmationParticipationValidated) {
+      await notifyJeuneConfirmationParticipationWasUpdated(young);
     }
 
-    res.status(200).send({ ok: true, data: serializeYoung(young) });
+    res.status(200).send({ ok: true, data: serializeYoung(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
