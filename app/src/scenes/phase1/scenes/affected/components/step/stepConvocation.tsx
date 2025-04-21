@@ -1,6 +1,5 @@
 import React, { useState } from "react";
-import { useDispatch } from "react-redux";
-import { setYoung } from "@/redux/auth/actions";
+import { useValidateStepConvocation } from "../lib/useValidateStepConvocation";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
 import { translate } from "snu-lib";
@@ -20,7 +19,7 @@ export default function StepConvocation() {
   const { isStepDone } = useSteps();
   const isEnabled = isStepDone(STEPS.AGREEMENT);
   const isDone = isStepDone(STEPS.CONVOCATION);
-  const dispatch = useDispatch();
+  const { mutate: validateStepConvocation } = useValidateStepConvocation();
   const [modal, setModal] = useState<{
     isOpen: boolean;
     title?: string;
@@ -39,11 +38,8 @@ export default function StepConvocation() {
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
         errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
       });
-      if (young?.convocationFileDownload === "false") {
-        const { data } = await API.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
-        plausibleEvent("affecté_step3");
-        dispatch(setYoung(data));
-      }
+      plausibleEvent("affecté_step3");
+      validateStepConvocation();
     } catch (e) {
       console.log(e);
       toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
@@ -61,6 +57,7 @@ export default function StepConvocation() {
       });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`, "");
+      validateStepConvocation();
       setModal({ isOpen: false, onConfirm: null });
     } catch (e) {
       capture(e);
@@ -68,6 +65,11 @@ export default function StepConvocation() {
       setModal({ isOpen: false, onConfirm: null });
     }
     setLoading(false);
+  };
+
+  const handleView = () => {
+    setOpenConvocation(true);
+    validateStepConvocation();
   };
 
   if (!isEnabled) {
@@ -114,7 +116,7 @@ export default function StepConvocation() {
             <p className="md:hidden">Envoyer par mail</p>
           </button>
 
-          <button onClick={() => setOpenConvocation(true)} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
+          <button onClick={handleView} className="w-full text-sm border hover:bg-gray-100 text-gray-600 p-2 shadow-sm rounded flex gap-2 justify-center">
             <HiEye className="h-5 w-5" />
             <p className="md:hidden">Afficher la convocation</p>
           </button>
