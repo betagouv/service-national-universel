@@ -2,13 +2,13 @@ import { useMutation } from "@tanstack/react-query";
 import { useDispatch } from "react-redux";
 import { setYoung } from "@/redux/auth/actions";
 import { toastr } from "react-redux-toastr";
-import { validateStepConvocation } from "./affectationRepository";
 import plausibleEvent from "@/services/plausible";
+import { updateConvocationFileDownload } from "./affectationRepository";
 
-export function useValidateStepConvocation() {
+export function useValidateConvocationStep() {
   const dispatch = useDispatch();
   return useMutation({
-    mutationFn: validateStepConvocation,
+    mutationFn: () => updateConvocationFileDownload("true"),
     onSuccess: (data) => {
       plausibleEvent("affecté_step3");
       dispatch(setYoung(data));

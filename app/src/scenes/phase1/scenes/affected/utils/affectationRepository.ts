@@ -37,8 +37,9 @@ export async function getDepartmentService(department: string): Promise<Departme
   return data;
 }
 
-export async function validateStepConvocation(): Promise<YoungType> {
-  const { ok, code, data } = await API.put(`/young/phase1/convocation`, { convocationFileDownload: "true" });
+export async function updateConvocationFileDownload(value: "true" | "false"): Promise<YoungType> {
+  const payload = { convocationFileDownload: value };
+  const { ok, code, data } = await API.put(`/young/phase1/convocation`, payload);
   if (!ok) throw new Error(code);
   return data;
 }

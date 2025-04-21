@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import { useValidateStepConvocation } from "../../utils/useValidateStepConvocation";
 import { toastr } from "react-redux-toastr";
+import { useValidateConvocationStep } from "../../utils/useValidateConvocationSTep";
 import API from "@/services/api";
 import { translate } from "snu-lib";
 import { capture } from "@/sentry";
@@ -19,7 +19,7 @@ export default function StepConvocation() {
   const { isStepDone } = useSteps();
   const isEnabled = isStepDone(STEPS.AGREEMENT);
   const isDone = isStepDone(STEPS.CONVOCATION);
-  const { mutate: validateStepConvocation } = useValidateStepConvocation();
+  const { mutate: validateConvocationStep } = useValidateConvocationStep();
   const [modal, setModal] = useState<{
     isOpen: boolean;
     title?: string;
@@ -38,7 +38,9 @@ export default function StepConvocation() {
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
         errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
       });
-      validateStepConvocation();
+      if (!isDone) {
+        validateConvocationStep();
+      }
     } catch (e) {
       console.log(e);
       toastr.error("Une erreur est survenue lors de l'édition de votre convocation", e.message);
@@ -56,7 +58,9 @@ export default function StepConvocation() {
       });
       if (!ok) throw new Error(translate(code));
       toastr.success(`Document envoyé à ${young.email}`, "");
-      validateStepConvocation();
+      if (!isDone) {
+        validateConvocationStep();
+      }
       setModal({ isOpen: false, onConfirm: null });
     } catch (e) {
       capture(e);
@@ -68,7 +72,9 @@ export default function StepConvocation() {
 
   const handleView = () => {
     setOpenConvocation(true);
-    validateStepConvocation();
+    if (!isDone) {
+      validateConvocationStep();
+    }
   };
 
   if (!isEnabled) {
