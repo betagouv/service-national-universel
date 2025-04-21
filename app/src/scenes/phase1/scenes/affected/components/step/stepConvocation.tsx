@@ -38,7 +38,6 @@ export default function StepConvocation() {
         fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
         errorTitle: "Une erreur est survenue lors de l'édition de votre convocation",
       });
-      plausibleEvent("affecté_step3");
       validateStepConvocation();
     } catch (e) {
       console.log(e);
