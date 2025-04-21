@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useValidateStepConvocation } from "../lib/useValidateStepConvocation";
+import { useValidateStepConvocation } from "../../utils/useValidateStepConvocation";
 import { toastr } from "react-redux-toastr";
 import API from "@/services/api";
 import { translate } from "snu-lib";
