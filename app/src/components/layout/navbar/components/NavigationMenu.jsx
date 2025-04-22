@@ -1,8 +1,8 @@
 import React from "react";
-import { useSelector } from "react-redux";
-import { YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, FEATURES_NAME, isFeatureEnabled } from "snu-lib";
+import useAuth from "@/services/useAuth";
+import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment, knowledgebaseURL } from "../../../../config";
-import { hasAccessToPhase3, permissionPhase1, permissionPhase2, permissionPhase3 } from "../../../../utils";
+import { hasAccessToPhase3, permissionPhase1, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
 
 import Diagoriente from "./Diagoriente";
@@ -20,8 +20,8 @@ import { CiPalette } from "react-icons/ci";
 import usePermissions from "@/hooks/usePermissions";
 
 export default function NavigationMenu({ onClose = () => {} }) {
-  const young = useSelector((state) => state.Auth.young);
-  const { hasAccessToNavigation } = usePermissions();
+  const { young } = useAuth();
+  const { hasAccessToNavigation, canViewPhase2 } = usePermissions();
 
   return (
     <nav className="flex h-full w-full flex-col justify-between bg-[#212B44] p-[24px] transition-all md:flex-1 md:p-[8px] md:pb-[24px]">
@@ -39,7 +39,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
           to="/phase2"
           icon={<IconPhase2 />}
           text="Phase 2 - Engagement"
-          enabled={hasAccessToNavigation && permissionPhase2(young)}
+          enabled={hasAccessToNavigation && canViewPhase2}
           status={young.statusPhase2}
           onClose={onClose}></MenuLink>
         {hasAccessToPhase3(young) && (
