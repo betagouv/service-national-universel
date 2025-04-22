@@ -2,7 +2,7 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
+import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore } from "date-fns";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
@@ -248,10 +248,10 @@ function canViewReferent(actor, target) {
 }
 
 type CanUpdateReferent = {
-  actor: any;
-  originalTarget: any;
-  modifiedTarget?: any | null;
-  structure: any;
+  actor: UserDto;
+  originalTarget: ReferentType;
+  modifiedTarget?: ReferentType | null;
+  structure?: StructureType | null;
 };
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
@@ -268,14 +268,14 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // Is responsible...
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) &&
     // ... modifying responsible ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) &&
+    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) &&
     withoutChangingRole;
 
   const isSupervisorModifyingTeamMember =
     // Is supervisor...
     actor.role === ROLES.SUPERVISOR &&
     // ... modifying team member ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) &&
+    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) &&
     actor.structureId === originalTarget.structureId;
 
   const isMeWithoutChangingRole =
@@ -290,16 +290,16 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role) &&
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role));
+    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role!));
   const isReferentModifyingHeadCenterWithoutChangingRole =
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
     originalTarget.role === ROLES.HEAD_CENTER &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.HEAD_CENTER].includes(modifiedTarget.role));
+    (modifiedTarget === null || [ROLES.HEAD_CENTER].includes(modifiedTarget.role!));
 
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
@@ -309,7 +309,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
   // Check si il y a au moins un match entre les departements de la target et de l'actor
-  const isActorAndTargetInTheSameDepartment = actor.department.some((department) => geographicTargetData.department.includes(department));
+  const isActorAndTargetInTheSameDepartment = (actor.department as string[]).some((department) => geographicTargetData.department.includes(department));
 
   const authorized =
     (isMeWithoutChangingRole ||
@@ -320,7 +320,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) || isMe) &&
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) || isMe) &&
         (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
