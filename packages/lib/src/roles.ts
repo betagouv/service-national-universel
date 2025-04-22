@@ -122,9 +122,13 @@ function canInviteUser(actorRole, targetRole) {
     return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.VISITOR].includes(targetRole);
   }
 
-  // RESPONSIBLE and SUPERVISOR can invite only RESPONSIBLE and SUPERVISOR.
-  if (actorRole === ROLES.RESPONSIBLE || actorRole === ROLES.SUPERVISOR) {
-    return targetRole === ROLES.RESPONSIBLE || targetRole === ROLES.SUPERVISOR;
+  // RESPONSIBLE can invite only RESPONSIBLE.
+  if (actorRole === ROLES.RESPONSIBLE) {
+    return targetRole === ROLES.RESPONSIBLE;
+  }
+  // SUPERVISOR can invite RESPONSIBLE and SUPERVISOR.
+  if (actorRole === ROLES.SUPERVISOR) {
+    return [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(targetRole);
   }
 
   return false;
