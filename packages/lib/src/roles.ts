@@ -258,6 +258,12 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
   const isAdmin = actor.role === ROLES.ADMIN;
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
+
+  // Seul les admins peuvent changer les roles des utilisateurs
+  if (!isAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
+    return false;
+  }
+
   const isResponsibleModifyingResponsibleWithoutChangingRole =
     // Is responsible...
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) &&
