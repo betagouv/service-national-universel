@@ -9,7 +9,6 @@ import { Input } from "@codegouvfr/react-dsfr/Input";
 import { translate, ReferentDto } from "snu-lib";
 import { Section, Container } from "@snu/ds/dsfr";
 
-import { User } from "@/types";
 import api from "@/services/api";
 
 import Stepper from "./components/Stepper";
@@ -18,7 +17,7 @@ interface Props {
   referent: ReferentDto;
   reinscription: boolean;
   invitationToken: string;
-  onReferentChange: (referent: User) => void;
+  onReferentChange: (referent: ReferentDto) => void;
 }
 
 export default function CodeForm({ referent, reinscription, invitationToken, onReferentChange }: Props) {

@@ -3,7 +3,19 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { ROLES, SENDINBLUE_TEMPLATES, YOUNG_STATUS, STATUS_CLASSE, FUNCTIONAL_ERRORS, YoungType, UserDto, SUB_ROLE_GOD, YOUNG_SOURCE, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
+import {
+  ROLES,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS,
+  STATUS_CLASSE,
+  FUNCTIONAL_ERRORS,
+  YoungType,
+  UserDto,
+  SUB_ROLE_GOD,
+  YOUNG_SOURCE,
+  INSCRIPTION_GOAL_LEVELS,
+  ROLES_LIST,
+} from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -52,9 +64,9 @@ beforeEach(async () => {
 });
 afterEach(resetAppAuth);
 
-describe.skip("Referent", () => {
+describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
-    it("should invite and add referent", async () => {
+    it("should invite and add referent (admin)", async () => {
       const referentFixture = getNewReferentFixture();
       const referentsBefore = await getReferentsHelper();
       const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
@@ -63,6 +75,13 @@ describe.skip("Referent", () => {
       expect(referentsAfter.length).toEqual(referentsBefore.length + 1);
       await deleteReferentByIdHelper(res.body.data._id);
     });
+    it("should invite and add referent (responsible)", async () => {
+      const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE };
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .post("/referent/signup_invite/001")
+        .send(referentFixture);
+      expect(res.statusCode).toEqual(200);
+    });
     it("should return 400 if no templates given", async () => {
       const referentFixture = getNewReferentFixture();
       const res = await request(getAppHelper())
@@ -70,12 +89,16 @@ describe.skip("Referent", () => {
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
     });
-    it("should return 403 if user can not invite", async () => {
+    it("should return 403 when responsible can not invite (all role except responsible)", async () => {
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
-        .post("/referent/signup_invite/001")
-        .send(referentFixture);
-      expect(res.statusCode).toEqual(403);
+      for (const role of ROLES_LIST) {
+        if (role !== ROLES.RESPONSIBLE) {
+          const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+            .post("/referent/signup_invite/001")
+            .send({ ...referentFixture, role });
+          expect(res.statusCode).toEqual(403);
+        }
+      }
     });
     it("should return 409 when user already exists", async () => {
       const fixture = getNewReferentFixture();
@@ -608,6 +631,21 @@ describe.skip("Referent", () => {
   });
 
   describe("PUT /referent", () => {
+    it("should return 200 when valid params are given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const res = await request(getAppHelper(referent)).put(`/referent`).send({ firstName: "MY NEW NAME" });
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should not update structureId if referent is responsible", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const res = await request(getAppHelper(referent)).put(`/referent`).send({ structureId: structure._id });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.structureId).toEqual(referent.structureId);
+    });
+  });
+
+  describe("PUT /referent/:id", () => {
     it("should return 400 when a role is given", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ role: "referent" });
@@ -619,9 +657,6 @@ describe.skip("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.data?.firstName).toEqual("My New Name");
     });
-  });
-
-  describe("PUT /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/${notExistingReferentId}`).send();
       expect(res.statusCode).toEqual(404);
@@ -638,10 +673,21 @@ describe.skip("Referent", () => {
       );
     });
     it("should return 403 if role is not admin", async () => {
-      const referent = await createReferentHelper(getNewReferentFixture());
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.SUPERVISOR }));
+      for (const role of ROLES_LIST) {
+        if (role !== ROLES.ADMIN) {
+          const res = await request(getAppHelper({ role })).put(`/referent/${referent._id}`).send({ role: ROLES.ADMIN });
+          expect(res.statusCode).toEqual(403);
+        }
+      }
+    });
+
+    it("should return 403 if responsible try to change structure", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const structure = await createStructureHelper(getNewStructureFixture());
       const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
         .put(`/referent/${referent._id}`)
-        .send();
+        .send({ structureId: structure._id });
       expect(res.statusCode).toEqual(403);
     });
 
