@@ -12,7 +12,7 @@ module.exports = {
               year: { $year: "$dateEnd" },
               month: { $month: "$dateEnd" },
               day: { $dayOfMonth: "$dateEnd" },
-              hour: 22,
+              hour: 21,
               minute: 0,
               second: 0,
               millisecond: 0,
@@ -29,7 +29,7 @@ module.exports = {
     const cohorts = await CohortModel.updateMany(
       {
         $expr: {
-          $eq: [{ $hour: "$dateEnd" }, 22],
+          $eq: [{ $hour: "$dateEnd" }, 21],
         },
       },
       [

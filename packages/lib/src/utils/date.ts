@@ -163,6 +163,12 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+const formatDateTimeZoneTo9pm = (date) => {
+  const d = new Date(date);
+  d.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
+  return d;
+};
+
 function checkTime(time1, time2) {
   const time1Split = time1.split(":");
   const time2Split = time2.split(":");
@@ -207,4 +213,5 @@ export {
   isNowBetweenDates,
   formatDateTimeZone,
   checkTime,
+  formatDateTimeZoneTo9pm,
 };
