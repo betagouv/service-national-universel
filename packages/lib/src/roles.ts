@@ -273,14 +273,14 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // Is responsible...
     isStructureTeamMember &&
     // ... modifying responsible ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) &&
+    isResponsibleOrSupervisor(originalTarget) &&
     withoutChangingRole;
 
   const isSupervisorModifyingTeamMember =
     // Is supervisor...
     actor.role === ROLES.SUPERVISOR &&
     // ... modifying team member ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) &&
+    isResponsibleOrSupervisor(originalTarget) &&
     actor.structureId === originalTarget.structureId;
 
   const isMeWithoutChangingRole =
