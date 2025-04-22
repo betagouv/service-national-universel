@@ -92,6 +92,15 @@ describe("Structure", () => {
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
       expect(updatedResponsible?.role).toBe(ROLES.SUPERVISOR);
     });
+
+    it("should not update isNetwork when responsible", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+      const res = await request(getAppHelper(responsible))
+        .put("/structure/" + structure._id)
+        .send({ isNetwork: "true" });
+      expect(res.status).toBe(403);
+    });
   });
 
   describe("DELETE /structure/:id", () => {
