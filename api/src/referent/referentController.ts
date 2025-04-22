@@ -1576,33 +1576,7 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
 });
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = validateReferent(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const referent = await ReferentModel.findById(req.params.id);
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const structure = await StructureModel.findById(value.structureId);
-
-    if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    referent.set(value);
-    referent.set(cleanReferentData(referent));
-
-    await referent.save({ fromUser: req.user });
-    await updateTutorNameInMissionsAndApplications(referent, req.user);
-    res.status(200).send({ ok: true, data: referent });
-  } catch (error) {
-    capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Modification de référent désactivée temporairement pour raison de sécurité." });
 });
 
 router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
