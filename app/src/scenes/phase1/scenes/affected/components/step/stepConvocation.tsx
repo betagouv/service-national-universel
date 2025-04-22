@@ -1,6 +1,7 @@
 import React from "react";
 import { useToggle } from "react-use";
 import { useDownloadConvocation, useSendConvocationByEmail, useValidateConvocationStep } from "../../utils/convocationMutations";
+import plausibleEvent from "@/services/plausible";
 import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
@@ -8,7 +9,6 @@ import { HiEye, HiMail, HiOutlineDownload } from "react-icons/hi";
 // eslint-disable-next-line import/extensions
 import { STEPS, useSteps } from "../../utils/steps.utils";
 import useAuth from "@/services/useAuth";
-import plausibleEvent from "@/services/plausible";
 
 export default function StepConvocation() {
   const index = 3;
@@ -27,16 +27,16 @@ export default function StepConvocation() {
     download();
   };
 
+  const handleMail = () => {
+    sendByEmail();
+    setIsEmailOpen(false);
+  };
+
   const handleView = () => {
     setIsConvocationOpen(true);
     if (!isDone) {
       validateStep();
     }
-  };
-
-  const handleMail = () => {
-    sendByEmail();
-    setIsEmailOpen(false);
   };
 
   if (!isEnabled) {
