@@ -31,7 +31,7 @@ export function injectRoutes(app) {
   app.use("/schema-de-repartition", require("./controllers/planDeTransport/schema-de-repartition"));
   app.use("/session-phase1", require("./controllers/session-phase1"));
   app.use("/signin", require("./controllers/signin"));
-  app.use("/structure", require("./controllers/structure"));
+  app.use("/structure", require("./controllers/structure").default);
   app.use("/table-de-repartition", require("./controllers/planDeTransport/table-de-repartition"));
   app.use("/tags", require("./controllers/tags"));
   app.use("/waiting-list", require("./controllers/waiting-list"));
