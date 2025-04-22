@@ -33,6 +33,20 @@ describe("Structure", () => {
       const updatedStructure = await getStructureByIdHelper(res.body.data._id);
       expect(updatedStructure?.networkName).toBe("network");
     });
+    it("RESPONSIBLE cannot create structure", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .post("/structure")
+        .send(structure);
+      expect(res.status).toBe(403);
+    });
+    it("SUPERVISOR cannot create structure", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const res = await request(getAppHelper({ role: ROLES.SUPERVISOR }))
+        .post("/structure")
+        .send(structure);
+      expect(res.status).toBe(403);
+    });
   });
 
   describe("PUT /structure/:id", () => {

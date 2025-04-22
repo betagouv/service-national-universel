@@ -256,17 +256,22 @@ type CanUpdateReferent = {
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
-  const isAdmin = actor.role === ROLES.ADMIN;
+  const isActorAdmin = isAdmin(actor);
+  const isStructureTeamMember = isResponsibleOrSupervisor(actor);
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
 
   // Seul les admins peuvent changer les roles des utilisateurs
-  if (!isAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
+  if (!isActorAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
+    return false;
+  }
+  // un responsable/superviseur ne peut pas se changer de structure
+  if (isStructureTeamMember && modifiedTarget?.structureId && modifiedTarget?.structureId !== originalTarget.structureId) {
     return false;
   }
 
   const isResponsibleModifyingResponsibleWithoutChangingRole =
     // Is responsible...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) &&
+    isStructureTeamMember &&
     // ... modifying responsible ...
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) &&
     withoutChangingRole;
@@ -313,7 +318,7 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
   const authorized =
     (isMeWithoutChangingRole ||
-      isAdmin ||
+      isActorAdmin ||
       isSupervisorModifyingTeamMember ||
       isResponsibleModifyingResponsibleWithoutChangingRole ||
       isReferentModifyingReferentWithoutChangingRole ||
@@ -484,7 +489,7 @@ function canModifyStructure(user: UserDto, structure: StructureType, modifyStruc
 }
 
 function canCreateStructure(user) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
 function canSendPlanDeTransport(user) {
@@ -512,8 +517,16 @@ function isReferentRegDep(user: UserRoles) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
 }
 
-function isSupervisor(user: UserRoles) {
+export function isResponsible(user: UserRoles) {
+  return ROLES.RESPONSIBLE === user.role;
+}
+
+export function isSupervisor(user: UserRoles) {
   return ROLES.SUPERVISOR === user.role;
+}
+
+export function isResponsibleOrSupervisor(user: UserRoles) {
+  return isResponsible(user) || isSupervisor(user);
 }
 
 function isReferentOrAdmin(user: UserRoles) {
@@ -1265,7 +1278,6 @@ export {
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
-  isSupervisor,
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
   canCheckIfRefExist,

@@ -631,6 +631,21 @@ describe("Referent", () => {
   });
 
   describe("PUT /referent", () => {
+    it("should return 200 when valid params are given", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const res = await request(getAppHelper(referent)).put(`/referent`).send({ firstName: "MY NEW NAME" });
+      expect(res.statusCode).toEqual(200);
+    });
+    it("should not update structureId if referent is responsible", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const res = await request(getAppHelper(referent)).put(`/referent`).send({ structureId: structure._id });
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.structureId).toEqual(referent.structureId);
+    });
+  });
+
+  describe("PUT /referent/:id", () => {
     it("should return 400 when a role is given", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
       const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ role: "referent" });
@@ -642,9 +657,6 @@ describe("Referent", () => {
       expect(res.statusCode).toEqual(200);
       expect(res.body.data?.firstName).toEqual("My New Name");
     });
-  });
-
-  describe("PUT /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
       const res = await request(getAppHelper()).put(`/referent/${notExistingReferentId}`).send();
       expect(res.statusCode).toEqual(404);
@@ -668,6 +680,15 @@ describe("Referent", () => {
           expect(res.statusCode).toEqual(403);
         }
       }
+    });
+
+    it("should return 403 if responsible try to change structure", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .put(`/referent/${referent._id}`)
+        .send({ structureId: structure._id });
+      expect(res.statusCode).toEqual(403);
     });
 
     it("should update tutor name in missions and applications", async () => {
