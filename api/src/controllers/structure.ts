@@ -31,7 +31,7 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { UserRequest } from "./request";
 
-const setAndSave = async (data: any, keys: Record<string, any>, fromUser: UserDto): Promise<void> => {
+const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
   await data.save({ fromUser });
 };
@@ -77,27 +77,27 @@ async function updateNetworkName(structure: StructureType, fromUser: UserDto): P
   }
 }
 
-async function updateMissionStructureName(structure: StructureType): Promise<void> {
+async function updateMissionStructureName(structure: StructureType, fromUser?: UserDto): Promise<void> {
   try {
     const missions = await MissionModel.find({ structureId: structure._id });
     if (!missions?.length) {
       logger.debug(`no missions edited for structure ${structure._id}`);
       return;
     }
-    for (const mission of missions) await setAndSave(mission, { structureName: structure.name }, null as any);
+    for (const mission of missions) await setAndSave(mission, { structureName: structure.name }, fromUser);
   } catch (error) {
     capture(error);
   }
 }
 
-async function updateResponsibleAndSupervisorRole(structure: StructureType): Promise<void> {
+async function updateResponsibleAndSupervisorRole(structure: StructureType, fromUser?: UserDto): Promise<void> {
   try {
     const referents = await ReferentModel.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     if (!referents?.length) {
       logger.debug(`no referents edited for structure ${structure._id}`);
       return;
     }
-    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE }, null as any);
+    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE }, fromUser);
   } catch (error) {
     capture(error);
   }
@@ -121,7 +121,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const data = await StructureModel.create(checkedStructure);
     await updateNetworkName(data, req.user);
-    await updateResponsibleAndSupervisorRole(data);
+    await updateResponsibleAndSupervisorRole(data, req.user);
     sendTemplate(SENDINBLUE_TEMPLATES.referent.STRUCTURE_REGISTERED, {
       emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: `${req.user.email}` }],
     });
@@ -154,8 +154,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     structure.set(checkedStructure);
     await structure.save({ fromUser: req.user });
     await updateNetworkName(structure, req.user);
-    await updateMissionStructureName(structure);
-    await updateResponsibleAndSupervisorRole(structure);
+    await updateMissionStructureName(structure, req.user);
+    await updateResponsibleAndSupervisorRole(structure, req.user);
     return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
   } catch (error) {
     capture(error);
