@@ -1126,12 +1126,10 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const sessionPhase1 = await SessionPhase1Model.findById(youngs[0].sessionPhase1Id);
-
     for (let young of youngs) {
       young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
       await young.save({ fromUser: req.user });
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+      await autoValidationSessionPhase1Young({ young, user: req.user });
     }
 
     for (let young of youngs) {
@@ -1182,12 +1180,9 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       } else {
         young.set({ [key]: newValue });
       }
-      if (key === "cohesionStayPresence" && newValue === "true") {
-        young.set({ statusPhase2OpenedAt: new Date() });
-      }
       await young.save({ fromUser: req.user });
       const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-      await autoValidationSessionPhase1Young({ young, sessionPhase1, user: req.user });
+      await autoValidationSessionPhase1Young({ young, user: req.user });
       await updatePlacesSessionPhase1(sessionPhase1, req.user);
       if (key === "cohesionStayPresence" && newValue === "true") {
         let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];

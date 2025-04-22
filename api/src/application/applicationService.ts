@@ -149,7 +149,7 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
   }
 
   if (!canApplyToPhase2(young, cohort)) {
-    refusalMessages.push("Pour candidater, vous devez avoir terminé votre séjour de cohésion");
+    refusalMessages.push("Pour candidater, vous devez avoir validé votre séjour de cohésion");
   }
 
   if (mission.placesLeft === 0) {
