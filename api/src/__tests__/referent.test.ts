@@ -52,7 +52,7 @@ beforeEach(async () => {
 });
 afterEach(resetAppAuth);
 
-describe.skip("Referent", () => {
+describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
     it("should invite and add referent", async () => {
       const referentFixture = getNewReferentFixture();
