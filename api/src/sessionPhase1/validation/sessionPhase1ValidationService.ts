@@ -53,8 +53,8 @@ export async function updateStatusPhase1(young: YoungDocument, validationDate: s
 }
 
 export function shouldValidatePhase1(young: YoungDocument, validationDate: Date | string): { shouldValidate: boolean; message?: string } {
-  if (!young.cohesionStayPresence) {
-    throw new Error(`La présence au séjour n'est pas définie pour le jeune ${young._id}`);
+  if (!young.cohesionStayPresence || !young.departSejourAt) {
+    throw new Error(`La présence au séjour ou la date de départ n'est pas définie pour le jeune ${young._id}`);
   }
   if (young.cohesionStayPresence === "false") {
     return { shouldValidate: false, message: "Le volontaire a été pointé absent au séjour" };
