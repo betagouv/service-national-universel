@@ -41,7 +41,6 @@ interface GeneralTabProps {
 
 // Use the interface for the props object
 export default function GeneralTab({ cohort, onCohortChange, readOnly, getCohort, isLoading, onLoadingChange }: GeneralTabProps) {
-  const cohorts = useSelector((state: any) => state.Cohorts);
   const dispatch = useDispatch();
   const [error, setError] = useState<{ [key: string]: string }>({});
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(cohort?.reInscriptionStartDate || cohort?.reInscriptionEndDate);
