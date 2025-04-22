@@ -1,4 +1,5 @@
 import API from "@/services/api";
+import downloadPDF from "@/utils/download-pdf";
 import { CohesionCenterType, DepartmentServiceType, PointDeRassemblementType, SessionPhase1Type, YoungType } from "snu-lib";
 
 export async function getCenter(sessionPhase1Id: string): Promise<CohesionCenterType> {
@@ -42,4 +43,17 @@ export async function updateConvocationFileDownload(value: "true" | "false"): Pr
   const { ok, code, data } = await API.put(`/young/phase1/convocation`, payload);
   if (!ok) throw new Error(code);
   return data;
+}
+
+export async function downloadConvocation(young: YoungType) {
+  await downloadPDF({
+    url: `/young/${young._id}/documents/convocation/cohesion`,
+    fileName: `${young.firstName} ${young.lastName} - convocation - cohesion.pdf`,
+  });
+}
+export async function sendConvocationByEmail(young: YoungType) {
+  const { ok, code } = await API.post(`/young/${young._id}/documents/convocation/cohesion/send-email`, {
+    fileName: `${young.firstName} ${young.lastName} - cohesion convocation.pdf`,
+  });
+  if (!ok) throw new Error(code);
 }
