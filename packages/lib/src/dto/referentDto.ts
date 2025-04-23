@@ -10,6 +10,8 @@ export type ReferentDto = {
   phone?: string;
   email?: string;
   emailWaitingValidation?: string;
+  region?: string;
+  department?: string;
 };
 
 export type ModifierReferentDto = {

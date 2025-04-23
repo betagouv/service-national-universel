@@ -4,7 +4,6 @@ import { Link, useHistory } from "react-router-dom";
 import ChevronDown from "../../../../assets/icons/ChevronDown";
 import { setYoung } from "../../../../redux/auth/actions";
 import API from "../../../../services/api";
-import { permissionPhase2 } from "../../../../utils";
 import { toastr } from "react-redux-toastr";
 import useAuth from "@/services/useAuth";
 import useTickets from "../useTickets";
@@ -65,17 +64,17 @@ export default function User() {
           <ChevronDown />
         </button>
       </div>
-      <Menu open={open} menuRef={menuRef} young={young} onClose={onClose} ticketsInfo={ticketsInfo} />
+      <Menu open={open} menuRef={menuRef} onClose={onClose} ticketsInfo={ticketsInfo} />
     </>
   );
 }
 
-function Menu({ open, menuRef, young, onClose }) {
+function Menu({ open, menuRef, onClose }) {
   const dispatch = useDispatch();
   const history = useHistory();
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   const { data: ticketsInfo } = useTickets();
-  const { hasAccessToNavigation } = usePermissions();
+  const { hasAccessToNavigation, canViewPhase2 } = usePermissions();
 
   async function logout() {
     try {
@@ -93,7 +92,7 @@ function Menu({ open, menuRef, young, onClose }) {
   return (
     <nav
       className={`absolute left-4 bottom-20 z-10 flex w-64 flex-col justify-around overflow-hidden rounded-lg bg-white shadow transition-all duration-200 ease-in-out ${
-        open ? permissionPhase2(young) && "h-auto" : "h-0"
+        open ? canViewPhase2 && "h-auto" : "h-0"
       }`}
       ref={menuRef}>
       {hasAccessToNavigation && (

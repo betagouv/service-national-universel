@@ -30,7 +30,7 @@ export class ClasseAdminCleGuard implements CanActivate {
                 return false;
             }
             return (
-                etablissement.referentEtablissementIds.includes(request.user.id) &&
+                etablissement.referentEtablissementIds.includes(request.user.id) ||
                 etablissement.coordinateurIds.includes(request.user.id)
             );
         }
