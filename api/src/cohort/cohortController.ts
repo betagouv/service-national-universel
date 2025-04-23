@@ -248,6 +248,7 @@ router.get("/:cohortId/public", async (req: UserRequest, res: Response) => {
       _id: cohort._id,
       name: cohort.name,
       type: cohort.type,
+      status: cohort.status,
       dateStart: cohort.dateStart,
       dateEnd: cohort.dateEnd,
       isAssignmentAnnouncementsOpenForYoung: cohort.isAssignmentAnnouncementsOpenForYoung,
