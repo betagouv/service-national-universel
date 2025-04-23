@@ -3,16 +3,9 @@ import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import { Input } from "@snu/ds/dsfr";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import { City, getCities, getSchools, School } from "../utils";
+import { City, Correction, formatSchoolName, getCities, School } from "../utils";
 import Select from "@/components/dsfr/forms/SearchableSelect";
-import { useQuery } from "@tanstack/react-query";
-
-import { Select as SelectNext } from "@codegouvfr/react-dsfr/SelectNext";
-
-type Correction = {
-  schoolName?: string;
-  schoolAddress?: string;
-};
+import useSchools from "../utils/useSchools";
 
 type Props = {
   school: School;
@@ -22,13 +15,8 @@ type Props = {
 };
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections }: Props) {
-  console.log("🚀 ~ SchoolInFrance ~ school:", school);
   const [city, setCity] = useState<City>();
-  const { data: schools } = useQuery({
-    queryFn: () => getSchools(city!.name, city!.departmentName),
-    queryKey: ["schools", city?.name, city?.departmentName],
-    enabled: !!city,
-  });
+  const { data: schools } = useSchools({ city: city?.name, departmentName: city?.departmentName });
   const schoolOptions = schools?.map((e) => ({ value: e.id, label: formatSchoolName(e) })) ?? [];
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id && school?.country === "FRANCE");
   const [manualSchool, setManualSchool] = useState<School | undefined>(school ?? {});
@@ -38,10 +26,9 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
     onSelectSchool(undefined);
   }
 
-  function formatSchoolName(school) {
-    if (!school?.fullName) return "";
-    if (!school?.adresse) return school.fullName;
-    return school.fullName + " - " + school.adresse;
+  function handleChangeSchool(value: string) {
+    const selectedSchool = schools?.find((school) => school.id === value);
+    onSelectSchool(selectedSchool);
   }
 
   return manualFilling ? (
@@ -99,29 +86,10 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         value={school?.id}
         placeholder="Sélectionnez un établissement"
         options={schoolOptions.sort((a, b) => a.label.localeCompare(b.label))}
-        onChange={(value: string) => {
-          const selectedSchool = schoolOptions.find((option) => option.value === value);
-          onSelectSchool(selectedSchool);
-        }}
+        onChange={handleChangeSchool}
         error={errors?.school}
         correction={corrections?.schoolName}
       />
-      {/* <SelectNext
-        label="Nom de l'établissement"
-        placeholder="Sélectionnez un établissement"
-        nativeSelectProps={{
-          value: school?.id,
-          onChange: (e) => onSelectSchool(schoolOptions.find((option) => option.id === e.target.value)),
-        }}
-        options={schoolOptions
-          .map((e) => ({
-            value: e.id ?? "",
-            label: `${e.fullName}${e.adresse ? ` - ${e.adresse}` : ""}`,
-          }))
-          .sort((a, b) => a.label.localeCompare(b.label))}
-        state={errors?.school ? "error" : undefined}
-        stateRelatedMessage={errors?.school || corrections?.schoolName}
-      /> */}
       <button
         className="text-sm text-gray-500 underline underline-offset-2"
         onClick={() => {

@@ -112,6 +112,17 @@ export type City = {
   departmentName: string;
 };
 
+export type Correction = {
+  schoolName?: string;
+  schoolAddress?: string;
+};
+
+export function formatSchoolName(school: School): string {
+  if (!school?.fullName) return "";
+  if (!school?.adresse) return school.fullName;
+  return school.fullName + " - " + school.adresse;
+}
+
 export async function getCities(query: string): Promise<City[]> {
   const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
   const cities = responses[0].aggregations.cities.buckets;
