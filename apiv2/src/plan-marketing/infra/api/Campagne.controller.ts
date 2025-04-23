@@ -13,7 +13,7 @@ import {
     ParseBoolPipe,
 } from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
-import { CampagneModel } from "../../core/Campagne.model";
+import { CampagneModel, CampagneModelWithNomSession } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
@@ -46,6 +46,13 @@ export class CampagneController {
             throw new Error("Campagne not found");
         }
         return campagne;
+    }
+
+    @Get(":id/campagnes-specifiques")
+    async getCampagneSpecifiquesByCampagneGeneriqueId(
+        @Param("id") campagneGeneriqueId: string,
+    ): Promise<CampagneModelWithNomSession[]> {
+        return await this.campagneService.findCampagneSpecifiquesByCampagneGeneriqueId(campagneGeneriqueId);
     }
 
     @Get()

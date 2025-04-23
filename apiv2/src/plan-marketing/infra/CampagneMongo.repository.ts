@@ -225,4 +225,39 @@ export class CampagneMongoRepository implements CampagneGateway {
 
         return campagnesWithProgrammation;
     }
+
+    async findCampagneSpecifiquesByCampagneGeneriqueId(
+        campagneGeneriqueId: string,
+    ): Promise<CampagneSpecifiqueModelWithRefAndGeneric[]> {
+        const campagnesSpecifiques = await this.campagneModel.find({
+            campagneGeneriqueId: campagneGeneriqueId,
+            generic: false,
+        });
+
+        const results = await Promise.all(
+            campagnesSpecifiques.map(async (campagne) => {
+                const campagneModel = CampagneMapper.toModel(campagne);
+                if (isCampagneWithRef(campagneModel)) {
+                    const campagneGenerique = await this.campagneModel.findById(campagneModel.campagneGeneriqueId);
+                    if (campagneGenerique) {
+                        return {
+                            ...campagneModel,
+                            nom: campagneGenerique.nom,
+                            objet: campagneGenerique.objet,
+                            contexte: campagneGenerique.contexte,
+                            templateId: campagneGenerique.templateId,
+                            listeDiffusionId: campagneGenerique.listeDiffusionId,
+                            destinataires: campagneGenerique.destinataires,
+                            type: campagneGenerique.type,
+                            programmations: campagneGenerique.programmations?.map(CampagneMapper.toModelProgrammation),
+                            isProgrammationActive: campagneGenerique.isProgrammationActive || false,
+                            isArchived: campagneGenerique.isArchived || false,
+                        } as CampagneSpecifiqueModelWithRefAndGeneric;
+                    }
+                }
+            }),
+        );
+
+        return results.filter((item): item is CampagneSpecifiqueModelWithRefAndGeneric => item !== null);
+    }
 }

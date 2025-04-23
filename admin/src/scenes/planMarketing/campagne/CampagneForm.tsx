@@ -4,7 +4,7 @@ import { Button, Collapsable, Container, InputText, Modal, Select, SelectOption,
 import React, { useState } from "react";
 import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
-import { useCampagneForm } from "./CampagneFormHook";
+import { useCampagneForm, useCampagnesSpecifiques } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
 import ProgrammationList from "./ProgrammationList";
 import { ProgrammationProps } from "./ProgrammationForm";
@@ -60,6 +60,7 @@ const recipientOptions = [
 export default React.memo(
   function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false, onToggleArchive }: CampagneFormProps) {
     const { state, handleChange, saveCampagne, isPending, isDirty } = useCampagneForm(campagneData, onSave);
+    const { campagnesSpecifiques, isLoading } = useCampagnesSpecifiques(campagneData.id);
     const { errors, validateForm } = useCampagneError(state);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
@@ -295,7 +296,24 @@ export default React.memo(
               <h3 className="text-xl font-medium">Modification de la campagne générique</h3>
             </div>
           }
-          content={<div className="text-gray-700">La mise à jour de cette campagne générique entrainera la modification des campagnes spécifiques associées.</div>}
+          content={
+            <div>
+              <div className="text-gray-700 mb-4">La mise à jour de cette campagne générique va modifier les campagnes spécifiques des séjours suivant :</div>
+              {isLoading ? (
+                <div className="text-center py-4">Chargement des campagnes spécifiques...</div>
+              ) : campagnesSpecifiques.length > 0 ? (
+                <ul className="list-disc pl-6 space-y-1 max-h-60 overflow-y-auto">
+                  {campagnesSpecifiques.map((campagne) => (
+                    <li key={campagne.id} className="text-gray-800 font-bold">
+                      {campagne.nomSession}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-2 text-gray-500">Aucune campagne spécifique liée</div>
+              )}
+            </div>
+          }
           footer={
             <div className="flex items-center justify-between gap-6">
               <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={closeModal} disabled={isPending} />

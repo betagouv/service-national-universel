@@ -73,6 +73,7 @@ export interface CampagneSpecifiqueModelWithRefAndGeneric extends CampagneComple
 // Types unions pour les différents cas d'utilisation
 export type CampagneSpecifiqueModel = CampagneSpecifiqueModelWithoutRef | CampagneSpecifiqueModelWithRef;
 export type CampagneModel = CampagneGeneriqueModel | CampagneSpecifiqueModel;
+export type CampagneModelWithNomSession = CampagneModel & { nomSession: string };
 
 // Types pour la création de campagnes
 export type CreateCampagneGeneriqueModel = Omit<
