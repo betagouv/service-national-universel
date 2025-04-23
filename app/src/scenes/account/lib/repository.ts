@@ -7,3 +7,10 @@ export async function updateYoung(path: string, payload: Partial<YoungType>): Pr
   if (!data) throw new Error("No data");
   return data;
 }
+
+export async function updatePassword({ password, verifyPassword, newPassword }: { password: string; newPassword: string; verifyPassword: string }): Promise<YoungType> {
+  const { ok, code, user } = await API.post("/young/reset_password", { password, verifyPassword, newPassword });
+  if (!ok) throw new Error(code);
+  if (!user) throw new Error("No user");
+  return user;
+}

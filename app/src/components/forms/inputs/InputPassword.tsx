@@ -4,16 +4,19 @@ import EyeOff from "../../../assets/icons/EyeOff";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 
-const InputPassword = ({ label = "", className = "", name = "", value = "", onChange = () => null, error = null, ...rest }) => {
+type Props = {
+  label?: string;
+  className?: string;
+  error?: string;
+  [key: string]: any; // To allow additional props like `rest`
+};
+
+const InputPassword = ({ label = "", className = "", error, ...rest }: Props) => {
   const [inputType, setInputType] = useState("password");
 
   if ("type" in rest) {
     throw new Error(`InputPassword component cannot handle a custom type.`);
   }
-
-  const handleChange = (event) => {
-    onChange(event.target.value);
-  };
 
   const handleChangeInputType = () => {
     setInputType((prevType) => (prevType === "password" ? "text" : "password"));
@@ -21,16 +24,9 @@ const InputPassword = ({ label = "", className = "", name = "", value = "", onCh
 
   return (
     <div className={`mb-[1rem] ${className}`}>
-      <Label title={label} hasError={error}>
+      <Label title={label} hasError={!!error}>
         <div className="flex">
-          <input
-            className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400"
-            name={name}
-            type={inputType}
-            value={value}
-            onChange={handleChange}
-            {...rest}
-          />
+          <input className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400" type={inputType} {...rest} />
           {inputType === "password" && (
             <button className="appearance-none" onClick={handleChangeInputType}>
               <Eye className="text-gray-400" />
