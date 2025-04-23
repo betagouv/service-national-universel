@@ -1,9 +1,16 @@
 import { config } from "../../config";
-import { CohortType, ERRORS, ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { CohortType, ERRORS, ROLES, SENDINBLUE_TEMPLATES, PlanTransportType } from "snu-lib";
 import { ClasseDocument, EtablissementModel, LigneBusDocument, ReferentModel, YoungDocument } from "../../models";
 import { sendTemplate } from "../../brevo";
 
-export async function notifyYoungsAndRlsPDRWasUpdated(youngs: YoungDocument[], cohort: CohortType) {
+interface notifyYoungsAndRlsPDRWasUpdatedProps {
+  youngs: YoungDocument[];
+  cohort: CohortType;
+  date: string;
+  meetingPoint: PlanTransportType["pointDeRassemblements"][number];
+}
+
+export async function notifyYoungsAndRlsPDRWasUpdated({ youngs, cohort, date, meetingPoint }: notifyYoungsAndRlsPDRWasUpdatedProps) {
   let isBeforeDeparture = false;
   let templateId: string | null = null;
   if (new Date() < new Date(cohort.dateStart)) {
@@ -27,10 +34,30 @@ export async function notifyYoungsAndRlsPDRWasUpdated(youngs: YoungDocument[], c
     } else {
       if (young.cohesionStayPresence !== "false" && young.departInform !== "true") {
         if (young.parent1Email) {
-          await sendTemplate(templateId, { emailTo: [{ email: young.parent1Email }], cc: [{ email: young.email }] });
+          await sendTemplate(templateId, {
+            emailTo: [{ email: young.parent1Email }],
+            cc: [{ email: young.email }],
+            params: {
+              PDR_RETOUR: meetingPoint.name,
+              PDR_RETOUR_ADRESSE: meetingPoint.address,
+              PDR_RETOUR_VILLE: meetingPoint.city,
+              DATE_RETOUR: date,
+              HEURE_RETOUR: meetingPoint.returnHour,
+            },
+          });
         }
         if (young.parent2Email) {
-          await sendTemplate(templateId, { emailTo: [{ email: young.parent2Email }], cc: [{ email: young.email }] });
+          await sendTemplate(templateId, {
+            emailTo: [{ email: young.parent2Email }],
+            cc: [{ email: young.email }],
+            params: {
+              PDR_RETOUR: meetingPoint.name,
+              PDR_RETOUR_ADRESSE: meetingPoint.address,
+              PDR_RETOUR_VILLE: meetingPoint.city,
+              DATE_RETOUR: date,
+              HEURE_RETOUR: meetingPoint.returnHour,
+            },
+          });
         }
       }
     }
