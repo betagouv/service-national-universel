@@ -71,13 +71,36 @@ describe("ClasseAdminCleGuard", () => {
         expect(result).toBe(true);
     });
 
-    it("should return true if user is admin_cle and has necessary permissions", async () => {
+    it("should return true if user is admin_cle (referentEtablissement) and has necessary permissions", async () => {
         const mockEtablissement = {
-            referentEtablissementIds: ["user_id"],
-            coordinateurIds: ["user_id"],
+            referentEtablissementIds: ["referent_id"],
+            coordinateurIds: ["coordinator_id"],
         };
         const mockRequest = {
-            user: { role: ROLES.ADMINISTRATEUR_CLE, id: "user_id" },
+            user: { role: ROLES.ADMINISTRATEUR_CLE, id: "referent_id" },
+            classe: { etablissementId: "etablissement_id" },
+        } as CustomRequest;
+        const mockContext = {
+            switchToHttp: () => ({
+                getRequest: () => mockRequest,
+            }),
+        } as ExecutionContext;
+
+        jest.spyOn(etablissementGateway, "findById").mockResolvedValue(mockEtablissement as EtablissementModel);
+        jest.spyOn(classeGuardService, "findClasse").mockResolvedValue(mockRequest.classe);
+
+        const result = await guard.canActivate(mockContext);
+
+        expect(result).toBe(true);
+    });
+
+    it("should return true if user is admin_cle (coordinator) and has necessary permissions", async () => {
+        const mockEtablissement = {
+            referentEtablissementIds: ["referent_id"],
+            coordinateurIds: ["coordinator_id"],
+        };
+        const mockRequest = {
+            user: { role: ROLES.ADMINISTRATEUR_CLE, id: "coordinator_id" },
             classe: { etablissementId: "etablissement_id" },
         } as CustomRequest;
         const mockContext = {

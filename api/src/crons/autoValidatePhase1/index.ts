@@ -2,24 +2,23 @@ import { capture } from "../../sentry";
 import slack from "../../slack";
 import { processCohort } from "./service";
 import { getSejoursEnCoursDeRealisation } from "./repository";
+import { isCohortValidationDateToday } from "./utils";
 
 const title = "Autovalidation de la phase 1";
+const user = { firstName: `[CRON] ${title}` };
 
 export const handler = async (date = new Date()): Promise<void> => {
   try {
     const cohortesEnCours = await getSejoursEnCoursDeRealisation(date);
-    if (!cohortesEnCours.length) {
-      slack.info({ title, text: "Aucune cohorte en cours" });
+    const cohortesAValider = cohortesEnCours.filter((c) => isCohortValidationDateToday(c, date));
+    if (!cohortesAValider.length) {
+      slack.info({ title, text: "Aucune cohorte à valider aujourd'hui" });
       return;
     }
-    slack.info({ title, text: `Cohortes en cours : ${cohortesEnCours.map((cohort) => cohort.name)}` });
+    slack.info({ title, text: `Cohortes à valider : ${cohortesAValider.map((cohort) => cohort.name).join(", ")}` });
 
-    for (const cohort of cohortesEnCours) {
-      const count = await processCohort(cohort, date);
-      if (count === 0) {
-        slack.info({ title, text: `Aucun jeune n'a été modifié pour la cohorte ${cohort.name}` });
-        return;
-      }
+    for (const cohort of cohortesAValider) {
+      const count = await processCohort(cohort, date, user);
       slack.success({ title, text: `${count} jeunes ont été modifiés pour la cohorte ${cohort.name}` });
     }
 
