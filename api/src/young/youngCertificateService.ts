@@ -27,8 +27,6 @@ export const fetchDataForYoungCertificate = async (young: YoungDto) => {
 
   const cohort = await CohortModel.findOne({ name: young.cohort });
   if (!cohort) throw new Error(`cohort ${young.cohort} not found for young ${young._id}`);
-  cohort.dateStart.setMinutes(cohort.dateStart.getMinutes() - cohort.dateStart.getTimezoneOffset());
-  cohort.dateEnd.setMinutes(cohort.dateEnd.getMinutes() - cohort.dateEnd.getTimezoneOffset());
 
   let service = null;
   if (young.source !== "CLE") {
