@@ -14,7 +14,7 @@ type FormValues = {
   verifyPassword: string;
 };
 
-const AccountPasswordPage = () => {
+function AccountPasswordPage() {
   const {
     handleSubmit,
     register,
@@ -22,14 +22,15 @@ const AccountPasswordPage = () => {
     watch,
     formState: { errors },
   } = useForm<FormValues>();
-  const { mutate: updatePassword, isPending: isSubmitting } = useUpdatePassword();
-  const handleChangePasswordSubmit = (formValues: FormValues) => {
+  const { mutate: updatePassword, isPending } = useUpdatePassword();
+
+  function onSubmit(formValues: FormValues) {
     updatePassword(formValues);
-  };
+  }
 
   return (
     <div className="mb-6 bg-white shadow-sm lg:rounded-lg">
-      <form onSubmit={handleSubmit(handleChangePasswordSubmit)}>
+      <form onSubmit={handleSubmit(onSubmit)}>
         <div className="grid grid-cols-1 lg:grid-cols-3">
           <div className="hidden py-6 pl-6 lg:col-start-1 lg:block">
             <h2 className="m-0 mb-1 text-lg font-medium leading-6 text-gray-900">Mot de passe</h2>
@@ -52,14 +53,14 @@ const AccountPasswordPage = () => {
           <ButtonLight className="w-full bg-white lg:w-fit" onClick={reset}>
             Annuler
           </ButtonLight>
-          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isSubmitting}>
-            {isSubmitting && <BiLoaderAlt className="animate-spin" />}
+          <ButtonPrimary type="submit" className="w-full lg:w-fit" disabled={isPending}>
+            {isPending && <BiLoaderAlt className="animate-spin" />}
             Enregistrer
           </ButtonPrimary>
         </div>
       </form>
     </div>
   );
-};
+}
 
 export default AccountPasswordPage;

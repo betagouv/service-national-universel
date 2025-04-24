@@ -1,8 +1,7 @@
 import React, { forwardRef, useState } from "react";
-import Eye from "../../../assets/icons/Eye";
-import EyeOff from "../../../assets/icons/EyeOff";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
+import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
 type Props = {
   label?: string;
@@ -28,16 +27,9 @@ const InputPassword = forwardRef<HTMLInputElement, Props>(function InputPassword
       <Label title={label} hasError={!!error}>
         <div className="flex">
           <input className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400" type={inputType} ref={ref} {...rest} />
-          {inputType === "password" && (
-            <button className="appearance-none" onClick={handleChangeInputType}>
-              <Eye className="text-gray-400" />
-            </button>
-          )}
-          {inputType === "text" && (
-            <button className="appearance-none" onClick={handleChangeInputType}>
-              <EyeOff className="text-gray-400" />
-            </button>
-          )}
+          <button className="appearance-none text-gray-400" onClick={handleChangeInputType}>
+            {inputType === "password" ? <HiOutlineEye /> : <HiOutlineEyeOff />}
+          </button>
         </div>
       </Label>
       <ErrorMessage error={error} />

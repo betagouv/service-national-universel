@@ -13,7 +13,6 @@ export default function useUpdatePassword() {
       dispatch(setYoung(data));
     },
     onError: (error: Error) => {
-      console.error("error", error);
       if (error.message === "OPERATION_UNAUTHORIZED") {
         toastr.error("Une erreur s'est produite :", "Vous n'avez pas les droits pour effectuer cette action.");
         return;
