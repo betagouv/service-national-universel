@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import plausibleEvent from "@/services/plausible";
 import { downloadConvocation, sendConvocationByEmail, updateConvocationFileDownload } from "./affectationRepository";
 import useAuth from "@/services/useAuth";
+// eslint-disable-next-line import/extensions
 import { STEPS, useSteps } from "./steps.utils";
 
 export function useValidateConvocationStep() {
