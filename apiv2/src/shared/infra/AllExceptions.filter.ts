@@ -28,6 +28,10 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const httpStatus =
             exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
+        if (httpStatus === HttpStatus.UNAUTHORIZED || httpStatus === HttpStatus.UNPROCESSABLE_ENTITY) {
+            return;
+        }
+
         const currentRoute = this.getCurrentRoute(request);
 
         Sentry.captureMessage(`💥 HTTP ${httpStatus} ${request.method} ${currentRoute} ${exception.name}`, {
