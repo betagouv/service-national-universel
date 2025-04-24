@@ -13,17 +13,34 @@ export const handler = async () => {
         },
       },
       {
+        $addFields: {
+          classeIdObj: { $toObjectId: "$classeId" },
+        },
+      },
+      {
         $lookup: {
           from: "classes",
-          localField: "classeId",
-          foreignField: "_id",
+          let: { classeId: "$classeIdObj" },
+          pipeline: [
+            {
+              $match: {
+                $expr: { $eq: ["$_id", "$$classeId"] },
+              },
+            },
+            {
+              $project: {
+                _id: 1,
+                cohortId: 1,
+              },
+            },
+          ],
           as: "classeData",
         },
       },
       {
         $unwind: {
           path: "$classeData",
-          preserveNullAndEmptyArrays: true, // Keep young without matching classe
+          preserveNullAndEmptyArrays: true,
         },
       },
       {
