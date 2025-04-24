@@ -5,7 +5,7 @@ import { ModalContainer, Content, Footer, Header } from "./Modal";
 import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
 
-export default function ModalConfirm({ isOpen, topTitle = "alerte", title, message, onChange, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) {
+export default function ModalConfirm({ isOpen, topTitle = "alerte", title, message, onChange = () => {}, onCancel, onConfirm, confirmText = "Confirmer", cancelText = "Annuler" }) {
   const [sending, setSending] = useState(false);
 
   const submit = async () => {
