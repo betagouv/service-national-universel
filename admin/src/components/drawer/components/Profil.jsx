@@ -3,7 +3,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translate, SUB_ROLE_GOD } from "snu-lib";
+import { ROLES, translate, SUB_ROLE_GOD, isWriteAuthorized, isReadAuthorized, PERMISSION_RESOURCES } from "snu-lib";
 import { setUser, setPreviousSignin } from "@/redux/auth/actions";
 import api from "@/services/api";
 import AddUser from "../icons/AddUser";
@@ -115,15 +115,17 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 ">
                     <div className="!ml-2 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20 flex flex-col">
                       {/* Header */}
-                      <Link className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" to={"/profil"}>
-                        <div className="flex items-center justify-center w-[26px] h-[26px]">
-                          <User className="text-[#30345B]" />
-                        </div>
-                        <div className="ml-[9px] flex flex-col gap-[2px]">
-                          <span className="text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle">Mon Profil</span>
-                          <span className="text-xs -leading-2 text-left text-[#7F83A7] truncate w-[210px] overflow-visible align-middle">{user.email}</span>
-                        </div>
-                      </Link>
+                      {isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.REFERENT }) && (
+                        <Link className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" to={"/profil"}>
+                          <div className="flex items-center justify-center w-[26px] h-[26px]">
+                            <User className="text-[#30345B]" />
+                          </div>
+                          <div className="ml-[9px] flex flex-col gap-[2px]">
+                            <span className="text-sm leading-5 h-[20px] text-left text-[#1B1F42] align-middle">Mon Profil</span>
+                            <span className="text-xs -leading-2 text-left text-[#7F83A7] truncate w-[210px] overflow-visible align-middle">{user.email}</span>
+                          </div>
+                        </Link>
+                      )}
                       <div className="bg-[#EEEFF5] h-[1px] mx-auto w-[247px] 1mb-1" />
                       {/* Body */}
                       <div className="flex flex-col !py-1 px-[3px]">
@@ -139,7 +141,9 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItem Icon={() => <HiOutlineMail size={22} />} title="Marketing" link={"/plan-marketing/campagnes-generiques"} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
-                        {<NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />}
+                        {isWriteAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT }) && (
+                          <NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />
+                        )}
                       </div>
                       <div className="bg-[#EEEFF5] h-[1px] mx-auto w-[247px] !mt-1" />
                       {/* Footer */}
