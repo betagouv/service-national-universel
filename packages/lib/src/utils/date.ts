@@ -164,9 +164,8 @@ const formatDateTimeZone = (date) => {
 };
 
 const setToEndOfDay = (date: Date): Date => {
-  const d = new Date(date);
-  d.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
-  return d;
+  date.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
+  return date;
 };
 
 function checkTime(time1, time2) {
