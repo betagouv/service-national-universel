@@ -455,7 +455,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     cohort.set({
       ...body,
       dateStart: formatDateTimeZone(body.dateStart),
-      dateEnd: setToEndOfDay(body.dateEnd),
+      dateEnd: setToEndOfDay(new Date(body.dateEnd)),
     });
 
     if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
