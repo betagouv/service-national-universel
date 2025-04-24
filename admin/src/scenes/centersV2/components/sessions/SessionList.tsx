@@ -12,9 +12,10 @@ import {
   canCreateOrUpdateCohesionCenter,
   canPutSpecificDateOnSessionPhase1,
   CohesionCenterType,
+  ROLES,
+  isAdmin,
   isSessionEditionOpen,
   isSuperAdmin,
-  ROLES,
   validateEmailAcademique,
 } from "snu-lib";
 import { capture } from "@/sentry";
@@ -282,7 +283,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                       if (values) setValues({ ...values, sanitaryContactEmail: e.target.value });
                     }}
                     readOnly={!values}
-                    disabled={cohort?.isAssignmentAnnouncementsOpenForYoung}
+                    disabled={!isAdmin(user) && cohort?.isAssignmentAnnouncementsOpenForYoung}
                   />
                 </div>
               </div>

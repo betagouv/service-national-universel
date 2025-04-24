@@ -6,6 +6,7 @@ import { QueueModule } from "@infra/Queue.module";
 import { ConfigModule } from "@nestjs/config";
 import { SentryModule } from "@sentry/nestjs/setup";
 import configuration from "./config/configuration";
+import { CronModule } from "./cron/cron.module";
 
 @Module({
     imports: [
@@ -15,7 +16,8 @@ import configuration from "./config/configuration";
         SentryModule.forRoot(),
         QueueModule,
         NotificationJobModule,
-        AdminJobModule
+        AdminJobModule,
+        CronModule,
     ],
     controllers: [HealthCheckController],
 })

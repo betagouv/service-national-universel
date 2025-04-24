@@ -6,6 +6,7 @@ export enum TechnicalExceptionType {
     NOT_IMPLEMENTED_YET = "NOT_IMPLEMENTED_YET",
     BREVO = "BREVO",
     DATABASE_ERROR = "DATABASE_ERROR",
+    CRON_JOB_NOT_HANDLED = "CRON_JOB_NOT_HANDLED",
 }
 
 export class TechnicalException extends HttpException {

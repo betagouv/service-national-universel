@@ -1,6 +1,5 @@
 import React from "react";
-import { HiOutlineInformationCircle } from "react-icons/hi";
-import { Button, Tooltip } from "@snu/ds/admin";
+import { Button } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
 import { DepartmentService } from "@/services/departmentService";
 import { translate } from "snu-lib";
@@ -8,6 +7,7 @@ import { useMutation } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
 import { downloadFileFrombase64 } from "@/services/file.service";
+
 interface ContactSimulationProps {
   session: CohortDto;
 }
@@ -34,14 +34,8 @@ export default function ExportContactConvocation({ session }: ContactSimulationP
   return (
     <div className="flex items-center justify-between px-4">
       <div className="flex gap-2">
-        <div className="text-sm leading-5 font-bold">Export des contacts de convocation</div>
-        <Tooltip id="export-contact-convocation" title="Récupérer la liste des emails de contacts manquants">
-          <HiOutlineInformationCircle className="text-gray-400" size={20} />
-        </Tooltip>
-        {isPending && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
-      </div>
-      <div className="flex gap-2">
         <Button title="Exporter les contacts" onClick={() => mutate()} loading={isPending} disabled={isPending || isCLE} />
+        {isPending && <div className="text-xs leading-4 font-normal text-orange-500 italic">Téléchargement en cours...</div>}
       </div>
     </div>
   );

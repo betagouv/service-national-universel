@@ -2,7 +2,7 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, YoungType } from "./mongoSchema";
+import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore } from "date-fns";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
@@ -136,9 +136,13 @@ function canInviteUser(actorRole, targetRole) {
     ].includes(targetRole);
   }
 
-  // RESPONSIBLE and SUPERVISOR can invite only RESPONSIBLE and SUPERVISOR.
-  if (actorRole === ROLES.RESPONSIBLE || actorRole === ROLES.SUPERVISOR) {
-    return targetRole === ROLES.RESPONSIBLE || targetRole === ROLES.SUPERVISOR;
+  // RESPONSIBLE can invite only RESPONSIBLE.
+  if (actorRole === ROLES.RESPONSIBLE) {
+    return targetRole === ROLES.RESPONSIBLE;
+  }
+  // SUPERVISOR can invite RESPONSIBLE and SUPERVISOR.
+  if (actorRole === ROLES.SUPERVISOR) {
+    return [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(targetRole);
   }
 
   return false;
@@ -264,28 +268,39 @@ function canViewReferent(actor, target) {
 }
 
 type CanUpdateReferent = {
-  actor: any;
-  originalTarget: any;
-  modifiedTarget?: any | null;
-  structure: any;
+  actor: UserDto;
+  originalTarget: ReferentType;
+  modifiedTarget?: ReferentType | null;
+  structure?: StructureType | null;
 };
 
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
-  const isAdmin = actor.role === ROLES.ADMIN;
+  const isActorAdmin = isAdmin(actor);
+  const isStructureTeamMember = isResponsibleOrSupervisor(actor);
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
+
+  // Seul les admins peuvent changer les roles des utilisateurs
+  if (!isActorAdmin && modifiedTarget?.role && modifiedTarget.role !== originalTarget.role) {
+    return false;
+  }
+  // un responsable/superviseur ne peut pas se changer de structure
+  if (isStructureTeamMember && modifiedTarget?.structureId && modifiedTarget?.structureId !== originalTarget.structureId) {
+    return false;
+  }
+
   const isResponsibleModifyingResponsibleWithoutChangingRole =
     // Is responsible...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) &&
+    isStructureTeamMember &&
     // ... modifying responsible ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) &&
+    isResponsibleOrSupervisor(originalTarget) &&
     withoutChangingRole;
 
   const isSupervisorModifyingTeamMember =
     // Is supervisor...
     actor.role === ROLES.SUPERVISOR &&
     // ... modifying team member ...
-    [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role) &&
+    isResponsibleOrSupervisor(originalTarget) &&
     actor.structureId === originalTarget.structureId;
 
   const isMeWithoutChangingRole =
@@ -300,9 +315,9 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role) &&
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role));
+    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role!));
   const isReferentModifyingHeadCenterWithoutChangingRole =
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
@@ -319,11 +334,11 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
   const isActorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
   // Check si il y a au moins un match entre les departements de la target et de l'actor
-  const isActorAndTargetInTheSameDepartment = actor.department.some((department) => geographicTargetData.department.includes(department));
+  const isActorAndTargetInTheSameDepartment = (actor.department as string[]).some((department) => geographicTargetData.department.includes(department));
 
   const authorized =
     (isMeWithoutChangingRole ||
-      isAdmin ||
+      isActorAdmin ||
       isSupervisorModifyingTeamMember ||
       isResponsibleModifyingResponsibleWithoutChangingRole ||
       isReferentModifyingReferentWithoutChangingRole ||
@@ -497,18 +512,24 @@ function canCreateOrUpdateProgram(user, program) {
     !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
   );
 }
-function canModifyStructure(user, structure) {
+function canModifyStructure(user: UserDto, structure: StructureType, modifyStructure?: StructureType) {
   const isAdmin = user.role === ROLES.ADMIN;
+  const isResponsible = user.role === ROLES.RESPONSIBLE;
   const isReferentRegionFromSameRegion = user.role === ROLES.REFERENT_REGION && user.region === structure.region;
-  const isReferentDepartmentFromSameDepartment = user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(structure.department);
-  const isResponsibleModifyingOwnStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && structure._id.equals(user.structureId);
+  const isReferentDepartmentFromSameDepartment = user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(structure.department!);
+  const isResponsibleModifyingOwnStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && structure._id.toString() === user.structureId;
   const isSupervisorModifyingChild = user.role === ROLES.SUPERVISOR && user.structureId === structure.networkId;
+
+  // un responsable ne peux pas passer en tête de réseau la structure
+  if (isResponsible && modifyStructure && structure.isNetwork !== "true" && modifyStructure.isNetwork === "true") {
+    return false;
+  }
 
   return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment || isResponsibleModifyingOwnStructure || isSupervisorModifyingChild;
 }
 
 function canCreateStructure(user) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
 }
 
 function canSendPlanDeTransport(user) {
@@ -536,8 +557,16 @@ function isReferentRegDep(user: UserRoles) {
   return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
 }
 
-function isSupervisor(user: UserRoles) {
+export function isResponsible(user: UserRoles) {
+  return ROLES.RESPONSIBLE === user.role;
+}
+
+export function isSupervisor(user: UserRoles) {
   return ROLES.SUPERVISOR === user.role;
+}
+
+export function isResponsibleOrSupervisor(user: UserRoles) {
+  return isResponsible(user) || isSupervisor(user);
 }
 
 function isReferentOrAdmin(user: UserRoles) {
@@ -1370,7 +1399,6 @@ export {
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
-  isSupervisor,
   canPutSpecificDateOnSessionPhase1,
   isBusEditionOpen,
   canCheckIfRefExist,
