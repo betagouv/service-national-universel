@@ -163,7 +163,7 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
-const formatDateTimeZoneTo9pm = (date) => {
+const setToEndOfDay = (date: Date): Date => {
   const d = new Date(date);
   d.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
   return d;
@@ -213,5 +213,5 @@ export {
   isNowBetweenDates,
   formatDateTimeZone,
   checkTime,
-  formatDateTimeZoneTo9pm,
+  setToEndOfDay,
 };
