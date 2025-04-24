@@ -1,12 +1,12 @@
 import { Response, NextFunction } from "express";
-import { ERRORS, isAuthorized, PERMISSION_CODES } from "snu-lib";
+import { ERRORS, HasPermissionsParams, isAuthorized, PERMISSION_ACTIONS } from "snu-lib";
 import { UserRequest } from "../controllers/request";
 
-export function permissionAccesControlMiddleware(allowedPermissions: (typeof PERMISSION_CODES)[keyof typeof PERMISSION_CODES][]) {
+export function permissionAccesControlMiddleware({ codes, action = PERMISSION_ACTIONS.READ }: Omit<HasPermissionsParams, "user">) {
   return (req: UserRequest, res: Response, next: NextFunction) => {
     const user = req.user;
 
-    if (!allowedPermissions.some((permission) => isAuthorized({ user, code: permission }))) {
+    if (!codes.some((code) => isAuthorized({ user, code, action }))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     return next();
