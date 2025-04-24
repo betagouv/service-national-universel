@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { forwardRef, useState } from "react";
 import Eye from "../../../assets/icons/Eye";
 import EyeOff from "../../../assets/icons/EyeOff";
 import Label from "../layout/Label";
@@ -11,7 +11,8 @@ type Props = {
   [key: string]: any; // To allow additional props like `rest`
 };
 
-const InputPassword = ({ label = "", className = "", error, ...rest }: Props) => {
+const InputPassword = forwardRef<HTMLInputElement, Props>(function InputPassword(props, ref) {
+  const { label, className, error, ...rest } = props;
   const [inputType, setInputType] = useState("password");
 
   if ("type" in rest) {
@@ -26,7 +27,7 @@ const InputPassword = ({ label = "", className = "", error, ...rest }: Props) =>
     <div className={`mb-[1rem] ${className}`}>
       <Label title={label} hasError={!!error}>
         <div className="flex">
-          <input className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400" type={inputType} {...rest} />
+          <input className="flex-grow bg-white text-sm text-gray-900 placeholder:text-gray-500 focus:outline-none disabled:text-gray-400" type={inputType} ref={ref} {...rest} />
           {inputType === "password" && (
             <button className="appearance-none" onClick={handleChangeInputType}>
               <Eye className="text-gray-400" />
@@ -42,6 +43,6 @@ const InputPassword = ({ label = "", className = "", error, ...rest }: Props) =>
       <ErrorMessage error={error} />
     </div>
   );
-};
+});
 
 export default InputPassword;

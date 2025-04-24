@@ -22,7 +22,6 @@ const AccountPasswordPage = () => {
     watch,
     formState: { errors },
   } = useForm<FormValues>();
-  console.log("🚀 ~ AccountPasswordPage ~ errors:", errors);
   const { mutate: updatePassword, isPending: isSubmitting } = useUpdatePassword();
   const handleChangePasswordSubmit = (formValues: FormValues) => {
     updatePassword(formValues);
@@ -45,14 +44,7 @@ const AccountPasswordPage = () => {
               label="Confirmer nouveau mot de passe"
               error={errors?.verifyPassword?.message}
               required
-              {...register("verifyPassword", {
-                validate: (value) => {
-                  console.log("🚀 ~ AccountPasswordPage ~ value:", value);
-                  const newPassword = watch("newPassword");
-                  console.log("🚀 ~ AccountPasswordPage ~ newPassword:", newPassword);
-                  return value === watch("newPassword") || "Les mots de passe ne correspondent pas.";
-                },
-              })}
+              {...register("verifyPassword", { validate: (value) => value === watch("newPassword") || "Les mots de passe ne correspondent pas." })}
             />
           </div>
         </div>
