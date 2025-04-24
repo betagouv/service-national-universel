@@ -12,6 +12,7 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+// eslint-disable-next-line import/extensions
 import { useSteps } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
