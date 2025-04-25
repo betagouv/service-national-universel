@@ -93,7 +93,7 @@ export const removeDeprecatedSessionsPhase1 = async (SessionsFromCSV: SessionCoh
   logger.info(`Removing deprecated sessions phase 1, testing ${sessionPhase1List.length} sessions, for ${cohortsList.length} cohorts`);
 
   for (const sessionPhase1 of sessionPhase1List) {
-    const centreSession = mappedSessionCenter.filter((sessionCenter) => sessionPhase1.sejourSnuIds.includes(sessionCenter.sejourSnuId));
+    const centreSession = mappedSessionCenter.find((sessionCenter) => sessionPhase1.sejourSnuIds.includes(sessionCenter.sejourSnuId));
     if (!centreSession) {
       logger.warn(`Session not found (${sessionPhase1._id}) in CSV for sejourSnuId ${sessionPhase1.sejourSnuIds.join(",")}`);
       const nbYoung = await YoungModel.countDocuments({ sessionPhase1Id: sessionPhase1._id });
