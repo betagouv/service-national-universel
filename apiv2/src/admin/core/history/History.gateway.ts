@@ -9,7 +9,7 @@ export interface HistoryGateway {
         history: HistoryType,
         referenceId: string,
         path: string,
-        originaleValue: string,
+        value: string,
     ): Promise<PatchType | null>;
     bulkCreate(history: HistoryType, patches: PatchType[]): Promise<number>;
     create(history: HistoryType, patch: PatchType): Promise<PatchType>;

@@ -34,14 +34,14 @@ export class HistoryRepository implements HistoryGateway {
         history: HistoryType,
         referenceId: string,
         path: string,
-        originaleValue: string,
+        value: string,
     ): Promise<PatchType | null> {
         const instance = this.getInstance(history);
         return instance
             .findOne({
                 ref: referenceId,
                 "ops.path": path,
-                "ops.value": originaleValue,
+                "ops.value": value,
             })
             .sort({ date: -1 })
             .lean();
