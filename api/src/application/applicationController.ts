@@ -155,6 +155,9 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
         }
       }
       const cohort = await CohortModel.findById(young.cohortId);
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
       if (!canApplyToPhase2(young, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
@@ -205,7 +208,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
     }
 
     if (mission.isMilitaryPreparation !== "true") {
-      await notifyReferentNewApplication(data);
+      await notifyReferentNewApplication(data, young);
     }
 
     return res.status(200).send({ ok: true, data: serializeApplication(data) });

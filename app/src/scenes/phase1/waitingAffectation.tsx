@@ -18,7 +18,7 @@ import { HiArrowRight } from "react-icons/hi";
 import Notice from "@/components/ui/alerts/Notice";
 
 export default function WaitingAffectation() {
-  const { young, isCLE } = useAuth();
+  const { young, isCLE, isHTS } = useAuth();
   const { cohortDateString } = useCohort();
   const title = `Mon séjour de cohésion ${cohortDateString}`;
   const text = isCLE
@@ -66,7 +66,7 @@ export default function WaitingAffectation() {
       <Files young={young} />
       <hr className="mx-auto mt-12 mb-7 w-full" />
       <CheckYourSpamSection />
-      {!isCLE && <FaqSection />}
+      {isHTS && <FaqSection />}
       <TestimonialsSection />
 
       <section className="mt-12 pb-32 md:mt-32">

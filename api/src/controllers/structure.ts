@@ -1,13 +1,12 @@
-const express = require("express");
-const Joi = require("joi");
-const router = express.Router();
-const passport = require("passport");
-const { capture } = require("../sentry");
-const { logger } = require("../logger");
+import express from "express";
+import Joi from "joi";
+import passport from "passport";
+import { capture } from "../sentry";
+import { logger } from "../logger";
 
-const { StructureModel, MissionModel, ReferentModel, ApplicationModel } = require("../models");
-const { ERRORS } = require("../utils");
-const {
+import { StructureModel, MissionModel, ReferentModel, ApplicationModel } from "../models";
+import { ERRORS } from "../utils";
+import {
   ROLES,
   canModifyStructure,
   canDeleteStructure,
@@ -18,39 +17,42 @@ const {
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
-} = require("snu-lib");
-const patches = require("./patches");
-const { sendTemplate } = require("../brevo");
-const { validateId, validateStructure, validateStructureManager, idSchema } = require("../utils/validator");
-const { serializeStructure, serializeArray, serializeMission } = require("../utils/serializer");
-const { serializeMissions, serializeReferents } = require("../utils/es-serializer");
-const { allRecords } = require("../es/utils");
-const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
-const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+  StructureType,
+  UserDto,
+} from "snu-lib";
+import patches from "./patches";
+import { sendTemplate } from "../brevo";
+import { validateId, validateStructure, validateStructureManager, idSchema } from "../utils/validator";
+import { serializeStructure, serializeArray, serializeMission } from "../utils/serializer";
+import { serializeMissions, serializeReferents } from "../utils/es-serializer";
+import { allRecords } from "../es/utils";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { UserRequest } from "./request";
 
-const setAndSave = async (data, keys, fromUser) => {
+const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
   await data.save({ fromUser });
 };
 
-const populateWithMissions = async (structures) => {
+const populateWithMissions = async (structures: StructureType[]): Promise<StructureType[]> => {
   const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
   const missions = await allRecords("mission", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
   const serializedMissions = serializeMissions(missions);
   return structures.map((item) => ({ ...item, missions: serializedMissions.filter((e) => e.structureId === item._id.toString()) }));
 };
 
-const populateWithReferents = async (structures) => {
+const populateWithReferents = async (structures: StructureType[]): Promise<StructureType[]> => {
   const departments = [...new Set(structures.map((item) => item.department))].filter(Boolean);
   const referents = await allRecords("referent", {
     bool: { must: [{ terms: { "department.keyword": departments } }, { term: { "role.keyword": "referent_department" } }] },
   });
   const serializedReferents = serializeReferents(referents);
-  return structures.map((item) => ({ ...item, referents: serializedReferents.filter((e) => item.department.includes(e.department)) }));
+  return structures.map((item) => ({ ...item, referents: serializedReferents.filter((e) => item.department?.includes(e.department)) }));
 };
 
-const populateWithTeam = async (structures) => {
+const populateWithTeam = async (structures: StructureType[]): Promise<StructureType[]> => {
   const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
   const referents = await allRecords("referent", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
   const serializedReferents = serializeReferents(referents);
@@ -59,48 +61,51 @@ const populateWithTeam = async (structures) => {
 
 // Update "network name" to ease search ("Affilié à un réseau national" filter).
 // See: https://trello.com/c/BjRN9NME/523-admin-filtre-affiliation-%C3%A0-une-t%C3%AAte-de-r%C3%A9seau
-async function updateNetworkName(structure, fromUser) {
+async function updateNetworkName(structure: StructureType, fromUser: UserDto): Promise<void> {
   if (structure.networkId) {
     // When the structure is a child (part of a network), get the network
     const network = await StructureModel.findById(structure.networkId);
     // then update networkName thanks to its name.
-    if (network) await setAndSave(structure, { networkName: network.name });
+    if (network) await setAndSave(structure, { networkName: network.name }, fromUser);
   } else if (structure.isNetwork === "true") {
     // When the structure is a partent (is a network).
     // Update the structure itself (a parent belongs to her own structure).
-    await setAndSave(structure, { networkName: structure.name });
+    await setAndSave(structure, { networkName: structure.name }, fromUser);
     // Then update their childs.
     const childs = await StructureModel.find({ networkId: structure._id });
     for (const child of childs) await setAndSave(child, { networkName: structure.name }, fromUser);
   }
 }
-async function updateMissionStructureName(structure) {
+
+async function updateMissionStructureName(structure: StructureType, fromUser?: UserDto): Promise<void> {
   try {
     const missions = await MissionModel.find({ structureId: structure._id });
     if (!missions?.length) {
       logger.debug(`no missions edited for structure ${structure._id}`);
       return;
     }
-    for (const mission of missions) await setAndSave(mission, { structureName: structure.name });
+    for (const mission of missions) await setAndSave(mission, { structureName: structure.name }, fromUser);
   } catch (error) {
     capture(error);
   }
 }
 
-async function updateResponsibleAndSupervisorRole(structure) {
+async function updateResponsibleAndSupervisorRole(structure: StructureType, fromUser?: UserDto): Promise<void> {
   try {
     const referents = await ReferentModel.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
     if (!referents?.length) {
       logger.debug(`no referents edited for structure ${structure._id}`);
       return;
     }
-    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE });
+    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE }, fromUser);
   } catch (error) {
     capture(error);
   }
 }
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router();
+
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value: checkedStructure } = validateStructure(req.body);
     if (error) {
@@ -127,7 +132,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -135,9 +140,10 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const structure = await StructureModel.findById(checkedId);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
     const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
+
+    if (!canModifyStructure(req.user, structure, checkedStructure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     // Only admin user can change the networkId of a structure
@@ -157,7 +163,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const data = await StructureModel.find({ isNetwork: "true" }).sort("name");
     if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -168,7 +174,7 @@ router.get("/networks", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.get("/:id/children", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/children", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -186,7 +192,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.get("/:id/mission", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/mission", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -215,7 +221,7 @@ router.get(
     }),
     accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
-  async (req, res) => {
+  async (req: UserRequest, res: express.Response) => {
     try {
       const { id } = req.params;
 
@@ -233,7 +239,7 @@ router.get(
   },
 );
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -245,15 +251,18 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     let structure = serializeStructure(data, req.user);
 
     if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
-      let promises = [];
+      let promises: Promise<any[]>[] = [];
 
       if (req.query.withMissions) promises.push(populateWithMissions([structure]));
+      //   @ts-ignore
       else promises.push(async () => [structure]);
 
       if (req.query.withReferents && structure.department) promises.push(populateWithReferents([structure]));
+      //   @ts-ignore
       else promises.push(async () => [structure]);
 
       if (req.query.withTeam) promises.push(populateWithTeam([structure]));
+      //   @ts-ignore
       else promises.push(async () => [structure]);
 
       const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
@@ -274,7 +283,7 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
   }
 });
 
-router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await StructureModel.find({});
@@ -285,12 +294,13 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const structure = await StructureModel.findById(checkedId);
+    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canDeleteStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const missionsLinkedToReferent = await MissionModel.find({ structureId: checkedId });
@@ -318,7 +328,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value } = validateStructureManager(req.body);
     if (error) {
@@ -345,7 +355,7 @@ router.post("/:id/representant", passport.authenticate("referent", { session: fa
   }
 });
 
-router.delete("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -353,9 +363,9 @@ router.delete("/:id/representant", passport.authenticate("referent", { session: 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canModifyStructure(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const structure = await StructureModel.findById(value);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     structure.set({ structureManager: undefined });
     await structure.save({ fromUser: req.user });
@@ -366,4 +376,4 @@ router.delete("/:id/representant", passport.authenticate("referent", { session: 
   }
 });
 
-module.exports = router;
+export default router;

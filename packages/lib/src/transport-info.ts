@@ -109,9 +109,9 @@ function getReturnHour(meetingPoint: any = null) {
  */
 const transportDatesToString = (departureDate, returnDate) => {
   if (departureDate.getMonth() === returnDate.getMonth()) {
-    return `du ${departureDate.getDate()} au ${returnDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long", year: "numeric" })}`;
+    return `du ${departureDate.getUTCDate()} au ${returnDate.getUTCDate()} ${departureDate.toLocaleString("fr", { month: "long", year: "numeric" })}`;
   }
-  return `du ${departureDate.getDate()} ${departureDate.toLocaleString("fr", { month: "long" })} au ${returnDate.getDate()} ${returnDate.toLocaleString("fr", {
+  return `du ${departureDate.getUTCDate()} ${departureDate.toLocaleString("fr", { month: "long" })} au ${returnDate.getUTCDate()} ${returnDate.toLocaleString("fr", {
     month: "long",
     year: "numeric",
   })}`;

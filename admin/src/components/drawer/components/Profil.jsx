@@ -39,12 +39,14 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
     setPopoverOpen(false);
   };
 
-  const getInitials = (word) =>
-    (word || "UK")
-      .match(/\b(\w)/g)
-      .join("")
-      .substring(0, 2)
-      .toUpperCase();
+  const getInitials = (word) => {
+    if (!word || typeof word !== "string") return "UK";
+
+    const matches = word.match(/\b(\w)/g);
+    if (!matches || matches.length === 0) return "UK";
+
+    return matches.join("").substring(0, 2).toUpperCase();
+  };
 
   async function logout() {
     try {

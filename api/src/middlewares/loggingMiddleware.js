@@ -11,6 +11,7 @@ const loggingMiddleware = async (req, res, next) => {
       if (req.body?.password) req.body.password = "**********";
       if (req.body?.newPassword) req.body.newPassword = "**********"
       if (req.body?.verifyPassword) req.body.verifyPassword = "**********";
+      if (req.body?.repassword) req.body.repassword = "**********";
 
       const ip = req.ipInfo;
 

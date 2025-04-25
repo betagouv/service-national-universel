@@ -33,6 +33,20 @@ describe("Structure", () => {
       const updatedStructure = await getStructureByIdHelper(res.body.data._id);
       expect(updatedStructure?.networkName).toBe("network");
     });
+    it("RESPONSIBLE cannot create structure", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .post("/structure")
+        .send(structure);
+      expect(res.status).toBe(403);
+    });
+    it("SUPERVISOR cannot create structure", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const res = await request(getAppHelper({ role: ROLES.SUPERVISOR }))
+        .post("/structure")
+        .send(structure);
+      expect(res.status).toBe(403);
+    });
   });
 
   describe("PUT /structure/:id", () => {
@@ -91,6 +105,15 @@ describe("Structure", () => {
       expect(res.status).toBe(200);
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
       expect(updatedResponsible?.role).toBe(ROLES.SUPERVISOR);
+    });
+
+    it("should not update isNetwork when responsible", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+      const res = await request(getAppHelper(responsible))
+        .put("/structure/" + structure._id)
+        .send({ isNetwork: "true" });
+      expect(res.status).toBe(403);
     });
   });
 
