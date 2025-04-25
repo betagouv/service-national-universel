@@ -28,7 +28,9 @@ export class AllExceptionsFilter implements ExceptionFilter {
         const httpStatus =
             exception instanceof HttpException ? exception.getStatus() : HttpStatus.INTERNAL_SERVER_ERROR;
 
-        if (httpStatus === HttpStatus.UNAUTHORIZED || httpStatus === HttpStatus.UNPROCESSABLE_ENTITY) {
+        const ignoreList = [HttpStatus.UNAUTHORIZED, HttpStatus.UNPROCESSABLE_ENTITY];
+
+        if (ignoreList.includes(httpStatus)) {
             return;
         }
 
