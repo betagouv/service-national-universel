@@ -23,6 +23,8 @@ const ROLES = {
   REFERENT_CLASSE: "referent_classe",
 };
 
+export const ROLE_JEUNE = "jeune";
+
 const SUB_ROLES = {
   manager_department: "manager_department",
   assistant_manager_department: "assistant_manager_department",

@@ -1,4 +1,6 @@
+const { ROLE_JEUNE } = require("snu-lib");
 const { ReferentModel } = require("../src/models");
+const { RoleModel } = require("../src/models/permissions/role");
 
 module.exports = {
   async up(db, client) {
@@ -15,6 +17,13 @@ module.exports = {
         },
       },
     ]);
+
+    await RoleModel.create({
+      code: ROLE_JEUNE,
+      name: "Jeune",
+      description: "Jeune sur MonCompte",
+      parent: null,
+    });
   },
 
   async down(db, client) {

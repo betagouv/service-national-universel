@@ -5,12 +5,13 @@ import { Strategy as JwtStrategy, ExtractJwt, VerifiedCallback } from "passport-
 import { Model } from "mongoose";
 import Joi from "joi";
 
-import { ROLES } from "snu-lib";
+import { ROLES, ROLE_JEUNE } from "snu-lib";
 
 import { YoungModel, ReferentModel } from "./models";
 import { checkJwtSigninVersion } from "./jwt-options";
 import { config } from "./config";
 import { capture } from "./sentry";
+import { isYoung } from "./utils";
 
 interface JwtPayload {
   __v: string;
@@ -35,7 +36,7 @@ function getToken(req: Request): string | null {
   return token;
 }
 
-async function validateUser(Model: Model<any>, jwtPayload: JwtPayload, done: VerifiedCallback, role?: string) {
+async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done: VerifiedCallback, role?: string) {
   try {
     const { error, value } = Joi.object({
       __v: Joi.string().required(),
@@ -47,7 +48,7 @@ async function validateUser(Model: Model<any>, jwtPayload: JwtPayload, done: Ver
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
 
-    const user = await Model.findById(value._id);
+    const user = await userModel.findById(value._id);
     if (user) {
       const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
       const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
@@ -55,6 +56,8 @@ async function validateUser(Model: Model<any>, jwtPayload: JwtPayload, done: Ver
       if (passwordMatch && logoutMatch && (!role || user.role === role)) {
         if (user.role || user.roles?.length) {
           user.acl = await getAcl(user);
+        } else if (isYoung(user)) {
+          user.acl = await getAcl({ roles: [ROLE_JEUNE] });
         }
         return done(null, user);
       }

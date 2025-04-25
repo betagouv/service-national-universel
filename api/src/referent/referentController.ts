@@ -111,6 +111,7 @@ import {
   ERRORS as ERRORS_LIB,
   ReferentType,
   PermissionDto,
+  ROLE_JEUNE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -277,6 +278,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       acl = await getAcl(user as any);
     } else if (type === "young") {
       user = await YoungModel.findById(id);
+      acl = await getAcl({ roles: [ROLE_JEUNE] } as any);
     }
     if (!user) {
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
@@ -298,7 +300,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     return res.status(200).json({
       ok: true,
       token,
-      data: isYoung(user) ? serializeYoung(user, user) : { ...serializeReferent(user), acl },
+      data: isYoung(user) ? { ...serializeYoung(user, user), acl } : { ...serializeReferent(user), acl },
     });
   } catch (error) {
     capture(error);

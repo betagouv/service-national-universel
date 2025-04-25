@@ -30,6 +30,7 @@ import {
   isAdminCle,
   isReferentClasse,
   YOUNG_STATUS,
+  ROLE_JEUNE,
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
@@ -478,7 +479,11 @@ class Auth {
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
-      data.acl = await getAcl(user);
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
+      }
 
       return res.status(200).send({
         ok: true,
@@ -813,7 +818,11 @@ class Auth {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
-      data.acl = await getAcl(user);
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
+      }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);

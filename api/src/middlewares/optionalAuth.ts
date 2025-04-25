@@ -8,6 +8,7 @@ import { getToken } from "../passport";
 import { checkJwtSigninVersion } from "../jwt-options";
 import { getAcl } from "../services/iam/Permission.service";
 import { UserRequest } from "../controllers/request";
+import { ROLE_JEUNE } from "snu-lib";
 
 interface JwtPayload {
   __v: string;
@@ -37,10 +38,12 @@ const optionalAuth = async (req: UserRequest, _: Response, next: NextFunction) =
       if (user) {
         // @ts-expect-error mapping user to UserDto
         user.acl = await getAcl(user);
-      }
-
-      if (!user) {
+      } else {
         user = await YoungModel.findById(_id);
+        if (user) {
+          // @ts-expect-error mapping user to UserDto
+          user.acl = await getAcl({ roles: [ROLE_JEUNE] } as any);
+        }
       }
 
       if (user) {
