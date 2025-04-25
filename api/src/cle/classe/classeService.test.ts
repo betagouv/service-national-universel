@@ -367,7 +367,7 @@ describe("deleteClasse function", () => {
     mockedYoungs.forEach((mockedYoung) => {
       expect(mockedYoung.set).toHaveBeenCalledWith({
         lastStatusAt: expect.any(Number),
-        status: "WITHDRAWN", // Update the expected status value
+        status: "ABANDONED", // Update the expected status value
         withdrawnMessage: "classe supprimée",
         withdrawnReason: "other",
       });
