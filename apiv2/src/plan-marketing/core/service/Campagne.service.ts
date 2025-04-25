@@ -1,6 +1,11 @@
 import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
 import { Inject, Injectable, Logger } from "@nestjs/common";
-import { CampagneModel, CreateCampagneModel, CampagneComplete } from "@plan-marketing/core/Campagne.model";
+import {
+    CampagneModel,
+    CreateCampagneModel,
+    CampagneComplete,
+    CampagneModelWithNomSession,
+} from "@plan-marketing/core/Campagne.model";
 import { DatesSession } from "@plan-marketing/core/Programmation.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { isCampagneGenerique, isCampagneWithRef, TypeEvenement } from "snu-lib";
@@ -192,5 +197,30 @@ export class CampagneService {
             instructionEndDate: sessionObj.instructionEndDate as Date,
             validationDate: sessionObj.validationDate as Date,
         };
+    }
+
+    async findCampagneSpecifiquesByCampagneGeneriqueId(
+        campagneGeneriqueId: string,
+    ): Promise<CampagneModelWithNomSession[]> {
+        const campagnes = await this.campagneGateway.findCampagneSpecifiquesByCampagneGeneriqueId(campagneGeneriqueId);
+
+        if (campagnes.length === 0) {
+            return [];
+        }
+
+        const sessionIdsInCampagnes = this.extractSessionIds(campagnes);
+
+        const sessionsMap = new Map<string, SessionModel>();
+        await Promise.all(
+            Array.from(sessionIdsInCampagnes).map(async (id) => {
+                const session = await this.sessionGateway.findById(id);
+                if (session) sessionsMap.set(id, session);
+            }),
+        );
+
+        return campagnes.map((campagne) => {
+            const session = sessionsMap.get(campagne.cohortId);
+            return { ...campagne, nomSession: session?.nom || "" };
+        });
     }
 }

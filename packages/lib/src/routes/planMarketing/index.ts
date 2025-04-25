@@ -49,6 +49,7 @@ export type CreateCampagneSpecifiqueWithoutRefPayload = OmitBaseFields<CampagneS
 export type CreateCampagneSpecifiqueWithRefPayload = OmitBaseFields<CampagneSpecifiqueWithRefPayload>;
 export type CreateCampagnePayload = CreateCampagneGeneriquePayload | CreateCampagneSpecifiqueWithoutRefPayload | CreateCampagneSpecifiqueWithRefPayload;
 
+export type CampagneModelWithNomSession = CampagneGeneriquePayload & { nomSession: string };
 export type CampagneResponse = CampagneComplete &
   CampagneSpecifiqueWithRefPayload & {
     createdAt: string;
@@ -111,6 +112,15 @@ interface ToggleArchivagePlanMarketingRoute extends BasicRoute {
   response: RouteResponseBodyV2<CampagneResponse>;
 }
 
+interface GetCampagneSpecifiquesByCampagneGeneriqueIdRoute extends BasicRoute {
+  method: "GET";
+  path: "/campagne/{id}/campagnes-specifiques";
+  params: {
+    id: string;
+  };
+  response: RouteResponseBodyV2<CampagneModelWithNomSession[]>;
+}
+
 export type PlanMarketingRoutes = {
   GetPlanMarketingRoute: GetPlanMarketingRoute;
   CreatePlanMarketingRoute: CreatePlanMarketingRoute;
@@ -121,4 +131,5 @@ export type PlanMarketingRoutes = {
   ListeDiffusionRoutes: ListeDiffusionRoutes;
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
   ToggleArchivagePlanMarketingRoute: ToggleArchivagePlanMarketingRoute;
+  GetCampagneSpecifiquesByCampagneGeneriqueIdRoute: GetCampagneSpecifiquesByCampagneGeneriqueIdRoute;
 };

@@ -30,6 +30,15 @@ const PlanMarketingService = {
     })();
   },
 
+  getCampagneSpecifiques: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["GetCampagneSpecifiquesByCampagneGeneriqueIdRoute"]>({
+      path: "/campagne/{id}/campagnes-specifiques",
+      params: { id },
+      method: "GET",
+      target: "API_V2",
+    })();
+  },
+
   envoyer: async (id: string, isProgrammationActive?: boolean) => {
     return await buildRequest<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]>({
       path: "/campagne/{id}/envoyer",

@@ -1,8 +1,10 @@
 import PlanMarketingService from "@/services/planMarketingService";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { useSetState } from "react-use";
 import { DestinataireListeDiffusion, PlanMarketingRoutes, translateMarketing } from "snu-lib";
+import { CampagneModelWithNomSession } from "snu-lib/src/routes/planMarketing";
 import { DraftCampagneDataProps } from "./CampagneForm";
 import { ProgrammationProps } from "./ProgrammationForm";
 
@@ -125,5 +127,40 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
     isPending,
     isToggleArchivagePending,
     isDirty,
+  };
+};
+
+export const useCampagnesSpecifiques = (campagneId?: string) => {
+  const [campagnesSpecifiques, setCampagnesSpecifiques] = useState<CampagneModelWithNomSession[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<Error | null>(null);
+
+  const fetchCampagnesSpecifiques = useCallback(async () => {
+    if (!campagneId) {
+      setCampagnesSpecifiques([]);
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      const result = await PlanMarketingService.getCampagneSpecifiques(campagneId);
+      setCampagnesSpecifiques(result);
+      setError(null);
+    } catch (err) {
+      setError(err instanceof Error ? err : new Error("Failed to fetch specific campaigns"));
+    } finally {
+      setIsLoading(false);
+    }
+  }, [campagneId]);
+
+  useEffect(() => {
+    fetchCampagnesSpecifiques();
+  }, [fetchCampagnesSpecifiques]);
+
+  return {
+    campagnesSpecifiques,
+    isLoading,
+    error,
+    reloadCampagnesSpecifiques: fetchCampagnesSpecifiques,
   };
 };
