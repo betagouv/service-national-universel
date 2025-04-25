@@ -17,7 +17,7 @@ export default function Historic() {
   const [loading, setLoading] = useState(false);
   const { user } = useSelector((state: AuthState) => state.Auth);
   const urlParams = new URLSearchParams(window.location.search);
-  const [cohort, setCohort] = useState(urlParams.get("cohort"));
+  const cohort = urlParams.get("cohort");
   const [data, setData] = useState([]);
   const [pagination, setPagination] = useState({ count: 0, page: 0, pageCount: 0 });
   const [currentPage, setCurrentPage] = useState(0);

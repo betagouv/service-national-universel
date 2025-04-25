@@ -19,7 +19,6 @@ import HeaderExport from "./ButtonExport";
 interface Props {
   cohort: string;
   setCohort: (cohort: string) => void;
-  getPlanDetransport: () => void;
   hasValue: boolean;
   currentTab: string;
   setCurrentTab: (tab: string) => void;
@@ -27,7 +26,7 @@ interface Props {
   children?: React.ReactNode;
 }
 
-export default function HeaderPDT({ cohort, setCohort, getPlanDetransport, hasValue, currentTab, setCurrentTab, selectedFilters }: Props) {
+export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, setCurrentTab, selectedFilters }: Props) {
   const history = useHistory();
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
@@ -49,8 +48,8 @@ export default function HeaderPDT({ cohort, setCohort, getPlanDetransport, hasVa
         ]}
       />
       <div className="flex gap-2 items-center">
-        {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
-        {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
+        {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
+        {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
       </div>
       {hasValue && (
         <Navbar

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import cx from "classnames";
 import { useToggle } from "react-use";
 import { toastr } from "react-redux-toastr";
-import { useMutation, useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 import { CohortDto, HttpError, translate, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { Button, Modal } from "@snu/ds/admin";
@@ -15,19 +15,19 @@ import { Phase1Service } from "@/services/phase1Service";
 interface DeletePDTButtonProps {
   cohort: CohortDto;
   disabled: boolean;
-  onChange: () => void;
   className?: string;
 }
 
-export default function DeletePDTButton({ cohort, disabled, onChange, className }: DeletePDTButtonProps) {
+export default function DeletePDTButton({ cohort, disabled, className }: DeletePDTButtonProps) {
   const [showModal, toggleModal] = useToggle(false);
   const [confirmValue, setConfirmValue] = useState("");
+  const queryClient = useQueryClient();
 
   const { isPending, mutate } = useMutation({
     mutationFn: async () => Phase1Service.deletePlanDeTransport(cohort._id!),
     onSuccess: () => {
       toastr.success("Le plan de transport a bien été supprimé", "", { timeOut: 5000 });
-      onChange();
+      queryClient.setQueryData(["hasPDT", cohort.name], false);
       toggleModal();
     },
     onError: (error: HttpError) => {
