@@ -110,6 +110,7 @@ import {
   FILE_STATUS_PHASE1,
   ERRORS as ERRORS_LIB,
   ReferentType,
+  PermissionDto,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -124,6 +125,7 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
+import { getAcl } from "../services/iam/Permission.service";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -269,8 +271,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const { id, type } = params;
 
     let user: ReferentDocument | YoungDocument | null = null;
+    let acl: PermissionDto[] | null = null;
     if (type === "referent") {
       user = await ReferentModel.findById(id);
+      acl = await getAcl(user as any);
     } else if (type === "young") {
       user = await YoungModel.findById(id);
     }
@@ -291,7 +295,11 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).json({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
+    return res.status(200).json({
+      ok: true,
+      token,
+      data: isYoung(user) ? serializeYoung(user, user) : { ...serializeReferent(user), acl },
+    });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

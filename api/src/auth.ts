@@ -38,7 +38,7 @@ import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
-import { getAcl } from "./services/iam/ACL.service";
+import { getAcl } from "./services/iam/Permission.service";
 
 class Auth {
   model: any;

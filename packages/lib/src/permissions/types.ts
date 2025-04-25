@@ -1,18 +1,21 @@
-import { ReferentType } from "../mongoSchema/referent";
 import { PermissionType } from "../mongoSchema/permissions/permission";
+import { UserDto } from "../dto";
 
 export interface HasPermissionParams {
-  user: Partial<ReferentType>;
+  user: UserDto;
   action?: PermissionType["action"];
-  code: PermissionType["code"];
+  ressource: PermissionType["ressource"];
   context?: PermissionContext;
 }
 
 export interface PermissionContext {
-  ressource: PermissionType["ressource"];
-  ressourceId?: string;
+  referent?: Record<string, string>;
+  [key: string]: Record<string, string> | undefined;
 }
 
-export interface HasPermissionsParams extends Omit<HasPermissionParams, "code"> {
-  codes: string[];
+export interface HasPermissionsParams extends Omit<HasPermissionParams, "ressource" | "action"> {
+  permissions: {
+    ressource: PermissionType["ressource"];
+    action?: PermissionType["action"];
+  }[];
 }

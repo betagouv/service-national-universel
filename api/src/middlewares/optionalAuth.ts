@@ -6,7 +6,7 @@ import { config } from "../config";
 import { ReferentModel, YoungModel } from "../models";
 import { getToken } from "../passport";
 import { checkJwtSigninVersion } from "../jwt-options";
-import { getAcl } from "../services/iam/ACL.service";
+import { getAcl } from "../services/iam/Permission.service";
 import { UserRequest } from "../controllers/request";
 
 interface JwtPayload {

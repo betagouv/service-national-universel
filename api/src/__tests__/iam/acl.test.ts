@@ -1,4 +1,4 @@
-import { getAcl, hasReadPermission } from "../../services/iam/ACL.service";
+import { getAcl } from "../../services/iam/Permission.service";
 import { RoleModel } from "../../models/permissions/role";
 import { PermissionModel } from "../../models/permissions/permission";
 import { PERMISSION_ACTIONS, ROLES, SUB_ROLES } from "snu-lib";
@@ -62,48 +62,5 @@ describe("getAcl", () => {
 
     expect(result).toHaveLength(2);
     expect(result.map((p) => p.code)).toEqual(expect.arrayContaining([adminPermission.code, referentPermission.code]));
-  });
-});
-
-describe("hasReadPermission", () => {
-  beforeEach(async () => {
-    await RoleModel.deleteMany();
-    await PermissionModel.deleteMany();
-  });
-
-  it("should return true when user has permission (read action)", async () => {
-    const role = await createRole(ROLES.ADMIN);
-    const permission = await createPermission("CodePermission", [role.code], "ressource", PERMISSION_ACTIONS.READ);
-
-    const user = { roles: [role.code] };
-    const result = await hasReadPermission({ user, code: permission.code });
-    expect(result).toBe(true);
-  });
-
-  it("should return true when user has permission (full action)", async () => {
-    const role = await createRole(ROLES.ADMIN);
-    const permission = await createPermission("FullPermission", [role.code], "ressource", PERMISSION_ACTIONS.FULL);
-
-    const user = { roles: [role.code] };
-    const result = await hasReadPermission({ user, code: permission.code });
-    expect(result).toBe(true);
-  });
-
-  it("should return false when user has no permission", async () => {
-    const role = await createRole(ROLES.ADMIN);
-    const permission = await createPermission("CodePermission", [role.code], "ressource", PERMISSION_ACTIONS.READ);
-    const permissionUpdate = await createPermission("UpdatePermission", [role.code], "ressource", PERMISSION_ACTIONS.UPDATE);
-
-    // wrong role
-    let result = await hasReadPermission({ user: { roles: [ROLES.VISITOR] }, code: permission.code });
-    expect(result).toBe(false);
-
-    // wrong permission code
-    result = await hasReadPermission({ user: { roles: [ROLES.ADMIN] }, code: "UnknownPermission" });
-    expect(result).toBe(false);
-
-    // wrong permission action
-    result = await hasReadPermission({ user: { roles: [ROLES.ADMIN] }, code: permissionUpdate.code });
-    expect(result).toBe(false);
   });
 });

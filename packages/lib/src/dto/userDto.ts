@@ -7,7 +7,7 @@ export type UserDto = {
   email: string;
   firstName: string;
   lastName: string;
-  structureId: string;
+  structureId?: string;
   region: string;
   department: string[] | string;
   subRole?: keyof typeof SUB_ROLES | keyof typeof SUPPORT_ROLES | keyof typeof VISITOR_SUBROLES | typeof SUB_ROLE_GOD;

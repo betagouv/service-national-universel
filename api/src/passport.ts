@@ -1,4 +1,4 @@
-import { getAcl } from "./services/iam/ACL.service";
+import { getAcl } from "./services/iam/Permission.service";
 import { Request } from "express";
 import passport from "passport";
 import { Strategy as JwtStrategy, ExtractJwt, VerifiedCallback } from "passport-jwt";

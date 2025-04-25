@@ -27,6 +27,13 @@ export const PermissionPolicyWhereSchema = {
 };
 
 export const PermissionPolicySchema = {
+  code: {
+    type: String,
+    optional: true,
+    documentation: {
+      description: "Code for custom rule",
+    },
+  },
   where: {
     type: [PermissionPolicyWhereSchema],
     documentation: {
