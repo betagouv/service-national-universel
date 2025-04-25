@@ -18,7 +18,6 @@ describe("AnnulerClasseDesistee", () => {
             update: jest.fn(),
         };
         mockHistoryGateway = {
-            findLastByReferenceIdAndPath: jest.fn(),
             findLastByReferenceIdAndPathAndValue: jest.fn(),
         };
 
@@ -36,10 +35,10 @@ describe("AnnulerClasseDesistee", () => {
             statut: YOUNG_STATUS.WITHDRAWN,
         };
 
-        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValue({
+        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValueOnce({
             ops: [{ path: "/status", value: STATUS_CLASSE.WITHDRAWN, originalValue: STATUS_CLASSE.VERIFIED }],
         });
-        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValue({
+        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValueOnce({
             ops: [{ path: "/status", value: YOUNG_STATUS.WITHDRAWN, originalValue: YOUNG_STATUS.VALIDATED }],
         });
 
@@ -78,7 +77,7 @@ describe("AnnulerClasseDesistee", () => {
             statut: STATUS_CLASSE.WITHDRAWN,
         } as ClasseModel;
 
-        mockHistoryGateway.findLastByReferenceIdAndPath.mockResolvedValue(null);
+        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValue(null);
         mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue([]);
 
         mockClasseGateway.update.mockResolvedValue({
@@ -103,8 +102,8 @@ describe("AnnulerClasseDesistee", () => {
             statut: YOUNG_STATUS.WITHDRAWN,
         };
 
-        mockHistoryGateway.findLastByReferenceIdAndPath.mockResolvedValue({
-            ops: [{ path: "/status", value: STATUS_CLASSE.VERIFIED }],
+        mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValueOnce({
+            ops: [{ path: "/status", value: STATUS_CLASSE.WITHDRAWN, originalValue: STATUS_CLASSE.VERIFIED }],
         });
         mockHistoryGateway.findLastByReferenceIdAndPathAndValue.mockResolvedValue(null);
 

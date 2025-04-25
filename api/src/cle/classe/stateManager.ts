@@ -64,7 +64,7 @@ const ClasseStateManager = {
     await Promise.all(
       students.map((s) => {
         s.set({
-          status: YOUNG_STATUS.ABANDONED,
+          status: YOUNG_STATUS.WITHDRAWN,
           lastStatusAt: Date.now(),
           withdrawnMessage: "classe désistée",
           withdrawnReason: "other",
