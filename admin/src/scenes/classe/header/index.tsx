@@ -11,6 +11,7 @@ import VerifClassButton from "./VerifClassButton";
 import ButtonManualInvite from "./ButtonManualInvite";
 import ButtonLinkInvite from "./ButtonLinkInvite";
 import ButtonHandleInscription from "./ButtonHandleInscription";
+import ButtonInscriptionEnMasse from "./ButtonInscriptionEnMasse";
 import ButtonDownloadEmptyFile from "./ButtonDownloadEmptyFile";
 import ButtonCertificateDownload from "./ButtonCertificateDownload";
 import DeleteButton from "./DeleteButton";
@@ -106,6 +107,14 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
           key: "manual",
           render: <ButtonManualInvite key="manual" id={id} />,
         },
+        ...([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role)
+          ? [
+              {
+                key: "bulk",
+                render: <ButtonInscriptionEnMasse key="bulk" id={id} />,
+              },
+            ]
+          : []),
       ],
     },
   ];
@@ -154,16 +163,18 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
   }
 
   const isManualInscriptionActionDisabled = !(classe?.status === STATUS_CLASSE.OPEN || canPerformManualInscriptionActions);
-  const optionsInscriptionFiltered =
-    classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
-      ? [
-          {
-            ...optionsInscription[0],
-            // override items to keep only manual inscription
-            items: optionsInscription[0].items.filter((i) => i.key === "manual"),
-          },
-        ]
-      : optionsInscription;
+  // TODO: revoir les règles d'affi
+  // const optionsInscriptionFiltered =
+  //   classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
+  //     ? [
+  //         {
+  //           ...optionsInscription[0],
+  //           // override items to keep only manual inscription
+  //           items: optionsInscription[0].items.filter((i) => i.key === "manual"),
+  //         },
+  //       ]
+  //     : optionsInscription;
+  const optionsInscriptionFiltered = optionsInscription;
 
   actionsList.push(
     <DropdownButton
@@ -174,7 +185,7 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
       position="right"
       buttonClassName={cx("mr-2", isManualInscriptionActionDisabled && "cursor-not-allowed")}
       disabled={isManualInscriptionActionDisabled}
-      {...(isManualInscriptionActionDisabled && { tooltip: "Les inscriptions sont fermées. Vous n’avez pas les droits pour inscrire un élève." })}
+      {...(isManualInscriptionActionDisabled && { tooltip: "Les inscriptions sont fermées. Vous n'avez pas les droits pour inscrire un élève." })}
     />,
   );
 
