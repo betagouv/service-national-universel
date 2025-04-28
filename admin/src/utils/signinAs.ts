@@ -10,7 +10,8 @@ export const signinAs = async (type: "referent" | "young", userId: string) => {
   if (!token) throw new Error("Erreur : aucun token");
   if (type === "referent") {
     api.setToken(token);
-    localStorage.setItem("isImpersonate", "true");
+    const channel = new BroadcastChannel("impersonation");
+    channel.postMessage({ action: "impersonation_started" });
   }
 
   return data;

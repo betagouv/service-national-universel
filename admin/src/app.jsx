@@ -211,12 +211,12 @@ const Home = () => {
     }
   }, [user]);
 
-  //allow refresh for other tab when impersonate
-  window.addEventListener("storage", (event) => {
-    if (event.key === "isImpersonate") {
+  const impersonationChannel = new BroadcastChannel("impersonation");
+  impersonationChannel.onmessage = (event) => {
+    if (event.data.action === "impersonation_started") {
       window.location.reload();
     }
-  });
+  };
 
   if (loading) return <Loader />;
   if (!user) {
