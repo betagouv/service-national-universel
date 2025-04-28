@@ -1,271 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useHistory, Link } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
-import { Link, useHistory } from "react-router-dom";
 import { FiFolderPlus } from "react-icons/fi";
-import { HiOutlineAdjustments } from "react-icons/hi";
-import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { PlanTransportType, ROLES, canExportConvoyeur, getDepartmentNumber, isSuperAdmin, translate } from "snu-lib";
-import { Button, Container, Header, Page, Navbar, DropdownButton } from "@snu/ds/admin";
-
-import { capture } from "@/sentry";
-import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
-
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
+import { ROLES } from "snu-lib";
+import { AuthState } from "@/redux/auth/reducer";
+import { Container } from "@snu/ds/admin";
 import ArrowUp from "@/assets/ArrowUp";
 import Comment from "@/assets/comment";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import Loader from "@/components/Loader";
-import SelectCohort from "@/components/cohorts/SelectCohort";
-
 import { PlainButton } from "../components/Buttons";
-import { translateStatus } from "../components/commons";
-import { exportLigneBus, getTransportIcon, exportConvoyeur } from "../util";
 import ListPanel from "./modificationPanel/List";
-import Historic from "./Historic";
-import ListeDemandeModif from "./ListeDemandeModif";
-import DeletePDTButton from "./DeletePDTButton";
-import { CohortState } from "@/redux/cohorts/reducer";
-import { AuthState } from "@/redux/auth/reducer";
-import SyncPlacesPDTButton from "./SyncPlacesPDTButton";
+import { getTransportIcon, getFilterArray } from "../util";
 
-export default function List() {
-  const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
-  const cohorts = useSelector((state: CohortState) => state.Cohorts);
-  const urlParams = new URLSearchParams(window.location.search);
-  const defaultCohort = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && sessionPhase1 ? sessionPhase1.cohort : undefined;
-  const [cohort, setCohort] = React.useState(urlParams.get("cohort") || defaultCohort);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [hasValue, setHasValue] = React.useState(false);
+interface Props {
+  hasValue: boolean;
+  cohort: string;
+  currentTab: string;
+  selectedFilters: any;
+  setSelectedFilters: (filters: any) => void;
+}
+
+export default function List({ hasValue, cohort, currentTab, selectedFilters, setSelectedFilters }: Props) {
   const history = useHistory();
-  const [showHistoric, setShowHistoric] = useState(false);
-  const [showModifications, setShowModifications] = useState(false);
-
-  const [currentTab, setCurrentTab] = React.useState("aller");
-  const [panel, setPanel] = React.useState({ open: false, id: null });
-  const cohortInURL = new URLSearchParams(history.location.search).get("cohort");
-
+  const { user } = useSelector((state: AuthState) => state.Auth);
   const [data, setData] = React.useState<any[]>([]);
   const pageId = "plandetransport";
-  const [selectedFilters, setSelectedFilters] = React.useState<any>({});
+  const [panel, setPanel] = React.useState({ open: false, id: null });
   const [paramData, setParamData] = React.useState({
     page: 0,
   });
   const [size, setSize] = useState(10);
 
-  const cohortDto = cohorts?.find((c) => c.name === cohort);
+  const filterArray = getFilterArray(user.role);
 
-  const filterArray = [
-    { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
-    { title: "Date aller", name: "departureString", parentGroup: "Bus", missingLabel: "Non renseigné" },
-    { title: "Date retour", name: "returnString", parentGroup: "Bus", missingLabel: "Non renseigné" },
-    {
-      title: "Taux de remplissage",
-      name: "lineFillingRate",
-      parentGroup: "Bus",
-      missingLabel: "Non renseigné",
-      transformData: (value) => transformDataTaux(value),
-    },
-    { title: "Nom", name: "pointDeRassemblements.name", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    {
-      title: "Région",
-      name: "pointDeRassemblements.region",
-      parentGroup: "Points de rassemblement",
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Département",
-      name: "pointDeRassemblements.department",
-      parentGroup: "Points de rassemblement",
-      missingLabel: "Non renseigné",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
-    },
-    { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Matricule", name: "pointDeRassemblements.matricule", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
-    { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
-    { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
-    {
-      title: "Département",
-
-      name: "centerDepartment",
-      parentGroup: "Centre",
-      missingLabel: "Non renseigné",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
-    },
-    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
-    { title: "Matricule", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
-    {
-      title: "Modification demandée",
-
-      name: "modificationBuses.requestMessage",
-      parentGroup: "Modification",
-      missingLabel: "Non renseigné",
-    },
-    {
-      title: "Statut de la modification",
-
-      name: "modificationBuses.status",
-      parentGroup: "Modification",
-      missingLabel: "Non renseigné",
-      translate: translateStatus,
-    },
-    user.role === ROLES.ADMIN
-      ? {
-          title: "Opinion sur la modification",
-
-          name: "modificationBuses.opinion",
-          parentGroup: "Modification",
-          missingLabel: "Non renseigné",
-          translate: translate,
-        }
-      : null,
-    {
-      title: "Aller",
-      name: "delayedForth",
-      parentGroup: "Retard",
-      missingLabel: "Non renseigné",
-      translate: translate,
-    },
-    {
-      title: "Retour",
-      name: "delayedBack",
-      parentGroup: "Retard",
-      missingLabel: "Non renseigné",
-      translate: translate,
-    },
-  ].filter((e) => e);
-
-  useEffect(() => {
-    if (cohortInURL) return;
-    if (!selectedFilters.cohort) setSelectedFilters({ ...selectedFilters, ["cohort"]: { filter: [cohort] } });
-  }, [selectedFilters]);
-
-  useEffect(() => {
-    if (!cohort) setCohort(cohorts?.[0]?.name);
-  }, []);
-
-  const getPlanDetransport = async () => {
-    try {
-      const { ok, code, data: reponseBus } = await api.get(`/ligne-de-bus/cohort/${cohort}/hasValue`);
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du plan de transport", translate(code));
-      }
-      setHasValue(reponseBus);
-      setIsLoading(false);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du bus", "");
-    }
-  };
-
-  useEffect(() => {
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && sessionPhase1) {
-      history.push(`/ligne-de-bus?cohort=${sessionPhase1.cohort}`);
-      setCohort(sessionPhase1.cohort);
-    }
-    setIsLoading(true);
-    getPlanDetransport();
-  }, [cohort]);
-
-  if (isLoading) return <Loader />;
-
-  const cannotSelectSEssion = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
+  const cannotSelectSession = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
 
   return (
-    <Page>
-      <Header
-        title="Plan de transport"
-        breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
-        actions={
-          !cannotSelectSEssion
-            ? [
-                <SelectCohort
-                  key="select-cohort"
-                  cohort={cohort}
-                  onChange={(cohortName) => {
-                    setCohort(cohortName);
-                    history.replace({ search: `?cohort=${cohortName}` });
-                  }}
-                />,
-              ]
-            : []
-        }
-      />
-      <div className="flex gap-2 items-center">
-        {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
-        {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} onChange={getPlanDetransport} disabled={!hasValue} className="mb-4" />}
-      </div>
-      {hasValue && (
-        <Navbar
-          tab={[
-            {
-              title: "Aller",
-              leftIcon: <LuArrowRightCircle size={20} className="mt-0.5 ml-2.5" />,
-              isActive: currentTab === "aller",
-              onClick: () => {
-                setCurrentTab("aller");
-                setShowHistoric(false);
-                setShowModifications(false);
-              },
-            },
-            {
-              title: "Retour",
-              leftIcon: <LuArrowLeftCircle size={20} className="mt-0.5 ml-2.5" />,
-              isActive: currentTab === "retour",
-              onClick: () => {
-                setCurrentTab("retour");
-                setShowHistoric(false);
-                setShowModifications(false);
-              },
-            },
-            ...(![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)
-              ? [
-                  {
-                    title: "Historique",
-                    leftIcon: <LuHistory size={20} className="mt-0.5 ml-2.5" />,
-                    isActive: currentTab === "historique",
-                    onClick: () => {
-                      setCurrentTab("historique");
-                      setShowModifications(false);
-                      setShowHistoric(true);
-                      plausibleEvent(`Historique du PDT - ${cohort}`);
-                    },
-                  },
-                  {
-                    title: "Demande de modification",
-                    leftIcon: <HiOutlineAdjustments size={22} className="mt-0.5 ml-2.5" />,
-                    isActive: currentTab === "modification",
-                    onClick: () => {
-                      setCurrentTab("modification");
-                      setShowHistoric(false);
-                      setShowModifications(true);
-                      plausibleEvent(`Demande de modifications du PDT - ${cohort}`);
-                    },
-                  },
-                ]
-              : []),
-          ]}
-          button={
-            ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)
-              ? [
-                  <Button
-                    title="Importer des lignes supplémentaires"
-                    leftIcon={<GoPlus size={20} className="mt-0.5" />}
-                    key={"btn-2"}
-                    type="wired"
-                    onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
-                  />,
-                  returnSelect(cohort, selectedFilters, user),
-                ]
-              : []
-          }
-        />
-      )}
-
-      {hasValue && !showHistoric && !showModifications && (
+    <>
+      {hasValue ? (
         <Container className="!p-0">
           <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
             <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
@@ -330,14 +104,7 @@ export default function List() {
             <ListPanel busId={panel?.id} open={panel?.open} setOpen={setPanel} />
           </div>
         </Container>
-      )}
-      {hasValue && showHistoric && !showModifications && (
-        <Container className="!p-0">
-          <Historic />
-        </Container>
-      )}
-      {hasValue && !showHistoric && showModifications && <Container className="!p-0">{<ListeDemandeModif />}</Container>}
-      {!hasValue && !showHistoric && !showModifications && (
+      ) : (
         <Container className="!p-8">
           <div className="m-auto flex w-full flex-col items-center justify-center gap-4 pt-12 bg-gray-50 pb-5">
             <FiFolderPlus size={36} className="text-gray-400" />
@@ -354,113 +121,9 @@ export default function List() {
           </div>
         </Container>
       )}
-    </Page>
+    </>
   );
 }
-
-const returnSelect = (cohort, selectedFilters, user) => {
-  const selectTest = [
-    {
-      key: "1",
-      items: [
-        {
-          action: async () => {},
-          render: (
-            // @ts-ignore
-            <ExportComponent
-              title="Plan de transport"
-              exportTitle="Plan_de_transport"
-              route="/elasticsearch/plandetransport/export"
-              selectedFilters={selectedFilters}
-              setIsOpen={() => true}
-              customCss={{
-                override: true,
-                button: `flex items-center gap-2 p-2 px-3 text-gray-700 cursor-pointer w-full text-sm text-gray-700`,
-                loadingButton: `text-sm text-gray-700`,
-              }}
-              transform={async (all: PlanTransportType[]) => {
-                // Get the length of the longest array of PDRs
-                const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
-
-                return all.map((data) => {
-                  const pdrs = {};
-
-                  for (let i = 0; i < maxPDRs; i++) {
-                    const pdr = data.pointDeRassemblements?.[i];
-                    const num = i + 1;
-                    pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
-                    pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
-                    pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
-                    pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
-                    pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
-                    pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
-                    pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
-                    pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
-                    pdrs[`HEURE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
-                    pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
-                  }
-
-                  return {
-                    "NUMERO DE LIGNE": data.busId,
-                    "DATE DE TRANSPORT ALLER": data.departureString,
-                    "DATE DE TRANSPORT RETOUR": data.returnString,
-                    ...pdrs,
-                    "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
-                    "REGION DU CENTRE": data.centerRegion,
-                    "ID CENTRE": data.centerId,
-                    "MATRICULE DU CENTRE": data.centerCode,
-                    "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
-                    "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
-                    "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
-
-                    // * followerCapacity !== Total des followers mais c'est la sémantique ici
-                    "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
-
-                    "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
-                    "CAPACITE TOTALE LIGNE": data.totalCapacity,
-                    "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
-                    "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
-                    "TEMPS DE ROUTE": data.travelTime.includes(":") ? data.travelTime : `${data.travelTime}:00`,
-                    "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
-                    "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
-                    "LIGNES FUSIONNÉES": data.mergedBusIds?.join(",") || "",
-                    "LIGNE MIROIR": data.mirrorBusId || "",
-                  };
-                });
-              }}
-            />
-          ),
-        },
-        [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
-          ? {
-              action: async () => {
-                await exportLigneBus(cohort);
-              },
-              render: (
-                <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">
-                  <div className="text-sm text-gray-700">Volontaires par ligne</div>
-                </div>
-              ),
-            }
-          : null,
-        canExportConvoyeur(user)
-          ? {
-              action: async () => {
-                await exportConvoyeur(cohort);
-              },
-              render: (
-                <div className="flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 ">
-                  <div className="text-sm text-gray-700">Convoyeurs</div>
-                </div>
-              ),
-            }
-          : null,
-      ].filter((x) => x),
-    },
-  ];
-  // @ts-ignore
-  return <DropdownButton title={"Exporter"} optionsGroup={selectTest} position={"right"} />;
-};
 
 const Line = ({ hit, currentTab, setPanel }) => {
   const meetingPoints =
@@ -593,23 +256,4 @@ const TooltipCenter = ({ children, name, region, department, ...props }) => {
       </div>
     </div>
   );
-};
-
-const translateLineFillingRate = (e) => {
-  if (e == 0) return "Vide";
-  if (e == 100) return "Rempli";
-  return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
-};
-const transformDataTaux = (data) => {
-  const newData: { key: string; doc_count: number }[] = [];
-  data.map((d) => {
-    const dizaine = translateLineFillingRate(parseInt(d.key));
-    const val = newData.find((e) => e.key === dizaine);
-    if (val) {
-      newData[newData.indexOf(val)].doc_count += d.doc_count;
-    } else {
-      newData.push({ key: dizaine, doc_count: d.doc_count });
-    }
-  });
-  return newData;
 };
