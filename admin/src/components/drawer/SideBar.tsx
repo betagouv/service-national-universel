@@ -57,13 +57,13 @@ const SideBar = ({ sessionsList }) => {
 
   //State
   const [open, setOpen] = React.useState(false);
-  const isImpersonate = localStorage.getItem("isImpersonate");
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
   const [isDemo, toggleDemo] = useToggle(false);
 
   //Redux
   const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
+  const isImpersonate = !!user.impersonateId;
   const newTickets = useSelector((state: TicketsState) => state.Tickets.new);
   const openedTickets = useSelector((state: TicketsState) => state.Tickets.open);
 

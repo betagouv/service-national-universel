@@ -1,9 +1,12 @@
 import React from "react";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 import { restorePreviousSignin } from "@/utils/signinAs";
 import Icon from "./Icon";
 
 export default function RestorePreviousSigninFlag() {
-  const isImpersonate = localStorage.getItem("isImpersonate") === "true";
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const isImpersonate = !!user.impersonateId;
 
   const onClick = async () => {
     await restorePreviousSignin();

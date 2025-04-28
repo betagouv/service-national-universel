@@ -294,7 +294,10 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).json({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
+    let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
+    userToReturn.impersonateId = req.user._id;
+
+    return res.status(200).json({ ok: true, token, data: userToReturn });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -826,11 +826,16 @@ class Auth {
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
+
       data.featureFlags = await getFeatureFlagsAvailable();
 
-      const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
-        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
-      });
+      const token = jwt.sign(
+        { __v: JWT_SIGNIN_VERSION, _id: user.id, _impersonateId: req.user.impersonateId, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt },
+        config.JWT_SECRET,
+        {
+          expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+        },
+      );
 
       if (!data || !token) {
         captureMessage("PB with signin_token", { extra: { data, token } });

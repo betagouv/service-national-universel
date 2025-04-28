@@ -53,7 +53,6 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
       setIsLoggingOut(true);
       await api.post(`/referent/logout`);
       dispatch(setUser(null));
-      localStorage.removeItem("isImpersonate");
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {

@@ -23,7 +23,6 @@ export const restorePreviousSignin = async () => {
 
     api.setToken(token);
     store.dispatch(setUser(data));
-    localStorage.removeItem("isImpersonate");
     plausibleEvent("Admin - Reprendre sa place");
   } catch (e) {
     console.log(e);
