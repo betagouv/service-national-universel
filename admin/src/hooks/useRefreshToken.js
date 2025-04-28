@@ -29,6 +29,7 @@ export default function useRefreshToken() {
       await api.post(`/referent/logout`);
       api.setToken(null);
       dispatch(setUser(null));
+      localStorage.removeItem("isImpersonate");
       toastr.info("Vous avez bien été déconnecté dû a une trop longue inactivité.", { timeOut: 10000 });
       window.location.href = "/auth?disconnected=1";
     } catch (e) {

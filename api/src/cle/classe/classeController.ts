@@ -436,8 +436,6 @@ router.get(
   ],
   async (req: RouteRequest<ClassesRoutes["GetOne"]>, res: RouteResponse<ClassesRoutes["GetOne"]>) => {
     try {
-      console.log("requser", req.user);
-      console.log("req.cookie", req.cookies);
       const { validatedParams, validatedQuery } = req;
 
       const data = await getClasseById(validatedParams.id, validatedQuery?.withDetails);

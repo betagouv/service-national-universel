@@ -3,7 +3,12 @@ import { UserDto, BasicRoute } from "snu-lib";
 
 export interface UserRequest extends Request {
   user: UserDto;
+  impersonatedUser?: UserDto;
   files?: any;
+}
+
+export interface AuthInfo {
+  impersonatedUser?: UserDto;
 }
 
 // @ts-expect-error params is optional

@@ -43,6 +43,14 @@ async function validateUser(Model, jwtPayload, done, role) {
       const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
 
       if (passwordMatch && logoutMatch && (!role || user.role === role)) {
+        if (value._impersonateId) {
+          const impersonatedUser = await Model.findById(value._impersonateId);
+          if (impersonatedUser) {
+            // Pass both the admin and impersonated user to the request
+            return done(null, user, { impersonatedUser });
+          }
+          // If impersonated user doesn't exist, fall back to normal auth
+        }
         return done(null, user);
       }
     }
