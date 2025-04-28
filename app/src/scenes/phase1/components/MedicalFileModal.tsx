@@ -12,7 +12,7 @@ import ConfirmationModal from "../../../components/ui/modals/ConfirmationModal";
 import { capture } from "@/sentry";
 import useAffectationInfo from "../scenes/affected/utils/useAffectationInfo";
 
-const MedicalFileModal = ({ isOpen, onClose, onClick, title = "Transmettez votre fiche sanitaire" }) => {
+const MedicalFileModal = ({ isOpen, onClose, onClick = () => {}, title = "Transmettez votre fiche sanitaire" }) => {
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const { young } = useAuth();

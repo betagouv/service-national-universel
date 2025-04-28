@@ -12,6 +12,7 @@ import Problem from "./components/Problem";
 import StepsAffected from "./components/StepsAffected";
 import TravelInfo from "./components/TravelInfo";
 import TodoBackpack from "./components/TodoBackpack";
+// eslint-disable-next-line import/extensions
 import { useSteps } from "./utils/steps.utils";
 import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
@@ -22,14 +23,14 @@ import useContactsConvocation from "./utils/useContactsConvocation";
 import ContactConvocation from "./components/ContactsConvocation";
 
 export default function Affected() {
-  const { young, isCLE } = useAuth();
+  const { young } = useAuth();
   const { cohort } = useCohort();
   const { center, meetingPoint, isPending: loading, isError } = useAffectationInfo();
   const { data: contacts } = useContactsConvocation();
   const { areAllStepsDone } = useSteps();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
-  const shouldDisplayContactConvocation = isPast(subDays(cohort.dateStart, 1)) && contacts?.length;
+  const shouldDisplayContactConvocation = isPast(subDays(cohort.dateStart, 1)) && !!contacts?.length;
 
   if (areAllStepsDone) {
     window.scrollTo(0, 0);

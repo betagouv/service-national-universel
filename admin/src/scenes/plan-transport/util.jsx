@@ -3,7 +3,7 @@ import Avion from "../../assets/icons/Avion";
 import Bus from "../../assets/icons/Bus";
 import Fusee from "../../assets/icons/Fusee";
 import Train from "./ligne-bus/components/Icons/Train";
-import { ES_NO_LIMIT, ROLES, translate, formatDateFRTimezoneUTC, departmentToAcademy } from "snu-lib";
+import { ROLES, translate, formatDateFRTimezoneUTC, departmentToAcademy, getDepartmentNumber } from "snu-lib";
 import FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
 import dayjs from "@/utils/dayjs.utils";
@@ -11,6 +11,7 @@ import API from "../../services/api";
 import * as XLSX from "xlsx";
 import { formatPhoneE164 } from "../../utils/formatPhoneE164";
 import { getPhoneZoneByDepartment } from "../../utils/getPhoneZoneByDepartment";
+import { translateStatus } from "./components/commons";
 
 export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = false) {
   if (total === 0 || total === undefined || total === null || value === undefined || value === null) {
@@ -22,6 +23,108 @@ export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = f
       return ((value / total) * 100).toFixed(fractionDigit).replace(/\./g, ",") + "%";
     }
   }
+}
+
+export function getFilterArray(role) {
+  const translateLineFillingRate = (e) => {
+    if (e == 0) return "Vide";
+    if (e == 100) return "Rempli";
+    return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
+  };
+  const transformDataTaux = (data) => {
+    const newData = [];
+    data.map((d) => {
+      const dizaine = translateLineFillingRate(parseInt(d.key));
+      const val = newData.find((e) => e.key === dizaine);
+      if (val) {
+        newData[newData.indexOf(val)].doc_count += d.doc_count;
+      } else {
+        newData.push({ key: dizaine, doc_count: d.doc_count });
+      }
+    });
+    return newData;
+  };
+  const filterArray = [
+    { title: "Numéro de la ligne", name: "busId", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    { title: "Date aller", name: "departureString", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    { title: "Date retour", name: "returnString", parentGroup: "Bus", missingLabel: "Non renseigné" },
+    {
+      title: "Taux de remplissage",
+      name: "lineFillingRate",
+      parentGroup: "Bus",
+      missingLabel: "Non renseigné",
+      transformData: (value) => transformDataTaux(value),
+    },
+    { title: "Nom", name: "pointDeRassemblements.name", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    {
+      title: "Région",
+      name: "pointDeRassemblements.region",
+      parentGroup: "Points de rassemblement",
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Département",
+      name: "pointDeRassemblements.department",
+      parentGroup: "Points de rassemblement",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    { title: "Ville", name: "pointDeRassemblements.city", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Code", name: "pointDeRassemblements.code", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Matricule", name: "pointDeRassemblements.matricule", parentGroup: "Points de rassemblement", missingLabel: "Non renseigné" },
+    { title: "Nom", name: "centerName", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Région", name: "centerRegion", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    {
+      title: "Département",
+
+      name: "centerDepartment",
+      parentGroup: "Centre",
+      missingLabel: "Non renseigné",
+      translate: (e) => getDepartmentNumber(e) + " - " + e,
+    },
+    { title: "Code", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    { title: "Matricule", name: "centerCode", parentGroup: "Centre", missingLabel: "Non renseigné" },
+    {
+      title: "Modification demandée",
+
+      name: "modificationBuses.requestMessage",
+      parentGroup: "Modification",
+      missingLabel: "Non renseigné",
+    },
+    {
+      title: "Statut de la modification",
+
+      name: "modificationBuses.status",
+      parentGroup: "Modification",
+      missingLabel: "Non renseigné",
+      translate: translateStatus,
+    },
+    role === ROLES.ADMIN
+      ? {
+          title: "Opinion sur la modification",
+
+          name: "modificationBuses.opinion",
+          parentGroup: "Modification",
+          missingLabel: "Non renseigné",
+          translate: translate,
+        }
+      : null,
+    {
+      title: "Aller",
+      name: "delayedForth",
+      parentGroup: "Retard",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+    {
+      title: "Retour",
+      name: "delayedBack",
+      parentGroup: "Retard",
+      missingLabel: "Non renseigné",
+      translate: translate,
+    },
+  ].filter((e) => e);
+  return filterArray;
 }
 
 export const getTransportIcon = (transportType) => {

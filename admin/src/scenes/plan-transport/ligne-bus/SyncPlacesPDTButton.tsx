@@ -1,7 +1,7 @@
 import React from "react";
 import cx from "classnames";
 import { toastr } from "react-redux-toastr";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 
 import { CohortDto, HttpError, translate } from "snu-lib";
 import { Button } from "@snu/ds/admin";
@@ -11,11 +11,12 @@ import { AffectationService } from "@/services/affectationService";
 interface SyncPlacesPDTButtonProps {
   cohort: CohortDto;
   disabled: boolean;
-  onChange: () => void;
   className?: string;
 }
 
-export default function SyncPlacesPDTButton({ cohort, disabled, onChange, className }: SyncPlacesPDTButtonProps) {
+export default function SyncPlacesPDTButton({ cohort, disabled, className }: SyncPlacesPDTButtonProps) {
+  const queryClient = useQueryClient();
+
   const { isPending, mutate } = useMutation({
     mutationFn: async () => {
       await AffectationService.postSyncPlacesLigneDeBus(cohort._id!);
@@ -23,7 +24,7 @@ export default function SyncPlacesPDTButton({ cohort, disabled, onChange, classN
     },
     onSuccess: () => {
       toastr.success("Les places dans les lignes de bus ont bien été recalculés ainsi que le taux de remplissage", "", { timeOut: 5000 });
-      onChange();
+      queryClient.invalidateQueries({ queryKey: ["hasPDT", cohort.name] });
     },
     onError: (error: HttpError) => {
       console.log(error);
