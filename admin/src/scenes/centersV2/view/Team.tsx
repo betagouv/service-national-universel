@@ -1,10 +1,11 @@
-import React, { useState, useEffect, ReactNode } from "react";
+import React, { useState, ReactNode } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useParams } from "react-router-dom";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { AuthState } from "@/redux/auth/reducer";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 
 import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES, SessionPhase1Type } from "snu-lib";
 import api from "@/services/api";
@@ -50,7 +51,6 @@ type AddBlockProps = {
 
 export default function Team({ focusedSession: focusedSessionfromProps }) {
   const { id, sessionId } = useParams<{ id: string; sessionId: string }>();
-  const [focusedSession, setFocusedSession] = useState<SessionPhase1Type>(focusedSessionfromProps);
   const [modal, setModal] = useState<{
     isOpen: boolean;
     onConfirm: () => void;
@@ -63,31 +63,64 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     message: "",
   });
   const user = useSelector((state: AuthState) => state.Auth.user);
+  const queryClient = useQueryClient();
+
+  const { data: fetchedSession } = useQuery({
+    queryKey: ["session-phase1", sessionId],
+    queryFn: async () => {
+      const { data } = await api.get(`/session-phase1/${sessionId}`);
+      return data;
+    },
+    enabled: !!sessionId,
+    initialData: focusedSessionfromProps,
+  });
+
+  const focusedSession = fetchedSession || focusedSessionfromProps;
 
   const addTeamate = async (teamate: TeamMate) => {
     if ([CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire].includes(teamate.role)) {
       setDirectionCenter(teamate);
     } else {
-      setCenterTeam(teamate);
+      addTeamMemberMutation.mutate(teamate);
     }
   };
 
-  const setCenterTeam = async (teamate: TeamMate) => {
-    const obj = { team: focusedSession.team };
-    obj.team.push(teamate);
-    if (!Object.keys(obj).length) return;
+  const addTeamMemberMutation = useMutation({
+    mutationFn: async (teamate: TeamMate) => {
+      const obj = { team: [...focusedSession.team, teamate] };
+      if (!Object.keys(obj).length) throw new Error("No data to update");
 
-    try {
       const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/team`, obj);
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(code));
-      setFocusedSession(data);
+      if (!ok) throw new Error(code);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
       toastr.success("Succès", "Le membre a été ajouté à l'équipe");
-    } catch (e) {
-      console.log(e);
-      capture(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
+    },
+    onError: (error) => {
+      console.log(error);
+      capture(error);
+      toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(error.message));
+    },
+  });
+
+  const setDirectionCenterMutation = useMutation({
+    mutationFn: async (referentId: string) => {
+      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId });
+      if (!ok) throw new Error(code);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
+      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    },
+    onError: (error) => {
+      console.log(error);
+      capture(error);
+      toastr.error("Erreur !", translate(error.message));
+    },
+  });
 
   const setDirectionCenter = async (teamate: TeamMate) => {
     try {
@@ -106,15 +139,12 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
             </div>
           ),
           isOpen: true,
-          onConfirm: () => inviteDirectionCenter(teamate),
+          onConfirm: () => inviteDirectionCenterMutation.mutate(teamate),
         });
         return {};
       }
 
-      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId: referent._id });
-      if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(code));
-      setFocusedSession(data);
-      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+      setDirectionCenterMutation.mutate(referent._id);
     } catch (e) {
       console.log(e);
       capture(e);
@@ -122,8 +152,8 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     }
   };
 
-  const inviteDirectionCenter = async (user: TeamMate) => {
-    try {
+  const inviteDirectionCenterMutation = useMutation({
+    mutationFn: async (user: TeamMate) => {
       let newRole = "";
       switch (user.role) {
         case CENTER_ROLES.chef:
@@ -136,6 +166,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
           newRole = ROLES.REFERENT_SANITAIRE;
           break;
       }
+
       const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[newRole]}`, {
         ...user,
         role: newRole,
@@ -143,42 +174,56 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         cohesionCenterId: focusedSession?.cohesionCenterId,
         cohesionCenterName: focusedSession?.nameCentre,
       });
-      if (!responseInvitation?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
-      const responseSession = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId: responseInvitation?.data?._id });
-      if (!responseSession?.ok) return toastr.error("Erreur !", translate(responseInvitation?.code));
-      setFocusedSession(responseSession?.data);
-      toastr.success("Succès", `${user.firstName} ${user.lastName} a reçu une invitation pour rejoindre l'équipe`);
-    } catch (e) {
-      console.log(e);
-      capture(e);
-      toastr.error("Erreur !", translate(e));
-    }
-  };
 
-  const deleteTeamate = async (user) => {
-    const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
-    focusedSession.team.splice(index, 1);
+      if (!responseInvitation?.ok) throw new Error(responseInvitation?.code);
 
-    try {
-      const r = await api.put(`/session-phase1/${focusedSession._id}/team`, { team: focusedSession.team });
-      const { ok, data } = r;
-      if (!ok) toastr.error("Oups, une erreur est survenue lors de la suppression du membre", translate(data.code));
-      setFocusedSession(data);
+      const responseSession = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, {
+        referentId: responseInvitation?.data?._id,
+      });
+
+      if (!responseSession?.ok) throw new Error(responseSession?.code);
+      return responseSession?.data;
+    },
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
+      toastr.success("Succès", `${variables.firstName} ${variables.lastName} a reçu une invitation pour rejoindre l'équipe`);
+    },
+    onError: (error) => {
+      console.log(error);
+      capture(error);
+      toastr.error("Erreur !", translate(error.message));
+    },
+  });
+
+  const deleteTeamateMutation = useMutation({
+    mutationFn: async (user) => {
+      const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
+      if (index === -1) throw new Error("User not found in team");
+
+      const updatedTeam = [...focusedSession.team];
+      updatedTeam.splice(index, 1);
+
+      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}/team`, {
+        team: updatedTeam,
+      });
+
+      if (!ok) throw new Error(data.code);
+      return data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
       toastr.success("Succès", "Le membre a été supprimé de l'équipe");
-    } catch (e) {
-      console.log(e);
-      capture(e);
-      toastr.error("Erreur !", translate(e.code));
-    }
-  };
+    },
+    onError: (error) => {
+      console.log(error);
+      capture(error);
+      toastr.error("Erreur !", translate(error.message));
+    },
+  });
 
-  useEffect(() => {
-    if (!sessionId) return;
-    (async () => {
-      const { data } = await api.get(`/session-phase1/${sessionId}`);
-      setFocusedSession(data);
-    })();
-  }, [sessionId]);
+  const deleteTeamate = (user) => {
+    deleteTeamateMutation.mutate(user);
+  };
 
   if (!focusedSession) return <Loader />;
 

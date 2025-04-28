@@ -37,7 +37,7 @@ import PedagoProject from "../PedagoProject";
 import { getDefaultSession } from "@/utils/session";
 import SyncPlacesButton from "./SyncPlacesButton";
 import SessionVolontairesButton from "./SessionVolontairesButton";
-import { EditButton } from "@snu/ds/admin";
+import { isResponsableDeCentre } from "@/utils";
 
 type Props = {
   center: CohesionCenterType;
@@ -172,7 +172,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
   };
 
   const canEdit = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  const cannotSelectSEssion = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
+  const cannotSelectSEssion = isResponsableDeCentre(user);
 
   return (
     <div className="mx-8 my-4 space-y-4">

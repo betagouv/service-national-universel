@@ -13,6 +13,7 @@ import SessionList from "../components/sessions/SessionList";
 import { capture } from "@/sentry";
 import { AuthState } from "@/redux/auth/reducer";
 import { Session } from "@/types";
+import { isResponsableDeCentre } from "@/utils";
 
 export default function Index() {
   const { id } = useParams<{ id: string }>();
@@ -59,9 +60,7 @@ export default function Index() {
   if (!center || !sessions) return <div />;
   return (
     <>
-      {![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && (
-        <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />
-      )}
+      {!isResponsableDeCentre(user) && <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre" }]} />}
       <CenterInformations center={center} />
       <SessionList center={center} onCenterChange={setCenter} sessions={sessions} onSessionsChange={setSessions} onRefetchSessions={() => loadSessions(center._id)} />
     </>

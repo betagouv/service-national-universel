@@ -14,6 +14,7 @@ import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
 import plausibleEvent from "../../services/plausible";
 import { ROLES } from "snu-lib";
+import { isResponsableDeCentre } from "@/utils";
 
 const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);
@@ -30,7 +31,7 @@ const Dashboard = (props) => {
     } else if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {
       setArticles(referentArticles);
       setKbRole("referent");
-    } else if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    } else if (isResponsableDeCentre(user)) {
       setArticles(headCenterArticles);
       setKbRole("head_center");
     } else if (user.role === ROLES.VISITOR) {

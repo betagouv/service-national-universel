@@ -34,6 +34,7 @@ import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRo
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
+import { isResponsableDeCentre } from "@/utils";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -64,7 +65,7 @@ export default function Details({ user, setUser, currentUser }) {
   }, [user]);
 
   useEffect(() => {
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    if (isResponsableDeCentre(user)) {
       loadHeadCenterSessions();
     } else {
       setCentersLoading(false);
@@ -222,10 +223,7 @@ export default function Details({ user, setUser, currentUser }) {
       setSaving(true);
       if (validate()) {
         plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
-        if (
-          [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) &&
-          ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role)
-        ) {
+        if (isResponsableDeCentre(user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role)) {
           for (let index = 0; index < sessionsWhereUserIsHeadCenter.length; index++) {
             const { ok, code } = await api.remove(`/session-phase1/${sessionsWhereUserIsHeadCenter[index]._id}/headCenter`);
             if (!ok) {
@@ -425,81 +423,79 @@ export default function Details({ user, setUser, currentUser }) {
                   regionOrDepOptions={regionList.map((r) => ({ value: r, label: r }))}
                 />
               )}
-              {![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) &&
-                [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
-                  <div className="mt-4 text-gray-500">Enregistrer les changement pour accéder au choix des centres.</div>
-                )}
-              {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) &&
-                [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
-                  <div className="flex flex-col">
-                    {sessionsWhereUserIsHeadCenter?.length > 0 && <div className={`mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "-mb-3" : ""}`}>Centres</div>}
-                    {areCentersLoading && <Loader />}
-                    {!areCentersLoading && (
-                      <>
-                        {sessionsWhereUserIsHeadCenter?.length > 0 &&
-                          sessionsWhereUserIsHeadCenter.map((session) => (
-                            <Session
-                              mode={[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) ? mode : MODE_DEFAULT}
-                              session={session}
-                              key={session._id}
-                              onClickView={session?.center?._id ? () => window.open(`/centre/${session.center._id}?cohorte=${session.cohort}`) : undefined}
-                              onDelete={openHeadOfCenterDeleteConfirmModal(session)}
-                              onCohortChange={openCohortChangeConfirmModal(session._id)}
-                            />
-                          ))}
-                        {newCenter && (
-                          <div className="flex flex-col border-b border-gray-200 pb-4">
-                            <CustomSelect
-                              className="mt-4"
-                              key={newCenter?.cohesionCenterId || "newCenter"}
-                              isClearable
-                              label="Centre"
-                              options={sessionOptions.map(({ cohesionCenterId, nameCentre }) => ({ value: cohesionCenterId, label: nameCentre }))}
-                              placeholder="Choisir un centre"
-                              onChange={(option) => {
-                                if (!option?.value) {
-                                  setNewCenter({});
-                                } else {
-                                  const centerToSet = sessionOptions.find((currentSession) => currentSession.cohesionCenterId === option.value);
-                                  if (centerToSet.cohorts.length === 1) {
-                                    centerToSet.cohort = centerToSet.cohorts[0];
-                                  }
-                                  setNewCenter(centerToSet);
+              {!isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
+                <div className="mt-4 text-gray-500">Enregistrer les changement pour accéder au choix des centres.</div>
+              )}
+              {isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
+                <div className="flex flex-col">
+                  {sessionsWhereUserIsHeadCenter?.length > 0 && <div className={`mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "-mb-3" : ""}`}>Centres</div>}
+                  {areCentersLoading && <Loader />}
+                  {!areCentersLoading && (
+                    <>
+                      {sessionsWhereUserIsHeadCenter?.length > 0 &&
+                        sessionsWhereUserIsHeadCenter.map((session) => (
+                          <Session
+                            mode={[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) ? mode : MODE_DEFAULT}
+                            session={session}
+                            key={session._id}
+                            onClickView={session?.center?._id ? () => window.open(`/centre/${session.center._id}?cohorte=${session.cohort}`) : undefined}
+                            onDelete={openHeadOfCenterDeleteConfirmModal(session)}
+                            onCohortChange={openCohortChangeConfirmModal(session._id)}
+                          />
+                        ))}
+                      {newCenter && (
+                        <div className="flex flex-col border-b border-gray-200 pb-4">
+                          <CustomSelect
+                            className="mt-4"
+                            key={newCenter?.cohesionCenterId || "newCenter"}
+                            isClearable
+                            label="Centre"
+                            options={sessionOptions.map(({ cohesionCenterId, nameCentre }) => ({ value: cohesionCenterId, label: nameCentre }))}
+                            placeholder="Choisir un centre"
+                            onChange={(option) => {
+                              if (!option?.value) {
+                                setNewCenter({});
+                              } else {
+                                const centerToSet = sessionOptions.find((currentSession) => currentSession.cohesionCenterId === option.value);
+                                if (centerToSet.cohorts.length === 1) {
+                                  centerToSet.cohort = centerToSet.cohorts[0];
                                 }
+                                setNewCenter(centerToSet);
+                              }
+                            }}
+                            value={newCenter?.cohesionCenterId || ""}
+                          />
+                          {newCenter.cohesionCenterId && (
+                            <CohortSelect
+                              className="mt-4 self-start"
+                              value={newCenter.cohort?.cohort || ""}
+                              options={newCenter.cohorts.map((c) => c.cohort)}
+                              onChange={(cohort) => {
+                                setNewCenter({ ...newCenter, cohort: newCenter.cohorts.find((c) => c.cohort === cohort) });
                               }}
-                              value={newCenter?.cohesionCenterId || ""}
                             />
-                            {newCenter.cohesionCenterId && (
-                              <CohortSelect
-                                className="mt-4 self-start"
-                                value={newCenter.cohort?.cohort || ""}
-                                options={newCenter.cohorts.map((c) => c.cohort)}
-                                onChange={(cohort) => {
-                                  setNewCenter({ ...newCenter, cohort: newCenter.cohorts.find((c) => c.cohort === cohort) });
-                                }}
-                              />
-                            )}
-                          </div>
-                        )}
-                        {roleMode === MODE_EDITION && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && !newCenter && (
-                          <AddButton onClick={addNewCenter} className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
-                            Ajouter un centre
-                          </AddButton>
-                        )}
-                        {roleMode === MODE_EDITION && newCenter && (
-                          <div className="mt-4 flex justify-end">
-                            <PlainButton mode="white" className="mr-2" onClick={() => setNewCenter(undefined)}>
-                              Annuler
-                            </PlainButton>
-                            <PlainButton onClick={setCenterHeadOfCenter} disabled={!newCenter.cohort}>
-                              Enregistrer le centre
-                            </PlainButton>
-                          </div>
-                        )}
-                      </>
-                    )}
-                  </div>
-                )}
+                          )}
+                        </div>
+                      )}
+                      {roleMode === MODE_EDITION && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && !newCenter && (
+                        <AddButton onClick={addNewCenter} className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
+                          Ajouter un centre
+                        </AddButton>
+                      )}
+                      {roleMode === MODE_EDITION && newCenter && (
+                        <div className="mt-4 flex justify-end">
+                          <PlainButton mode="white" className="mr-2" onClick={() => setNewCenter(undefined)}>
+                            Annuler
+                          </PlainButton>
+                          <PlainButton onClick={setCenterHeadOfCenter} disabled={!newCenter.cohort}>
+                            Enregistrer le centre
+                          </PlainButton>
+                        </div>
+                      )}
+                    </>
+                  )}
+                </div>
+              )}
               {(data.role === ROLES.RESPONSIBLE || data.role === ROLES.SUPERVISOR) && (
                 <>
                   {structures.length === 0 && (

@@ -9,6 +9,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
 import Breadcrumbs from "../../components/Breadcrumbs";
+import { isResponsableDeCentre } from "@/utils";
 
 // todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../assets/programmes-engagement/*", { eager: true });
@@ -27,7 +28,7 @@ export default function List() {
   }, []);
 
   const getTitle = () => {
-    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) return <Title>Outils pour les professionnels d&apos;État</Title>;
+    if (isResponsableDeCentre(user)) return <Title>Outils pour les professionnels d&apos;État</Title>;
     return <Title>Les grands programmes d&apos;engagement</Title>;
   };
 

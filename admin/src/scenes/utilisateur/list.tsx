@@ -12,6 +12,7 @@ import dayjs from "@/utils/dayjs.utils";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 import { AuthState } from "@/redux/auth/reducer";
+import { isResponsableDeCentre } from "@/utils";
 
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -93,7 +94,7 @@ export default function List() {
     })();
   }, []);
 
-  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) && !sessionPhase1) return <Loader />;
+  if (isResponsableDeCentre(user) && !sessionPhase1) return <Loader />;
 
   return (
     <Page>
@@ -105,9 +106,7 @@ export default function List() {
             key={0}
             title="Exporter"
             exportTitle="Utilisateurs"
-            route={`/elasticsearch/referent/export${
-              [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) ? "?cohort=" + sessionPhase1?.cohort : ""
-            }`}
+            route={`/elasticsearch/referent/export${isResponsableDeCentre(user) ? "?cohort=" + sessionPhase1?.cohort : ""}`}
             // @ts-expect-error jsx component
             filters={filterArray}
             selectedFilters={selectedFilters}
@@ -158,9 +157,7 @@ export default function List() {
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
               pageId={pageId}
-              route={`/elasticsearch/referent/search${
-                [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role) ? "?cohort=" + sessionPhase1?.cohort : ""
-              }`}
+              route={`/elasticsearch/referent/search${isResponsableDeCentre(user) ? "?cohort=" + sessionPhase1?.cohort : ""}`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email..."

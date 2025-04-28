@@ -445,3 +445,8 @@ export const CDN_BASE_URL =
 export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.now()}`;
 
 export const desktopBreakpoint = 1024;
+
+export const isResponsableDeCentre = (user) => {
+  if (!user || !user.role) return false;
+  return user.role === ROLES.HEAD_CENTER || user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE;
+};

@@ -5,7 +5,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, isSuperAdmin } from "snu-lib";
+import { isSuperAdmin } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { Button, Header, Navbar } from "@snu/ds/admin";
@@ -15,6 +15,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import DeletePDTButton from "../DeletePDTButton";
 import SyncPlacesPDTButton from "../SyncPlacesPDTButton";
 import HeaderExport from "./ButtonExport";
+import { isResponsableDeCentre } from "@/utils";
 
 interface Props {
   cohort: string;
@@ -32,12 +33,12 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohortDto = cohorts?.find((c) => c.name === cohort);
 
-  const cannotSelectSession = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
+  const isResonsableDeCentre = isResponsableDeCentre(user);
 
   const getActions = () => {
     const buttons: JSX.Element[] = [];
 
-    if (!cannotSelectSession) {
+    if (!isResonsableDeCentre) {
       buttons.push(
         <Button
           title="Importer des lignes supplémentaires"
@@ -59,9 +60,8 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
         title="Plan de transport"
         breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
         actions={
-          cannotSelectSession
-            ? []
-            : [
+          !isResonsableDeCentre
+            ? [
                 <SelectCohort
                   key="select-cohort"
                   cohort={cohort}
@@ -71,6 +71,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                   }}
                 />,
               ]
+            : []
         }
       />
       <div className="flex gap-2 items-center">
@@ -98,7 +99,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                 setCurrentTab("retour");
               },
             },
-            ...(!cannotSelectSession
+            ...(!isResonsableDeCentre
               ? [
                   {
                     title: "Historique",

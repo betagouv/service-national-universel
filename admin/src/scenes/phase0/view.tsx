@@ -8,6 +8,7 @@ import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
+import { isResponsableDeCentre } from "@/utils";
 import { REJECTION_REASONS, REJECTION_REASONS_KEY } from "./commons";
 import YoungHeader from "./components/YoungHeader";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";
@@ -251,7 +252,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           currentRequest={currentCorrectionRequestField}
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
-          readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
+          readonly={isResponsableDeCentre(user)}
           user={user}
         />
         <SectionParents
@@ -263,18 +264,9 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
-          readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
+          readonly={isResponsableDeCentre(user)}
         />
-        {oldCohort ? (
-          <SectionOldConsentements young={young} />
-        ) : (
-          <SectionConsentements
-            young={young}
-            onChange={onChange}
-            readonly={[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)}
-            cohort={cohort}
-          />
-        )}
+        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={isResponsableDeCentre(user)} cohort={cohort} />}
       </div>
       {globalMode === "correction" && (
         <>
