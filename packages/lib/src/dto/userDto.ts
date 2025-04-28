@@ -16,5 +16,6 @@ export type UserDto = {
   meetingPointId?: string;
   cohortId?: string;
   cohort?: string;
+  acceptCGU?: string;
   acl?: PermissionDto[];
 };
