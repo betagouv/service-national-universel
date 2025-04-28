@@ -74,6 +74,27 @@ describe("DesisterClasses", () => {
             error: "",
             jeunesDesistesIds: "YOUNG-001,YOUNG-002",
         });
+        expect(mockJeuneGateway.bulkUpdate).toHaveBeenCalledWith(
+            mockJeunes.map((jeune) => ({
+                ...jeune,
+                statut: YOUNG_STATUS.WITHDRAWN,
+                lastStatusAt: expect.any(Date),
+                desistementMotif: "other",
+                centreId: undefined,
+                sejourId: undefined,
+                pointDeRassemblementId: undefined,
+                ligneDeBusId: undefined,
+                hasPDR: undefined,
+                transportInfoGivenByLocal: undefined,
+                deplacementPhase1Autonomous: undefined,
+                presenceArrivee: undefined,
+                presenceJDM: undefined,
+                departInform: undefined,
+                departSejourAt: undefined,
+                departSejourMotif: undefined,
+                departSejourMotifComment: undefined,
+            })),
+        );
     });
 
     it("should handle class not found error", async () => {

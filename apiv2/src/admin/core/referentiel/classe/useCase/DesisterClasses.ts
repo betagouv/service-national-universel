@@ -101,6 +101,21 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
             ...jeune,
             statut: YOUNG_STATUS.WITHDRAWN,
             lastStatusAt: new Date(),
+            desistementMotif: "other",
+            // reset des informations d'affectation
+            centreId: undefined,
+            sejourId: undefined,
+            pointDeRassemblementId: undefined,
+            ligneDeBusId: undefined,
+            hasPDR: undefined,
+            transportInfoGivenByLocal: undefined,
+            deplacementPhase1Autonomous: undefined,
+            presenceArrivee: undefined,
+            presenceJDM: undefined,
+            departInform: undefined,
+            departSejourAt: undefined,
+            departSejourMotif: undefined,
+            departSejourMotifComment: undefined,
         }));
 
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
