@@ -144,7 +144,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         return {};
       }
 
-      setDirectionCenterMutation.mutate(referent._id);
+      return setDirectionCenterMutation.mutate(referent._id);
     } catch (e) {
       console.log(e);
       capture(e);
