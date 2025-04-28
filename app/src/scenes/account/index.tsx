@@ -1,5 +1,5 @@
 import React from "react";
-import { Redirect, Switch, useLocation } from "react-router-dom";
+import { Switch, Redirect, useLocation } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import AccountGeneralPage from "./scenes/general";
 import PageTitle from "./components/PageTitle";
