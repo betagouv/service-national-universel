@@ -2,14 +2,14 @@ import React from "react";
 import { Modal } from "@snu/ds/admin";
 import { BsClipboardCheck } from "react-icons/bs";
 
-export type SuccessModalProps = {
+interface SuccessModalProps {
   isOpen: boolean;
   onClose: () => void;
   onConfirm: () => void;
   studentCount: number;
-};
+}
 
-export const SuccessModal = ({ isOpen, onClose, onConfirm, studentCount }: SuccessModalProps) => {
+export const SuccessModal: React.FC<SuccessModalProps> = ({ isOpen, onClose, onConfirm, studentCount }) => {
   const header = (
     <div className="flex flex-col items-center text-center">
       <div className="flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 mb-4">

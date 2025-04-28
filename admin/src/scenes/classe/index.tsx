@@ -6,7 +6,7 @@ import { SentryRoute } from "../../sentry";
 import Create from "./create";
 import List from "./list";
 import View from "./view";
-import InvitationEnMasse from "./invitationEnMasse";
+import InscriptionEnMasse from "./inscriptionEnMasse/InscriptionEnMassePage";
 import { toastr } from "react-redux-toastr";
 import NotFound from "@/components/layout/NotFound";
 
@@ -24,7 +24,7 @@ export default function Index() {
             toastr.error("Identifiant invalide : " + id, "");
             return <SentryRoute component={NotFound} />;
           }
-          return <SentryRoute component={InvitationEnMasse} />;
+          return <SentryRoute component={InscriptionEnMasse} />;
         }}
       />
       <SentryRoute
