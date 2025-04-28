@@ -4,7 +4,7 @@ export const MONGO_COLLECTION = {
   APPLICATION: "application",
   AREA: "area",
   BUS: "bus",
-  CAMPAIGN: "campaign",
+  CAMPAIGN: "campagne",
   CLASSE: "classe",
   COHESION_CENTER: "cohesioncenter",
   COHORT_GROUP: "cohortGroup",
