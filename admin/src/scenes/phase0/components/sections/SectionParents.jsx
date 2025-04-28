@@ -5,6 +5,7 @@ import { toastr } from "react-redux-toastr";
 import ReactTooltip from "react-tooltip";
 import validator from "validator";
 import { HiInformationCircle } from "react-icons/hi";
+import { useSelector } from "react-redux";
 
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";
@@ -21,6 +22,7 @@ import {
   translateColoration,
   departmentToAcademy,
   region2zone,
+  ROLES,
 } from "snu-lib";
 import { filterDataForYoungSection } from "../../utils";
 import { countryOptions, SPECIFIC_SITUATIONS_KEY, YOUNG_SCHOOLED_SITUATIONS, YOUNG_ACTIVE_SITUATIONS } from "../../commons";
@@ -65,6 +67,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
   const [youngAge, setYoungAge] = useState(0);
   const [situationOptions, setSituationOptions] = useState([]);
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
+  const user = useSelector((state) => state.Auth.user);
 
   useEffect(() => {
     if (youngFiltered) {
@@ -411,9 +414,11 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                       transformer={translateColoration}
                     />
                   </div>
-                  <Link to={`/classes/${young.classeId}`}>
-                    <Button type="tertiary" title="Voir la classe" className="w-full mb-[24px] max-w-none" />
-                  </Link>
+                  {![ROLES.HEAD_CENTER].includes(user.role) && (
+                    <Link to={`/classes/${young.classeId}`}>
+                      <Button type="tertiary" title="Voir la classe" className="w-full mb-[24px] max-w-none" />
+                    </Link>
+                  )}
                   <MiniTitle>Situation scolaire</MiniTitle>
                   <Field
                     name="classeStatus"

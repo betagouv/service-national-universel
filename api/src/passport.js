@@ -29,6 +29,7 @@ async function validateUser(Model, jwtPayload, done, role) {
     const { error, value } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
+      _impersonateId: Joi.string().allow(null),
       passwordChangedAt: Joi.date().allow(null),
       lastLogoutAt: Joi.date().allow(null),
     }).validate(jwtPayload, { stripUnknown: true });

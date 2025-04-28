@@ -57,7 +57,7 @@ const SideBar = ({ sessionsList }) => {
 
   //State
   const [open, setOpen] = React.useState(false);
-  const test = useSelector((state: AuthState) => state.Auth.previousSigninToken);
+  const isImpersonate = localStorage.getItem("isImpersonate");
   const [openInvite, setOpenInvite] = React.useState(false);
   const [dropDownOpen, setDropDownOpen] = React.useState("");
   const [isDemo, toggleDemo] = useToggle(false);
@@ -289,8 +289,8 @@ const SideBar = ({ sessionsList }) => {
         "sticky flex flex-col inset-y-0  z-40 print:hidden",
         { "w-[250px]": open },
         { "w-[88px]": !open },
-        { "top-[5vh] max-h-[95vh]": test },
-        { "h-screen max-h-screen": !test },
+        { "top-[5vh] max-h-[95vh]": isImpersonate },
+        { "h-screen max-h-screen": !isImpersonate },
         { "bg-[#25294F]": isProduction || isDemo },
         { "bg-blue-800": isDevelopment && !isDemo },
         { "bg-teal-900": isCustom && !isDemo },
