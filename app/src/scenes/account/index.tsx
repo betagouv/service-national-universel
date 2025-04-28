@@ -1,5 +1,5 @@
-import React, { useEffect } from "react";
-import { Switch, useHistory, useLocation } from "react-router-dom";
+import React from "react";
+import { Redirect, Switch, useLocation } from "react-router-dom";
 import { SentryRoute } from "../../sentry";
 import AccountGeneralPage from "./scenes/general";
 import PageTitle from "./components/PageTitle";
@@ -14,12 +14,11 @@ import AccountSpecialSituationsPage from "./scenes/special-situations";
 import AccountWithdrawnPage from "./scenes/withdrawn";
 import Tabs from "../../components/nav/Tabs";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
-import useAuth from "@/services/useAuth";
-import { youngCanWithdraw } from "snu-lib";
+import usePermissions from "@/hooks/usePermissions";
 
 const Account = () => {
   useDocumentTitle("Mon profil");
-  const { young } = useAuth();
+  const { hasAccessToDesistement } = usePermissions();
 
   const ACCOUNT_PAGES = {
     general: {
@@ -42,7 +41,7 @@ const Account = () => {
       title: "Situations particulières",
       key: "/account/special-situations",
     },
-    ...(youngCanWithdraw(young) && {
+    ...(hasAccessToDesistement && {
       withdrawn: {
         title: "Se désister",
         key: "/account/withdrawn",
@@ -53,17 +52,9 @@ const Account = () => {
   const { pathname } = useLocation();
   const [, pagePath] = pathname.split("/").filter((path) => path);
 
-  const history = useHistory();
-
-  const handleChangeTab = (path) => {
-    history.push(path);
-  };
-
-  useEffect(() => {
-    if (device === "desktop" && !pagePath) {
-      history.push("/account/general");
-    }
-  }, [pagePath]);
+  if (device === "desktop" && !pagePath) {
+    return <Redirect to="/account/general" />;
+  }
 
   return (
     <>
@@ -86,7 +77,7 @@ const Account = () => {
         )}
         {device === "desktop" && (
           <div>
-            <Tabs onChange={handleChangeTab} tabs={Object.values(ACCOUNT_PAGES)} selectedTabKey={`/account/${pagePath || "general"}`} />
+            <Tabs tabs={Object.values(ACCOUNT_PAGES)} selectedTabKey={`/account/${pagePath || "general"}`} />
           </div>
         )}
       </div>
