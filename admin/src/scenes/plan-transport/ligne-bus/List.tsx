@@ -35,8 +35,6 @@ export default function List({ hasValue, cohort, currentTab, selectedFilters, se
 
   const filterArray = getFilterArray(user.role);
 
-  const cannotSelectSession = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
-
   return (
     <>
       {hasValue ? (

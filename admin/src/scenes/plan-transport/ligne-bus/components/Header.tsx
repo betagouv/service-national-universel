@@ -31,21 +31,47 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohortDto = cohorts?.find((c) => c.name === cohort);
+
+  const cannotSelectSession = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role);
+
+  const getActions = () => {
+    const buttons: JSX.Element[] = [];
+
+    if (!cannotSelectSession) {
+      buttons.push(
+        <Button
+          title="Importer des lignes supplémentaires"
+          leftIcon={<GoPlus size={20} className="mt-0.5" />}
+          key="btn-2"
+          type="wired"
+          onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
+        />,
+      );
+    }
+
+    buttons.push(<HeaderExport cohort={cohort} key="export" selectedFilters={selectedFilters} user={user} />);
+    return buttons;
+  };
+
   return (
     <>
       <Header
         title="Plan de transport"
         breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
-        actions={[
-          <SelectCohort
-            key="select-cohort"
-            cohort={cohort}
-            onChange={(cohortName) => {
-              setCohort(cohortName);
-              history.replace({ search: `?cohort=${cohortName}` });
-            }}
-          />,
-        ]}
+        actions={
+          cannotSelectSession
+            ? []
+            : [
+                <SelectCohort
+                  key="select-cohort"
+                  cohort={cohort}
+                  onChange={(cohortName) => {
+                    setCohort(cohortName);
+                    history.replace({ search: `?cohort=${cohortName}` });
+                  }}
+                />,
+              ]
+        }
       />
       <div className="flex gap-2 items-center">
         {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
@@ -72,7 +98,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                 setCurrentTab("retour");
               },
             },
-            ...(user.role !== ROLES.HEAD_CENTER
+            ...(!cannotSelectSession
               ? [
                   {
                     title: "Historique",
@@ -97,16 +123,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                 ]
               : []),
           ]}
-          button={[
-            <Button
-              title="Importer des lignes supplémentaires"
-              leftIcon={<GoPlus size={20} className="mt-0.5" />}
-              key={"btn-2"}
-              type="wired"
-              onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
-            />,
-            <HeaderExport cohort={cohort} key="export" selectedFilters={selectedFilters} user={user} />,
-          ]}
+          button={getActions()}
         />
       )}
     </>
