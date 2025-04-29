@@ -108,14 +108,15 @@ export default function HomePhase2() {
                 </Link>
               ) : (
                 <>
-                  <div
+                  <button
+                    disabled
                     data-tip
                     data-for="tooltip-delai"
                     className="flex gap-2 justify-center items-center bg-gray-400 text-white rounded-md px-3 py-2.5 line-clamp-1 cursor-not-allowed">
                     <HiSearch className="inline-block text-xl" />
                     <p>Trouver un engagement</p>
                     <RiInformationLine className="text-white" />
-                  </div>
+                  </button>
                   <ReactTooltip id="tooltip-delai" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
                     <span className="text-gray-800">
                       Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
