@@ -63,8 +63,8 @@ const AccountRepresentantsPage = () => {
   const { mutate: updateRepresentants, isPending: isSubmitting } = useUpdateAccount("parents");
   const [hasParent2, setHasParent2] = useState(young?.parent2Email ? true : false);
 
-  const handleChangeParent2 = (value: boolean) => {
-    setHasParent2(value);
+  const handleChangeParent2 = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setHasParent2(event.target.checked);
   };
 
   const onSubmit = (formValues: FormValues) => {
@@ -100,13 +100,13 @@ const AccountRepresentantsPage = () => {
           <div className="px-4 pt-6 pb-2 lg:col-span-2 lg:col-start-2">
             <section className="mb-4">
               <SectionTitle>Représentant légal 1</SectionTitle>
-              <Select {...register("parent1Status", { required: true })} label="Statut" error={errors?.parent1Status?.message}>
+              <Select label="Statut" error={errors?.parent1Status?.message} {...register("parent1Status", { required: true })}>
                 <option value="mother">Mère</option>
                 <option value="father">Père</option>
                 <option value="representant">Représentant légal</option>
               </Select>
-              <Input {...register("parent1LastName", { required: "Ce champ est obligatoire" })} label="Nom" placeholder="Dupond" error={errors?.parent1LastName?.message} />
-              <Input {...register("parent1FirstName", { required: "Ce champ est obligatoire" })} label="Prénom" placeholder="Gaspard" error={errors?.parent1FirstName?.message} />
+              <Input label="Nom" placeholder="Dupond" error={errors?.parent1LastName?.message} {...register("parent1LastName", { required: "Ce champ est obligatoire" })} />
+              <Input label="Prénom" placeholder="Gaspard" error={errors?.parent1FirstName?.message} {...register("parent1FirstName", { required: "Ce champ est obligatoire" })} />
               <Input
                 type="email"
                 label="Adresse email"

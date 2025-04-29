@@ -6,10 +6,6 @@ type Props = {
   label?: string;
   className?: string;
   error?: string;
-  name?: string;
-  value?: string;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
-  type?: "text" | "email";
   [key: string]: any;
 };
 

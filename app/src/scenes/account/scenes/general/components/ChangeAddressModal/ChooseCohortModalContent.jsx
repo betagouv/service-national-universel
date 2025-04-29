@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import Modal from "../../../../../../components/ui/modals/Modal";
-import RadioButton from "../../../../../../components/forms/inputs/RadioButton";
+import RadioButtonGroup from "../../../../../../components/forms/inputs/RadioButtonGroup";
 import Calendar from "../../../../../../assets/icons/CalendarFill";
 
 const ChooseCohortModalContent = ({ onConfirm, currentCohortPeriod, cohorts, isLoading, onCancel }) => {
@@ -19,7 +19,7 @@ const ChooseCohortModalContent = ({ onConfirm, currentCohortPeriod, cohorts, isL
         </div>
       </Modal.Subtitle>
       <div className="my-6 h-[1px] bg-gray-200" />
-      <RadioButton className="mb-6" label="Choisissez un nouveau séjour :" value={newCohort} onChange={setNewCohort} options={cohorts} />
+      <RadioButtonGroup className="mb-6" label="Choisissez un nouveau séjour :" value={newCohort} onChange={setNewCohort} options={cohorts} />
       <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={() => onConfirm(newCohort)} confirmText="Valider ce séjour" disabled={isLoading || !newCohort} />
     </>
   );
