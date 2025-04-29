@@ -186,13 +186,11 @@ export function getDepartureDateSession(session, young, cohort) {
 export function getReturnDateSession(session, young, cohort) {
   if (session?.dateEnd) {
     const sessionDateEnd = new Date(session.dateEnd);
-    sessionDateEnd.setHours(sessionDateEnd.getHours() + 12);
     return sessionDateEnd;
   }
   if (young?.cohort === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(young.region)) {
     return new Date(2023, 6, 16);
   }
   const cohortDateEnd = new Date(cohort?.dateEnd);
-  cohortDateEnd.setHours(cohortDateEnd.getHours() + 12);
-  return new Date(cohortDateEnd);
+  return cohortDateEnd;
 }

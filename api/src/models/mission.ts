@@ -1,13 +1,13 @@
 import mongoose, { InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MissionSchema } from "snu-lib";
+import { InterfaceExtended, MissionSchema, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/mission";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "mission";
+const MODELNAME = MONGO_COLLECTION.MISSION;
 
 const schema = new mongoose.Schema(MissionSchema);
 

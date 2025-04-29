@@ -1,13 +1,13 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, StructureSchema } from "snu-lib";
+import { InterfaceExtended, StructureSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
 import anonymize from "../anonymization/structure";
 
-const MODELNAME = "structure";
+const MODELNAME = MONGO_COLLECTION.STRUCTURE;
 
 const schema = new Schema(StructureSchema);
 

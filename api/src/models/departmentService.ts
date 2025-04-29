@@ -1,12 +1,12 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DepartmentServiceSchema, InterfaceExtended } from "snu-lib";
+import { DepartmentServiceSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/departmentService";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "departmentservice";
+const MODELNAME = MONGO_COLLECTION.DEPARTMENT_SERVICE;
 
 const schema = new Schema(DepartmentServiceSchema);
 
