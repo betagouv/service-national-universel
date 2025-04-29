@@ -9,6 +9,7 @@ import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-ro
 import { QueryClientProvider } from "@tanstack/react-query";
 import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD } from "snu-lib";
 import * as Sentry from "@sentry/react";
+import { getImpersonationChannel } from "./utils/broadcastChannel";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
@@ -211,12 +212,14 @@ const Home = () => {
     }
   }, [user]);
 
-  const impersonationChannel = new BroadcastChannel("impersonation");
-  impersonationChannel.onmessage = (event) => {
+  const handleImpersonationMessage = (event) => {
     if (event.data.action === "impersonation_started" || event.data.action === "impersonation_stopped") {
       window.location.reload();
     }
   };
+
+  const channel = getImpersonationChannel();
+  channel.addEventListener("message", handleImpersonationMessage);
 
   if (loading) return <Loader />;
   if (!user) {
