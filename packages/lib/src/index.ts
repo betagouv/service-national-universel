@@ -2,6 +2,7 @@ export * from "./cohort";
 export * from "./common";
 export * from "./constants/academy";
 export * from "./constants/cle/classeConstants";
+export * from "./constants/cle/classeImportEnMasse";
 export * from "./constants/cohesionCenter";
 export * from "./constants/cohort";
 export * from "./constants/colors";

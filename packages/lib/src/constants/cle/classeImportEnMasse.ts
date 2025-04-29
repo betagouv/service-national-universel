@@ -1,0 +1,13 @@
+export const CLASSE_IMPORT_EN_MASSE_ERRORS = {
+  EMPTY_FILE: "EMPTY_FILE",
+  MISSING_COLUMN: "MISSING_COLUMN",
+  INVALID_FORMAT: "INVALID_FORMAT",
+};
+
+export const CLASSE_IMPORT_EN_MASSE_COLUMNS = {
+  NOM: "Nom",
+  PRENOM: "Prénom",
+  DATE_DE_NAISSANCE: "Date de naissance",
+  GENRE: "Genre",
+  UAI: "UAI",
+};
