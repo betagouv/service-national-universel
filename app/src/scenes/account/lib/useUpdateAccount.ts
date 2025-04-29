@@ -5,7 +5,7 @@ import { toastr } from "react-redux-toastr";
 import { ERRORS, translate, YoungType } from "snu-lib";
 import { updateYoung } from "./repository";
 
-export default function useUpdateAccount(section: string) {
+export default function useUpdateAccount(section: "profile" | "address" | "parents" | "mission-preferences") {
   const dispatch = useDispatch();
   return useMutation({
     mutationFn: (payload: Partial<YoungType & { parent2: boolean }>) => updateYoung(section, payload),

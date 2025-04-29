@@ -162,7 +162,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
     const { value, error } = validateParents(req.body, true);
 
     if (error) {
-      console.log("🚀 ~ router.put ~ error:", error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const young = await YoungModel.findById(req.user._id);
