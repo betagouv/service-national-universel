@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, SessionPhase1TokenSchema } from "snu-lib";
+import { InterfaceExtended, SessionPhase1TokenSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "sessionphase1token";
+const MODELNAME = MONGO_COLLECTION.SESSION_PHASE1_TOKEN;
 
 const schema = new Schema(SessionPhase1TokenSchema);
 

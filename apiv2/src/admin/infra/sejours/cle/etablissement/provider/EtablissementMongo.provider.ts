@@ -1,9 +1,9 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { EtablissementSchema, EtablissementType } from "snu-lib";
+import { EtablissementSchema, EtablissementType, MONGO_COLLECTION } from "snu-lib";
 
 export type EtablissementDocument = HydratedDocument<EtablissementType>;
-export const EtablissementName = "etablissement";
+export const EtablissementName = MONGO_COLLECTION.ETABLISSEMENT;
 export const ETABLISSEMENT_MONGOOSE_ENTITY = "ETABLISSEMENT_MONGOOSE_ENTITY";
 
 export const etablissementMongoProviders = [

@@ -1,12 +1,12 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { CohesionCenterSchema, CohesionCenterType } from "snu-lib";
+import { MONGO_COLLECTION, CohesionCenterSchema, CohesionCenterType } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type CentreDocument = HydratedDocument<CohesionCenterType>;
-export const CentreName = "cohesioncenter";
+export const CentreName = MONGO_COLLECTION.COHESION_CENTER;
 export const CENTRE_MONGOOSE_ENTITY = "CENTRE_MONGOOSE_ENTITY";
 
 const CentreSchemaRef = new mongoose.Schema(CohesionCenterSchema);

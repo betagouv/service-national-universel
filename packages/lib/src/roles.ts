@@ -37,16 +37,6 @@ const SUB_ROLES = {
 
 export const SUB_ROLE_GOD = "god";
 
-const SUPPORT_ROLES = {
-  admin: "Modérateur",
-  referent: "Référent",
-  structure: "Structure",
-  head_center: "Chef de Centre",
-  young: "Volontaire",
-  public: "Public",
-  visitor: "Visiteur",
-};
-
 const VISITOR_SUBROLES = {
   recteur_region: "Recteur de région académique",
   recteur: "Recteur d’académie",
@@ -58,6 +48,21 @@ const VISITOR_SUBROLES = {
   other: "Autre",
 };
 
+// /!\ n'est pas un role pour un referent
+// legacy
+// TODO: à retirer
+const SUPPORT_ROLES = {
+  admin: "Modérateur",
+  referent: "Référent",
+  structure: "Structure",
+  head_center: "Chef de Centre",
+  young: "Volontaire",
+  public: "Public",
+  visitor: "Visiteur",
+};
+
+// /!\ n'est pas un role pour un referent
+// uniquement le champ "team" des sessions phase 1
 const CENTER_ROLES = {
   chef: "Chef de centre",
   adjoint: "Chef de centre adjoint",

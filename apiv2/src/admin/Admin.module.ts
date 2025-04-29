@@ -68,6 +68,7 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
+import { AuthModule } from "../auth/Auth.module";
 
 @Module({
     imports: [
@@ -89,6 +90,7 @@ import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
         TaskModule,
         // forwardRef(() => PlanMarketingModule),
         ReferentielModule,
+        AuthModule,
     ],
     controllers: [
         ClasseController,

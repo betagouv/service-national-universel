@@ -28,7 +28,8 @@
             "@notification/*": ["src/notification/*"],
             "@task/*": ["src/task/*"],
             "@plan-marketing/*": ["src/plan-marketing/*"],
-            "@analytics/*": ["src/analytics/*"]
+            "@analytics/*": ["src/analytics/*"],
+            "@auth/*": ["src/auth/*"]
         }
     }
 }

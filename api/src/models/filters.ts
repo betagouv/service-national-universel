@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { FiltersSchema, InterfaceExtended } from "snu-lib";
+import { FiltersSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "filter";
+const MODELNAME = MONGO_COLLECTION.FILTER;
 
 const schema = new Schema(FiltersSchema);
 
