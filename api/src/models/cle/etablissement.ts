@@ -1,13 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { EtablissementSchema, EtablissementType } from "snu-lib";
+import { EtablissementSchema, EtablissementType, MONGO_COLLECTION } from "snu-lib";
 
 import { CustomSaveParams, UserExtension, UserSaved, DocumentExtended } from "../types";
 
 import { ClasseModel } from "./classe";
 
-const MODELNAME = "etablissement";
+const MODELNAME = MONGO_COLLECTION.ETABLISSEMENT;
 
 const schema = new Schema(EtablissementSchema);
 

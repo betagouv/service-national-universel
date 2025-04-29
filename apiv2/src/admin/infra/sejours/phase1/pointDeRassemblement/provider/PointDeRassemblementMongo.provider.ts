@@ -1,10 +1,10 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { PointDeRassemblementSchema, PointDeRassemblementType } from "snu-lib";
+import { MONGO_COLLECTION, PointDeRassemblementSchema, PointDeRassemblementType } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type PointDeRassemblementDocument = HydratedDocument<PointDeRassemblementType>;
-export const PointDeRassemblementName = "pointDeRassemblement";
+export const PointDeRassemblementName = MONGO_COLLECTION.POINT_DE_RASSEMBLEMENT;
 export const PDR_MONGOOSE_ENTITY = "PDR_MONGOOSE_ENTITY";
 
 const PointDeRassemblementSchemaRef = new mongoose.Schema(PointDeRassemblementSchema);

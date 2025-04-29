@@ -399,7 +399,7 @@ export async function sync(obj, type, { force } = { force: false }) {
       listIds.push(1446);
     }
     if (attributes.TYPE === "REFERENT") listIds.push(1448);
-    [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && listIds.push(1243);
+    [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && listIds.push(1243, 2225);
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && listIds.push(1449);
 
     delete attributes.EMAIL;

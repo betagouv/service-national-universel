@@ -39,6 +39,20 @@ const SUB_ROLES = {
 
 export const SUB_ROLE_GOD = "god";
 
+const VISITOR_SUBROLES = {
+  recteur_region: "Recteur de région académique",
+  recteur: "Recteur d’académie",
+  vice_recteur: "Vice-recteur d'académie",
+  dasen: "Directeur académique des services de l’éducation nationale (DASEN)",
+  sgra: "Secrétaire général de région académique (SGRA)",
+  sga: "Secrétaire général d’académie (SGA)",
+  drajes: "Délégué régional académique à la jeunesse, à l’engagement et aux sports (DRAJES)",
+  other: "Autre",
+};
+
+// /!\ n'est pas un role pour un referent
+// legacy
+// TODO: à retirer
 const SUPPORT_ROLES = {
   admin: "Modérateur",
   referent: "Référent",
@@ -51,17 +65,8 @@ const SUPPORT_ROLES = {
   visitor: "Visiteur",
 };
 
-const VISITOR_SUBROLES = {
-  recteur_region: "Recteur de région académique",
-  recteur: "Recteur d’académie",
-  vice_recteur: "Vice-recteur d'académie",
-  dasen: "Directeur académique des services de l’éducation nationale (DASEN)",
-  sgra: "Secrétaire général de région académique (SGRA)",
-  sga: "Secrétaire général d’académie (SGA)",
-  drajes: "Délégué régional académique à la jeunesse, à l’engagement et aux sports (DRAJES)",
-  other: "Autre",
-};
-
+// /!\ n'est pas un role pour un referent
+// uniquement le champ "team" des sessions phase 1
 const CENTER_ROLES = {
   chef: "Chef de centre",
   adjoint: "Chef de centre adjoint",
