@@ -1,16 +1,16 @@
+import Loader from "@/components/Loader";
 import { Container, Header, Page } from "@snu/ds/admin";
-import React, { useCallback, useRef } from "react";
+import React, { useEffect, useRef } from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
 import { ROLES } from "snu-lib";
 import useClass from "../utils/useClass";
 import { FileUploadPanel } from "./FileUploadPanel";
-import { ColumnMapping, MappingModal } from "./MappingModal";
-import { SuccessModal } from "./SuccessModal";
 import { ValidationFile } from "./FileValidationErrorsList";
+import { MappingModal } from "./MappingModal";
+import { SuccessModal } from "./SuccessModal";
 import { useFileUploadHandler } from "./useFileUploadHandler";
-import Loader from "@/components/Loader";
 
 export default function InscriptionEnMasse() {
   const { id } = useParams<{ id: string }>();
@@ -18,12 +18,7 @@ export default function InscriptionEnMasse() {
   const user = useSelector((state) => state.Auth.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Always call hooks before any conditional returns
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
-
-  const handleRetryImport = useCallback((mappings: ColumnMapping[]) => {
-    console.log("Retrying import with mappings:", mappings);
-  }, []);
 
   const {
     showErrorDisplay,
@@ -32,21 +27,12 @@ export default function InscriptionEnMasse() {
     mappingModalOpen,
     studentCount,
     successModalOpen,
-    handleFileChange,
+    handleFileUpload,
     setMappingModalOpen,
     setSuccessModalOpen,
-    setStudentCount,
+    handleRetryImportWithMapping,
   } = useFileUploadHandler({
     classeId: id,
-    onMappingNeeded: (columns) => {
-      console.log("Mapping needed for columns:", columns);
-    },
-    onSuccess: (count) => {
-      console.log(`Successfully processed ${count} students`);
-    },
-    onError: (errors) => {
-      console.error("File processing errors:", errors);
-    },
   });
 
   if (isClasseLoading) return <Loader />;
@@ -57,12 +43,16 @@ export default function InscriptionEnMasse() {
   }
 
   const handleFileUploadClick = () => {
+    fileInputRef.current!.value = "";
     fileInputRef.current?.click();
   };
 
-  const handleRetryUpload = () => {
-    // setShowErrorDisplay(false);
-    handleFileUploadClick();
+  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) {
+      return;
+    }
+    handleFileUpload(file);
   };
 
   const closeSuccessModal = () => {
@@ -77,15 +67,6 @@ export default function InscriptionEnMasse() {
     // TODO: Implement the actual student import logic
     console.log(`Importing ${studentCount} students...`);
     setSuccessModalOpen(false);
-    // You could show a loading state or another confirmation message here
-  };
-
-  const onRetryMapping = (mappings: ColumnMapping[]) => {
-    handleRetryImport(mappings);
-    setMappingModalOpen(false);
-    // Example of continuing the flow after mapping
-    setStudentCount(24);
-    setSuccessModalOpen(true);
   };
 
   return (
@@ -117,7 +98,7 @@ export default function InscriptionEnMasse() {
       <Container className="mt-6">
         {showErrorDisplay ? (
           <div className="max-w-4xl mx-auto">
-            <ValidationFile errorMessage={errorMessage} onRetry={handleRetryUpload} />
+            <ValidationFile errorMessage={errorMessage} onRetry={handleFileUploadClick} />
           </div>
         ) : (
           <FileUploadPanel handleFileUploadClick={handleFileUploadClick} />
@@ -125,7 +106,14 @@ export default function InscriptionEnMasse() {
       </Container>
 
       <SuccessModal isOpen={successModalOpen} onClose={closeSuccessModal} onConfirm={confirmImport} studentCount={studentCount} />
-      <MappingModal isOpen={mappingModalOpen} onClose={closeMappingModal} onRetry={onRetryMapping} columns={fileColumns} />
+      {mappingModalOpen && (
+        <MappingModal
+          isOpen={mappingModalOpen}
+          onClose={closeMappingModal}
+          onRetry={(mappings) => handleRetryImportWithMapping(mappings, fileInputRef.current?.files?.[0])}
+          fileColumns={fileColumns}
+        />
+      )}
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx" className="hidden" />
     </Page>
   );

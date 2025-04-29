@@ -38,6 +38,7 @@ class Apiv2 implements IApiV2 {
   async postFile<T>(path: string, file: File, payload?: Record<string, unknown>): Promise<T> {
     const formData = payload ? hashToFormData(payload, "data") : new FormData();
     formData.append("file", file, file.name);
+
     return this.axios.post<T, T>(path, formData, { headers: { "Content-Type": "multipart/form-data" } });
   }
 

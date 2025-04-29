@@ -53,22 +53,27 @@ export class ClasseController {
     @UseInterceptors(FileInterceptor("file"))
     async inscriptionEnMasseValidate(
         @Param("id") classeId: string,
-        @Body() data: InscriptionEnMasseValidationPayloadDto,
+        @Body("data") data: InscriptionEnMasseValidationPayloadDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ClassesRoutes["InscriptionEnMasseValider"]["response"]> {
         if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
+        let decodedMapping;
+        if (data.mapping) {
+            decodedMapping = Object.keys(data.mapping).reduce((acc, key) => {
+                acc[decodeURIComponent(key)] = decodeURIComponent(data.mapping[key]);
+                return acc;
+            }, {}) as any;
 
-        if (data?.mapping) {
-            Object.keys(data.mapping).forEach((key) => {
+            Object.keys(decodedMapping).forEach((key) => {
                 if (!Object.values(CLASSE_IMPORT_EN_MASSE_COLUMNS).includes(key as CLASSE_IMPORT_EN_MASSE_COLUMNS)) {
-                    throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "mapping");
+                    throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, key);
                 }
             });
         }
 
-        return this.validationInscriptionEnMasseClasse.execute(classeId, data.mapping, {
+        return this.validationInscriptionEnMasseClasse.execute(classeId, decodedMapping, {
             fileName: file.originalname,
             buffer: file.buffer,
             mimetype: file.mimetype,

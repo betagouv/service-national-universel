@@ -1,38 +1,19 @@
-import React, { useState } from "react";
-import { Modal, Button } from "@snu/ds/admin";
-import { SelectMapping } from "./SelectMapping";
+import { Button, Modal } from "@snu/ds/admin";
+import React from "react";
 import { IoAlertCircle } from "react-icons/io5";
-
-export interface ColumnMapping {
-  fileColumn: string;
-  appField: string;
-}
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, ColumnsMapping } from "snu-lib";
+import { SelectMapping } from "./SelectMapping";
+import { useMappingColumns } from "./useMappingColumns";
 
 interface MappingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRetry: (mappings: ColumnMapping[]) => void;
-  columns: string[];
+  onRetry: (mappings: ColumnsMapping) => void;
+  fileColumns: string[];
 }
 
-export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onRetry, columns }) => {
-  const [mappings, setMappings] = useState<ColumnMapping[]>(columns.map((col) => ({ fileColumn: col, appField: "" })));
-
-  const requiredFields = ["firstName", "lastName", "birthDate", "gender"];
-  const fieldLabels: Record<string, string> = {
-    firstName: "Prénom",
-    lastName: "Nom",
-    birthDate: "Date de naissance",
-    gender: "Genre",
-  };
-
-  const handleFieldChange = (fileColumn: string, appField: string) => {
-    setMappings((prev) => prev.map((mapping) => (mapping.fileColumn === fileColumn ? { ...mapping, appField } : mapping)));
-  };
-
-  const handleSubmit = () => {
-    onRetry(mappings);
-  };
+export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onRetry, fileColumns }) => {
+  const { mappings, handleFieldChange, isButtonDisabled, isColumnAlreadyMapped } = useMappingColumns(fileColumns);
 
   const header = (
     <div className="flex flex-col items-center text-center">
@@ -49,19 +30,33 @@ export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onR
   );
 
   const content = (
-    <div className="mt-8 space-y-8">
-      {Object.entries(fieldLabels).map(([key, label]) => {
-        return <SelectMapping key={key} fileColumn={columns} expectedField={label} />;
+    <div className="mt-8 space-y-10">
+      {Object.entries(mappings).map(([expectedColumnName, fileColumnName]) => {
+        return (
+          <div key={expectedColumnName} className="relative">
+            <SelectMapping
+              key={expectedColumnName}
+              fileColumns={fileColumns}
+              expectedColumnName={expectedColumnName}
+              onChange={(expectedColumnName, fileColumn) => handleFieldChange(expectedColumnName as CLASSE_IMPORT_EN_MASSE_COLUMNS, fileColumn)}
+              selectedFileColumn={fileColumnName}
+              className="pb-2"
+            />
+            {isColumnAlreadyMapped(fileColumnName) && (
+              <div className="text-red-500 text-sm absolute top-full left-0">
+                La colonne <span className="font-bold">{fileColumnName}</span> est déjà mappée.
+              </div>
+            )}
+          </div>
+        );
       })}
     </div>
   );
 
-  const isButtonDisabled = mappings.some((m) => !m.appField) || new Set(mappings.map((m) => m.appField)).size !== requiredFields.length;
-
   const footer = (
     <div className="flex justify-center w-full mt-6">
       <Button
-        onClick={handleSubmit}
+        onClick={() => onRetry(mappings)}
         leftIcon={
           <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
             <path
@@ -78,5 +73,5 @@ export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onR
     </div>
   );
 
-  return <Modal isOpen={isOpen} onClose={onClose} header={header} content={content} footer={footer} className="sm:max-w-2xl mx-auto" />;
+  return <Modal isOpen={isOpen} onClose={onClose} header={header} content={content} footer={footer} className="md:max-w-xl xl:max-w-3xl 2xl:max-w-5xl" />;
 };
