@@ -42,6 +42,7 @@ import SNUpportBox from "./components/SNUpportBox";
 import SwitchSession from "./components/SwitchSession";
 import Profil from "./components/Profil";
 import InviteHeader from "./components/invite";
+import { isResponsableDeCentre } from "@/utils";
 
 //Css !important becuse of bootstrap override
 
@@ -302,7 +303,7 @@ const SideBar = ({ sessionsList }) => {
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} onDemoChange={toggleDemo} />
         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user?.role) && <Tickets />}
-        {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user?.role) && <Session />}
+        {isResponsableDeCentre(user) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
           <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>
             <div className="flex flex-col items-center !mt-1">

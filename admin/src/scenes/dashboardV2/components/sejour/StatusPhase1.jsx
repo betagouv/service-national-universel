@@ -1,7 +1,9 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import { getNewLink, ROLES } from "@/utils";
+import { getNewLink } from "@/utils";
 import queryString from "query-string";
+import { isResponsableDeCentre } from "@/utils";
+import { useSelector } from "react-redux";
 
 export default function StatusPhase1({ statusPhase1, total, filter, role, sessionId, centerId }) {
   const WAITING_AFFECTATION = statusPhase1?.WAITING_AFFECTATION || 0;
@@ -14,13 +16,12 @@ export default function StatusPhase1({ statusPhase1, total, filter, role, sessio
 
   const filterWithoutStatusPhase1 = { ...filter };
   delete filterWithoutStatusPhase1.statusPhase1;
-  const base = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(role) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
+  const user = useSelector((state) => state.user);
+  const base = isResponsableDeCentre(user) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
 
   return (
     <div className="flex h-[220px] w-[70%] flex-col gap-6 rounded-lg bg-white px-8 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
-      <p className="text-base font-bold leading-5 text-gray-900">
-        {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(role) ? "Statut de séjour" : "Statut de phase 1"}
-      </p>
+      <p className="text-base font-bold leading-5 text-gray-900">{isResponsableDeCentre(user) ? "Statut de séjour" : "Statut de phase 1"}</p>
       <div className="flex">
         <div className="flex w-[45%] flex-col gap-2">
           <StatusText

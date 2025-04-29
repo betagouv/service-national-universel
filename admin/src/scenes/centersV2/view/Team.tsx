@@ -5,7 +5,7 @@ import { Link, useParams } from "react-router-dom";
 import { Formik, Field } from "formik";
 import validator from "validator";
 import { AuthState } from "@/redux/auth/reducer";
-import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQuery, useMutation } from "@tanstack/react-query";
 
 import { CENTER_ROLES, ROLES, translate, SENDINBLUE_TEMPLATES, SessionPhase1Type } from "snu-lib";
 import api from "@/services/api";
@@ -16,7 +16,17 @@ import Loader from "@/components/Loader";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import { Page, Container } from "@snu/ds/admin";
 import { User } from "@/types";
+import { queryClient } from "@/services/react-query";
 
+type TeamMemberAction = "add" | "delete";
+type UpdateTeamParams = {
+  action: TeamMemberAction;
+  member: TeamMate;
+};
+type MutationResponse = {
+  data: SessionPhase1Type;
+  action: TeamMemberAction;
+};
 interface TeamMate {
   firstName: string;
   lastName: string;
@@ -63,7 +73,6 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     message: "",
   });
   const user = useSelector((state: AuthState) => state.Auth.user);
-  const queryClient = useQueryClient();
 
   const { data: fetchedSession } = useQuery({
     queryKey: ["session-phase1", sessionId],
@@ -81,27 +90,45 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     if ([CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire].includes(teamate.role)) {
       setDirectionCenter(teamate);
     } else {
-      addTeamMemberMutation.mutate(teamate);
+      updateTeamMemberMutation.mutate({
+        action: "add",
+        member: teamate,
+      });
     }
   };
 
-  const addTeamMemberMutation = useMutation({
-    mutationFn: async (teamate: TeamMate) => {
-      const obj = { team: [...focusedSession.team, teamate] };
-      if (!Object.keys(obj).length) throw new Error("No data to update");
+  const updateTeamMemberMutation = useMutation<MutationResponse, Error, UpdateTeamParams>({
+    mutationFn: async ({ action, member }) => {
+      let updatedTeam;
 
-      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/team`, obj);
+      if (action === "add") {
+        updatedTeam = [...focusedSession.team, member];
+      } else if (action === "delete") {
+        const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(member));
+        if (index === -1) throw new Error("User not found in team");
+
+        updatedTeam = [...focusedSession.team];
+        updatedTeam.splice(index, 1);
+      } else {
+        throw new Error("Invalid action");
+      }
+
+      if (!updatedTeam.length && action === "add") throw new Error("No data to update");
+
+      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/team`, { team: updatedTeam });
+
       if (!ok) throw new Error(code);
-      return data;
+      return { data, action };
     },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
-      toastr.success("Succès", "Le membre a été ajouté à l'équipe");
+    onSuccess: ({ data, action }) => {
+      queryClient.setQueryData(["session-phase1", sessionId], data);
+      const message = action === "add" ? "Le membre a été ajouté à l'équipe" : "Le membre a été supprimé de l'équipe";
+      toastr.success("Succès", message);
     },
     onError: (error) => {
       console.log(error);
       capture(error);
-      toastr.error("Oups, une erreur est survenue lors de l'ajout du membre", translate(error.message));
+      toastr.error("Oups, une erreur est survenue lors de la modification", translate(error.message));
     },
   });
 
@@ -112,7 +139,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
       return data;
     },
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
+      queryClient.setQueryData(["session-phase1", sessionId], data);
       toastr.success("Succès", "Le membre a été ajouté à l'équipe");
     },
     onError: (error) => {
@@ -185,7 +212,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
       return responseSession?.data;
     },
     onSuccess: (data, variables) => {
-      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
+      queryClient.setQueryData(["session-phase1", sessionId], data);
       toastr.success("Succès", `${variables.firstName} ${variables.lastName} a reçu une invitation pour rejoindre l'équipe`);
     },
     onError: (error) => {
@@ -195,34 +222,11 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
     },
   });
 
-  const deleteTeamateMutation = useMutation({
-    mutationFn: async (user) => {
-      const index = focusedSession.team.findIndex((e) => JSON.stringify(e) === JSON.stringify(user));
-      if (index === -1) throw new Error("User not found in team");
-
-      const updatedTeam = [...focusedSession.team];
-      updatedTeam.splice(index, 1);
-
-      const { ok, data } = await api.put(`/session-phase1/${focusedSession._id}/team`, {
-        team: updatedTeam,
-      });
-
-      if (!ok) throw new Error(data.code);
-      return data;
-    },
-    onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: ["session-phase1", sessionId] });
-      toastr.success("Succès", "Le membre a été supprimé de l'équipe");
-    },
-    onError: (error) => {
-      console.log(error);
-      capture(error);
-      toastr.error("Erreur !", translate(error.message));
-    },
-  });
-
   const deleteTeamate = (user) => {
-    deleteTeamateMutation.mutate(user);
+    updateTeamMemberMutation.mutate({
+      action: "delete",
+      member: user,
+    });
   };
 
   if (!focusedSession) return <Loader />;

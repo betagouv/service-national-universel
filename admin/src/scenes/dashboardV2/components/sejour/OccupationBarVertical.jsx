@@ -3,13 +3,15 @@ import queryString from "query-string";
 import { Link } from "react-router-dom";
 import { getNewLink } from "../../../../utils";
 import React from "react";
-import { ROLES } from "snu-lib";
+import { isResponsableDeCentre } from "@/utils";
+import { useSelector } from "react-redux";
 
 export default function OccupationBarVertical({ percentage, nbDepart, departMotif, filter, role, sessionId, centerId }) {
   let height = `h-0`;
   let bgColor = "bg-blue-700";
   let occupationPercentage = percentage * 100;
-  const base = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(role) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
+  const user = useSelector((state) => state.user);
+  const base = isResponsableDeCentre(user) ? `/centre/${centerId}/${sessionId}/tableau-de-pointage` : "/volontaire";
 
   const exclusion = departMotif?.Exclusion || 0;
   const forceMajeure = departMotif && "Cas de force majeure pour le volontaire" in departMotif ? departMotif["Cas de force majeure pour le volontaire"] : 0;

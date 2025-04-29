@@ -160,7 +160,7 @@ const Home = () => {
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
-        if (![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(res.user.role)) setLoading(false);
+        if (!isResponsableDeCentre(res.user)) setLoading(false);
       } catch (e) {
         console.log(e);
         setLoading(false);
