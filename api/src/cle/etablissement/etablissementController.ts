@@ -30,7 +30,6 @@ import { buildUniqueClasseKey } from "../classe/classeService";
 import { findOrCreateReferent, inviteReferent } from "../../services/cle/referent";
 import { apiEducation } from "../../services/gouv.fr/api-education";
 import { mapEtablissementFromAnnuaireToEtablissement } from "./etablissementMapper";
-import { impersonationMiddleWare } from "../../middlewares/accessControlMiddleware";
 
 const router = express.Router();
 
@@ -64,16 +63,13 @@ router.get("/from-user", passport.authenticate("referent", { session: false, fai
   }
 });
 
-router.get("/:id", impersonationMiddleWare("referent"), async (req: UserRequest, res: Response) => {
+router.get("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    console.log("req.user", req.user);
-    console.log("req.impersonatedUser", req.impersonatedUser);
 
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 

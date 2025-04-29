@@ -2,7 +2,7 @@ import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
-import { ReferentSchema, ReferentType } from "snu-lib";
+import { ReferentSchema, ReferentType, UserDto } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import * as brevo from "../brevo";
@@ -11,6 +11,24 @@ import anonymize from "../anonymization/referent";
 const MODELNAME = "referent";
 
 const schema = new Schema(ReferentSchema);
+
+schema
+  .virtual("impersonateUser")
+  .get(function (this: any) {
+    return this._impersonateUser;
+  })
+  .set(function (this: any, user: any) {
+    this._impersonateUser = user;
+  });
+
+schema
+  .virtual("impersonateId")
+  .get(function (this: any) {
+    return this._impersonateId;
+  })
+  .set(function (this: any, id: string) {
+    this._impersonateId = id;
+  });
 
 schema.virtual("fullName").get(function () {
   const { firstName, lastName } = this;
@@ -93,6 +111,8 @@ export type ReferentDocument<T = {}> = DocumentExtended<
   ReferentType & {
     // virtual fields
     fullName?: string;
+    impersonateUser?: UserDto;
+    impersonateId?: string;
   } & T
 >;
 type SchemaExtended = ReferentDocument & UserExtension;

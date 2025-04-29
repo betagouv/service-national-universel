@@ -15,6 +15,7 @@ import User from "../icons/User";
 import VericalDot from "../icons/VerticalDot";
 import Separator from "./Separator";
 import { HiOutlinePaperClip, HiOutlineMail } from "react-icons/hi";
+import { closeImpersonationChannel } from "@/utils/broadcastChannel";
 
 export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -53,6 +54,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
       setIsLoggingOut(true);
       await api.post(`/referent/logout`);
       dispatch(setUser(null));
+      closeImpersonationChannel();
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {

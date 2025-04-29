@@ -2,6 +2,7 @@ import api from "@/services/api";
 import plausibleEvent from "@/services/plausible";
 import store from "@/redux/store";
 import { setUser } from "@/redux/auth/actions";
+import { getImpersonationChannel } from "@/utils/broadcastChannel";
 
 export const signinAs = async (type: "referent" | "young", userId: string) => {
   const { ok, data, token } = await api.post(`/referent/signin_as/${type}/${userId}`);
@@ -10,8 +11,7 @@ export const signinAs = async (type: "referent" | "young", userId: string) => {
   if (!token) throw new Error("Erreur : aucun token");
   if (type === "referent") {
     api.setToken(token);
-    const channel = new BroadcastChannel("impersonation");
-    channel.postMessage({ action: "impersonation_started" });
+    getImpersonationChannel().postMessage({ action: "impersonation_started" });
   }
 
   return data;
@@ -24,6 +24,7 @@ export const restorePreviousSignin = async () => {
 
     api.setToken(token);
     store.dispatch(setUser(data));
+    getImpersonationChannel().postMessage({ action: "impersonation_stopped" });
     plausibleEvent("Admin - Reprendre sa place");
   } catch (e) {
     console.log(e);

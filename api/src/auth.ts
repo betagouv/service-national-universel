@@ -820,7 +820,7 @@ class Auth {
   async refreshToken(req, res) {
     const { error, value } = Joi.object({ token_ref: Joi.string(), token_young: Joi.string() }).validate({ token_ref: req.cookies.jwt_ref, token_young: req.cookies.jwt_young });
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-
+    console.log(req.user);
     try {
       const { user } = req;
       user.set({ lastActivityAt: Date.now() });

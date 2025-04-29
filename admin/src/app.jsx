@@ -213,7 +213,7 @@ const Home = () => {
 
   const impersonationChannel = new BroadcastChannel("impersonation");
   impersonationChannel.onmessage = (event) => {
-    if (event.data.action === "impersonation_started") {
+    if (event.data.action === "impersonation_started" || event.data.action === "impersonation_stopped") {
       window.location.reload();
     }
   };
