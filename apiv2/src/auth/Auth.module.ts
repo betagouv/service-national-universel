@@ -19,6 +19,6 @@ import { PermissionService } from "./core/Permission.service";
         ...roleMongoProviders,
         ...permissionMongoProviders,
     ],
-    exports: [PermissionGateway, RoleGateway],
+    exports: [PermissionService, PermissionGateway, RoleGateway],
 })
 export class AuthModule {}
