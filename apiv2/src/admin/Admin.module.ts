@@ -60,7 +60,6 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
-import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
@@ -68,6 +67,7 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
+import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 
 @Module({
     imports: [
@@ -111,6 +111,7 @@ import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
         SimulationAffectationCLEService,
         DesistementService,
         ValiderDesisterPostAffectation,
+        ValidationInscriptionEnMasseClasse,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,

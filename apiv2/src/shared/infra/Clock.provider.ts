@@ -5,7 +5,9 @@ import {
     format,
     isAfter as isAfterFns,
     isBefore as isBeforeFns,
+    isValid,
     isWithinInterval as isWithinIntervalFns,
+    parse,
 } from "date-fns";
 
 import { getZonedDate } from "snu-lib";
@@ -27,6 +29,17 @@ export class ClockProvider implements ClockGateway {
     }
     isValidDate(date: Date): boolean {
         return !isNaN(new Date(date).getTime());
+    }
+    isValidDateFormat(date: string, format: string): boolean {
+        try {
+            const parsed = parse(date, format, new Date());
+            return isValid(parsed);
+        } catch (error) {
+            return false;
+        }
+    }
+    parseDate(date: string, format: string): Date {
+        return parse(date, format, new Date());
     }
     formatShort(date: Date): string {
         return format(date, "dd/MM/yyyy");

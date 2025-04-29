@@ -1,15 +1,13 @@
-import React, { RefObject } from "react";
+import React from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineUpload } from "react-icons/hi";
 import { Button } from "@snu/ds/admin";
 
 interface FileUploadPanelProps {
-  fileInputRef: RefObject<HTMLInputElement>;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   handleFileUploadClick: () => void;
 }
 
-export const FileUploadPanel = ({ fileInputRef, handleFileChange, handleFileUploadClick }: FileUploadPanelProps) => {
+export const FileUploadPanel = ({ handleFileUploadClick }: FileUploadPanelProps) => {
   return (
     <div className="py-12 px-4 max-w-4xl mx-auto text-center">
       <div className="flex justify-center mb-6">
@@ -26,8 +24,6 @@ export const FileUploadPanel = ({ fileInputRef, handleFileChange, handleFileUplo
       </p>
 
       <p className="text-md mb-8 text-gray-600">Format .xlsx • Jusqu'à 5Mo</p>
-
-      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx" className="hidden" />
 
       <div className="flex flex-col md:flex-row items-center justify-center gap-4">
         <Button type="wired" leftIcon={<HiOutlineDownload size={20} />} title="Télécharger le modèle d'import" className="w-full md:w-auto" />

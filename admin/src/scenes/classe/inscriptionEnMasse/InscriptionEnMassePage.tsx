@@ -1,4 +1,4 @@
-import { Container, Header, Page, Button, Modal } from "@snu/ds/admin";
+import { Container, Header, Page } from "@snu/ds/admin";
 import React, { useCallback, useRef } from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -33,11 +33,11 @@ export default function InscriptionEnMasse() {
     studentCount,
     successModalOpen,
     handleFileChange,
-    setShowErrorDisplay,
     setMappingModalOpen,
     setSuccessModalOpen,
     setStudentCount,
   } = useFileUploadHandler({
+    classeId: id,
     onMappingNeeded: (columns) => {
       console.log("Mapping needed for columns:", columns);
     },
@@ -61,7 +61,7 @@ export default function InscriptionEnMasse() {
   };
 
   const handleRetryUpload = () => {
-    setShowErrorDisplay(false);
+    // setShowErrorDisplay(false);
     handleFileUploadClick();
   };
 
@@ -120,12 +120,13 @@ export default function InscriptionEnMasse() {
             <ValidationFile errorMessage={errorMessage} onRetry={handleRetryUpload} />
           </div>
         ) : (
-          <FileUploadPanel fileInputRef={fileInputRef} handleFileChange={handleFileChange} handleFileUploadClick={handleFileUploadClick} />
+          <FileUploadPanel handleFileUploadClick={handleFileUploadClick} />
         )}
       </Container>
 
       <SuccessModal isOpen={successModalOpen} onClose={closeSuccessModal} onConfirm={confirmImport} studentCount={studentCount} />
       <MappingModal isOpen={mappingModalOpen} onClose={closeMappingModal} onRetry={onRetryMapping} columns={fileColumns} />
+      <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx" className="hidden" />
     </Page>
   );
 }
