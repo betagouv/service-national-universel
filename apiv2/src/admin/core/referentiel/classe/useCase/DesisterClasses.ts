@@ -7,6 +7,7 @@ import { UseCase } from "@shared/core/UseCase";
 import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
+import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
 import {
     ClasseDesisterModel,
     ClasseDesisterRapport,
@@ -23,6 +24,7 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
+        @Inject(DesistementService) private readonly desistementService: DesistementService,
     ) {}
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseDesisterRapport[]> {
         const report: ClasseDesisterRapport[] = [];
@@ -97,26 +99,18 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
             classe.sessionId,
         );
         // Filtrer les jeunes ayant le même cohortId que la classe
-        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => ({
-            ...jeune,
-            statut: YOUNG_STATUS.WITHDRAWN,
-            lastStatusAt: new Date(),
-            desistementMotif: "other",
+        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => {
+            // First apply status changes
+            const updatedJeune = {
+                ...jeune,
+                statut: YOUNG_STATUS.WITHDRAWN,
+                lastStatusAt: new Date(),
+                desistementMotif: "other",
+            };
+
             // reset des informations d'affectation
-            centreId: undefined,
-            sejourId: undefined,
-            pointDeRassemblementId: undefined,
-            ligneDeBusId: undefined,
-            hasPDR: undefined,
-            transportInfoGivenByLocal: undefined,
-            deplacementPhase1Autonomous: undefined,
-            presenceArrivee: undefined,
-            presenceJDM: undefined,
-            departInform: undefined,
-            departSejourAt: undefined,
-            departSejourMotif: undefined,
-            departSejourMotifComment: undefined,
-        }));
+            return this.desistementService.resetInfoAffectation(updatedJeune);
+        });
 
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
 

@@ -15,6 +15,7 @@ describe("ImporterClasses", () => {
     let mockJeuneGateway: any;
     let mockSejourGateway: any;
     let mockReferentielService: any;
+    let mockDesistementService: any;
     let mockLogger: any;
     beforeEach(() => {
         mockFileGateway = {
@@ -50,6 +51,9 @@ describe("ImporterClasses", () => {
             log: jest.fn(),
             warn: jest.fn(),
         };
+        mockDesistementService = {
+            resetInfoAffectation: jest.fn((jeune) => jeune),
+        };
 
         useCase = new ImporterClasses(
             mockFileGateway,
@@ -61,6 +65,7 @@ describe("ImporterClasses", () => {
             mockSejourGateway,
             mockReferentielService,
             mockLogger,
+            mockDesistementService,
         );
     });
 

@@ -27,6 +27,25 @@ export class DesistementService {
         private readonly affectationService: AffectationService,
     ) {}
 
+    resetInfoAffectation(jeune: JeuneModel): JeuneModel {
+        return {
+            ...jeune,
+            centreId: undefined,
+            sejourId: undefined,
+            pointDeRassemblementId: undefined,
+            ligneDeBusId: undefined,
+            hasPDR: undefined,
+            transportInfoGivenByLocal: undefined,
+            deplacementPhase1Autonomous: undefined,
+            presenceArrivee: undefined,
+            presenceJDM: undefined,
+            departInform: undefined,
+            departSejourAt: undefined,
+            departSejourMotif: undefined,
+            departSejourMotifComment: undefined,
+        };
+    }
+
     groupJeunesByReponseAuxAffectations(jeunes: JeuneModel[], sessionId: string) {
         return jeunes.reduce(
             (acc, jeune) => {
@@ -69,26 +88,17 @@ export class DesistementService {
     async desisterJeunes(jeunes: JeuneModel[], sessionId: string): Promise<number> {
         const jeunesList: JeuneModel[] = [];
         for (const jeune of jeunes) {
-            jeunesList.push({
+            const jeuneUpdatedStatus = {
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
                 statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 desistementMotif: "Non confirmation de la participation au séjour",
-                // reset des informations d'affectation
-                centreId: undefined,
-                sejourId: undefined,
-                pointDeRassemblementId: undefined,
-                ligneDeBusId: undefined,
-                hasPDR: undefined,
-                transportInfoGivenByLocal: undefined,
-                deplacementPhase1Autonomous: undefined,
-                presenceArrivee: undefined,
-                presenceJDM: undefined,
-                departInform: undefined,
-                departSejourAt: undefined,
-                departSejourMotif: undefined,
-                departSejourMotifComment: undefined,
-            });
+            };
+
+            // reset affectation info
+            const updatedJeune = this.resetInfoAffectation(jeuneUpdatedStatus);
+
+            jeunesList.push(updatedJeune);
         }
 
         const res = await this.jeuneGateway.bulkUpdate(jeunesList);

@@ -11,6 +11,7 @@ describe("DesisterClasses", () => {
     let mockSessionGateway: any;
     let mockClasseGateway: any;
     let mockJeuneGateway: any;
+    let mockDesistementService: any;
 
     beforeEach(() => {
         mockFileGateway = {
@@ -30,8 +31,11 @@ describe("DesisterClasses", () => {
         mockSessionGateway = {
             findBySnuId: jest.fn(),
         };
+        mockDesistementService = {
+            resetInfoAffectation: jest.fn((jeune) => jeune),
+        };
 
-        useCase = new DesisterClasses(mockFileGateway, mockClasseGateway, mockJeuneGateway);
+        useCase = new DesisterClasses(mockFileGateway, mockClasseGateway, mockJeuneGateway, mockDesistementService);
     });
 
     it("should successfully process class withdrawal", async () => {
@@ -57,6 +61,7 @@ describe("DesisterClasses", () => {
         mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.findById.mockResolvedValue(mockClasse);
         mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue(mockJeunes);
+        mockDesistementService.resetInfoAffectation.mockImplementation((jeune) => jeune);
         mockClasseGateway.updateStatut.mockResolvedValue({ ...mockClasse, statut: STATUS_CLASSE.WITHDRAWN });
 
         const result = await useCase.execute({
