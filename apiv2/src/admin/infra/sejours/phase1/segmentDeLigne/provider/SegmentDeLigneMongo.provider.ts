@@ -1,10 +1,10 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { LigneToPointSchema, LigneToPointType } from "snu-lib";
+import { MONGO_COLLECTION, LigneToPointSchema, LigneToPointType } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type SegmentDeLigneDocument = HydratedDocument<LigneToPointType>;
-export const SegmentDeLigneName = "lignetopoint";
+export const SegmentDeLigneName = MONGO_COLLECTION.LIGNE_TO_POINT;
 export const SEGMENTLIGNE_MONGOOSE_ENTITY = "SEGMENTLIGNE_MONGOOSE_ENTITY";
 
 const SegmentDeLigneSchemaRef = new mongoose.Schema(LigneToPointSchema);
