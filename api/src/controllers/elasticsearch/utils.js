@@ -91,7 +91,8 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
-  const search = (queryFilters.searchbar || []).filter((e) => e.trim()).length ? searchSubQuery(queryFilters.searchbar, searchFields) : null;
+  const searchbar = queryFilters?.searchbar || [];
+  const search = searchbar.filter((e) => e.trim()).length ? searchSubQuery(searchbar, searchFields) : null;
   // Hits request body
   const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
   let countAggsQuery = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
