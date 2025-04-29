@@ -1,7 +1,7 @@
 import axios, { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import { toastr } from "react-redux-toastr";
 
-import { FunctionalException, HttpError, translate } from "snu-lib";
+import { FunctionalException, hashToFormData, HttpError, translate } from "snu-lib";
 
 import { apiv2URL } from "@/config";
 import { capture } from "@/sentry";
@@ -35,8 +35,8 @@ class Apiv2 implements IApiV2 {
     return this.axios.post<T, T>(path, payload);
   }
 
-  async postFile<T>(path: string, file: File): Promise<T> {
-    const formData = new FormData();
+  async postFile<T>(path: string, file: File, payload?: Record<string, unknown>): Promise<T> {
+    const formData = payload ? hashToFormData(payload, "data") : new FormData();
     formData.append("file", file, file.name);
     return this.axios.post<T, T>(path, formData, { headers: { "Content-Type": "multipart/form-data" } });
   }
