@@ -1,11 +1,11 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { CohortGroupSchema, CohortGroupType } from "snu-lib";
+import { CohortGroupSchema, CohortGroupType, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "cohortGroup";
+const MODELNAME = MONGO_COLLECTION.COHORT_GROUP;
 
 const schema = new Schema(CohortGroupSchema);
 

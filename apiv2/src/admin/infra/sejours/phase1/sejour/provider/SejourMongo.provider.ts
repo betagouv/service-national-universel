@@ -1,12 +1,12 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { SessionPhase1FileSchema, SessionPhase1Schema, SessionPhase1Type } from "snu-lib";
+import { MONGO_COLLECTION, SessionPhase1FileSchema, SessionPhase1Schema, SessionPhase1Type } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type SejourDocument = HydratedDocument<SessionPhase1Type>;
-export const SejourName = "sessionphase1";
+export const SejourName = MONGO_COLLECTION.SESSION_PHASE1;
 export const SEJOUR_MONGOOSE_ENTITY = "SEJOUR_MONGOOSE_ENTITY";
 
 const SejourSchemaRef = new mongoose.Schema({

@@ -3,6 +3,7 @@ import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
 import {
+    MONGO_COLLECTION,
     PlanTransportSchema,
     PlanTransportType,
     ModificationBusSchema,
@@ -11,7 +12,7 @@ import {
 } from "snu-lib";
 
 export type PlanDeTransportDocument = HydratedDocument<PlanTransportType>;
-export const PlanDeTransportName = "plandetransport";
+export const PlanDeTransportName = MONGO_COLLECTION.PLAN_TRANSPORT;
 export const PLANDETRANSPORT_MONGOOSE_ENTITY = "PLANDETRANSPORT_MONGOOSE_ENTITY";
 
 const PlanDeTransportSchemaRef = new mongoose.Schema({

@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ImportPlanTransportSchema, InterfaceExtended } from "snu-lib";
+import { ImportPlanTransportSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
-const MODELNAME = "importplandetransport";
+const MODELNAME = MONGO_COLLECTION.IMPORT_PLAN_TRANSPORT;
 
 const schema = new Schema(ImportPlanTransportSchema);
 

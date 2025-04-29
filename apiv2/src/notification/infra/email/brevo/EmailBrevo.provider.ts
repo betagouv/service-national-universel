@@ -95,7 +95,7 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         const listIds = [1448];
         if (referent.role) {
             if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(referent.role)) {
-                listIds.push(1243);
+                listIds.push(1243, 2225);
             }
             if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(referent.role)) {
                 listIds.push(1449);
