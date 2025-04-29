@@ -8,7 +8,7 @@ import { updateYoung } from "./repository";
 export default function useUpdateAccount(section: string) {
   const dispatch = useDispatch();
   return useMutation({
-    mutationFn: (payload: Partial<YoungType>) => updateYoung(section, payload),
+    mutationFn: (payload: Partial<YoungType & { parent2: boolean }>) => updateYoung(section, payload),
     onSuccess: (data) => {
       toastr.success("Succès", "Votre profil a été mis à jour.");
       dispatch(setYoung(data));

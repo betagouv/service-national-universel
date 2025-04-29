@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { BiLoaderAlt } from "react-icons/bi";
 import { useForm, Controller } from "react-hook-form";
-import { isPhoneNumberWellFormated } from "snu-lib";
+import { validatePhoneNumber } from "@/utils/form-validation.utils";
 import useUpdateAccount from "../../lib/useUpdateAccount";
 import Input from "@/components/forms/inputs/Input";
 import Select from "@/components/forms/inputs/Select";
@@ -24,19 +24,20 @@ type FormValues = {
     phoneNumber: string;
     phoneZone: string;
   };
-  psc1Info: string | null;
+  psc1Info: boolean | null;
 };
 
 const AccountGeneralPage = () => {
   const { young } = useAuth();
-  const { canUpdatePSC1 } = usePermissions();
+  // const { canUpdatePSC1 } = usePermissions();
+  const canUpdatePSC1 = true;
   const searchParams = new URLSearchParams(window.location.search);
   const newEmailValidationToken = searchParams.get("newEmailValidationToken");
   const shouldValidateEmail = newEmailValidationToken && young.newEmail;
   const { mutate: updateProfile, isPending: isSubmitting } = useUpdateAccount("profile");
   const [isChangeAddressModalOpen, setChangeAddressModalOpen] = useState(false);
   const [isChangeEmailModalOpen, setChangeEmailModalOpen] = useState(shouldValidateEmail ? true : false);
-  const { handleSubmit, reset, control } = useForm<FormValues>({
+  const { handleSubmit, reset, control, register } = useForm<FormValues>({
     defaultValues: {
       gender: young.gender || "male",
       email: young.email,
@@ -44,18 +45,17 @@ const AccountGeneralPage = () => {
         phoneNumber: young.phone,
         phoneZone: young.phoneZone,
       },
-      psc1Info: young.psc1Info,
+      psc1Info: young.psc1Info === "true" ? true : young.psc1Info === "false" ? false : null,
     },
   });
 
   const handleSubmitGeneralForm = (formValues: FormValues) => {
-    const youngDataToUpdate = {
+    updateProfile({
       gender: formValues.gender,
       phone: formValues.phone.phoneNumber.trim(),
       phoneZone: formValues.phone.phoneZone,
-      psc1Info: formValues.psc1Info,
-    };
-    updateProfile(youngDataToUpdate);
+      psc1Info: formValues.psc1Info === true ? "true" : formValues.psc1Info === false ? "false" : null,
+    });
   };
 
   return (
@@ -80,16 +80,10 @@ const AccountGeneralPage = () => {
                   <Input label="Nom" name="lastName" placeholder="Dupond" className="basis-1/2" value={young.lastName} disabled />
                   <Input label="Prénom" name="firstName" placeholder="Gaspard" className="basis-1/2" value={young.firstName} disabled />
                 </FormRow>
-                <Controller
-                  name="gender"
-                  control={control}
-                  render={({ field }) => (
-                    <Select label="Sexe" name="gender" value={field.value} onChange={field.onChange}>
-                      <option value="male">Homme</option>
-                      <option value="female">Femme</option>
-                    </Select>
-                  )}
-                />
+                <Select label="Sexe" {...register("gender")}>
+                  <option value="male">Homme</option>
+                  <option value="female">Femme</option>
+                </Select>
                 <Input label="Date de naissance" name="birthdateAt" value={young.birthdateAt ? new Date(young.birthdateAt).toLocaleDateString("fr-fr") : undefined} disabled />
                 <Input type="email" label="Adresse email" name="email" value={young.email} disabled />
                 <InlineButton onClick={() => setChangeEmailModalOpen(true)} className="text-gray-500 hover:text-gray-700 text-sm font-medium mb-4">
@@ -98,10 +92,7 @@ const AccountGeneralPage = () => {
                 <Controller
                   name="phone"
                   control={control}
-                  rules={{
-                    required: "Le numéro de téléphone est requis",
-                    validate: (value) => isPhoneNumberWellFormated(value.phoneNumber, value.phoneZone) || "Le numéro de téléphone est invalide",
-                  }}
+                  rules={{ required: "Le numéro de téléphone est requis", validate: validatePhoneNumber }}
                   render={({ field, fieldState }) => <InputPhone label="Téléphone" value={field.value} error={fieldState.error?.message} onChange={field.onChange} />}
                 />
               </section>

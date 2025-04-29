@@ -1,7 +1,7 @@
 import React from "react";
 import ErrorMessage from "../ErrorMessage";
 
-const Checkbox = ({ label = "", className = "", name = "", checked = false, onChange = () => null, error = null, disabled = false, ...rest }) => {
+const Checkbox = ({ label = "", className = "", name = "", checked = false, onChange, error = null, disabled = false, ...rest }) => {
   const handleChange = (event) => {
     onChange(event.target.checked);
   };
