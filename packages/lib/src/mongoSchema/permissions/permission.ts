@@ -1,6 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 import { InterfaceExtended } from "../..";
-import { PERMISSION_ACTIONS_LIST } from "../../permissions";
+import { PERMISSION_ACTIONS_LIST } from "../../permissions/constantes/actions";
 
 export const PermissionPolicyWhereSchema = {
   field: {

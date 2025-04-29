@@ -1,6 +1,6 @@
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 
-import { ReferentType, getUserRoles } from "snu-lib";
+import { PermissionDto, ReferentType, getUserRoles } from "snu-lib";
 
 import { PermissionGateway } from "./Permission.gateway";
 import { RoleGateway } from "./Role.gateway";
@@ -12,7 +12,7 @@ export class PermissionService {
         @Inject(RoleGateway) private readonly roleGateway: RoleGateway,
     ) {}
 
-    async getAcl(user: Partial<ReferentType>) {
+    async getAcl(user: Partial<ReferentType>): Promise<PermissionDto[]> {
         if (!user) return [];
         const rolesCodes = getUserRoles(user);
         const roles = await this.roleGateway.findByCodesAndParent(rolesCodes);
@@ -22,7 +22,7 @@ export class PermissionService {
             code: permission.code,
             action: permission.action,
             ressource: permission.ressource,
-            policy: permission.policy,
+            policy: permission.policy || [],
         }));
     }
 }

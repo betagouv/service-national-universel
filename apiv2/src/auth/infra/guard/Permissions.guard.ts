@@ -1,7 +1,7 @@
 import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
-import { HasPermissionParams, HasPermissionsParams, isAclAuthorized } from "snu-lib";
+import { HasPermissionParams, HasPermissionsParams, isAuthorized } from "snu-lib";
 
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { ReferentMapper } from "@admin/infra/iam/repository/mongo/Referent.mapper";
@@ -28,6 +28,6 @@ export class PermissionGuard implements CanActivate {
             acl: request.user.acl,
         } as HasPermissionParams["user"];
 
-        return !permissions.some(({ ressource, action }) => isAclAuthorized({ user, ressource, action }));
+        return !permissions.some(({ ressource, action }) => isAuthorized({ user, ressource, action }));
     }
 }
