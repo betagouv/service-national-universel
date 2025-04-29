@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useState } from "react";
 import { HiArrowNarrowRight } from "react-icons/hi";
+import { Label, Select, SelectOption } from "@snu/ds/admin";
 
 export type SelectMappingProps = {
   fileColumn: string[];
@@ -8,18 +9,24 @@ export type SelectMappingProps = {
 };
 
 export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumn, expectedField, className = "" }) => {
+  const [selectedColumn, setSelectedColumn] = useState(fileColumn[0] || "");
+
+  const options = fileColumn.map((column) => ({
+    value: column,
+    label: column,
+  }));
+
   return (
     <div className={`flex items-center ${className}`}>
       <div className="w-5/12">
-        <p className="mb-1 text-sm text-gray-500">Nom de la colonne dans votre fichier</p>
+        <Label title="Nom de la colonne dans votre fichier" name="fileColumn" />
         <div className="relative">
-          <select className="block w-full bg-white border border-gray-300 rounded-md py-2 pl-3 pr-10 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500">
-            {fileColumn.map((column) => (
-              <option key={column} value={column}>
-                {column}
-              </option>
-            ))}
-          </select>
+          <Select
+            options={options}
+            value={options.find((option) => option.value === selectedColumn)}
+            onChange={(option: SelectOption<string>) => setSelectedColumn(option.value)}
+            className="w-full"
+          />
         </div>
       </div>
 
@@ -28,7 +35,7 @@ export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumn, expect
       </div>
 
       <div className="w-5/12">
-        <p className="mb-1 text-sm text-gray-500">Information attendue</p>
+        <Label title="Information attendue" name="expectedField" />
         <div className="relative">
           <div className="w-full bg-white border border-green-500 rounded-md py-2 px-3 text-gray-900">{expectedField}</div>
         </div>

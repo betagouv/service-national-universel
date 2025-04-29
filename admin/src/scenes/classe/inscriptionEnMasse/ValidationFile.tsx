@@ -1,5 +1,6 @@
 import React from "react";
 import { HiOutlineExclamation } from "react-icons/hi";
+import { Button } from "@snu/ds/admin";
 
 export type ImportEnMasseError = {
   category: string;
@@ -52,14 +53,15 @@ export const ValidationFile = ({ errorMessage, onRetry }: ValidationFileProps) =
       </div>
 
       <div className="text-center mt-6">
-        <button
+        <Button
           onClick={onRetry}
-          className="inline-flex justify-center items-center rounded-md px-4 py-2 bg-blue-600 text-white text-base font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 sm:text-sm">
-          <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-          </svg>
-          Téléverser le fichier corrigé
-        </button>
+          leftIcon={
+            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+            </svg>
+          }
+          title="Téléverser le fichier corrigé"
+        />
       </div>
     </div>
   );

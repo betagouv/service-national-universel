@@ -1,5 +1,4 @@
-import Loader from "@/components/Loader";
-import { Container, Header, Page } from "@snu/ds/admin";
+import { Container, Header, Page, Button, Modal } from "@snu/ds/admin";
 import React, { useCallback, useRef } from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
@@ -11,6 +10,7 @@ import { ColumnMapping, MappingModal } from "./MappingModal";
 import { SuccessModal } from "./SuccessModal";
 import { ValidationFile } from "./ValidationFile";
 import { useFileUploadHandler } from "./useFileUploadHandler";
+import Loader from "@/components/Loader";
 
 export default function InscriptionEnMasse() {
   const { id } = useParams<{ id: string }>();
@@ -48,12 +48,12 @@ export default function InscriptionEnMasse() {
       console.error("File processing errors:", errors);
     },
   });
-  console.log("fileColumns", fileColumns);
+
   if (isClasseLoading) return <Loader />;
-  if (!classe) return <div>Classe non trouvée</div>;
+  if (!classe) return <Container>Classe non trouvée</Container>;
 
   if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role)) {
-    return <div>Vous n'avez pas les droits pour accéder à cette page.</div>;
+    return <Container>Vous n'avez pas les droits pour accéder à cette page.</Container>;
   }
 
   const handleFileUploadClick = () => {
