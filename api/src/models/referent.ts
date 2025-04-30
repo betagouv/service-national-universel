@@ -13,21 +13,12 @@ const MODELNAME = MONGO_COLLECTION.REFERENT;
 const schema = new Schema(ReferentSchema);
 
 schema
-  .virtual("impersonateUser")
+  .virtual("impersonateBy")
   .get(function (this: any) {
-    return this._impersonateUser;
+    return this._impersonatedBy;
   })
   .set(function (this: any, user: any) {
-    this._impersonateUser = user;
-  });
-
-schema
-  .virtual("impersonateId")
-  .get(function (this: any) {
-    return this._impersonateId;
-  })
-  .set(function (this: any, id: string) {
-    this._impersonateId = id;
+    this._impersonatedBy = user;
   });
 
 schema.virtual("fullName").get(function () {
@@ -111,8 +102,7 @@ export type ReferentDocument<T = {}> = DocumentExtended<
   ReferentType & {
     // virtual fields
     fullName?: string;
-    impersonateUser?: UserDto;
-    impersonateId?: string;
+    impersonateBy?: UserDto;
   } & T
 >;
 type SchemaExtended = ReferentDocument & UserExtension;

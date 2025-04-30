@@ -46,8 +46,7 @@ async function validateUser(Model, jwtPayload, done, role) {
         if (value._impersonateId) {
           const impersonateUser = await Model.findById(value._impersonateId);
           if (impersonateUser) {
-            user.set("impersonateUser", impersonateUser);
-            user.set("impersonateId", value._impersonateId);
+            user.set("impersonateBy", impersonateUser);
           }
         }
         return done(null, user);
