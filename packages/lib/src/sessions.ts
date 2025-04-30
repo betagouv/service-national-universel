@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { APPLICATION_STATUS, COHORT_STATUS, EQUIVALENCE_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format, isPast } from "date-fns";
@@ -140,25 +140,24 @@ function hasAccessToReinscription(young: YoungType) {
   return young.cohort === "à venir";
 }
 
-function canApplyToPhase2(young: YoungType, cohort: CohortType) {
-  if (cohort.status === COHORT_STATUS.ARCHIVED) return false;
-  if (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) return true;
-  if ([YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)) return true;
-  return false;
+const hasValidatedPhase1 = (young: YoungType) =>
+  (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) || [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+
+const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
+
+// Ils peuvent voir les missions tant que la cohorte n'est pas archivée
+function canViewMissions(young: YoungType, cohort: CohortType) {
+  return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
 }
 
-function estActifEnPhase2(young: YoungType) {
-  const isDoingAMission = young.phase2ApplicationStatus.some((status) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status as any));
-  const isWaitingForEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence as any);
-  return isDoingAMission || isWaitingForEquivalence;
+// Mais ils ne peuvent candidater qu'après avoir été validés
+function canCreateApplications(young: YoungType, cohort: CohortType) {
+  return hasValidatedPhase1(young) && !isCohortTooOld(cohort);
 }
 
-function canViewPhase2(young: YoungType, cohort: CohortType) {
-  if (cohort.status === COHORT_STATUS.ARCHIVED) return false;
-  if (estActifEnPhase2(young)) return true;
-  if (canApplyToPhase2(young, cohort)) return true;
-  if (young.cohesionStayPresence === "true") return true;
-  return false;
+// Ils peuvent demander des reconnaissances d'équivalences même si leur cohorte est archivée.
+function canCreateEquivalences(young: YoungType) {
+  return hasValidatedPhase1(young);
 }
 
 export {
@@ -170,8 +169,9 @@ export {
   inscriptionCreationOpenForYoungs,
   hasAccessToReinscription,
   isCohortTooOld,
-  canApplyToPhase2,
-  canViewPhase2,
+  canViewMissions,
+  canCreateApplications,
+  canCreateEquivalences,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

@@ -2,8 +2,7 @@ import {
   SENDINBLUE_TEMPLATES,
   MISSION_STATUS,
   APPLICATION_STATUS,
-  isCohortTooOld,
-  canApplyToPhase2,
+  canCreateApplications,
   calculateAge,
   YoungType,
   MissionType,
@@ -144,11 +143,7 @@ export const updateApplicationStatus = async (mission, fromUser) => {
 export const getAuthorizationToApply = async (mission: MissionType, young: YoungType, cohort: CohortType) => {
   let refusalMessages: string[] = [];
 
-  if (isCohortTooOld(cohort)) {
-    refusalMessages.push("Le délai pour candidater est dépassé.");
-  }
-
-  if (!canApplyToPhase2(young, cohort)) {
+  if (!canCreateApplications(young, cohort)) {
     refusalMessages.push("Pour candidater, vous devez avoir validé votre séjour de cohésion");
   }
 
