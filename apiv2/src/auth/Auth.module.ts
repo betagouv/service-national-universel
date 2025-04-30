@@ -1,4 +1,6 @@
 import { Logger, Module } from "@nestjs/common";
+import { ConfigModule } from "@nestjs/config";
+import { ClsModule } from "nestjs-cls";
 
 import { DatabaseModule } from "@infra/Database.module";
 import { RoleGateway } from "./core/Role.gateway";
@@ -10,7 +12,7 @@ import { permissionMongoProviders } from "./infra/provider/Permission.provider";
 import { PermissionService } from "./core/Permission.service";
 
 @Module({
-    imports: [DatabaseModule],
+    imports: [DatabaseModule, ConfigModule, ClsModule],
     providers: [
         Logger,
         PermissionService,
