@@ -3,6 +3,8 @@ import { QueryCache, QueryClient } from "@tanstack/react-query";
 import { toastr } from "react-redux-toastr";
 import { ERRORS } from "snu-lib";
 
+const filteredErrors = [ERRORS.NOT_FOUND, ERRORS.UNAUTHORIZED, ERRORS.FORBIDDEN];
+
 export const queryClient = new QueryClient({
   queryCache: new QueryCache({
     onError: (error, query) => {
@@ -10,11 +12,9 @@ export const queryClient = new QueryClient({
       if (query.meta?.errorMessage) {
         toastr.error("Erreur", query.meta.errorMessage);
       }
-      // Filter out 401, 404 and 403 errors
-      if (error.message === ERRORS.NOT_FOUND || error.message === ERRORS.UNAUTHORIZED || error.message === ERRORS.FORBIDDEN) {
-        return;
+      if (!filteredErrors.includes(error.message)) {
+        capture(error);
       }
-      capture(error);
     },
   }),
 });
