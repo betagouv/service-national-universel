@@ -4,6 +4,10 @@ on:
   workflow_dispatch:
   schedule:
     - cron: "47 1 * * 3" # Every wednesday at 01:47 UTC
+  push: # TODO: remove
+    branches:
+      - fix-docker-cron
+    
 
 env:
   DOCKER_REGISTRY: ${{ vars.SCW_DOCKER_REGISTRY }}
@@ -51,6 +55,7 @@ jobs:
           APP_NAME: app
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
           file: devops/build/docker/Dockerfile.front
           tags: |
@@ -75,6 +80,7 @@ jobs:
           APP_NAME: admin
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
           file: devops/build/docker/Dockerfile.front
           tags: |
@@ -101,6 +107,7 @@ jobs:
           APP_NAME: api
         uses: docker/build-push-action@v6
         with:
+          context: .
           push: true
           file: devops/build/docker/Dockerfile.back
           tags: |
