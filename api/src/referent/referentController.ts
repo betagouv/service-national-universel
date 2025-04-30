@@ -1480,6 +1480,7 @@ async function populateReferent(ref) {
     ref.classe = classes;
 
     const lastClasse = classes.find((classe) => classe.schoolYear === ClasseSchoolYear.YEAR_2024_2025) || classes[0];
+    if (!lastClasse) throw new Error(ERRORS.NOT_FOUND);
     const etablissement = await EtablissementModel.findById(lastClasse.etablissementId).lean();
     if (!etablissement) throw new Error(ERRORS.NOT_FOUND);
     ref.etablissement = etablissement;
