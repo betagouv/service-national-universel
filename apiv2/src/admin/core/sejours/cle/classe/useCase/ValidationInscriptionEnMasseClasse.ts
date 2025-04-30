@@ -162,7 +162,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const errors: ClasseImportEnMasseValidationDto["errors"] = [];
         for (const [index, row] of dataToImport.entries()) {
             const line = index + 2;
-            const hasError = errorsFormat.find((error) => error.line === line);
+            const hasError = errorsFormat.find((error) => !error.line || error.line === line);
             if (!hasError) {
                 // check etablissement
                 if (
