@@ -1,7 +1,7 @@
 import React from "react";
-import { HiOutlineExclamation } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlineUpload } from "react-icons/hi";
 import { Button } from "@snu/ds/admin";
-
+import cx from "classnames";
 export type ImportEnMasseError = {
   category: string;
   details: Array<{
@@ -26,20 +26,20 @@ export const ValidationFile = ({ errorMessage, onRetry }: ValidationFileProps) =
         <div className="flex items-center justify-center w-16 h-16 rounded-full bg-red-100 mb-4">
           <HiOutlineExclamation className="w-8 h-8 text-red-600" />
         </div>
-        <h2 className="text-xl font-semibold text-gray-900">Votre fichier semble comporter quelques erreurs...</h2>
-        <p className="text-lg mt-4 font-medium">{totalErrors} erreurs identifiées</p>
+        <h2 className="text-lg font-bold text-gray-900">Votre fichier semble comporter quelques erreurs...</h2>
+        <p className="text-lg mt-4">{totalErrors} erreurs identifiées</p>
       </div>
 
       <div className="mt-4">
         {errors.length > 0 ? (
-          <div className="border border-gray-200 rounded-md">
+          <div className="border !border-red-500 rounded-md">
             {errors.map((error, index) => (
-              <div key={index} className={index < errors.length - 1 ? "border-b border-gray-200 px-4 py-3" : "px-4 py-3"}>
-                <h3 className="font-semibold">{error.category}</h3>
+              <div key={index} className={cx("border-red-500 px-4 py-3", { "border-t": index })}>
+                <h3 className="text-sm leading-5 font-bold gray-900">{error.category}</h3>
                 <div className="mt-1">
                   {error.details.map((detail, detailIndex) => (
-                    <p key={detailIndex} className="my-1">
-                      <span className="text-red-500 font-medium">Ligne {detail.line} • </span>
+                    <p key={detailIndex} className="text-sm leading-5 font-normal my-1">
+                      <span className="text-red-600">Ligne {detail.line || 1} • </span>
                       {detail.message}
                     </p>
                   ))}
@@ -52,16 +52,8 @@ export const ValidationFile = ({ errorMessage, onRetry }: ValidationFileProps) =
         )}
       </div>
 
-      <div className="text-center mt-6">
-        <Button
-          onClick={onRetry}
-          leftIcon={
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-            </svg>
-          }
-          title="Téléverser le fichier corrigé"
-        />
+      <div className="flex justify-center mt-6">
+        <Button onClick={onRetry} leftIcon={<HiOutlineUpload className="w-5 h-5" />} title="Téléverser le fichier corrigé" />
       </div>
     </div>
   );

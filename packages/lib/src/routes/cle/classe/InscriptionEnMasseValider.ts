@@ -1,3 +1,4 @@
+import { ClasseImportEnMasseValidationDto } from "../../../dto/classeImportEnMasseValidationDto";
 import { BasicRoute, RouteResponseBodyV2 } from "../..";
 
 export interface InscriptionEnMasseValiderRoute extends BasicRoute {
@@ -10,13 +11,5 @@ export interface InscriptionEnMasseValiderRoute extends BasicRoute {
   payload: {
     mapping: Record<string, string> | null;
   };
-  response: RouteResponseBodyV2<{
-    isValid: boolean;
-    errors: Array<{
-      column: string;
-      line?: number;
-      code: string;
-      message?: string;
-    }>;
-  }>;
+  response: RouteResponseBodyV2<ClasseImportEnMasseValidationDto>;
 }

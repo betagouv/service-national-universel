@@ -1,7 +1,13 @@
 import { useState } from "react";
-import { ImportEnMasseError } from "./ValidationFile";
+
+import { translateClasseImportEnMasse } from "snu-lib";
+
+import { ClasseService } from "@/services/classeService";
+
+import { ImportEnMasseError } from "./FileValidationErrorsList";
 
 type FileUploadOptions = {
+  classeId: string;
   onMappingNeeded?: (columns: string[]) => void;
   onSuccess?: (studentCount: number) => void;
   onError?: (errors: ImportEnMasseError[]) => void;
@@ -16,13 +22,12 @@ type FileUploadHandlerReturn = {
   studentCount: number;
   successModalOpen: boolean;
   handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  setShowErrorDisplay: (show: boolean) => void;
   setMappingModalOpen: (open: boolean) => void;
   setSuccessModalOpen: (open: boolean) => void;
   setStudentCount: (count: number) => void;
 };
 
-export const useFileUploadHandler = (options?: FileUploadOptions): FileUploadHandlerReturn => {
+export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHandlerReturn => {
   const { onMappingNeeded, onSuccess, onError, defaultStudentCount = 0 } = options || {};
 
   // Error state
@@ -38,7 +43,7 @@ export const useFileUploadHandler = (options?: FileUploadOptions): FileUploadHan
 
   // TODO : Récupérer les colonnes du fichier
   const [fileColumns, setFileColumns] = useState<string[]>([]);
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
 
@@ -66,27 +71,25 @@ export const useFileUploadHandler = (options?: FileUploadOptions): FileUploadHan
       // Error example
       else {
         // Example error response
-        const errorMsg: ImportEnMasseError[] = [
-          {
-            category: "Prénom",
-            details: [
-              {
-                line: 1,
-                message: 'Le champ "Prénom" est obligatoire.',
-              },
-            ],
-          },
-          {
-            category: "Genre",
-            details: [
-              {
-                line: 2,
-                message: 'Le champ "Genre" doit contenir uniquement "F" ou "M".',
-              },
-            ],
-          },
-        ];
-        throw new Error(JSON.stringify(errorMsg));
+        try {
+          const { errors } = await ClasseService.validateInscriptionEnMasse(options.classeId, null, file);
+          const errorByColumn = errors.reduce((acc, error) => {
+            const columnName = error.column ?? "inconnu";
+            if (!acc[columnName]) {
+              acc[columnName] = {
+                category: columnName,
+                details: [],
+              };
+            }
+            acc[columnName].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, columnName) });
+            return acc;
+          }, {});
+          setShowErrorDisplay(true);
+          setErrorMessage(Object.values(errorByColumn));
+        } catch (error) {
+          setShowErrorDisplay(true);
+          setErrorMessage([{ category: "Général", details: [{ line: 0, message: translateClasseImportEnMasse(error.message) }] }]);
+        }
       }
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : JSON.stringify([]);
@@ -105,7 +108,6 @@ export const useFileUploadHandler = (options?: FileUploadOptions): FileUploadHan
     studentCount,
     successModalOpen,
     handleFileChange,
-    setShowErrorDisplay,
     setMappingModalOpen,
     setSuccessModalOpen,
     setStudentCount,
