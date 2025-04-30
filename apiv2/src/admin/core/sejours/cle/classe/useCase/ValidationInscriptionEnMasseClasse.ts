@@ -162,7 +162,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const errors: ClasseImportEnMasseValidationDto["errors"] = [];
         for (const [index, row] of dataToImport.entries()) {
             const line = index + 2;
-            const hasError = errorsFormat.find((error) => !error.line || error.line === line);
+            const hasError = this.hasErrors(errorsFormat, line);
             if (!hasError) {
                 // check etablissement
                 if (
@@ -202,11 +202,15 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         let count = 0;
         for (const [index] of dataToImport.entries()) {
             const line = index + 2;
-            const hasError = errorsFormat.find((error) => error.line === line);
+            const hasError = this.hasErrors(errorsFormat, line);
             if (!hasError) {
                 count++;
             }
         }
         return count;
+    }
+
+    hasErrors(errorsFormat: ClasseImportEnMasseValidationDto["errors"], line: number) {
+        return errorsFormat.find((error) => !error.line || error.line === line);
     }
 }
