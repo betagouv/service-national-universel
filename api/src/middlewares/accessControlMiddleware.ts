@@ -1,7 +1,6 @@
 import { Response, NextFunction } from "express";
-import { ERRORS, isSuperAdmin, ROLES, UserDto } from "snu-lib";
+import { ERRORS, isSuperAdmin, ROLES } from "snu-lib";
 import { UserRequest } from "../controllers/request";
-import passport from "passport";
 
 export function accessControlMiddleware(allowedRoles: (typeof ROLES)[keyof typeof ROLES][]) {
   return (req: UserRequest, res: Response, next: NextFunction) => {
