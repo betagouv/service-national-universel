@@ -49,15 +49,17 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // A head center can only see bus line rattached to his center.
     if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+      const cohort = queryFilters.cohort?.[0];
+      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       let field = "";
       if (user.role === ROLES.HEAD_CENTER) {
         field = "headCenterId";
       } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
         field = "adjointsIds";
       }
-      const centers = await SessionPhase1Model.find({ [field]: user._id, cohort: queryFilters.cohort[0] });
+      const centers = await SessionPhase1Model.find({ [field]: user._id, cohort });
       if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort: queryFilters.cohort[0] });
+      const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort });
       if (!lignebus.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       contextFilters.push({ terms: { _id: lignebus.map((e) => e._id) } });
     }
