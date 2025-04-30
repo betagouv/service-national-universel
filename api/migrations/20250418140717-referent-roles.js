@@ -21,8 +21,7 @@ module.exports = {
 
     await RoleModel.create({
       code: ROLE_JEUNE,
-      name: "Jeune",
-      description: "Jeune sur MonCompte",
+      titre: "Jeune sur MonCompte",
       parent: null,
     });
   },
