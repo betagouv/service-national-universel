@@ -4,8 +4,12 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { FileGateway } from "@shared/core/File.gateway";
-import { ValidationError } from "./ValidationInscriptionEnMasseClasse.model";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS, IMPORT_REQUIRED_COLUMN } from "snu-lib";
+import {
+    CLASSE_IMPORT_EN_MASSE_COLUMNS,
+    CLASSE_IMPORT_EN_MASSE_ERRORS,
+    IMPORT_REQUIRED_COLUMN,
+    ClasseImportEnMasseValidationDto,
+} from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClasseModel } from "../Classe.model";
 import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
@@ -13,7 +17,7 @@ import { EtablissementModel } from "../../etablissement/Etablissement.model";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 @Injectable()
-export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: ValidationError[] }> {
+export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportEnMasseValidationDto> {
     constructor(
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(EtablissementGateway) private readonly etablissementGateway: EtablissementGateway,
@@ -26,7 +30,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: Val
         classeId: string,
         mapping: Record<string, string> | null,
         file: { fileName: string; buffer: Buffer; mimetype: string },
-    ): Promise<any> {
+    ) {
         const classe = await this.classeGateway.findById(classeId);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Classe non trouvée");
@@ -44,19 +48,16 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: Val
         if (dataToImport.length === 0) {
             return {
                 isValid: false,
-                errors: [{ column: "inconnu", code: CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE }],
+                validRowsCount: 0,
+                errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE }],
             };
         }
 
         if (dataToImport.length > 100) {
             return {
                 isValid: false,
-                errors: [
-                    {
-                        column: "inconnu",
-                        code: CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES,
-                    },
-                ],
+                validRowsCount: 0,
+                errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES }],
             };
         }
 
@@ -76,12 +77,13 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: Val
         const errors = [...errorsFormat, ...errorsCoherence];
         return {
             isValid: errors.length === 0,
+            validRowsCount: this.countValidRows(dataToImport, errors),
             errors,
         };
     }
 
     async validateFormat(dataToImport: Record<string, string>[]) {
-        const errors: ValidationError[] = [];
+        const errors: ClasseImportEnMasseValidationDto["errors"] = [];
 
         for (const columnName of Object.keys(IMPORT_REQUIRED_COLUMN)) {
             const column = IMPORT_REQUIRED_COLUMN[columnName];
@@ -155,9 +157,9 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: Val
         dataToImport: Record<string, string>[],
         classe: ClasseModel,
         etablissement: EtablissementModel,
-        errorsFormat: ValidationError[],
+        errorsFormat: ClasseImportEnMasseValidationDto["errors"],
     ) {
-        const errors: ValidationError[] = [];
+        const errors: ClasseImportEnMasseValidationDto["errors"] = [];
         for (const [index, row] of dataToImport.entries()) {
             const line = index + 2;
             const hasError = errorsFormat.find((error) => error.line === line);
@@ -194,5 +196,17 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<{ errors: Val
             }
         }
         return errors;
+    }
+
+    countValidRows(dataToImport: Record<string, string>[], errorsFormat: ClasseImportEnMasseValidationDto["errors"]) {
+        let count = 0;
+        for (const [index] of dataToImport.entries()) {
+            const line = index + 2;
+            const hasError = errorsFormat.find((error) => error.line === line);
+            if (!hasError) {
+                count++;
+            }
+        }
+        return count;
     }
 }

@@ -8,7 +8,7 @@ import useClass from "../utils/useClass";
 import { FileUploadPanel } from "./FileUploadPanel";
 import { ColumnMapping, MappingModal } from "./MappingModal";
 import { SuccessModal } from "./SuccessModal";
-import { ValidationFile } from "./ValidationFile";
+import { ValidationFile } from "./FileValidationErrorsList";
 import { useFileUploadHandler } from "./useFileUploadHandler";
 import Loader from "@/components/Loader";
 

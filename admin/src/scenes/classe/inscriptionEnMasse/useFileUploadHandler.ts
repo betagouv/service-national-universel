@@ -4,7 +4,7 @@ import { translateClasseImportEnMasse } from "snu-lib";
 
 import { ClasseService } from "@/services/classeService";
 
-import { ImportEnMasseError } from "./ValidationFile";
+import { ImportEnMasseError } from "./FileValidationErrorsList";
 
 type FileUploadOptions = {
   classeId: string;
@@ -74,13 +74,14 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
         try {
           const { errors } = await ClasseService.validateInscriptionEnMasse(options.classeId, null, file);
           const errorByColumn = errors.reduce((acc, error) => {
-            if (!acc[error.column]) {
-              acc[error.column] = {
-                category: error.column,
+            const columnName = error.column ?? "inconnu";
+            if (!acc[columnName]) {
+              acc[columnName] = {
+                category: columnName,
                 details: [],
               };
             }
-            acc[error.column].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, error.column) });
+            acc[columnName].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, columnName) });
             return acc;
           }, {});
           setShowErrorDisplay(true);
