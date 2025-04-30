@@ -17,6 +17,7 @@ describe("ImporterClasses", () => {
     let mockReferentielService: any;
     let mockDesistementService: any;
     let mockLogger: any;
+
     beforeEach(() => {
         mockFileGateway = {
             downloadFile: jest.fn(),
@@ -64,8 +65,8 @@ describe("ImporterClasses", () => {
             mockJeuneGateway,
             mockSejourGateway,
             mockReferentielService,
-            mockLogger,
             mockDesistementService,
+            mockLogger,
         );
     });
 
