@@ -4,19 +4,20 @@ const { RoleModel } = require("../src/models/permissions/role");
 
 module.exports = {
   async up(db, client) {
-    await ReferentModel.updateMany({}, [
-      {
-        $set: {
-          roles: {
-            $filter: {
-              input: ["$role", "$subRole"],
-              as: "role",
-              cond: { $ne: ["$$role", null] },
-            },
-          },
-        },
-      },
-    ]);
+    // TOO LONG: Run manually
+    // await ReferentModel.updateMany({}, [
+    //   {
+    //     $set: {
+    //       roles: {
+    //         $filter: {
+    //           input: ["$role", "$subRole"],
+    //           as: "role",
+    //           cond: { $ne: ["$$role", null] },
+    //         },
+    //       },
+    //     },
+    //   },
+    // ]);
 
     await RoleModel.create({
       code: ROLE_JEUNE,
