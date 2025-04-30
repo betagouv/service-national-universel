@@ -74,6 +74,7 @@ const CENTER_ROLES = {
 };
 
 const ROLES_LIST = Object.values(ROLES);
+export const REFERENT_AND_JEUNE_ROLES_LIST = [...ROLES_LIST, ROLE_JEUNE];
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);

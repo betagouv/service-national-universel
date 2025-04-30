@@ -1,5 +1,5 @@
 const { YoungModel, ReferentModel } = require("../models");
-const SNUpport = require("../SNUpport");
+const SNUpport = require("../SNUpport").default;
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const { getUserAttributes } = require("../services/support");

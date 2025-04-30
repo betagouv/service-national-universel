@@ -7,7 +7,7 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD } from "snu-lib";
+import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized } from "snu-lib";
 import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
@@ -303,9 +303,9 @@ const Home = () => {
   );
 };
 
+// legacy
 const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil", "/besoin-d-aide"], default: "/dsnj-export" },
-  [ROLES.INJEP]: { authorised: ["/injep-export", "/profil", "/besoin-d-aide"], default: "/injep-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
   // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
@@ -319,19 +319,45 @@ const limitedAccess = {
   [ROLES.VISITOR]: { authorised: ["/dashboard", "/school", "/profil", "/besoin-d-aide"], default: "/dashboard" },
 };
 
+const PERMISSIONS_BY_ROUTE = {
+  "/injep-export": [{ ressource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
+  "/profil": [{ ressource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
+  "/besoin-d-aide": [{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
+};
+
+const DEFAULT_ROUTE_BY_ROLE = {
+  [ROLES.INJEP]: "/injep-export",
+};
+
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();
   const user = useSelector((state) => state.Auth.user);
 
-  const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
+  if (!roles.includes(user.role)) {
+    return <Redirect to="/dashboard" />;
+  }
 
+  // TODO: remove legacy matchRoute
+  const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
   if (limitedAccess[user.role] && !matchRoute) {
     return <Redirect to={limitedAccess[user.role].default} />;
   }
 
-  if (!roles.includes(user.role)) {
-    return <Redirect to="/dashboard" />;
+  if (!matchRoute && PERMISSIONS_BY_ROUTE[pathname]) {
+    const routeAuthorized = PERMISSIONS_BY_ROUTE[pathname].some((permission) => isAuthorized({ user, ressource: permission.ressource, action: permission.action }));
+    if (!routeAuthorized) {
+      console.log(`use does not have permission for ${pathname}`);
+      return <Redirect to={DEFAULT_ROUTE_BY_ROLE[user.role] || "/"} />;
+    } else {
+      console.debug(`user has permission for ${pathname}`);
+    }
   }
+
+  // TODO: remove this hack when all routes are protected with permissions
+  if (!matchRoute && !PERMISSIONS_BY_ROUTE[pathname] && [ROLES.INJEP].includes(user.role)) {
+    return <Redirect to={DEFAULT_ROUTE_BY_ROLE[user.role] || "/"} />;
+  }
+
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };
 
