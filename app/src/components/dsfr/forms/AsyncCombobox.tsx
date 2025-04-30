@@ -22,7 +22,7 @@ const Dropdown = ({ loading, options, handleSelect, hint }) => (
   </div>
 );
 
-export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeholder = "", getOptions, value, onChange, errorMessage }) {
+export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeholder = "", getOptions, onChange, errorMessage }) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
   const [options, setOptions] = useState<{ label: string; value: any }[]>([]);
@@ -49,7 +49,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
     return () => document.removeEventListener("keydown", handleKeyDown);
   }, []);
 
-  const getOptionsDebounced = useCallback(
+  const debouncedOptions = useCallback(
     debounce(async (query) => {
       try {
         setLoading(true);
@@ -77,7 +77,7 @@ export default function AsyncCombobox({ label, hint = "Aucun résultat.", placeh
     const newQuery = e.target.value;
     setQuery(newQuery);
     if (newQuery.length > 1) {
-      getOptionsDebounced(newQuery);
+      debouncedOptions(newQuery);
     }
   };
 

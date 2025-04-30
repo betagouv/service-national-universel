@@ -3,7 +3,7 @@ import AsyncCombobox from "@/components/dsfr/forms/AsyncCombobox";
 import { Input } from "@snu/ds/dsfr";
 import AddressForm from "@/components/dsfr/forms/AddressForm";
 import { RiArrowGoBackLine } from "react-icons/ri";
-import { City, Correction, formatSchoolName, getCities, School } from "../utils";
+import { CityWithDepartment, Correction, formatSchoolName, getCityOptions, School } from "../utils";
 import Select from "@/components/dsfr/forms/SearchableSelect";
 import useSchools from "../utils/useSchools";
 
@@ -15,13 +15,13 @@ type Props = {
 };
 
 export default function SchoolInFrance({ school, onSelectSchool, errors, corrections }: Props) {
-  const [city, setCity] = useState<City>();
+  const [city, setCity] = useState<CityWithDepartment>();
   const { data: schools } = useSchools({ city: city?.name, departmentName: city?.departmentName });
   const schoolOptions = schools?.map((e) => ({ value: e.id, label: formatSchoolName(e) })) ?? [];
   const [manualFilling, setManualFilling] = useState(school?.fullName && !school?.id && school?.country === "FRANCE");
   const [manualSchool, setManualSchool] = useState<School | undefined>(school ?? {});
 
-  function handleChangeCity(city?: { label: string; value: City }) {
+  function handleChangeCity(city?: { label: string; value: CityWithDepartment }) {
     if (city) setCity(city.value);
     onSelectSchool(undefined);
   }
@@ -76,8 +76,7 @@ export default function SchoolInFrance({ school, onSelectSchool, errors, correct
         label="Rechercher la commune de l'établissement"
         placeholder="Ex. Lille, La Rochelle, Paris 13e..."
         hint="Aucune commune trouvée."
-        getOptions={getCities}
-        value={city}
+        getOptions={getCityOptions}
         onChange={handleChangeCity}
         errorMessage={errors.city}
       />
