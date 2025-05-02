@@ -68,6 +68,7 @@ import { DesistementService } from "./core/sejours/phase1/desistement/Desistemen
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
 import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
+import { AuthModule } from "../auth/Auth.module";
 
 @Module({
     imports: [
@@ -89,6 +90,7 @@ import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/us
         TaskModule,
         // forwardRef(() => PlanMarketingModule),
         ReferentielModule,
+        AuthModule,
     ],
     controllers: [
         ClasseController,

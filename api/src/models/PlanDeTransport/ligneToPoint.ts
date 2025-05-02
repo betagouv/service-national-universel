@@ -1,11 +1,11 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, LigneToPointSchema } from "snu-lib";
+import { InterfaceExtended, LigneToPointSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
-const MODELNAME = "lignetopoint";
+const MODELNAME = MONGO_COLLECTION.LIGNE_TO_POINT;
 
 const schema = new Schema(LigneToPointSchema);
 

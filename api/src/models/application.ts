@@ -2,10 +2,10 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import anonymize from "../anonymization/application";
 
-import { ApplicationSchema, InterfaceExtended } from "snu-lib";
+import { ApplicationSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "application";
+const MODELNAME = MONGO_COLLECTION.APPLICATION;
 
 const schema = new Schema(ApplicationSchema);
 

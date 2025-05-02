@@ -1,12 +1,12 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { SessionPhase1FileSchema, SessionPhase1Schema, SessionPhase1Type } from "snu-lib";
+import { SessionPhase1FileSchema, SessionPhase1Schema, SessionPhase1Type, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/sessionPhase1";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "sessionphase1";
+const MODELNAME = MONGO_COLLECTION.SESSION_PHASE1;
 
 const schema = new Schema({
   ...SessionPhase1Schema,

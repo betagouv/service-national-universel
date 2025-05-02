@@ -2,13 +2,13 @@ import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
-import { ReferentSchema, ReferentType } from "snu-lib";
+import { ReferentSchema, ReferentType, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/referent";
 
-const MODELNAME = "referent";
+const MODELNAME = MONGO_COLLECTION.REFERENT;
 
 const schema = new Schema(ReferentSchema);
 

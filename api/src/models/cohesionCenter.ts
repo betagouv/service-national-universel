@@ -1,12 +1,12 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { CohesionCenterSchema, CohesionCenterType } from "snu-lib";
+import { CohesionCenterSchema, CohesionCenterType, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/cohesionCenter";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "cohesioncenter";
+const MODELNAME = MONGO_COLLECTION.COHESION_CENTER;
 
 const schema = new Schema(CohesionCenterSchema);
 

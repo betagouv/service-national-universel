@@ -1,10 +1,10 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { ClasseSchema, ClasseType } from "snu-lib";
+import { ClasseSchema, ClasseType, MONGO_COLLECTION } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type ClasseDocument = HydratedDocument<ClasseType>;
-export const ClasseName = "classe";
+export const ClasseName = MONGO_COLLECTION.CLASSE;
 export const CLASSE_MONGOOSE_ENTITY = "CLASSE_MONGOOSE_ENTITY";
 
 const ClasseSchemaRef = new mongoose.Schema(ClasseSchema);
