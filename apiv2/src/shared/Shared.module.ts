@@ -10,7 +10,7 @@ import { FileGateway } from "./core/File.gateway";
 import { DatabaseModule } from "@infra/Database.module";
 import { CryptoGateway } from "./core/Crypto.gateway";
 import { CryptoProvider } from "./infra/Crypto.provider";
-import { FeatureFlagService } from "./core/featureFlag/FeatureFlag.Service";
+import { FeatureFlagService } from "./core/featureFlag/FeatureFlag.service";
 import { featureFlagMongoProviders } from "./infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagGateway } from "./core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "./infra/featureFlag/FeatureFlagMongo.repository";
