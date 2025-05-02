@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { translateClasseImportEnMasse } from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, translateClasseImportEnMasse } from "snu-lib";
 import { ColumnsMapping } from "snu-lib";
 
 import { ClasseService } from "@/services/classeService";
@@ -47,10 +47,12 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
     try {
       let encodedMapping;
       if (mapping) {
-        encodedMapping = Object.keys(mapping).reduce((acc, key) => {
-          acc[encodeURIComponent(key)] = encodeURIComponent(mapping[key]);
-          return acc;
-        }, {}) as any;
+        encodedMapping = Object.keys(mapping)
+          .filter((key) => key !== CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI) // TODO: à supprimer en fonction de la RG
+          .reduce((acc, key) => {
+            acc[encodeURIComponent(key)] = encodeURIComponent(mapping[key]);
+            return acc;
+          }, {}) as any;
       }
 
       const { errors } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
