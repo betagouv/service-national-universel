@@ -16,7 +16,7 @@ import { InscriptionEnMasseValidationPayloadDto, ModifierReferentPayloadDto } fr
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
-import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.Service";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 
 @Controller("classe")
 export class ClasseController {
@@ -67,7 +67,6 @@ export class ClasseController {
         const isInscriptionEnMasseEnabled = await this.featureFlagService.isFeatureFlagEnabled(
             FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE,
         );
-        console.log("isInscriptionEnMasseEnabled", isInscriptionEnMasseEnabled);
         if (!isInscriptionEnMasseEnabled) {
             throw new FunctionalException(
                 FunctionalExceptionCode.FEATURE_FLAG_NOT_ENABLED,
@@ -79,6 +78,7 @@ export class ClasseController {
         }
         let decodedMapping;
         if (data && data.mapping) {
+            // TODO : in a multipart form, utf-8 is not applied
             decodedMapping = Object.keys(data.mapping).reduce((acc, key) => {
                 acc[decodeURIComponent(key)] = decodeURIComponent(data.mapping[key]);
                 return acc;

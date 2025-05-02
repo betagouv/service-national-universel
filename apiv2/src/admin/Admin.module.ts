@@ -72,7 +72,7 @@ import { AuthModule } from "../auth/Auth.module";
 import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
-import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.Service";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 
 @Module({
     imports: [

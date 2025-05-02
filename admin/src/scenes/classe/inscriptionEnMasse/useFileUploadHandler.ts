@@ -45,6 +45,7 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
 
   const sendFileToBackend = async (classeId: string, mapping: ColumnsMapping | null, file: File) => {
     try {
+      // TODO : in a multipart form, utf-8 is not applied
       let encodedMapping;
       if (mapping) {
         encodedMapping = Object.keys(mapping)
