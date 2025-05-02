@@ -10,51 +10,56 @@ import { validateColumnsName } from "./MappingService";
 
 type FileUploadOptions = {
   classeId: string;
-  defaultStudentCount?: number;
 };
 
+type ImportState =
+  | { status: "idle" }
+  | { status: "validating" }
+  | { status: "mapping"; columns: string[] }
+  | { status: "error"; errors: ImportEnMasseError[] }
+  | { status: "success"; studentCount: number };
+
 type FileUploadHandlerReturn = {
-  showErrorDisplay: boolean;
-  errorMessage: ImportEnMasseError[];
-  fileColumns: string[];
-  mappingModalOpen: boolean;
-  studentCount: number;
-  successModalOpen: boolean;
+  importState: ImportState;
   handleFileUpload: (file: File) => void;
   handleRetryImportWithMapping: (mapping: ColumnsMapping, file: File | undefined) => void;
-  setMappingModalOpen: (open: boolean) => void;
-  setSuccessModalOpen: (open: boolean) => void;
-  setStudentCount: (count: number) => void;
+  resetState: () => void;
+  closeMapping: () => void;
+  closeSuccess: () => void;
 };
 
 export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHandlerReturn => {
-  const { defaultStudentCount = 0 } = options || {};
+  const [importState, setImportState] = useState<ImportState>({ status: "idle" });
 
-  // Error state
-  const [showErrorDisplay, setShowErrorDisplay] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<ImportEnMasseError[]>([]);
+  const resetState = () => {
+    setImportState({ status: "idle" });
+  };
 
-  // Success modal state
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [studentCount, setStudentCount] = useState(defaultStudentCount);
+  const closeMapping = () => {
+    setImportState({ status: "idle" });
+  };
 
-  // Mapping modal state
-  const [mappingModalOpen, setMappingModalOpen] = useState(false);
-
-  // TODO : Récupérer les colonnes du fichier
-  const [fileColumns, setFileColumns] = useState<string[]>([]);
+  const closeSuccess = () => {
+    setImportState({ status: "idle" });
+  };
 
   const sendFileToBackend = async (classeId: string, mapping: ColumnsMapping | null, file: File) => {
     try {
-      // Envoi au backend pour validation de la cohérence des données
-      if (!mapping) {
+      let encodedMapping;
+      if (mapping) {
+        encodedMapping = Object.keys(mapping).reduce((acc, key) => {
+          acc[encodeURIComponent(key)] = encodeURIComponent(mapping[key]);
+          return acc;
+        }, {}) as any;
+      }
+
+      const { errors } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
+
+      if (errors.length === 0) {
+        setImportState({ status: "success", studentCount: 0 }); // Set actual student count here
         return;
       }
-      const encodedMapping = Object.keys(mapping).reduce((acc, key) => {
-        acc[encodeURIComponent(key)] = encodeURIComponent(mapping[key]);
-        return acc;
-      }, {}) as any;
-      const { errors } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
+
       const errorByColumn = errors.reduce((acc, error) => {
         const columnName = error.column ?? "inconnu";
         if (!acc[columnName]) {
@@ -66,22 +71,30 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
         acc[columnName].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, columnName) });
         return acc;
       }, {});
-      setShowErrorDisplay(true);
-      setErrorMessage(Object.values(errorByColumn));
+
+      setImportState({ status: "error", errors: Object.values(errorByColumn) });
     } catch (error) {
-      setShowErrorDisplay(true);
-      setErrorMessage([{ category: "Général", details: [{ line: 0, message: translateClasseImportEnMasse(error.message) }] }]);
+      setImportState({
+        status: "error",
+        errors: [
+          {
+            category: "Général",
+            details: [{ line: 0, message: translateClasseImportEnMasse(error.message) }],
+          },
+        ],
+      });
     }
   };
 
   const handleFileUpload = async (file: File) => {
     if (!file) return;
 
+    setImportState({ status: "validating" });
+
     // Valider le nom des colonnes
     const validationResult = await validateColumnsName(file);
     if (!validationResult.valid && validationResult.columns && validationResult.columns.length > 0) {
-      setFileColumns(validationResult.columns);
-      setMappingModalOpen(true);
+      setImportState({ status: "mapping", columns: validationResult.columns });
       return;
     }
 
@@ -89,26 +102,18 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
   };
 
   const handleRetryImportWithMapping = async (mapping: ColumnsMapping, file: File | undefined) => {
-    console.log("handleRetryImport", mapping, file);
-    if (!file) {
-      return;
-    }
+    if (!file) return;
 
+    setImportState({ status: "validating" });
     sendFileToBackend(options.classeId, mapping, file);
-    setMappingModalOpen(false);
   };
 
   return {
-    showErrorDisplay,
-    errorMessage,
-    fileColumns,
-    mappingModalOpen,
-    studentCount,
-    successModalOpen,
+    importState,
     handleFileUpload,
-    setMappingModalOpen,
-    setSuccessModalOpen,
-    setStudentCount,
     handleRetryImportWithMapping,
+    resetState,
+    closeMapping,
+    closeSuccess,
   };
 };

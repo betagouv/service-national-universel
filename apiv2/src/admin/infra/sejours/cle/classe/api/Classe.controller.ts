@@ -60,7 +60,7 @@ export class ClasseController {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
         let decodedMapping;
-        if (data.mapping) {
+        if (data && data.mapping) {
             decodedMapping = Object.keys(data.mapping).reduce((acc, key) => {
                 acc[decodeURIComponent(key)] = decodeURIComponent(data.mapping[key]);
                 return acc;

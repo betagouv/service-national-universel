@@ -1,10 +1,9 @@
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS } from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, IMPORT_REQUIRED_COLUMN } from "snu-lib";
 import * as XLSX from "xlsx";
 
 interface ValidationResult {
   valid: boolean;
   columns?: string[];
-  error?: string;
 }
 
 export const validateColumnsName = async (file: File): Promise<ValidationResult> => {
@@ -12,14 +11,6 @@ export const validateColumnsName = async (file: File): Promise<ValidationResult>
     // Read the Excel file
     const buffer = await readFileAsBuffer(file);
     const workbook = XLSX.read(buffer, { type: "array" });
-
-    // Check if the file has exactly one sheet
-    if (workbook.SheetNames.length !== 1) {
-      return {
-        valid: false,
-        error: "Le fichier doit contenir une seule feuille de calcul",
-      };
-    }
 
     const sheetName = workbook.SheetNames[0];
     const worksheet = workbook.Sheets[sheetName];
@@ -29,21 +20,26 @@ export const validateColumnsName = async (file: File): Promise<ValidationResult>
     if (!Array.isArray(headers)) {
       return {
         valid: false,
-        error: "Impossible d'extraire les en-têtes du fichier Excel",
       };
     }
 
     const columns = headers.map((header) => String(header).trim());
 
-    // Check if the required columns are present (case insensitive check)
-    const requiredColumns = Object.values(CLASSE_IMPORT_EN_MASSE_COLUMNS);
-    const missingColumns = requiredColumns.filter((required) => !columns.some((col) => col.toLowerCase().includes(String(required).toLowerCase())));
+    const requiredColumns: CLASSE_IMPORT_EN_MASSE_COLUMNS[] = Object.entries(IMPORT_REQUIRED_COLUMN)
+      .filter(([_, column]) => {
+        if ("required" in column && column.required) {
+          return true;
+        }
+        return false;
+      })
+      .map(([key, _]: [CLASSE_IMPORT_EN_MASSE_COLUMNS, (typeof IMPORT_REQUIRED_COLUMN)[CLASSE_IMPORT_EN_MASSE_COLUMNS]]) => key);
+
+    const missingColumns = requiredColumns.filter((requiredColumn) => !columns.includes(requiredColumn));
 
     if (missingColumns.length > 0) {
       return {
         valid: false,
         columns: columns,
-        error: `Colonnes manquantes: ${missingColumns.join(", ")}`,
       };
     }
 
@@ -54,7 +50,6 @@ export const validateColumnsName = async (file: File): Promise<ValidationResult>
   } catch (error) {
     return {
       valid: false,
-      error: error instanceof Error ? error.message : "Erreur lors de la lecture du fichier",
     };
   }
 };
