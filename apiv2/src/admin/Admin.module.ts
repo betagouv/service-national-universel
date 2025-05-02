@@ -69,6 +69,10 @@ import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistemen
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
 import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 import { AuthModule } from "../auth/Auth.module";
+import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
+import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
+import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.Service";
 
 @Module({
     imports: [
@@ -134,6 +138,7 @@ import { AuthModule } from "../auth/Auth.module";
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },
+        { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
@@ -144,6 +149,8 @@ import { AuthModule } from "../auth/Auth.module";
         ...jeuneGatewayProviders,
         ...referentielUseCaseProviders,
         ...serviceProvider,
+        ...featureFlagMongoProviders,
+        FeatureFlagService,
     ],
     exports: [
         ClsModule,

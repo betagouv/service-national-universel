@@ -5,11 +5,18 @@ import { ClasseModel, ClasseWithReferentsModel } from "../../../../../core/sejou
 import { ClasseService } from "../../../../../core/sejours/cle/classe/Classe.service";
 import { VerifierClasse } from "../../../../../core/sejours/cle/classe/useCase/VerifierClasse";
 import { ClasseAdminCleGuard } from "../guard/ClasseAdminCle.guard";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, ClassesRoutes, MIME_TYPES, ModifierReferentDto } from "snu-lib";
+import {
+    CLASSE_IMPORT_EN_MASSE_COLUMNS,
+    ClassesRoutes,
+    FeatureFlagName,
+    MIME_TYPES,
+    ModifierReferentDto,
+} from "snu-lib";
 import { InscriptionEnMasseValidationPayloadDto, ModifierReferentPayloadDto } from "./Classe.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.Service";
 
 @Controller("classe")
 export class ClasseController {
@@ -18,6 +25,7 @@ export class ClasseController {
         private readonly classeService: ClasseService,
         private readonly modifierReferentClasse: ModifierReferentClasse,
         private readonly validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse,
+        private readonly featureFlagService: FeatureFlagService,
     ) {}
 
     // TODO : remove after testing
@@ -56,6 +64,16 @@ export class ClasseController {
         @Body("data") data: InscriptionEnMasseValidationPayloadDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ClassesRoutes["InscriptionEnMasseValider"]["response"]> {
+        const isInscriptionEnMasseEnabled = await this.featureFlagService.isFeatureFlagEnabled(
+            FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE,
+        );
+        console.log("isInscriptionEnMasseEnabled", isInscriptionEnMasseEnabled);
+        if (!isInscriptionEnMasseEnabled) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.FEATURE_FLAG_NOT_ENABLED,
+                "Inscription en masse is not enabled",
+            );
+        }
         if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
