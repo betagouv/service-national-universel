@@ -55,7 +55,6 @@ describe("PUT /cle/etablissement/:id", () => {
       });
     expect(res.status).toBe(403);
     // @ts-ignore
-    // @ts-ignore
     passport.user.role = ROLES.ADMIN;
   });
 

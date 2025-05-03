@@ -1,10 +1,10 @@
-import { UserDto } from "snu-lib";
+import { PermissionType, UserDto } from "snu-lib";
 
 export type Young = { _id: string };
 
 export type BusLine = { _id: string };
 
-export type User = UserDto & { featureFlags?: { [key: string]: boolean } };
+export type User = UserDto & { featureFlags?: { [key: string]: boolean }; acl?: PermissionType[] };
 
 export type Center = {
   academy: string;

@@ -86,6 +86,7 @@
     "@faker-js/faker": "^8.4.1",
     "@types/bull": "^4.10.0",
     "@types/jest": "^29.5.13",
+    "@types/passport-jwt": "^4.0.1",
     "@types/pdfkit": "^0.13.4",
     "csv-parser": "^3.0.0",
     "eslint": "^8.56.0",

@@ -1,7 +1,7 @@
 export const PERMISSION_ACTIONS = {
   CREATE: "create",
   READ: "read",
-  UPDATE: "update",
+  WRITE: "write",
   DELETE: "delete",
   EXECUTE: "execute",
   FULL: "full",

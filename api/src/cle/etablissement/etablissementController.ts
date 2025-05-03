@@ -213,6 +213,7 @@ router.delete("/:id/referents", passport.authenticate("referent", { session: fal
         referent.set({
           role: ROLES.REFERENT_CLASSE,
           subRole: SUB_ROLES.none,
+          roles: [ROLES.REFERENT_CLASSE],
         });
       } else {
         const newEmail = `deleted-${referent.id}-${referent.email}`;

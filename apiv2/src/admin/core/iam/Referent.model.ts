@@ -5,6 +5,7 @@ export interface ReferentModel {
     id: string;
     nom?: string;
     prenom?: string;
+    roles?: Role[];
     role?: Role;
     sousRole?: SousRole;
     email: string;
