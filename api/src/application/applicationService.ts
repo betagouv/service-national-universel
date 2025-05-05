@@ -144,7 +144,7 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
   let refusalMessages: string[] = [];
 
   if (!canCreateApplications(young, cohort)) {
-    refusalMessages.push("Pour candidater, vous devez avoir validé votre séjour de cohésion");
+    refusalMessages.push("Vous n'avez pas validé votre séjour de cohésion.");
   }
 
   if (mission.placesLeft === 0) {
