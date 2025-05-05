@@ -45,6 +45,7 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedPlanDeTransport.set(planDeTransportEntity);
+        retrievedPlanDeTransport.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
@@ -80,7 +81,7 @@ export class PlanDeTransportRepository implements PlanDeTransportGateway {
 
         const pdtsEntity = pdtsUpdated.map((updated) => ({
             original: PlanDeTransportMapper.toEntity(pdtsOriginal.find(({ id }) => updated.id === id)!),
-            updated: PlanDeTransportMapper.toEntity(updated),
+            updated: { ...PlanDeTransportMapper.toEntity(updated), updatedAt: new Date() },
         }));
 
         const user = this.cls.get("user");
