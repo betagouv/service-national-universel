@@ -62,6 +62,7 @@ export class ClasseRepository implements ClasseGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedClasse.set(classeEntity);
+        retrievedClasse.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
