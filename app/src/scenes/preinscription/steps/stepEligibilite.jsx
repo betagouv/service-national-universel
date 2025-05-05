@@ -15,7 +15,7 @@ import IconFrance from "../../../assets/IconFrance";
 import Input from "../../../components/dsfr/forms/input";
 import Toggle from "../../../components/dsfr/forms/toggle";
 import SearchableSelect from "../../../components/dsfr/forms/SearchableSelect";
-import SchoolInFrance from "../../inscription2023/components/ShoolInFrance";
+import SchoolInFrance from "../../inscription2023/components/SchoolInFrance";
 import SchoolOutOfFrance from "../../inscription2023/components/ShoolOutOfFrance";
 import DSFRContainer from "../../../components/dsfr/layout/DSFRContainer";
 import ProgressBar from "../components/ProgressBar";
