@@ -1,11 +1,9 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { DepartmentServiceSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
+import { DepartmentServiceSchema, InterfaceExtended, MONGO_COLLECTION, getVirtualUser, getUserToSave, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
 import anonymize from "../anonymization/departmentService";
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
-import { getUserToSave } from "./utils";
 
 const MODELNAME = MONGO_COLLECTION.DEPARTMENT_SERVICE;
 
@@ -16,14 +14,11 @@ schema.methods.anonymise = function () {
 };
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  if (params.fromUser) {
+  if (params?.fromUser) {
     this.user = getUserToSave(params.fromUser);
   }
   this.updatedAt = new Date();

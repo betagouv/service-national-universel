@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ClasseType, ClasseSchema, MONGO_COLLECTION } from "snu-lib";
+import { ClasseType, ClasseSchema, MONGO_COLLECTION, getUserToSave, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 import { EtablissementDocument } from "./etablissement";
 import { ReferentDocument } from "../referent";
 import { CohesionCenterDocument } from "../cohesionCenter";
@@ -11,7 +10,6 @@ import { SessionPhase1Document } from "../sessionPhase1";
 import { PointDeRassemblementDocument } from "../PlanDeTransport/pointDeRassemblement";
 import { LigneBusDocument } from "../PlanDeTransport/ligneBus";
 import { CohortDocument } from "../cohort";
-import { getUserToSave } from "../utils";
 
 const MODELNAME = MONGO_COLLECTION.CLASSE;
 
@@ -66,17 +64,14 @@ schema.virtual("cohortDetails", {
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  if (params.fromUser) {
+  if (params?.fromUser) {
     this.user = getUserToSave(params.fromUser);
   }
   this.updatedAt = new Date();

@@ -1,18 +1,26 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
-import { MONGO_COLLECTION, ReferentSchema, ReferentType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    ReferentSchema,
+    ReferentType,
+    CustomSaveParams,
+    UserExtension,
+    getUserToSave,
+} from "snu-lib";
 
 export type ReferentDocument = HydratedDocument<ReferentType>;
+type SchemaExtended = ReferentDocument & UserExtension;
 export const ReferentName = MONGO_COLLECTION.REFERENT;
 export const REFERENT_MONGOOSE_ENTITY = "REFERENT_MONGOOSE_ENTITY";
 
 const ReferentSchemaRef = new mongoose.Schema(ReferentSchema);
 
-ReferentSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+ReferentSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+    if (params?.fromUser) {
+        this._user = getUserToSave(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

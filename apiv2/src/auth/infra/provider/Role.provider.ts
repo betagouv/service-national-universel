@@ -1,19 +1,20 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { MONGO_COLLECTION, RoleSchema, RoleType } from "snu-lib";
+import { MONGO_COLLECTION, RoleSchema, RoleType, UserExtension, CustomSaveParams, getUserToSave } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type RoleDocument = HydratedDocument<RoleType>;
+type SchemaExtended = RoleDocument & UserExtension;
 export const ROLE_MONGOOSE_ENTITY = "ROLE_MONGOOSE_ENTITY";
 
 const RoleSchemaRef = new mongoose.Schema(RoleSchema);
 
-RoleSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+RoleSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+    if (params?.fromUser) {
+        this._user = getUserToSave(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

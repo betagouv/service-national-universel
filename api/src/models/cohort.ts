@@ -2,10 +2,21 @@ import mongoose, { Schema } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
 import patchHistory from "mongoose-patch-history";
 
-import { CohortSchema, CohortType, getDateTimeByTimeZoneOffset, YoungDSNJExportDatesSchema, YoungINJEPExportDatesSchema, YoungEligibilitySchema, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
-import { getUserToSave } from "./utils";
+import {
+  CohortSchema,
+  CohortType,
+  getDateTimeByTimeZoneOffset,
+  YoungDSNJExportDatesSchema,
+  YoungINJEPExportDatesSchema,
+  YoungEligibilitySchema,
+  MONGO_COLLECTION,
+  getVirtualUser,
+  getUserToSave,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.COHORT;
 
@@ -69,14 +80,11 @@ schema.virtual("isReInscriptionOpen").get<SchemaExtended>(function () {
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  if (params.fromUser) {
+  if (params?.fromUser) {
     this.user = getUserToSave(params.fromUser);
   }
   this.updatedAt = new Date();

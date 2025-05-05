@@ -1,19 +1,27 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { MONGO_COLLECTION, PermissionSchema, PermissionType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    PermissionSchema,
+    PermissionType,
+    CustomSaveParams,
+    UserExtension,
+    getUserToSave,
+} from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type PermissionDocument = HydratedDocument<PermissionType>;
+type SchemaExtended = PermissionDocument & UserExtension;
 export const PERMISSION_MONGOOSE_ENTITY = "PERMISSION_MONGOOSE_ENTITY";
 
 const PermissionSchemaRef = new mongoose.Schema(PermissionSchema);
 
-PermissionSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+PermissionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+    if (params?.fromUser) {
+        this._user = getUserToSave(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

@@ -49,3 +49,5 @@ export * from "./campagne";
 export * from "./listeDiffusion";
 export * from "./permissions/permission";
 export * from "./permissions/role";
+export * from "./types";
+export * from "./utils";

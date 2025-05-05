@@ -3,13 +3,26 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import patchHistory from "mongoose-patch-history";
 
-import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType, MONGO_COLLECTION } from "snu-lib";
+import {
+  YOUNG_SOURCE,
+  YOUNG_STATUS,
+  YoungSchema,
+  YoungSchemaCorrectionRequest,
+  YoungSchemaFile,
+  YoungSchemaNote,
+  YoungType,
+  MONGO_COLLECTION,
+  getVirtualUser,
+  getUserToSave,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/young";
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import ClasseStateManager from "../cle/classe/stateManager";
-import { getUserToSave } from "./utils";
 
 const MODELNAME = MONGO_COLLECTION.YOUNG;
 
@@ -32,10 +45,7 @@ const schema = new Schema({
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next) {
@@ -76,7 +86,7 @@ schema.post("deleteOne", function (doc) {
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  if (params.fromUser) {
+  if (params?.fromUser) {
     this.user = getUserToSave(params.fromUser);
   }
   this.updatedAt = new Date();

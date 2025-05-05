@@ -3,16 +3,20 @@ import patchHistory from "mongoose-patch-history";
 
 import {
     MONGO_COLLECTION,
+    UserExtension,
     YoungSchema,
     YoungSchemaCorrectionRequest,
     YoungSchemaFile,
     YoungSchemaNote,
     YoungType,
+    CustomSaveParams,
+    getUserToSave,
 } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type JeuneDocument = HydratedDocument<YoungType>;
+type SchemaExtended = JeuneDocument & UserExtension;
 export const JeuneName = MONGO_COLLECTION.YOUNG;
 export const JEUNE_MONGOOSE_ENTITY = "JEUNE_MONGOOSE_ENTITY";
 
@@ -34,10 +38,10 @@ const JeuneSchemaRef = new mongoose.Schema({
     },
 });
 
-JeuneSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+JeuneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+    if (params?.fromUser) {
+        this._user = getUserToSave(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

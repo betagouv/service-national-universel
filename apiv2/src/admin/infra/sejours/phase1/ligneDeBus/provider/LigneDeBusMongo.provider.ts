@@ -2,9 +2,18 @@ import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { MONGO_COLLECTION, LigneBusSchema, LigneBusTeamSchema, LigneBusType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    LigneBusSchema,
+    LigneBusTeamSchema,
+    LigneBusType,
+    CustomSaveParams,
+    UserExtension,
+    getUserToSave,
+} from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
+type SchemaExtended = LigneDeBusDocument & UserExtension;
 export const LigneDeBusName = MONGO_COLLECTION.LIGNE_BUS;
 export const LIGNEDEBUS_MONGOOSE_ENTITY = "LIGNEDEBUS_MONGOOSE_ENTITY";
 
@@ -16,10 +25,10 @@ const LigneDeBusSchemaRef = new mongoose.Schema({
     },
 });
 
-LigneDeBusSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+LigneDeBusSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+    if (params?.fromUser) {
+        this._user = getUserToSave(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });
