@@ -1,6 +1,17 @@
 import { ModifierReferentClasse } from "@admin/core/sejours/cle/classe/useCase/modifierReferentClasse/ModifierReferentClasse";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { Body, Controller, Get, Logger, Param, Post, UploadedFile, UseGuards, UseInterceptors } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Get,
+    Logger,
+    Param,
+    Post,
+    Request,
+    UploadedFile,
+    UseGuards,
+    UseInterceptors,
+} from "@nestjs/common";
 import { ClasseModel, ClasseWithReferentsModel } from "../../../../../core/sejours/cle/classe/Classe.model";
 import { ClasseService } from "../../../../../core/sejours/cle/classe/Classe.service";
 import { VerifierClasse } from "../../../../../core/sejours/cle/classe/useCase/VerifierClasse";
@@ -17,6 +28,9 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
+import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
+import { CustomRequest } from "@shared/infra/CustomRequest";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
 
 @Controller("classe")
 export class ClasseController {
@@ -26,6 +40,7 @@ export class ClasseController {
         private readonly modifierReferentClasse: ModifierReferentClasse,
         private readonly validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse,
         private readonly featureFlagService: FeatureFlagService,
+        private readonly classeImportService: ClasseImportService,
     ) {}
 
     @Post(":id/verify")
@@ -109,5 +124,25 @@ export class ClasseController {
             status: statut.status,
             lastCompletedAt: statut.lastCompletedAt?.toISOString(),
         };
+    }
+
+    // TODO : remove after testing
+    @Post(":id/inscription-en-masse/importer-temp")
+    @UseGuards(ClasseAdminCleGuard)
+    async inscriptionEnMasseImportTemp(
+        @Request() request: CustomRequest,
+        @Param("id") classeId: string,
+        @Body()
+        { mapping, fileKey }: { mapping: Record<string, string> | null; fileKey: string; auteur: string },
+    ): Promise<any> {
+        const auteur: Partial<ReferentModel> = {
+            id: request.user.id,
+            prenom: request.user.prenom,
+            nom: request.user.nom,
+            role: request.user.role,
+            sousRole: request.user.sousRole,
+            email: request.user.email,
+        };
+        return this.classeImportService.importClasse(classeId, mapping, fileKey, auteur);
     }
 }

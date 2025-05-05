@@ -1,3 +1,5 @@
+import { YOUNG_SOURCE } from "snu-lib";
+
 // TODO: Mettre à niveau pour de l'ecriture
 export type JeuneModel = {
     id: string;
@@ -41,11 +43,18 @@ export type JeuneModel = {
     transportInfoGivenByLocal?: string;
     desistementMotif?: string;
     desistementMessage?: string;
+    source?: keyof typeof YOUNG_SOURCE;
+    consentement?: string;
+    imageRight?: string;
+    acceptCGU?: string;
+    parentAllowSNU?: string;
     // Parent 1 Information
     parent1Prenom?: string;
     parent1Nom?: string;
     parent1Email?: string;
     parent1Telephone?: string;
+    parent1AllowSNU?: string;
+    parent1AllowImageRights?: string;
     // Parent 2 Information
     parent2Prenom?: string;
     parent2Nom?: string;
