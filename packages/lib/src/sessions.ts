@@ -145,7 +145,7 @@ const hasValidatedPhase1 = (young: YoungType) =>
 
 const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
 
-// Ils peuvent voir les missions tant que la cohorte n'est pas archivée
+// Les volontaires peuvent voir les missions dès qu'ils sont pointés et tant que leur cohorte n'est pas archivée
 function canViewMissions(young: YoungType, cohort: CohortType) {
   return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
 }

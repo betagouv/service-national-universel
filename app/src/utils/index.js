@@ -109,10 +109,9 @@ export function permissionPhase1(y) {
 
 const isDoingAMission = (young) => young.phase2ApplicationStatus.some((status) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status));
 const isWaitingForEquivalence = (young) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
-const isDoingPhase2 = (young) => isDoingAMission(young) || isWaitingForEquivalence(young);
 
 export function canViewPhase2(young, cohort) {
-  return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young) || isDoingPhase2(young);
+  return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young) || isDoingAMission(young) || isWaitingForEquivalence(young);
 }
 
 export function permissionPhase3(y) {
