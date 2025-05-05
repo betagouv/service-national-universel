@@ -1,3 +1,4 @@
+import { TaskDto } from "../../../dto/taskDto";
 import { BasicRoute, RouteResponseBodyV2 } from "../..";
 
 export interface InscriptionEnMasseImporterRoute extends BasicRoute {
@@ -6,17 +7,10 @@ export interface InscriptionEnMasseImporterRoute extends BasicRoute {
   params: {
     id: string;
   };
-  file: File;
   payload: {
     mapping: Record<string, string> | null;
+    fileKey: string;
   };
-  response: RouteResponseBodyV2<{
-    isValid: boolean;
-    errors: Array<{
-      column: string;
-      line?: number;
-      code: string;
-      message?: string;
-    }>;
-  }>;
+  // TODO: type
+  response: RouteResponseBodyV2<TaskDto<any, any>>;
 }

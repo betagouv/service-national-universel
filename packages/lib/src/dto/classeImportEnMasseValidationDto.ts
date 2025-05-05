@@ -9,4 +9,5 @@ export interface ClasseImportEnMasseValidationDto {
   isValid: boolean;
   validRowsCount: number;
   errors: ImportValidationError[];
+  fileKey?: string;
 }

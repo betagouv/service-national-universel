@@ -75,10 +75,28 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const errorsCoherence = await this.validateCoherence(dataToImport, classe, etablissement, errorsFormat);
 
         const errors = [...errorsFormat, ...errorsCoherence];
+        const isValid = errors.length === 0;
+
+        let fileKey: string | undefined = undefined;
+        if (isValid) {
+            // Save file to s3
+            const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
+            const fileName = `inscription_en_masse_${classeId}_${timestamp}.xlsx`;
+            const fileS3 = await this.fileGateway.uploadFile(
+                `file/admin/sejours/cle/classe/${classeId}/inscription-en-masse/${fileName}`,
+                {
+                    data: file.buffer,
+                    mimetype: file.mimetype,
+                },
+            );
+            fileKey = fileS3.Key;
+        }
+
         return {
-            isValid: errors.length === 0,
+            isValid,
             validRowsCount: this.countValidRows(dataToImport, errors),
             errors,
+            fileKey,
         };
     }
 

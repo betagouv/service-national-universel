@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useHistory } from "react-router-dom";
 
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, translateClasseImportEnMasse } from "snu-lib";
 import { ColumnsMapping } from "snu-lib";
@@ -17,7 +18,7 @@ type ImportState =
   | { status: "validating" }
   | { status: "mapping"; columns: string[] }
   | { status: "error"; errors: ImportEnMasseError[] }
-  | { status: "success"; studentCount: number };
+  | { status: "success"; studentCount: number; fileKey?: string; mapping?: ColumnsMapping | null };
 
 type FileUploadHandlerReturn = {
   importState: ImportState;
@@ -29,6 +30,7 @@ type FileUploadHandlerReturn = {
 };
 
 export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHandlerReturn => {
+  const history = useHistory();
   const [importState, setImportState] = useState<ImportState>({ status: "idle" });
 
   const resetState = () => {
@@ -36,11 +38,12 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
   };
 
   const closeMapping = () => {
-    setImportState({ status: "idle" });
+    resetState();
   };
 
   const closeSuccess = () => {
-    setImportState({ status: "idle" });
+    history.push(`/classes/${options.classeId}`);
+    resetState();
   };
 
   const sendFileToBackend = async (classeId: string, mapping: ColumnsMapping | null, file: File) => {
@@ -56,10 +59,10 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
           }, {}) as any;
       }
 
-      const { errors } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
+      const { errors, fileKey, validRowsCount } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
 
       if (errors.length === 0) {
-        setImportState({ status: "success", studentCount: 0 }); // Set actual student count here
+        setImportState({ status: "success", studentCount: validRowsCount, fileKey, mapping });
         return;
       }
 

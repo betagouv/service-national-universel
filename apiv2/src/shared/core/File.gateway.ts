@@ -42,6 +42,7 @@ export interface FileGateway {
         Bucket: string;
         Key: string;
     }>;
+    isS3FileExists(path: string): Promise<boolean>;
     downloadFile(
         path: string,
     ): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }>;

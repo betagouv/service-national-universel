@@ -9,6 +9,7 @@ export interface InscriptionEnMasseStatutRoute extends BasicRoute {
   };
   response: RouteResponseBodyV2<{
     status: TaskStatus | "NONE";
+    statusDate: string;
     lastCompletedAt: string;
   }>;
 }

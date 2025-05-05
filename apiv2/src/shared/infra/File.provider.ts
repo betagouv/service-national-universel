@@ -124,6 +124,26 @@ export class FileProvider implements FileGateway {
         };
     }
 
+    async isS3FileExists(path: string): Promise<boolean> {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.HeadObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+        };
+
+        try {
+            await s3bucket.headObject(params).promise();
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
     deleteFile(path: string): Promise<void> {
         throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
     }
