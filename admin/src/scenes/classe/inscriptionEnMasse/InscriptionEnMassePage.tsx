@@ -1,6 +1,6 @@
 import Loader from "@/components/Loader";
 import { Container, Header, Page } from "@snu/ds/admin";
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
@@ -17,12 +17,15 @@ export default function InscriptionEnMasse() {
   // @ts-expect-error property does not exist
   const user = useSelector((state) => state.Auth.user);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [isErrorRetry, setIsErrorRetry] = useState(false);
 
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
 
   const { importState, handleFileUpload, handleRetryImportWithMapping, closeMapping, closeSuccess } = useFileUploadHandler({
     classeId: id,
   });
+
+  const isValidating = importState.status === "validating";
 
   if (isClasseLoading) return <Loader />;
   if (!classe) return <Container>Classe non trouvée</Container>;
@@ -34,6 +37,13 @@ export default function InscriptionEnMasse() {
   const handleFileUploadClick = () => {
     fileInputRef.current!.value = "";
     fileInputRef.current?.click();
+    setIsErrorRetry(false);
+  };
+
+  const handleErrorRetry = () => {
+    fileInputRef.current!.value = "";
+    fileInputRef.current?.click();
+    setIsErrorRetry(true);
   };
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -77,12 +87,12 @@ export default function InscriptionEnMasse() {
       </div>
 
       <Container className="mt-6">
-        {importState.status === "error" ? (
+        {importState.status === "error" || (isErrorRetry && isValidating) ? (
           <div className="max-w-4xl mx-auto">
-            <ValidationFile errorMessage={importState.errors} onRetry={handleFileUploadClick} />
+            <ValidationFile errorMessage={importState.status === "error" ? importState.errors : []} onRetry={handleErrorRetry} isValidating={isValidating} />
           </div>
         ) : (
-          <FileUploadPanel handleFileUploadClick={handleFileUploadClick} />
+          <FileUploadPanel handleFileUploadClick={handleFileUploadClick} isValidating={isValidating} />
         )}
       </Container>
 
@@ -99,6 +109,7 @@ export default function InscriptionEnMasse() {
           onClose={closeMapping}
           onRetry={(mappings) => handleRetryImportWithMapping(mappings, fileInputRef.current?.files?.[0])}
           fileColumns={importState.columns}
+          isValidating={isValidating}
         />
       )}
       <input type="file" ref={fileInputRef} onChange={handleFileChange} accept=".xlsx" className="hidden" />

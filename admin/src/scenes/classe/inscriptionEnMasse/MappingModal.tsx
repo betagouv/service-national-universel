@@ -10,9 +10,10 @@ interface MappingModalProps {
   onClose: () => void;
   onRetry: (mappings: Omit<ColumnsMapping, CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI>) => void;
   fileColumns: string[];
+  isValidating?: boolean;
 }
 
-export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onRetry, fileColumns }) => {
+export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onRetry, fileColumns, isValidating = false }) => {
   const { mappings, handleFieldChange, isButtonDisabled, isColumnAlreadyMapped } = useMappingColumns(fileColumns);
 
   const header = (
@@ -58,16 +59,23 @@ export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onR
       <Button
         onClick={() => onRetry(mappings)}
         leftIcon={
-          <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path
-              fillRule="evenodd"
-              d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 01-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
-              clipRule="evenodd"
-            />
-          </svg>
+          isValidating ? (
+            <svg className="animate-spin h-5 w-5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+          ) : (
+            <svg className="w-5 h-5" viewBox="0 0 20 20" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+              <path
+                fillRule="evenodd"
+                d="M4 2a1 1 0 011 1v2.101a7.002 7.002 0 0111.601 2.566 1 1 0 01-1.885.666A5.002 5.002 0 005.999 7H9a1 1 0 010 2H4a1 1 0 01-1-1V3a1 1 0 011-1zm.008 9.057a1 1 0 011.276.61A5.002 5.002 0 0014.001 13H11a1 1 0 110-2h5a1 1 0 011 1v5a1 1 0 11-2 0v-2.101a7.002 7.002 0 01-11.601-2.566 1 1 0 01.61-1.276z"
+                clipRule="evenodd"
+              />
+            </svg>
+          )
         }
-        title="Relancer l'import"
-        disabled={isButtonDisabled}
+        title={isValidating ? "Validation en cours..." : "Relancer l'import"}
+        disabled={isButtonDisabled || isValidating}
         className="mx-auto"
       />
     </div>
