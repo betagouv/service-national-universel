@@ -8,7 +8,7 @@ import { useMappingColumns } from "./useMappingColumns";
 interface MappingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onRetry: (mappings: ColumnsMapping) => void;
+  onRetry: (mappings: Omit<ColumnsMapping, CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI>) => void;
   fileColumns: string[];
 }
 

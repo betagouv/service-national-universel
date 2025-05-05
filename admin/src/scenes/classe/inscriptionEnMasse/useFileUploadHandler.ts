@@ -22,7 +22,7 @@ type ImportState =
 type FileUploadHandlerReturn = {
   importState: ImportState;
   handleFileUpload: (file: File) => void;
-  handleRetryImportWithMapping: (mapping: ColumnsMapping, file: File | undefined) => void;
+  handleRetryImportWithMapping: (mapping: Omit<ColumnsMapping, CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI>, file: File | undefined) => void;
   resetState: () => void;
   closeMapping: () => void;
   closeSuccess: () => void;

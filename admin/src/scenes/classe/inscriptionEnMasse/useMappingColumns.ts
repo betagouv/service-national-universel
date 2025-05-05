@@ -1,12 +1,11 @@
 import { useSetState } from "react-use";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, ColumnsMapping } from "snu-lib";
 export const useMappingColumns = (fileColumns: string[]) => {
-  const [mappings, setMappings] = useSetState<ColumnsMapping>({
+  const [mappings, setMappings] = useSetState<Omit<ColumnsMapping, CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI>>({
     [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: fileColumns.find((fileColumn) => fileColumn === CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM) || "",
     [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: fileColumns.find((fileColumn) => fileColumn === CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM) || "",
     [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: fileColumns.find((fileColumn) => fileColumn === CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE) || "",
     [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: fileColumns.find((fileColumn) => fileColumn === CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE) || "",
-    [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: fileColumns.find((fileColumn) => fileColumn === CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI) || "", // TODO: à supprimer en fonction de la RG
   });
 
   const handleFieldChange = (expectedColumnName: CLASSE_IMPORT_EN_MASSE_COLUMNS, fileColumnName: string) => {
