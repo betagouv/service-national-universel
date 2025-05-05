@@ -82,6 +82,31 @@ const ClasseService = {
       target: "API_V2",
     })();
   },
+
+  importInscriptionEnMasse: async (
+    id: ClassesRoutes["InscriptionEnMasseImporter"]["params"]["id"],
+    mapping: ClassesRoutes["InscriptionEnMasseImporter"]["payload"]["mapping"],
+    file: File,
+  ) => {
+    // TODO
+    return await buildFileRequest<ClassesRoutes["InscriptionEnMasseImporter"]>({
+      path: "/classe/{id}/inscription-en-masse/importer",
+      method: "POST",
+      params: { id },
+      payload: { mapping },
+      file,
+      target: "API_V2",
+    })();
+  },
+
+  getStatusInscriptionEnMasse: async (id: ClassesRoutes["InscriptionEnMasseStatut"]["params"]["id"]) => {
+    return await buildRequest<ClassesRoutes["InscriptionEnMasseStatut"]>({
+      path: "/classe/{id}/inscription-en-masse",
+      method: "GET",
+      params: { id },
+      target: "API_V2",
+    })();
+  },
 };
 
 export { ClasseService };

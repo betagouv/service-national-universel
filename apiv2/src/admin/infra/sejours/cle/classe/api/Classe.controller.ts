@@ -28,13 +28,6 @@ export class ClasseController {
         private readonly featureFlagService: FeatureFlagService,
     ) {}
 
-    // TODO : remove after testing
-    @Get("/")
-    @UseGuards(SuperAdminGuard)
-    findAll(): Promise<ClasseModel[]> {
-        return this.classeService.findAll();
-    }
-
     @Post(":id/verify")
     @UseGuards(ClasseAdminCleGuard)
     verify(@Param("id") id: string): Promise<ClasseWithReferentsModel> {
@@ -106,5 +99,15 @@ export class ClasseController {
         @UploadedFile() file: Express.Multer.File,
     ): Promise<any> {
         throw new FunctionalException(FunctionalExceptionCode.NOT_IMPLEMENTED_YET);
+    }
+
+    @Get(":id/inscription-en-masse")
+    @UseGuards(ClasseAdminCleGuard)
+    async inscriptionEnMasseStatus(@Param("id") classeId: string): Promise<any> {
+        const statut = await this.classeService.getStatusImportInscriptionEnMasse(classeId);
+        return {
+            status: statut.status,
+            lastCompletedAt: statut.lastCompletedAt?.toISOString(),
+        };
     }
 }
