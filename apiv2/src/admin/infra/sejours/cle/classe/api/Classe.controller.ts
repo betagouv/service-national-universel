@@ -5,11 +5,18 @@ import { ClasseModel, ClasseWithReferentsModel } from "../../../../../core/sejou
 import { ClasseService } from "../../../../../core/sejours/cle/classe/Classe.service";
 import { VerifierClasse } from "../../../../../core/sejours/cle/classe/useCase/VerifierClasse";
 import { ClasseAdminCleGuard } from "../guard/ClasseAdminCle.guard";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, ClassesRoutes, MIME_TYPES, ModifierReferentDto } from "snu-lib";
+import {
+    CLASSE_IMPORT_EN_MASSE_COLUMNS,
+    ClassesRoutes,
+    FeatureFlagName,
+    MIME_TYPES,
+    ModifierReferentDto,
+} from "snu-lib";
 import { InscriptionEnMasseValidationPayloadDto, ModifierReferentPayloadDto } from "./Classe.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 
 @Controller("classe")
 export class ClasseController {
@@ -18,6 +25,7 @@ export class ClasseController {
         private readonly classeService: ClasseService,
         private readonly modifierReferentClasse: ModifierReferentClasse,
         private readonly validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse,
+        private readonly featureFlagService: FeatureFlagService,
     ) {}
 
     // TODO : remove after testing
@@ -53,22 +61,37 @@ export class ClasseController {
     @UseInterceptors(FileInterceptor("file"))
     async inscriptionEnMasseValidate(
         @Param("id") classeId: string,
-        @Body() data: InscriptionEnMasseValidationPayloadDto,
+        @Body("data") data: InscriptionEnMasseValidationPayloadDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ClassesRoutes["InscriptionEnMasseValider"]["response"]> {
+        const isInscriptionEnMasseEnabled = await this.featureFlagService.isFeatureFlagEnabled(
+            FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE,
+        );
+        if (!isInscriptionEnMasseEnabled) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.FEATURE_FLAG_NOT_ENABLED,
+                "Inscription en masse is not enabled",
+            );
+        }
         if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
+        let decodedMapping;
+        if (data && data.mapping) {
+            // TODO : in a multipart form, utf-8 is not applied
+            decodedMapping = Object.keys(data.mapping).reduce((acc, key) => {
+                acc[decodeURIComponent(key)] = decodeURIComponent(data.mapping[key]);
+                return acc;
+            }, {}) as any;
 
-        if (data?.mapping) {
-            Object.keys(data.mapping).forEach((key) => {
+            Object.keys(decodedMapping).forEach((key) => {
                 if (!Object.values(CLASSE_IMPORT_EN_MASSE_COLUMNS).includes(key as CLASSE_IMPORT_EN_MASSE_COLUMNS)) {
-                    throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "mapping");
+                    throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, key);
                 }
             });
         }
 
-        return this.validationInscriptionEnMasseClasse.execute(classeId, data.mapping, {
+        return this.validationInscriptionEnMasseClasse.execute(classeId, decodedMapping, {
             fileName: file.originalname,
             buffer: file.buffer,
             mimetype: file.mimetype,

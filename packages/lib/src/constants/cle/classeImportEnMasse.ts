@@ -14,7 +14,7 @@ export enum CLASSE_IMPORT_EN_MASSE_COLUMNS {
   PRENOM = "Prénom",
   DATE_DE_NAISSANCE = "Date de naissance",
   GENRE = "Genre",
-  UAI = "UAI",
+  UAI = "UAI", // TODO: à supprimer en fonction de la RG
 }
 
 export const IMPORT_REQUIRED_COLUMN = {
@@ -24,3 +24,5 @@ export const IMPORT_REQUIRED_COLUMN = {
   [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: { type: "value", values: ["M", "F"], required: true },
   [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: { type: "string", minLength: 8, maxLength: 8 },
 };
+
+export type ColumnsMapping = Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>;

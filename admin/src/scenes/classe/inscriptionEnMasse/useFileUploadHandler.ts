@@ -1,115 +1,122 @@
 import { useState } from "react";
 
-import { translateClasseImportEnMasse } from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, translateClasseImportEnMasse } from "snu-lib";
+import { ColumnsMapping } from "snu-lib";
 
 import { ClasseService } from "@/services/classeService";
 
 import { ImportEnMasseError } from "./FileValidationErrorsList";
+import { validateColumnsName } from "./MappingService";
 
 type FileUploadOptions = {
   classeId: string;
-  onMappingNeeded?: (columns: string[]) => void;
-  onSuccess?: (studentCount: number) => void;
-  onError?: (errors: ImportEnMasseError[]) => void;
-  defaultStudentCount?: number;
 };
 
+type ImportState =
+  | { status: "idle" }
+  | { status: "validating" }
+  | { status: "mapping"; columns: string[] }
+  | { status: "error"; errors: ImportEnMasseError[] }
+  | { status: "success"; studentCount: number };
+
 type FileUploadHandlerReturn = {
-  showErrorDisplay: boolean;
-  errorMessage: ImportEnMasseError[];
-  fileColumns: string[];
-  mappingModalOpen: boolean;
-  studentCount: number;
-  successModalOpen: boolean;
-  handleFileChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
-  setMappingModalOpen: (open: boolean) => void;
-  setSuccessModalOpen: (open: boolean) => void;
-  setStudentCount: (count: number) => void;
+  importState: ImportState;
+  handleFileUpload: (file: File) => void;
+  handleRetryImportWithMapping: (mapping: Omit<ColumnsMapping, CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI>, file: File | undefined) => void;
+  resetState: () => void;
+  closeMapping: () => void;
+  closeSuccess: () => void;
 };
 
 export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHandlerReturn => {
-  const { onMappingNeeded, onSuccess, onError, defaultStudentCount = 0 } = options || {};
+  const [importState, setImportState] = useState<ImportState>({ status: "idle" });
 
-  // Error state
-  const [showErrorDisplay, setShowErrorDisplay] = useState(false);
-  const [errorMessage, setErrorMessage] = useState<ImportEnMasseError[]>([]);
+  const resetState = () => {
+    setImportState({ status: "idle" });
+  };
 
-  // Success modal state
-  const [successModalOpen, setSuccessModalOpen] = useState(false);
-  const [studentCount, setStudentCount] = useState(defaultStudentCount);
+  const closeMapping = () => {
+    setImportState({ status: "idle" });
+  };
 
-  // Mapping modal state
-  const [mappingModalOpen, setMappingModalOpen] = useState(false);
+  const closeSuccess = () => {
+    setImportState({ status: "idle" });
+  };
 
-  // TODO : Récupérer les colonnes du fichier
-  const [fileColumns, setFileColumns] = useState<string[]>([]);
-  const handleFileChange = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    console.log("File selected:", file);
-    event.target.value = "";
-
+  const sendFileToBackend = async (classeId: string, mapping: ColumnsMapping | null, file: File) => {
     try {
-      // Simulate different responses based on file name for demonstration
-      // Mapping error example: file needs column mapping
-      if (file.name.includes("mapping")) {
-        const columns = ["prenom_élève", "nom_élève", "date_naissance", "sexe"];
-        setFileColumns(columns);
-        setMappingModalOpen(true);
-        onMappingNeeded?.(columns);
-      }
-
-      // Success example
-      else if (file.name.includes("success")) {
-        const count = 24; // Example count
-        setStudentCount(count);
-        setSuccessModalOpen(true);
-        onSuccess?.(count);
-      }
-
-      // Error example
-      else {
-        // Example error response
-        try {
-          const { errors } = await ClasseService.validateInscriptionEnMasse(options.classeId, null, file);
-          const errorByColumn = errors.reduce((acc, error) => {
-            const columnName = error.column ?? "inconnu";
-            if (!acc[columnName]) {
-              acc[columnName] = {
-                category: columnName,
-                details: [],
-              };
-            }
-            acc[columnName].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, columnName) });
+      // TODO : in a multipart form, utf-8 is not applied
+      let encodedMapping;
+      if (mapping) {
+        encodedMapping = Object.keys(mapping)
+          .filter((key) => key !== CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI) // TODO: à supprimer en fonction de la RG
+          .reduce((acc, key) => {
+            acc[encodeURIComponent(key)] = encodeURIComponent(mapping[key]);
             return acc;
-          }, {});
-          setShowErrorDisplay(true);
-          setErrorMessage(Object.values(errorByColumn));
-        } catch (error) {
-          setShowErrorDisplay(true);
-          setErrorMessage([{ category: "Général", details: [{ line: 0, message: translateClasseImportEnMasse(error.message) }] }]);
-        }
+          }, {}) as any;
       }
+
+      const { errors } = await ClasseService.validateInscriptionEnMasse(classeId, encodedMapping, file);
+
+      if (errors.length === 0) {
+        setImportState({ status: "success", studentCount: 0 }); // Set actual student count here
+        return;
+      }
+
+      const errorByColumn = errors.reduce((acc, error) => {
+        const columnName = error.column ?? "inconnu";
+        if (!acc[columnName]) {
+          acc[columnName] = {
+            category: columnName,
+            details: [],
+          };
+        }
+        acc[columnName].details.push({ line: error.line, message: translateClasseImportEnMasse(error.code, columnName) });
+        return acc;
+      }, {});
+
+      setImportState({ status: "error", errors: Object.values(errorByColumn) });
     } catch (error) {
-      const errorMsg = error instanceof Error ? error.message : JSON.stringify([]);
-      const parsedErrors = JSON.parse(errorMsg) as ImportEnMasseError[];
-      setErrorMessage(parsedErrors);
-      setShowErrorDisplay(true);
-      onError?.(parsedErrors);
+      setImportState({
+        status: "error",
+        errors: [
+          {
+            category: "Général",
+            details: [{ line: 0, message: translateClasseImportEnMasse(error.message) }],
+          },
+        ],
+      });
     }
   };
 
+  const handleFileUpload = async (file: File) => {
+    if (!file) return;
+
+    setImportState({ status: "validating" });
+
+    // Valider le nom des colonnes
+    const validationResult = await validateColumnsName(file);
+    if (!validationResult.valid && validationResult.columns && validationResult.columns.length > 0) {
+      setImportState({ status: "mapping", columns: validationResult.columns });
+      return;
+    }
+
+    sendFileToBackend(options.classeId, null, file);
+  };
+
+  const handleRetryImportWithMapping = async (mapping: ColumnsMapping, file: File | undefined) => {
+    if (!file) return;
+
+    setImportState({ status: "validating" });
+    sendFileToBackend(options.classeId, mapping, file);
+  };
+
   return {
-    showErrorDisplay,
-    errorMessage,
-    fileColumns,
-    mappingModalOpen,
-    studentCount,
-    successModalOpen,
-    handleFileChange,
-    setMappingModalOpen,
-    setSuccessModalOpen,
-    setStudentCount,
+    importState,
+    handleFileUpload,
+    handleRetryImportWithMapping,
+    resetState,
+    closeMapping,
+    closeSuccess,
   };
 };

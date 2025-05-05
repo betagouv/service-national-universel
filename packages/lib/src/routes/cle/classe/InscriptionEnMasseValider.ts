@@ -1,4 +1,5 @@
 import { ClasseImportEnMasseValidationDto } from "../../../dto/classeImportEnMasseValidationDto";
+import { ColumnsMapping } from "../../../constants/cle/classeImportEnMasse";
 import { BasicRoute, RouteResponseBodyV2 } from "../..";
 
 export interface InscriptionEnMasseValiderRoute extends BasicRoute {
@@ -9,7 +10,7 @@ export interface InscriptionEnMasseValiderRoute extends BasicRoute {
   };
   file: File;
   payload: {
-    mapping: Record<string, string> | null;
+    mapping: ColumnsMapping | null;
   };
   response: RouteResponseBodyV2<ClasseImportEnMasseValidationDto>;
 }

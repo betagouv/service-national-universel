@@ -2,7 +2,7 @@ import React from "react";
 import { HiOutlineClipboardList } from "react-icons/hi";
 import cx from "classnames";
 
-import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseFileKeys, ClasseCertificateKeys, ClassesRoutes, isAdmin, isReferentRegDep } from "snu-lib";
+import { ROLES, STATUS_CLASSE, YOUNG_STATUS, ClasseFileKeys, ClasseCertificateKeys, ClassesRoutes, isAdmin, isReferentRegDep, FeatureFlagName } from "snu-lib";
 import { User } from "@/types";
 import { DropdownButton } from "@snu/ds/admin";
 
@@ -107,7 +107,7 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
           key: "manual",
           render: <ButtonManualInvite key="manual" id={id} />,
         },
-        ...(isReferentRegDep(user) || isAdmin(user)
+        ...(isReferentRegDep(user) || (isAdmin(user) && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE])
           ? [
               {
                 key: "bulk",

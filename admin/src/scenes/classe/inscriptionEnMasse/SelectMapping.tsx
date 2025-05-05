@@ -1,17 +1,17 @@
-import React, { useState } from "react";
-import { HiArrowNarrowRight } from "react-icons/hi";
 import { Label, Select, SelectOption } from "@snu/ds/admin";
+import React from "react";
+import { HiArrowNarrowRight } from "react-icons/hi";
 
 export type SelectMappingProps = {
-  fileColumn: string[];
-  expectedField: string;
+  fileColumns: string[];
+  expectedColumnName: string;
   className?: string;
+  selectedFileColumn?: string;
+  onChange: (expectedColumnName: string, fileColumn: string) => void;
 };
 
-export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumn, expectedField, className = "" }) => {
-  const [selectedColumn, setSelectedColumn] = useState(fileColumn[0] || "");
-
-  const options = fileColumn.map((column) => ({
+export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumns, expectedColumnName, selectedFileColumn, className = "", onChange }) => {
+  const options = fileColumns.map((column) => ({
     value: column,
     label: column,
   }));
@@ -23,9 +23,13 @@ export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumn, expect
         <div className="relative">
           <Select
             options={options}
-            value={options.find((option) => option.value === selectedColumn)}
-            onChange={(option: SelectOption<string>) => setSelectedColumn(option.value)}
+            value={options.find((option) => option.value === selectedFileColumn)}
+            onChange={(option: SelectOption<string | undefined>) => {
+              onChange(expectedColumnName, option?.value || "");
+            }}
             className="w-full"
+            closeMenuOnSelect={true}
+            isClearable={true}
           />
         </div>
       </div>
@@ -37,7 +41,7 @@ export const SelectMapping: React.FC<SelectMappingProps> = ({ fileColumn, expect
       <div className="w-5/12">
         <Label title="Information attendue" name="expectedField" />
         <div className="relative">
-          <div className="w-full bg-white border border-green-500 rounded-md py-2 px-3 text-gray-900">{expectedField}</div>
+          <div className="w-full bg-white border border-green-500 rounded-md py-2 px-3 text-gray-900">{expectedColumnName}</div>
         </div>
       </div>
     </div>
