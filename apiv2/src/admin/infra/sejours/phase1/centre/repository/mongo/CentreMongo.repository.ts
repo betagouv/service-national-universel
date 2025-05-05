@@ -46,6 +46,7 @@ export class CentreRepository implements CentreGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedCentre.set(centreEntity);
+        retrievedCentre.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown

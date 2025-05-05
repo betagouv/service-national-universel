@@ -126,6 +126,7 @@ export class JeuneRepository implements JeuneGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedJeune.set(jeuneEntity);
+        retrievedJeune.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
@@ -141,7 +142,7 @@ export class JeuneRepository implements JeuneGateway {
 
         const jeunesEntity = jeunesUpdated.map((updated) => ({
             original: JeuneMapper.toEntity(jeunesOriginal.find(({ id }) => updated.id === id)!),
-            updated: JeuneMapper.toEntity(updated),
+            updated: { ...JeuneMapper.toEntity(updated), updatedAt: new Date() },
         }));
 
         const user = this.cls.get("user");

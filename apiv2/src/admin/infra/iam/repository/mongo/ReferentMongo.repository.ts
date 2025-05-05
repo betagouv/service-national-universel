@@ -178,6 +178,7 @@ export class ReferentRepository implements ReferentGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedReferent.set({ ...referent });
+        retrievedReferent.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown

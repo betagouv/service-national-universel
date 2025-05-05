@@ -72,6 +72,7 @@ export class SessionRepository implements SessionGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedSession.set(sessionEntity);
+        retrievedSession.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown

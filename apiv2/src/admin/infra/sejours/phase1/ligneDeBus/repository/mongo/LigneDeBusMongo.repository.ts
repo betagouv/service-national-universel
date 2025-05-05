@@ -56,6 +56,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
         }
 
         retrievedLigneDeBus.set(ligneDeBusEntity);
+        retrievedLigneDeBus.set("updatedAt", new Date());
         //@ts-expect-error fromUser unknown
         await retrievedLigneDeBus.save({ fromUser: user });
         return LigneDeBusMapper.toModel(retrievedLigneDeBus);
@@ -105,7 +106,7 @@ export class LigneDeBusRepository implements LigneDeBusGateway {
 
         const lignesEntity = lignesUpdated.map((updated) => ({
             original: LigneDeBusMapper.toEntity(lignesOriginal.find(({ id }) => updated.id === id)!),
-            updated: LigneDeBusMapper.toEntity(updated),
+            updated: { ...LigneDeBusMapper.toEntity(updated), updatedAt: new Date() },
         }));
 
         const user = this.cls.get("user");
