@@ -6,6 +6,7 @@ import { InterfaceExtended, ModificationBusSchema, MONGO_COLLECTION, PlanTranspo
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
 import { PointDeRassemblementModel } from "./pointDeRassemblement";
+import { getUserToSave } from "../utils";
 
 const MODELNAME = MONGO_COLLECTION.PLAN_TRANSPORT;
 
@@ -25,13 +26,15 @@ const schema = new Schema({
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
+    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
   }
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params.fromUser) {
+    this.user = getUserToSave(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });

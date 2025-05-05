@@ -9,6 +9,7 @@ import * as brevo from "../brevo";
 import anonymize from "../anonymization/young";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import ClasseStateManager from "../cle/classe/stateManager";
+import { getUserToSave } from "./utils";
 
 const MODELNAME = MONGO_COLLECTION.YOUNG;
 
@@ -30,10 +31,10 @@ const schema = new Schema({
   },
 });
 
-schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
-  if (fromUser) {
-    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
+schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
+  if (user) {
+    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
   }
 });
 
@@ -75,7 +76,9 @@ schema.post("deleteOne", function (doc) {
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.fromUser = params?.fromUser;
+  if (params.fromUser) {
+    this.user = getUserToSave(params.fromUser);
+  }
   this.updatedAt = new Date();
   this.previousStatus = this.status; // Used to compute classe if a young CLE has a change in status (see post save hook)
   next();

@@ -6,6 +6,7 @@ import { EtablissementSchema, EtablissementType, MONGO_COLLECTION } from "snu-li
 import { CustomSaveParams, UserExtension, UserSaved, DocumentExtended } from "../types";
 
 import { ClasseModel } from "./classe";
+import { getUserToSave } from "../utils";
 
 const MODELNAME = MONGO_COLLECTION.ETABLISSEMENT;
 
@@ -13,13 +14,15 @@ const schema = new Schema(EtablissementSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
   if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
+    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
   }
 });
 
 schema.pre<SchemaExtended>("save", async function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params.fromUser) {
+    this.user = getUserToSave(params.fromUser);
+  }
   this.updatedAt = new Date();
   if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {
     const classes = await ClasseModel.find({ etablissementId: this._id });

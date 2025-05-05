@@ -4,20 +4,23 @@ import patchHistory from "mongoose-patch-history";
 import { InterfaceExtended, SchoolRAMSESchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import { getUserToSave } from "./utils";
 
 const MODELNAME = MONGO_COLLECTION.SCHOOL_RAMSES;
 
 const schema = new Schema(SchoolRAMSESchema, { timestamps: true });
 
-schema.virtual("fromUser").set<SchemaExtended>(function (fromUser: UserSaved) {
-  if (fromUser) {
-    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
+schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
+  if (user) {
+    const { _id, role, department, region, email, firstName, lastName, model, impersonatedBy } = user;
+    this._user = { _id, role, department, region, email, firstName, lastName, model, impersonatedBy };
   }
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.fromUser = params?.fromUser;
+  if (params.fromUser) {
+    this.user = getUserToSave(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });
