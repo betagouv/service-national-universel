@@ -2,19 +2,13 @@ import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 import { CreateJeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
+import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
-import {
-    CLASSE_IMPORT_EN_MASSE_COLUMNS,
-    ColumnsMapping,
-    YOUNG_SOURCE,
-    YOUNG_STATUS,
-    YOUNG_STATUS_PHASE1,
-} from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ClasseService } from "../../Classe.service";
-import { ImportClasseEnMasseTaskParameters, JeuneImportEnMasse } from "../ClasseImportEnMasse.model";
-import { CryptoGateway } from "@shared/core/Crypto.gateway";
+import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
 
 @Injectable()
 export class ImporterClasseEnMasse implements UseCase<void> {
