@@ -66,13 +66,29 @@ export class CampagneMongoRepository implements CampagneGateway {
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]> {
-        const searchFilter = { ...filter };
+        const cleanedFilter = Object.entries(filter ?? {})
+            .filter(([key, value]) =>
+                !["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"].includes(key) || value !== undefined
+            )
+            .reduce<Record<string, unknown>>((acc, [key, value]) => {
+                acc[key] = value;
+                return acc;
+            }, {});
 
-        if (searchFilter && searchFilter.isArchived === undefined) {
-            delete searchFilter.isArchived;
+        let mongoFilter = { ...cleanedFilter };
+        if ("isLinkedToGenericCampaign" in mongoFilter) {
+            mongoFilter = {
+                ...mongoFilter,
+                campagneGeneriqueId: mongoFilter.isLinkedToGenericCampaign
+                    ? { $ne: null }
+                    : { $eq: null },
+            };
+
+            const { isLinkedToGenericCampaign, ...rest } = mongoFilter;
+            mongoFilter = rest;
         }
 
-        const campagnes = await this.campagneModel.find(searchFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
+        const campagnes = await this.campagneModel.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
         return Promise.all(
             campagnes.map(async (campagne) => {
                 const campagneModel = CampagneMapper.toModel(campagne);

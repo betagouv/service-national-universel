@@ -90,6 +90,9 @@ interface SearchPlanMarketingRoute extends BasicRoute {
     sort?: "ASC" | "DESC";
     cohortId?: string;
     isArchived?: boolean;
+    isProgrammationActive?: boolean;
+    campagneGeneriqueId?: string;
+    isLinkedToGenericCampaign?: boolean;
   };
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }

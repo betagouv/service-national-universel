@@ -33,9 +33,21 @@ export class CampagneService {
         return campagne;
     }
 
-    async search(options: { generic?: boolean; cohortId?: string; isArchived?: boolean }, sort?: "ASC" | "DESC") {
+    async search(options: {
+        generic?: boolean;
+        cohortId?: string;
+        isArchived?: boolean;
+        isProgrammationActive?: boolean;
+        isLinkedToGenericCampaign?: boolean;
+    }, sort?: "ASC" | "DESC") {
         const campagnes = await this.campagneGateway.search(
-            { generic: options.generic, cohortId: options.cohortId, isArchived: options.isArchived },
+            {
+                generic: options.generic,
+                cohortId: options.cohortId,
+                isArchived: options.isArchived,
+                isProgrammationActive: options.isProgrammationActive,
+                isLinkedToGenericCampaign: options.isLinkedToGenericCampaign,
+            },
             sort,
         );
 
