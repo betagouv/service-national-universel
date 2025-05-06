@@ -1,10 +1,10 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { ModificationBusSchema, ModificationBusType } from "snu-lib";
+import { MONGO_COLLECTION, ModificationBusSchema, ModificationBusType } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type DemandeModificationLigneDeBusDocument = HydratedDocument<ModificationBusType>;
-export const DemandeModificationLigneDeBusName = "modificationbus";
+export const DemandeModificationLigneDeBusName = MONGO_COLLECTION.MODIFICATION_BUS;
 export const DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY = "DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY";
 
 const DemandeModificationLigneDeBusSchemaRef = new mongoose.Schema(ModificationBusSchema);

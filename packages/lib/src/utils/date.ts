@@ -163,6 +163,11 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+const setToEndOfDay = (date: Date): Date => {
+  date.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
+  return date;
+};
+
 function checkTime(time1, time2) {
   const time1Split = time1.split(":");
   const time2Split = time2.split(":");
@@ -207,4 +212,5 @@ export {
   isNowBetweenDates,
   formatDateTimeZone,
   checkTime,
+  setToEndOfDay,
 };

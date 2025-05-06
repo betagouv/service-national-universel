@@ -1,7 +1,7 @@
 import { Injectable, Logger, OnModuleInit } from "@nestjs/common";
 import { Queue } from "bullmq";
 import { QueueName } from "@shared/infra/Queue";
-import { cronJobs } from "../jobs.config";
+import { cronJobs, CronJobName } from "../jobs.config";
 import { InjectQueue } from "@nestjs/bullmq";
 
 @Injectable()
@@ -15,12 +15,19 @@ export class CronJobSchedulerService implements OnModuleInit {
 
     private async scheduleJobs() {
         const repeatableJobs = await this.jobQueue.getJobSchedulers();
+        const cronJobNames = cronJobs.map((job) => job.name);
+        this.logger.log(`Number of repeatable jobs in ${QueueName.CRON} queue: ${repeatableJobs.length}`);
+        this.logger.log(`Number of cron jobs in configuration: ${cronJobs.length}`);
+
         for (const job of repeatableJobs) {
-            await this.jobQueue.removeJobScheduler(job.name);
+            if (!cronJobNames.includes(job.name as CronJobName)) {
+                this.logger.log(`Removing job ${job.name} with key ${job.key} as it's no longer in the configuration`);
+                await this.jobQueue.removeJobScheduler(job.name);
+            }
         }
 
         for (const job of cronJobs) {
-            this.logger.log(`Adding job ${job.name} with pattern ${job.pattern}`);
+            this.logger.log(`Adding/updating job ${job.name} with pattern ${job.pattern}`);
             await this.jobQueue.upsertJobScheduler(
                 job.name,
                 { pattern: job.pattern },
@@ -33,5 +40,11 @@ export class CronJobSchedulerService implements OnModuleInit {
                 },
             );
         }
+        const repeatableJobsAfterUpsertion = await this.jobQueue.getJobSchedulers();
+        this.logger.log(
+            `List of repeatable jobs in ${
+                QueueName.CRON
+            } queue after removal and upsertion: "${repeatableJobsAfterUpsertion.map((job) => job.name).join(", ")}"`,
+        );
     }
 }

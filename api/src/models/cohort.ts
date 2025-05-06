@@ -2,11 +2,11 @@ import mongoose, { Schema } from "mongoose";
 import { isAfter, isWithinInterval } from "date-fns";
 import patchHistory from "mongoose-patch-history";
 
-import { CohortSchema, CohortType, getDateTimeByTimeZoneOffset, YoungDSNJExportDatesSchema, YoungINJEPExportDatesSchema, YoungEligibilitySchema } from "snu-lib";
+import { CohortSchema, CohortType, getDateTimeByTimeZoneOffset, YoungDSNJExportDatesSchema, YoungINJEPExportDatesSchema, YoungEligibilitySchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "cohort";
+const MODELNAME = MONGO_COLLECTION.COHORT;
 
 const schema = new Schema({
   ...CohortSchema,

@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone, COHORT_STATUS } from "snu-lib";
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone, setToEndOfDay } from "snu-lib";
 
 import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
 import ClasseStateManager from "../cle/classe/stateManager";
@@ -248,6 +248,7 @@ router.get("/:cohortId/public", async (req: UserRequest, res: Response) => {
       _id: cohort._id,
       name: cohort.name,
       type: cohort.type,
+      status: cohort.status,
       dateStart: cohort.dateStart,
       dateEnd: cohort.dateEnd,
       isAssignmentAnnouncementsOpenForYoung: cohort.isAssignmentAnnouncementsOpenForYoung,
@@ -454,7 +455,7 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
     cohort.set({
       ...body,
       dateStart: formatDateTimeZone(body.dateStart),
-      dateEnd: formatDateTimeZone(body.dateEnd),
+      dateEnd: setToEndOfDay(new Date(body.dateEnd)),
     });
 
     if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);

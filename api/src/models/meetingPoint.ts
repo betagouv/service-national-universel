@@ -1,12 +1,12 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MeetingPointSchema } from "snu-lib";
+import { InterfaceExtended, MeetingPointSchema, MONGO_COLLECTION } from "snu-lib";
 
 import anonymize from "../anonymization/meetingPoint";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 
-const MODELNAME = "meetingpoint";
+const MODELNAME = MONGO_COLLECTION.MEETING_POINT;
 
 const schema = new Schema(MeetingPointSchema);
 

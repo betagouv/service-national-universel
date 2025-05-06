@@ -1,10 +1,10 @@
 import mongoose, { InferSchemaType } from "mongoose";
 
-import { InterfaceExtended, PatchOperationSchema, PatchSchema, PatchUserSchema } from "snu-lib";
+import { InterfaceExtended, PatchOperationSchema, PatchSchema, PatchUserSchema, MONGO_COLLECTION } from "snu-lib";
 
 import { DocumentExtended } from "./types";
 
-const MODELNAME = "patche";
+const MODELNAME = MONGO_COLLECTION.PATCH;
 
 const schema = new mongoose.Schema({
   ...PatchSchema,

@@ -3,14 +3,14 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import patchHistory from "mongoose-patch-history";
 
-import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType } from "snu-lib";
+import { YOUNG_SOURCE, YOUNG_STATUS, YoungSchema, YoungSchemaCorrectionRequest, YoungSchemaFile, YoungSchemaNote, YoungType, MONGO_COLLECTION } from "snu-lib";
 
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/young";
 import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import ClasseStateManager from "../cle/classe/stateManager";
 
-const MODELNAME = "young";
+const MODELNAME = MONGO_COLLECTION.YOUNG;
 
 const schema = new Schema({
   ...YoungSchema,

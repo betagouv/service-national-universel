@@ -6,20 +6,25 @@ import DontForget from "../assets/DontForget";
 import { ModalConvocation } from "./ModalConvocation";
 import useAuth from "@/services/useAuth";
 import useAffectationData from "../utils/useAffectationInfo";
+import Loader from "@/components/Loader";
 
 export default function TodoBackpack() {
   const { isCLE } = useAuth();
-  const { session, meetingPoint } = useAffectationData();
+  const { session, meetingPoint, isPending, isError } = useAffectationData();
   const [modalConvocationOpen, setModalConvocationOpen] = useState(false);
   const [isMedicalFileModalOpen, setMedicalFileModalOpen] = useState(false);
 
-  const persistedTodo = JSON.parse(localStorage.getItem("todo")) || {
-    convocation: false,
-    identite: false,
-    sanitaire: false,
-    masques: false,
-    collation: false,
-  };
+  const dataFromLocalStorage = localStorage.getItem("todo");
+
+  const persistedTodo = dataFromLocalStorage
+    ? JSON.parse(dataFromLocalStorage)
+    : {
+        convocation: false,
+        identite: false,
+        sanitaire: false,
+        masques: false,
+        collation: false,
+      };
 
   const [todo, setTodo] = useState(persistedTodo);
 
@@ -34,6 +39,12 @@ export default function TodoBackpack() {
     localStorage.setItem("todo", JSON.stringify(todo));
   }
 
+  if (isPending) {
+    return <Loader />;
+  }
+  if (isError) {
+    return <p>Erreur</p>;
+  }
   return (
     <section id="a-faire">
       <MedicalFileModal isOpen={isMedicalFileModalOpen} onClose={() => setMedicalFileModalOpen(false)} />
@@ -69,10 +80,10 @@ export default function TodoBackpack() {
             <button onClick={() => setMedicalFileModalOpen(true)} className="h-6 font-semibold underline decoration-2 underline-offset-4">
               fiche sanitaire
             </button>{" "}
-            {session.sanitaryContactEmail ? (
+            {session!.sanitaryContactEmail ? (
               <>
                 <p>complétée, à envoyer par e-mail à</p>
-                <p>{session.sanitaryContactEmail}</p>
+                <p>{session!.sanitaryContactEmail}</p>
               </>
             ) : (
               "complétée, sous enveloppe destinée au référent sanitaire"

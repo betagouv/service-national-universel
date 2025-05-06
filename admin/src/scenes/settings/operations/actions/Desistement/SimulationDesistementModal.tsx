@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { HiOutlineLightningBolt } from "react-icons/hi";
-import { CohortDto, formatDateFR, TaskName, translateSimulationName } from "snu-lib";
+import { CohortDto, TaskName, translateSimulationName, formatLongDateFR, getZonedDate } from "snu-lib";
 import { Button, Modal, Select } from "@snu/ds/admin";
 import useTraitements from "../../hooks/useTraitements";
 import dayjs from "dayjs";
@@ -13,7 +13,7 @@ export default function SimulationDesistementModal({ session, onClose }: { sessi
 
   const options = traitements?.map((t) => ({
     value: t.id,
-    label: `${translateSimulationName(t.name)} - ${formatDateFR(dayjs(t.createdAt))}`,
+    label: `${translateSimulationName(t.name)} - ${formatLongDateFR(getZonedDate(t.createdAt))}`,
   }));
   const sortedTraitements = traitements?.sort((a, b) => dayjs(b.createdAt).diff(dayjs(a.createdAt)));
   const selectedTraitement = selectedOption ? sortedTraitements?.find((t) => t.id === selectedOption) : sortedTraitements?.[0];
