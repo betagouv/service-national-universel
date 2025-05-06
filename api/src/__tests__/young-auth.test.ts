@@ -10,6 +10,7 @@ import getNewCohortFixture from "./fixtures/cohort";
 import { createFixtureClasse } from "./fixtures/classe";
 import { ClasseModel } from "../models";
 import { YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import jwt from "jsonwebtoken";
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -198,6 +199,10 @@ describe("Young Auth", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.set = jest.fn();
       young.save = jest.fn();
+      jest.spyOn(jwt, "verify").mockImplementation(() => ({
+        _id: young._id,
+      }));
+
       const res = await request(getAppHelper(young)).get("/young/signin_token").set("Cookie", ["jwt_young=blah"]);
       expect(res.status).toBe(200);
       expect(young.set).toHaveBeenCalled();

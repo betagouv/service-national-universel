@@ -9,6 +9,7 @@ import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-ro
 import { QueryClientProvider } from "@tanstack/react-query";
 import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD } from "snu-lib";
 import * as Sentry from "@sentry/react";
+import { getImpersonationChannel } from "./utils/broadcastChannel";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
@@ -72,7 +73,7 @@ import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
 
 import { getCohorts } from "./services/cohort.service";
-import RestorePreviousSignin from "./components/RestorePreviousSignin";
+import RestorePreviousSigninFlag from "./components/RestorePreviousSignin";
 import useRefreshToken from "./hooks/useRefreshToken";
 
 import SideBar from "./components/drawer/SideBar";
@@ -211,6 +212,15 @@ const Home = () => {
     }
   }, [user]);
 
+  const handleImpersonationMessage = (event) => {
+    if (event.data.action === "impersonation_started" || event.data.action === "impersonation_stopped") {
+      window.location.reload();
+    }
+  };
+
+  const channel = getImpersonationChannel();
+  channel.addEventListener("message", handleImpersonationMessage);
+
   if (loading) return <Loader />;
   if (!user) {
     const queryObject = { disconnected: 1 };
@@ -221,7 +231,7 @@ const Home = () => {
 
   return (
     <div>
-      <RestorePreviousSignin />
+      <RestorePreviousSigninFlag />
 
       <div className="flex">
         <SideBar sessionsList={sessionPhase1List} />
@@ -307,17 +317,24 @@ const limitedAccess = {
   [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil", "/besoin-d-aide"], default: "/dsnj-export" },
   [ROLES.INJEP]: { authorised: ["/injep-export", "/profil", "/besoin-d-aide"], default: "/injep-export" },
   [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
-  // FIXME [CLE]: remove dev routes when
   [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
     default: "/accueil",
   },
   [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
+    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
     default: "/accueil",
   },
   [ROLES.VISITOR]: { authorised: ["/dashboard", "/school", "/profil", "/besoin-d-aide"], default: "/dashboard" },
+  [ROLES.HEAD_CENTER]: {
+    authorised: ["/dashboard", "/profil", "/volontaire", "/ligne-de-bus", "/besoin-d-aide", "/centre", "/contenu", "/user"],
+    default: "/dashboard",
+  },
+  [ROLES.RESPONSIBLE]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
+  [ROLES.SUPERVISOR]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
 };
+
+const nonExistingRouteForAdmin = ["/mes-eleves", "/mon-etablissement", "/accueil"];
 
 const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
   const { pathname } = useLocation();
@@ -332,6 +349,11 @@ const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) 
   if (!roles.includes(user.role)) {
     return <Redirect to="/dashboard" />;
   }
+
+  if (user.role === ROLES.ADMIN && nonExistingRouteForAdmin.some((route) => pathname.includes(route))) {
+    return <Redirect to="/dashboard" />;
+  }
+
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };
 
