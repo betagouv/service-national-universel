@@ -1,4 +1,4 @@
-import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
+import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { DesisterClasses } from "./DesisterClasses";
 
 jest.mock("@nestjs-cls/transactional", () => ({
@@ -83,6 +83,7 @@ describe("DesisterClasses", () => {
             mockJeunes.map((jeune) => ({
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
+                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 lastStatusAt: expect.any(Date),
                 desistementMotif: "other",
                 centreId: undefined,

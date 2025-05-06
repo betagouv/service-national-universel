@@ -4,7 +4,7 @@ import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { Inject, Injectable } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
+import { STATUS_CLASSE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
 import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
@@ -104,6 +104,7 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
             const updatedJeune = {
                 ...jeune,
                 statut: YOUNG_STATUS.WITHDRAWN,
+                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 lastStatusAt: new Date(),
                 desistementMotif: "other",
             };
