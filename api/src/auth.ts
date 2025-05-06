@@ -806,6 +806,10 @@ class Auth {
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
       const token = isYoung(user) ? value.token_young : value.token_ref;
+      const jwtPayload = (await jwt.verify(token, config.JWT_SECRET)) as jwt.JwtPayload;
+      if (jwtPayload._impersonateId) {
+        data.impersonateId = jwtPayload._impersonateId;
+      }
       if (!data || !token) {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
@@ -827,6 +831,7 @@ class Auth {
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
 
       data.featureFlags = await getFeatureFlagsAvailable();
+      data.impersonateId = req.user.impersonateId;
 
       const token = jwt.sign(
         { __v: JWT_SIGNIN_VERSION, _id: user.id, _impersonateId: req.user.impersonateId, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt },

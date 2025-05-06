@@ -46,6 +46,7 @@ export class PointDeRassemblementRepository implements PointDeRassemblementGatew
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedPointDeRassemblement.set(pointDeRassemblementEntity);
+        retrievedPointDeRassemblement.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown

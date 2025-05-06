@@ -56,6 +56,7 @@ export class SejourRepository implements SejourGateway {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         retrievedSejour.set(sejourEntity);
+        retrievedSejour.set("updatedAt", new Date());
         const user = this.cls.get("user");
 
         //@ts-expect-error fromUser unknown
@@ -89,7 +90,7 @@ export class SejourRepository implements SejourGateway {
 
         const sejoursEntity = sejoursUpdated.map((updated) => ({
             original: SejourMapper.toEntity(sejoursOriginal.find(({ id }) => updated.id === id)!),
-            updated: SejourMapper.toEntity(updated),
+            updated: { ...SejourMapper.toEntity(updated), updatedAt: new Date() },
         }));
 
         const user = this.cls.get("user");
