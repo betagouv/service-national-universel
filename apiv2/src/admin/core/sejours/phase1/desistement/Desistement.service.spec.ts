@@ -62,6 +62,46 @@ describe("DesistementService", () => {
         sejourGateway = module.get<SejourGateway>(SejourGateway);
     });
 
+    describe("resetInfoAffectation", () => {
+        it("should correctly reset Jeune Affectation Info", () => {
+            const mockJeune: Partial<JeuneModel> = {
+                id: "123",
+                statut: "VALIDATED",
+                centreId: "centre-123",
+                sejourId: "sejour-456",
+                pointDeRassemblementId: "pdr-789",
+                ligneDeBusId: "bus-101",
+                hasPDR: "true",
+                transportInfoGivenByLocal: "true",
+                deplacementPhase1Autonomous: "true",
+                presenceArrivee: "true",
+                presenceJDM: "true",
+                departInform: "true",
+                departSejourAt: "2023-06-30",
+                departSejourMotif: "completed",
+                departSejourMotifComment: "Successfully completed the program",
+            };
+            const result = service.resetInfoAffectation(mockJeune as JeuneModel);
+
+            expect(result.id).toBe("123");
+            expect(result.statut).toBe("VALIDATED");
+
+            expect(result.centreId).toBeUndefined();
+            expect(result.sejourId).toBeUndefined();
+            expect(result.pointDeRassemblementId).toBeUndefined();
+            expect(result.ligneDeBusId).toBeUndefined();
+            expect(result.hasPDR).toBeUndefined();
+            expect(result.transportInfoGivenByLocal).toBeUndefined();
+            expect(result.deplacementPhase1Autonomous).toBeUndefined();
+            expect(result.presenceArrivee).toBeUndefined();
+            expect(result.presenceJDM).toBeUndefined();
+            expect(result.departInform).toBeUndefined();
+            expect(result.departSejourAt).toBeUndefined();
+            expect(result.departSejourMotif).toBeUndefined();
+            expect(result.departSejourMotifComment).toBeUndefined();
+        });
+    });
+
     describe("desisterJeunes", () => {
         it("should update lignes de bus and session occupancy when jeunes are withdrawn", async () => {
             const sejour = { id: "sejourId", sessionId: "sessionId" } as SejourModel;
