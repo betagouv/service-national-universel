@@ -283,38 +283,42 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
-      expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
-    });
+    const token = jwt.sign(
+      { __v: JWT_SIGNIN_VERSION, _id: user.id, _impersonateId: req.user._id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt },
+      config.JWT_SECRET,
+      {
+        expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
+      },
+    );
     if (type === "referent") {
       res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     } else if (type === "young") {
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     }
 
-    return res.status(200).json({ ok: true, token, data: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
+    let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
+    userToReturn.impersonateId = req.user._id;
+
+    return res.status(200).json({ ok: true, token, data: userToReturn });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
-router.post("/restore_signin", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
+router.get("/restore_signin", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const { error, value } = Joi.object({ jwt: Joi.string().required() }).unknown().validate(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
+    const jwtValue = req.cookies.jwt_ref;
+    if (!jwtValue) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
     let jwtPayload;
     try {
-      jwtPayload = await jwt.verify(value.jwt, config.JWT_SECRET);
+      jwtPayload = await jwt.verify(jwtValue, config.JWT_SECRET);
     } catch (error) {
       return res.status(401).send({ ok: false, user: { restriction: "public" } });
     }
 
-    const user = await ReferentModel.findOne({ _id: jwtPayload._id, role: ROLES.ADMIN });
+    const user = await ReferentModel.findOne({ _id: jwtPayload._impersonateId, role: ROLES.ADMIN });
     if (!user) return res.status(401).send({ ok: false, user: { restriction: "public" } });
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
