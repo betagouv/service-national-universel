@@ -87,6 +87,7 @@ describe("ImporterClasseEnMasse", () => {
         const mockDateNaissance = new Date("2006-01-01");
         const mockClockGateway = {
             parseDate: jest.fn().mockReturnValue(mockDateNaissance),
+            formatDateNaissance: jest.fn().mockReturnValue(mockDateNaissance),
         };
 
         const mockCryptoGateway = {
@@ -174,7 +175,7 @@ describe("ImporterClasseEnMasse", () => {
         expect(jeuneGateway.create).toHaveBeenCalledTimes(1);
         expect(jeuneGateway.update).toHaveBeenCalledTimes(1);
 
-        expect(clockGateway.parseDate).toHaveBeenCalledWith("01/01/2006", "dd/MM/yyyy");
+        expect(clockGateway.formatDateNaissance).toHaveBeenCalledWith("01/01/2006");
 
         expect(jeuneGateway.create).toHaveBeenCalledWith(
             expect.objectContaining({
@@ -204,7 +205,7 @@ describe("ImporterClasseEnMasse", () => {
             }),
         );
 
-        expect(clockGateway.parseDate).toHaveBeenCalledWith("01/01/2006", "dd/MM/yyyy");
+        expect(clockGateway.formatDateNaissance).toHaveBeenCalledWith("01/01/2006");
     });
 
     it("should generate email with UUID and lowercase formatting", async () => {
