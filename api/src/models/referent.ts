@@ -3,6 +3,7 @@ import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
 import { ReferentSchema, ReferentType, UserDto, MONGO_COLLECTION, getVirtualUser, getUserToSave, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
+
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/referent";
 
