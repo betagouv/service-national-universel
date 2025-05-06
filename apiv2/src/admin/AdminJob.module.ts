@@ -68,6 +68,9 @@ import { SimulationAffectationHTSDromCom } from "./core/sejours/phase1/affectati
 import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/ValiderAffectationHTS.service";
 import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
+import { ImporterClasseEnMasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
+import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
+import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 
 @Module({
     imports: [
@@ -143,6 +146,8 @@ import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desiste
         ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
+        ImporterClasseEnMasse,
+        ClasseService,
     ],
 })
 export class AdminJobModule {

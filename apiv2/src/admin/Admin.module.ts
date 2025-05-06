@@ -73,6 +73,7 @@ import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
+import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 
 @Module({
     imports: [
@@ -92,7 +93,6 @@ import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service
         NotificationModule,
         QueueModule,
         TaskModule,
-        // forwardRef(() => PlanMarketingModule),
         ReferentielModule,
         AuthModule,
     ],
@@ -151,6 +151,7 @@ import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service
         ...serviceProvider,
         ...featureFlagMongoProviders,
         FeatureFlagService,
+        ClasseImportService,
     ],
     exports: [
         ClsModule,

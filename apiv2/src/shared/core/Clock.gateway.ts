@@ -13,6 +13,7 @@ export interface ClockGateway {
     computeAge(dateNaissance: Date);
     addHours(date: Date, hours: number): Date;
     parseDate(date: string, format: string): Date;
+    formatDateNaissance(date: string): Date;
 }
 
 export const ClockGateway = Symbol("ClockGateway");

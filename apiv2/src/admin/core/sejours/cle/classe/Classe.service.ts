@@ -5,6 +5,9 @@ import { TaskName, TaskStatus } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { ClasseGateway } from "./Classe.gateway";
+import { FunctionalException } from "@shared/core/FunctionalException";
+import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { ClasseModel } from "./Classe.model";
 
 export type StatusImportInscriptionEnMasse = {
     status: TaskStatus | "NONE";
@@ -45,5 +48,13 @@ export class ClasseService {
             status: lastImport?.status || "NONE",
             lastCompletedAt: lastImportCompleted?.updatedAt,
         };
+    }
+
+    async findById(id: string): Promise<ClasseModel> {
+        const classe = await this.classeGateway.findById(id);
+        if (!classe) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return classe;
     }
 }
