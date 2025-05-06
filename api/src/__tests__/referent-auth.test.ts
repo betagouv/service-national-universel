@@ -7,6 +7,7 @@ import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent"
 import { dbConnect, dbClose } from "./helpers/db";
 import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
+import jwt from "jsonwebtoken";
 
 const VALID_PASSWORD = faker.internet.password(16, false, /^[a-z]*$/, "AZ12/+");
 
@@ -161,6 +162,10 @@ describe("Referent", () => {
 
       referent.set = jest.fn();
       referent.save = jest.fn();
+      jest.spyOn(jwt, "verify").mockImplementation(() => ({
+        _id: referent._id,
+      }));
+
       const res = await request(getAppHelper(referent)).get("/referent/signin_token").set("Cookie", ["jwt_ref=blah"]);
       expect(res.status).toBe(200);
       expect(referent.set).toHaveBeenCalled();

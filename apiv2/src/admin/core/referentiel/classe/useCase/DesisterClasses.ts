@@ -4,9 +4,10 @@ import { JeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { Inject, Injectable } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import { UseCase } from "@shared/core/UseCase";
-import { STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
+import { STATUS_CLASSE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ReferentielImportTaskParameters } from "../../routes/ReferentielImportTask.model";
 import { ReferentielClasseMapper } from "../ReferentielClasse.mapper";
+import { DesistementService } from "@admin/core/sejours/phase1/desistement/Desistement.service";
 import {
     ClasseDesisterModel,
     ClasseDesisterRapport,
@@ -23,6 +24,7 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
+        @Inject(DesistementService) private readonly desistementService: DesistementService,
     ) {}
     async execute(parameters: ReferentielImportTaskParameters): Promise<ClasseDesisterRapport[]> {
         const report: ClasseDesisterRapport[] = [];
@@ -97,10 +99,19 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
             classe.sessionId,
         );
         // Filtrer les jeunes ayant le même cohortId que la classe
-        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => ({
-            ...jeune,
-            statut: YOUNG_STATUS.ABANDONED,
-        }));
+        const jeunesToDesisterList: JeuneModel[] = jeunesToDesister.map((jeune) => {
+            // First apply status changes
+            const updatedJeune = {
+                ...jeune,
+                statut: YOUNG_STATUS.WITHDRAWN,
+                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                lastStatusAt: new Date(),
+                desistementMotif: "other",
+            };
+
+            // reset des informations d'affectation
+            return this.desistementService.resetInfoAffectation(updatedJeune);
+        });
 
         await this.jeuneGateway.bulkUpdate(jeunesToDesisterList);
 

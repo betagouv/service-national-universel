@@ -64,6 +64,7 @@ import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFla
 import { SharedModule } from "@shared/Shared.module";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
+import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -120,6 +121,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
             ValiderBasculeJeunesService,
+            DesistementService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,

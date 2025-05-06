@@ -3,6 +3,8 @@ import { UserDto, BasicRoute } from "snu-lib";
 
 export interface UserRequest extends Request {
   user: UserDto;
+  impersonatedId?: string;
+  impersonatedUser?: UserDto;
   files?: any;
 }
 

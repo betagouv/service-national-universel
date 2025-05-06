@@ -65,6 +65,7 @@ export type JeuneModel = {
     classeId?: string;
     niveauScolaire?: string;
     scolarise?: string;
+    lastStatusAt?: Date;
 };
 
 export type CreateJeuneModel = Omit<JeuneModel, "id" | "createdAt" | "updatedAt">;
