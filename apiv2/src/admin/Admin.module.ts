@@ -67,7 +67,7 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
-import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
+import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { AuthModule } from "../auth/Auth.module";
 import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";

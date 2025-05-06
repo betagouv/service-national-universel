@@ -22,7 +22,7 @@ import {
     ModifierReferentPayloadDto,
 } from "./Classe.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
+import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";

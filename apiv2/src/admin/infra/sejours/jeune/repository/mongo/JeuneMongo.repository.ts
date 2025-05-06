@@ -45,8 +45,8 @@ export class JeuneRepository implements JeuneGateway {
         classeId: string,
     ): Promise<JeuneModel | null> {
         const jeune = await this.jeuneMongooseEntity.findOne({
-            firstName: nom,
-            lastName: prenom,
+            firstName: prenom,
+            lastName: nom,
             birthdateAt: dateDeNaissance,
             classeId,
         });

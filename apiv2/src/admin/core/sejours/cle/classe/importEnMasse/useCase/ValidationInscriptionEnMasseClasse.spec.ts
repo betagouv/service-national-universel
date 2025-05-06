@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { ConfigModule } from "@nestjs/config";
 import configuration from "@config/testConfiguration";
 
-import { ClasseGateway } from "../Classe.gateway";
+import { ClasseGateway } from "../../Classe.gateway";
 
 import { ValidationInscriptionEnMasseClasse } from "./ValidationInscriptionEnMasseClasse";
 import { FileGateway } from "@shared/core/File.gateway";
@@ -10,7 +10,7 @@ import { Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS } from "snu-lib";
 import { ClockProvider } from "@shared/infra/Clock.provider";
-import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
+import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 describe("ValidationFileInscriptionEnMasseClasse", () => {

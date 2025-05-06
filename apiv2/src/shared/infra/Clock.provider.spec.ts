@@ -147,7 +147,7 @@ describe("ClockProvider", () => {
     describe("formatBirthDate", () => {
         it("should format birth date correctly", () => {
             const birthDate = "08/01/2008";
-            const formattedBirthDate = clockProvider.formatDateNaissance(birthDate);
+            const formattedBirthDate = clockProvider.parseDateNaissance(birthDate);
             expect(formattedBirthDate).toStrictEqual(new Date("2008-01-08T00:00:00.000+00:00"));
         });
     });

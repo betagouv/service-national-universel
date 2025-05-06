@@ -70,6 +70,7 @@ export class JeuneMapper {
             sessionChangeReason: jeuneDocument.cohortChangeReason,
             // CLE
             classeId: jeuneDocument.classeId,
+            etablissementId: jeuneDocument.etablissementId,
         };
     }
 
@@ -185,6 +186,7 @@ export class JeuneMapper {
             cohortChangeReason: jeuneModel.sessionChangeReason,
             // CLE
             classeId: jeuneModel.classeId,
+            etablissementId: jeuneModel.etablissementId,
         };
     }
 }

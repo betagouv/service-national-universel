@@ -11,9 +11,9 @@ import {
     ClasseImportEnMasseValidationDto,
 } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import { ClasseModel } from "../Classe.model";
-import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
-import { EtablissementModel } from "../../etablissement/Etablissement.model";
+import { ClasseModel } from "../../Classe.model";
+import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
+import { EtablissementModel } from "../../../etablissement/Etablissement.model";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 @Injectable()
@@ -198,7 +198,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                 const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
                     row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
                     row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
-                    this.clockGateway.parseDate(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE], "dd/MM/yyyy"),
+                    this.clockGateway.parseDateNaissance(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]),
                     classe.id,
                 );
                 if (jeune) {
