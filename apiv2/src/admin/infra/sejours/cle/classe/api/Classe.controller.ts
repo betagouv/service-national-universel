@@ -114,9 +114,9 @@ export class ClasseController {
             this.classeService.checkImportMapping(data.mapping);
         }
 
-        const fileExists = await this.fileGateway.isS3FileExists(data.fileKey);
+        const fileExists = await this.fileGateway.remoteFileExists(data.fileKey);
         if (!fileExists) {
-            throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, data.fileKey);
+            throw new FunctionalException(FunctionalExceptionCode.FILE_NOT_FOUND, data.fileKey);
         }
 
         const auteur: Partial<ReferentModel> = {

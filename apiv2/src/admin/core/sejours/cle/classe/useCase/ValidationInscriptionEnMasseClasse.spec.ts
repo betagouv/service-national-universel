@@ -73,9 +73,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the file is empty", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE)).toBeDefined();
+        expect(results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE)).toBeDefined();
     });
 
     it("should return an error if there is missing columns", async () => {
@@ -87,12 +87,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.isValid).toEqual(false);
-        expect(errors.errors.length).toBeGreaterThan(0);
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
         expect(
-            errors.errors.find(
+            results.errors.find(
                 (error) =>
                     error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.MISSING_COLUMN &&
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE,
@@ -111,12 +111,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.isValid).toEqual(false);
-        expect(errors.errors.length).toBeGreaterThan(0);
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
         expect(
-            errors.errors.find(
+            results.errors.find(
                 (error) =>
                     error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT &&
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE,
@@ -135,12 +135,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.isValid).toEqual(false);
-        expect(errors.errors.length).toBeGreaterThan(0);
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
         expect(
-            errors.errors.find(
+            results.errors.find(
                 (error) =>
                     error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT &&
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE,
@@ -159,12 +159,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.isValid).toEqual(false);
-        expect(errors.errors.length).toBeGreaterThan(0);
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
         expect(
-            errors.errors.find(
+            results.errors.find(
                 (error) =>
                     error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT &&
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI,
@@ -183,12 +183,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        expect(errors.isValid).toEqual(false);
-        expect(errors.errors.length).toBeGreaterThan(0);
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
         expect(
-            errors.errors.find(
+            results.errors.find(
                 (error) =>
                     error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT &&
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI,
@@ -206,11 +206,10 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
-        console.log(errors);
-        expect(errors.errors.length).toEqual(0);
-        expect(errors.isValid).toEqual(true);
+        expect(results.errors.length).toEqual(0);
+        expect(results.isValid).toEqual(true);
     });
 
     it("should succeed if the format is valid with a mapping", async () => {
@@ -223,7 +222,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        const errors = await validationInscriptionEnMasseClasse.execute(
+        const results = await validationInscriptionEnMasseClasse.execute(
             "classeId",
             {
                 Nom: "nom",
@@ -234,7 +233,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             mockFile,
         );
 
-        expect(errors.errors.length).toEqual(0);
-        expect(errors.isValid).toEqual(true);
+        expect(results.errors.length).toEqual(0);
+        expect(results.isValid).toEqual(true);
     });
 });

@@ -124,7 +124,7 @@ export class FileProvider implements FileGateway {
         };
     }
 
-    async isS3FileExists(path: string): Promise<boolean> {
+    async remoteFileExists(path: string): Promise<boolean> {
         const bucket = this.config.getOrThrow("bucket.name");
         const endpoint = this.config.getOrThrow("bucket.endpoint");
         const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
@@ -144,7 +144,7 @@ export class FileProvider implements FileGateway {
         }
     }
 
-    deleteFile(path: string): Promise<void> {
+    async deleteRemoteFile(path: string): Promise<void> {
         throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
     }
 

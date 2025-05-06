@@ -30,7 +30,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         classeId: string,
         mapping: Record<string, string> | null,
         file: { fileName: string; buffer: Buffer; mimetype: string },
-    ) {
+    ): Promise<ClasseImportEnMasseValidationDto> {
         const classe = await this.classeGateway.findById(classeId);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Classe non trouvée");

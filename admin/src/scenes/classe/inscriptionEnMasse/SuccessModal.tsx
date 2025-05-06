@@ -11,8 +11,8 @@ interface SuccessModalProps {
   onClose: () => void;
   studentCount: number;
   classeId: string;
-  mapping: Record<string, string>;
-  fileKey: string;
+  mapping?: Record<string, string> | null;
+  fileKey?: string | null;
   onSuccess: () => void;
 }
 
@@ -20,7 +20,7 @@ export const SuccessModal = ({ isOpen, onClose, studentCount, classeId, mapping,
   const queryClient = useQueryClient();
 
   const { mutate: confirmImport, isPending: isImporting } = useMutation({
-    mutationFn: () => ClasseService.importInscriptionEnMasse(classeId, mapping, fileKey),
+    mutationFn: () => ClasseService.importInscriptionEnMasse(classeId, mapping || null, fileKey!),
     onSuccess: (task: ClassesRoutes["InscriptionEnMasseImporter"]["response"]) => {
       onSuccess();
       queryClient.setQueryData(["inscription-en-masse", classeId], () => ({

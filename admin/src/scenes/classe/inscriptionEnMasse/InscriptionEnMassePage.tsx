@@ -54,8 +54,6 @@ export default function InscriptionEnMasse() {
     handleFileUpload(file);
   };
 
-  console.log(importState);
-
   return (
     <Page>
       <div className="relative">
@@ -98,10 +96,8 @@ export default function InscriptionEnMasse() {
         onSuccess={closeSuccess}
         studentCount={importState.status === "success" ? importState.studentCount : 0}
         classeId={id}
-        // @ts-ignore
-        mapping={importState.mapping}
-        // @ts-ignore
-        fileKey={importState.fileKey}
+        mapping={importState.status === "success" ? importState.mapping : null}
+        fileKey={importState.status === "success" ? importState.fileKey : null}
       />
 
       {importState.status === "mapping" && (
