@@ -63,6 +63,7 @@ import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { SharedModule } from "@shared/Shared.module";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
+import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -153,6 +154,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             FeatureFlagService,
             { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
             ...featureFlagMongoProviders,
+            ClasseImportService,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
