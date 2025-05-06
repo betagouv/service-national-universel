@@ -54,6 +54,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
                     provide: FileGateway,
                     useValue: {
                         parseXLS: jest.fn(),
+                        uploadFile: jest.fn().mockResolvedValue({ Key: "test-key" }),
                     },
                 },
                 {
@@ -210,6 +211,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
 
         expect(results.errors.length).toEqual(0);
         expect(results.isValid).toEqual(true);
+        expect(results.fileKey).toEqual("test-key");
     });
 
     it("should succeed if the format is valid with a mapping", async () => {
