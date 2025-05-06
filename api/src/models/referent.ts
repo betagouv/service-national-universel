@@ -90,6 +90,7 @@ schema.plugin(patchHistory, {
     "/updatedAt",
     "/token2FA",
     "/token2FAExpires",
+    "/impersonatedBy",
   ],
 });
 

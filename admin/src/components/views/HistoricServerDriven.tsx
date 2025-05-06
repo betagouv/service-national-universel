@@ -116,7 +116,7 @@ export default function HistoricServerDriven({
                 <th className="px-4 py-3 text-xs font-normal text-gray-500">Détails</th>
                 <th className="w-16 px-4 py-3 text-xs font-normal text-gray-500"></th>
                 <th className="px-4 py-3 text-xs font-normal text-gray-500"></th>
-                <th className="px-4 py-3 text-xs font-normal text-gray-500">Auteur</th>
+                <th className="w-[25%] px-4 py-3 text-xs font-normal text-gray-500">Auteur</th>
               </tr>
             </thead>
             <tbody>

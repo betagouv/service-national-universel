@@ -3,7 +3,6 @@ import { ROLES, translate } from "snu-lib";
 import cx from "classnames";
 
 export default function UserCard({ user }) {
-  console.log(user);
   function getAvatar(user) {
     if (!user) return "??";
     const firstName = user.impersonatedBy ? user.impersonatedBy.firstName : user?.firstName;
@@ -50,7 +49,9 @@ export default function UserCard({ user }) {
               "hover:cursor-pointer hover:text-blue-600": getLink(user) !== null,
               "hover:text-inherit": getLink(user) === null,
             })}>
-            <p className="w-full truncate font-medium decoration-2 underline-offset-2 text-sm">{getAuthor(user.impersonatedBy)}</p>
+            <p className="w-full truncate font-medium decoration-2 underline-offset-2 text-sm">
+              {getAuthor(user.impersonatedBy)} <span className="truncate font-normal capitalize text-gray-500 text-xs">{getRole(user)}</span>
+            </p>
           </a>
           <a
             href={getLink(user)}
