@@ -1,7 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { DocumentExtended } from "./types";
-import { EmailSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
+import { EmailSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.EMAIL;
 
