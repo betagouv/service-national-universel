@@ -7,58 +7,12 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized } from "snu-lib";
+import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD, ROLES } from "snu-lib";
 import * as Sentry from "@sentry/react";
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
-
-const CGU = lazy(() => import("./scenes/CGU"));
-const Alerte = lazy(() => import("./scenes/alerte"));
-const Association = lazy(() => import("./scenes/association"));
-const Auth = lazy(() => import("./scenes/auth"));
-const Center = lazy(() => import("./scenes/centersV2"));
-const Content = lazy(() => import("./scenes/content"));
-const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
-const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
-const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
-const INJEPExport = lazy(() => import("./scenes/injep-export"));
-const EditTransport = lazy(() => import("./scenes/edit-transport"));
-const Goal = lazy(() => import("./scenes/goal"));
-const Inscription = lazy(() => import("./scenes/inscription"));
-const Missions = lazy(() => import("./scenes/missions"));
-const LigneBus = lazy(() => import("./scenes/plan-transport/ligne-bus"));
-const SchemaDeRepartition = lazy(() => import("./scenes/plan-transport/schema-repartition"));
-const TableDeRepartition = lazy(() => import("./scenes/plan-transport/table-repartition"));
-const PointDeRassemblement = lazy(() => import("./scenes/pointDeRassemblement"));
-const Profil = lazy(() => import("./scenes/profil"));
-const PublicSupport = lazy(() => import("./scenes/public-support-center"));
-const School = lazy(() => import("./scenes/school"));
-const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
-const Settings = lazy(() => import("./scenes/settings"));
-const RapportPdfPage = lazy(() => import("./scenes/settings/operations/rapport-pdf/RapportPdfPage"));
-const Structure = lazy(() => import("./scenes/structure"));
-const SupportCenter = lazy(() => import("./scenes/support-center"));
-const Utilisateur = lazy(() => import("./scenes/utilisateur"));
-const Validate = lazy(() => import("./scenes/validate"));
-const Volontaires = lazy(() => import("./scenes/volontaires"));
-const VolontairesHeadCenter = lazy(() => import("./scenes/volontaires-head-center"));
-const VolontairesResponsible = lazy(() => import("./scenes/volontaires-responsible"));
-const Etablissement = lazy(() => import("./scenes/etablissement"));
-const Classe = lazy(() => import("./scenes/classe"));
-const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
-const Contact = lazy(() => import("./scenes/contact"));
-const Signup = lazy(() => import("./scenes/signup"));
-const ImportSiSnu = lazy(() => import("./scenes/importSiSnu"));
-const PlanMarketing = lazy(() => import("./scenes/planMarketing"));
-
-//DashboardV2
-const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
-const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
-const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
-const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
-const Team = lazy(() => import("./scenes/team"));
-const Accueil = lazy(() => import("./scenes/dashboardV2/ref-cle/Accueil"));
+import { RestrictedRoute } from "./components/layout/RestrictedRoute";
 
 import Loader from "./components/Loader";
 import Footer from "./components/footer";
@@ -66,7 +20,6 @@ import Footer from "./components/footer";
 import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
-import { ROLES, ROLES_LIST } from "./utils";
 
 import ModalCGU from "./components/modals/ModalCGU";
 import "./index.css";
@@ -81,6 +34,100 @@ import NotFound from "./components/layout/NotFound";
 import { getDefaultSession } from "./utils/session";
 import { COHORTS_ACTIONS } from "./redux/cohorts/actions";
 import EmailPreview from "./scenes/email-preview";
+import { ScrollToTop } from "./utils/router";
+import { AuthState } from "./redux/auth/reducer";
+import { CohortState } from "./redux/cohorts/reducer";
+
+// @ts-ignore
+const CGU = lazy(() => import("./scenes/CGU"));
+// @ts-ignore
+const Alerte = lazy(() => import("./scenes/alerte"));
+// @ts-ignore
+const Association = lazy(() => import("./scenes/association"));
+// @ts-ignore
+const Auth = lazy(() => import("./scenes/auth"));
+// @ts-ignore
+const Center = lazy(() => import("./scenes/centersV2"));
+// @ts-ignore
+const Content = lazy(() => import("./scenes/content"));
+// @ts-ignore
+const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
+// @ts-ignore
+const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
+// @ts-ignore
+const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
+// @ts-ignore
+const INJEPExport = lazy(() => import("./scenes/injep-export"));
+// @ts-ignore
+const EditTransport = lazy(() => import("./scenes/edit-transport"));
+// @ts-ignore
+const Goal = lazy(() => import("./scenes/goal"));
+// @ts-ignore
+const Inscription = lazy(() => import("./scenes/inscription"));
+// @ts-ignore
+const Missions = lazy(() => import("./scenes/missions"));
+// @ts-ignore
+const LigneBus = lazy(() => import("./scenes/plan-transport/ligne-bus"));
+// @ts-ignore
+const SchemaDeRepartition = lazy(() => import("./scenes/plan-transport/schema-repartition"));
+// @ts-ignore
+const TableDeRepartition = lazy(() => import("./scenes/plan-transport/table-repartition"));
+// @ts-ignore
+const PointDeRassemblement = lazy(() => import("./scenes/pointDeRassemblement"));
+// @ts-ignore
+const Profil = lazy(() => import("./scenes/profil"));
+// @ts-ignore
+const PublicSupport = lazy(() => import("./scenes/public-support-center"));
+// @ts-ignore
+const School = lazy(() => import("./scenes/school"));
+// @ts-ignore
+const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
+// @ts-ignore
+const Settings = lazy(() => import("./scenes/settings"));
+// @ts-ignore
+const RapportPdfPage = lazy(() => import("./scenes/settings/operations/rapport-pdf/RapportPdfPage"));
+// @ts-ignore
+const Structure = lazy(() => import("./scenes/structure"));
+// @ts-ignore
+const SupportCenter = lazy(() => import("./scenes/support-center"));
+// @ts-ignore
+const Utilisateur = lazy(() => import("./scenes/utilisateur"));
+// @ts-ignore
+const Validate = lazy(() => import("./scenes/validate"));
+// @ts-ignore
+const Volontaires = lazy(() => import("./scenes/volontaires"));
+// @ts-ignore
+const VolontairesHeadCenter = lazy(() => import("./scenes/volontaires-head-center"));
+// @ts-ignore
+const VolontairesResponsible = lazy(() => import("./scenes/volontaires-responsible"));
+// @ts-ignore
+const Etablissement = lazy(() => import("./scenes/etablissement"));
+// @ts-ignore
+const Classe = lazy(() => import("./scenes/classe"));
+// @ts-ignore
+const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
+// @ts-ignore
+const Contact = lazy(() => import("./scenes/contact"));
+// @ts-ignore
+const Signup = lazy(() => import("./scenes/signup"));
+// @ts-ignore
+const ImportSiSnu = lazy(() => import("./scenes/importSiSnu"));
+// @ts-ignore
+const PlanMarketing = lazy(() => import("./scenes/planMarketing"));
+
+//DashboardV2
+// @ts-ignore
+const DashboardHeadCenterV2 = lazy(() => import("./scenes/dashboardV2/head-center"));
+// @ts-ignore
+const DashboardV2 = lazy(() => import("./scenes/dashboardV2/moderator-ref"));
+// @ts-ignore
+const DashboardResponsibleV2 = lazy(() => import("./scenes/dashboardV2/responsible"));
+// @ts-ignore
+const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
+// @ts-ignore
+const Team = lazy(() => import("./scenes/team"));
+// @ts-ignore
+const Accueil = lazy(() => import("./scenes/dashboardV2/ref-cle/Accueil"));
 
 initApi();
 
@@ -89,6 +136,7 @@ class App extends React.Component {
     return (
       <Sentry.ErrorBoundary fallback={ApplicationError}>
         <QueryClientProvider client={queryClient}>
+          {/* @ts-ignore */}
           <Router history={history}>
             <ScrollToTop />
             <div className="main">
@@ -120,10 +168,16 @@ export default Sentry.withProfiler(App);
 
 const Home = () => {
   const dispatch = useDispatch();
-  const user = useSelector((state) => state.Auth.user);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const { pathname, search } = useLocation();
-  const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
+  const [modal, setModal] = useState<{ isOpen: boolean; title?: string; message?: React.ReactNode; confirmText?: string; onConfirm?: (() => void) | null }>({
+    isOpen: false,
+    title: "",
+    message: null,
+    confirmText: "",
+    onConfirm: null,
+  });
   const [loading, setLoading] = useState(true);
 
   // pour les chefs de centre, il faut afficher une seul session à la fois si il y en a plusieurs (peu importe le centre de cohésion)
@@ -179,7 +233,7 @@ const Home = () => {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);
           if (!ok) return console.log(`Error: ${code}`);
 
-          const sessions = data.sort((a, b) => new Date(a.createdAt) - new Date(b.createdAt));
+          const sessions = data.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
           const activeSession = getDefaultSession(sessions, cohorts);
 
           setSessionPhase1List(sessions.reverse());
@@ -213,7 +267,7 @@ const Home = () => {
 
   if (loading) return <Loader />;
   if (!user) {
-    const queryObject = { disconnected: 1 };
+    const queryObject: any = { disconnected: 1 };
     if (pathname) queryObject.redirect = `${pathname}${search}`;
 
     return <Redirect to={`/auth?${queryString.stringify(queryObject)}`} />;
@@ -292,7 +346,7 @@ const Home = () => {
         message={modal?.message}
         confirmText={modal?.confirmText}
         onConfirm={() => {
-          modal?.onConfirm();
+          modal?.onConfirm?.();
           setModal({ isOpen: false, onConfirm: null });
         }}
         onCancel={() => {
@@ -302,74 +356,3 @@ const Home = () => {
     </div>
   );
 };
-
-// legacy
-const limitedAccess = {
-  [ROLES.DSNJ]: { authorised: ["/dsnj-export", "/profil", "/besoin-d-aide"], default: "/dsnj-export" },
-  [ROLES.TRANSPORTER]: { authorised: ["/schema-repartition", "/profil", "/ligne-de-bus", "/centre", "/point-de-rassemblement", "/besoin-d-aide"], default: "/schema-repartition" },
-  // FIXME [CLE]: remove dev routes when
-  [ROLES.ADMINISTRATEUR_CLE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
-    default: "/accueil",
-  },
-  [ROLES.REFERENT_CLASSE]: {
-    authorised: ["/mon-etablissement", "/classes", "/mes-eleves", "/design-system", "/develop-assets", "/user", "/profil", "/volontaire", "/besoin-d-aide", "/accueil"],
-    default: "/accueil",
-  },
-  [ROLES.VISITOR]: { authorised: ["/dashboard", "/school", "/profil", "/besoin-d-aide"], default: "/dashboard" },
-};
-
-const PERMISSIONS_BY_ROUTE = {
-  "/injep-export": [{ ressource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
-  "/profil": [{ ressource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
-  "/besoin-d-aide": [{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
-};
-
-const DEFAULT_ROUTE_BY_ROLE = {
-  [ROLES.INJEP]: "/injep-export",
-};
-
-const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
-  const { pathname } = useLocation();
-  const user = useSelector((state) => state.Auth.user);
-
-  if (!roles.includes(user.role)) {
-    return <Redirect to="/dashboard" />;
-  }
-
-  // TODO: remove legacy matchRoute
-  const matchRoute = limitedAccess[user.role]?.authorised.some((route) => pathname.includes(route));
-  if (limitedAccess[user.role] && !matchRoute) {
-    return <Redirect to={limitedAccess[user.role].default} />;
-  }
-
-  if (!matchRoute && PERMISSIONS_BY_ROUTE[pathname]) {
-    const routeAuthorized = PERMISSIONS_BY_ROUTE[pathname].some((permission) => isAuthorized({ user, ressource: permission.ressource, action: permission.action }));
-    if (!routeAuthorized) {
-      console.log(`use does not have permission for ${pathname}`);
-      return <Redirect to={DEFAULT_ROUTE_BY_ROLE[user.role] || "/"} />;
-    } else {
-      console.debug(`user has permission for ${pathname}`);
-    }
-  }
-
-  // TODO: remove this hack when all routes are protected with permissions
-  if (!matchRoute && !PERMISSIONS_BY_ROUTE[pathname] && [ROLES.INJEP].includes(user.role)) {
-    return <Redirect to={DEFAULT_ROUTE_BY_ROLE[user.role] || "/"} />;
-  }
-
-  return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
-};
-
-function ScrollToTop() {
-  const { pathname } = useLocation();
-  useEffect(() => {
-    if (document.getElementsByTagName) {
-      const inputElements = document.getElementsByTagName("input");
-      for (let i = 0; inputElements[i]; i++) inputElements[i].setAttribute("autocomplete", "novalue");
-    }
-    window.scrollTo(0, 0);
-  }, [pathname]);
-
-  return null;
-}
