@@ -143,9 +143,10 @@ export class ClasseController {
         @Param("id") classeId: string,
     ): Promise<ClassesRoutes["InscriptionEnMasseStatut"]["response"]> {
         const statut = await this.classeService.getStatusImportInscriptionEnMasse(classeId);
+
         return {
             status: statut.status,
-            statusDate: statut.statusDate.toISOString(),
+            statusDate: statut.statusDate?.toISOString(),
             lastCompletedAt: statut.lastCompletedAt?.toISOString(),
         };
     }

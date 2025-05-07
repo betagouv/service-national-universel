@@ -10,8 +10,8 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 
 export type StatusImportInscriptionEnMasse = {
     status: TaskStatus | "NONE";
-    statusDate: Date;
-    lastCompletedAt: Date;
+    statusDate?: Date;
+    lastCompletedAt?: Date;
 };
 
 @Injectable()
