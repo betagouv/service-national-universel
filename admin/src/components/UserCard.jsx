@@ -1,6 +1,7 @@
 import React from "react";
 import { ROLES } from "snu-lib";
 import cx from "classnames";
+import { getAuthor } from "@/utils";
 
 import UserInfo from "./UserInfo";
 import LinkWrapper from "./LinkWrapper";
@@ -19,6 +20,7 @@ export default function UserCard({ user }) {
     if (user?.role === "Volontaire") return `/volontaire/${user._id}`;
     return null;
   }
+
   const hasLink = getLink(user) !== null;
 
   return (
