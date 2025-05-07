@@ -13,7 +13,7 @@ import {
   YoungType,
   MONGO_COLLECTION,
   getVirtualUser,
-  getUserToSave,
+  buildPatchUser,
   DocumentExtended,
   CustomSaveParams,
   UserExtension,
@@ -87,7 +87,7 @@ schema.post("deleteOne", function (doc) {
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   this.previousStatus = this.status; // Used to compute classe if a young CLE has a change in status (see post save hook)

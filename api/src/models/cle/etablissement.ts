@@ -1,7 +1,7 @@
 import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { EtablissementSchema, EtablissementType, MONGO_COLLECTION, getUserToSave, getVirtualUser, CustomSaveParams, UserExtension, UserSaved, DocumentExtended } from "snu-lib";
+import { EtablissementSchema, EtablissementType, MONGO_COLLECTION, buildPatchUser, getVirtualUser, CustomSaveParams, UserExtension, UserSaved, DocumentExtended } from "snu-lib";
 
 import { ClasseModel } from "./classe";
 
@@ -15,7 +15,7 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
 
 schema.pre<SchemaExtended>("save", async function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   if (!this.isNew && (this.isModified("department") || this.isModified("region"))) {

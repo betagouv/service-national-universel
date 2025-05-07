@@ -11,7 +11,7 @@ import {
   YoungEligibilitySchema,
   MONGO_COLLECTION,
   getVirtualUser,
-  getUserToSave,
+  buildPatchUser,
   DocumentExtended,
   CustomSaveParams,
   UserExtension,
@@ -85,7 +85,7 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   next();

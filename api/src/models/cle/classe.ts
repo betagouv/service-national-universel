@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ClasseType, ClasseSchema, MONGO_COLLECTION, getUserToSave, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
+import { ClasseType, ClasseSchema, MONGO_COLLECTION, buildPatchUser, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
 import { EtablissementDocument } from "./etablissement";
 import { ReferentDocument } from "../referent";
@@ -72,7 +72,7 @@ schema.set("toJSON", { virtuals: true });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   next();

@@ -5,7 +5,7 @@ import {
   InterfaceExtended,
   PointDeRassemblementSchema,
   MONGO_COLLECTION,
-  getUserToSave,
+  buildPatchUser,
   getVirtualUser,
   DocumentExtended,
   CustomSaveParams,
@@ -23,7 +23,7 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   next();

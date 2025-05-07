@@ -10,7 +10,7 @@ import {
   UserExtension,
   UserSaved,
   getVirtualUser,
-  getUserToSave,
+  buildPatchUser,
 } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.SCHEMA_DE_REPARTITION;
@@ -30,7 +30,7 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   next();

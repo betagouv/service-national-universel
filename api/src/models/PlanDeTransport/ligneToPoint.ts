@@ -1,7 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, LigneToPointSchema, MONGO_COLLECTION, getUserToSave, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
+import { InterfaceExtended, LigneToPointSchema, MONGO_COLLECTION, buildPatchUser, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.LIGNE_TO_POINT;
 
@@ -13,7 +13,7 @@ schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
   if (params?.fromUser) {
-    this.user = getUserToSave(params.fromUser);
+    this.user = buildPatchUser(params.fromUser);
   }
   this.updatedAt = new Date();
   next();
