@@ -445,3 +445,9 @@ export const CDN_BASE_URL =
 export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.now()}`;
 
 export const desktopBreakpoint = 1024;
+
+export function getAuthor(user) {
+  if (!user) return "Auteur inconnu";
+  if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
+  if (user.firstName && !user.lastName) return user.firstName;
+}

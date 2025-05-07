@@ -1,6 +1,7 @@
 import React from "react";
 import { ROLES, translate } from "snu-lib";
 import cx from "classnames";
+import { getAuthor } from "@/utils";
 
 export default function UserCard({ user }) {
   function getAvatar(user) {
@@ -21,11 +22,6 @@ export default function UserCard({ user }) {
     } else {
       return "Script";
     }
-  }
-  function getAuthor(user) {
-    if (!user) return "Auteur inconnu";
-    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
-    if (user.firstName && !user.lastName) return user.firstName;
   }
 
   return (
