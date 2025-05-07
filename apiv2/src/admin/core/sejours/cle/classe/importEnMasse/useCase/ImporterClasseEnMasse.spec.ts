@@ -240,3 +240,35 @@ describe("ImporterClasseEnMasse", () => {
         );
     });
 });
+
+describe("mapJeunes", () => {
+    it("should map jeunes according to mapping", () => {
+        const importer = new ImporterClasseEnMasse({} as any, {} as any, {} as any, {} as any, {} as any);
+        const input = [
+            {
+                "Nom Eleve": "Doe",
+                "Prenom Eleve": "John",
+                Naissance: "01/01/2006",
+                Sexe: "M",
+                "Code Etablissement": "12345678",
+            },
+        ];
+        const mapping = {
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Nom Eleve",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "Prenom Eleve",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "Naissance",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "Sexe",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "Code Etablissement",
+        };
+        const result = importer["mapJeunes"](input, mapping);
+        expect(result).toEqual([
+            {
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Doe",
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "John",
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "01/01/2006",
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "M",
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "12345678",
+            },
+        ]);
+    });
+});

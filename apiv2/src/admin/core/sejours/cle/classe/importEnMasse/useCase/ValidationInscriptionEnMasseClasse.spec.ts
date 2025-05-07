@@ -8,14 +8,21 @@ import { ValidationInscriptionEnMasseClasse } from "./ValidationInscriptionEnMas
 import { FileGateway } from "@shared/core/File.gateway";
 import { Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS } from "snu-lib";
+import {
+    CLASSE_IMPORT_EN_MASSE_COLUMNS,
+    CLASSE_IMPORT_EN_MASSE_ERRORS,
+    FunctionalException,
+    STATUS_CLASSE,
+} from "snu-lib";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
-
+import { ClasseModel } from "../../Classe.model";
+import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 describe("ValidationFileInscriptionEnMasseClasse", () => {
     let validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse;
     let fileGateway: jest.Mocked<FileGateway>;
+    let classeGateway: jest.Mocked<ClasseGateway>;
 
     const mockFile = {
         fileName: "test.xls",
@@ -35,7 +42,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
                 {
                     provide: ClasseGateway,
                     useValue: {
-                        findById: jest.fn().mockResolvedValue({}),
+                        findById: jest.fn().mockResolvedValue({
+                            statut: STATUS_CLASSE.OPEN,
+                        }),
                     },
                 },
                 {
@@ -69,6 +78,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             ValidationInscriptionEnMasseClasse,
         );
         fileGateway = module.get(FileGateway);
+        classeGateway = module.get(ClasseGateway);
     });
 
     it("should return an error if the file is empty", async () => {
@@ -237,5 +247,15 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
 
         expect(results.errors.length).toEqual(0);
         expect(results.isValid).toEqual(true);
+    });
+
+    it("should throw an error if the classe is not open", async () => {
+        classeGateway.findById.mockResolvedValueOnce({
+            statut: STATUS_CLASSE.CLOSED,
+        } as ClasseModel);
+
+        await expect(validationInscriptionEnMasseClasse.execute("classeId", null, mockFile)).rejects.toThrow(
+            FunctionalExceptionCode.CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE,
+        );
     });
 });

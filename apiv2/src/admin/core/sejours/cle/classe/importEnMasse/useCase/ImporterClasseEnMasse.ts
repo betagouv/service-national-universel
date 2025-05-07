@@ -94,14 +94,13 @@ export class ImporterClasseEnMasse implements UseCase<void> {
     private mapJeunes(
         jeunes: Record<string, string>[],
         mapping: Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>,
-    ): Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string | Date>[] {
+    ): Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>[] {
         return jeunes.map((jeune) => {
             return {
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]],
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: this.clockGateway.parseDateNaissance(
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]:
                     jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]],
-                ),
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]],
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]],
             };
