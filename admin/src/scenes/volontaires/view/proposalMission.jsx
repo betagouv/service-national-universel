@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canApplyToPhase2 } from "snu-lib";
+import { canCreateApplications } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";
@@ -115,7 +115,7 @@ export default function ProposeMission({ young, onSend }) {
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
-        {canApplyToPhase2(young, cohort) ? (
+        {canCreateApplications(young, cohort) ? (
           <>
             <div className="h-[38px] w-1/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
               <input

@@ -8,7 +8,7 @@ import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
 import { shouldForceRedirectToInscription } from "./utils/navigation";
-
+import usePermissions from "./hooks/usePermissions";
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
 import Diagoriente from "./components/layout/navbar/components/Diagoriente";
@@ -32,7 +32,7 @@ const Phase3 = lazy(() => import("./scenes/phase3"));
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
   const [isModalRIOpen, setIsModalRIOpen] = useState(false);
-
+  const { canViewPhase2 } = usePermissions();
   const { young } = useAuth();
   const { cohort } = useCohort();
 
@@ -80,7 +80,7 @@ const Espace = () => {
           <SentryRoute path="/account" component={Account} />
           <SentryRoute path="/echanges" component={Echanges} />
           <SentryRoute path="/phase1" component={Phase1} />
-          <SentryRoute path="/phase2" component={Phase2} />
+          {canViewPhase2 && <SentryRoute path="/phase2" component={Phase2} />}
           <SentryRoute path="/phase3" component={Phase3} />
           <SentryRoute path="/autres-engagements" component={AutresEngagements} />
           <SentryRoute path="/les-programmes" component={Engagement} />
