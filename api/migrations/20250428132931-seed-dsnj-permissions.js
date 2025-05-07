@@ -7,7 +7,7 @@ module.exports = {
       code: PERMISSION_CODES.EXPORT_DSNJ,
       titre: "Export DSNJ",
       action: PERMISSION_ACTIONS.EXECUTE,
-      roles: [ROLES.DSNJ],
+      roles: [ROLES.DSNJ, ROLES.ADMIN],
       ressource: PERMISSION_RESOURCES.EXPORT_DSNJ,
     });
   },

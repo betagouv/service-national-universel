@@ -53,8 +53,9 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
     return <Redirect to={limitedAccess[user.role].default} />;
   }
 
-  if (!matchRoute && PERMISSIONS_BY_ROUTE[pathname]) {
-    const routeAuthorized = PERMISSIONS_BY_ROUTE[pathname].some((permission) => isAuthorized({ user, ressource: permission.ressource, action: permission.action }));
+  const route = Object.keys(PERMISSIONS_BY_ROUTE).find((route) => pathname.startsWith(route));
+  if (!matchRoute && route && PERMISSIONS_BY_ROUTE[route]) {
+    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].some((permission) => isAuthorized({ user, ressource: permission.ressource, action: permission.action }));
     if (!routeAuthorized) {
       console.log(`user does not have permission for ${pathname}`);
       if (pathname === defaultRoute) {
@@ -77,7 +78,7 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
   }
 
   // TODO: remove this hack when all routes are protected with permissions
-  if (!matchRoute && !PERMISSIONS_BY_ROUTE[pathname] && [ROLES.INJEP, ROLES.DSNJ].includes(user.role)) {
+  if (!matchRoute && route && !PERMISSIONS_BY_ROUTE[route] && [ROLES.INJEP, ROLES.DSNJ].includes(user.role)) {
     console.log(`user does not have permission for ${pathname}.`);
     if (pathname !== defaultRoute) {
       toastr.error("Accès non autorisé", `Vous n'avez pas les permissions nécessaires pour accéder à cette page, vous avez été redirigé vers l'accueil.`);

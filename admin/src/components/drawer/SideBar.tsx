@@ -251,7 +251,6 @@ const SideBar = ({ sessionsList }) => {
   const responsableItems = [Dashboard, Candidature, Structure, Missions];
   const supervisorItems = [Dashboard, Candidature, Network, StructureSupervisor, Missions, Utilisateurs];
   const visitorItems = [Dashboard];
-  const dsnjItems = [ExportDsnj];
   const institutionItems = [Accueil, Institution, Classe, VolontaireCle, Contact];
 
   const getItems = () => {
@@ -279,16 +278,20 @@ const SideBar = ({ sessionsList }) => {
       case ROLES.VISITOR:
         items = [...visitorItems];
         break;
-      case ROLES.DSNJ:
-        items = [...dsnjItems];
-        break;
       case ROLES.ADMINISTRATEUR_CLE:
       case ROLES.REFERENT_CLASSE:
         items = [...institutionItems];
         break;
     }
-    if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
-      items.push(ExportInjep);
+
+    // clean la construction du menu qui est différente en fonction du rôle
+    if (!items.includes(SejoursAdmin) && !items.includes(SejoursGod)) {
+      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
+        items.push(ExportInjep);
+      }
+      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_DSNJ })) {
+        items.push(ExportDsnj);
+      }
     }
     return items;
   };

@@ -7,7 +7,7 @@ module.exports = {
       code: PERMISSION_CODES.EXPORT_INJEP,
       titre: "Export INJEP",
       action: PERMISSION_ACTIONS.EXECUTE,
-      roles: [ROLES.INJEP],
+      roles: [ROLES.INJEP, ROLES.ADMIN],
       ressource: PERMISSION_RESOURCES.EXPORT_INJEP,
     });
     await PermissionModel.create({
