@@ -8,6 +8,7 @@ import { ClasseService } from "@/services/classeService";
 
 import { ImportEnMasseError } from "./FileValidationErrorsList";
 import { validateColumnsName } from "./MappingService";
+import { toastr } from "react-redux-toastr";
 
 type FileUploadOptions = {
   classeId: string;
@@ -80,6 +81,7 @@ export const useFileUploadHandler = (options: FileUploadOptions): FileUploadHand
 
       setImportState({ status: "error", errors: Object.values(errorByColumn) });
     } catch (error) {
+      toastr.error("Erreur lors de la validation du fichier", translateClasseImportEnMasse(error.message));
       setImportState({
         status: "error",
         errors: [

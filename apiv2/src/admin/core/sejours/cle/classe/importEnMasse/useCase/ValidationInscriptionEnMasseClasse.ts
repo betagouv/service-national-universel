@@ -9,6 +9,7 @@ import {
     CLASSE_IMPORT_EN_MASSE_ERRORS,
     IMPORT_REQUIRED_COLUMN,
     ClasseImportEnMasseValidationDto,
+    STATUS_CLASSE,
 } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClasseModel } from "../../Classe.model";
@@ -34,6 +35,12 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const classe = await this.classeGateway.findById(classeId);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Classe non trouvée");
+        }
+        if (classe.statut !== STATUS_CLASSE.OPEN) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE,
+                "La classe n'est pas ouverte",
+            );
         }
         const etablissement = await this.etablissementGateway.findById(classe.etablissementId);
         if (!etablissement) {

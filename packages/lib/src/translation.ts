@@ -1391,6 +1391,8 @@ export const translateClasseImportEnMasse = (name: string, column?: string) => {
       return `Cet élève est déjà inscrit dans cette classe et ne peut pas être importé à nouveau.`;
     case CLASSE_IMPORT_EN_MASSE_ERRORS.UAI_NOT_MATCH:
       return `Le champ "UAI" ne correspond pas à l'etablissement de la classe.`;
+    case "CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE":
+      return `La classe n'est pas ouverte.`;
     default:
       return name;
   }
