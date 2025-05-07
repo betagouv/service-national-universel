@@ -11,7 +11,7 @@ import {
     PlanTransportPointDeRassemblementEnrichedSchema,
     UserExtension,
     CustomSaveParams,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 
 export type PlanDeTransportDocument = HydratedDocument<PlanTransportType>;
@@ -35,7 +35,7 @@ const PlanDeTransportSchemaRef = new mongoose.Schema({
 
 PlanDeTransportSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

@@ -7,7 +7,7 @@ import {
     SessionPhase1Schema,
     SessionPhase1Type,
     UserExtension,
-    getUserToSave,
+    buildPatchUser,
     CustomSaveParams,
 } from "snu-lib";
 
@@ -32,7 +32,7 @@ const SejourSchemaRef = new mongoose.Schema({
 
 SejourSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

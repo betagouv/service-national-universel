@@ -6,7 +6,7 @@ import {
     ModificationBusType,
     CustomSaveParams,
     UserExtension,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
@@ -21,7 +21,7 @@ DemandeModificationLigneDeBusSchemaRef.pre<SchemaExtended>(
     "save",
     function (next, params: CustomSaveParams | undefined) {
         if (params?.fromUser) {
-            this._user = getUserToSave(params.fromUser);
+            this._user = buildPatchUser(params.fromUser);
         }
         this.updatedAt = new Date();
         next();

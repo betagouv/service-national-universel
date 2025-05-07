@@ -1,7 +1,7 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { MONGO_COLLECTION, RoleSchema, RoleType, UserExtension, CustomSaveParams, getUserToSave } from "snu-lib";
+import { MONGO_COLLECTION, RoleSchema, RoleType, UserExtension, CustomSaveParams, buildPatchUser } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
@@ -13,7 +13,7 @@ const RoleSchemaRef = new mongoose.Schema(RoleSchema);
 
 RoleSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

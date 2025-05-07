@@ -6,7 +6,7 @@ import {
     LigneToPointType,
     UserExtension,
     CustomSaveParams,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
@@ -19,7 +19,7 @@ const SegmentDeLigneSchemaRef = new mongoose.Schema(LigneToPointSchema);
 
 SegmentDeLigneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

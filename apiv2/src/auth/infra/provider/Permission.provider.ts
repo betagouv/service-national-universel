@@ -7,7 +7,7 @@ import {
     PermissionType,
     CustomSaveParams,
     UserExtension,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
@@ -20,7 +20,7 @@ const PermissionSchemaRef = new mongoose.Schema(PermissionSchema);
 
 PermissionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

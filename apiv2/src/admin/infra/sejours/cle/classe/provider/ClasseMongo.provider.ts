@@ -1,6 +1,6 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { ClasseSchema, ClasseType, MONGO_COLLECTION, CustomSaveParams, getUserToSave, UserExtension } from "snu-lib";
+import { ClasseSchema, ClasseType, MONGO_COLLECTION, CustomSaveParams, buildPatchUser, UserExtension } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type ClasseDocument = HydratedDocument<ClasseType>;
@@ -12,7 +12,7 @@ const ClasseSchemaRef = new mongoose.Schema(ClasseSchema);
 
 ClasseSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

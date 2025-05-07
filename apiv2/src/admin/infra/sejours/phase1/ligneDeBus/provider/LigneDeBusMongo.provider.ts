@@ -9,7 +9,7 @@ import {
     LigneBusType,
     CustomSaveParams,
     UserExtension,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 
 export type LigneDeBusDocument = HydratedDocument<LigneBusType>;
@@ -27,7 +27,7 @@ const LigneDeBusSchemaRef = new mongoose.Schema({
 
 LigneDeBusSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();

@@ -10,7 +10,7 @@ import {
     YoungSchemaNote,
     YoungType,
     CustomSaveParams,
-    getUserToSave,
+    buildPatchUser,
 } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
@@ -40,7 +40,7 @@ const JeuneSchemaRef = new mongoose.Schema({
 
 JeuneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
+        this._user = buildPatchUser(params.fromUser);
     }
     this.updatedAt = new Date();
     next();
