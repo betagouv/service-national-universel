@@ -163,18 +163,16 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
   }
 
   const isManualInscriptionActionDisabled = !(classe?.status === STATUS_CLASSE.OPEN || canPerformManualInscriptionActions);
-  // TODO: revoir les règles d'affi
-  // const optionsInscriptionFiltered =
-  //   classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
-  //     ? [
-  //         {
-  //           ...optionsInscription[0],
-  //           // override items to keep only manual inscription
-  //           items: optionsInscription[0].items.filter((i) => i.key === "manual"),
-  //         },
-  //       ]
-  //     : optionsInscription;
-  const optionsInscriptionFiltered = optionsInscription;
+  const optionsInscriptionFiltered =
+    classe?.status !== STATUS_CLASSE.OPEN && canPerformManualInscriptionActions
+      ? [
+          {
+            ...optionsInscription[0],
+            // override items to keep only manual inscription
+            items: optionsInscription[0].items.filter((i) => i.key === "manual"),
+          },
+        ]
+      : optionsInscription;
 
   actionsList.push(
     <DropdownButton
