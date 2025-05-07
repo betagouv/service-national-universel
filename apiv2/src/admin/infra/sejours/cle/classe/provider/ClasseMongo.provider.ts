@@ -10,7 +10,7 @@ export const CLASSE_MONGOOSE_ENTITY = "CLASSE_MONGOOSE_ENTITY";
 
 const ClasseSchemaRef = new mongoose.Schema(ClasseSchema);
 
-ClasseSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+ClasseSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

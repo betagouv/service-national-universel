@@ -25,7 +25,7 @@ const LigneDeBusSchemaRef = new mongoose.Schema({
     },
 });
 
-LigneDeBusSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+LigneDeBusSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

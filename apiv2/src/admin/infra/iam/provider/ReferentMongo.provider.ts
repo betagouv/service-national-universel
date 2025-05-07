@@ -17,7 +17,7 @@ export const REFERENT_MONGOOSE_ENTITY = "REFERENT_MONGOOSE_ENTITY";
 
 const ReferentSchemaRef = new mongoose.Schema(ReferentSchema);
 
-ReferentSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+ReferentSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

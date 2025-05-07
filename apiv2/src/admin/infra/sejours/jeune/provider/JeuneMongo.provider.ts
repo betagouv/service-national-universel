@@ -38,7 +38,7 @@ const JeuneSchemaRef = new mongoose.Schema({
     },
 });
 
-JeuneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+JeuneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

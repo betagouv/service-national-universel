@@ -33,7 +33,7 @@ const PlanDeTransportSchemaRef = new mongoose.Schema({
     },
 });
 
-PlanDeTransportSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+PlanDeTransportSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

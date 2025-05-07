@@ -17,13 +17,16 @@ export const DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY = "DEMANDEMODIFICATIONBUS_MO
 
 const DemandeModificationLigneDeBusSchemaRef = new mongoose.Schema(ModificationBusSchema);
 
-DemandeModificationLigneDeBusSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-    if (params?.fromUser) {
-        this._user = getUserToSave(params.fromUser);
-    }
-    this.updatedAt = new Date();
-    next();
-});
+DemandeModificationLigneDeBusSchemaRef.pre<SchemaExtended>(
+    "save",
+    function (next, params: CustomSaveParams | undefined) {
+        if (params?.fromUser) {
+            this._user = getUserToSave(params.fromUser);
+        }
+        this.updatedAt = new Date();
+        next();
+    },
+);
 
 DemandeModificationLigneDeBusSchemaRef.plugin(patchHistory, {
     mongoose,

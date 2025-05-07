@@ -1,5 +1,5 @@
-import { UserSaved } from "./types";
-export function getUserToSave(fromUser: UserSaved): UserSaved {
+import { UserSaved } from "../mongoSchema/types";
+export function buildPatchUser(fromUser: UserSaved): UserSaved {
   if (fromUser.impersonatedBy) {
     return {
       ...getVirtualUser(fromUser),

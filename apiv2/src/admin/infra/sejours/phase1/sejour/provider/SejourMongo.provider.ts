@@ -30,7 +30,7 @@ const SejourSchemaRef = new mongoose.Schema({
     },
 });
 
-SejourSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+SejourSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

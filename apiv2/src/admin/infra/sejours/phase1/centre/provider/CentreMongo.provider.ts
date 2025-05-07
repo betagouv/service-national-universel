@@ -19,7 +19,7 @@ export const CENTRE_MONGOOSE_ENTITY = "CENTRE_MONGOOSE_ENTITY";
 
 const CentreSchemaRef = new mongoose.Schema(CohesionCenterSchema);
 
-CentreSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+CentreSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

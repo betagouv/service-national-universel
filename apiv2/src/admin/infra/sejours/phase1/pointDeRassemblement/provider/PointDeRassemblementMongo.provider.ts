@@ -17,7 +17,7 @@ export const PDR_MONGOOSE_ENTITY = "PDR_MONGOOSE_ENTITY";
 
 const PointDeRassemblementSchemaRef = new mongoose.Schema(PointDeRassemblementSchema);
 
-PointDeRassemblementSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+PointDeRassemblementSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

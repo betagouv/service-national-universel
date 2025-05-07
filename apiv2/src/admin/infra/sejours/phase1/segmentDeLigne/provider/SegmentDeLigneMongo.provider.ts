@@ -17,7 +17,7 @@ export const SEGMENTLIGNE_MONGOOSE_ENTITY = "SEGMENTLIGNE_MONGOOSE_ENTITY";
 
 const SegmentDeLigneSchemaRef = new mongoose.Schema(LigneToPointSchema);
 
-SegmentDeLigneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+SegmentDeLigneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

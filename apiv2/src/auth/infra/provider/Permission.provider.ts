@@ -18,7 +18,7 @@ export const PERMISSION_MONGOOSE_ENTITY = "PERMISSION_MONGOOSE_ENTITY";
 
 const PermissionSchemaRef = new mongoose.Schema(PermissionSchema);
 
-PermissionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+PermissionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

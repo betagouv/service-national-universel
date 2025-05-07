@@ -36,7 +36,7 @@ const SessionSchemaRef = new mongoose.Schema({
     },
 });
 
-SessionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+SessionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }

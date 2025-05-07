@@ -11,7 +11,7 @@ export const ROLE_MONGOOSE_ENTITY = "ROLE_MONGOOSE_ENTITY";
 
 const RoleSchemaRef = new mongoose.Schema(RoleSchema);
 
-RoleSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+RoleSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
     if (params?.fromUser) {
         this._user = getUserToSave(params.fromUser);
     }
