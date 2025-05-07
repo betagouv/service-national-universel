@@ -1,15 +1,21 @@
-import React from "react";
+import React, { forwardRef } from "react";
 import ErrorMessage from "../ErrorMessage";
 
-const Checkbox = ({ label = "", className = "", name = "", checked = false, onChange = () => null, error = null, disabled = false, ...rest }) => {
-  const handleChange = (event) => {
-    onChange(event.target.checked);
-  };
+type Props = {
+  label?: string;
+  className?: string;
+  error?: string;
+  checked?: boolean;
+  disabled?: boolean;
+  [key: string]: any;
+};
 
+const Checkbox = forwardRef<HTMLInputElement, Props>(function Checkbox(props, ref) {
+  const { label, className, error, checked, disabled, ...rest } = props;
   return (
     <div className={`mb-3 ${className}`}>
       <label className={`flex items-center gap-2 ${error ? "border-red-500" : ""}`}>
-        <input type="checkbox" name={name} checked={checked} onChange={handleChange} disabled={disabled} className="hidden" {...rest} />
+        <input type="checkbox" className="hidden" ref={ref} checked={checked} disabled={disabled} {...rest} />
         <span
           className={`w-4 h-4 flex-shrink-0 border rounded-sm flex items-center justify-center
             ${checked ? (disabled ? "bg-gray-300 border-gray-300" : "bg-blue-600 border-blue-600") : "bg-white border-gray-400"}
@@ -26,6 +32,6 @@ const Checkbox = ({ label = "", className = "", name = "", checked = false, onCh
       {error && <ErrorMessage error={error} />}
     </div>
   );
-};
+});
 
 export default Checkbox;

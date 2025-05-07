@@ -1,6 +1,6 @@
 import React from "react";
 
-const RadioButton = ({ label = "", className = "", options = [], onChange = () => null, value: currentValue }) => {
+const RadioButtonGroup = ({ label = "", className = "", options = [], onChange = () => null, value: currentValue }) => {
   return (
     <fieldset className={className} aria-labelledby="radio-hint-legend radio-hint-messages">
       {label && <legend className="text-gray-500 text-sm mb-2">{label}</legend>}
@@ -30,4 +30,4 @@ const RadioButton = ({ label = "", className = "", options = [], onChange = () =
   );
 };
 
-export default RadioButton;
+export default RadioButtonGroup;
