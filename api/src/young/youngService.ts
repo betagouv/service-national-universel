@@ -280,7 +280,14 @@ export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: Coh
     const youngFullName = young.firstName + " " + young.lastName;
     const referents: ReferentDocument[] = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
     const SUB_ROLES_PRIORITY = [SUB_ROLES.manager_department, SUB_ROLES.assistant_manager_department, SUB_ROLES.secretariat, SUB_ROLES.manager_phase2];
-    let selectedReferent: ReferentDocument | undefined = referents.find((referent) => referent.subRole && SUB_ROLES_PRIORITY.includes(referent.subRole));
+    let selectedReferent = referents
+      .filter((referent) => referent.subRole && SUB_ROLES_PRIORITY.includes(referent.subRole))
+      .sort((a, b) => {
+        const priorityA = SUB_ROLES_PRIORITY.indexOf(a.subRole!);
+        const priorityB = SUB_ROLES_PRIORITY.indexOf(b.subRole!);
+
+        return priorityA - priorityB;
+      })[0];
     if (!selectedReferent && referents.length > 0) {
       selectedReferent = referents[0];
     }
