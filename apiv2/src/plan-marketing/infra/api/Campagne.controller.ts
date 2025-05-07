@@ -67,15 +67,15 @@ export class CampagneController {
         isArchived?: boolean,
         @Query("isProgrammationActive", new ParseBoolPipe({ optional: true }))
         isProgrammationActive?: boolean,
-        @Query("campagneGeneriqueId")
-        campagneGeneriqueId?: string,
+        @Query("isLinkedToGenericCampaign", new ParseBoolPipe({ optional: true }))
+        isLinkedToGenericCampaign?: boolean,
     ): Promise<CampagneModel[]> {
         return await this.campagneService.search({
             generic,
             cohortId,
             isArchived,
             isProgrammationActive,
-            campagneGeneriqueId
+            isLinkedToGenericCampaign,
         }, sort);
     }
 

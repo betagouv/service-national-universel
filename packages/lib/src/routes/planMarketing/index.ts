@@ -91,7 +91,6 @@ interface SearchPlanMarketingRoute extends BasicRoute {
     cohortId?: string;
     isArchived?: boolean;
     isProgrammationActive?: boolean;
-    campagneGeneriqueId?: string;
     isLinkedToGenericCampaign?: boolean;
   };
   response: RouteResponseBodyV2<CampagneResponse[]>;

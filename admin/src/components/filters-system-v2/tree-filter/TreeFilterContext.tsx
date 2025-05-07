@@ -12,6 +12,7 @@ interface TreeFilterContextType {
   deleteNode: (nodeId: string) => void;
   showSelectedValues?: boolean;
   showSelectedValuesCount?: boolean;
+  onUserSelectionChange?: (selectedItems: Set<string>) => void;
 }
 
 const TreeFilterContext = createContext<TreeFilterContextType | undefined>(undefined);
@@ -22,12 +23,14 @@ export function TreeFilterProvider({
   id,
   showSelectedValues,
   showSelectedValuesCount,
+  onUserSelectionChange,
 }: {
   children: React.ReactNode;
   flatTree: Record<string, TreeNodeFilterType>;
   id: string;
   showSelectedValues?: boolean;
   showSelectedValuesCount?: boolean;
+  onUserSelectionChange?: (selectedItems: Set<string>) => void;
 }) {
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set());
 
@@ -74,6 +77,9 @@ export function TreeFilterProvider({
         } else {
           descendantIds.forEach((id) => newSet.add(id));
         }
+      }
+      if (onUserSelectionChange) {
+        onUserSelectionChange(newSet);
       }
       return newSet;
     });
@@ -146,7 +152,14 @@ export function TreeFilterProvider({
 
   useMemo(() => {
     initSelectedItems();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flatTree]);
+
+  // useEffect(() => {
+  //   if (onSelectionChange) {
+  //     onSelectionChange(selectedItems);
+  //   }
+  // }, [selectedItems, onSelectionChange]);
 
   return (
     <TreeFilterContext.Provider
@@ -161,6 +174,7 @@ export function TreeFilterProvider({
         deleteNode,
         showSelectedValues,
         showSelectedValuesCount,
+        onUserSelectionChange,
       }}>
       {children}
     </TreeFilterContext.Provider>
