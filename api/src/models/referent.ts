@@ -2,9 +2,8 @@ import mongoose, { Schema } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import bcrypt from "bcryptjs";
 
-import { ReferentSchema, ReferentType, UserDto, MONGO_COLLECTION } from "snu-lib";
+import { ReferentSchema, ReferentType, UserDto, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
 import * as brevo from "../brevo";
 import anonymize from "../anonymization/referent";
 
@@ -13,7 +12,7 @@ const MODELNAME = MONGO_COLLECTION.REFERENT;
 const schema = new Schema(ReferentSchema);
 
 schema
-  .virtual("impersonateBy")
+  .virtual("impersonatedBy")
   .get(function (this: any) {
     return this._impersonatedBy;
   })
@@ -56,14 +55,13 @@ schema.post("deleteOne", function (doc) {
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });
@@ -92,6 +90,7 @@ schema.plugin(patchHistory, {
     "/updatedAt",
     "/token2FA",
     "/token2FAExpires",
+    "/impersonatedBy",
   ],
 });
 
@@ -102,7 +101,7 @@ export type ReferentDocument<T = {}> = DocumentExtended<
   ReferentType & {
     // virtual fields
     fullName?: string;
-    impersonateBy?: UserDto;
+    impersonatedBy?: UserDto;
   } & T
 >;
 type SchemaExtended = ReferentDocument & UserExtension;

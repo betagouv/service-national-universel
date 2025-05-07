@@ -1,10 +1,20 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, LigneBusSchema, LigneBusTeamSchema, MONGO_COLLECTION } from "snu-lib";
+import {
+  InterfaceExtended,
+  LigneBusSchema,
+  LigneBusTeamSchema,
+  MONGO_COLLECTION,
+  buildPatchUser,
+  getVirtualUser,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 import anonymize from "../../anonymization/PlanDeTransport/ligneBus";
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 
 const MODELNAME = MONGO_COLLECTION.LIGNE_BUS;
 
@@ -21,14 +31,13 @@ schema.methods.anonymise = function () {
 };
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });

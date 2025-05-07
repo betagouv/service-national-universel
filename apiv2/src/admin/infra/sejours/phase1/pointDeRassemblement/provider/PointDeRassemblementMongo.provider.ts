@@ -1,18 +1,26 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { MONGO_COLLECTION, PointDeRassemblementSchema, PointDeRassemblementType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    PointDeRassemblementSchema,
+    PointDeRassemblementType,
+    UserExtension,
+    CustomSaveParams,
+    buildPatchUser,
+} from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type PointDeRassemblementDocument = HydratedDocument<PointDeRassemblementType>;
+type SchemaExtended = PointDeRassemblementDocument & UserExtension;
 export const PointDeRassemblementName = MONGO_COLLECTION.POINT_DE_RASSEMBLEMENT;
 export const PDR_MONGOOSE_ENTITY = "PDR_MONGOOSE_ENTITY";
 
 const PointDeRassemblementSchemaRef = new mongoose.Schema(PointDeRassemblementSchema);
 
-PointDeRassemblementSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+PointDeRassemblementSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
+    if (params?.fromUser) {
+        this._user = buildPatchUser(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

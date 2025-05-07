@@ -1,9 +1,8 @@
 import mongoose from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ClasseType, ClasseSchema, MONGO_COLLECTION } from "snu-lib";
+import { ClasseType, ClasseSchema, MONGO_COLLECTION, buildPatchUser, getVirtualUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
 import { EtablissementDocument } from "./etablissement";
 import { ReferentDocument } from "../referent";
 import { CohesionCenterDocument } from "../cohesionCenter";
@@ -65,17 +64,16 @@ schema.virtual("cohortDetails", {
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });

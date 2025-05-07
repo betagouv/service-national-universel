@@ -1,6 +1,5 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
-import { DocumentExtended } from "./types";
-import { AreasSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
+import { AreasSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.AREA;
 

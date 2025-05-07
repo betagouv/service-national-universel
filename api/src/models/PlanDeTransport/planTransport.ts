@@ -1,9 +1,20 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, ModificationBusSchema, MONGO_COLLECTION, PlanTransportPointDeRassemblementEnrichedSchema, PlanTransportSchema, TRANSPORT_MODES_LIST } from "snu-lib";
-
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
+import {
+  InterfaceExtended,
+  ModificationBusSchema,
+  MONGO_COLLECTION,
+  PlanTransportPointDeRassemblementEnrichedSchema,
+  PlanTransportSchema,
+  TRANSPORT_MODES_LIST,
+  buildPatchUser,
+  getVirtualUser,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 import { PointDeRassemblementModel } from "./pointDeRassemblement";
 
@@ -24,14 +35,13 @@ const schema = new Schema({
 });
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });
