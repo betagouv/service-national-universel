@@ -86,15 +86,13 @@ const ClasseService = {
   importInscriptionEnMasse: async (
     id: ClassesRoutes["InscriptionEnMasseImporter"]["params"]["id"],
     mapping: ClassesRoutes["InscriptionEnMasseImporter"]["payload"]["mapping"],
-    file: File,
+    fileKey: string,
   ) => {
-    // TODO
-    return await buildFileRequest<ClassesRoutes["InscriptionEnMasseImporter"]>({
+    return await buildRequest<ClassesRoutes["InscriptionEnMasseImporter"]>({
       path: "/classe/{id}/inscription-en-masse/importer",
       method: "POST",
       params: { id },
-      payload: { mapping },
-      file,
+      payload: { mapping, fileKey },
       target: "API_V2",
     })();
   },

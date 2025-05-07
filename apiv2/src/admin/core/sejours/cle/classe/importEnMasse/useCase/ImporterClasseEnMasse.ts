@@ -48,7 +48,7 @@ export class ImporterClasseEnMasse implements UseCase<void> {
         }
 
         for (const jeune of jeunes) {
-            const dateNaissance = this.clockGateway.formatDateNaissance(
+            const dateNaissance = this.clockGateway.parseDateNaissance(
                 jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE],
             );
             const jeuneToCreate: CreateJeuneModel = {
@@ -63,8 +63,11 @@ export class ImporterClasseEnMasse implements UseCase<void> {
                 }@localhost-${this.cryptoGateway.getUuid().slice(0, 6)}`
                     .toLowerCase()
                     .replace(/\s/g, ""),
+                sessionId: classe.sessionId,
+                sessionNom: classe.sessionNom,
                 youngPhase1Agreement: "true",
                 classeId: classe.id,
+                etablissementId: classe.etablissementId,
                 scolarise: "true",
                 psh: "false",
                 departement: classe.departement,
@@ -96,7 +99,7 @@ export class ImporterClasseEnMasse implements UseCase<void> {
             return {
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]],
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: this.clockGateway.formatDateNaissance(
+                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: this.clockGateway.parseDateNaissance(
                     jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]],
                 ),
                 [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]],

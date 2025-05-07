@@ -21,7 +21,7 @@ export default function InscriptionEnMasse() {
 
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
 
-  const { importState, handleFileUpload, handleRetryImportWithMapping, closeMapping, closeSuccess } = useFileUploadHandler({
+  const { importState, handleFileUpload, handleRetryImportWithMapping, closeMapping, closeSuccess, resetState } = useFileUploadHandler({
     classeId: id,
   });
 
@@ -52,12 +52,6 @@ export default function InscriptionEnMasse() {
       return;
     }
     handleFileUpload(file);
-  };
-
-  const confirmImport = () => {
-    // TODO: Implement the actual student import logic
-    console.log(`Importing ${importState.status === "success" ? importState.studentCount : 0} students...`);
-    closeSuccess();
   };
 
   return (
@@ -98,9 +92,12 @@ export default function InscriptionEnMasse() {
 
       <SuccessModal
         isOpen={importState.status === "success"}
-        onClose={closeSuccess}
-        onConfirm={confirmImport}
+        onClose={resetState}
+        onSuccess={closeSuccess}
         studentCount={importState.status === "success" ? importState.studentCount : 0}
+        classeId={id}
+        mapping={importState.status === "success" ? importState.mapping : null}
+        fileKey={importState.status === "success" ? importState.fileKey : null}
       />
 
       {importState.status === "mapping" && (

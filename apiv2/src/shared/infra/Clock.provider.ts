@@ -69,7 +69,7 @@ export class ClockProvider implements ClockGateway {
         return add(new Date(), { days });
     }
     // Legacy format for compatibility
-    formatDateNaissance(date: string): Date {
+    parseDateNaissance(date: string): Date {
         return new Date(`${date.split("/")[2]}-${date.split("/")[1]}-${date.split("/")[0]}T00:00:00.000+00:00`);
     }
 }

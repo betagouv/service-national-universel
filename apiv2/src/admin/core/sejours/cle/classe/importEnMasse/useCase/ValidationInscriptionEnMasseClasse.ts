@@ -11,9 +11,9 @@ import {
     ClasseImportEnMasseValidationDto,
 } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import { ClasseModel } from "../Classe.model";
-import { EtablissementGateway } from "../../etablissement/Etablissement.gateway";
-import { EtablissementModel } from "../../etablissement/Etablissement.model";
+import { ClasseModel } from "../../Classe.model";
+import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
+import { EtablissementModel } from "../../../etablissement/Etablissement.model";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 @Injectable()
@@ -30,7 +30,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         classeId: string,
         mapping: Record<string, string> | null,
         file: { fileName: string; buffer: Buffer; mimetype: string },
-    ) {
+    ): Promise<ClasseImportEnMasseValidationDto> {
         const classe = await this.classeGateway.findById(classeId);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Classe non trouvée");
@@ -75,10 +75,28 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const errorsCoherence = await this.validateCoherence(dataToImport, classe, etablissement, errorsFormat);
 
         const errors = [...errorsFormat, ...errorsCoherence];
+        const isValid = errors.length === 0;
+
+        let fileKey: string | undefined = undefined;
+        if (isValid) {
+            // Save file to s3
+            const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
+            const fileName = `inscription_en_masse_${classeId}_${timestamp}.xlsx`;
+            const fileS3 = await this.fileGateway.uploadFile(
+                `file/admin/sejours/cle/classe/${classeId}/inscription-en-masse/${fileName}`,
+                {
+                    data: file.buffer,
+                    mimetype: file.mimetype,
+                },
+            );
+            fileKey = fileS3.Key;
+        }
+
         return {
-            isValid: errors.length === 0,
+            isValid,
             validRowsCount: this.countValidRows(dataToImport, errors),
             errors,
+            fileKey,
         };
     }
 
@@ -180,7 +198,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                 const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
                     row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
                     row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
-                    this.clockGateway.parseDate(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE], "dd/MM/yyyy"),
+                    this.clockGateway.parseDateNaissance(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]),
                     classe.id,
                 );
                 if (jeune) {

@@ -1,16 +1,16 @@
 import { Inject, Injectable } from "@nestjs/common";
 
-import { TaskName, TaskStatus } from "snu-lib";
+import { TaskName, TaskStatus, CLASSE_IMPORT_EN_MASSE_COLUMNS } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { ClasseGateway } from "./Classe.gateway";
-import { FunctionalException } from "@shared/core/FunctionalException";
-import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { ClasseModel } from "./Classe.model";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 export type StatusImportInscriptionEnMasse = {
     status: TaskStatus | "NONE";
+    statusDate: Date;
     lastCompletedAt: Date;
 };
 
@@ -46,6 +46,7 @@ export class ClasseService {
         )?.[0];
         return {
             status: lastImport?.status || "NONE",
+            statusDate: lastImport?.updatedAt,
             lastCompletedAt: lastImportCompleted?.updatedAt,
         };
     }
@@ -56,5 +57,13 @@ export class ClasseService {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
         return classe;
+    }
+
+    checkImportMapping(mapping: Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>): void {
+        Object.keys(mapping).forEach((key) => {
+            if (!Object.values(CLASSE_IMPORT_EN_MASSE_COLUMNS).includes(key as CLASSE_IMPORT_EN_MASSE_COLUMNS)) {
+                throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, key);
+            }
+        });
     }
 }

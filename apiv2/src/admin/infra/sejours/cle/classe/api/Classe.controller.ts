@@ -1,10 +1,9 @@
 import { ModifierReferentClasse } from "@admin/core/sejours/cle/classe/useCase/modifierReferentClasse/ModifierReferentClasse";
-import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import {
     Body,
     Controller,
     Get,
-    Logger,
+    Inject,
     Param,
     Post,
     Request,
@@ -12,25 +11,26 @@ import {
     UseGuards,
     UseInterceptors,
 } from "@nestjs/common";
-import { ClasseModel, ClasseWithReferentsModel } from "../../../../../core/sejours/cle/classe/Classe.model";
+import { ClasseWithReferentsModel } from "../../../../../core/sejours/cle/classe/Classe.model";
 import { ClasseService } from "../../../../../core/sejours/cle/classe/Classe.service";
 import { VerifierClasse } from "../../../../../core/sejours/cle/classe/useCase/VerifierClasse";
 import { ClasseAdminCleGuard } from "../guard/ClasseAdminCle.guard";
+import { ClassesRoutes, FeatureFlagName, MIME_TYPES, ModifierReferentDto } from "snu-lib";
 import {
-    CLASSE_IMPORT_EN_MASSE_COLUMNS,
-    ClassesRoutes,
-    FeatureFlagName,
-    MIME_TYPES,
-    ModifierReferentDto,
-} from "snu-lib";
-import { InscriptionEnMasseValidationPayloadDto, ModifierReferentPayloadDto } from "./Classe.validation";
+    InscriptionEnMasseImportPayloadDto,
+    InscriptionEnMasseValidationPayloadDto,
+    ModifierReferentPayloadDto,
+} from "./Classe.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/useCase/ValidationInscriptionEnMasseClasse";
+import { ValidationInscriptionEnMasseClasse } from "@admin/core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { FileInterceptor } from "@nestjs/platform-express";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { FileGateway } from "@shared/core/File.gateway";
+import { TaskMapper } from "@task/infra/Task.mapper";
+import { TaskModel } from "@task/core/Task.model";
 
 @Controller("classe")
 export class ClasseController {
@@ -41,6 +41,7 @@ export class ClasseController {
         private readonly validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse,
         private readonly featureFlagService: FeatureFlagService,
         private readonly classeImportService: ClasseImportService,
+        @Inject(FileGateway) private readonly fileGateway: FileGateway,
     ) {}
 
     @Post(":id/verify")
@@ -92,11 +93,7 @@ export class ClasseController {
                 return acc;
             }, {}) as any;
 
-            Object.keys(decodedMapping).forEach((key) => {
-                if (!Object.values(CLASSE_IMPORT_EN_MASSE_COLUMNS).includes(key as CLASSE_IMPORT_EN_MASSE_COLUMNS)) {
-                    throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, key);
-                }
-            });
+            this.classeService.checkImportMapping(decodedMapping);
         }
 
         return this.validationInscriptionEnMasseClasse.execute(classeId, decodedMapping, {
@@ -109,32 +106,19 @@ export class ClasseController {
     @Post(":id/inscription-en-masse/importer")
     @UseGuards(ClasseAdminCleGuard)
     async inscriptionEnMasseImport(
-        @Param("id") classeId: string,
-        @Body() mapping: Record<string, string> | null,
-        @UploadedFile() file: Express.Multer.File,
-    ): Promise<any> {
-        throw new FunctionalException(FunctionalExceptionCode.NOT_IMPLEMENTED_YET);
-    }
-
-    @Get(":id/inscription-en-masse")
-    @UseGuards(ClasseAdminCleGuard)
-    async inscriptionEnMasseStatus(@Param("id") classeId: string): Promise<any> {
-        const statut = await this.classeService.getStatusImportInscriptionEnMasse(classeId);
-        return {
-            status: statut.status,
-            lastCompletedAt: statut.lastCompletedAt?.toISOString(),
-        };
-    }
-
-    // TODO : remove after testing
-    @Post(":id/inscription-en-masse/importer-temp")
-    @UseGuards(ClasseAdminCleGuard)
-    async inscriptionEnMasseImportTemp(
         @Request() request: CustomRequest,
         @Param("id") classeId: string,
-        @Body()
-        { mapping, fileKey }: { mapping: Record<string, string> | null; fileKey: string; auteur: string },
-    ): Promise<any> {
+        @Body() data: InscriptionEnMasseImportPayloadDto,
+    ): Promise<ClassesRoutes["InscriptionEnMasseImporter"]["response"]> {
+        if (data?.mapping) {
+            this.classeService.checkImportMapping(data.mapping);
+        }
+
+        const fileExists = await this.fileGateway.remoteFileExists(data.fileKey);
+        if (!fileExists) {
+            throw new FunctionalException(FunctionalExceptionCode.FILE_NOT_FOUND, data.fileKey);
+        }
+
         const auteur: Partial<ReferentModel> = {
             id: request.user.id,
             prenom: request.user.prenom,
@@ -143,6 +127,26 @@ export class ClasseController {
             sousRole: request.user.sousRole,
             email: request.user.email,
         };
-        return this.classeImportService.importClasse(classeId, mapping, fileKey, auteur);
+
+        const task = (await this.classeImportService.importClasse(
+            classeId,
+            data.mapping,
+            data.fileKey,
+            auteur,
+        )) as TaskModel;
+        return TaskMapper.toDto(task);
+    }
+
+    @Get(":id/inscription-en-masse")
+    @UseGuards(ClasseAdminCleGuard)
+    async inscriptionEnMasseStatus(
+        @Param("id") classeId: string,
+    ): Promise<ClassesRoutes["InscriptionEnMasseStatut"]["response"]> {
+        const statut = await this.classeService.getStatusImportInscriptionEnMasse(classeId);
+        return {
+            status: statut.status,
+            statusDate: statut.statusDate.toISOString(),
+            lastCompletedAt: statut.lastCompletedAt?.toISOString(),
+        };
     }
 }

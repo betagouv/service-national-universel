@@ -63,6 +63,7 @@ export type JeuneModel = {
     youngPhase1Agreement: string;
     sessionChangeReason?: string;
     classeId?: string;
+    etablissementId?: string;
     niveauScolaire?: string;
     scolarise?: string;
     lastStatusAt?: Date;
