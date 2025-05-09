@@ -1,6 +1,6 @@
 import { ClassesRoutes } from "snu-lib";
 
-import { buildRequest } from "@/utils/buildRequest";
+import { buildFileRequest, buildRequest } from "@/utils/buildRequest";
 import { ReferentService } from "./referentService";
 
 const ClasseService = {
@@ -66,6 +66,44 @@ const ClasseService = {
       updatedAt: classeDto.updatedAt,
       deletedAt: classeDto.deletedAt,
     };
+  },
+
+  validateInscriptionEnMasse: async (
+    id: ClassesRoutes["InscriptionEnMasseValider"]["params"]["id"],
+    mapping: ClassesRoutes["InscriptionEnMasseValider"]["payload"]["mapping"],
+    file: File,
+  ) => {
+    return await buildFileRequest<ClassesRoutes["InscriptionEnMasseValider"]>({
+      path: "/classe/{id}/inscription-en-masse/valider",
+      method: "POST",
+      params: { id },
+      payload: { mapping },
+      file,
+      target: "API_V2",
+    })();
+  },
+
+  importInscriptionEnMasse: async (
+    id: ClassesRoutes["InscriptionEnMasseImporter"]["params"]["id"],
+    mapping: ClassesRoutes["InscriptionEnMasseImporter"]["payload"]["mapping"],
+    fileKey: string,
+  ) => {
+    return await buildRequest<ClassesRoutes["InscriptionEnMasseImporter"]>({
+      path: "/classe/{id}/inscription-en-masse/importer",
+      method: "POST",
+      params: { id },
+      payload: { mapping, fileKey },
+      target: "API_V2",
+    })();
+  },
+
+  getStatusInscriptionEnMasse: async (id: ClassesRoutes["InscriptionEnMasseStatut"]["params"]["id"]) => {
+    return await buildRequest<ClassesRoutes["InscriptionEnMasseStatut"]>({
+      path: "/classe/{id}/inscription-en-masse",
+      method: "GET",
+      params: { id },
+      target: "API_V2",
+    })();
   },
 };
 
