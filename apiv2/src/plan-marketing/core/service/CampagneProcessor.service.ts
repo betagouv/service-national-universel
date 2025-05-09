@@ -42,7 +42,10 @@ export class CampagneProcessorService {
                 `Cas campagne spécifique liée à une campagne générique, campagne: ${campagne.id}, liée à la campagne générique: ${campagne.campagneGeneriqueId}`,
             );
             const campagneSpecifique = await this.campagneGateway.findSpecifiqueWithRefById(campagne.id);
-            destinataires = campagneSpecifique!.destinataires;
+            if (!campagneSpecifique?.destinataires) {
+                throw new FunctionalException(FunctionalExceptionCode.CAMPAGNE_DESTINATAIRES_NOT_FOUND);
+            }
+            destinataires = campagneSpecifique?.destinataires;
             contactsQuery = await this.buildListeDiffusionFiltre(campagneSpecifique, destinataires);
         } else if (isCampagneSansRef(campagne)) {
             this.logger.log(`Cas campagne spécifique non liée à une campagne générique, campagne: ${campagne.id}`);

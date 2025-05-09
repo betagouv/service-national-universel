@@ -55,4 +55,7 @@ export class ClockProvider implements ClockGateway {
     addDaysToNow(days: number): Date {
         return add(new Date(), { days });
     }
+    addDays(date: Date, days: number): Date {
+        return add(date, { days });
+    }
 }
