@@ -34,6 +34,7 @@ import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRo
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
+import { isResponsableDeCentre } from "@/utils";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -64,7 +65,7 @@ export default function Details({ user, setUser, currentUser }) {
   }, [user]);
 
   useEffect(() => {
-    if (user?.role === ROLES.HEAD_CENTER) {
+    if (isResponsableDeCentre(user)) {
       loadHeadCenterSessions();
     } else {
       setCentersLoading(false);
@@ -222,7 +223,7 @@ export default function Details({ user, setUser, currentUser }) {
       setSaving(true);
       if (validate()) {
         plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
-        if (user.role === ROLES.HEAD_CENTER && data.role !== ROLES.HEAD_CENTER) {
+        if (isResponsableDeCentre(user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role)) {
           for (let index = 0; index < sessionsWhereUserIsHeadCenter.length; index++) {
             const { ok, code } = await api.remove(`/session-phase1/${sessionsWhereUserIsHeadCenter[index]._id}/headCenter`);
             if (!ok) {
@@ -422,10 +423,10 @@ export default function Details({ user, setUser, currentUser }) {
                   regionOrDepOptions={regionList.map((r) => ({ value: r, label: r }))}
                 />
               )}
-              {!(user.role === ROLES.HEAD_CENTER) && data.role === ROLES.HEAD_CENTER && (
+              {!isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
                 <div className="mt-4 text-gray-500">Enregistrer les changement pour accéder au choix des centres.</div>
               )}
-              {user.role === ROLES.HEAD_CENTER && data.role === ROLES.HEAD_CENTER && (
+              {isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
                 <div className="flex flex-col">
                   {sessionsWhereUserIsHeadCenter?.length > 0 && <div className={`mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "-mb-3" : ""}`}>Centres</div>}
                   {areCentersLoading && <Loader />}

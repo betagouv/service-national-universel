@@ -446,6 +446,10 @@ export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.n
 
 export const desktopBreakpoint = 1024;
 
+export const isResponsableDeCentre = (user) => {
+  if (!user || !user.role) return false;
+  return user.role === ROLES.HEAD_CENTER || user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE;
+};
 export function getAuthor(user) {
   if (!user) return "Auteur inconnu";
   if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;

@@ -44,7 +44,7 @@ export default function CenterYoungIndex() {
   const [filter, setFilter] = useState({});
   const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
-  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState();
+  const [isYoungCheckinOpen, setIsYoungCheckinOpen] = useState(false);
   const [focusedSession, setFocusedSession] = useState(null);
   const [hasYoungValidated, setHasYoungValidated] = useState(false);
   const [modal, setModal] = useState({ isOpen: false });

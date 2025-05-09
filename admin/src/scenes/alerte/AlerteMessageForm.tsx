@@ -38,6 +38,8 @@ export default function AlerteMessageForm({ message, isNew, onIsNewChange, onMes
     { value: ROLES.SUPERVISOR, label: "Superviseurs" },
     { value: ROLES.RESPONSIBLE, label: "Responsables" },
     { value: ROLES.HEAD_CENTER, label: "Chefs de centre" },
+    { value: ROLES.HEAD_CENTER_ADJOINT, label: "Chefs de centre adjoints" },
+    { value: ROLES.REFERENT_SANITAIRE, label: "Référents sanitaires" },
     { value: ROLES.ADMINISTRATEUR_CLE, label: "Administrateurs CLE" },
     { value: ROLES.REFERENT_CLASSE, label: "Référents classe" },
   ];

@@ -8,6 +8,7 @@ import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import { IoFlashOutline } from "react-icons/io5";
 import { HiHome } from "react-icons/hi";
+import { isResponsableDeCentre } from "@/utils";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);
@@ -165,7 +166,7 @@ export default function List() {
             key={0}
             title="Exporter"
             exportTitle="Utilisateurs"
-            route={`/elasticsearch/referent/export${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+            route={`/elasticsearch/referent/export${isResponsableDeCentre(user) ? "?cohort=" + sessionPhase1?.cohort : ""}`}
             filters={filterArray}
             selectedFilters={selectedFilters}
             setIsOpen={() => true}
@@ -211,7 +212,7 @@ export default function List() {
           <div className="flex items-stretch justify-between  bg-white px-4 pt-2">
             <Filters
               pageId={pageId}
-              route={`/elasticsearch/referent/search${user.role === ROLES.HEAD_CENTER ? "?cohort=" + sessionPhase1?.cohort : ""}`}
+              route={`/elasticsearch/referent/search${isResponsableDeCentre(user) ? "?cohort=" + sessionPhase1?.cohort : ""}`}
               setData={(value) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email..."

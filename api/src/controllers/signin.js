@@ -24,6 +24,10 @@ const allowedRole = (user) => {
       return "structure";
     case ROLES.HEAD_CENTER:
       return "head_center";
+    case ROLES.HEAD_CENTER_ADJOINT:
+      return "head_center_adjoint";
+    case ROLES.REFERENT_SANITAIRE:
+      return "referent_sanitaire";
     case ROLES.ADMINISTRATEUR_CLE:
       return "administrateur_cle";
     case ROLES.REFERENT_CLASSE:
