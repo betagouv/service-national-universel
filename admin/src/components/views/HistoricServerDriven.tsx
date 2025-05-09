@@ -2,7 +2,8 @@
  * Cette version de l'historique considère que les données, la pagination et les filtres se font côté serveur.
  */
 import React, { useState, useCallback } from "react";
-import { translateHistory, debounce } from "../../utils";
+import ReactTooltip from "react-tooltip";
+import { translateHistory, debounce, getAuthor } from "../../utils";
 import { formatLongDateFR, translateAction, translateBusPatchesField } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
@@ -116,12 +117,12 @@ export default function HistoricServerDriven({
                 <th className="px-4 py-3 text-xs font-normal text-gray-500">Détails</th>
                 <th className="w-16 px-4 py-3 text-xs font-normal text-gray-500"></th>
                 <th className="px-4 py-3 text-xs font-normal text-gray-500"></th>
-                <th className="px-4 py-3 text-xs font-normal text-gray-500">Auteur</th>
+                <th className="w-[25%] px-4 py-3 text-xs font-normal text-gray-500">Auteur</th>
               </tr>
             </thead>
             <tbody>
               {data.map((event, index) => (
-                <Event key={index} event={event} refName={refName} path={path} />
+                <Event key={index} event={event} refName={refName} path={path} index={index} />
               ))}
             </tbody>
           </table>
@@ -134,26 +135,52 @@ export default function HistoricServerDriven({
   );
 }
 
-function Event({ event, refName, path }: { event: Event; refName: string; path: string }) {
+function Event({ event, refName, path, index }: { event: Event; refName: string; path: string; index: number }) {
+  const tooltipLigneId = `tooltip-ligne-${index}`;
+  const tooltipActionId = `tooltip-action-${index}`;
+  const tooltipAvantId = `tooltip-avant-${index}`;
+  const tooltipApresId = `tooltip-apres-${index}`;
+  const tooltipAuteurId = `tooltip-auteur-${index}`;
   return (
     <tr className="cursor-default border-t border-t-slate-100 hover:bg-slate-50">
       {refName && (
-        <td className="cursor-pointer overflow-hidden px-4 py-3">
-          <a href={`/${path}/${event.ref}`}>{event.refName}</a>
+        <td data-tip data-for={tooltipLigneId} className="cursor-pointer overflow-hidden px-4 py-3">
+          <ReactTooltip id={tooltipLigneId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
+            <div className="text-gray-700 text-xs font-[400] text-center mb-1">{event.refName}</div>
+          </ReactTooltip>
+          <a target="_blank" rel="noreferrer" href={`/${path}/${event.ref}`}>
+            {event.refName}
+          </a>
         </td>
       )}
-      <td className="overflow-hidden px-4 py-3">
+      <td data-tip data-for={tooltipActionId} className="overflow-hidden px-4 py-3">
+        <ReactTooltip id={tooltipActionId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{translateBusPatchesField(event.path)}</div>
+        </ReactTooltip>
         <p className="truncate text-gray-400" title={`${translateAction(event.op)} • ${formatLongDateFR(event.date)}`}>
           {translateAction(event.op)} • {formatLongDateFR(event.date)}
         </p>
         <p>{translateBusPatchesField(event.path)}</p>
       </td>
-      <td className="truncate px-4 py-3 text-gray-400">{translateHistory(event.path, event.originalValue)}</td>
+      <td data-tip data-for={tooltipAvantId} className="truncate px-4 py-3 text-gray-400">
+        <ReactTooltip id={tooltipAvantId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{translateHistory(event.path, event.originalValue)}</div>
+        </ReactTooltip>
+        {translateHistory(event.path, event.originalValue)}
+      </td>
       <td className="px-4 py-3">
         <HiOutlineArrowRight />
       </td>
-      <td className="truncate px-4 py-3">{translateHistory(event.path, event.value)}</td>
-      <td className="overflow-hidden px-4 py-3">
+      <td data-tip data-for={tooltipApresId} className="truncate px-4 py-3">
+        <ReactTooltip id={tooltipApresId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{translateHistory(event.path, event.value)}</div>
+        </ReactTooltip>
+        {translateHistory(event.path, event.value)}
+      </td>
+      <td data-tip data-for={tooltipAuteurId} className="overflow-hidden px-4 py-3">
+        <ReactTooltip id={tooltipAuteurId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthor(event.user)}</div>
+        </ReactTooltip>
         <UserCard user={event.user} />
       </td>
     </tr>

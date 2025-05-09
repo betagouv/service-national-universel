@@ -1,21 +1,32 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { MONGO_COLLECTION, ModificationBusSchema, ModificationBusType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    ModificationBusSchema,
+    ModificationBusType,
+    CustomSaveParams,
+    UserExtension,
+    buildPatchUser,
+} from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type DemandeModificationLigneDeBusDocument = HydratedDocument<ModificationBusType>;
+type SchemaExtended = DemandeModificationLigneDeBusDocument & UserExtension;
 export const DemandeModificationLigneDeBusName = MONGO_COLLECTION.MODIFICATION_BUS;
 export const DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY = "DEMANDEMODIFICATIONBUS_MONGOOSE_ENTITY";
 
 const DemandeModificationLigneDeBusSchemaRef = new mongoose.Schema(ModificationBusSchema);
 
-DemandeModificationLigneDeBusSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
-    this.updatedAt = new Date();
-    next();
-});
+DemandeModificationLigneDeBusSchemaRef.pre<SchemaExtended>(
+    "save",
+    function (next, params: CustomSaveParams | undefined) {
+        if (params?.fromUser) {
+            this._user = buildPatchUser(params.fromUser);
+        }
+        this.updatedAt = new Date();
+        next();
+    },
+);
 
 DemandeModificationLigneDeBusSchemaRef.plugin(patchHistory, {
     mongoose,

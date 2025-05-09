@@ -8,11 +8,15 @@ import {
     YoungINJEPExportDatesSchema,
     YoungEligibilitySchema,
     MONGO_COLLECTION,
+    UserExtension,
+    buildPatchUser,
+    CustomSaveParams,
 } from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type SessionDocument = HydratedDocument<CohortType>;
+type SchemaExtended = SessionDocument & UserExtension;
 export const SessionName = MONGO_COLLECTION.COHORT;
 export const SESSION_MONGOOSE_ENTITY = "SESSION_MONGOOSE_ENTITY";
 
@@ -32,10 +36,10 @@ const SessionSchemaRef = new mongoose.Schema({
     },
 });
 
-SessionSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+SessionSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
+    if (params?.fromUser) {
+        this._user = buildPatchUser(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });
