@@ -19,13 +19,13 @@ import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 
 @Injectable()
 export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportEnMasseValidationDto> {
+    private readonly logger = new Logger(ValidationInscriptionEnMasseClasse.name);
     constructor(
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(EtablissementGateway) private readonly etablissementGateway: EtablissementGateway,
         @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
-        private readonly logger: Logger,
     ) {}
     async execute(
         classeId: string,
@@ -50,7 +50,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
             defval: "",
         });
 
-        this.logger.log("Nombre de jeunes à inscrire", dataToImport.length);
+        this.logger.log(`Nombre de jeunes à inscrire: ${dataToImport.length}`);
 
         if (dataToImport.length === 0) {
             return {
@@ -79,7 +79,9 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         }
 
         const errorsFormat = await this.validateFormat(dataToImport);
+        this.logger.log(`Erreurs de format: ${errorsFormat.length}`);
         const errorsCoherence = await this.validateCoherence(dataToImport, classe, etablissement, errorsFormat);
+        this.logger.log(`Erreurs de cohérence: ${errorsCoherence.length}`);
 
         const errors = [...errorsFormat, ...errorsCoherence];
         const isValid = errors.length === 0;
@@ -151,7 +153,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                             }
                             break;
                         case "date":
-                            if (!this.clockGateway.isValidDateFormat(rowValue, column.format!)) {
+                            if (!this.clockGateway.isValidFrenchDate(rowValue)) {
                                 errors.push({
                                     column: columnName,
                                     code: CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT,
@@ -202,21 +204,25 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                     });
                 }
                 // check doublons
-                const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
-                    row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
-                    row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
-                    this.clockGateway.parseDateNaissance(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]),
-                    classe.id,
-                );
-                if (jeune) {
-                    errors.push({
-                        column: CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM,
-                        code: CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST,
-                        message: `Le jeune ${row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]} ${
-                            row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]
-                        } existe déjà dans la classe.`,
-                        line,
-                    });
+                try {
+                    const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
+                        this.clockGateway.parseDateNaissance(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]),
+                        classe.id,
+                    );
+                    if (jeune) {
+                        errors.push({
+                            column: CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM,
+                            code: CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST,
+                            message: `Le jeune ${row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]} ${
+                                row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]
+                            } existe déjà dans la classe.`,
+                            line,
+                        });
+                    }
+                } catch (error) {
+                    this.logger.error(`${error} - Erreur lors de la recherche du jeune ${JSON.stringify(row)}`);
                 }
             }
         }

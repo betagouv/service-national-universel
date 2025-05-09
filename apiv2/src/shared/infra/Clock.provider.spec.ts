@@ -151,4 +151,14 @@ describe("ClockProvider", () => {
             expect(formattedBirthDate).toStrictEqual(new Date("2008-01-08T00:00:00.000+00:00"));
         });
     });
+
+    describe("isValidFrenchDate", () => {
+        it("should return true for valid french date", () => {
+            expect(clockProvider.isValidFrenchDate("01/01/2024")).toBe(true);
+        });
+
+        it("should return false for invalid french date", () => {
+            expect(clockProvider.isValidFrenchDate("01/01/24")).toBe(false);
+        });
+    });
 });

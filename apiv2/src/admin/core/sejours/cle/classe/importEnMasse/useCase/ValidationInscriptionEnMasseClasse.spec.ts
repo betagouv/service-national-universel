@@ -8,12 +8,7 @@ import { ValidationInscriptionEnMasseClasse } from "./ValidationInscriptionEnMas
 import { FileGateway } from "@shared/core/File.gateway";
 import { Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import {
-    CLASSE_IMPORT_EN_MASSE_COLUMNS,
-    CLASSE_IMPORT_EN_MASSE_ERRORS,
-    FunctionalException,
-    STATUS_CLASSE,
-} from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS, STATUS_CLASSE } from "snu-lib";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
@@ -257,5 +252,29 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
         await expect(validationInscriptionEnMasseClasse.execute("classeId", null, mockFile)).rejects.toThrow(
             FunctionalExceptionCode.CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE,
         );
+    });
+
+    it("should return an error if the French date format is invalid", async () => {
+        fileGateway.parseXLS.mockResolvedValueOnce([
+            {
+                Nom: "John",
+                Prénom: "Doe",
+                Genre: "M",
+                "Date de naissance": "01/02/09",
+                UAI: "12345678",
+            },
+        ]);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
+        expect(
+            results.errors.find(
+                (error) =>
+                    error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT &&
+                    error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE,
+            ),
+        ).toBeDefined();
     });
 });

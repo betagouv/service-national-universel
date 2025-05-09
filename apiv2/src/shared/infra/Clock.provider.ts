@@ -72,4 +72,17 @@ export class ClockProvider implements ClockGateway {
     parseDateNaissance(date: string): Date {
         return new Date(`${date.split("/")[2]}-${date.split("/")[1]}-${date.split("/")[0]}T00:00:00.000+00:00`);
     }
+    isValidFrenchDate(date: string): boolean {
+        if (!date || typeof date !== "string") {
+            return false;
+        }
+
+        const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        if (!dateRegex.test(date)) {
+            return false;
+        }
+
+        const parsed = parse(date, "dd/MM/yyyy", new Date());
+        return isValid(parsed);
+    }
 }

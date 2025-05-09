@@ -14,6 +14,7 @@ export interface ClockGateway {
     addHours(date: Date, hours: number): Date;
     parseDate(date: string, format: string): Date;
     parseDateNaissance(date: string): Date;
+    isValidFrenchDate(date: string): boolean;
 }
 
 export const ClockGateway = Symbol("ClockGateway");
