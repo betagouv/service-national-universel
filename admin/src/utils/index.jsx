@@ -450,3 +450,8 @@ export const isResponsableDeCentre = (user) => {
   if (!user || !user.role) return false;
   return user.role === ROLES.HEAD_CENTER || user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE;
 };
+export function getAuthor(user) {
+  if (!user) return "Auteur inconnu";
+  if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
+  if (user.firstName && !user.lastName) return user.firstName;
+}

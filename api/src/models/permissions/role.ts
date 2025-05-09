@@ -1,9 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MONGO_COLLECTION, RoleSchema } from "snu-lib";
-
-import { CustomSaveParams, DocumentExtended, UserExtension, UserSaved } from "../types";
+import { InterfaceExtended, MONGO_COLLECTION, RoleSchema, CustomSaveParams, DocumentExtended, UserExtension, UserSaved } from "snu-lib";
 
 const schema = new Schema(RoleSchema);
 
