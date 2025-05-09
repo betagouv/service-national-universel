@@ -173,7 +173,9 @@ export default function List() {
       for (let i = 0; i < subStructures.data.length; i++) {
         const subStructure = subStructures.data[i];
         const tempMissions = await appendMissions(subStructure._id);
-        m.push(...tempMissions);
+        if (tempMissions) {
+          m.push(...tempMissions);
+        }
       }
     }
     setMissions(m);

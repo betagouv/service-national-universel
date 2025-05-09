@@ -22,6 +22,7 @@ import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { Transactional } from "@nestjs-cls/transactional";
 import { ClsService } from "nestjs-cls";
 import { SessionGateway } from "../session/Session.gateway";
+import { DesistementService } from "../desistement/Desistement.service";
 
 export type ValiderBasculeRapportData = Array<
     JeuneRapportSimulation &
@@ -71,6 +72,7 @@ export class ValiderBasculeJeunesService {
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        @Inject(DesistementService) private readonly desistementService: DesistementService,
         private readonly cls: ClsService,
         private readonly logger: Logger,
     ) {}
@@ -153,26 +155,19 @@ export class ValiderBasculeJeunesService {
     ) {
         const nouvelleSession = await this.sessionGateway.findById(nouvelleSessionId);
         // on désaffecte le jeune et le bascule
-        const jeuneUpdated: JeuneModel = {
+        const jeuneNewSession: JeuneModel = {
             ...jeune,
             sessionId: nouvelleSession.id,
             sessionNom: nouvelleSession.nom,
             originalSessionId: jeune.sessionId,
             originalSessionNom: jeune.sessionNom,
-            centreId: undefined,
-            sejourId: undefined,
-            pointDeRassemblementId: undefined,
-            ligneDeBusId: undefined,
-            hasPDR: undefined,
-            transportInfoGivenByLocal: undefined,
-            deplacementPhase1Autonomous: undefined,
-            presenceArrivee: undefined,
-            presenceJDM: undefined,
-            departInform: undefined,
-            departSejourAt: undefined,
-            departSejourMotif: undefined,
-            departSejourMotifComment: undefined,
             youngPhase1Agreement: "false",
+        };
+        // reset des informations d'affectation
+        const jeuneDesaffecte = this.desistementService.resetInfoAffectation(jeuneNewSession);
+
+        const jeuneUpdated: JeuneModel = {
+            ...jeuneDesaffecte,
             ...champsSpecifiqueBascule,
         };
 

@@ -1,9 +1,8 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { DocumentExtended } from "./types";
-import { EmailSchema, InterfaceExtended } from "snu-lib";
+import { EmailSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
-const MODELNAME = "email";
+const MODELNAME = MONGO_COLLECTION.EMAIL;
 
 // https://developers.sendinblue.com/docs/transactional-webhooks
 

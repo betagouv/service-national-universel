@@ -1,5 +1,7 @@
 export type InterfaceExtended<T> = T & { _id: string; _doc?: T };
 
+export * from "./constantes/collections";
+
 export * from "./alerteMessage";
 export * from "./application";
 export * from "./areas";
@@ -45,3 +47,7 @@ export * from "./young";
 export * from "./patch";
 export * from "./campagne";
 export * from "./listeDiffusion";
+export * from "./permissions/permission";
+export * from "./permissions/role";
+export * from "./types";
+export * from "../utils/patchUtils";

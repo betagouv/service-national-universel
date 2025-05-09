@@ -1,19 +1,18 @@
 import React from "react";
 import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 import { restorePreviousSignin } from "@/utils/signinAs";
 import Icon from "./Icon";
-import { useHistory } from "react-router-dom";
 
-export default function RestorePreviousSignin() {
-  const previousSigninToken = useSelector((state) => state.Auth.previousSigninToken);
-  const history = useHistory();
+export default function RestorePreviousSigninFlag() {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const isImpersonate = !!user.impersonateId;
 
   const onClick = async () => {
     await restorePreviousSignin();
-    history.push("/");
   };
 
-  if (!previousSigninToken) return null;
+  if (!isImpersonate) return null;
 
   return (
     <div className="flex justify-end items-center py-2 px-8 bg-pink-600 font-medium text-xs text-white sticky top-0 z-50 h-[5vh]">

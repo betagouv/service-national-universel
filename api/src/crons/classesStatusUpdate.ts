@@ -1,10 +1,9 @@
-import { CohortType } from "snu-lib";
+import { CohortType, UserSaved } from "snu-lib";
 import { isCohortInscriptionOpen } from "../cohort/cohortService";
 import { ClasseModel, CohortModel, YoungModel } from "../models";
 import { capture } from "../sentry";
 import slack from "../slack";
 import ClasseStateManager from "../cle/classe/stateManager";
-import { UserSaved } from "../models/types";
 
 export const handler = async () => {
   try {

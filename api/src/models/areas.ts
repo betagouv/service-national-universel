@@ -1,8 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
-import { DocumentExtended } from "./types";
-import { AreasSchema, InterfaceExtended } from "snu-lib";
+import { AreasSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
-const MODELNAME = "area";
+const MODELNAME = MONGO_COLLECTION.AREA;
 
 // This object is used to get the density of a city and assign it to a young
 

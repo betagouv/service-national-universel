@@ -1,20 +1,28 @@
 import mongoose, { Connection, HydratedDocument } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { CohesionCenterSchema, CohesionCenterType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    CohesionCenterSchema,
+    CohesionCenterType,
+    CustomSaveParams,
+    UserExtension,
+    buildPatchUser,
+} from "snu-lib";
 
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 
 export type CentreDocument = HydratedDocument<CohesionCenterType>;
-export const CentreName = "cohesioncenter";
+type SchemaExtended = CentreDocument & UserExtension;
+export const CentreName = MONGO_COLLECTION.COHESION_CENTER;
 export const CENTRE_MONGOOSE_ENTITY = "CENTRE_MONGOOSE_ENTITY";
 
 const CentreSchemaRef = new mongoose.Schema(CohesionCenterSchema);
 
-CentreSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+CentreSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
+    if (params?.fromUser) {
+        this._user = buildPatchUser(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

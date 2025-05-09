@@ -2,10 +2,9 @@ import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 import anonymize from "../anonymization/application";
 
-import { ApplicationSchema, InterfaceExtended } from "snu-lib";
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "./types";
+import { ApplicationSchema, InterfaceExtended, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
 
-const MODELNAME = "application";
+const MODELNAME = MONGO_COLLECTION.APPLICATION;
 
 const schema = new Schema(ApplicationSchema);
 
@@ -35,20 +34,19 @@ schema.methods.anonymise = function () {
 };
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
+  this._user = getVirtualUser(user);
+});
+
+schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
   }
+  this.updatedAt = new Date();
+  next();
 });
 
 schema.set("toObject", { virtuals: true });
 schema.set("toJSON", { virtuals: true });
-
-schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
-  this.updatedAt = new Date();
-  next();
-});
 
 schema.plugin(patchHistory, {
   mongoose,

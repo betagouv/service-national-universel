@@ -142,7 +142,7 @@ describe("ClasseStateManager.withdraw function", () => {
   });
 
   const saveStudentMock = jest.fn().mockImplementation(() => {
-    return { status: "ABANDONED" }; // Simulating the saved state after updating student status
+    return { status: "WITHDRAWN" }; // Simulating the saved state after updating student status
   });
 
   it("should throw an error if YoungModel is not provided", async () => {
@@ -203,10 +203,10 @@ describe("ClasseStateManager.withdraw function", () => {
 
     // Assert that classe status is updated to withdrawn
     expect(saveMock).toHaveBeenCalledWith({ fromUser });
-    // Assert that each student's status is updated to abandoned
+    // Assert that each student's status is updated to withdrawn
     mockedYoungs.forEach((mockedYoung) => {
       expect(mockedYoung.set).toHaveBeenCalledWith({
-        status: "ABANDONED",
+        status: "WITHDRAWN",
         lastStatusAt: expect.any(Number),
         withdrawnMessage: "classe désistée",
         withdrawnReason: "other",
