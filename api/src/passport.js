@@ -29,6 +29,7 @@ async function validateUser(Model, jwtPayload, done, role) {
     const { error, value } = Joi.object({
       __v: Joi.string().required(),
       _id: Joi.string().required(),
+      _impersonateId: Joi.string().allow(null),
       passwordChangedAt: Joi.date().allow(null),
       lastLogoutAt: Joi.date().allow(null),
     }).validate(jwtPayload, { stripUnknown: true });
@@ -36,12 +37,18 @@ async function validateUser(Model, jwtPayload, done, role) {
     if (error) return done(null, false);
     if (!checkJwtSigninVersion(value)) return done(null, false);
 
-    const user = await Model.findById(value._id);
+    let user = await Model.findById(value._id);
     if (user) {
       const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
       const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
 
       if (passwordMatch && logoutMatch && (!role || user.role === role)) {
+        if (value._impersonateId) {
+          const impersonateUser = await Model.findById(value._impersonateId);
+          if (impersonateUser) {
+            user.set("impersonatedBy", impersonateUser);
+          }
+        }
         return done(null, user);
       }
     }

@@ -99,23 +99,6 @@ export default function HomePhase2() {
             <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
               {canApplyToPhase2 ? (
-                <>
-                  <div className="flex bg-gray-400 text-white rounded-md px-3 py-2.5 text-center line-clamp-1 cursor-not-allowed">
-                    <div className="mr-2">
-                      <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
-                      Trouver un engagement
-                    </div>
-                    <div data-tip data-for="tooltip-nationalite">
-                      <RiInformationLine className="mt-1.5 text-white" />
-                    </div>
-                    <ReactTooltip id="tooltip-nationalite" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
-                      <span className="text-gray-800">
-                        Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
-                      </span>
-                    </ReactTooltip>
-                  </div>
-                </>
-              ) : (
                 <Link
                   to="/mission"
                   onClick={() => plausibleEvent("Phase2/CTA - Trouver un engagement")}
@@ -123,6 +106,23 @@ export default function HomePhase2() {
                   <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
                   Trouver un engagement
                 </Link>
+              ) : (
+                <>
+                  <button
+                    disabled
+                    data-tip
+                    data-for="tooltip-delai"
+                    className="flex gap-2 justify-center items-center bg-gray-400 text-white rounded-md px-3 py-2.5 line-clamp-1 cursor-not-allowed">
+                    <HiSearch className="inline-block text-xl" />
+                    <p>Trouver un engagement</p>
+                    <RiInformationLine className="text-white" />
+                  </button>
+                  <ReactTooltip id="tooltip-delai" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <span className="text-gray-800">
+                      Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
+                    </span>
+                  </ReactTooltip>
+                </>
               )}
               <Link
                 to="/phase2/equivalence"

@@ -1,12 +1,21 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { InterfaceExtended, MissionEquivalenceSchema } from "snu-lib";
+import {
+  InterfaceExtended,
+  MissionEquivalenceSchema,
+  MONGO_COLLECTION,
+  getVirtualUser,
+  buildPatchUser,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 import anonymize from "../anonymization/missionEquivalence";
-import { DocumentExtended, CustomSaveParams, UserExtension } from "./types";
 
-const MODELNAME = "missionequivalence";
+const MODELNAME = MONGO_COLLECTION.MISSION_EQUIVALENCE;
 
 const schema = new Schema(MissionEquivalenceSchema);
 
@@ -14,15 +23,14 @@ schema.methods.anonymise = function () {
   return anonymize(this);
 };
 
-schema.virtual("fromUser").set<SchemaExtended>(function (fromUser) {
-  if (fromUser) {
-    const { _id, role, department, region, email, firstName, lastName, model } = fromUser;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.fromUser = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });

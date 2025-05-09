@@ -286,4 +286,5 @@ const schema = new Schema(ReferentSchema);
 export type ReferentType = InterfaceExtended<InferSchemaType<typeof schema>> & {
   // virtual fields
   fullName?: string;
+  impersonatedBy?: ReferentType;
 };

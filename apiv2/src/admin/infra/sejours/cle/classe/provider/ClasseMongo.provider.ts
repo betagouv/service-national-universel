@@ -1,18 +1,19 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { ClasseSchema, ClasseType } from "snu-lib";
+import { ClasseSchema, ClasseType, MONGO_COLLECTION, CustomSaveParams, buildPatchUser, UserExtension } from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type ClasseDocument = HydratedDocument<ClasseType>;
-export const ClasseName = "classe";
+type SchemaExtended = ClasseDocument & UserExtension;
+export const ClasseName = MONGO_COLLECTION.CLASSE;
 export const CLASSE_MONGOOSE_ENTITY = "CLASSE_MONGOOSE_ENTITY";
 
 const ClasseSchemaRef = new mongoose.Schema(ClasseSchema);
 
-ClasseSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+ClasseSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
+    if (params?.fromUser) {
+        this._user = buildPatchUser(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

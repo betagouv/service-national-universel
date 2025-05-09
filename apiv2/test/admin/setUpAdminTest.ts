@@ -58,7 +58,7 @@ import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 import { DesistementController } from "@admin/infra/sejours/phase1/desistement/api/Desistement.controller";
-
+import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
 export interface SetupOptions {
     newContainer: boolean;
 }
@@ -114,6 +114,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             SimulationAffectationHTSService,
             SimulationAffectationCLEService,
             ValiderBasculeJeunesService,
+            DesistementService,
             ...cleGatewayProviders,
             ...sejourGatewayProviders,
             ...jeuneGatewayProviders,

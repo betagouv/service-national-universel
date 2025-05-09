@@ -1,18 +1,26 @@
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
 import mongoose, { Connection, HydratedDocument } from "mongoose";
-import { LigneToPointSchema, LigneToPointType } from "snu-lib";
+import {
+    MONGO_COLLECTION,
+    LigneToPointSchema,
+    LigneToPointType,
+    UserExtension,
+    CustomSaveParams,
+    buildPatchUser,
+} from "snu-lib";
 import patchHistory from "mongoose-patch-history";
 
 export type SegmentDeLigneDocument = HydratedDocument<LigneToPointType>;
-export const SegmentDeLigneName = "lignetopoint";
+type SchemaExtended = SegmentDeLigneDocument & UserExtension;
+export const SegmentDeLigneName = MONGO_COLLECTION.LIGNE_TO_POINT;
 export const SEGMENTLIGNE_MONGOOSE_ENTITY = "SEGMENTLIGNE_MONGOOSE_ENTITY";
 
 const SegmentDeLigneSchemaRef = new mongoose.Schema(LigneToPointSchema);
 
-SegmentDeLigneSchemaRef.pre("save", function (next, params) {
-    //@ts-ignore
-    // TODO : add typing
-    this._user = params?.fromUser;
+SegmentDeLigneSchemaRef.pre<SchemaExtended>("save", function (next, params: CustomSaveParams | undefined) {
+    if (params?.fromUser) {
+        this._user = buildPatchUser(params.fromUser);
+    }
     this.updatedAt = new Date();
     next();
 });

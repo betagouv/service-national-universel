@@ -202,8 +202,7 @@ export default function StepEligibilite() {
           <div className="pl-12">
             <p className="m-0 text-xl font-bold">Message Important</p>
             <p className="m-0 text-sm sm:mr-4 md:mr-0">
-              Les inscriptions sont ouvertes pour les volontaires résidant en Corse et dans une région ou un département d’Outremer, les sessions organisées pour les volontaires
-              des autres régions sont complètes.
+              Les inscriptions sont ouvertes pour les volontaires résidant dans certaines régions ou certains départements d’Outremer, les sessions organisées pour les volontaires des autres régions sont complètes.
             </p>
           </div>
         </Container>

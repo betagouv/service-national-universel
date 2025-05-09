@@ -20,21 +20,19 @@ export class AnnulerClasseDesistee implements UseCase<AnnulerClasseDesisteeModel
         let rapport: string[] = [];
         this.logger.log(`Annulation du désistement pour la classe : ${classe.id}`, AnnulerClasseDesistee.name);
         // Précédent statut de la classe
-        const classeHistory = await this.historyGateway.findLastByReferenceIdAndPath(
+        const classeHistory = await this.historyGateway.findLastByReferenceIdAndPathAndValue(
             HistoryType.CLASSE,
             classe.id,
             "/status",
+            STATUS_CLASSE.WITHDRAWN,
         );
         if (!classeHistory) {
             this.logger.warn(`Aucun historique trouvé pour la classe : ${classe.id}`, AnnulerClasseDesistee.name);
         }
-        const previousStatut = classeHistory?.ops.find((op) => op.path === "/status")?.value;
+        const previousStatut = classeHistory?.ops.find((op) => op.path === "/status")?.originalValue;
+        const dateDesistementClasse = classeHistory?.date;
         let nextStatut = previousStatut as keyof typeof STATUS_CLASSE;
-        if (
-            !previousStatut ||
-            !STATUS_CLASSE.hasOwnProperty(previousStatut) ||
-            previousStatut === STATUS_CLASSE.WITHDRAWN
-        ) {
+        if (!previousStatut || !STATUS_CLASSE.hasOwnProperty(previousStatut)) {
             this.logger.warn(
                 `Statut précédent incohérent ou non trouvé pour la classe : ${classe.id}, statut précédent : ${previousStatut}`,
                 AnnulerClasseDesistee.name,
@@ -53,33 +51,39 @@ export class AnnulerClasseDesistee implements UseCase<AnnulerClasseDesisteeModel
         const jeunes = await this.jeuneGateway.findByClasseIdAndSessionId(classe.id, classe.sessionId!);
         for (const jeune of jeunes) {
             // // Récupérer le statut de chaque jeune
-            const jeuneHistory = await this.historyGateway.findLastByReferenceIdAndPath(
+            const jeuneHistory = await this.historyGateway.findLastByReferenceIdAndPathAndValue(
                 HistoryType.JEUNE,
                 jeune.id,
                 "/status",
+                YOUNG_STATUS.WITHDRAWN,
             );
             if (!jeuneHistory) {
                 this.logger.warn(`Aucun historique trouvé pour le jeune : ${jeune.id}`, AnnulerClasseDesistee.name);
             }
-            const previousStatut = jeuneHistory?.ops.find((op) => op.path === "/status")?.value;
-            let nextStatut = previousStatut as string;
+            const dateDesistementJeune = jeuneHistory?.date;
+            if (dateDesistementJeune && dateDesistementClasse && dateDesistementJeune < dateDesistementClasse) {
+                this.logger.warn(
+                    `Le jeune : ${jeune.id} s'est désisté avant la classe : ${classe.id}`,
+                    AnnulerClasseDesistee.name,
+                );
+                continue;
+            }
+            const previousStatut = jeuneHistory?.ops.find((op) => op.path === "/status")?.originalValue;
+            let nextStatut = previousStatut as keyof typeof YOUNG_STATUS;
 
-            if (
-                !previousStatut ||
-                !YOUNG_STATUS.hasOwnProperty(previousStatut) ||
-                previousStatut === YOUNG_STATUS.ABANDONED
-            ) {
+            if (!previousStatut || !YOUNG_STATUS.hasOwnProperty(previousStatut)) {
                 this.logger.warn(
                     `Statut précédent incohérent ou non trouvé pour le jeune : ${jeune.id}, statut précédent : ${previousStatut}`,
                     AnnulerClasseDesistee.name,
                 );
-                nextStatut = YOUNG_STATUS.VALIDATED;
+                nextStatut = YOUNG_STATUS.WAITING_VALIDATION;
                 rapport.push(`Jeune ${jeune.id} : Statut précédent : ${previousStatut}`);
             }
             // Passer le jeune à son précédent statut
             await this.jeuneGateway.update({
                 ...jeune,
                 statut: nextStatut,
+                lastStatusAt: new Date(),
             });
         }
 
