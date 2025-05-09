@@ -155,12 +155,6 @@ export function TreeFilterProvider({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [flatTree]);
 
-  // useEffect(() => {
-  //   if (onSelectionChange) {
-  //     onSelectionChange(selectedItems);
-  //   }
-  // }, [selectedItems, onSelectionChange]);
-
   return (
     <TreeFilterContext.Provider
       value={{
