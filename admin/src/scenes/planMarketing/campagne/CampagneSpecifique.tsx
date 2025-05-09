@@ -9,6 +9,8 @@ import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagn
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 import { HiOutlineExclamation } from "react-icons/hi";
+import CampagneFilters, { CampagneSpecifiqueFilters } from "./filters/CampagneFilters";
+import { useCampagneFilters } from "./filters/CampagneFiltersHook";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -20,7 +22,12 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, sendCampagne, isLoading, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({ sessionId });
+
+  const { filters, setFilters } = useCampagneFilters<CampagneSpecifiqueFilters>(() => {}, {});
+  const { campagnes, saveCampagne, sendCampagne, isLoading, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({
+    sessionId,
+    filters,
+  });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
   const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
@@ -64,6 +71,10 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       cohortId: sessionId,
     };
     setDraftCampagne(newCampagne);
+  };
+
+  const handleFiltersChange = (newFilters: CampagneSpecifiqueFilters) => {
+    setFilters(newFilters);
   };
 
   const handleImportCampagneGenerique = (data: CampagnesGeneriquesImportData) => {
@@ -136,14 +147,6 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-col gap-6">
@@ -159,6 +162,8 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             </ButtonPrimary>
           </div>
         </div>
+
+        <CampagneFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} isSpecificCampaign={true} filters={filters} />
       </div>
 
       <div className="flex flex-col gap-0">
