@@ -39,7 +39,8 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
   const listeDiffusionOptions = useMemo(() => {
     return listesDiffusion.map((liste) => ({
       value: liste.id,
-      label: liste.nom,
+      label: liste.nom + (liste.isArchived ? " (Archivée)" : ""),
+      disabled: liste.isArchived,
     }));
   }, [listesDiffusion]);
 

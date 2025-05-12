@@ -2,11 +2,14 @@ import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/
 import { ListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionService } from "@plan-marketing/core/service/ListeDiffusion.service";
 import { CreateListeDiffusionDto, UpdateListeDiffusionDto } from "./ListeDiffusion.validation";
+import { BasculerArchivageListeDiffusion } from "@plan-marketing/core/useCase/BasculerArchivageListeDiffusion";
 
 @Controller("liste-diffusion")
 export class ListeDiffusionController {
     constructor(
-        private readonly listeDiffusionService: ListeDiffusionService) {}
+        private readonly listeDiffusionService: ListeDiffusionService,
+        private readonly basculerArchivageListeDiffusion: BasculerArchivageListeDiffusion,
+    ) {}
 
     @Post()
     async create(@Body() listeDiffusionDto: CreateListeDiffusionDto): Promise<ListeDiffusionModel> {
@@ -34,4 +37,8 @@ export class ListeDiffusionController {
         await this.listeDiffusionService.deleteListeDiffusion(id);
     }
 
+    @Post(":id/toggle-archivage")
+    async toggleArchivage(@Param("id") id: string): Promise<ListeDiffusionModel | null> {
+        return await this.basculerArchivageListeDiffusion.execute(id);
+    }
 }

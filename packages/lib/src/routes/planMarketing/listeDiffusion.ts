@@ -6,6 +6,7 @@ export interface ListeDiffusionPayload {
   nom: string;
   type: ListeDiffusionEnum;
   filters: ListeDiffusionFiltres;
+  isArchived?: boolean;
 }
 
 export interface CreateListeDiffusionPayload extends Omit<ListeDiffusionPayload, "id"> {}
@@ -50,9 +51,19 @@ export interface SearchListeDiffusionRoute extends BasicRoute {
   response: RouteResponseBodyV2<ListeDiffusionResponse[]>;
 }
 
+export interface ToggleArchivageListeDiffusionRoute extends BasicRoute {
+  method: "POST";
+  path: "/liste-diffusion/{id}/toggle-archivage";
+  params: {
+    id: string;
+  };
+  response: RouteResponseBodyV2<ListeDiffusionResponse>;
+}
+
 export type ListeDiffusionRoutes = {
   CreateListeDiffusionRoute: CreateListeDiffusionRoute;
   GetListeDiffusionRoute: GetListeDiffusionRoute;
   UpdateListeDiffusionRoute: UpdateListeDiffusionRoute;
   SearchListeDiffusionRoute: SearchListeDiffusionRoute;
+  ToggleArchivageListeDiffusionRoute: ToggleArchivageListeDiffusionRoute;
 };

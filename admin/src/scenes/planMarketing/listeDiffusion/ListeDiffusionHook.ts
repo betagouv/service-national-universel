@@ -43,6 +43,23 @@ export const useListeDiffusion = () => {
     },
   });
 
+  const { mutate: toggleArchivageListeDiffusion, isPending: isToggleArchivagePending } = useMutation({
+    mutationFn: (id: string) => ListeDiffusionService.toggleArchivage(id),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT] });
+      toastr.clean();
+      if (data?.isArchived) {
+        toastr.success("Succès", "Liste de diffusion archivée", { timeOut: 3000 });
+      } else {
+        toastr.success("Succès", "Liste de diffusion désarchivée", { timeOut: 3000 });
+      }
+    },
+    onError: (error: HttpError) => {
+      toastr.clean();
+      toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors du changement d'état d'archivage", { timeOut: 5000 });
+    },
+  });
+
   const { data: listesDiffusion, isLoading } = useQuery<ListeDiffusionDataProps[]>({
     queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT],
     enabled: true,
@@ -54,5 +71,7 @@ export const useListeDiffusion = () => {
     listesDiffusion: listesDiffusion || [],
     isLoading,
     saveListeDiffusion,
+    toggleArchivageListeDiffusion,
+    isToggleArchivagePending,
   };
 };

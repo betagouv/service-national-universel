@@ -9,7 +9,7 @@ import { useListeDiffusionFilters } from "./filters/ListeDiffusionFiltersHook";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 
 export default function ListeDiffusion() {
-  const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
+  const { listesDiffusion, saveListeDiffusion, toggleArchivageListeDiffusion, isToggleArchivagePending } = useListeDiffusion();
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
   const [keepOpenListeIds, setKeepOpenListeIds] = useState<Set<string>>(new Set());
 
@@ -61,14 +61,6 @@ export default function ListeDiffusion() {
     return draftListe !== null;
   }, [draftListe]);
 
-  if (isLoading || isPending) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-col gap-6">
@@ -95,6 +87,8 @@ export default function ListeDiffusion() {
             onSave={handleOnSave}
             onCancel={handleOnCancel}
             forceOpen={liste.id ? keepOpenListeIds.has(liste.id) : false}
+            onToggleArchive={liste.id ? () => toggleArchivageListeDiffusion(liste.id!) : undefined}
+            isToggleArchivagePending={isToggleArchivagePending}
           />
         ))}
       </div>
