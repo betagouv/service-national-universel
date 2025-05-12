@@ -419,6 +419,52 @@ router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, R
   }
 });
 
+router.put("/:id/general", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: idError, value: cohortId } = validateId(req.params.id);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { error: bodyError, value: body } = Joi.object({
+      dateStart: Joi.date().required(),
+      dateEnd: Joi.date().required(),
+      status: Joi.string().required(),
+      cohortGroupId: Joi.string().allow(null),
+      uselessInformation: Joi.object({
+        toolkit: Joi.string().default(""),
+        zones: Joi.string().default(""),
+        eligibility: Joi.string().default(""),
+      }),
+      specificSnuIdCohort: Joi.boolean().default(false),
+    }).validate(req.body, { stripUnknown: true });
+
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
+    const cohort = await CohortModel.findById(cohortId);
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    cohort.set({
+      ...body,
+      dateStart: formatDateTimeZone(body.dateStart),
+      dateEnd: setToEndOfDay(new Date(body.dateEnd)),
+    });
+
+    await cohort.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
 router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {
     const { error: idError, value: cohortName } = Joi.string().required().validate(req.params.cohort, { stripUnknown: true });

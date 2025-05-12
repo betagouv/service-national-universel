@@ -9,11 +9,11 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { IoWarningOutline } from "react-icons/io5";
 import ReactTooltip from "react-tooltip";
+import { queryClient } from "@/services/react-query";
 
 type EligibilityTabsProps = {
-  cohort?: CohortDto;
+  cohort: CohortDto;
   readOnly?: boolean;
-  getCohort: () => void;
 };
 
 type EligibilityForm = {
@@ -33,7 +33,7 @@ type ErrorForm = {
 
 region2department["Étranger"] = ["Etranger"]; // Add Etranger to the list of regions because eligibility can be set to Etranger
 
-export default function EligibilityTab({ cohort, readOnly, getCohort }: EligibilityTabsProps) {
+export default function EligibilityTab({ cohort, readOnly }: EligibilityTabsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorForm>({});
   const [formValues, setFormValues] = useState<EligibilityForm>({
@@ -79,7 +79,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", "");
     } finally {
-      await getCohort();
+      queryClient.invalidateQueries({ queryKey: ["cohort", cohort.name] });
       setIsLoading(false);
     }
   };
