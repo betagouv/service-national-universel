@@ -6,7 +6,7 @@ import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { ERRORS } from "snu-lib";
+import { cleanFileNamePath, ERRORS } from "snu-lib";
 import { CsvOptions, FileGateway } from "@shared/core/File.gateway";
 
 import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
@@ -80,11 +80,7 @@ export class FileProvider implements FileGateway {
         const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
         const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
 
-        const cleanPath = path
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "") //remove accents
-            .replaceAll(" ", "_") // remove spaces
-            .replace(/[^\/a-zA-Z0-9._-]/g, ""); // remove special characters
+        const cleanPath = cleanFileNamePath(path);
 
         const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
         const params: AWS.S3.Types.PutObjectRequest = {

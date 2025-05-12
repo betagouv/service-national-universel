@@ -2,14 +2,23 @@ import React from "react";
 import { BsPeopleFill } from "react-icons/bs";
 import { HiOutlineDownload, HiOutlineUpload } from "react-icons/hi";
 import { Button } from "@snu/ds/admin";
-import { CDN_BASE_URL } from "@/utils";
+import { cleanFileNamePath } from "@/utils";
+import { downloadSecuredFile } from "@/services/file.service";
 
 interface FileUploadPanelProps {
-  handleFileUploadClick: () => void;
+  classeName?: string;
+  etablissementName?: string;
   isValidating?: boolean;
+  handleFileUploadClick: () => void;
 }
 
-export const FileUploadPanel = ({ handleFileUploadClick, isValidating = false }: FileUploadPanelProps) => {
+export const FileUploadPanel = ({ classeName, etablissementName, handleFileUploadClick, isValidating = false }: FileUploadPanelProps) => {
+  const handleDownloadFile = async () => {
+    downloadSecuredFile("file/snu-cle-model-import-liste-eleves.xlsx", {
+      fileName: `snu-${cleanFileNamePath(classeName)}-${cleanFileNamePath(etablissementName)}-liste_eleves.xlsx`,
+    });
+  };
+
   return (
     <div className="py-12 px-4 max-w-4xl mx-auto text-center">
       <div className="flex justify-center mb-6">
@@ -28,18 +37,7 @@ export const FileUploadPanel = ({ handleFileUploadClick, isValidating = false }:
       <p className="text-md mb-8 text-gray-600">Format .xlsx • Jusqu'à 5Mo</p>
 
       <div className="flex flex-col md:flex-row items-center justify-center gap-4">
-        <Button
-          type="wired"
-          leftIcon={<HiOutlineDownload size={20} />}
-          title="Télécharger le modèle d'import"
-          className="w-full md:w-auto"
-          onClick={() => {
-            const link = document.createElement("a");
-            link.href = `${CDN_BASE_URL}/file/snu-cle-model-import-liste-eleves.xlsx`;
-            link.download = "snu-cle-model-import-liste-eleves.xlsx";
-            link.click();
-          }}
-        />
+        <Button type="wired" leftIcon={<HiOutlineDownload size={20} />} title="Télécharger le modèle d'import" className="w-full md:w-auto" onClick={handleDownloadFile} />
 
         <span className="text-gray-600 my-2 md:my-0">puis</span>
 

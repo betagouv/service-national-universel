@@ -30,12 +30,12 @@ export async function resizeImage(file, config = {}) {
   return image;
 }
 
-export const downloadSecuredFile = async (url) => {
+export const downloadSecuredFile = async (url: string, { fileName }: { fileName?: string } = {}) => {
   const link = getSecuredFileUrl(url);
-  const fileName = url.replace(/^.*[\\/]/, "");
+  const downloadFileName = fileName || url.replace(/^.*[\\/]/, "");
   const result = await apiv2.get<any>(link);
   const blob = new Blob([new Uint8Array(result.data.data)], { type: result.headers["content-type"] });
-  download(blob, fileName);
+  download(blob, downloadFileName);
 };
 
 export const downloadFileFrombase64 = (base64: string, fileName: string, mimeType: string) => {
