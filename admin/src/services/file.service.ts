@@ -30,8 +30,8 @@ export async function resizeImage(file, config = {}) {
   return image;
 }
 
-export const downloadSecuredFile = async (url: string, { fileName }: { fileName?: string } = {}) => {
-  const link = getSecuredFileUrl(url);
+export const downloadSecuredFile = async (url: string, { fileName, isPublic }: { fileName?: string; isPublic?: boolean } = {}) => {
+  const link = getSecuredFileUrl(url, isPublic);
   const downloadFileName = fileName || url.replace(/^.*[\\/]/, "");
   const result = await apiv2.get<any>(link);
   const blob = new Blob([new Uint8Array(result.data.data)], { type: result.headers["content-type"] });
@@ -52,4 +52,9 @@ export const downloadFileFrombase64 = (base64: string, fileName: string, mimeTyp
   window.URL.revokeObjectURL(url);
 };
 
-export const getSecuredFileUrl = (key) => `${apiv2URL}/file?key=${encodeURIComponent(key)}`;
+export const getSecuredFileUrl = (key: string, isPublic?: boolean) => {
+  if (isPublic) {
+    return `${apiv2URL}/file/public?key=${encodeURIComponent(key)}`;
+  }
+  return `${apiv2URL}/file?key=${encodeURIComponent(key)}`;
+};

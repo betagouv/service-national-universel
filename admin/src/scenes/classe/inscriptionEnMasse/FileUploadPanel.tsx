@@ -14,8 +14,9 @@ interface FileUploadPanelProps {
 
 export const FileUploadPanel = ({ classeName, etablissementName, handleFileUploadClick, isValidating = false }: FileUploadPanelProps) => {
   const handleDownloadFile = async () => {
-    downloadSecuredFile("file/snu-cle-model-import-liste-eleves.xlsx", {
+    downloadSecuredFile("public/snu-cle-model-import-liste-eleves.xlsx", {
       fileName: `snu-${cleanFileNamePath(classeName)}-${cleanFileNamePath(etablissementName)}-liste_eleves.xlsx`,
+      isPublic: true,
     });
   };
 
