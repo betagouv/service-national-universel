@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { translateApplication, canApplyToPhase2 } from "snu-lib";
+import { translateApplication, canCreateApplications } from "snu-lib";
 import validator from "validator";
 import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
@@ -208,7 +208,7 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  if (!canApplyToPhase2(young, cohort))
+  if (!canCreateApplications(young, cohort))
     return (
       <>
         {" "}

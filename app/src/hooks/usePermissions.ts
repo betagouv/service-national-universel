@@ -1,7 +1,7 @@
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
-import { permissionPhase1 } from "@/utils";
-import { canApplyToPhase2, canViewPhase2, hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { canViewPhase2, permissionPhase1 } from "@/utils";
+import { canCreateApplications, canCreateEquivalences, canViewMissions, hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 
 export default function usePermissions() {
   const { young } = useAuth();
@@ -15,6 +15,8 @@ export default function usePermissions() {
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status as any),
     canViewPhase1: permissionPhase1(young),
     canViewPhase2: canViewPhase2(young, cohort),
-    canApplyToPhase2: canApplyToPhase2(young, cohort),
+    canViewMissions: canViewMissions(young, cohort),
+    canCreateApplications: canCreateApplications(young, cohort),
+    canCreateEquivalences: canCreateEquivalences(young),
   };
 }
