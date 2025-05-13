@@ -15,7 +15,7 @@ import {
   SENDINBLUE_TEMPLATES,
   canCreateYoungApplication,
   canViewYoungApplications,
-  canApplyToPhase2,
+  canCreateApplications,
   canViewContract,
   translateAddFilePhase2,
   translateAddFilesPhase2,
@@ -158,7 +158,7 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       if (!cohort) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      if (!canApplyToPhase2(young, cohort)) {
+      if (!canCreateApplications(young, cohort)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     }

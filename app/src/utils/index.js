@@ -1,10 +1,20 @@
 import PasswordValidator from "password-validator";
-import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3, REGLEMENT_INTERIEUR_VERSION, isCohortTooOld, EQUIVALENCE_STATUS } from "snu-lib";
+import {
+  YOUNG_STATUS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
+  REGLEMENT_INTERIEUR_VERSION,
+  EQUIVALENCE_STATUS,
+  canViewMissions,
+  APPLICATION_STATUS,
+  canCreateApplications,
+  canCreateEquivalences,
+} from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
 import { toastr } from "react-redux-toastr";
 import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
-import store from "@/redux/store";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -97,19 +107,11 @@ export function permissionPhase1(y) {
   );
 }
 
-export function hasAccessToPhase2(young) {
-  if (!young) return false;
-  if (young.statusPhase2 === "VALIDATED") return true;
-  if (young.status === YOUNG_STATUS.WITHDRAWN) return false;
-  const userIsDoingAMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
-  const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
+const isDoingAMission = (young) => young.phase2ApplicationStatus.some((status) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status));
+const isWaitingForEquivalence = (young) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
-  const { cohort } = store.getState().Cohort;
-  if (isCohortTooOld(cohort) && !userIsDoingAMission && !hasEquivalence) {
-    return false;
-  }
-  if (wasYoungExcluded(young)) return false;
-  return true;
+export function canViewPhase2(young, cohort) {
+  return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young) || isDoingAMission(young) || isWaitingForEquivalence(young);
 }
 
 export function permissionPhase3(y) {

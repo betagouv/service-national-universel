@@ -19,8 +19,7 @@ import usePermissions from "@/hooks/usePermissions";
 
 export default function HomePhase2() {
   const { young } = useAuth();
-
-  const { canApplyToPhase2 } = usePermissions();
+  const { canViewMissions, canCreateEquivalences } = usePermissions();
 
   return (
     <div className="bg-white pt-8 pb-16">
@@ -98,7 +97,7 @@ export default function HomePhase2() {
           <>
             <h1 className="mt-6 mx-auto text-center font-bold text-3xl md:text-5xl max-w-xl leading-tight md:leading-tight">Engagez-vous au service de la Nation&nbsp;!</h1>
             <div className="flex flex-col md:flex-row justify-center gap-4 my-6">
-              {canApplyToPhase2 ? (
+              {canViewMissions ? (
                 <Link
                   to="/mission"
                   onClick={() => plausibleEvent("Phase2/CTA - Trouver un engagement")}
@@ -124,13 +123,15 @@ export default function HomePhase2() {
                   </ReactTooltip>
                 </>
               )}
-              <Link
-                to="/phase2/equivalence"
-                onClick={() => plausibleEvent("Phase2/CTA - Ajouter un engagement")}
-                className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
-                <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                Ajouter un engagement réalisé
-              </Link>
+              {canCreateEquivalences && (
+                <Link
+                  to="/phase2/equivalence"
+                  onClick={() => plausibleEvent("Phase2/CTA - Ajouter un engagement")}
+                  className="border rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center">
+                  <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
+                  Ajouter un engagement réalisé
+                </Link>
+              )}
             </div>
           </>
         )}
