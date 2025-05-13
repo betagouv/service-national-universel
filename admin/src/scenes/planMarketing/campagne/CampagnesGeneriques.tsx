@@ -10,6 +10,8 @@ import { useLocation } from "react-router-dom";
 import { HiOutlineExclamation } from "react-icons/hi";
 import { useCampagneForm } from "./CampagneFormHook";
 import { useSearchTerm } from "../hooks/useSearchTerm";
+import CampagneFilters, { CampagneGeneriqueFilters } from "./filters/CampagneFilters";
+import { useCampagneFilters } from "./filters/CampagneFiltersHook";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
@@ -18,6 +20,7 @@ export default function CampagnesGeneriques() {
   const [isArchiveToggleModalOpen, setIsArchiveToggleModalOpen] = useState<boolean>(false);
   const [selectedCampagne, setSelectedCampagne] = useState<DraftCampagneDataProps | null>(null);
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
+  const { filters, setFilters } = useCampagneFilters<CampagneGeneriqueFilters>(() => {}, {});
 
   const { toggleArchivageCampagne, isToggleArchivagePending } = useCampagneForm(
     selectedCampagne || {
@@ -65,12 +68,21 @@ export default function CampagnesGeneriques() {
 
   const { listesDiffusion, isLoading: isLoadingListesDiffusion } = useListeDiffusion();
 
+  const handleFiltersChange = (newFilters: CampagneGeneriqueFilters) => {
+    setFilters(newFilters);
+  };
+
   const { data: campagnesData, refetch: refetchCampagnes } = useQuery({
-    queryKey: ["get-campagnes"],
+    queryKey: ["get-campagnes", filters],
     queryFn: async () => {
-      return await PlanMarketingService.search({ generic: true });
+      return await PlanMarketingService.search({
+        generic: true,
+        isArchived: filters.isArchived,
+        isProgrammationActive: filters.isProgrammationActive,
+      });
     },
     enabled: !isLoadingListesDiffusion,
+    refetchOnWindowFocus: false,
   });
 
   const listeDiffusionOptions = useMemo(() => {
@@ -137,8 +149,11 @@ export default function CampagnesGeneriques() {
     <>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between pb-8">
-          <div className="text-2xl font-bold leading-7 text-gray-900">Campagnes Génériques</div>
           <div className="flex items-center gap-4">
+            <div className="text-2xl font-bold leading-7 text-gray-900">Campagnes Génériques</div>
+          </div>
+          <div className="flex items-center gap-4">
+            <CampagneFilters<CampagneGeneriqueFilters> filters={filters} onChange={handleFiltersChange} isSpecificCampaign={false} />
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
               Nouvelle campagne
