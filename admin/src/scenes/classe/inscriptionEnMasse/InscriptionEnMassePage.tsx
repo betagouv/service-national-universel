@@ -86,7 +86,7 @@ export default function InscriptionEnMasse() {
             <ValidationFile errorMessage={importState.status === "error" ? importState.errors : []} onRetry={handleErrorRetry} isValidating={isValidating} />
           </div>
         ) : (
-          <FileUploadPanel handleFileUploadClick={handleFileUploadClick} isValidating={isValidating} />
+          <FileUploadPanel classeName={classe.name} etablissementName={classe.etablissement?.name} handleFileUploadClick={handleFileUploadClick} isValidating={isValidating} />
         )}
       </Container>
 
