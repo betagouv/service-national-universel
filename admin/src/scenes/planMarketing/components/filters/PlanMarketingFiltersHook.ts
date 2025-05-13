@@ -6,7 +6,7 @@ export interface PlanMarketingFiltersBase {
   hasGenericLink?: boolean;
 }
 
-export const usePlanMarketingFiltersFilters = <T extends PlanMarketingFiltersBase>(onChange: (filters: T) => void, initialFilters: Partial<T> = {} as Partial<T>) => {
+export const usePlanMarketingFilters = <T extends PlanMarketingFiltersBase>(onChange: (filters: T) => void, initialFilters: Partial<T> = {} as Partial<T>) => {
   const [filters, setFiltersState] = useState<T>({ ...initialFilters } as T);
 
   const setFilters = useCallback(
