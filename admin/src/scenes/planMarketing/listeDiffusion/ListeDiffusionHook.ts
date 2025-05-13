@@ -3,11 +3,12 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { HttpError, PlanMarketingRoutes, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { ListeDiffusionDataProps } from "./ListeDiffusionForm";
+import { ListeDiffusionFilters } from "../components/filters/PlanMarketingFilters";
 
 const LISTE_DIFFUSION_QUERY_KEY = "listes-diffusion";
 const DEFAULT_SORT = "DESC";
 
-export const useListeDiffusion = () => {
+export const useListeDiffusion = (filters?: ListeDiffusionFilters) => {
   const queryClient = useQueryClient();
 
   const { mutate: saveListeDiffusion } = useMutation({
@@ -26,7 +27,7 @@ export const useListeDiffusion = () => {
       return ListeDiffusionService.create(payload);
     },
     onSuccess: (data, variables) => {
-      queryClient.setQueryData<ListeDiffusionDataProps[]>([LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT], (old = []) => {
+      queryClient.setQueryData<ListeDiffusionDataProps[]>([LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT, filters], (old = []) => {
         if (variables.id) {
           return old.map((item) => (item.id === variables.id ? { ...item, ...variables.payload } : item));
         }
@@ -46,7 +47,7 @@ export const useListeDiffusion = () => {
   const { mutate: toggleArchivageListeDiffusion, isPending: isToggleArchivagePending } = useMutation({
     mutationFn: (id: string) => ListeDiffusionService.toggleArchivage(id),
     onSuccess: (data) => {
-      queryClient.invalidateQueries({ queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT] });
+      queryClient.invalidateQueries({ queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT, filters] });
       toastr.clean();
       if (data?.isArchived) {
         toastr.success("Succès", "Liste de diffusion archivée", { timeOut: 3000 });
@@ -61,10 +62,10 @@ export const useListeDiffusion = () => {
   });
 
   const { data: listesDiffusion, isLoading } = useQuery<ListeDiffusionDataProps[]>({
-    queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT],
+    queryKey: [LISTE_DIFFUSION_QUERY_KEY, DEFAULT_SORT, filters],
     enabled: true,
     refetchOnWindowFocus: false,
-    queryFn: () => ListeDiffusionService.search({ sort: DEFAULT_SORT }),
+    queryFn: () => ListeDiffusionService.search({ sort: DEFAULT_SORT, isArchived: filters?.isArchived }),
   });
 
   return {

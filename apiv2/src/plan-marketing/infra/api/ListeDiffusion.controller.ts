@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, Post, Put, Query } from "@nestjs/common";
 import { ListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionService } from "@plan-marketing/core/service/ListeDiffusion.service";
 import { CreateListeDiffusionDto, UpdateListeDiffusionDto } from "./ListeDiffusion.validation";
@@ -23,8 +23,10 @@ export class ListeDiffusionController {
 
     @Get()
     // TODO : add filter on archive and unarchive
-    async search(@Query("sort") sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
-        return await this.listeDiffusionService.searchListesDiffusion(undefined, sort);
+    async search(
+        @Query("isArchived", new ParseBoolPipe({ optional: true })) isArchived?: boolean,
+        @Query("sort") sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
+        return await this.listeDiffusionService.searchListesDiffusion({ isArchived }, sort);
     }
 
     @Put(":id")

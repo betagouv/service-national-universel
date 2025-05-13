@@ -9,8 +9,8 @@ import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagn
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 import { HiOutlineExclamation } from "react-icons/hi";
-import CampagneFilters, { CampagneSpecifiqueFilters } from "./filters/CampagneFilters";
-import { useCampagneFilters } from "./filters/CampagneFiltersHook";
+import PlanMarketingFilters, { CampagneSpecifiqueFilters } from "../components/filters/PlanMarketingFilters";
+import { usePlanMarketingFilters } from "../components/filters/PlanMarketingFiltersHook";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -23,8 +23,8 @@ export interface CampagnesGeneriquesImportData {
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
 
-  const { filters, setFilters } = useCampagneFilters<CampagneSpecifiqueFilters>(() => {}, {});
-  const { campagnes, saveCampagne, sendCampagne, isLoading, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({
+  const { filters, setFilters } = usePlanMarketingFilters<CampagneSpecifiqueFilters>(() => {}, {});
+  const { campagnes, saveCampagne, sendCampagne, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({
     sessionId,
     filters,
   });
@@ -164,7 +164,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
           </div>
         </div>
 
-        <CampagneFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} isSpecificCampaign={true} filters={filters} />
+        <PlanMarketingFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} filterType="specifique" filters={filters} />
       </div>
 
       <div className="flex flex-col gap-0">

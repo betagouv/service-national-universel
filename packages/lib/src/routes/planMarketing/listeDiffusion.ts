@@ -47,6 +47,7 @@ export interface SearchListeDiffusionRoute extends BasicRoute {
   path: "/liste-diffusion";
   query?: {
     sort?: "ASC" | "DESC";
+    isArchived?: boolean;
   };
   response: RouteResponseBodyV2<ListeDiffusionResponse[]>;
 }
