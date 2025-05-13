@@ -6,7 +6,6 @@ type ToggleItem = {
   label: string;
   value: boolean;
   field: keyof CohortDto;
-  disabled?: boolean;
 };
 
 interface ManualInscriptionCLETogglesProps {
@@ -55,26 +54,18 @@ const renderManualInscriptionHTSToggles = ({ cohort, handleToggleChange, isLoadi
       label: "Référents régionaux",
       value: cohort.inscriptionOpenForReferentRegion ?? false,
       field: "inscriptionOpenForReferentRegion" as keyof CohortDto,
-      disabled: cohort.isInscriptionOpen,
     },
     {
       label: "Référents départementaux",
       value: cohort.inscriptionOpenForReferentDepartment ?? false,
       field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
-      disabled: cohort.isInscriptionOpen,
     },
   ];
 
   return (
     <>
       {toggles.map((toggle) => (
-        <SimpleToggle
-          key={toggle.field}
-          label={toggle.label}
-          value={toggle.value}
-          disabled={isLoading || readOnly || toggle.disabled}
-          onChange={() => handleToggleChange(toggle.field)}
-        />
+        <SimpleToggle key={toggle.field} label={toggle.label} value={toggle.value} disabled={isLoading || readOnly} onChange={() => handleToggleChange(toggle.field)} />
       ))}
     </>
   );
