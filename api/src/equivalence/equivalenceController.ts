@@ -2,9 +2,9 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import mime from "mime-types";
-import { canApplyToPhase2, EQUIVALENCE_STATUS, ERRORS, PHASE2_TOTAL_HOURS, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { canCreateEquivalences, EQUIVALENCE_STATUS, ERRORS, PHASE2_TOTAL_HOURS, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { capture } from "../sentry";
-import { CohortModel, MissionEquivalenceModel, YoungModel } from "../models";
+import { MissionEquivalenceModel, YoungModel } from "../models";
 import { deleteFilesByList, getFile, isYoung as isYoungFn, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
 import { UserRequest } from "../controllers/request";
 import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
@@ -96,10 +96,7 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
 
     const isYoung = isYoungFn(req.user);
 
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.COHORT_NOT_FOUND });
-
-    if (isYoung && !canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung && !canCreateEquivalences(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const youngId = value.id;
     delete value.id;
@@ -146,9 +143,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    const cohort = await CohortModel.findById(young.cohortId);
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.COHORT_NOT_FOUND });
-    if (!canApplyToPhase2(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateEquivalences(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
