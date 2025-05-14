@@ -75,6 +75,7 @@ export default function YoungCard({ young, mission, application }: Props) {
         />
       )}
 
+      {/* @ts-expect-error jsx component */}
       <ModalConfirm
         isOpen={modal}
         title="Confirmation de la proposition"
