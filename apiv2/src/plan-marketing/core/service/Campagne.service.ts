@@ -111,8 +111,17 @@ export class CampagneService {
         startDate: Date,
         endDate: Date,
     ): Promise<CampagneComplete[]> {
-        const campagnes = await this.campagneGateway.search({ generic: false, isProgrammationActive: true });
-        const sessionIds = this.extractSessionIds(campagnes);
+        const campagnes = await this.campagneGateway.search({
+            generic: false,
+        });
+        const campagnesActives = campagnes.filter((campagne) => {
+            return (
+                (campagne as CampagneComplete).isProgrammationActive === true &&
+                (campagne as CampagneComplete).isArchived === false
+            );
+        });
+        this.logger.log(`Campagnes actives non archivées : ${campagnesActives.length}`);
+        const sessionIds = this.extractSessionIds(campagnesActives);
 
         const filteredCampagnes: CampagneComplete[] = [];
         for (const sessionId of sessionIds) {
@@ -120,7 +129,7 @@ export class CampagneService {
                 startDate,
                 endDate,
                 sessionId,
-                campagnes.filter((campagne) => "cohortId" in campagne && campagne.cohortId === sessionId),
+                campagnesActives.filter((campagne) => "cohortId" in campagne && campagne.cohortId === sessionId),
             );
             filteredCampagnes.push(...sessionSpecificCampagnes);
         }
