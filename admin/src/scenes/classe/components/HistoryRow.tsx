@@ -109,7 +109,7 @@ export default function HistoryRow({ patch, type }: HistoryRowProps) {
             <ReactTooltip id={tooltipAuteurIds[index]} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
               <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthor(patch.user)}</div>
             </ReactTooltip>
-            <UserCard user={patch.user} />
+            {patch.user && <UserCard user={patch.user} />}
           </td>
         </tr>
       ))}

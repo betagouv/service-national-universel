@@ -1,12 +1,14 @@
 import React from "react";
-import { ROLES } from "snu-lib";
+import { ROLES, UserSaved } from "snu-lib";
 import cx from "classnames";
-import { getAuthor } from "@/utils";
-
 import UserInfo from "./UserInfo";
 import LinkWrapper from "./LinkWrapper";
 
-export default function UserCard({ user }) {
+interface Props {
+  user: UserSaved;
+}
+
+export default function UserCard({ user }: Props) {
   function getAvatar(user) {
     if (!user) return "??";
     const firstName = user.impersonatedBy ? user.impersonatedBy.firstName : user?.firstName;
@@ -14,6 +16,7 @@ export default function UserCard({ user }) {
     if (firstName === "Acteur inconnu") return "?";
     if (firstName && lastName) return `${firstName?.substring(0, 1)}${lastName ? lastName.substring(0, 1) : null}`;
     if (firstName && !lastName) return "🤖";
+    return "??";
   }
   function getLink(user) {
     if (Object.values(ROLES).includes(user?.role)) return `/user/${user._id}`;
@@ -22,6 +25,8 @@ export default function UserCard({ user }) {
   }
 
   const hasLink = getLink(user) !== null;
+
+  if (!user) return null;
 
   return (
     <div className="flex items-center gap-2">
