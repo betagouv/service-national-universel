@@ -37,7 +37,7 @@ export default function UserCard({ user }: Props) {
         {getAvatar(user)}
       </div>
 
-      {user && (
+      {user ? (
         <div className="flex w-10/12 flex-col leading-5">
           {user.impersonatedBy ? (
             <>
@@ -55,6 +55,10 @@ export default function UserCard({ user }: Props) {
               <UserInfo user={user} />
             </LinkWrapper>
           )}
+        </div>
+      ) : (
+        <div className="flex w-10/12 flex-col leading-5">
+          <p className="w-full truncate capitalize text-gray-500 text-xs decoration-2 underline-offset-2">Auteur inconnu</p>
         </div>
       )}
     </div>
