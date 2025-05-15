@@ -14,8 +14,8 @@ export const departmentOptions = departmentList.map((d) => ({ value: d, label: d
 
 export const articleSummaries = [
   {
-    title: "Séjour : Quelles sont les dates des séjours 2024 ?",
-    description: "Vous souhaitez connaitre les dates des séjours proposés en 2024",
+    title: `Séjour : Quelles sont les dates des séjours ${new Date().getFullYear()} ?`,
+    description: `Vous souhaitez connaitre les dates des séjours proposés en ${new Date().getFullYear()}`,
     slug: "je-souhaite-minscrire-au-snu",
   },
   {
