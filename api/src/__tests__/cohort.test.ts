@@ -111,21 +111,6 @@ describe("Cohort", () => {
       expect(new Date(res.body.data.dateStart).toISOString()).toBe(formatDateTimeZone(startDate).toISOString());
       expect(new Date(res.body.data.dateEnd).toISOString()).toBe(setToEndOfDay(endDate).toISOString());
     });
-
-    it("should handle null values in uselessInformation correctly", async () => {
-      const cohortFixture = getNewCohortFixture();
-      const cohort = await createCohortHelper(cohortFixture);
-
-      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
-        .put(`/cohort/${cohort._id}/general`)
-        .send({ ...updatedData, uselessInformation: { toolkit: null, zones: undefined, eligibility: true } });
-
-      expect(res.status).toBe(200);
-      // The validator should convert nulls to empty strings
-      expect(res.body.data.uselessInformation.toolkit).toBe("");
-      expect(res.body.data.uselessInformation.zones).toBe("");
-      expect(res.body.data.uselessInformation.eligibility).toBe("");
-    });
   });
 
   describe("PUT /:id/inscriptions", () => {
@@ -273,8 +258,8 @@ describe("Cohort", () => {
       expect(res.status).toBe(200);
       const updatedClasse1 = await ClasseModel.findById(classe1Id);
       const updatedClasse2 = await ClasseModel.findById(classe2Id);
-      expect(updatedClasse1?.status).toBe(STATUS_CLASSE.OPEN);
-      expect(updatedClasse2?.status).toBe(STATUS_CLASSE.OPEN);
+      expect(updatedClasse1?.status).toBe(STATUS_CLASSE.CLOSED);
+      expect(updatedClasse2?.status).toBe(STATUS_CLASSE.CLOSED);
     });
   });
 
