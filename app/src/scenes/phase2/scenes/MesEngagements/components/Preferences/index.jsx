@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
-import { capture } from "@/sentry";
+import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
-import { setYoung } from "@/redux/auth/actions";
-import plausibleEvent from "@/services/plausible";
-import api from "@/services/api";
-import { TRANSPORT, translate, PROFESSIONNAL_PROJECT, PERIOD } from "snu-lib";
+import useUpdateAccount from "@/scenes/account/lib/useUpdateAccount";
+import { TRANSPORT, PROFESSIONNAL_PROJECT, PERIOD } from "snu-lib";
 import View from "./View";
 import { PREF_FORMATS } from "./commons";
 
 export default function Index() {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
   const [data, setData] = useState({
     domains: young?.domains || [],
     missionFormat: young?.missionFormat,
@@ -35,9 +32,8 @@ export default function Index() {
     mobilityNearRelativeZip: young?.mobilityNearRelativeZip || "",
     mobilityNearRelativeCity: young?.mobilityNearRelativeCity || "",
   });
-  const [saving, setSaving] = useState(false);
+  const { mutate: updateMissionPreferences, isPending: saving } = useUpdateAccount("mission-preferences");
   const [errors, setErrors] = useState({});
-  const dispatch = useDispatch();
 
   function getCleanedYoung() {
     let cleanData = { ...data };
@@ -58,25 +54,13 @@ export default function Index() {
   }
 
   async function onSave() {
-    setSaving(true);
     if (validateBeforeSave()) {
-      try {
-        plausibleEvent("Phase2/CTA préférences missions - Enregistrer préférences");
-        const { ok, code, data: updatedYoung } = await api.put("/young/account/mission-preferences", getCleanedYoung());
-        if (ok) {
-          if (updatedYoung) {
-            dispatch(setYoung(updatedYoung));
-          }
+      updateMissionPreferences(getCleanedYoung(), {
+        onSuccess: () => {
           toastr.success("Vos préférences ont bien été enregistrées.");
-        } else {
-          toastr.error("Une erreur s'est produite", translate(code));
-        }
-      } catch (err) {
-        capture(err);
-        toastr.error("Impossible d'enregistrer", "Une erreur est survenue lors de l'enregistrement de vos préférences. Veuillez réessayer dans quelques instants.");
-      }
+        },
+      });
     }
-    setSaving(false);
   }
 
   function validateBeforeSave() {

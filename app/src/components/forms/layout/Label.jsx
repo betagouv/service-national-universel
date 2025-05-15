@@ -1,7 +1,7 @@
 import React from "react";
 
 // Children should be an input
-const Label = ({ children = null, title = "", hasError = false, className = "", titleClassName = "", ...rest }) => {
+const Label = ({ children, title = "", hasError = false, className = "", titleClassName = "", ...rest }) => {
   return (
     <label
       className={`m-0 flex min-h-[54px] w-full flex-col justify-center rounded-lg border-[1px] border-gray-300 bg-white py-2 px-3 focus-within:border-blue-600 disabled:border-gray-200 ${
