@@ -7,7 +7,7 @@ import { CohortDto } from "snu-lib";
 type propType = {
   group: string;
   cohort: CohortDto;
-  onChange: (value) => void;
+  onChange: (value: string) => void;
   readOnly: boolean;
 };
 

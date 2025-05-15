@@ -9,7 +9,7 @@ import ClasseStateManager from "../cle/classe/stateManager";
 import { capture } from "../sentry";
 import { ERRORS, getFile, deleteFile } from "../utils";
 import { decrypt } from "../cryptoUtils";
-import { validateCohortDto } from "./cohortValidator";
+import { validateCohortGeneralDto, validateCohortInscriptionDto, validateCohortPreparationDto, validateCohortAffectationDto, validateCohortCLEDto } from "./cohortValidator";
 import { UserRequest } from "../controllers/request";
 import { validateId } from "../utils/validator";
 
@@ -426,19 +426,7 @@ router.put("/:id/general", passport.authenticate([ROLES.ADMIN], { session: false
       capture(idError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-
-    const { error: bodyError, value: body } = Joi.object({
-      dateStart: Joi.date().required(),
-      dateEnd: Joi.date().required(),
-      status: Joi.string().required(),
-      cohortGroupId: Joi.string().allow(null),
-      uselessInformation: Joi.object({
-        toolkit: Joi.string().default(""),
-        zones: Joi.string().default(""),
-        eligibility: Joi.string().default(""),
-      }),
-      specificSnuIdCohort: Joi.boolean().default(false),
-    }).validate(req.body, { stripUnknown: true });
+    const { error: bodyError, value: body } = validateCohortGeneralDto(req.body);
 
     if (bodyError) {
       capture(bodyError);
@@ -465,49 +453,30 @@ router.put("/:id/general", passport.authenticate([ROLES.ADMIN], { session: false
   }
 });
 
-router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+router.put("/:id/inscriptions", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {
-    const { error: idError, value: cohortName } = Joi.string().required().validate(req.params.cohort, { stripUnknown: true });
+    const { error: idError, value: cohortId } = validateId(req.params.id);
     if (idError) {
       capture(idError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { error: bodyError, value: body } = validateCohortDto(req.body);
+    const { error: bodyError, value: body } = validateCohortInscriptionDto(req.body);
+
     if (bodyError) {
       capture(bodyError);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
-    const cohort = await CohortModel.findOne({ name: cohortName });
+    const cohort = await CohortModel.findById(cohortId);
 
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    //set to 23h59 certains dates
-    const valueToSet = ["pdrChoiceLimitDate", "validationDate", "validationDateForTerminaleGrade"];
-    valueToSet.forEach((key) => {
-      if (body[key]) {
-        let date = new Date(body[key]);
-        date.setHours(23, 59, 59, 999);
-        body[key] = date;
-      }
-    });
     const oldCohort = {
       inscriptionStartDate: cohort.inscriptionStartDate,
       inscriptionEndDate: cohort.inscriptionEndDate,
     };
-
-    cohort.set({
-      ...body,
-      dateStart: formatDateTimeZone(body.dateStart),
-      dateEnd: setToEndOfDay(new Date(body.dateEnd)),
-    });
-
-    if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
-    if (body.validationDate) cohort.validationDate = formatDateTimeZone(body.validationDate);
-    if (body.validationDateForTerminaleGrade) cohort.validationDateForTerminaleGrade = formatDateTimeZone(body.validationDateForTerminaleGrade);
-
+    cohort.set({ ...body });
     await cohort.save({ fromUser: req.user });
 
     if (cohort.type === COHORT_TYPE.CLE && (oldCohort.inscriptionStartDate !== cohort.inscriptionStartDate || oldCohort.inscriptionEndDate !== cohort.inscriptionEndDate)) {
@@ -516,6 +485,103 @@ router.put("/:cohort", passport.authenticate([ROLES.ADMIN], { session: false }),
         await ClasseStateManager.compute(c._id, req.user, { YoungModel });
       }
     }
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/preparation", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: idError, value: cohortId } = validateId(req.params.id);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { error: bodyError, value: body } = validateCohortPreparationDto(req.body);
+
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohort = await CohortModel.findById(cohortId);
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    cohort.set({ ...body });
+
+    await cohort.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/affectation", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: idError, value: cohortId } = validateId(req.params.id);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+    const { error: bodyError, value: body } = validateCohortAffectationDto(req.body);
+
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohort = await CohortModel.findById(cohortId);
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    //set to 23h59 certains dates
+    if (body.pdrChoiceLimitDate) {
+      let date = new Date(body.pdrChoiceLimitDate);
+      date.setHours(23, 59, 59, 999);
+      body.pdrChoiceLimitDate = date;
+    }
+
+    cohort.set({ ...body });
+
+    if (body.pdrChoiceLimitDate) cohort.pdrChoiceLimitDate = formatDateTimeZone(body.pdrChoiceLimitDate);
+
+    await cohort.save({ fromUser: req.user });
+    return res.status(200).send({ ok: true, data: cohort });
+  } catch (error) {
+    capture(error);
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+  }
+});
+
+router.put("/:id/cleSetting", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
+  try {
+    const { error: idError, value: cohortId } = validateId(req.params.id);
+    if (idError) {
+      capture(idError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
+    const { error: bodyError, value: body } = validateCohortCLEDto(req.body);
+
+    if (bodyError) {
+      capture(bodyError);
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+    }
+
+    if (!isSuperAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    const cohort = await CohortModel.findById(cohortId);
+
+    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    cohort.set({ ...body });
+
+    await cohort.save({ fromUser: req.user });
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);

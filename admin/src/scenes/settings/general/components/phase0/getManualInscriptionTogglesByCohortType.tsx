@@ -1,4 +1,5 @@
 import React from "react";
+import { Controller } from "react-hook-form";
 import { CohortDto, COHORT_TYPE } from "snu-lib";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
 
@@ -6,17 +7,16 @@ type ToggleItem = {
   label: string;
   value: boolean;
   field: keyof CohortDto;
-  disabled?: boolean;
 };
 
 interface ManualInscriptionCLETogglesProps {
   cohort: CohortDto;
-  handleToggleChange: (field: keyof CohortDto) => void;
+  control: any;
   isLoading: boolean;
   readOnly: boolean;
 }
 
-const renderManualInscriptionCLEToggles = ({ cohort, handleToggleChange, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
   const toggles: ToggleItem[] = [
     {
       label: "Référents régionaux",
@@ -43,50 +43,51 @@ const renderManualInscriptionCLEToggles = ({ cohort, handleToggleChange, isLoadi
   return (
     <>
       {toggles.map((toggle) => (
-        <SimpleToggle key={toggle.field} label={toggle.label} value={toggle.value} disabled={isLoading || readOnly} onChange={() => handleToggleChange(toggle.field)} />
-      ))}
-    </>
-  );
-};
-
-const renderManualInscriptionHTSToggles = ({ cohort, handleToggleChange, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
-  const toggles: ToggleItem[] = [
-    {
-      label: "Référents régionaux",
-      value: cohort.inscriptionOpenForReferentRegion ?? false,
-      field: "inscriptionOpenForReferentRegion" as keyof CohortDto,
-      disabled: cohort.isInscriptionOpen,
-    },
-    {
-      label: "Référents départementaux",
-      value: cohort.inscriptionOpenForReferentDepartment ?? false,
-      field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
-      disabled: cohort.isInscriptionOpen,
-    },
-  ];
-
-  return (
-    <>
-      {toggles.map((toggle) => (
-        <SimpleToggle
+        <Controller
+          name={toggle.field}
           key={toggle.field}
-          label={toggle.label}
-          value={toggle.value}
-          disabled={isLoading || readOnly || toggle.disabled}
-          onChange={() => handleToggleChange(toggle.field)}
+          control={control}
+          render={({ field }) => <SimpleToggle label={toggle.label} value={field.value} disabled={isLoading || readOnly} onChange={(value) => field.onChange(value)} />}
         />
       ))}
     </>
   );
 };
 
-export const getManualInscriptionTogglesByCohortType = ({ cohort, handleToggleChange, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+const renderManualInscriptionHTSToggles = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+  const toggles: ToggleItem[] = [
+    {
+      label: "Référents régionaux",
+      value: cohort.inscriptionOpenForReferentRegion ?? false,
+      field: "inscriptionOpenForReferentRegion" as keyof CohortDto,
+    },
+    {
+      label: "Référents départementaux",
+      value: cohort.inscriptionOpenForReferentDepartment ?? false,
+      field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
+    },
+  ];
+  return (
+    <>
+      {toggles.map((toggle) => (
+        <Controller
+          name={toggle.field}
+          key={toggle.field}
+          control={control}
+          render={({ field }) => <SimpleToggle label={toggle.label} value={field.value} disabled={isLoading || readOnly} onChange={(value) => field.onChange(value)} />}
+        />
+      ))}
+    </>
+  );
+};
+
+export const getManualInscriptionTogglesByCohortType = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
   const cohortType = cohort.type as (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
   switch (cohortType) {
     case COHORT_TYPE.CLE:
-      return renderManualInscriptionCLEToggles({ cohort, handleToggleChange, isLoading, readOnly });
+      return renderManualInscriptionCLEToggles({ cohort, control, isLoading, readOnly });
     case COHORT_TYPE.VOLONTAIRE:
-      return renderManualInscriptionHTSToggles({ cohort, handleToggleChange, isLoading, readOnly });
+      return renderManualInscriptionHTSToggles({ cohort, control, isLoading, readOnly });
     default:
       return null;
   }

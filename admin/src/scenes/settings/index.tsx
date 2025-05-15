@@ -76,7 +76,7 @@ export default function Settings() {
       id: "general",
       title: "Général",
       leftIcon: <CiSettings size={20} className="mt-0.5" />,
-      content: <GeneralTab cohort={cohort} isLoading={isLoading} readOnly={isReadOnly} />,
+      content: <GeneralTab cohort={cohort} readOnly={isReadOnly} />,
     },
     ...(hasSuperAdminAccess
       ? [

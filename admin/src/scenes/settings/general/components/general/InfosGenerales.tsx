@@ -6,7 +6,7 @@ import { Controller, useForm } from "react-hook-form";
 
 import { COHORT_TYPE, COHORT_STATUS, CohortDto } from "snu-lib";
 import InputText from "@/components/ui/forms/InputText";
-import { Select, Tooltip, Button } from "@snu/ds/admin";
+import { Select, Tooltip, Button, Container } from "@snu/ds/admin";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
 import CohortGroupSelector from "./CohortGroupSelector";
@@ -40,6 +40,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
         eligibility: cohort.uselessInformation?.eligibility,
       },
     },
+    mode: "onChange",
   });
   const isNotSaved = isDirty && !isSubmitting;
   const updateCohortGeneralMutation = useUpdateCohortGeneral();
@@ -63,7 +64,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
   ];
 
   return (
-    <div className="flex flex-col gap-8 rounded-xl bg-white px-8 pb-12 pt-8 shadow-[0_8px_16px_0_rgba(0,0,0,0.05)]">
+    <Container>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
         <div className="flex">
@@ -176,7 +177,6 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                       // @ts-ignore
                       value={field.value}
                       error={errors.dateStart?.message}
-                      // @ts-ignore
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}
@@ -195,7 +195,6 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                       // @ts-ignore
                       value={field.value}
                       error={errors.dateEnd?.message}
-                      // @ts-ignore
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}
@@ -287,6 +286,6 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
           onClick={handleSubmit(handleConfirmSubmit)}
         />
       </div>
-    </div>
+    </Container>
   );
 }
