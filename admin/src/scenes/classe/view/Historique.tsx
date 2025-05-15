@@ -83,9 +83,9 @@ export default function Historique(props) {
     <Page>
       <ClasseHeader classe={classe} setClasse={setClasse} isLoading={isLoading} setIsLoading={setIsLoading} studentStatus={studentStatus} page={"Historique"} />
       <Container className="!px-0 !pb-0">
-        {patches.length === 0 ? (
+        {patches.length === 0 && !isNoPatches ? (
           <Loader />
-        ) : isNoPatches ? (
+        ) : patches.length === 0 && isNoPatches ? (
           <div className="bg-gray-50 mx-8 h-[500px] flex flex-col justify-center items-center">
             <LuHistory size={64} className="text-gray-400 mb-8" strokeWidth="1" />
             <p className="text-base leading-5 text-gray-400">Aucun historique trouvé pour cette classe.</p>

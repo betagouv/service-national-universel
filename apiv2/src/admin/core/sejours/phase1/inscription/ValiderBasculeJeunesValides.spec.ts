@@ -13,6 +13,7 @@ import { JeuneGateway } from "../../jeune/Jeune.gateway";
 import { SessionGateway } from "../session/Session.gateway";
 import { ValiderBasculeJeunesValides } from "./ValiderBasculeJeunesValides";
 import { ValiderBasculeJeunesService } from "./ValiderBasculeJeunes.service";
+import { DesistementService } from "../desistement/Desistement.service";
 
 jest.mock("@nestjs-cls/transactional", () => ({
     Transactional: () => jest.fn(),
@@ -23,14 +24,24 @@ const mockSession = { id: "mockedSessionId", nom: "mockedSessionName" };
 describe("ValiderBasculeJeunesValides", () => {
     let validerBasculeJeunesValides: ValiderBasculeJeunesValides;
     let cls: ClsService;
+    let mockDesistementService: any;
 
     beforeEach(async () => {
+        mockDesistementService = {
+            resetInfoAffectation: jest.fn((jeune) => jeune),
+        };
         const module: TestingModule = await Test.createTestingModule({
             imports: [ClsModule],
             providers: [
                 ValiderBasculeJeunesValides,
                 ValiderBasculeJeunesService,
                 Logger,
+                {
+                    provide: DesistementService,
+                    useValue: {
+                        resetInfoAffectation: jest.fn((jeune) => jeune),
+                    },
+                },
                 {
                     provide: FileGateway,
                     useValue: {

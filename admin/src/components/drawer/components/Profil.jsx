@@ -4,7 +4,7 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 import { ROLES, translate, SUB_ROLE_GOD } from "snu-lib";
-import { setUser, setPreviousSignin } from "@/redux/auth/actions";
+import { setUser } from "@/redux/auth/actions";
 import api from "@/services/api";
 import AddUser from "../icons/AddUser";
 import Logout from "../icons/Logout";
@@ -15,6 +15,7 @@ import User from "../icons/User";
 import VericalDot from "../icons/VerticalDot";
 import Separator from "./Separator";
 import { HiOutlinePaperClip, HiOutlineMail } from "react-icons/hi";
+import { closeImpersonationChannel } from "@/utils/broadcastChannel";
 
 export default function Profil({ sideBarOpen, user, setOpenInvite }) {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
@@ -53,7 +54,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
       setIsLoggingOut(true);
       await api.post(`/referent/logout`);
       dispatch(setUser(null));
-      dispatch(setPreviousSignin(null));
+      closeImpersonationChannel();
       toastr.info("Vous avez bien été déconnecté.", { timeOut: 10000 });
       return history.push("/auth");
     } catch (e) {

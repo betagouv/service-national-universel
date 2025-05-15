@@ -1,9 +1,7 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import anonymize from "../anonymization/waitingList";
 
-import { WaitingListSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended } from "./types";
+import { WaitingListSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.WAITING_LIST;
 

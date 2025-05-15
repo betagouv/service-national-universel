@@ -18,10 +18,12 @@ export default function Inscriptions(props) {
   const [classe, setClasse] = useState(props.classe);
   const studentStatus = props.studentStatus;
   const [isLoading, setIsLoading] = useState(true);
+  const [isPatches1Done, setIsPatches1Done] = useState(false);
+  const [isPatches2Done, setIsPatches2Done] = useState(false);
   const [patches, setPatches] = useState<ClasseYoungPatchesType[]>([]);
   const [oldYoungPatches, setOldYoungPatches] = useState<ClasseYoungPatchesType[]>([]);
   const allPatches = [...patches, ...oldYoungPatches];
-  const isNoYoung = allPatches.length === 0 && !isLoading;
+  const isNoYoung = allPatches.length === 0 && isPatches1Done && isPatches2Done;
   const [youngFilter, setYoungFilter] = useState("");
   const [valueFilter, setValueFilter] = useState("");
   const [userFilter, setUserFilter] = useState("");
@@ -40,6 +42,8 @@ export default function Inscriptions(props) {
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'historique", translate(e.message));
+    } finally {
+      setIsPatches1Done(true);
     }
   };
 
@@ -54,7 +58,7 @@ export default function Inscriptions(props) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la récupération de l'historique", translate(e.message));
     } finally {
-      setIsLoading(false);
+      setIsPatches2Done(true);
     }
   };
 
@@ -64,6 +68,12 @@ export default function Inscriptions(props) {
       getOldPatches();
     }
   }, [classe]);
+
+  useEffect(() => {
+    if (isPatches1Done && isPatches2Done) {
+      setIsLoading(false);
+    }
+  }, [isPatches1Done, isPatches2Done]);
 
   function getFilteredPatches(patches: ClasseYoungPatchesType[]) {
     let filteredPatches = patches;

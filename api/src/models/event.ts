@@ -1,8 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { EventSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended } from "./types";
+import { EventSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.EVENT;
 

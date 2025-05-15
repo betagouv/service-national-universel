@@ -1,23 +1,30 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 import patchHistory from "mongoose-patch-history";
 
-import { ImportPlanTransportSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "../types";
+import {
+  ImportPlanTransportSchema,
+  InterfaceExtended,
+  MONGO_COLLECTION,
+  buildPatchUser,
+  getVirtualUser,
+  DocumentExtended,
+  CustomSaveParams,
+  UserExtension,
+  UserSaved,
+} from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.IMPORT_PLAN_TRANSPORT;
 
 const schema = new Schema(ImportPlanTransportSchema);
 
 schema.virtual("user").set<SchemaExtended>(function (user: UserSaved) {
-  if (user) {
-    const { _id, role, department, region, email, firstName, lastName, model } = user;
-    this._user = { _id, role, department, region, email, firstName, lastName, model };
-  }
+  this._user = getVirtualUser(user);
 });
 
 schema.pre<SchemaExtended>("save", function (next, params: CustomSaveParams) {
-  this.user = params?.fromUser;
+  if (params?.fromUser) {
+    this.user = buildPatchUser(params.fromUser);
+  }
   this.updatedAt = new Date();
   next();
 });

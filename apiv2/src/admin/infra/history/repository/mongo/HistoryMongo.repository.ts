@@ -4,6 +4,7 @@ import { HistoryDocument, mapHistory } from "./HistoryMongo.provider";
 import { HistoryType } from "@admin/core/history/History";
 import { PatchType } from "snu-lib";
 import { HistoryGateway } from "@admin/core/history/History.gateway";
+import path from "path";
 
 @Injectable()
 export class HistoryRepository implements HistoryGateway {
@@ -17,13 +18,33 @@ export class HistoryRepository implements HistoryGateway {
         @Inject(mapHistory(HistoryType.PLANDETRANSPORT))
         private readonly planDeTransportMongooseEntity: Model<HistoryDocument>,
     ) {}
-    findLastByReferenceIdAndPath(history: HistoryType, referenceId: string, path: string): Promise<PatchType | null> {
+    async findLastByReferenceIdAndPath(
+        history: HistoryType,
+        referenceId: string,
+        path: string,
+    ): Promise<PatchType | null> {
         const instance = this.getInstance(history);
         return instance.findOne({ ref: referenceId, "ops.path": path }).sort({ date: -1 }).lean();
     }
     async findLastByReferenceId(history: HistoryType, referenceId: string): Promise<PatchType | null> {
         const instance = this.getInstance(history);
         return instance.findOne({ ref: referenceId }).sort({ date: -1 }).lean();
+    }
+    async findLastByReferenceIdAndPathAndValue(
+        history: HistoryType,
+        referenceId: string,
+        path: string,
+        value: string,
+    ): Promise<PatchType | null> {
+        const instance = this.getInstance(history);
+        return instance
+            .findOne({
+                ref: referenceId,
+                "ops.path": path,
+                "ops.value": value,
+            })
+            .sort({ date: -1 })
+            .lean();
     }
 
     private getInstance(history: HistoryType) {

@@ -1,4 +1,4 @@
-import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS } from "snu-lib";
+import { ReferentielTaskType, STATUS_CLASSE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { DesisterClasses } from "./DesisterClasses";
 
 jest.mock("@nestjs-cls/transactional", () => ({
@@ -11,6 +11,7 @@ describe("DesisterClasses", () => {
     let mockSessionGateway: any;
     let mockClasseGateway: any;
     let mockJeuneGateway: any;
+    let mockDesistementService: any;
 
     beforeEach(() => {
         mockFileGateway = {
@@ -30,8 +31,11 @@ describe("DesisterClasses", () => {
         mockSessionGateway = {
             findBySnuId: jest.fn(),
         };
+        mockDesistementService = {
+            resetInfoAffectation: jest.fn((jeune) => jeune),
+        };
 
-        useCase = new DesisterClasses(mockFileGateway, mockClasseGateway, mockJeuneGateway);
+        useCase = new DesisterClasses(mockFileGateway, mockClasseGateway, mockJeuneGateway, mockDesistementService);
     });
 
     it("should successfully process class withdrawal", async () => {
@@ -57,6 +61,7 @@ describe("DesisterClasses", () => {
         mockFileGateway.parseXLS.mockResolvedValueOnce([]); // import
         mockClasseGateway.findById.mockResolvedValue(mockClasse);
         mockJeuneGateway.findByClasseIdAndSessionId.mockResolvedValue(mockJeunes);
+        mockDesistementService.resetInfoAffectation.mockImplementation((jeune) => jeune);
         mockClasseGateway.updateStatut.mockResolvedValue({ ...mockClasse, statut: STATUS_CLASSE.WITHDRAWN });
 
         const result = await useCase.execute({
@@ -74,6 +79,28 @@ describe("DesisterClasses", () => {
             error: "",
             jeunesDesistesIds: "YOUNG-001,YOUNG-002",
         });
+        expect(mockJeuneGateway.bulkUpdate).toHaveBeenCalledWith(
+            mockJeunes.map((jeune) => ({
+                ...jeune,
+                statut: YOUNG_STATUS.WITHDRAWN,
+                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                lastStatusAt: expect.any(Date),
+                desistementMotif: "other",
+                centreId: undefined,
+                sejourId: undefined,
+                pointDeRassemblementId: undefined,
+                ligneDeBusId: undefined,
+                hasPDR: undefined,
+                transportInfoGivenByLocal: undefined,
+                deplacementPhase1Autonomous: undefined,
+                presenceArrivee: undefined,
+                presenceJDM: undefined,
+                departInform: undefined,
+                departSejourAt: undefined,
+                departSejourMotif: undefined,
+                departSejourMotifComment: undefined,
+            })),
+        );
     });
 
     it("should handle class not found error", async () => {

@@ -1,8 +1,6 @@
 import mongoose, { InferSchemaType, Schema } from "mongoose";
 
-import { FeatureFlagSchema, InterfaceExtended, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended } from "./types";
+import { FeatureFlagSchema, InterfaceExtended, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const schema = new Schema(FeatureFlagSchema);
 

@@ -61,6 +61,7 @@ import {
   CohortType,
   ReferentType,
   getCohortPeriod,
+  WITHRAWN_REASONS,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -654,11 +655,12 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
         params: {
-          motif: cohortChangeReason,
+          motif: WITHRAWN_REASONS.find((r) => r.value === cohortChangeReason)?.label || "",
           oldCohort,
           cohort: cohortObj.name,
           youngFirstName: young?.firstName,
           youngLastName: young?.lastName,
+          message: cohortDetailedChangeReason,
         },
       });
     }

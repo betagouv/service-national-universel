@@ -1,8 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { InterfaceExtended, SchoolSchema, MONGO_COLLECTION } from "snu-lib";
-
-import { DocumentExtended } from "./types";
+import { InterfaceExtended, SchoolSchema, MONGO_COLLECTION, DocumentExtended } from "snu-lib";
 
 const MODELNAME = MONGO_COLLECTION.SCHOOL;
 
