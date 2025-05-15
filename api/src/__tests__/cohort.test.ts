@@ -1,10 +1,11 @@
 import request from "supertest";
+import { ObjectId } from "mongodb";
 import getAppHelper from "./helpers/app";
 import getNewCohortFixture from "./fixtures/cohort";
 import { createCohortHelper } from "./helpers/cohort";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
-import { COHORT_TYPE, ERRORS, ROLES, STATUS_CLASSE, SUB_ROLE_GOD } from "snu-lib";
+import { COHORT_TYPE, ERRORS, ROLES, STATUS_CLASSE, SUB_ROLE_GOD, COHORT_STATUS, formatDateTimeZone, setToEndOfDay } from "snu-lib";
 import { dbConnect, dbClose } from "./helpers/db";
 import { ClasseModel } from "../models";
 
@@ -126,6 +127,117 @@ describe("Cohort", () => {
 
       const updatedClasse = await ClasseModel.findById(classeId);
       expect(updatedClasse?.status).toBe(STATUS_CLASSE.CLOSED);
+    });
+  });
+
+  describe("PUT /:id/general", () => {
+    const updatedData = {
+      dateStart: new Date(),
+      dateEnd: new Date(),
+      status: COHORT_STATUS.PUBLISHED,
+      cohortGroupId: "newGroup123",
+      uselessInformation: {
+        toolkit: "Updated toolkit",
+        zones: "Updated zones",
+        eligibility: "Updated eligibility",
+      },
+      specificSnuIdCohort: true,
+    };
+    it("should return 400 if cohort id is invalid", async () => {
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put("/cohort/invalidId/general")
+        .send(updatedData);
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 400 if request body is invalid", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture());
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send({
+          dateStart: "not-a-date",
+          status: 123,
+        });
+      expect(res.status).toBe(400);
+    });
+
+    it("should return 403 if user is not an admin", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send(updatedData);
+      expect(res.status).toBe(403);
+    });
+
+    it("should return 403 if user is not a super admin", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "NONgod" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send(updatedData);
+      expect(res.status).toBe(403);
+    });
+
+    it("should return 404 if cohort is not found", async () => {
+      const nonExistentId = new ObjectId();
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${nonExistentId}/general`)
+        .send(updatedData);
+      expect(res.status).toBe(404);
+    });
+
+    it("should return 200 when cohort general info is updated successfully", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send({ ...updatedData, dateStart: now, dateEnd: tomorrow });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(updatedData.status);
+      expect(res.body.data.cohortGroupId).toBe(updatedData.cohortGroupId);
+      expect(res.body.data.uselessInformation.toolkit).toBe(updatedData.uselessInformation.toolkit);
+      expect(res.body.data.specificSnuIdCohort).toBe(updatedData.specificSnuIdCohort);
+      expect(new Date(res.body.data.dateStart).toISOString()).toBe(formatDateTimeZone(now).toISOString());
+      const expectedEndDate = setToEndOfDay(tomorrow);
+      expect(new Date(res.body.data.dateEnd).toISOString()).toBe(expectedEndDate.toISOString());
+    });
+
+    it("should handle date formatting correctly", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+      const startDate = new Date("2025-06-01T10:00:00Z");
+      const endDate = new Date("2025-06-30T10:00:00Z");
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send({ ...updatedData, dateStart: startDate, dateEnd: endDate });
+
+      expect(res.status).toBe(200);
+      // Check that the dates were formatted correctly
+      expect(new Date(res.body.data.dateStart).toISOString()).toBe(formatDateTimeZone(startDate).toISOString());
+      expect(new Date(res.body.data.dateEnd).toISOString()).toBe(setToEndOfDay(endDate).toISOString());
+    });
+
+    it("should handle null values in uselessInformation correctly", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send({ ...updatedData, uselessInformation: { toolkit: null, zones: undefined, eligibility: true } });
+
+      expect(res.status).toBe(200);
+      // The validator should convert nulls to empty strings
+      expect(res.body.data.uselessInformation.toolkit).toBe("");
+      expect(res.body.data.uselessInformation.zones).toBe("");
+      expect(res.body.data.uselessInformation.eligibility).toBe("");
     });
   });
   describe("PUT /:id/eligibility", () => {

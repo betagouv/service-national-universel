@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { CohortsRoutes, UpdateCohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
+import { CohortsRoutes, UpdateCohortDto, INSCRIPTION_GOAL_LEVELS, COHORT_STATUS } from "snu-lib";
 import { idSchema } from "../utils/validator";
 
 export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<UpdateCohortDto> => {
@@ -7,7 +7,7 @@ export const validateCohortDto = (dto: UpdateCohortDto): Joi.ValidationResult<Up
     // Informations générales
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
-    status: Joi.string().required(),
+    status: Joi.string().valid(COHORT_STATUS.ARCHIVED, COHORT_STATUS.PUBLISHED).required(),
     objectifLevel: Joi.string().valid(INSCRIPTION_GOAL_LEVELS.DEPARTEMENTAL, INSCRIPTION_GOAL_LEVELS.REGIONAL).allow(null),
     // Inscriptions (phase 0)
     inscriptionStartDate: Joi.date().required(),
@@ -95,7 +95,7 @@ export const validateCohortGeneralDto = (dto: Partial<CohortGeneralFields>): Joi
   return Joi.object<CohortGeneralFields>({
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
-    status: Joi.string().required(),
+    status: Joi.string().valid(COHORT_STATUS.ARCHIVED, COHORT_STATUS.PUBLISHED).required(),
     cohortGroupId: Joi.string().allow(null),
     uselessInformation: Joi.object({
       toolkit: Joi.string().allow(null, "").default(""),
