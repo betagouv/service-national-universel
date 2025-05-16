@@ -435,6 +435,8 @@ export const debouncePromise = (func, delay) => {
 export const youngCheckinField = {
   [ROLES.ADMIN]: "youngCheckinForAdmin",
   [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",
+  [ROLES.HEAD_CENTER_ADJOINT]: "youngCheckinForHeadOfCenter",
+  [ROLES.REFERENT_SANITAIRE]: "youngCheckinForHeadOfCenter",
   [ROLES.REFERENT_REGION]: "youngCheckinForRegionReferent",
   [ROLES.REFERENT_DEPARTMENT]: "youngCheckinForDepartmentReferent",
 };
