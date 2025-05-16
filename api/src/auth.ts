@@ -30,6 +30,7 @@ import {
   isAdminCle,
   isReferentClasse,
   YOUNG_STATUS,
+  ROLE_JEUNE,
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
@@ -38,6 +39,7 @@ import { getFilteredSessions } from "./utils/cohort";
 
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
+import { getAcl } from "./services/iam/Permission.service";
 
 class Auth {
   model: any;
@@ -477,6 +479,12 @@ class Auth {
 
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
       data.featureFlags = await getFeatureFlagsAvailable();
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
+      }
+
       return res.status(200).send({
         ok: true,
         token,
@@ -814,6 +822,11 @@ class Auth {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
+      if (isYoung(user)) {
+        data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        data.acl = await getAcl(user);
+      }
       res.send({ ok: true, token: token, user: data, data });
     } catch (error) {
       capture(error);
@@ -927,8 +940,13 @@ class Auth {
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
-      if (isYoung(user)) res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      else if (isReferent(user)) res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+      if (isYoung(user)) {
+        res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        user.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
+      } else if (isReferent(user)) {
+        res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
+        user.acl = await getAcl(user);
+      }
 
       return res.status(200).send({ ok: true, user: isYoung(user) ? serializeYoung(user, user) : serializeReferent(user) });
     } catch (error) {

@@ -12,3 +12,4 @@ export * from "./phase1";
 export * from "./referentiel/ReferentielTaskDto";
 export * from "./filterLabelDto";
 export * from "./ligneDeBus";
+export * from "./PermissionDto";

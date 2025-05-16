@@ -37,6 +37,6 @@ export async function sendNotificationApplicationWasCreated({ mission, young }) 
     missionName: mission.name,
     structureName: mission.structureName,
   });
-  if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", code);
+  if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", code || "");
   else toastr.success("Email envoyé !", "");
 }

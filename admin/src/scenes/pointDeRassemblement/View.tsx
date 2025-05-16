@@ -41,7 +41,7 @@ export default function View(props) {
       if (!id) return <div />;
       const { ok, code, data: reponsePDR } = await api.get(`/point-de-rassemblement/${id}`);
       if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", code);
+        toastr.error("Oups, une erreur est survenue lors de la récupération du point de rassemblement", code || "");
         return history.push("/point-de-rassemblement");
       }
       setPdr({ ...reponsePDR, addressVerified: true });

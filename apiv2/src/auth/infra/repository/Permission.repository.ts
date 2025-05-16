@@ -19,6 +19,11 @@ export class PermissionRepository implements PermissionGateway {
         return PermissionMapper.toModel(permission);
     }
 
+    async findByRoles(roles: string[]): Promise<PermissionModel[]> {
+        const permissions = await this.permissionMongooseEntity.find({ roles: { $in: roles } });
+        return permissions.map((permission) => PermissionMapper.toModel(permission));
+    }
+
     async findById(id: string): Promise<PermissionModel | null> {
         const permission = await this.permissionMongooseEntity.findById(id);
         if (!permission) {

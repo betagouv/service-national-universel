@@ -4,7 +4,7 @@ import { HiUsers } from "react-icons/hi";
 import { FaMagnifyingGlass } from "react-icons/fa6";
 import cx from "classnames";
 
-import { COHORTS, formatCohortPeriod } from "snu-lib";
+import { COHORT_STATUS, COHORTS, formatCohortPeriod } from "snu-lib";
 import { Select, BadgeNotif } from "@snu/ds/admin";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { addDays, isBefore } from "date-fns";
@@ -26,9 +26,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
 
   const [isSelectMenuOpen, setIsSelectMenuOpen] = useState(false);
 
-  const options = getOptions();
-
-  function getOptions() {
+  const options = useMemo(() => {
     let updatedCohorts = cohorts || [];
     if (filterFn) {
       updatedCohorts = updatedCohorts.filter(filterFn);
@@ -37,7 +35,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
       updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
     if (showArchived === false) {
-      updatedCohorts = updatedCohorts.filter((cohort) => cohort.status !== "ARCHIVED");
+      updatedCohorts = updatedCohorts.filter((cohort) => cohort.status !== COHORT_STATUS.ARCHIVED);
     }
 
     return updatedCohorts.map((cohort) => {
@@ -60,7 +58,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
         ),
       };
     });
-  }
+  }, [cohorts, filterFn, sort, showArchived]);
 
   const currentCohortName = cohort ?? options?.[0]?.value;
 

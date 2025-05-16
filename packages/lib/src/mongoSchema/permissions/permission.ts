@@ -27,6 +27,13 @@ export const PermissionPolicyWhereSchema = {
 };
 
 export const PermissionPolicySchema = {
+  code: {
+    type: String,
+    optional: true,
+    documentation: {
+      description: "Code for custom rule",
+    },
+  },
   where: {
     type: [PermissionPolicyWhereSchema],
     documentation: {
@@ -85,7 +92,7 @@ export const PermissionSchema = {
   },
   policy: {
     type: [PermissionPolicySchema],
-    required: true,
+    optional: true,
     documentation: {
       description: "Policy for a specific ressource or a script",
     },

@@ -1,5 +1,5 @@
 const { ReferentModel } = require("../models");
-const SNUpport = require("../SNUpport");
+const SNUpport = require("../SNUpport").default;
 const { capture, captureMessage } = require("../sentry");
 const slack = require("../slack");
 const { ROLES } = require("snu-lib");

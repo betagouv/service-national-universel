@@ -13,11 +13,11 @@ ChartJS.register(ArcElement, Tooltip, Legend, LinearScale);
 
 import store from "./redux/store";
 
-import App from "./app.jsx";
+import App from "./app";
 
 window.addEventListener("vite:preloadError", (event) => {
   captureMessage("Preloading Error", event);
-  window.location.reload(true);
+  window.location.reload();
 });
 
 ReactDOM.createRoot(document.getElementById("root")).render(

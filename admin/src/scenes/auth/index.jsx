@@ -11,7 +11,7 @@ import Signin from "./signin";
 import Signin2FA from "./signin2FA";
 import Signup from "./signup";
 import SignupInvite from "./signupInvite";
-import api from "../../services/api";
+import api, { setJwtToken } from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import Loader from "../../components/Loader";
 import FooterComponent from "../../components/footer";
@@ -29,11 +29,11 @@ export default function AuthIndex() {
       try {
         const res = await api.checkToken();
         if (!res.ok || !res.user) {
-          api.setToken(null);
+          setJwtToken(null);
           dispatch(setUser(null));
           return setLoading(false);
         }
-        if (res.token) api.setToken(res.token);
+        if (res.token) setJwtToken(res.token);
         if (res.user) dispatch(setUser(res.user));
       } catch (e) {
         console.log(e);
