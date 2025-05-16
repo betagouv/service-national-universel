@@ -1,4 +1,6 @@
 import { ROLES, DASHBOARD_TODOS_FUNCTIONS } from "snu-lib";
+import { isResponsableDeCentre } from "@/utils";
+import { is } from "date-fns/locale";
 
 const getNoteData = (key, user) => {
   const NOTES = {
@@ -31,7 +33,7 @@ const getNoteData = (key, user) => {
     [DASHBOARD_TODOS_FUNCTIONS.INSCRIPTION.IMAGE_RIGHT]: {
       title: "Dossier",
       content: "volontaires sans accord renseigné pour le séjour de $1",
-      link: user.role === ROLES.HEAD_CENTER ? "centre/$centerId/$sessionId/general?status=VALIDATED&imageRight=N/A" : "volontaire?status=VALIDATED&imageRight=N/A",
+      link: isResponsableDeCentre(user) ? "centre/$centerId/$sessionId/general?status=VALIDATED&imageRight=N/A" : "volontaire?status=VALIDATED&imageRight=N/A",
       args: ["cohort"],
       btnLabel: "À relancer",
     },
@@ -54,14 +56,14 @@ const getNoteData = (key, user) => {
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.SCHEDULE_NOT_UPLOADED]: {
       title: "Emploi du temps",
       content: "emplois du temps n'ont pas été déposés. $1",
-      link: user.role === ROLES.HEAD_CENTER ? "/centre/$centerId" : "/centre/liste/session?hasTimeSchedule=false&cohort=$1",
+      link: isResponsableDeCentre(user) ? "/centre/$centerId" : "/centre/liste/session?hasTimeSchedule=false&cohort=$1",
       args: ["cohort"],
       btnLabel: "À relancer",
     },
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.PROJECT_NOT_UPLOADED]: {
       title: "Projet pédagogique",
       content: "projets pédagogiques n'ont pas été déposés. $1",
-      link: user.role === ROLES.HEAD_CENTER ? "/centre/$centerId" : "/centre/liste/session?hasPedagoProject=false&cohort=$1",
+      link: isResponsableDeCentre(user) ? "/centre/$centerId" : "/centre/liste/session?hasPedagoProject=false&cohort=$1",
       args: ["cohort"],
       btnLabel: "À relancer",
     },
@@ -89,7 +91,7 @@ const getNoteData = (key, user) => {
     [DASHBOARD_TODOS_FUNCTIONS.SEJOUR.CHECKIN]: {
       title: "Pointage",
       content: "centres n'ont pas pointés tous leurs volontaires à l'arrivée au séjour de $1",
-      link: user.role === ROLES.HEAD_CENTER ? "/centre/$centerId/$sessionId/tableau-de-pointage?status=VALIDATED&cohesionStayPresence=N/A" : null,
+      link: isResponsableDeCentre(user) ? "/centre/$centerId/$sessionId/tableau-de-pointage?status=VALIDATED&cohesionStayPresence=N/A" : null,
       args: ["cohort"],
       btnLabel: "À renseigner",
     },

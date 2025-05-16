@@ -350,7 +350,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     const filterFields = ["cohort", "status", "cohesionCenterId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const allowedRoles = [ROLES.HEAD_CENTER];
+    const allowedRoles = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

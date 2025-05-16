@@ -9,6 +9,8 @@ const adminRole = [
   "administrateur_cle_coordinateur_cle",
   "referent_classe",
   "head_center",
+  "head_center_adjoint",
+  "referent_sanitaire",
   "referent",
   "dsnj",
 ];

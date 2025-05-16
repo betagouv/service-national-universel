@@ -204,7 +204,7 @@ export default function UserPanel({ onChange, value }) {
             </Info>
           </React.Fragment>
         ) : null}
-        {value?.role === ROLES.HEAD_CENTER && <Sessions user={value} />}
+        {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(value?.role) && <Sessions user={value} />}
         <ModalConfirm
           isOpen={modal?.isOpen}
           title={modal?.title}

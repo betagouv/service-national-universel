@@ -2,11 +2,13 @@ import queryString from "query-string";
 import React, { useEffect, useRef, useState } from "react";
 import { BsChevronDown, BsChevronUp } from "react-icons/bs";
 import { Link } from "react-router-dom";
-import { YOUNG_SITUATIONS, YOUNG_STATUS, translate, ROLES } from "snu-lib";
+import { YOUNG_SITUATIONS, YOUNG_STATUS, translate } from "snu-lib";
 import api from "../../../../services/api";
 import { getNewLink } from "../../../../utils";
 import { FilterComponent } from "../FilterDashBoard";
 import { BarChart, FullDoughnut, Legend, graphColors } from "../graphs";
+import { isResponsableDeCentre } from "@/utils";
+import { useSelector } from "react-redux";
 
 export default function Details({ selectedFilters, role, sessionId, centerId }) {
   const [age, setAge] = useState({});
@@ -18,7 +20,8 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
   const [specificSituation, setSpecificSituation] = useState({});
   const [selectedDetail, setSelectedDetail] = useState("age");
   const [selectedFiltersBottom, setSelectedFiltersBottom] = React.useState({});
-  const base = role === ROLES.HEAD_CENTER ? `/centre/${centerId}/${sessionId}/general` : "/inscription";
+  const user = useSelector((state) => state.user);
+  const base = isResponsableDeCentre(user) ? `/centre/${centerId}/${sessionId}/general` : "/inscription";
   const filterArrayBottom = [
     {
       id: "status",
@@ -78,7 +81,7 @@ export default function Details({ selectedFilters, role, sessionId, centerId }) 
     <div className="flex w-[40%] flex-col items-center rounded-lg bg-white py-6 px-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
       <div className="flex w-full flex-row justify-between">
         <div className="text-base font-bold text-gray-900">En détail</div>
-        {role !== ROLES.HEAD_CENTER && (
+        {!isResponsableDeCentre(user) && (
           <div className="flex flex-col items-end">
             {filterArrayBottom.map((filter) => (
               <FilterComponent key={filter.id} filter={filter} selectedFilters={selectedFiltersBottom} setSelectedFilters={setSelectedFiltersBottom} maxItems={2} />

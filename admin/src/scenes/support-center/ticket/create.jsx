@@ -42,7 +42,7 @@ export default function Create(props) {
     } else if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role)) {
       setTypeList(typesStructure);
       setSubjectsList(subjectsStructure);
-    } else if ([ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.TRANSPORTER].includes(user.role)) {
+    } else if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR, ROLES.TRANSPORTER].includes(user.role)) {
       setTypeList(step1Public);
     } else if ([ROLES.DSNJ, ROLES.INJEP].includes(user.role)) {
       setTypeList(typesExport);
@@ -117,7 +117,9 @@ export default function Create(props) {
                 errors={errors}
                 touched={touched}
               />
-              {[ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
+              {[ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(
+                user.role,
+              ) ? (
                 <Item
                   name="messageSubject"
                   title="Ma demande"
@@ -139,7 +141,9 @@ export default function Create(props) {
               ) : null}
               {values.type?.id &&
               !["OTHER", "QUESTION_SUPPORT"].includes(values.type?.id) &&
-              ![ROLES.HEAD_CENTER, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(user.role) ? (
+              ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER].includes(
+                user.role,
+              ) ? (
                 <SelectTag
                   name="subject"
                   options={Object.values(subjectsList).filter((e) => e.parentId === values?.type?.id)}
