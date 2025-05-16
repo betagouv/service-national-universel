@@ -1,12 +1,26 @@
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import {
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Inject,
+    Param,
+    Post,
+    Put,
+    Query,
+    UseGuards,
+    ParseBoolPipe,
+} from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
-import { CampagneModel } from "../../core/Campagne.model";
+import { CampagneModel, CampagneModelWithNomSession } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
-import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
+import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
+import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
+import { MettreAJourActivationProgrammationSpecifique } from "@plan-marketing/core/useCase/MettreAJourActivationProgrammationSpecifique";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -16,6 +30,8 @@ export class CampagneController {
         private readonly campagneService: CampagneService,
         private readonly mettreAJourCampagne: MettreAJourCampagne,
         private readonly preparerEnvoiCampagne: PreparerEnvoiCampagne,
+        private readonly basculerArchivageCampagne: BasculerArchivageCampagne,
+        private readonly mettreAJourActivationProgrammationSpecifique: MettreAJourActivationProgrammationSpecifique,
     ) {}
 
     @Post()
@@ -32,16 +48,25 @@ export class CampagneController {
         return campagne;
     }
 
+    @Get(":id/campagnes-specifiques")
+    async getCampagneSpecifiquesByCampagneGeneriqueId(
+        @Param("id") campagneGeneriqueId: string,
+    ): Promise<CampagneModelWithNomSession[]> {
+        return await this.campagneService.findCampagneSpecifiquesByCampagneGeneriqueId(campagneGeneriqueId);
+    }
+
     @Get()
     async search(
-        @Query("generic")
+        @Query("generic", new ParseBoolPipe({ optional: true }))
         generic?: boolean,
         @Query("sort")
         sort?: "ASC" | "DESC",
         @Query("cohortId")
         cohortId?: string,
+        @Query("isArchived", new ParseBoolPipe({ optional: true }))
+        isArchived?: boolean,
     ): Promise<CampagneModel[]> {
-        return await this.campagneGateway.search({ generic, cohortId }, sort);
+        return await this.campagneService.search({ generic, cohortId, isArchived }, sort);
     }
 
     @Put(":id")
@@ -57,7 +82,14 @@ export class CampagneController {
     @Post(":id/envoyer")
     async envoyerCampagne(
         @Param("id") campagneId: string,
+        @Body() dto: EnvoyerCampagneDto,
     ): Promise<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]["response"]> {
+        await this.mettreAJourActivationProgrammationSpecifique.execute(campagneId, dto.isProgrammationActive);
         return await this.preparerEnvoiCampagne.execute(campagneId);
+    }
+
+    @Post(":id/toggle-archivage")
+    async toggleArchivage(@Param("id") id: string): Promise<CampagneModel | null> {
+        return await this.basculerArchivageCampagne.execute(id);
     }
 }

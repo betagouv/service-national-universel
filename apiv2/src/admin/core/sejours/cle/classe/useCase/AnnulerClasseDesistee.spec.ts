@@ -8,6 +8,7 @@ describe("AnnulerClasseDesistee", () => {
     let mockJeuneGateway: any;
     let mockClasseGateway: any;
     let mockHistoryGateway: any;
+    let mockLogger: any;
 
     beforeEach(() => {
         mockJeuneGateway = {
@@ -20,8 +21,12 @@ describe("AnnulerClasseDesistee", () => {
         mockHistoryGateway = {
             findLastByReferenceIdAndPathAndValue: jest.fn(),
         };
+        mockLogger = {
+            log: jest.fn(),
+            warn: jest.fn(),
+        };
 
-        useCase = new AnnulerClasseDesistee(mockJeuneGateway, mockClasseGateway, mockHistoryGateway, new Logger());
+        useCase = new AnnulerClasseDesistee(mockJeuneGateway, mockClasseGateway, mockHistoryGateway, mockLogger);
     });
 
     it("should restore previous class and young statuses", async () => {

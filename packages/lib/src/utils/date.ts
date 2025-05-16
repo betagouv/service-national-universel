@@ -163,6 +163,12 @@ const formatDateTimeZone = (date) => {
   return d;
 };
 
+const formatDateForInput = (dateString: string | Date | null | undefined): string => {
+  if (!dateString) return "";
+  const date = new Date(dateString);
+  return date.toISOString().slice(0, 16);
+};
+
 const setToEndOfDay = (date: Date): Date => {
   date.setUTCHours(21, 0, 0, 0); // Set to 21:00:00.000 UTC
   return date;
@@ -211,6 +217,7 @@ export {
   formatDateForPostGre,
   isNowBetweenDates,
   formatDateTimeZone,
+  formatDateForInput,
   checkTime,
   setToEndOfDay,
 };

@@ -1,4 +1,5 @@
 import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "snu-lib";
+import { CampagneProgrammation, CreateCampagneProgrammation } from "./Programmation.model";
 
 /**
  * Interface de base pour toutes les campagnes
@@ -18,15 +19,18 @@ export interface CampagneEnvoi {
  * Interface pour les campagnes avec tous les champs
  * Utilisée pour les campagnes génériques et spécifiques sans référence
  */
-interface CampagneComplete extends CampagneBase {
+export interface CampagneComplete extends CampagneBase {
     nom: string;
     objet: string;
     contexte?: string;
     templateId: number;
     listeDiffusionId: string;
-    destinataires: DestinataireListeDiffusion[];
+    destinataires?: DestinataireListeDiffusion[];
     type: CampagneJeuneType;
     envois?: CampagneEnvoi[];
+    programmations?: CampagneProgrammation[];
+    isProgrammationActive: boolean;
+    isArchived?: boolean;
 }
 
 /**
@@ -69,17 +73,21 @@ export interface CampagneSpecifiqueModelWithRefAndGeneric extends CampagneComple
 // Types unions pour les différents cas d'utilisation
 export type CampagneSpecifiqueModel = CampagneSpecifiqueModelWithoutRef | CampagneSpecifiqueModelWithRef;
 export type CampagneModel = CampagneGeneriqueModel | CampagneSpecifiqueModel;
+export type CampagneModelWithNomSession = CampagneModel & { nomSession: string };
 
 // Types pour la création de campagnes
-export type CreateCampagneGeneriqueModel = Omit<CampagneGeneriqueModel, "id" | "createdAt" | "updatedAt" | "envois">;
+export type CreateCampagneGeneriqueModel = Omit<
+    CampagneGeneriqueModel,
+    "id" | "createdAt" | "updatedAt" | "envois" | "programmations"
+> & { programmations: CreateCampagneProgrammation[] };
 export type CreateCampagneSpecifiqueModelWithoutRef = Omit<
     CampagneSpecifiqueModelWithoutRef,
-    "id" | "createdAt" | "updatedAt" | "envois"
->;
+    "id" | "createdAt" | "updatedAt" | "envois" | "programmations"
+> & { programmations: CreateCampagneProgrammation[] };
 export type CreateCampagneSpecifiqueModelWithRef = Omit<
     CampagneSpecifiqueModelWithRef,
-    "id" | "createdAt" | "updatedAt"
->;
+    "id" | "createdAt" | "updatedAt" | "programmations"
+> & { programmations: CreateCampagneProgrammation[] };
 export type CreateCampagneSpecifiqueModel =
     | CreateCampagneSpecifiqueModelWithoutRef
     | CreateCampagneSpecifiqueModelWithRef;
