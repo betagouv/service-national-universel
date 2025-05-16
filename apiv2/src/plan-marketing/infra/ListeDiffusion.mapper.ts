@@ -10,6 +10,7 @@ export class ListeDiffusionMapper {
             filters: document.filters,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
+            isArchived: document.isArchived,
         };
     }
 
@@ -19,6 +20,7 @@ export class ListeDiffusionMapper {
             nom: model.nom,
             type: model.type,
             filters: model.filters,
+            isArchived: model.isArchived ?? false,
         };
     }
 
@@ -29,6 +31,7 @@ export class ListeDiffusionMapper {
             nom: model.nom,
             type: model.type,
             filters: model.filters,
+            isArchived: model.isArchived ?? false,
         };
     }
 }

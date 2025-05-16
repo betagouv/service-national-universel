@@ -31,7 +31,24 @@ export class ListeDiffusionMongoRepository implements ListeDiffusionGateway {
     }
 
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
-        const listeDiffusions = await this.listeDiffusionModel.find({ ...filter }).sort({ createdAt: sort === "ASC" ? 1 : -1 });
+        const cleanedFilter = Object.entries(filter ?? {})
+            .filter(([key, value]) =>
+                !["isArchived"].includes(key) || value !== undefined
+            )
+            .reduce<Record<string, unknown>>((acc, [key, value]) => {
+                acc[key] = value;
+                return acc;
+            }, {});
+
+        let mongoFilter = { ...cleanedFilter };
+        if ("isArchived" in mongoFilter) {
+            mongoFilter = {
+                ...mongoFilter,
+                isArchived: mongoFilter.isArchived,
+            };
+        }
+
+        const listeDiffusions = await this.listeDiffusionModel.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
         return listeDiffusions.map(ListeDiffusionMapper.toModel);
     }
 }

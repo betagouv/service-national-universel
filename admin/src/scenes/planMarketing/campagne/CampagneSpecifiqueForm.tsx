@@ -4,7 +4,7 @@ import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircl
 import { LuSend } from "react-icons/lu";
 
 import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge, Switcher } from "@snu/ds/admin";
+import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Switcher } from "@snu/ds/admin";
 
 import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, CampagneEnvoi, Programmation, CAMPAGNE_TYPE_COLORS } from "snu-lib";
 
@@ -258,6 +258,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                         placeholder="Sélectionner une liste de diffusion"
                         className={`mt-2 ${errors.listeDiffusionId ? "border-red-500" : ""}`}
                         closeMenuOnSelect={true}
+                        isOptionDisabled={(option) => !!option.disabled}
                       />
                     )}
                   />

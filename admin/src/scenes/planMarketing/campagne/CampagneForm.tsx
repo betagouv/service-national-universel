@@ -161,6 +161,7 @@ export default React.memo(
                     options={listeDiffusionOptions}
                     className={`mt-2 ${errors.listeDiffusion ? "border-red-500" : ""}`}
                     closeMenuOnSelect={true}
+                    isOptionDisabled={(option) => !!option.disabled}
                   />
                   <ErrorMessage message={errors.listeDiffusion} />
                 </div>

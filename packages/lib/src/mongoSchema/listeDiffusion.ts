@@ -12,6 +12,7 @@ export const ListeDiffusionSchema = {
   },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
+  isArchived: { type: Boolean, default: false },
 };
 
 export const schema = new Schema(ListeDiffusionSchema);

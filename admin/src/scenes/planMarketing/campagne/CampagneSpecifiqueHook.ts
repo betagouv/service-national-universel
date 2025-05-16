@@ -4,7 +4,7 @@ import { CampagneEnvoi, HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { CampagneSpecifiqueFormData, ValidationErrors } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
-import { CampagneSpecifiqueFilters } from "./filters/CampagneFilters";
+import { CampagneSpecifiqueFilters } from "../components/filters/PlanMarketingFilters";
 
 const CAMPAGNE_SPECIFIQUE_QUERY_KEY = "campagnes-specifiques";
 const DEFAULT_SORT = "DESC";
