@@ -119,7 +119,7 @@ function getLiaisonNodes(selectedItems: Set<string>): Record<string, TreeNodeFil
   };
 }
 
-function CampagneFilters<T extends PlanMarketingFiltersBase>(props: CampagneFiltersProps<T> & { filters: T }) {
+function PlanMarketingFilters<T extends PlanMarketingFiltersBase>(props: CampagneFiltersProps<T> & { filters: T }) {
   const { onChange, additionalFilters, filters, filterType } = props;
 
   const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set(Object.keys(filters)));
@@ -199,4 +199,4 @@ function CampagneFilters<T extends PlanMarketingFiltersBase>(props: CampagneFilt
   );
 }
 
-export default CampagneFilters;
+export default PlanMarketingFilters;
