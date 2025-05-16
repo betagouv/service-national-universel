@@ -1156,6 +1156,10 @@ export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "
   return true;
 }
 
+export function canCreateMission(actor: UserDto) {
+  return actor.role === ROLES.SUPERVISOR && actor.structureId && actor.structureId !== "DRAFT";
+}
+
 export {
   ROLES,
   SUB_ROLES,
