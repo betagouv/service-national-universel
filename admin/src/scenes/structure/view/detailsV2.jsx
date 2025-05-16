@@ -17,7 +17,7 @@ import Select from "../../../components/forms/Select";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import CardRepresentant from "../components/cards/CardRepresentant";
 import TeamCard from "../components/cards/TeamCard";
-import StructureView from "./wrapperv2";
+import StructureView, { ActionButton } from "./wrapperv2";
 
 export default function DetailsView({ ...props }) {
   const [structure, setStructure] = useState(null);
@@ -34,7 +34,7 @@ export default function DetailsView({ ...props }) {
   if (!structure) return <Loader />;
 
   return (
-    <StructureView tab="details" structure={structure}>
+    <StructureView tab="details" structure={structure} actionButton={<ActionButton />}>
       <div className="my-4 flex gap-6">
         <CardRepresentant structure={structure} setStructure={setStructure} />
         <TeamCard structure={structure} />
