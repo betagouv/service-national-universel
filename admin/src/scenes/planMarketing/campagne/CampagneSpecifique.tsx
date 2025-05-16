@@ -154,6 +154,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
         <div className="flex items-center justify-between pb-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Marketing</div>
           <div className="flex items-center gap-4">
+            <PlanMarketingFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} filterType="specifique" filters={filters} />
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
               Nouvelle campagne
@@ -163,8 +164,6 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             </ButtonPrimary>
           </div>
         </div>
-
-        <PlanMarketingFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} filterType="specifique" filters={filters} />
       </div>
 
       <div className="flex flex-col gap-0">
