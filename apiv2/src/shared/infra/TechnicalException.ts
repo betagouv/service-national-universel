@@ -2,6 +2,7 @@ import { HttpException, HttpStatus } from "@nestjs/common";
 
 export enum TechnicalExceptionType {
     UNAUTORIZED = "Unauthorized",
+    FORBIDDEN = "Forbidden",
     CANNOT_SEND_EMAIL = "CANNOT_SEND_EMAIL",
     NOT_IMPLEMENTED_YET = "NOT_IMPLEMENTED_YET",
     BREVO = "BREVO",
@@ -16,6 +17,9 @@ export class TechnicalException extends HttpException {
         switch (type) {
             case TechnicalExceptionType.UNAUTORIZED:
                 super(type, HttpStatus.UNAUTHORIZED, { description: description });
+                break;
+            case TechnicalExceptionType.FORBIDDEN:
+                super(type, HttpStatus.FORBIDDEN, { description: description });
                 break;
             default:
                 super(type, HttpStatus.INTERNAL_SERVER_ERROR);

@@ -14,6 +14,17 @@ export function download(file, fileName) {
   }
 }
 
+export const cleanFileNamePath = (path?: string) => {
+  if (!path) return "";
+  const cleanPath = path
+    .trim()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "") //remove accents
+    .replaceAll(" ", "_") // remove spaces
+    .replace(/[^/a-zA-Z0-9._-]/g, ""); // remove special characters
+  return cleanPath.length > 1024 ? cleanPath.slice(0, 1024) : cleanPath;
+};
+
 /**
  * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe
  * @param [File]

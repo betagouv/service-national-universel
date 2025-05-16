@@ -1,4 +1,4 @@
-import { YoungType } from "snu-lib";
+import { YOUNG_SOURCE, YoungType } from "snu-lib";
 
 import { JeuneModel } from "../../../../core/sejours/jeune/Jeune.model";
 import { JeuneDocument } from "../provider/JeuneMongo.provider";
@@ -49,11 +49,18 @@ export class JeuneMapper {
             niveauScolaire: jeuneDocument.grade,
             scolarise: jeuneDocument.schooled,
             codePostal: jeuneDocument.zip,
+            source: jeuneDocument.source,
+            consentement: jeuneDocument.consentment,
+            imageRight: jeuneDocument.imageRight,
+            acceptCGU: jeuneDocument.acceptCGU,
+            parentAllowSNU: jeuneDocument.parentAllowSNU,
             // Parent 1 Information
             parent1Prenom: jeuneDocument.parent1FirstName,
             parent1Nom: jeuneDocument.parent1LastName,
             parent1Email: jeuneDocument.parent1Email,
             parent1Telephone: jeuneDocument.parent1Phone,
+            parent1AllowSNU: jeuneDocument.parent1AllowSNU,
+            parent1AllowImageRights: jeuneDocument.parent1AllowImageRights,
             // Parent 2 Information
             parent2Prenom: jeuneDocument.parent2FirstName,
             parent2Nom: jeuneDocument.parent2LastName,
@@ -63,6 +70,7 @@ export class JeuneMapper {
             sessionChangeReason: jeuneDocument.cohortChangeReason,
             // CLE
             classeId: jeuneDocument.classeId,
+            etablissementId: jeuneDocument.etablissementId,
         };
     }
 
@@ -98,7 +106,6 @@ export class JeuneMapper {
         | "attempts2FA"
         | "lastLoginAt"
         | "forgotPasswordResetToken"
-        | "acceptCGU"
         | "invitationToken"
         | "phase"
         | "statusPhase2"
@@ -110,7 +117,6 @@ export class JeuneMapper {
         | "attemptsEmailValidation"
         | "cohesionStayMedicalFileDownload"
         | "convocationFileDownload"
-        | "source"
         | "phase3Token"
         | "parent1FromFranceConnect"
         | "parent2FromFranceConnect"
@@ -151,6 +157,11 @@ export class JeuneMapper {
             cohesionStayPresence: jeuneModel.presenceArrivee,
             presenceJDM: jeuneModel.presenceJDM,
             departInform: jeuneModel.departInform,
+            source: jeuneModel.source || YOUNG_SOURCE.VOLONTAIRE,
+            consentment: jeuneModel.consentement,
+            imageRight: jeuneModel.imageRight,
+            acceptCGU: jeuneModel.acceptCGU || "",
+            parentAllowSNU: jeuneModel.parentAllowSNU,
             // departSejourAt: jeuneModel.departSejourAt,
             departSejourMotif: jeuneModel.departSejourMotif,
             departSejourMotifComment: jeuneModel.departSejourMotifComment,
@@ -164,6 +175,8 @@ export class JeuneMapper {
             parent1LastName: jeuneModel.parent1Nom,
             parent1Email: jeuneModel.parent1Email,
             parent1Phone: jeuneModel.parent1Telephone,
+            parent1AllowSNU: jeuneModel.parent1AllowSNU,
+            parent1AllowImageRights: jeuneModel.parent1AllowImageRights,
             // Parent 2 Information
             parent2FirstName: jeuneModel.parent2Prenom,
             parent2LastName: jeuneModel.parent2Nom,
@@ -173,6 +186,7 @@ export class JeuneMapper {
             cohortChangeReason: jeuneModel.sessionChangeReason,
             // CLE
             classeId: jeuneModel.classeId,
+            etablissementId: jeuneModel.etablissementId,
         };
     }
 }

@@ -6,6 +6,6 @@ export interface ImportReferentiel extends BasicRoute {
   params: {
     name: string;
   };
-  payload: File;
+  file: File;
   response: RouteResponseBodyV2<ReferentielImportTaskDto>;
 }

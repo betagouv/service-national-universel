@@ -60,7 +60,6 @@ import { TransactionalAdapterMongoose } from "@infra/TransactionalAdatpterMongoo
 import { ReferentielModule } from "./infra/referentiel/ReferentielModule";
 import { segmentDeLigneMongoProviders } from "./infra/sejours/phase1/segmentDeLigne/provider/SegmentDeLigneMongo.provider";
 import { demandeModificationLigneDeBusMongoProviders } from "./infra/sejours/phase1/demandeModificationLigneDeBus/provider/DemandeModificationLigneDeBusMongo.provider";
-import { PlanMarketingModule } from "@plan-marketing/plan-marketing.module";
 import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneValides.controller";
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
@@ -68,7 +67,13 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
+import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { AuthModule } from "../auth/Auth.module";
+import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
+import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
+import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
+import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 
 @Module({
     imports: [
@@ -88,7 +93,6 @@ import { AuthModule } from "../auth/Auth.module";
         NotificationModule,
         QueueModule,
         TaskModule,
-        // forwardRef(() => PlanMarketingModule),
         ReferentielModule,
         AuthModule,
     ],
@@ -113,6 +117,7 @@ import { AuthModule } from "../auth/Auth.module";
         SimulationAffectationCLEService,
         DesistementService,
         ValiderDesisterPostAffectation,
+        ValidationInscriptionEnMasseClasse,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,
@@ -133,6 +138,7 @@ import { AuthModule } from "../auth/Auth.module";
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },
+        { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
         { provide: NotificationGateway, useClass: NotificationProducer },
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
@@ -143,6 +149,9 @@ import { AuthModule } from "../auth/Auth.module";
         ...jeuneGatewayProviders,
         ...referentielUseCaseProviders,
         ...serviceProvider,
+        ...featureFlagMongoProviders,
+        FeatureFlagService,
+        ClasseImportService,
     ],
     exports: [
         ClsModule,
