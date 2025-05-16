@@ -1,16 +1,14 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
 import { HiOutlineLightningBolt, HiOutlineMail } from "react-icons/hi";
 
-import { CohortDto, isSuperAdmin, ROLES } from "snu-lib";
+import { isSuperAdmin, ROLES } from "snu-lib";
 import { NavbarControlled } from "@snu/ds/admin";
 
 import api from "@/services/api";
-import { capture } from "@/sentry";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
@@ -26,6 +24,8 @@ import OperationsTab from "./operations/OperationsTab";
 import MarketingTab from "./marketing/MarketingTab";
 import ExportContactConvocation from "./operations/actions/Inscription/ExportContactSimulation/ExportContactConvocation";
 
+import { useQuery } from "@tanstack/react-query";
+
 export default function Settings() {
   const history = useHistory();
   const { tab } = useParams<{ tab: string }>();
@@ -34,38 +34,22 @@ export default function Settings() {
 
   const currentTab = (tab || "general") as "general" | "eligibility" | "operations" | "marketing";
 
-  const [cohort, setCohort] = useState<CohortDto>();
-  const [isLoading, setIsLoading] = useState(true);
-
   const urlParams = new URLSearchParams(window.location.search);
   const currentCohortName = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort") || "") : cohorts[0].name;
 
   const hasSuperAdminAccess = isSuperAdmin(user);
   const isReadOnly = !hasSuperAdminAccess;
 
-  const getCohort = async () => {
-    try {
-      const { ok, data: reponseCohort } = await api.get("/cohort/" + encodeURIComponent(currentCohortName));
-      if (!ok) {
-        return toastr.error("Oups, une erreur est survenue lors de la récupération du séjour", "");
-      }
+  const { data: cohort, isLoading } = useQuery({
+    queryKey: ["cohort", currentCohortName],
+    queryFn: async () => {
+      const { data } = await api.get(`/cohort/${encodeURIComponent(currentCohortName)}`);
+      return data;
+    },
+    enabled: !!currentCohortName,
+  });
 
-      setCohort(reponseCohort);
-
-      setIsLoading(false);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la récupération du séjour", "");
-    }
-  };
-
-  useEffect(() => {
-    if (!currentCohortName) return;
-    setIsLoading(true);
-    getCohort();
-  }, [currentCohortName]);
-
-  if (!cohort) return null;
+  if (!cohort) return <Loader />;
 
   if (user.role !== ROLES.ADMIN) {
     return (
@@ -92,7 +76,7 @@ export default function Settings() {
       id: "general",
       title: "Général",
       leftIcon: <CiSettings size={20} className="mt-0.5" />,
-      content: <GeneralTab cohort={cohort} onCohortChange={setCohort} getCohort={getCohort} isLoading={isLoading} onLoadingChange={setIsLoading} readOnly={isReadOnly} />,
+      content: <GeneralTab cohort={cohort} readOnly={isReadOnly} />,
     },
     ...(hasSuperAdminAccess
       ? [
@@ -100,7 +84,7 @@ export default function Settings() {
             id: "eligibility" as const,
             title: "Éligibilités",
             leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
-            content: <EligibilityTab cohort={cohort} getCohort={getCohort} />,
+            content: <EligibilityTab cohort={cohort} />,
           },
           {
             id: "operations" as const,

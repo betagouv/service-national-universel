@@ -1,22 +1,118 @@
 import React from "react";
-import { Container } from "@snu/ds/admin";
+import { HiOutlineExclamation } from "react-icons/hi";
+import { Controller, useForm } from "react-hook-form";
+import { Container, Button } from "@snu/ds/admin";
 import { CohortDto } from "snu-lib";
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
+import { useUpdateCohortCle } from "@/scenes/settings/general/hooks/useCohortUpdate";
 
-type CleSettingsData = Partial<CohortDto>;
+export type SettingCleFormData = Pick<
+  CohortDto,
+  | "cleUpdateCohortForReferentRegion"
+  | "cleUpdateCohortForReferentRegionDate"
+  | "cleUpdateCohortForReferentDepartment"
+  | "cleUpdateCohortForReferentDepartmentDate"
+  | "cleDisplayCohortsForAdminCLE"
+  | "cleDisplayCohortsForAdminCLEDate"
+  | "cleDisplayCohortsForReferentClasse"
+  | "cleDisplayCohortsForReferentClasseDate"
+  | "cleUpdateCentersForReferentRegion"
+  | "cleUpdateCentersForReferentRegionDate"
+  | "cleUpdateCentersForReferentDepartment"
+  | "cleUpdateCentersForReferentDepartmentDate"
+  | "cleDisplayCentersForAdminCLE"
+  | "cleDisplayCentersForAdminCLEDate"
+  | "cleDisplayCentersForReferentClasse"
+  | "cleDisplayCentersForReferentClasseDate"
+  | "cleDisplayPDRForAdminCLE"
+  | "cleDisplayPDRForAdminCLEDate"
+  | "cleDisplayPDRForReferentClasse"
+  | "cleDisplayPDRForReferentClasseDate"
+>;
 
 type CleSettingsProps = {
-  cleSettingsData?: CleSettingsData;
-  isLoading: boolean;
+  cohort: CohortDto;
   readOnly: boolean;
-  onChange: (data: CleSettingsData) => void;
 };
 
-export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: CleSettingsProps) => {
-  const handleChange = (data: Partial<CleSettingsData>) => {
-    onChange({ ...cleSettingsData, ...data });
+export const CleSettings = ({ cohort, readOnly }: CleSettingsProps) => {
+  const {
+    control,
+    setValue,
+    watch,
+    handleSubmit,
+    formState: { errors, isDirty, isSubmitting, dirtyFields },
+    reset,
+  } = useForm<SettingCleFormData>({
+    defaultValues: {
+      cleUpdateCohortForReferentRegion: cohort.cleUpdateCohortForReferentRegion,
+      cleUpdateCohortForReferentRegionDate: {
+        from: cohort.cleUpdateCohortForReferentRegionDate?.from,
+        to: cohort.cleUpdateCohortForReferentRegionDate?.to,
+      },
+      cleUpdateCohortForReferentDepartment: cohort.cleUpdateCohortForReferentDepartment,
+      cleUpdateCohortForReferentDepartmentDate: {
+        from: cohort.cleUpdateCohortForReferentDepartmentDate?.from,
+        to: cohort.cleUpdateCohortForReferentDepartmentDate?.to,
+      },
+      cleDisplayCohortsForAdminCLE: cohort.cleDisplayCohortsForAdminCLE,
+      cleDisplayCohortsForAdminCLEDate: {
+        from: cohort.cleDisplayCohortsForAdminCLEDate?.from,
+        to: cohort.cleDisplayCohortsForAdminCLEDate?.to,
+      },
+      cleDisplayCohortsForReferentClasse: cohort.cleDisplayCohortsForReferentClasse,
+      cleDisplayCohortsForReferentClasseDate: {
+        from: cohort.cleDisplayCohortsForReferentClasseDate?.from,
+        to: cohort.cleDisplayCohortsForReferentClasseDate?.to,
+      },
+      cleUpdateCentersForReferentRegion: cohort.cleUpdateCentersForReferentRegion,
+      cleUpdateCentersForReferentRegionDate: {
+        from: cohort.cleUpdateCentersForReferentRegionDate?.from,
+        to: cohort.cleUpdateCentersForReferentRegionDate?.to,
+      },
+      cleUpdateCentersForReferentDepartment: cohort.cleUpdateCentersForReferentDepartment,
+      cleUpdateCentersForReferentDepartmentDate: {
+        from: cohort.cleUpdateCentersForReferentDepartmentDate?.from,
+        to: cohort.cleUpdateCentersForReferentDepartmentDate?.to,
+      },
+      cleDisplayCentersForAdminCLE: cohort.cleDisplayCentersForAdminCLE,
+      cleDisplayCentersForAdminCLEDate: {
+        from: cohort.cleDisplayCentersForAdminCLEDate?.from,
+        to: cohort.cleDisplayCentersForAdminCLEDate?.to,
+      },
+      cleDisplayCentersForReferentClasse: cohort.cleDisplayCentersForReferentClasse,
+      cleDisplayCentersForReferentClasseDate: {
+        from: cohort.cleDisplayCentersForReferentClasseDate?.from,
+        to: cohort.cleDisplayCentersForReferentClasseDate?.to,
+      },
+      cleDisplayPDRForAdminCLE: cohort.cleDisplayPDRForAdminCLE,
+      cleDisplayPDRForAdminCLEDate: {
+        from: cohort.cleDisplayPDRForAdminCLEDate?.from,
+        to: cohort.cleDisplayPDRForAdminCLEDate?.to,
+      },
+      cleDisplayPDRForReferentClasse: cohort.cleDisplayPDRForReferentClasse,
+      cleDisplayPDRForReferentClasseDate: {
+        from: cohort.cleDisplayPDRForReferentClasseDate?.from,
+        to: cohort.cleDisplayPDRForReferentClasseDate?.to,
+      },
+    },
+    mode: "onChange",
+  });
+  const isNotSaved = isDirty && !isSubmitting;
+  const updateCohorteCleMutation = useUpdateCohortCle();
+
+  const handleOnCancel = () => {
+    reset();
   };
 
+  const handleConfirmSubmit = (data: SettingCleFormData) => {
+    if (!cohort._id) return;
+    updateCohorteCleMutation.mutate({
+      data,
+      cohortId: cohort._id,
+    });
+    reset(data);
+  };
   return (
     <Container title="Classes engagées">
       <div className="flex w-full">
@@ -25,86 +121,118 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
             <div className="flex items-center gap-2">
               <p className="text-xs  font-medium text-gray-900">Modification des cohortes </p>
             </div>
-            <ToggleDate
-              label="Référents régionaux"
-              disabled={isLoading}
-              readOnly={readOnly}
-              value={!!cleSettingsData?.cleUpdateCohortForReferentRegion}
-              onChange={() => handleChange({ cleUpdateCohortForReferentRegion: !cleSettingsData?.cleUpdateCohortForReferentRegion })}
-              range={{
-                from: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.from || null,
-                to: cleSettingsData?.cleUpdateCohortForReferentRegionDate?.to || null,
-              }}
-              onChangeRange={(range) => {
-                handleChange({
-                  cleUpdateCohortForReferentRegionDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
-                  },
-                });
-              }}
+            <Controller
+              name="cleUpdateCohortForReferentRegion"
+              control={control}
+              render={({ field }) => (
+                <ToggleDate
+                  label="Référents régionaux"
+                  disabled={isSubmitting}
+                  readOnly={readOnly}
+                  value={!!field.value}
+                  onChange={(value) => field.onChange(value)}
+                  range={{
+                    from: watch("cleUpdateCohortForReferentRegionDate.from") || null,
+                    to: watch("cleUpdateCohortForReferentRegionDate.to") || null,
+                  }}
+                  onChangeRange={(range) => {
+                    setValue(
+                      "cleUpdateCohortForReferentRegionDate",
+                      {
+                        from: range.from ? new Date(range.from).toISOString() : null,
+                        to: range.to ? new Date(range.to).toISOString() : null,
+                      },
+                      { shouldDirty: true },
+                    );
+                  }}
+                />
+              )}
             />
-            <ToggleDate
-              label="Référents départementaux"
-              disabled={isLoading}
-              readOnly={readOnly}
-              value={!!cleSettingsData?.cleUpdateCohortForReferentDepartment}
-              onChange={() => handleChange({ cleUpdateCohortForReferentDepartment: !cleSettingsData?.cleUpdateCohortForReferentDepartment })}
-              range={{
-                from: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.from || null,
-                to: cleSettingsData?.cleUpdateCohortForReferentDepartmentDate?.to || null,
-              }}
-              onChangeRange={(range) => {
-                handleChange({
-                  cleUpdateCohortForReferentDepartmentDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
-                  },
-                });
-              }}
+            <Controller
+              name="cleUpdateCohortForReferentDepartment"
+              control={control}
+              render={({ field }) => (
+                <ToggleDate
+                  label="Référents départementaux"
+                  disabled={isSubmitting}
+                  readOnly={readOnly}
+                  value={!!field.value}
+                  onChange={(value) => field.onChange(value)}
+                  range={{
+                    from: watch("cleUpdateCohortForReferentDepartmentDate.from") || null,
+                    to: watch("cleUpdateCohortForReferentDepartmentDate.to") || null,
+                  }}
+                  onChangeRange={(range) => {
+                    setValue(
+                      "cleUpdateCohortForReferentDepartmentDate",
+                      {
+                        from: range.from ? new Date(range.from).toISOString() : null,
+                        to: range.to ? new Date(range.to).toISOString() : null,
+                      },
+                      { shouldDirty: true },
+                    );
+                  }}
+                />
+              )}
             />
           </div>
           <div className="mt-2 flex flex-col gap-3">
             <div className="flex items-center gap-2">
               <p className="text-xs  font-medium text-gray-900">Affichage des cohortes </p>
             </div>
-            <ToggleDate
-              label="Admin CLE"
-              disabled={isLoading}
-              readOnly={readOnly}
-              value={!!cleSettingsData?.cleDisplayCohortsForAdminCLE}
-              onChange={() => handleChange({ cleDisplayCohortsForAdminCLE: !cleSettingsData?.cleDisplayCohortsForAdminCLE })}
-              range={{
-                from: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.from || null,
-                to: cleSettingsData?.cleDisplayCohortsForAdminCLEDate?.to || null,
-              }}
-              onChangeRange={(range) => {
-                handleChange({
-                  cleDisplayCohortsForAdminCLEDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
-                  },
-                });
-              }}
+            <Controller
+              name="cleDisplayCohortsForAdminCLE"
+              control={control}
+              render={({ field }) => (
+                <ToggleDate
+                  label="Admin CLE"
+                  disabled={isSubmitting}
+                  readOnly={readOnly}
+                  value={!!field.value}
+                  onChange={(value) => field.onChange(value)}
+                  range={{
+                    from: watch("cleDisplayCohortsForAdminCLEDate.from") || null,
+                    to: watch("cleDisplayCohortsForAdminCLEDate.to") || null,
+                  }}
+                  onChangeRange={(range) => {
+                    setValue(
+                      "cleDisplayCohortsForAdminCLEDate",
+                      {
+                        from: range.from ? new Date(range.from).toISOString() : null,
+                        to: range.to ? new Date(range.to).toISOString() : null,
+                      },
+                      { shouldDirty: true },
+                    );
+                  }}
+                />
+              )}
             />
-            <ToggleDate
-              label="Référents de classe"
-              disabled={isLoading}
-              readOnly={readOnly}
-              value={!!cleSettingsData?.cleDisplayCohortsForReferentClasse}
-              onChange={() => handleChange({ cleDisplayCohortsForReferentClasse: !cleSettingsData?.cleDisplayCohortsForReferentClasse })}
-              range={{
-                from: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.from || null,
-                to: cleSettingsData?.cleDisplayCohortsForReferentClasseDate?.to || null,
-              }}
-              onChangeRange={(range) => {
-                handleChange({
-                  cleDisplayCohortsForReferentClasseDate: {
-                    from: range.from ? new Date(range.from).toISOString() : null,
-                    to: range.to ? new Date(range.to).toISOString() : null,
-                  },
-                });
-              }}
+            <Controller
+              name="cleDisplayCohortsForReferentClasse"
+              control={control}
+              render={({ field }) => (
+                <ToggleDate
+                  label="Référents de classe"
+                  disabled={isSubmitting}
+                  readOnly={readOnly}
+                  value={!!field.value}
+                  onChange={(value) => field.onChange(value)}
+                  range={{
+                    from: watch("cleDisplayCohortsForReferentClasseDate.from") || null,
+                    to: watch("cleDisplayCohortsForReferentClasseDate.to") || null,
+                  }}
+                  onChangeRange={(range) => {
+                    setValue(
+                      "cleDisplayCohortsForReferentClasseDate",
+                      {
+                        from: range.from ? new Date(range.from).toISOString() : null,
+                        to: range.to ? new Date(range.to).toISOString() : null,
+                      },
+                      { shouldDirty: true },
+                    );
+                  }}
+                />
+              )}
             />
           </div>
         </div>
@@ -117,131 +245,196 @@ export const CleSettings = ({ cleSettingsData, isLoading, readOnly, onChange }: 
               <div className="flex items-center gap-2">
                 <p className="text-xs  font-medium text-gray-900">Modification des centres </p>
               </div>
-              <ToggleDate
-                label="Référent régionaux"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleUpdateCentersForReferentRegion}
-                onChange={() => handleChange({ cleUpdateCentersForReferentRegion: !cleSettingsData?.cleUpdateCentersForReferentRegion })}
-                range={{
-                  from: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.from || null,
-                  to: cleSettingsData?.cleUpdateCentersForReferentRegionDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleUpdateCentersForReferentRegionDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleUpdateCentersForReferentRegion"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Référent régionaux"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleUpdateCentersForReferentRegionDate.from") || null,
+                      to: watch("cleUpdateCentersForReferentRegionDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleUpdateCentersForReferentRegionDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
-              <ToggleDate
-                label="Référent départementaux"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleUpdateCentersForReferentDepartment}
-                onChange={() => handleChange({ cleUpdateCentersForReferentDepartment: !cleSettingsData?.cleUpdateCentersForReferentDepartment })}
-                range={{
-                  from: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.from || null,
-                  to: cleSettingsData?.cleUpdateCentersForReferentDepartmentDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleUpdateCentersForReferentDepartmentDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleUpdateCentersForReferentDepartment"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Référents départementaux"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleUpdateCentersForReferentDepartmentDate.from") || null,
+                      to: watch("cleUpdateCentersForReferentDepartmentDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleUpdateCentersForReferentDepartmentDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="mt-2 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <p className="text-xs  font-medium text-gray-900">Affichage des centres </p>
               </div>
-              <ToggleDate
-                label="Admin CLE"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleDisplayCentersForAdminCLE}
-                onChange={() => handleChange({ cleDisplayCentersForAdminCLE: !cleSettingsData?.cleDisplayCentersForAdminCLE })}
-                range={{
-                  from: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.from || null,
-                  to: cleSettingsData?.cleDisplayCentersForAdminCLEDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleDisplayCentersForAdminCLEDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleDisplayCentersForAdminCLE"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Admin CLE"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleDisplayCentersForAdminCLEDate.from") || null,
+                      to: watch("cleDisplayCentersForAdminCLEDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleDisplayCentersForAdminCLEDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
-              <ToggleDate
-                label="Référents de classe"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleDisplayCentersForReferentClasse}
-                onChange={() => handleChange({ cleDisplayCentersForReferentClasse: !cleSettingsData?.cleDisplayCentersForReferentClasse })}
-                range={{
-                  from: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.from || null,
-                  to: cleSettingsData?.cleDisplayCentersForReferentClasseDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleDisplayCentersForReferentClasseDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleDisplayCentersForReferentClasse"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Référents de classe"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleDisplayCentersForReferentClasseDate.from") || null,
+                      to: watch("cleDisplayCentersForReferentClasseDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleDisplayCentersForReferentClasseDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
             </div>
             <div className="mt-2 flex flex-col gap-3">
               <div className="flex items-center gap-2">
                 <p className="text-xs  font-medium text-gray-900">Affichage des points de rassemblement </p>
               </div>
-              <ToggleDate
-                label="Admin CLE"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleDisplayPDRForAdminCLE}
-                onChange={() => handleChange({ cleDisplayPDRForAdminCLE: !cleSettingsData?.cleDisplayPDRForAdminCLE })}
-                range={{
-                  from: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.from || null,
-                  to: cleSettingsData?.cleDisplayPDRForAdminCLEDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleDisplayPDRForAdminCLEDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleDisplayPDRForAdminCLE"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Admin CLE"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleDisplayPDRForAdminCLEDate.from") || null,
+                      to: watch("cleDisplayPDRForAdminCLEDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleDisplayPDRForAdminCLEDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
-              <ToggleDate
-                label="Référents de classe"
-                disabled={isLoading}
-                readOnly={readOnly}
-                value={!!cleSettingsData?.cleDisplayPDRForReferentClasse}
-                onChange={() => handleChange({ cleDisplayPDRForReferentClasse: !cleSettingsData?.cleDisplayPDRForReferentClasse })}
-                range={{
-                  from: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.from || null,
-                  to: cleSettingsData?.cleDisplayPDRForReferentClasseDate?.to || null,
-                }}
-                onChangeRange={(range) => {
-                  handleChange({
-                    cleDisplayPDRForReferentClasseDate: {
-                      from: range.from ? new Date(range.from).toISOString() : null,
-                      to: range.to ? new Date(range.to).toISOString() : null,
-                    },
-                  });
-                }}
+              <Controller
+                name="cleDisplayPDRForReferentClasse"
+                control={control}
+                render={({ field }) => (
+                  <ToggleDate
+                    label="Référents de classe"
+                    disabled={isSubmitting}
+                    readOnly={readOnly}
+                    value={!!field.value}
+                    onChange={(value) => field.onChange(value)}
+                    range={{
+                      from: watch("cleDisplayPDRForReferentClasseDate.from") || null,
+                      to: watch("cleDisplayPDRForReferentClasseDate.to") || null,
+                    }}
+                    onChangeRange={(range) => {
+                      setValue(
+                        "cleDisplayPDRForReferentClasseDate",
+                        {
+                          from: range.from ? new Date(range.from).toISOString() : null,
+                          to: range.to ? new Date(range.to).toISOString() : null,
+                        },
+                        { shouldDirty: true },
+                      );
+                    }}
+                  />
+                )}
               />
             </div>
+          </div>
+          <hr className="border-t border-gray-200" />
+          <div className="flex justify-end mt-4 gap-2">
+            {isNotSaved && (
+              <div className="flex items-center gap-2 text-gray-500">
+                <HiOutlineExclamation className="w-5 h-5" />
+                <span>Non enregistrée</span>
+              </div>
+            )}
+            {isDirty ? <Button title="Annuler" type="secondary" className="flex justify-center" onClick={handleOnCancel} disabled={isSubmitting} /> : null}
+            <Button
+              disabled={isSubmitting || !isDirty}
+              type="wired"
+              className="flex items-center gap-2 px-6 py-2 rounded-md"
+              title="Enregistrer"
+              onClick={handleSubmit(handleConfirmSubmit)}
+            />
           </div>
         </div>
       </div>

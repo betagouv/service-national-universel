@@ -4,7 +4,7 @@ import { formatLongDateFR, translateAction } from "snu-lib";
 import { translateHistory, translateModelFields } from "../../../../utils";
 import UserCard from "../../../UserCard";
 import ReactTooltip from "react-tooltip";
-import { getAuthor } from "@/utils";
+import { getAuthorTooltip } from "@/utils";
 
 export default function Event({ e, index, model }) {
   const tooltipActionId = `tooltip-action-${index}`;
@@ -40,7 +40,7 @@ export default function Event({ e, index, model }) {
       </div>
       <div data-tip data-for={tooltipAuteurId} className="w-[25%]">
         <ReactTooltip id={tooltipAuteurId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
-          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthor(e.user)}</div>
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthorTooltip(e.user)}</div>
         </ReactTooltip>
         <UserCard user={e.user} />
       </div>

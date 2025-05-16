@@ -446,8 +446,22 @@ export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.n
 
 export const desktopBreakpoint = 1024;
 
-export function getAuthor(user) {
-  if (!user) return "Auteur inconnu";
-  if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
-  if (user.firstName && !user.lastName) return user.firstName;
+export function getAuthorTooltip(user) {
+  function getRole(user) {
+    if (!user) return "";
+    if (user.role) {
+      return translate(user.role);
+    } else {
+      return "Script";
+    }
+  }
+  function getFullName(user) {
+    if (!user) return "Auteur inconnu";
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
+    if (user.firstName && !user.lastName) return user.firstName;
+  }
+
+  const fullName = getFullName(user);
+  const role = getRole(user);
+  return `${fullName} ${role}`;
 }

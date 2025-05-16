@@ -8,7 +8,7 @@ import { formatLongDateFR, translateAction, ROLES } from "snu-lib";
 import { translateHistory, translateModelFields } from "@/utils";
 import UserCard from "@/components/UserCard";
 import { AuthState } from "@/redux/auth/reducer";
-import { getAuthor } from "@/utils";
+import { getAuthorTooltip } from "@/utils";
 
 import { ClasseYoungPatchesType, ClassePatchesType } from "./types";
 
@@ -107,7 +107,7 @@ export default function HistoryRow({ patch, type }: HistoryRowProps) {
           </td>
           <td data-tip data-for={tooltipAuteurIds[index]} className="w-[23%]">
             <ReactTooltip id={tooltipAuteurIds[index]} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
-              <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthor(patch.user)}</div>
+              <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthorTooltip(patch.user)}</div>
             </ReactTooltip>
             <UserCard user={patch.user} />
           </td>

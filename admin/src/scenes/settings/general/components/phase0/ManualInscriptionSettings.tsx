@@ -8,21 +8,14 @@ import { getManualInscriptionTogglesByCohortType } from "./getManualInscriptionT
 
 interface ManualInscriptionSettingsProps {
   cohort: CohortDto;
-  setCohort: React.Dispatch<React.SetStateAction<CohortDto>>;
+  control: any;
   isLoading: boolean;
   readOnly: boolean;
 }
 
-export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps> = ({ cohort, setCohort, isLoading, readOnly }) => {
-  const handleToggleChange = useCallback(
-    (field: keyof CohortDto) => {
-      setCohort((prev) => ({ ...prev, [field]: !prev[field] }));
-    },
-    [setCohort],
-  );
-
+export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps> = ({ cohort, control, isLoading, readOnly }) => {
   const renderedManualInscriptionTogglesByCohortType = useMemo(
-    () => getManualInscriptionTogglesByCohortType({ cohort, handleToggleChange, isLoading, readOnly }),
+    () => getManualInscriptionTogglesByCohortType({ cohort, control, isLoading, readOnly }),
     // Disabled exhaustive-deps because we don't want to re-render the component when the all props data changes only specific fields should trigger a re-render
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -31,7 +24,6 @@ export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps>
       cohort.inscriptionOpenForReferentDepartment,
       cohort.inscriptionOpenForReferentClasse,
       cohort.inscriptionOpenForAdministrateurCle,
-      handleToggleChange,
       isLoading,
       readOnly,
     ],
