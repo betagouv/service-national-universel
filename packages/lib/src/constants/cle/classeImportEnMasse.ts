@@ -6,14 +6,15 @@ export enum CLASSE_IMPORT_EN_MASSE_ERRORS {
   TOO_MANY_JEUNES = "TOO_MANY_JEUNES",
   INVALID_FORMAT = "INVALID_FORMAT",
   ALREADY_EXIST = "ALREADY_EXIST",
+  DOUBLON = "DOUBLON",
   UAI_NOT_MATCH = "UAI_NOT_MATCH",
 }
 
 export enum CLASSE_IMPORT_EN_MASSE_COLUMNS {
-  NOM = "Nom",
-  PRENOM = "Prénom",
+  NOM = "Nom de famille",
+  PRENOM = "Prénom 1",
   DATE_DE_NAISSANCE = "Date de naissance",
-  GENRE = "Genre",
+  GENRE = "Sexe",
   UAI = "UAI", // TODO: à supprimer en fonction de la RG
 }
 

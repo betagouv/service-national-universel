@@ -14,6 +14,7 @@ import { EtablissementGateway } from "../../../etablissement/Etablissement.gatew
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 import { ClasseModel } from "../../Classe.model";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
+
 describe("ValidationFileInscriptionEnMasseClasse", () => {
     let validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse;
     let fileGateway: jest.Mocked<FileGateway>;
@@ -87,8 +88,8 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if there is missing columns", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
                 "Date de naissance": "2010-01-01",
             },
         ]);
@@ -109,9 +110,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the date format is invalid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "M",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "M",
                 "Date de naissance": "2010-01-01",
                 UAI: "12345678",
             },
@@ -133,9 +134,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the value format is invalid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "X",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "X",
                 "Date de naissance": "01/01/2010",
                 UAI: "12345678",
             },
@@ -157,9 +158,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the minLength format is invalid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "F",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "F",
                 "Date de naissance": "01/01/2010",
                 UAI: "1234567",
             },
@@ -181,9 +182,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the maxLength format is invalid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "F",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "F",
                 "Date de naissance": "01/01/2010",
                 UAI: "1234567890",
             },
@@ -205,9 +206,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should succeed if the format is valid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "M",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "M",
                 "Date de naissance": "01/01/2010",
             },
         ]);
@@ -232,9 +233,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
         const results = await validationInscriptionEnMasseClasse.execute(
             "classeId",
             {
-                Nom: "nom",
-                Prénom: "prenom",
-                Genre: "genre",
+                ["Nom de famille"]: "nom",
+                ["Prénom 1"]: "prenom",
+                Sexe: "genre",
                 "Date de naissance": "dateNaissance",
             },
             mockFile,
@@ -257,9 +258,9 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
     it("should return an error if the French date format is invalid", async () => {
         fileGateway.parseXLS.mockResolvedValueOnce([
             {
-                Nom: "John",
-                Prénom: "Doe",
-                Genre: "M",
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "M",
                 "Date de naissance": "01/02/09",
                 UAI: "12345678",
             },
@@ -276,5 +277,23 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
                     error.column === CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE,
             ),
         ).toBeDefined();
+    });
+
+    it("should return an error if student given twice", async () => {
+        const jeune = {
+            ["Nom de famille"]: "John",
+            ["Prénom 1"]: "Doe",
+            Sexe: "M",
+            "Date de naissance": "01/01/2010",
+            UAI: "12345678",
+        };
+
+        fileGateway.parseXLS.mockResolvedValueOnce([jeune, jeune]);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
+        expect(results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.DOUBLON)).toBeDefined();
     });
 });

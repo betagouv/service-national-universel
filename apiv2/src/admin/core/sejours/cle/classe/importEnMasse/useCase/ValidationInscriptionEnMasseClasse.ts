@@ -60,7 +60,9 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
             };
         }
 
-        if (dataToImport.length > 100) {
+        // Lorsque l’effectif ajusté est renseigné, vérifier que le nb d’élèves inscrits après l’import est inférieur ou égale à l’effectif ajusté.
+        const maxJeune = classe.placesTotal || 100;
+        if (dataToImport.length > maxJeune) {
             return {
                 isValid: false,
                 validRowsCount: 0,
@@ -204,6 +206,25 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                     });
                 }
                 // check doublons
+                const doublons = dataToImport.filter(
+                    (fileRow) =>
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM] === fileRow[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM] &&
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM] === fileRow[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM] &&
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE] ===
+                            fileRow[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE] &&
+                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE] === fileRow[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE],
+                );
+                if (doublons.length > 1) {
+                    errors.push({
+                        column: CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM,
+                        code: CLASSE_IMPORT_EN_MASSE_ERRORS.DOUBLON,
+                        message: `Le jeune ${row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]} ${
+                            row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]
+                        } existe plusieurs fois dans le fichier.`,
+                        line,
+                    });
+                }
+                // check already exist
                 try {
                     const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
                         row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],

@@ -25,7 +25,7 @@ export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onR
       <p className="text-gray-600 mt-2">
         Des colonnes du fichier n'ont pas été reconnues correctement.
         <br />
-        Veuillez associer chaque colonne de votre fichier au format attendu.
+        Veuillez associer chaque colonne de votre fichier à l'information attendue.
       </p>
     </div>
   );
@@ -45,7 +45,7 @@ export const MappingModal: React.FC<MappingModalProps> = ({ isOpen, onClose, onR
             />
             {isColumnAlreadyMapped(fileColumnName) && (
               <div className="text-red-500 text-sm absolute top-full left-0">
-                La colonne <span className="font-bold">{fileColumnName}</span> est déjà mappée.
+                La colonne <span className="font-bold">{fileColumnName}</span> est déjà associée.
               </div>
             )}
           </div>
