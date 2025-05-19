@@ -93,7 +93,7 @@ export default function InfosAffectations({ cohort, readOnly }: AffectationsProp
   };
 
   return (
-    <Container>
+    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
         <div className="flex">
@@ -301,7 +301,8 @@ export default function InfosAffectations({ cohort, readOnly }: AffectationsProp
                 control={control}
                 render={({ field }) => (
                   <ToggleDate
-                    label="Chefs de centre"
+                    label="Chefs de centre et leurs équipes"
+                    tooltipText="Donne également accès au pointage aux chefs de centre adjoint et aux référents sanitaires."
                     disabled={isSubmitting}
                     readOnly={readOnly}
                     value={!!field.value}
@@ -399,7 +400,7 @@ export default function InfosAffectations({ cohort, readOnly }: AffectationsProp
           </div>
         </div>
       </div>
-      <hr className="border-t border-gray-200" />
+      <hr className="border-t border-gray-200 mt-4" />
       <div className="flex justify-end mt-4 gap-2">
         {isNotSaved && (
           <div className="flex items-center gap-2 text-gray-500">

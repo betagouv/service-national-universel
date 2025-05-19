@@ -88,7 +88,7 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
     reset(data);
   };
   return (
-    <Container>
+    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
         <div className="flex">
@@ -306,7 +306,7 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
           </div>
         </div>
       </div>
-      <hr className="border-t border-gray-200" />
+      <hr className="border-t border-gray-200 mt-4" />
       <div className="flex justify-end mt-4 gap-2">
         {isNotSaved && (
           <div className="flex items-center gap-2 text-gray-500">

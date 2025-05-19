@@ -76,7 +76,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   };
 
   return (
-    <Container>
+    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
       <div className="flex flex-col w-full gap-8">
         <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
         <div className="flex">
@@ -335,7 +335,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
           </div>
         </div>
       </div>
-      <hr className="border-t border-gray-200" />
+      <hr className="border-t border-gray-200 mt-4" />
       <div className="flex justify-end mt-4 gap-2">
         {isNotSaved && (
           <div className="flex items-center gap-2 text-gray-500">
