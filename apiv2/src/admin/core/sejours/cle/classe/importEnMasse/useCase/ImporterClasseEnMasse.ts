@@ -9,20 +9,20 @@ import { UseCase } from "@shared/core/UseCase";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import { ClasseService } from "../../Classe.service";
 import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 
 @Injectable()
 export class ImporterClasseEnMasse implements UseCase<void> {
     private readonly logger: Logger = new Logger(ImporterClasseEnMasse.name);
     constructor(
         private readonly classeService: ClasseService,
-        @Inject(JeuneGateway)
-        private readonly jeuneGateway: JeuneGateway,
         @Inject(FileGateway)
         private readonly fileGateway: FileGateway,
         @Inject(ClockGateway)
         private readonly clockGateway: ClockGateway,
         @Inject(CryptoGateway)
         private readonly cryptoGateway: CryptoGateway,
+        private readonly jeuneService: JeuneService,
     ) {}
     async execute(parameters: ImportClasseEnMasseTaskParameters | undefined): Promise<void> {
         this.logger.log(
@@ -81,10 +81,10 @@ export class ImporterClasseEnMasse implements UseCase<void> {
                 source: YOUNG_SOURCE.CLE,
             };
             this.logger.log(`Création du jeune: ${jeuneToCreate.prenom} ${jeuneToCreate.nom} ${dateNaissance}`);
-            const jeuneCreated = await this.jeuneGateway.create(jeuneToCreate);
+            const jeuneCreated = await this.jeuneService.create(jeuneToCreate);
 
             // TODO : passer statut à validated pour la data
-            await this.jeuneGateway.update({
+            await this.jeuneService.update({
                 ...jeuneCreated,
                 statut: YOUNG_STATUS.VALIDATED,
             });

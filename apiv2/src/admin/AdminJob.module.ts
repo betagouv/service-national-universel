@@ -71,6 +71,9 @@ import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desiste
 import { ImporterClasseEnMasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
 import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
+import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
+import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
 
 @Module({
     imports: [
@@ -148,6 +151,7 @@ import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
         AdminTaskImportReferentielSelectorService,
         ImporterClasseEnMasse,
         ClasseService,
+        JeuneService,
     ],
 })
 export class AdminJobModule {

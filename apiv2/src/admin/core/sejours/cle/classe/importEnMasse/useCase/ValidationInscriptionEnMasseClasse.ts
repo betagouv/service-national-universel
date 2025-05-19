@@ -60,9 +60,9 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
             };
         }
 
-        // Lorsque l’effectif ajusté est renseigné, vérifier que le nb d’élèves inscrits après l’import est inférieur ou égale à l’effectif ajusté.
+        // Lorsque l’effectif ajusté est renseigné, vérifier que le nb d’élèves inscrits après l’import est inférieur ou égal à l’effectif ajusté.
         const maxJeune = classe.placesTotal || 100;
-        if (dataToImport.length > maxJeune) {
+        if (dataToImport.length + classe.placesPrises > maxJeune) {
             return {
                 isValid: false,
                 validRowsCount: 0,

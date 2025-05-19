@@ -1,12 +1,13 @@
-import { Inject, Injectable } from "@nestjs/common";
+import { Inject, Injectable, Logger } from "@nestjs/common";
 
-import { TaskName, TaskStatus, CLASSE_IMPORT_EN_MASSE_COLUMNS } from "snu-lib";
+import { TaskName, TaskStatus, CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_STATUS } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 
 import { ClasseGateway } from "./Classe.gateway";
 import { ClasseModel } from "./Classe.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { JeuneGateway } from "../../jeune/Jeune.gateway";
 
 export type StatusImportInscriptionEnMasse = {
     status: TaskStatus | "NONE";
@@ -16,9 +17,11 @@ export type StatusImportInscriptionEnMasse = {
 
 @Injectable()
 export class ClasseService {
+    private readonly logger = new Logger(ClasseService.name);
     constructor(
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
+        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
     ) {}
 
     async getStatusImportInscriptionEnMasse(classeId: string): Promise<StatusImportInscriptionEnMasse> {
@@ -65,5 +68,16 @@ export class ClasseService {
                 throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, key);
             }
         });
+    }
+
+    async updatePlacesPrises(classeId?: string): Promise<void> {
+        if (!classeId) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        const jeunes = await this.jeuneGateway.findByClasseId(classeId);
+        const jeunesInscrits = jeunes.filter((jeune) => jeune.statut === YOUNG_STATUS.VALIDATED);
+        const placesPrises = jeunesInscrits.length;
+        this.logger.debug(`Updating places prises for classe ${classeId} to ${placesPrises}`);
+        await this.classeGateway.updatePlacesPrises(classeId, placesPrises);
     }
 }
