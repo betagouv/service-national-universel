@@ -1,11 +1,11 @@
 import React from "react";
-import { useSelector } from "react-redux";
+import useAuth from "@/services/useAuth";
 import Checkbox from "../../../../components/forms/inputs/Checkbox";
 import Textarea from "../../../../components/forms/inputs/Textarea";
 import FormDescription from "../../components/FormDescription";
 
 const AccountSpecialSituationsPage = () => {
-  const young = useSelector((state) => state.Auth.young);
+  const { young } = useAuth();
 
   const values = {
     handicap: (young.handicap || "false") === "true" ? true : false,
@@ -33,7 +33,7 @@ const AccountSpecialSituationsPage = () => {
             <Checkbox label="Je suis bénéficiaire d'un Projet d'accueil individualisé (PAI)" name="paiBeneficiary" checked={values.paiBeneficiary} disabled />
             <Checkbox label="J'ai des allergies ou intolérances alimentaires" name="allergies" checked={values.allergies} disabled />
             <Checkbox label="J'ai besoin d'aménagements spécifiques" name="specificAmenagment" checked={values.specificAmenagment} disabled />
-            {values.specificAmenagment === "true" && values.specificAmenagmentType !== "Contenu supprimé" && (
+            {values.specificAmenagment && values.specificAmenagmentType !== "Contenu supprimé" && (
               <Textarea label="Nature de cet aménagement spécifique" name="specificAmenagmentType" checked={values.specificAmenagmentType} disabled />
             )}
             <Checkbox label="J'ai besoin d'un aménagement pour mobilité réduite" name="reducedMobilityAccess" checked={values.reducedMobilityAccess} disabled />

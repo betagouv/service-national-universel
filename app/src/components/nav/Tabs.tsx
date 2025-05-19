@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import usePageLoad from "../../hooks/usePageLoad";
+import { Link } from "react-router-dom";
 
 // tabs should be an array of object using the following schema:
 // {
@@ -9,17 +9,12 @@ import usePageLoad from "../../hooks/usePageLoad";
 //    ...rest
 // }
 
-const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () => {} }) => {
+const Tabs = ({ tabs, selectedTabKey = "", className = "" }) => {
   const activeTabKey = selectedTabKey || tabs[0]?.key || null;
   const [tabUnderlineWidth, setTabUnderlineWidth] = useState(0);
   const [tabUnderlineOffsetLeft, setTabUnderlineOffsetLeft] = useState(0);
-  const isPageLoaded = usePageLoad();
 
   const tabsRef = useRef({});
-
-  const handleChangeTab = (key) => () => {
-    onChange(key);
-  };
 
   const setTabPosition = () => {
     const currentTab = tabsRef.current[activeTabKey];
@@ -28,22 +23,20 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
   };
 
   useEffect(() => {
-    if (isPageLoaded) {
-      setTabPosition();
-      window.addEventListener("resize", setTabPosition);
-      return () => {
-        window.removeEventListener("resize", setTabPosition);
-      };
-    }
-  }, [activeTabKey, isPageLoaded]);
+    setTabPosition();
+    window.addEventListener("resize", setTabPosition);
+    return () => {
+      window.removeEventListener("resize", setTabPosition);
+    };
+  }, [activeTabKey]);
 
   return (
     <nav className={`scrollbar-hide relative flex flex-nowrap overflow-x-auto border-b-[1px] border-gray-200 ${className}`}>
       {tabs.map(({ className: tabClassName = "", title, key, ...rest }) => {
         return (
-          <button
+          <Link
             key={key}
-            onClick={handleChangeTab(key)}
+            to={key}
             ref={(el) => (tabsRef.current[key] = el)}
             style={{
               paddingBottom: "1rem",
@@ -55,7 +48,7 @@ const Tabs = ({ tabs = [], selectedTabKey = "", className = "", onChange = () =>
             } ${tabClassName}`}
             {...rest}>
             {title}
-          </button>
+          </Link>
         );
       })}
       <span className="absolute bottom-0 block h-[2px] bg-blue-600 transition-all duration-300" style={{ left: tabUnderlineOffsetLeft, width: tabUnderlineWidth }} />
