@@ -30,6 +30,7 @@ import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmD
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";
 import { signinAs } from "@/utils/signinAs";
+import { isResponsableDeCentre } from "@/utils";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();
@@ -109,7 +110,7 @@ export default function VolontairePanel({ onChange, value }) {
               <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
-              {user.role !== ROLES.HEAD_CENTER && (
+              {!isResponsableDeCentre(user) && (
                 <>
                   <button onClick={() => onPrendreLaPlace(young._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />

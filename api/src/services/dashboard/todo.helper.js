@@ -1,6 +1,6 @@
 const { ROLES, YOUNG_SOURCE } = require("snu-lib");
 const helpers = {};
-const { SessionPhase1Model } = require("../../models");
+const { SessionPhase1Model, ReferentModel } = require("../../models");
 
 helpers.queryFromFilter = (role, region, department, filter, { regionField = "region.keyword", departmentField = "department.keyword" } = {}) => {
   const body = {
@@ -28,13 +28,20 @@ helpers.buildFilterContext = async (user, cohorts, index) => {
 
   switch (user.role) {
     case ROLES.HEAD_CENTER:
+    case ROLES.HEAD_CENTER_ADJOINT:
+    case ROLES.REFERENT_SANITAIRE:
       return contextForHeadCenter(user, cohorts, index);
     default:
       return null;
   }
 
   async function contextForHeadCenter(user, cohorts, index) {
-    const session = await SessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    let session = null;
+    if (user.role === ROLES.HEAD_CENTER) {
+      session = await SessionPhase1Model.findOne({ headCenterId: user._id, cohort: cohorts });
+    } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+      session = await SessionPhase1Model.findOne({ adjointsIds: { $in: [user._id] }, cohort: cohorts });
+    }
     if (!session?._id) {
       return null;
     } else {

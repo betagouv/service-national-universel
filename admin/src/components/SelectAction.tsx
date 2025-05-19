@@ -1,5 +1,6 @@
 import React, { ReactElement } from "react";
 import ChevronDown from "../assets/icons/ChevronDown";
+import ReactTooltip, { TooltipProps } from "react-tooltip";
 
 type OptionGroupItem = {
   key: string;
@@ -19,6 +20,9 @@ interface SelectActionProps {
   buttonClassNames?: string;
   textClassNames?: string;
   rightIconClassNames?: string;
+  tooltip?: string;
+  tooltipProps?: TooltipProps;
+  tooltipClassName?: string;
 }
 
 export default function SelectAction({
@@ -30,6 +34,9 @@ export default function SelectAction({
   buttonClassNames = "border-[1px] border-gray-300",
   textClassNames = "text-gray-700 font-medium text-sm",
   rightIconClassNames = "text-gray-400",
+  tooltip,
+  tooltipProps,
+  tooltipClassName,
 }: SelectActionProps) {
   const [open, setOpen] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
@@ -55,6 +62,7 @@ export default function SelectAction({
       document.removeEventListener("click", handleClickOutside, true);
     };
   }, []);
+  const tooltipId = `tooltip-${title}`;
 
   return (
     <div style={{ fontFamily: "Marianne" }} ref={ref}>
@@ -66,7 +74,14 @@ export default function SelectAction({
             loading ? "disabled:cursor-wait" : "disabled:cursor-auto"
           } ${buttonClassNames}`}
           style={{ fontFamily: "Marianne" }}
-          onClick={() => setOpen((e) => !e)}>
+          onClick={() => setOpen((e) => !e)}
+          data-tip
+          data-for={tooltipId}>
+          {tooltip && disabled === true && (
+            <ReactTooltip id={tooltipId} type="light" place="bottom" effect="solid" className="custom-tooltip-radius !shadow-md " {...(tooltipProps || {})}>
+              <div className={"w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-800 " + tooltipClassName}>{tooltip}</div>
+            </ReactTooltip>
+          )}
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
 

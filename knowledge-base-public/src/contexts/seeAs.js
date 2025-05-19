@@ -8,6 +8,8 @@ const roles = [
   "referent",
   "structure",
   "head_center",
+  "head_center_adjoint",
+  "referent_sanitaire",
   "young",
   "young_cle",
   "public",

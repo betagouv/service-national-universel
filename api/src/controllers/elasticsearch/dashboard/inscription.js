@@ -5,7 +5,7 @@ const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
-const { SessionPhase1Model, CohortModel } = require("../../../models");
+const { SessionPhase1Model, CohortModel, ReferentModel } = require("../../../models");
 const { ES_NO_LIMIT, ROLES, region2department, YOUNG_STATUS, canSeeDashboardInscriptionInfo, canSeeDashboardInscriptionDetail } = require("snu-lib");
 
 router.post("/inscriptionGoal", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -129,6 +129,9 @@ router.post("/inscriptionInfo", passport.authenticate(["referent"], { session: f
     let session = null;
     if (req.user.role === ROLES.HEAD_CENTER) {
       session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: queryFilters.cohort });
+    }
+    if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
+      session = await SessionPhase1Model.findOne({ adjointsIds: { $in: [req.user._id] }, cohort: queryFilters.cohort });
     }
 
     const body = {

@@ -28,6 +28,8 @@ export default function AdminMenu() {
       "referent",
       "structure",
       "head_center",
+      "head_center_adjoint",
+      "referent_sanitaire",
       "young",
       "visitor",
       "young_cle",
@@ -36,14 +38,16 @@ export default function AdminMenu() {
       "referent_classe",
     ],
     administrateur_cle_referent_etablissement: ["young_cle", "administrateur_cle_coordinateur_cle", "administrateur_cle_referent_etablissement", "referent_classe"],
-    administrateur_cle_coordinateur_cle: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center"],
-    referent_classe: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center"],
+    administrateur_cle_coordinateur_cle: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center", "head_center_adjoint", "referent_sanitaire"],
+    referent_classe: ["young_cle", "administrateur_cle_coordinateur_cle", "referent_classe", "head_center", "head_center_adjoint", "referent_sanitaire"],
   };
 
   const withSeeAs = [
     "admin",
     "referent",
     "head_center",
+    "head_center_adjoint",
+    "referent_sanitaire",
     "structure",
     "visitor",
     "dsnj",

@@ -123,6 +123,8 @@ export default function Pointage({ updateFilter, isYoungCheckinOpen, focusedSess
                     Icon={<CursorClick className="text-gray-400" />}
                     title="Actions"
                     alignItems="right"
+                    disabled={!isYoungCheckinOpen}
+                    tooltip="Le pointage n'est pas ouvert"
                     optionsGroup={[
                       {
                         key: "group1",
