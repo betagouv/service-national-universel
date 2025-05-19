@@ -63,7 +63,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   try {
     let data = [];
     if (req.user.role === ROLES.ADMIN) data = await ProgramModel.find({});
-    else if (req.user.role === ROLES.HEAD_CENTER) data = await ProgramModel.find({ visibility: "HEAD_CENTER" });
+    else if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) data = await ProgramModel.find({ visibility: "HEAD_CENTER" });
     else {
       let errorDepartement, checkedDepartement;
       if (isYoung(req.user)) {

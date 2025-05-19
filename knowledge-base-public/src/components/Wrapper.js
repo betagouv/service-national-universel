@@ -23,6 +23,8 @@ const Wrapper = ({ home, children }) => {
     "admin",
     "referent",
     "head_center",
+    "head_center_adjoint",
+    "referent_sanitaire",
     "structure",
     "visitor",
     "dsnj",

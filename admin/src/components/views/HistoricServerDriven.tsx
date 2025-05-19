@@ -4,7 +4,7 @@
 import React, { useState, useCallback } from "react";
 import ReactTooltip from "react-tooltip";
 import { translateHistory, debounce, getAuthor } from "../../utils";
-import { formatLongDateFR, translateAction, translateBusPatchesField } from "snu-lib";
+import { formatLongDateFR, translateAction, translateBusPatchesField, UserSaved } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
 import MultiSelect from "../legacy-dashboard/MultiSelect";
@@ -14,7 +14,7 @@ import Loader from "../Loader";
 
 interface Event {
   path: string;
-  user: string;
+  user: UserSaved;
   author: string;
   authorId: string;
   op: string;

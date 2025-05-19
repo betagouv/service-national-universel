@@ -224,6 +224,17 @@ function buildDashboardUserRoleContext(user) {
   return { dashboardUserRoleContextFilters: contextFilters };
 }
 
+function getResponsibleCenterField(role) {
+  if (!role) return null;
+  let field = "";
+  if (role === ROLES.HEAD_CENTER) {
+    field = "headCenterId";
+  } else if (role === ROLES.HEAD_CENTER_ADJOINT || role === ROLES.REFERENT_SANITAIRE) {
+    field = "adjointsIds";
+  }
+  return field;
+}
+
 module.exports = {
   buildNdJson,
   buildArbitratyNdJson,
@@ -232,4 +243,5 @@ module.exports = {
   buildMissionContext,
   buildApplicationContext,
   buildDashboardUserRoleContext,
+  getResponsibleCenterField,
 };

@@ -946,7 +946,8 @@ Cette fonctionnalité est à utiliser uniquement pour les séjours CLE spécifiq
                   </ReactTooltip>
                 </div>
                 <ToggleDate
-                  label="Chefs de centre"
+                  label="Chefs de centre et leurs équipes"
+                  tooltipText="Donne également accès au pointage aux chefs de centre adjoint et aux référents sanitaires."
                   disabled={isLoading}
                   readOnly={readOnly}
                   // @ts-ignore
