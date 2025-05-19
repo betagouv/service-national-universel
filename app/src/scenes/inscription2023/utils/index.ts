@@ -10,7 +10,6 @@ import cniOldFront from "../../../assets/IDProof/cniOldFront.jpg";
 import passport from "../../../assets/IDProof/passport.jpg";
 import passportDate from "../../../assets/IDProof/passportDate.jpg";
 import API from "@/services/api";
-import { capture } from "@/sentry";
 import dayjs from "dayjs";
 
 countries.registerLocale(fr);
@@ -99,27 +98,49 @@ export const ID = {
   },
 };
 
-export async function getCities(query) {
-  try {
-    const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
-    const cities = responses[0].aggregations.cities.buckets;
-    return cities.map((e) => ({ label: e.key[0] + " - " + e.key[1], value: e.key })) ?? [];
-  } catch (e) {
-    capture(e);
-    return [];
-  }
+export async function getCityOptions(query: string): Promise<{ label: string; value: CityWithDepartment }[]> {
+  const { responses } = await API.post(`/elasticsearch/schoolramses/public/search?searchCity=${encodeURIComponent(query)}&aggsByCitiesAndDepartments=true`);
+  const cities = responses[0].aggregations.cities.buckets;
+  return cities.map((e) => {
+    const name = e.key[0];
+    const departmentName = e.key[1];
+    return {
+      label: name + " - " + departmentName,
+      value: { name, departmentName },
+    };
+  });
 }
 
-export async function getSchools(city) {
-  try {
-    const { responses } = await API.post("/elasticsearch/schoolramses/public/search", {
-      filters: { country: ["FRANCE"], city: [city.value[0]], departmentName: [city.value[1]] },
-    });
-    const schools = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
-    return schools;
-  } catch (e) {
-    capture(e);
-  }
+export type School = {
+  fullName: string;
+  adresse?: string;
+  city?: string;
+  departmentName?: string;
+  country?: string;
+  id?: string;
+};
+
+export type CityWithDepartment = {
+  name: string;
+  departmentName: string;
+};
+
+export type Correction = {
+  schoolName?: string;
+  schoolAddress?: string;
+};
+
+export function formatSchoolName(school: School): string {
+  if (!school?.fullName) return "";
+  if (!school?.adresse) return school.fullName;
+  return school.fullName + " - " + school.adresse;
+}
+
+export async function getSchools(city: string, departmentName: string): Promise<School[]> {
+  const filters = { country: ["FRANCE"], city: [city], departmentName: [departmentName] };
+  const { responses } = await API.post("/elasticsearch/schoolramses/public/search", { filters });
+  const schools = responses[0].hits.hits.map((e) => new Object({ ...e._source, ...{ id: e._id } }));
+  return schools;
 }
 
 export function validateBirthDate(date) {
