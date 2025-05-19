@@ -296,4 +296,62 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
         expect(results.errors.length).toBeGreaterThan(0);
         expect(results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.DOUBLON)).toBeDefined();
     });
+
+    it("should return an error placesTotal is exceeded", async () => {
+        classeGateway.findById.mockResolvedValueOnce({
+            placesTotal: 10,
+            statut: STATUS_CLASSE.OPEN,
+            placesPrises: 9,
+        } as ClasseModel);
+
+        fileGateway.parseXLS.mockResolvedValueOnce([
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                "Date de naissance": "01/01/2010",
+                Sexe: "M",
+            },
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe2",
+                "Date de naissance": "01/01/2010",
+                Sexe: "M",
+            },
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe3",
+                "Date de naissance": "01/01/2010",
+                Sexe: "M",
+            },
+        ]);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
+        expect(
+            results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES),
+        ).toBeDefined();
+    });
+
+    it("should succeed if jeunes to import + placesPrises = placesTotal", async () => {
+        classeGateway.findById.mockResolvedValueOnce({
+            placesTotal: 10,
+            statut: STATUS_CLASSE.OPEN,
+            placesPrises: 9,
+        } as ClasseModel);
+
+        fileGateway.parseXLS.mockResolvedValueOnce([
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                "Date de naissance": "01/01/2010",
+                Sexe: "M",
+            },
+        ]);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+        expect(results.isValid).toEqual(true);
+        expect(results.errors.length).toEqual(0);
+    });
 });

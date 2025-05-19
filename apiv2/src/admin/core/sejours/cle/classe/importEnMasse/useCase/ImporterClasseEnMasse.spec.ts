@@ -9,14 +9,14 @@ import { ClasseService } from "../../Classe.service";
 import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
 import { ImporterClasseEnMasse } from "./ImporterClasseEnMasse";
 import { Logger } from "@nestjs/common";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 
 describe("ImporterClasseEnMasse", () => {
     let importerClasseEnMasse: ImporterClasseEnMasse;
-    let jeuneGateway: JeuneGateway;
     let fileGateway: FileGateway;
     let clockGateway: ClockGateway;
     let cryptoGateway: CryptoGateway;
-    let classeService: ClasseService;
+    let jeuneService: JeuneService;
 
     const mockFileBody = Buffer.from("mock file content");
 
@@ -74,7 +74,7 @@ describe("ImporterClasseEnMasse", () => {
     };
 
     beforeEach(async () => {
-        const mockJeuneGateway = {
+        const mockJeuneService = {
             create: jest.fn().mockImplementation((jeune) => Promise.resolve({ ...jeune, id: "young-001" })),
             update: jest.fn().mockImplementation((jeune) => Promise.resolve(jeune)),
         };
@@ -101,7 +101,7 @@ describe("ImporterClasseEnMasse", () => {
         const module: TestingModule = await Test.createTestingModule({
             providers: [
                 ImporterClasseEnMasse,
-                { provide: JeuneGateway, useValue: mockJeuneGateway },
+                { provide: JeuneService, useValue: mockJeuneService },
                 { provide: FileGateway, useValue: mockFileGateway },
                 { provide: ClockGateway, useValue: mockClockGateway },
                 { provide: CryptoGateway, useValue: mockCryptoGateway },
@@ -111,11 +111,10 @@ describe("ImporterClasseEnMasse", () => {
         }).compile();
 
         importerClasseEnMasse = module.get<ImporterClasseEnMasse>(ImporterClasseEnMasse);
-        jeuneGateway = module.get<JeuneGateway>(JeuneGateway);
+        jeuneService = module.get<JeuneService>(JeuneService);
         fileGateway = module.get<FileGateway>(FileGateway);
         clockGateway = module.get<ClockGateway>(ClockGateway);
         cryptoGateway = module.get<CryptoGateway>(CryptoGateway);
-        classeService = module.get<ClasseService>(ClasseService);
     });
 
     it("should throw exception when parameters are missing", async () => {
@@ -137,10 +136,10 @@ describe("ImporterClasseEnMasse", () => {
 
         await importerClasseEnMasse.execute(mockParameters);
 
-        expect(jeuneGateway.create).toHaveBeenCalledTimes(2);
-        expect(jeuneGateway.update).toHaveBeenCalledTimes(2);
+        expect(jeuneService.create).toHaveBeenCalledTimes(2);
+        expect(jeuneService.update).toHaveBeenCalledTimes(2);
 
-        expect(jeuneGateway.create).toHaveBeenCalledWith(
+        expect(jeuneService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
@@ -154,7 +153,7 @@ describe("ImporterClasseEnMasse", () => {
             }),
         );
 
-        expect(jeuneGateway.update).toHaveBeenCalledWith(
+        expect(jeuneService.update).toHaveBeenCalledWith(
             expect.objectContaining({
                 id: "young-001",
                 statut: YOUNG_STATUS.VALIDATED,
@@ -172,12 +171,12 @@ describe("ImporterClasseEnMasse", () => {
 
         await importerClasseEnMasse.execute(parametersWithMapping);
 
-        expect(jeuneGateway.create).toHaveBeenCalledTimes(1);
-        expect(jeuneGateway.update).toHaveBeenCalledTimes(1);
+        expect(jeuneService.create).toHaveBeenCalledTimes(1);
+        expect(jeuneService.update).toHaveBeenCalledTimes(1);
 
         expect(clockGateway.parseDateNaissance).toHaveBeenCalledWith("01/01/2006");
 
-        expect(jeuneGateway.create).toHaveBeenCalledWith(
+        expect(jeuneService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
@@ -197,7 +196,7 @@ describe("ImporterClasseEnMasse", () => {
 
         await importerClasseEnMasse.execute(parametersWithMapping);
 
-        expect(jeuneGateway.create).toHaveBeenCalledWith(
+        expect(jeuneService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
@@ -214,7 +213,7 @@ describe("ImporterClasseEnMasse", () => {
 
         await importerClasseEnMasse.execute(mockParameters);
 
-        expect(jeuneGateway.create).toHaveBeenCalledWith(
+        expect(jeuneService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 email: "john.doe@localhost-abcdef",
             }),
@@ -233,7 +232,7 @@ describe("ImporterClasseEnMasse", () => {
 
         await importerClasseEnMasse.execute(mockParameters);
 
-        expect(jeuneGateway.create).toHaveBeenCalledWith(
+        expect(jeuneService.create).toHaveBeenCalledWith(
             expect.objectContaining({
                 email: "johnpaul.doesmith@localhost-abcdef",
             }),
