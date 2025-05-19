@@ -6,7 +6,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } = require("./utils");
 const { ROLES } = require("snu-lib");
 const { LigneBusModel, SessionPhase1Model } = require("../../models");
 
@@ -51,12 +51,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
       const cohort = queryFilters.cohort?.[0];
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      let field = "";
-      if (user.role === ROLES.HEAD_CENTER) {
-        field = "headCenterId";
-      } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-        field = "adjointsIds";
-      }
+      const field = getResponsibleCenterField(user.role);
       const centers = await SessionPhase1Model.find({ [field]: user._id, cohort });
       if (!centers.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const lignebus = await LigneBusModel.find({ centerId: centers[0].cohesionCenterId, cohort });

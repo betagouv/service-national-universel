@@ -7,7 +7,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } = require("./utils");
 
 const { serializeApplications, serializeYoungs, serializeMissions, serializeStructures, serializeReferents } = require("../../utils/es-serializer");
 const { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel } = require("../../models");
@@ -82,12 +82,7 @@ async function buildYoungContext(user, showAffectedToRegionOrDep = false) {
 
   // A head center can only see youngs of their session.
   if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-    let field = "";
-    if (user.role === ROLES.HEAD_CENTER) {
-      field = "headCenterId";
-    } else if (user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE) {
-      field = "adjointsIds";
-    }
+    const field = getResponsibleCenterField(user.role);
     const sessionPhase1 = await SessionPhase1Model.find({ [field]: user._id });
     if (!sessionPhase1.length) return { youngContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     contextFilters.push(
@@ -373,12 +368,7 @@ router.post("/by-session/:sessionId/:action(search|export|exportBus)", passport.
     ].filter(Boolean);
 
     if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
-      let field = "";
-      if (user.role === ROLES.HEAD_CENTER) {
-        field = "headCenterId";
-      } else if (user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE) {
-        field = "adjointsIds";
-      }
+      const field = getResponsibleCenterField(user.role);
       const sessionsPhase1 = await SessionPhase1Model.find({ [field]: user._id });
       if (!sessionsPhase1.length) return res.status(200).send({ ok: false, code: ERRORS.NOT_FOUND });
       const visibleCohorts = await getCohortNamesEndAfter(addMonths(new Date(), -3));
