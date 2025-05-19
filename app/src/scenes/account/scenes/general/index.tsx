@@ -44,7 +44,7 @@ const AccountGeneralPage = () => {
       email: young.email,
       phone: {
         phoneNumber: young.phone,
-        phoneZone: young.phoneZone,
+        phoneZone: young.phoneZone || "FRANCE",
       },
       psc1Info: young.psc1Info === "true" ? "true" : young.psc1Info === "false" ? "false" : null,
     },

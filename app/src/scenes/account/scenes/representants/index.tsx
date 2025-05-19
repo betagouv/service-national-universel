@@ -48,7 +48,7 @@ const AccountRepresentantsPage = () => {
       parent1Email: young?.parent1Email || "",
       parent1Phone: {
         phoneNumber: young?.parent1Phone || "",
-        phoneZone: young?.parent1PhoneZone || "",
+        phoneZone: young?.parent1PhoneZone || "FRANCE",
       },
       parent2Status: young?.parent2Status || "representant",
       parent2LastName: young?.parent2LastName || "",
@@ -56,7 +56,7 @@ const AccountRepresentantsPage = () => {
       parent2Email: young?.parent2Email || "",
       parent2Phone: {
         phoneNumber: young?.parent2Phone || "",
-        phoneZone: young?.parent2PhoneZone || "",
+        phoneZone: young?.parent2PhoneZone || "FRANCE",
       },
     },
   });
