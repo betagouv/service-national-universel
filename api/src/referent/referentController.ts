@@ -158,6 +158,8 @@ function cleanReferentData(referent) {
     dsnj: [],
     injep: [],
     head_center: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
+    head_center_adjoint: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
+    referent_sanitaire: ["cohesionCenterId", "cohesionCenterName", "cohorts", "cohortIds", "sessionPhase1Id"],
     referent_department: ["department", "region"],
     referent_region: ["department", "region"],
     responsible: ["structureId"],
@@ -1200,7 +1202,9 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     switch (req.user.role) {
-      case ROLES.HEAD_CENTER: {
+      case ROLES.HEAD_CENTER:
+      case ROLES.HEAD_CENTER_ADJOINT:
+      case ROLES.REFERENT_SANITAIRE: {
         const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
         if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         const center = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
@@ -1731,7 +1735,12 @@ router.get("/:id/session-phase1", passport.authenticate("referent", { session: f
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = await SessionPhase1Model.find({ headCenterId: checkedId });
+    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = [];
+    if (req.user.role === ROLES.HEAD_CENTER) {
+      sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
+    } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
+      sessions = await SessionPhase1Model.find({ adjointsIds: { $in: [checkedId] } });
+    }
     const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
     if (JoiQueryWithCohesionCenter.value === "true") {
       sessions = sessions.map((s) => {

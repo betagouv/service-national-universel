@@ -59,7 +59,7 @@ const getUserAttributes = async (user) => {
         });
       }
     }
-    if (user.role === ROLES.HEAD_CENTER) {
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
       userAttributes.push({ name: "lien vers le centre de cohésion", value: centerLink });
     }
     if (user.role === ROLES.REFERENT_DEPARTMENT || user.role === ROLES.REFERENT_REGION) {

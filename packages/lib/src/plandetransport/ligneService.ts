@@ -12,6 +12,8 @@ export const isTeamLeaderOrSupervisorEditable = (actor: Pick<UserDto, "role">, c
     case ROLES.REFERENT_DEPARTMENT:
       return !!cohort?.informationsConvoyage?.editionOpenForReferentDepartment;
     case ROLES.HEAD_CENTER:
+    case ROLES.HEAD_CENTER_ADJOINT:
+    case ROLES.REFERENT_SANITAIRE:
       return !!cohort?.informationsConvoyage?.editionOpenForHeadOfCenter;
     default:
       return false;

@@ -19,7 +19,6 @@ export default function GeneralTab({ cohort, readOnly }: GeneralTabProps) {
       <InfosInscriptions cohort={cohort} readOnly={readOnly} />
       <InfosPreparation cohort={cohort} readOnly={readOnly} />
       <InfosAffectations cohort={cohort} readOnly={readOnly} />
-
       {cohort.type === COHORT_TYPE.CLE && <CleSettings cohort={cohort} readOnly={readOnly} />}
     </div>
   );

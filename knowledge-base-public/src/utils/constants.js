@@ -5,6 +5,8 @@ export const translateRoleBDC = {
   young: "Volontaire HTS",
   young_cle: "Volontaire CLE",
   head_center: "Chef de centre",
+  head_center_adjoint: "Chef de centre Adjoint",
+  referent_sanitaire: "Référent sanitaire",
   public: "Public",
   visitor: "Visiteur régional",
   dsnj: "DSNJ",

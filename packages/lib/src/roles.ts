@@ -15,6 +15,8 @@ const ROLES = {
   RESPONSIBLE: "responsible",
   SUPERVISOR: "supervisor",
   HEAD_CENTER: "head_center",
+  HEAD_CENTER_ADJOINT: "head_center_adjoint",
+  REFERENT_SANITAIRE: "referent_sanitaire",
   VISITOR: "visitor",
   DSNJ: "dsnj",
   INJEP: "injep",
@@ -56,6 +58,8 @@ const SUPPORT_ROLES = {
   referent: "Référent",
   structure: "Structure",
   head_center: "Chef de Centre",
+  head_center_adjoint: "Chef de Centre Adjoint",
+  referent_sanitaire: "Référent Sanitaire",
   young: "Volontaire",
   public: "Public",
   visitor: "Visiteur",
@@ -66,6 +70,7 @@ const SUPPORT_ROLES = {
 const CENTER_ROLES = {
   chef: "Chef de centre",
   adjoint: "Chef de centre adjoint",
+  referent_sanitaire: "Référent sanitaire",
   cadre_specialise: "Cadre spécialisé",
   cadre_compagnie: "Cadre de compagnie",
   tuteur: "Tuteur de maisonnée",
@@ -117,14 +122,23 @@ function canInviteUser(actorRole, targetRole) {
   // Admins can invite any user
   if (actorRole === ROLES.ADMIN) return true;
 
-  // REFERENT_DEPARTMENT can invite REFERENT_DEPARTMENT, RESPONSIBLE, SUPERVISOR, HEAD_CENTER
+  // REFERENT_DEPARTMENT can invite REFERENT_DEPARTMENT, RESPONSIBLE, SUPERVISOR, HEAD_CENTER, HEAD_CENTER_ADJOINT, REFERENT_SANITAIRE
   if (actorRole === ROLES.REFERENT_DEPARTMENT) {
-    return [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(targetRole);
+    return [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(targetRole);
   }
 
-  // REFERENT_REGION can invite REFERENT_DEPARTMENT, REFERENT_REGION, RESPONSIBLE, SUPERVISOR, HEAD_CENTER, VISITOR
+  // REFERENT_REGION can invite REFERENT_DEPARTMENT, REFERENT_REGION, RESPONSIBLE, SUPERVISOR, HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, VISITOR
   if (actorRole === ROLES.REFERENT_REGION) {
-    return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.VISITOR].includes(targetRole);
+    return [
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.REFERENT_REGION,
+      ROLES.HEAD_CENTER,
+      ROLES.HEAD_CENTER_ADJOINT,
+      ROLES.REFERENT_SANITAIRE,
+      ROLES.RESPONSIBLE,
+      ROLES.SUPERVISOR,
+      ROLES.VISITOR,
+    ].includes(targetRole);
   }
 
   // RESPONSIBLE can invite only RESPONSIBLE.
@@ -139,6 +153,10 @@ function canInviteUser(actorRole, targetRole) {
   return false;
 }
 
+const canModifyDirectionCenterTeam = (actor) => {
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
+};
+
 const canDeleteStructure = (actor, target) => isAdmin(actor) || referentInSameGeography(actor, target);
 
 const canDeleteYoung = (actor) => {
@@ -147,7 +165,7 @@ const canDeleteYoung = (actor) => {
 
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
-  const isHeadCenter = actor.role === ROLES.HEAD_CENTER;
+  const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 
   const actorAndTargetInTheSameRegion = actor.region === young.region;
   const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
@@ -181,7 +199,7 @@ function canDeleteReferent({ actor, originalTarget, structure }) {
   const targetIsSupervisor = originalTarget.role === ROLES.SUPERVISOR;
   const targetIsResponsible = originalTarget.role === ROLES.RESPONSIBLE;
   const targetIsVisitor = originalTarget.role === ROLES.VISITOR;
-  const targetIsHeadCenter = originalTarget.role === ROLES.HEAD_CENTER;
+  const targetIsHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role);
 
   // actor is referent region
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsReferentRegion && actorAndTargetInTheSameRegion;
@@ -244,7 +262,9 @@ function canViewReferent(actor, target) {
   const isMe = actor.id === target.id;
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isResponsibleModifyingResponsible = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role) && [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(target.role);
-  const isHeadCenter = actor.role === ROLES.HEAD_CENTER && [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(target.role);
+  const isHeadCenter =
+    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role) &&
+    [ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(target.role);
   const isAdministratorCLE = actor.role === ROLES.ADMINISTRATEUR_CLE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
   const isReferentClasse = actor.role === ROLES.REFERENT_CLASSE && [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(target.role);
   //@todo update doc
@@ -307,9 +327,9 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
-    originalTarget.role === ROLES.HEAD_CENTER &&
+    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.HEAD_CENTER].includes(modifiedTarget.role!));
+    (modifiedTarget === null || [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(modifiedTarget.role!));
 
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
@@ -330,7 +350,8 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
       isReferentModifyingHeadCenterWithoutChangingRole) &&
     (actor.role === ROLES.REFERENT_REGION ? isActorAndTargetInTheSameRegion || isReferentModifyingHeadCenterWithoutChangingRole : true) &&
     (actor.role === ROLES.REFERENT_DEPARTMENT
-      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) || isMe) &&
+      ? ([ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(originalTarget.role!) ||
+          isMe) &&
         (isActorAndTargetInTheSameDepartment || isReferentModifyingHeadCenterWithoutChangingRole)
       : true);
   return authorized;
@@ -376,16 +397,28 @@ function canCreateOrUpdateSessionPhase1(actor: UserDto, target?: SessionPhase1Ty
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferent = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
   const isHeadCenter = actor.role === ROLES.HEAD_CENTER && target && actor._id.toString() === target.headCenterId;
+  const isAdjoints = [ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role) && target && target.adjointsIds.includes(actor._id.toString());
 
-  return isAdmin || isReferent || isHeadCenter;
+  return isAdmin || isReferent || isHeadCenter || isAdjoints;
 }
 
 function canSearchSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.TRANSPORTER].includes(
+    actor.role,
+  );
 }
 
 function canViewSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.ADMINISTRATEUR_CLE,
+  ].includes(actor.role);
 }
 
 function canPutSpecificDateOnSessionPhase1(actor) {
@@ -393,11 +426,14 @@ function canPutSpecificDateOnSessionPhase1(actor) {
 }
 
 function canSeeYoungInfo(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
 function canEditSanitaryEmailContact(actor, cohort) {
-  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER].includes(actor.role) && !cohort.isAssignmentAnnouncementsOpenForYoung) {
+  if (
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role) &&
+    !cohort.isAssignmentAnnouncementsOpenForYoung
+  ) {
     return true;
   } else if ([ROLES.ADMIN].includes(actor.role)) {
     return true;
@@ -411,6 +447,10 @@ function isSessionEditionOpen(actor, cohort) {
     case ROLES.ADMIN:
       return true;
     case ROLES.HEAD_CENTER:
+      return true;
+    case ROLES.HEAD_CENTER_ADJOINT:
+      return true;
+    case ROLES.REFERENT_SANITAIRE:
       return true;
     case ROLES.REFERENT_REGION:
       return cohort?.sessionEditionOpenForReferentRegion;
@@ -460,7 +500,7 @@ function canSendTimeScheduleReminderForSessionPhase1(actor) {
 }
 
 function canSendImageRightsForSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
 function canCreateOrModifyMission(user, mission, structure) {
@@ -558,6 +598,14 @@ function isHeadCenter(user: UserRoles) {
   return user?.role === ROLES.HEAD_CENTER;
 }
 
+function isHeadCenterAdjoint(user: UserRoles) {
+  return user?.role === ROLES.HEAD_CENTER_ADJOINT;
+}
+
+function isReferentSanitaire(user: UserRoles) {
+  return user?.role === ROLES.REFERENT_SANITAIRE;
+}
+
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
 
 const FORCE_DISABLED_ASSIGN_COHESION_CENTER = false;
@@ -568,7 +616,7 @@ const canAssignMeetingPoint = (actor, target) => !FORCE_DISABLED_ASSIGN_MEETING_
 
 const canEditPresenceYoung = (actor) => {
   // todo affiner les droits
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 };
 
 const canSigninAs = (
@@ -606,19 +654,35 @@ function canSearchAssociation(actor) {
 }
 
 function canViewCohesionCenter(actor: UserDto) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
-    actor.role,
-  );
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.TRANSPORTER,
+    ROLES.REFERENT_CLASSE,
+    ROLES.ADMINISTRATEUR_CLE,
+  ].includes(actor.role);
 }
 
 function canGetReferentByEmail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
 function canViewMeetingPoints(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
-    actor.role,
-  );
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.TRANSPORTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+  ].includes(actor.role);
 }
 
 function canUpdateMeetingPoint(actor, meetingPoint: PointDeRassemblementType | null = null) {
@@ -650,7 +714,7 @@ function canSearchMeetingPoints(actor) {
 }
 
 function canViewMeetingPointId(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
 function canUpdateInscriptionGoals(actor) {
@@ -658,7 +722,9 @@ function canUpdateInscriptionGoals(actor) {
 }
 
 function canViewInscriptionGoals(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE, ROLES.VISITOR].includes(
+    actor.role,
+  );
 }
 
 function canViewTicketTags(actor) {
@@ -675,6 +741,8 @@ function canViewYoung(actor) {
     ROLES.REFERENT_REGION,
     ROLES.REFERENT_DEPARTMENT,
     ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
     ROLES.RESPONSIBLE,
     ROLES.SUPERVISOR,
     ROLES.ADMINISTRATEUR_CLE,
@@ -700,7 +768,16 @@ function canViewMission(actor) {
 
 function canViewStructures(actor) {
   if (actor.constructor.modelName === "young") return true;
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.RESPONSIBLE,
+    ROLES.SUPERVISOR,
+  ].includes(actor.role);
 }
 
 function canModifyMissionStructureId(actor) {
@@ -718,6 +795,8 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
       ROLES.REFERENT_REGION,
       ROLES.ADMIN,
       ROLES.HEAD_CENTER,
+      ROLES.HEAD_CENTER_ADJOINT,
+      ROLES.REFERENT_SANITAIRE,
       ROLES.RESPONSIBLE,
       ROLES.SUPERVISOR,
       ROLES.REFERENT_CLASSE,
@@ -790,6 +869,8 @@ function canViewDepartmentService(actor) {
     ROLES.RESPONSIBLE,
     ROLES.SUPERVISOR,
     ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
     ROLES.ADMINISTRATEUR_CLE,
     ROLES.REFERENT_CLASSE,
   ].includes(actor.role);
@@ -808,7 +889,17 @@ function canSearchInElasticSearch(actor, index) {
   if (index === "mission") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "school" || index === "schoolramses") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.HEAD_CENTER, ROLES.VISITOR].includes(actor.role);
+    return [
+      ROLES.ADMIN,
+      ROLES.REFERENT_REGION,
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.RESPONSIBLE,
+      ROLES.SUPERVISOR,
+      ROLES.HEAD_CENTER,
+      ROLES.HEAD_CENTER_ADJOINT,
+      ROLES.REFERENT_SANITAIRE,
+      ROLES.VISITOR,
+    ].includes(actor.role);
   } else if (index === "young-having-school-in-department") {
     return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (index === "young-having-school-in-region") {
@@ -816,9 +907,17 @@ function canSearchInElasticSearch(actor, index) {
   } else if (index === "cohesionyoung") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
   } else if (/* legacy and new name */ index === "sessionphase1young" || index === "sessionphase1") {
-    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
-      actor.role,
-    );
+    return [
+      ROLES.ADMIN,
+      ROLES.REFERENT_REGION,
+      ROLES.REFERENT_DEPARTMENT,
+      ROLES.HEAD_CENTER,
+      ROLES.HEAD_CENTER_ADJOINT,
+      ROLES.REFERENT_SANITAIRE,
+      ROLES.TRANSPORTER,
+      ROLES.ADMINISTRATEUR_CLE,
+      ROLES.REFERENT_CLASSE,
+    ].includes(actor.role);
   } else if (index === "structure") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
   } else if (index === "referent") {
@@ -829,6 +928,8 @@ function canSearchInElasticSearch(actor, index) {
       ROLES.RESPONSIBLE,
       ROLES.SUPERVISOR,
       ROLES.HEAD_CENTER,
+      ROLES.HEAD_CENTER_ADJOINT,
+      ROLES.REFERENT_SANITAIRE,
       ROLES.ADMINISTRATEUR_CLE,
       ROLES.REFERENT_CLASSE,
     ].includes(actor.role);
@@ -863,7 +964,9 @@ function canSendTutorTemplate(actor) {
 }
 
 function canShareSessionPhase1(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
+    actor.role,
+  );
 }
 
 function canCreateAlerteMessage(actor) {
@@ -877,6 +980,8 @@ function canReadAlerteMessage(actor) {
     ROLES.REFERENT_DEPARTMENT,
     ROLES.RESPONSIBLE,
     ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
     ROLES.SUPERVISOR,
     ROLES.REFERENT_CLASSE,
     ROLES.ADMINISTRATEUR_CLE,
@@ -912,9 +1017,17 @@ function canDeleteSchemaDeRepartition(actor) {
 }
 
 function canViewLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER, ROLES.HEAD_CENTER, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(
-    actor.role,
-  );
+  return [
+    ROLES.ADMIN,
+    ROLES.REFERENT_REGION,
+    ROLES.REFERENT_DEPARTMENT,
+    ROLES.TRANSPORTER,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.ADMINISTRATEUR_CLE,
+  ].includes(actor.role);
 }
 function canUpdateLigneBus(actor) {
   return [
@@ -941,7 +1054,9 @@ function canDeleteLigneBus(actor) {
 }
 
 function canSearchLigneBus(actor) {
-  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
+    actor.role,
+  );
 }
 
 function canExportLigneBus(actor) {
@@ -972,7 +1087,9 @@ function ligneBusCanCreateDemandeDeModification(actor) {
 }
 
 function ligneBusCanViewDemandeDeModification(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
+    actor.role,
+  );
 }
 
 function ligneBusCanSendMessageDemandeDeModification(actor) {
@@ -1009,7 +1126,7 @@ function canSeeDashboardSejourInfo(actor) {
 }
 
 function canSeeDashboardSejourHeadCenter(actor) {
-  return [ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
 function canSeeDashboardInscriptionInfo(actor) {
@@ -1017,7 +1134,9 @@ function canSeeDashboardInscriptionInfo(actor) {
 }
 
 function canSeeDashboardInscriptionDetail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.VISITOR, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(
+    actor.role,
+  );
 }
 
 function canSeeDashboardEngagementInfo(actor) {
@@ -1280,6 +1399,8 @@ export {
   isCoordinateurEtablissement,
   isReferentClasse,
   isHeadCenter,
+  isHeadCenterAdjoint,
+  isReferentSanitaire,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
@@ -1313,4 +1434,5 @@ export {
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
+  canModifyDirectionCenterTeam,
 };

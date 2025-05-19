@@ -5,7 +5,7 @@ import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 import { GoPlus } from "react-icons/go";
 
-import { ROLES, isSuperAdmin } from "snu-lib";
+import { isSuperAdmin } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { Button, Header, Navbar } from "@snu/ds/admin";
@@ -15,6 +15,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import DeletePDTButton from "../DeletePDTButton";
 import SyncPlacesPDTButton from "../SyncPlacesPDTButton";
 import HeaderExport from "./ButtonExport";
+import { isResponsableDeCentre } from "@/utils";
 
 interface Props {
   cohort: string;
@@ -31,21 +32,47 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohortDto = cohorts?.find((c) => c.name === cohort);
+
+  const isResonsableDeCentre = isResponsableDeCentre(user);
+
+  const getActions = () => {
+    const buttons: JSX.Element[] = [];
+
+    if (!isResonsableDeCentre) {
+      buttons.push(
+        <Button
+          title="Importer des lignes supplémentaires"
+          leftIcon={<GoPlus size={20} className="mt-0.5" />}
+          key="btn-2"
+          type="wired"
+          onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
+        />,
+      );
+    }
+
+    buttons.push(<HeaderExport cohort={cohort} key="export" selectedFilters={selectedFilters} user={user} />);
+    return buttons;
+  };
+
   return (
     <>
       <Header
         title="Plan de transport"
         breadcrumb={[{ title: "Séjours" }, { title: "Plan de transport" }]}
-        actions={[
-          <SelectCohort
-            key="select-cohort"
-            cohort={cohort}
-            onChange={(cohortName) => {
-              setCohort(cohortName);
-              history.replace({ search: `?cohort=${cohortName}` });
-            }}
-          />,
-        ]}
+        actions={
+          !isResonsableDeCentre
+            ? [
+                <SelectCohort
+                  key="select-cohort"
+                  cohort={cohort}
+                  onChange={(cohortName) => {
+                    setCohort(cohortName);
+                    history.replace({ search: `?cohort=${cohortName}` });
+                  }}
+                />,
+              ]
+            : []
+        }
       />
       <div className="flex gap-2 items-center">
         {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
@@ -72,7 +99,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                 setCurrentTab("retour");
               },
             },
-            ...(user.role !== ROLES.HEAD_CENTER
+            ...(!isResonsableDeCentre
               ? [
                   {
                     title: "Historique",
@@ -97,16 +124,7 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                 ]
               : []),
           ]}
-          button={[
-            <Button
-              title="Importer des lignes supplémentaires"
-              leftIcon={<GoPlus size={20} className="mt-0.5" />}
-              key={"btn-2"}
-              type="wired"
-              onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
-            />,
-            <HeaderExport cohort={cohort} key="export" selectedFilters={selectedFilters} user={user} />,
-          ]}
+          button={getActions()}
         />
       )}
     </>
