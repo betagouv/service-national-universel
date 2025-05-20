@@ -1373,7 +1373,7 @@ export const translateClasseImportEnMasse = (name: string, column?: string) => {
     case CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE:
       return `Aucune donnée n’a été trouvée dans le fichier. Merci de vérifier que le fichier contient un onglet avec les informations des élèves.`;
     case CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES:
-      return `Le nombre d’élèves dans l’import dépasse le maximum autorisé.`;
+      return `Le total des élèves déjà inscrits et à inscrire dépasse l'effectif ajusté pour cette classe.`;
     case CLASSE_IMPORT_EN_MASSE_ERRORS.MISSING_COLUMN:
       return `Le fichier ne respecte pas la structure attendue. Veuillez vérifier que les colonnes suivantes sont présentes : Nom, Prénom, Date de naissance, Genre.`;
     case CLASSE_IMPORT_EN_MASSE_ERRORS.REQUIRED_COLUMN:
