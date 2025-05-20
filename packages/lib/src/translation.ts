@@ -542,7 +542,7 @@ const translateContractStatus = (contract) => {
 const translateApplication = (candidature) => {
   switch (candidature) {
     case "WAITING_VALIDATION":
-      return "Candidature en attente";
+      return "En attente de validation";
     case "WAITING_VERIFICATION":
       return "En attente de vérification";
     case "WAITING_ACCEPTATION":
