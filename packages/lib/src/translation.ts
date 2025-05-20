@@ -1,5 +1,6 @@
 import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS } from "./constants/cle/classeImportEnMasse";
 
 const translate = (value) => {
   switch (value) {
@@ -1364,6 +1365,42 @@ function translateBusPatchesField(path) {
   // return translationKey ? allBusPatchesFields[translationKey] : path;
   return allBusPatchesFields[path] ? allBusPatchesFields[path] : path;
 }
+
+export const translateClasseImportEnMasse = (name: string, column?: string) => {
+  switch (name) {
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FILE_FORMAT:
+      return `Le fichier sélectionné n’est pas un fichier Excel valide. Merci d’importer un fichier au format .xlsx ou .xls.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE:
+      return `Aucune donnée n’a été trouvée dans le fichier. Merci de vérifier que le fichier contient un onglet avec les informations des élèves.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES:
+      return `Le total des élèves déjà inscrits et à inscrire dépasse l'effectif ajusté pour cette classe.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.MISSING_COLUMN:
+      return `Le fichier ne respecte pas la structure attendue. Veuillez vérifier que les colonnes suivantes sont présentes : Nom, Prénom, Date de naissance, Genre.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.REQUIRED_COLUMN:
+      return `Le champ "${column}" est obligatoire`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.INVALID_FORMAT:
+      switch (column) {
+        case CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM:
+        case CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM:
+          return `Le champ "${column}" ne peut pas comporter de caractères spéciaux.`;
+        case CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE:
+          return `Le format de la date de naissance est incorrect. Format attendu : JJ/MM/AAAA.`;
+        case CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE:
+          return `Le champ "${column}" doit être soit "M" soit "F".`;
+        case CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI:
+          return `Le champ "UAI" doit contenir 7 chiffres suivis d'une lettre (ex : 1234567A).`;
+      }
+      return `La colonne "${column}" n'a pas le bon format.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST:
+      return `Cet élève est déjà inscrit dans cette classe et ne peut pas être importé à nouveau.`;
+    case CLASSE_IMPORT_EN_MASSE_ERRORS.UAI_NOT_MATCH:
+      return `Le champ "UAI" ne correspond pas à l'etablissement de la classe.`;
+    case "CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE":
+      return `La classe n'est pas ouverte.`;
+    default:
+      return name;
+  }
+};
 
 export {
   translate,

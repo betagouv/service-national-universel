@@ -12,6 +12,7 @@ export interface ClasseGateway {
     findByLigneDeBusIds(ids: string[]): Promise<ClasseModel[]>;
     findBySessionIdAndDepartmentNotWithdrawn(sessionId: string, departements: string[]): Promise<ClasseModel[]>;
     findByIds(ids: string[]): Promise<ClasseModel[]>;
+    updatePlacesPrises(classeId: string, placesPrises: number): Promise<ClasseModel>;
 }
 
 export const ClasseGateway = Symbol("ClasseGateway");

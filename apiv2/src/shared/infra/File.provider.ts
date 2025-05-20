@@ -6,7 +6,7 @@ import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { ERRORS } from "snu-lib";
+import { cleanFileNamePath, ERRORS } from "snu-lib";
 import { CsvOptions, FileGateway } from "@shared/core/File.gateway";
 
 import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
@@ -80,11 +80,7 @@ export class FileProvider implements FileGateway {
         const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
         const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
 
-        const cleanPath = path
-            .normalize("NFD")
-            .replace(/[\u0300-\u036f]/g, "") //remove accents
-            .replaceAll(" ", "_") // remove spaces
-            .replace(/[^\/a-zA-Z0-9._-]/g, ""); // remove special characters
+        const cleanPath = cleanFileNamePath(path);
 
         const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
         const params: AWS.S3.Types.PutObjectRequest = {
@@ -124,7 +120,27 @@ export class FileProvider implements FileGateway {
         };
     }
 
-    deleteFile(path: string): Promise<void> {
+    async remoteFileExists(path: string): Promise<boolean> {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.HeadObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+        };
+
+        try {
+            await s3bucket.headObject(params).promise();
+            return true;
+        } catch (error) {
+            return false;
+        }
+    }
+
+    async deleteRemoteFile(path: string): Promise<void> {
         throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
     }
 

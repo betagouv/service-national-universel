@@ -1434,5 +1434,6 @@ export {
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
+  isReferentRegDep,
   canModifyDirectionCenterTeam,
 };

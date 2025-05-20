@@ -32,6 +32,12 @@ export interface JeuneGateway {
     create(jeune: CreateJeuneModel): Promise<JeuneModel>;
     countAffectedByLigneDeBus(ligneDeBusId: string): Promise<number>;
     findByClasseId(classeId: string): Promise<JeuneModel[]>;
+    findByNomPrenomDateDeNaissanceAndClasseId(
+        nom: string,
+        prenom: string,
+        dateDeNaissance: Date,
+        classeId: string,
+    ): Promise<JeuneModel | null>;
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");

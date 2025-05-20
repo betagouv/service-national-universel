@@ -5,7 +5,9 @@ import {
     format,
     isAfter as isAfterFns,
     isBefore as isBeforeFns,
+    isValid,
     isWithinInterval as isWithinIntervalFns,
+    parse,
 } from "date-fns";
 
 import { getZonedDate } from "snu-lib";
@@ -27,6 +29,17 @@ export class ClockProvider implements ClockGateway {
     }
     isValidDate(date: Date): boolean {
         return !isNaN(new Date(date).getTime());
+    }
+    isValidDateFormat(date: string, format: string): boolean {
+        try {
+            const parsed = parse(date, format, new Date());
+            return isValid(parsed);
+        } catch (error) {
+            return false;
+        }
+    }
+    parseDate(date: string, format: string): Date {
+        return parse(date, format, new Date());
     }
     formatShort(date: Date): string {
         return format(date, "dd/MM/yyyy");
@@ -54,5 +67,22 @@ export class ClockProvider implements ClockGateway {
     }
     addDaysToNow(days: number): Date {
         return add(new Date(), { days });
+    }
+    // Legacy format for compatibility
+    parseDateNaissance(date: string): Date {
+        return new Date(`${date.split("/")[2]}-${date.split("/")[1]}-${date.split("/")[0]}T00:00:00.000+00:00`);
+    }
+    isValidFrenchDate(date: string): boolean {
+        if (!date || typeof date !== "string") {
+            return false;
+        }
+
+        const dateRegex = /^(\d{2})\/(\d{2})\/(\d{4})$/;
+        if (!dateRegex.test(date)) {
+            return false;
+        }
+
+        const parsed = parse(date, "dd/MM/yyyy", new Date());
+        return isValid(parsed);
     }
 }
