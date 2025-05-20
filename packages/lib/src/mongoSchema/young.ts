@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { YOUNG_SOURCE_LIST, YOUNG_SOURCE } from "../constants/constants";
+import { YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_ACCOUNT_STATUS } from "../constants/constants";
 import { PHONE_ZONES_NAMES_ARR } from "../phone-number";
 import { ROLES_LIST } from "../roles";
 
@@ -248,6 +248,16 @@ export const YoungSchema = {
       description: "Phase actuelle du volontaire",
     },
   },
+
+  accountStatus: {
+    type: String,
+    enum: [YOUNG_ACCOUNT_STATUS.ACTIVE, YOUNG_ACCOUNT_STATUS.PRECOMPTE],
+    optional: true,
+    documentation: {
+      description: "Statut du compte du volontaire",
+    },
+  },
+
   status: {
     type: String,
     default: "IN_PROGRESS",

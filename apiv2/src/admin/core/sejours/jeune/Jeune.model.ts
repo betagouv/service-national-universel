@@ -1,10 +1,11 @@
-import { YOUNG_SOURCE } from "snu-lib";
+import { YOUNG_ACCOUNT_STATUS, YOUNG_SOURCE } from "snu-lib";
 
 // TODO: Mettre à niveau pour de l'ecriture
 export type JeuneModel = {
     id: string;
     statut: string;
     statutPhase1: string;
+    statutCompte?: YOUNG_ACCOUNT_STATUS;
     email: string;
     telephone?: string;
     dateNaissance?: Date;

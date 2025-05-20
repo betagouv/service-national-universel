@@ -6,6 +6,9 @@ import ReactTooltip from "react-tooltip";
 import validator from "validator";
 import { HiInformationCircle } from "react-icons/hi";
 import { useSelector } from "react-redux";
+import cx from "classnames";
+
+import { ClasseDto, EtablissementDto, YoungDto } from "snu-lib";
 
 import { FieldsGroup } from "../FieldsGroup";
 import Field from "../Field";
@@ -40,34 +43,79 @@ import Section from "../Section";
 import { validateEmpty, getCorrectionRequest } from "../../utils";
 import { MiniTitle } from "../commons/MiniTitle";
 
-const PARENT_STATUS_OPTIONS = [
+interface ParentStatusOption {
+  label: string;
+  value: string;
+}
+
+interface BooleanOption {
+  value: string;
+  label: string;
+}
+
+interface Tab {
+  label: string;
+  value: number;
+  warning: boolean;
+}
+
+interface ExtendedYoungDto extends YoungDto {
+  classe?: ClasseDto;
+  etablissement?: EtablissementDto;
+}
+
+interface SectionParentsProps {
+  young: ExtendedYoungDto;
+  onStartRequest: (field: string) => void;
+  currentRequest: string;
+  onCorrectionRequestChange: (field: string, value: any) => void;
+  requests: any[];
+  globalMode: string;
+  onChange?: () => void;
+  oldCohort?: boolean;
+  readonly?: boolean;
+  isPrecompte?: boolean;
+}
+
+const PARENT_STATUS_OPTIONS: ParentStatusOption[] = [
   { label: "Mère", value: "mother" },
   { label: "Père", value: "father" },
   { label: "Autre", value: "representant" },
 ];
 
-const BOOLEAN_OPTIONS = [
+const BOOLEAN_OPTIONS: BooleanOption[] = [
   { value: "true", label: translate("true") },
   { value: "false", label: translate("false") },
 ];
 
-const psc1Options = [
+const psc1Options: BooleanOption[] = [
   { value: "true", label: "Oui" },
   { value: "false", label: "Non" },
-  { value: null, label: "Non renseigné" },
+  { value: "", label: "Non renseigné" },
 ];
 
-export default function SectionParents({ young, onStartRequest, currentRequest, onCorrectionRequestChange, requests, globalMode, onChange, oldCohort, readonly }) {
-  const [currentParent, setCurrentParent] = useState(1);
-  const [hasSpecificSituation, setHasSpecificSituation] = useState(false);
-  const [sectionMode, setSectionMode] = useState(globalMode);
-  const [youngFiltered, setYoungFiltered] = useState(filterDataForYoungSection(young, "parent"));
-  const [saving, setSaving] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [youngAge, setYoungAge] = useState(0);
-  const [situationOptions, setSituationOptions] = useState([]);
+export default function SectionParents({
+  young,
+  onStartRequest,
+  currentRequest,
+  onCorrectionRequestChange,
+  requests,
+  globalMode,
+  isPrecompte,
+  onChange,
+  oldCohort,
+  readonly,
+}: SectionParentsProps) {
+  const [currentParent, setCurrentParent] = useState<number>(1);
+  const [hasSpecificSituation, setHasSpecificSituation] = useState<boolean>(false);
+  const [sectionMode, setSectionMode] = useState<string>(globalMode);
+  const [youngFiltered, setYoungFiltered] = useState<ExtendedYoungDto>(filterDataForYoungSection(young, "parent") as ExtendedYoungDto);
+  const [saving, setSaving] = useState<boolean>(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [youngAge, setYoungAge] = useState<number>(0);
+  const [situationOptions, setSituationOptions] = useState<ParentStatusOption[]>([]);
   const gradeOptions = Object.keys(GRADES).map((g) => ({ value: g, label: translateGrade(g) }));
-  const user = useSelector((state) => state.Auth.user);
+  const user = useSelector((state: any) => state.Auth.user);
 
   useEffect(() => {
     if (youngFiltered) {
@@ -78,32 +126,32 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
       }
     }
     if (young) {
-      setYoungFiltered({ ...young, psc1Info: young.psc1Info });
+      setYoungFiltered({ ...young });
       setHasSpecificSituation(SPECIFIC_SITUATIONS_KEY.findIndex((key) => young[key] === "true") >= 0);
-      setYoungAge(getAge(young.birthdateAt));
+      setYoungAge(getAge(young.birthdateAt || new Date()) as number);
     } else {
-      setYoungFiltered({});
+      setYoungFiltered({} as ExtendedYoungDto);
       setHasSpecificSituation(false);
       setYoungAge(0);
     }
   }, [young]);
 
-  function onSectionChangeMode(mode) {
+  function onSectionChangeMode(mode: string) {
     setSectionMode(mode === "default" ? globalMode : mode);
   }
 
-  function onLocalChange(field, value) {
+  function onLocalChange(field: string, value: any) {
     const newData = { ...youngFiltered, [field]: value };
     if (field === "grade") {
       if (value === GRADES.NOT_SCOLARISE) {
         newData.schooled = "false";
-        if (!YOUNG_ACTIVE_SITUATIONS[youngFiltered.situation]) {
+        if (!YOUNG_ACTIVE_SITUATIONS[youngFiltered.situation || ""]) {
           newData.situation = "";
         }
         setSituationOptions(Object.keys(YOUNG_ACTIVE_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
       } else {
         newData.schooled = "true";
-        if (!YOUNG_SCHOOLED_SITUATIONS[youngFiltered.situation]) {
+        if (!YOUNG_SCHOOLED_SITUATIONS[youngFiltered.situation || ""]) {
           newData.situation = "";
         }
         setSituationOptions(Object.keys(YOUNG_SCHOOLED_SITUATIONS).map((s) => ({ value: s, label: translate(s) })));
@@ -112,8 +160,8 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     setYoungFiltered(newData);
   }
 
-  function onSchoolChange(changes) {
-    setYoungFiltered({ ...youngFiltered, ...changes });
+  function onSchoolChange(changes: Partial<ExtendedYoungDto>) {
+    setYoungFiltered((prev) => ({ ...prev, ...changes }));
   }
 
   function onCancel() {
@@ -121,7 +169,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     setErrors({});
   }
 
-  const trimmedPhones = {};
+  const trimmedPhones: Record<number, string> = {};
   if (youngFiltered.parent1Phone) trimmedPhones[1] = youngFiltered.parent1Phone.replace(/\s/g, "");
   if (youngFiltered.parent2Phone) trimmedPhones[2] = youngFiltered.parent2Phone.replace(/\s/g, "");
 
@@ -142,7 +190,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
           youngFiltered.schoolDepartment = "";
           youngFiltered.schoolRegion = "";
           youngFiltered.schoolCountry = "";
-          youngFiltered.schoolLocation = null;
+          youngFiltered.schoolLocation = undefined;
           youngFiltered.schoolId = "";
           youngFiltered.academy = "";
         }
@@ -163,9 +211,9 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     setSaving(false);
   }
 
-  function validate() {
+  function validate(): boolean {
     let result = true;
-    let errors = {};
+    const errors: Record<string, string> = {};
 
     if (!youngFiltered.parent1Status) return true;
 
@@ -173,7 +221,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     if (youngFiltered.parent2Phone) youngFiltered.parent2Phone = trimmedPhones[2];
 
     for (let parent = 1; parent <= (young.parent2Status ? 2 : 1); ++parent) {
-      if (["", undefined].includes(youngFiltered[`parent${parent}Email`]) || !validator.isEmail(youngFiltered[`parent${parent}Email`])) {
+      if (["", undefined].includes(youngFiltered[`parent${parent}Email`]) || !validator.isEmail(youngFiltered[`parent${parent}Email`] || "")) {
         errors[`parent${parent}Email`] = "L'email ne semble pas valide";
         result = false;
       }
@@ -188,7 +236,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
       if (
         trimmedPhones[parent] &&
         trimmedPhones[parent] !== "" &&
-        !isPhoneNumberWellFormated(youngFiltered[`parent${parent}Phone`], youngFiltered[`parent${parent}PhoneZone`] || "AUTRE")
+        !isPhoneNumberWellFormated(youngFiltered[`parent${parent}Phone`] || "", youngFiltered[`parent${parent}PhoneZone`] || "AUTRE")
       ) {
         errors[`parent${parent}Phone`] = PHONE_ZONES[youngFiltered[`parent${parent}PhoneZone`] || "AUTRE"].errorMessage;
         result = false;
@@ -220,7 +268,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     return result;
   }
 
-  const [isChecked, setIsChecked] = useState(young.sameSchoolCLE === "false");
+  const [isChecked, setIsChecked] = useState<boolean>(young.sameSchoolCLE === "false");
 
   const handleCheckboxChange = () => {
     const newValue = !isChecked;
@@ -228,7 +276,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     setYoungFiltered({ ...youngFiltered, sameSchoolCLE: newValue ? "false" : "true" });
   };
 
-  function parentHasRequest(parentId) {
+  function parentHasRequest(parentId: number): boolean {
     return (
       requests &&
       requests.findIndex((req) => {
@@ -237,12 +285,15 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
     );
   }
 
-  const tabs = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) || Object.keys(errors)?.some((error) => error.includes("parent1")) }];
+  let tabs: Tab[] = [{ label: "Représentant légal 1", value: 1, warning: parentHasRequest(1) || Object.keys(errors)?.some((error) => error.includes("parent1")) }];
   if (young.parent2Status) {
     tabs.push({ label: "Représentant légal 2", value: 2, warning: parentHasRequest(2) || Object.keys(errors)?.some((error) => error.includes("parent2")) });
   }
+  if (isPrecompte) {
+    tabs = [];
+  }
 
-  function onParrentTabChange(tab) {
+  function onParrentTabChange(tab: number) {
     setCurrentParent(tab);
     onStartRequest("");
   }
@@ -301,14 +352,14 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   {youngFiltered.schooled === "true" && (
                     <>
                       {sectionMode === "edition" ? (
-                        <SchoolEditor young={youngFiltered} onChange={onSchoolChange} />
+                        <SchoolEditor young={youngFiltered as YoungDto} onChange={onSchoolChange} />
                       ) : (
                         <>
                           <div className="flex items-center gap-4 mb-[16px]">
                             <Field
                               name="schoolZone"
                               label="Zone"
-                              value={region2zone[youngFiltered?.schoolRegion]}
+                              value={region2zone[youngFiltered?.schoolRegion || ""]}
                               mode={sectionMode}
                               className="w-1/2"
                               onStartRequest={onStartRequest}
@@ -321,7 +372,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                             <Field
                               name="schoolAcademy"
                               label="Académie"
-                              value={departmentToAcademy[youngFiltered?.schoolDepartment]}
+                              value={departmentToAcademy[youngFiltered?.schoolDepartment || ""]}
                               mode={sectionMode}
                               className="w-1/2"
                               onStartRequest={onStartRequest}
@@ -423,6 +474,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field
                     name="classeStatus"
                     label="Statut"
+                    // @ts-ignore
                     value={youngFiltered?.etablissement?.sector}
                     mode="readonly"
                     className="mb-[16px]"
@@ -432,7 +484,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <Field name="classeGrade" label="Niveau Scolaire" value={young?.grade} mode="readonly" className="mb-[24px]" young={young} transformer={translateGrade} />
                   <MiniTitle>Établissement</MiniTitle>
                   <div className="flex items-center gap-4 mb-[16px]">
-                    <Field name="etablissementZone" label="Zone" value={region2zone[youngFiltered?.etablissement?.region]} mode="readonly" className="w-1/2" young={young} />
+                    <Field name="etablissementZone" label="Zone" value={region2zone[youngFiltered?.etablissement?.region || ""]} mode="readonly" className="w-1/2" young={young} />
                     <Field name="etablissementAcademy" label="Académie" value={youngFiltered?.etablissement?.academy} mode="readonly" className="w-1/2" young={young} />
                   </div>
                   <div className="flex items-center gap-4 mb-[16px]">
@@ -441,9 +493,9 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   </div>
                   <Field name="etablissementCity" label="Ville" value={youngFiltered?.etablissement?.city} mode="readonly" className="mb-[16px]" young={young} />
                   <Field name="etablissementName" label="Nom" value={youngFiltered?.etablissement?.name} mode="readonly" className="mb-[24px]" young={young} />
-                  <div className="flex items-center">
+                  <div className={cx("flex items-center", { hidden: isPrecompte })}>
                     <input type="checkbox" checked={isChecked} onChange={handleCheckboxChange} className="mr-2" />
-                    <p className="text-xs font-base text-gray-900 mr-1">Situation de l’élève différente de celle de la Classe engagée</p>
+                    <p className="text-xs font-base text-gray-900 mr-1">Situation de l'élève différente de celle de la Classe engagée</p>
                   </div>
                 </>
               )}
@@ -453,11 +505,12 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 <MiniTitle>Situations particulières</MiniTitle>
                 <FieldSituationsParticulieres
                   name="specificSituations"
-                  young={youngFiltered}
+                  young={youngFiltered as YoungDto}
                   mode={sectionMode === "edition" ? "edition" : "readonly"}
                   onStartRequest={onStartRequest}
                   currentRequest={currentRequest}
                   correctionRequest={getCorrectionRequest(requests, "specificSituations")}
+                  // @ts-ignore
                   onCorrectionRequestChange={onCorrectionRequestChange}
                   onChange={onLocalChange}
                 />
@@ -477,7 +530,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 )}
               </div>
             )}
-            <div className="mt-[24px]">
+            <div className={cx("mt-[24px]", { hidden: isPrecompte })}>
               <div className="flex flex">
                 <MiniTitle>Titulaire du PSC1</MiniTitle>
                 <HiInformationCircle data-tip data-for="psc1Info" className="mt-0.5 ml-1 text-gray-400" />
@@ -487,6 +540,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
               </ReactTooltip>
               <Field
                 name="psc1Info"
+                // @ts-ignore
                 value={youngFiltered?.psc1Info || "Non renseigné"}
                 transformer={translate}
                 mode={sectionMode}
@@ -505,7 +559,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
           <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
           <div className="flex-[1_0_50%] pl-[56px]">
             <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
-            <div className="mt-[32px]">
+            <div className={cx("mt-[32px]", { hidden: isPrecompte })}>
               <Field
                 name={`parent${currentParent}Status`}
                 label="Statut"
@@ -595,6 +649,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 young={young}
               />
               {youngFiltered[`parent${currentParent}OwnAddress`] === "true" && (
+                // @ts-ignore
                 <FieldsGroup
                   name={`parent${currentParent}Address`}
                   mode={sectionMode === "edition" ? "edition" : "readonly"}
@@ -653,8 +708,8 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                   <div>
                     <div className="text-bold mb-[6px] text-[14px] leading-[20px] text-[#242526]">Attestation des représentants légaux</div>
                     <div className="grow text-[12px] leading-[20px] text-[#000000]">
-                      Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s’identifier et consentir, ce qui permet de
-                      s’affranchir du formulaire de consentement numérique.
+                      Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s'identifier et consentir, ce qui permet de
+                      s'affranchir du formulaire de consentement numérique.
                     </div>
                   </div>
                 </div>
@@ -684,6 +739,7 @@ export default function SectionParents({ young, onStartRequest, currentRequest, 
                 updateYoung={onChange}
               />
               {youngAge && youngAge < 15 && (
+                // @ts-ignore
                 <FileField mode={sectionMode} young={youngFiltered} label="Accord pour les mineurs de moins de 15 ans" fileType="parentConsentmentFiles" updateYoung={onChange} />
               )}
             </div>

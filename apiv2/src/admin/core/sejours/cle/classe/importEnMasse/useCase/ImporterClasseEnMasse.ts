@@ -6,7 +6,7 @@ import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_STATUS } from "snu-lib";
 import { ClasseService } from "../../Classe.service";
 import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
