@@ -10,6 +10,7 @@ import {
 import { CampagneEnvoi } from "@plan-marketing/core/Campagne.model";
 import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "./CampagneMongo.provider";
 import { CampagneMapper } from "./Campagne.mapper";
+import { buildFilter } from "./PlanMarketingFilterBuilder.util";
 import { isCampagneSansRef, isCampagneWithRef } from "snu-lib";
 
 @Injectable()
@@ -257,15 +258,7 @@ export class CampagneMongoRepository implements CampagneGateway {
     }
 
     private buildMongoFilter(filter?: Record<string, any>): Record<string, unknown> {
-        const cleanedFilter = Object.entries(filter ?? {})
-            .filter(([key, value]) =>
-                !["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"].includes(key) || value !== undefined
-            )
-            .reduce<Record<string, unknown>>((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-            }, {});
-
+        const cleanedFilter = buildFilter(filter, ["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"]);
         let mongoFilter = { ...cleanedFilter };
         if ("isLinkedToGenericCampaign" in mongoFilter) {
             mongoFilter = {
@@ -274,7 +267,6 @@ export class CampagneMongoRepository implements CampagneGateway {
                     ? { $ne: null }
                     : { $eq: null },
             };
-
             const { isLinkedToGenericCampaign, ...rest } = mongoFilter;
             mongoFilter = rest;
         }

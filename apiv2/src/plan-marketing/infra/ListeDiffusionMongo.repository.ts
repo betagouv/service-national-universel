@@ -4,6 +4,7 @@ import { ListeDiffusionGateway } from '../core/gateway/ListeDiffusion.gateway';
 import { Inject } from "@nestjs/common";
 import { CreateListeDiffusionModel, ListeDiffusionModel } from '../core/ListeDiffusion.model';
 import { ListeDiffusionMapper } from "./ListeDiffusion.mapper";
+import { buildFilter } from "./PlanMarketingFilterBuilder.util";
 
 export class ListeDiffusionMongoRepository implements ListeDiffusionGateway {
     constructor(
@@ -31,15 +32,14 @@ export class ListeDiffusionMongoRepository implements ListeDiffusionGateway {
     }
 
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
-        const cleanedFilter = Object.entries(filter ?? {})
-            .filter(([key, value]) =>
-                !["isArchived"].includes(key) || value !== undefined
-            )
-            .reduce<Record<string, unknown>>((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-            }, {});
+        const mongoFilter = this.buildMongoFilter(filter);
 
+        const listeDiffusions = await this.listeDiffusionModel.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
+        return listeDiffusions.map(ListeDiffusionMapper.toModel);
+    }
+
+    private buildMongoFilter(filter?: Record<string, any>): Record<string, unknown> {
+        const cleanedFilter = buildFilter(filter, ["isArchived"]);
         let mongoFilter = { ...cleanedFilter };
         if ("isArchived" in mongoFilter) {
             mongoFilter = {
@@ -47,8 +47,6 @@ export class ListeDiffusionMongoRepository implements ListeDiffusionGateway {
                 isArchived: mongoFilter.isArchived,
             };
         }
-
-        const listeDiffusions = await this.listeDiffusionModel.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
-        return listeDiffusions.map(ListeDiffusionMapper.toModel);
+        return mongoFilter;
     }
 }
