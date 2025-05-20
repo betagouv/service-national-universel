@@ -546,7 +546,7 @@ const translateApplication = (candidature) => {
     case "WAITING_VERIFICATION":
       return "En attente de vérification";
     case "WAITING_ACCEPTATION":
-      return "Proposition de mission en attente";
+      return "Candidature en attente";
     case "VALIDATED":
       return "Candidature approuvée";
     case "REFUSED":
