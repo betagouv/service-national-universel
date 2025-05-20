@@ -3,7 +3,7 @@
  */
 import React, { useState, useCallback } from "react";
 import ReactTooltip from "react-tooltip";
-import { translateHistory, debounce, getAuthor } from "../../utils";
+import { translateHistory, debounce, getAuthorTooltip } from "../../utils";
 import { formatLongDateFR, translateAction, translateBusPatchesField, UserSaved } from "snu-lib";
 import FilterIcon from "../../assets/icons/Filter";
 import UserCard from "../UserCard";
@@ -179,7 +179,7 @@ function Event({ event, refName, path, index }: { event: Event; refName: string;
       </td>
       <td data-tip data-for={tooltipAuteurId} className="overflow-hidden px-4 py-3">
         <ReactTooltip id={tooltipAuteurId} type="light" place="top" effect="solid" className="custom-tooltip-radius rounded-md !opacity-100 !shadow-md !z-50">
-          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthor(event.user)}</div>
+          <div className="text-gray-700 text-xs font-[400] text-center mb-1">{getAuthorTooltip(event.user)}</div>
         </ReactTooltip>
         <UserCard user={event.user} />
       </td>
