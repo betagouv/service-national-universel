@@ -7,11 +7,11 @@ import { createFormDataForFileUpload, ERRORS, RouteResponseBody } from "snu-lib"
 export const JWT_TOKEN_KEY = "jwt_token";
 
 export function getJwtToken(): string | null {
-  return sessionStorage.getItem(JWT_TOKEN_KEY) || null;
+  return localStorage.getItem(JWT_TOKEN_KEY) || null;
 }
 
 export function setJwtToken(token: string | null) {
-  return sessionStorage.setItem(JWT_TOKEN_KEY, token || "");
+  return localStorage.setItem(JWT_TOKEN_KEY, token || "");
 }
 
 let fetch = window.fetch;
