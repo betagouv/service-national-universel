@@ -1,5 +1,5 @@
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
-import { CreateJeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
+import { CreateJeuneModel, JeuneGenre } from "@admin/core/sejours/jeune/Jeune.model";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
@@ -51,11 +51,15 @@ export class ImporterClasseEnMasse implements UseCase<void> {
             const dateNaissance = this.clockGateway.parseDateNaissance(
                 jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE],
             );
+            let genre = JeuneGenre.FEMALE;
+            if (jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE] === "M") {
+                genre = JeuneGenre.MALE;
+            }
             const jeuneToCreate: CreateJeuneModel = {
                 nom: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
                 prenom: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
                 dateNaissance: dateNaissance,
-                genre: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE],
+                genre: genre,
                 statut: YOUNG_STATUS.IN_PROGRESS,
                 statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 email: `${jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]}.${
