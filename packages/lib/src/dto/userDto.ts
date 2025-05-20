@@ -11,6 +11,7 @@ export type UserDto = {
   department: string[] | string;
   subRole?: keyof typeof SUB_ROLES | keyof typeof SUPPORT_ROLES | keyof typeof VISITOR_SUBROLES | typeof SUB_ROLE_GOD;
   sessionPhase1Id?: string;
+  cohesionCenterId?: string;
   // young
   meetingPointId?: string;
   cohortId?: string;

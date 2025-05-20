@@ -12,13 +12,14 @@ interface Props {
   title?: AlerteMessageDto["title"];
   message?: AlerteMessageDto["content"];
   priority?: AlerteMessageDto["priority"];
+  icon?: React.ElementType;
   className?: string;
 }
 
-export default function InfoMessage({ title, message, priority, className }: Props) {
+export default function InfoMessage({ title, message, priority, icon = HiLightBulb, className }: Props) {
   const [show, setShow] = React.useState(true);
 
-  let Icon = HiLightBulb;
+  let Icon = icon;
   switch (priority) {
     case "normal":
       Icon = HiInformationCircle;
@@ -51,21 +52,27 @@ export default function InfoMessage({ title, message, priority, className }: Pro
           size={24}
         />
         <div className="text-base leading-6 font-bold">{title}</div>
-        <button className="text-xs ml-auto underline" onClick={() => setShow(!show)}>
-          {show ? "Masquer" : "Afficher"}
-        </button>
+        {message ? (
+          <button className="text-xs ml-auto underline" onClick={() => setShow(!show)}>
+            {show ? "Masquer" : "Afficher"}
+          </button>
+        ) : (
+          <span className="ml-auto" />
+        )}
       </div>
-      <div className={cx("ml-[38px] text-sm leading-5 font-medium", { block: show, hidden: !show })}>
-        <Markdown
-          remarkPlugins={[remarkGfm]}
-          components={{
-            a({ node, ...rest }) {
-              return <a className="underline" {...rest} />;
-            },
-          }}>
-          {message}
-        </Markdown>
-      </div>
+      {message && (
+        <div className={cx("ml-[38px] text-sm leading-5 font-medium", { block: show, hidden: !show })}>
+          <Markdown
+            remarkPlugins={[remarkGfm]}
+            components={{
+              a({ node, ...rest }) {
+                return <a className="underline" {...rest} />;
+              },
+            }}>
+            {message}
+          </Markdown>
+        </div>
+      )}
     </div>
   );
 }

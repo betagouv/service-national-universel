@@ -1,0 +1,63 @@
+---
+description: 
+globs: admin/**
+alwaysApply: false
+---
+You will always start a response with the name of the current rule : **RULE : admin-react-design-system**
+
+# Design System Component Usage Rules for Admin
+
+## Component Imports
+
+```typescript
+// DS Components Imports
+import { Checkbox } from "@snu/ds";
+import {
+  Button,
+  Collapsable,
+  Container,
+  InputText,
+  Label,
+  Modal,
+  Select,
+  SelectOption,
+  Tooltip,
+  DataTable,
+  Badge,
+} from "@snu/ds/admin";
+
+// Local Components Imports 
+import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
+import Breadcrumbs from "@/components/Breadcrumbs";
+import UserCard from "@/components/UserCard";
+```
+
+## Component Usage Rules
+
+### 1. Input Controls
+- Use `InputText` for text inputs
+- Use `Checkbox` for boolean toggles
+- Use `Select` with `SelectOption` for dropdown selects
+
+### 2. Layout Components
+- Use `Container` for content containers
+- Use `Collapsable` for expandable sections
+- Use `Label` for form input labels
+
+### 3. Interactive Elements
+- Use `Button` for regular buttons
+- Use `ButtonPrimary` for primary actions
+- Use `Tooltip` for additional info on hover
+
+### 4. Data Display
+- Use `DataTable` for tabular data
+- Use `Badge` for status indicators
+- Use `UserCard` for displaying user information
+
+### 5. Navigation
+- Use `Breadcrumbs` for page navigation trails
+
+### 6. Dialogs
+- Use `Modal` for any dialog/popup content
+
+**Important:** Avoid creating duplicate components or using custom styled elements when an equivalent design system component is available.

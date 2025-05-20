@@ -10,7 +10,7 @@ const ReferentielService = {
       params: {
         name,
       },
-      payload: file,
+      file,
       target: "API_V2",
     })();
   },

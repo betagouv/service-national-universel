@@ -1,5 +1,5 @@
 import { Schema, InferSchemaType } from "mongoose";
-import { InterfaceExtended } from "..";
+import { InterfaceExtended, ReferentType } from "..";
 
 export const SessionPhase1FileSchema = {
   _id: String,
@@ -68,6 +68,12 @@ export const SessionPhase1Schema = {
     type: String,
     documentation: {
       description: "Id de l'utilisateur responsable, le chef de centre",
+    },
+  },
+  adjointsIds: {
+    type: [String],
+    documentation: {
+      description: "Ids des utilisateurs adjoints, les adjoints de centre",
     },
   },
   team: {
@@ -202,4 +208,7 @@ const schema = new Schema({
   },
 });
 
-export type SessionPhase1Type = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type SessionPhase1Type = InterfaceExtended<InferSchemaType<typeof schema>> & {
+  headCenter?: Pick<ReferentType, "_id" | "firstName" | "lastName" | "email" | "role" | "phone" | "mobile">;
+  adjoints?: Pick<ReferentType, "_id" | "firstName" | "lastName" | "email" | "role">[];
+};

@@ -38,7 +38,6 @@ services:
   bullboard:
     container_name: bullboard
     image: venatum/bull-board:latest
-    restart: always
     ports:
       - 3001:3000
     environment:

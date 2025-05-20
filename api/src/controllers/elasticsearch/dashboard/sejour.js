@@ -4,7 +4,7 @@ const router = express.Router();
 const { capture } = require("../../../sentry");
 const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
-const { joiElasticSearch, buildDashboardUserRoleContext } = require("../utils");
+const { joiElasticSearch, buildDashboardUserRoleContext, getResponsibleCenterField } = require("../utils");
 const { ROLES, ES_NO_LIMIT, YOUNG_STATUS_PHASE1, YOUNG_STATUS, canSeeDashboardSejourInfo, canSeeDashboardSejourHeadCenter } = require("snu-lib");
 const { SessionPhase1Model } = require("../../../models");
 const Joi = require("joi");
@@ -270,7 +270,8 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     if (!canSeeDashboardSejourHeadCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const session = await SessionPhase1Model.findOne({ headCenterId: req.user._id, cohort: req.body.filters.cohort });
+    const field = getResponsibleCenterField(req.user.role);
+    const session = await SessionPhase1Model.findOne({ [field]: req.user._id, cohort: req.body.filters.cohort });
     // creation de la Query avec filtres pour récupèrer les infos des jeunes
     const aggsFilter = {};
     aggsFilter.filter = {
@@ -350,7 +351,7 @@ router.post("/head-center", passport.authenticate(["referent"], { session: false
     const filterFields = ["cohort", "status", "cohesionCenterId"];
     const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const allowedRoles = [ROLES.HEAD_CENTER];
+    const allowedRoles = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
     if (!allowedRoles.includes(req.user.role)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

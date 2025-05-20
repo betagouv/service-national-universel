@@ -12,6 +12,7 @@ import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
 import Sejour from "./ui/icons/Sejour";
+import { isResponsableDeCentre } from "@/utils";
 
 // Adding Todos to a user role dashboard
 // 1. Import <Todos /> in the dashboard/general component
@@ -86,7 +87,7 @@ export default function Todos({ user }) {
     return (
       <div
         className={`flex ${
-          user.role !== ROLES.HEAD_CENTER ? "w-[70%]" : "w-full"
+          !isResponsableDeCentre(user) ? "w-[70%]" : "w-full"
         } flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] h-[584px]"}`}>
         <div className="text-slate-300 py-8 m-auto text-center animate-pulse text-xl">Chargement des actualités</div>
       </div>
@@ -112,6 +113,8 @@ export default function Todos({ user }) {
 
   switch (user.role) {
     case ROLES.HEAD_CENTER:
+    case ROLES.HEAD_CENTER_ADJOINT:
+    case ROLES.REFERENT_SANITAIRE:
       Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
         if (index % 3 === 0) columnTodo1.data[key] = value;
         if (index % 3 === 1) columnTodo2.data[key] = value;
@@ -139,7 +142,7 @@ export default function Todos({ user }) {
 
   return (
     <div
-      className={`flex ${user.role !== ROLES.HEAD_CENTER ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
+      className={`flex ${!isResponsableDeCentre(user) ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
         !fullNote ? "h-[584px]" : "h-fit"
       }`}>
       <div className="grid grid-cols-3 gap-4">

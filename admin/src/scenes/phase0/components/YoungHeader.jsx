@@ -46,6 +46,7 @@ import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
 import { useMutation } from "@tanstack/react-query";
 import { notifyYoungStatusChanged, updateYoung } from "../utils/service";
+import { isResponsableDeCentre } from "@/utils";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -182,7 +183,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   };
 
   const canYoungChangeCohort = () => {
-    if (young.status === YOUNG_STATUS.DELETED || user.role === ROLES.HEAD_CENTER) {
+    if (young.status === YOUNG_STATUS.DELETED || isResponsableDeCentre(user)) {
       return false;
     }
     if (young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) {
@@ -205,13 +206,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   return (
     <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
-      <div className={`flex w-full flex-row flex-wrap-reverse items-end justify-end gap-2 ${user.role === ROLES.HEAD_CENTER ? "pt-[57px]" : ""}`}>
+      <div className={`flex w-full flex-row flex-wrap-reverse items-end justify-end gap-2 ${isResponsableDeCentre(user) ? "pt-[57px]" : ""}`}>
         <div className="grow self-start">
           <div className=" flex flex-row w-full justify-between items-center">
             <Title>
               <div className="mr-[15px]">
                 <div className="flex items-center">
-                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
+                  {!isResponsableDeCentre(user) && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
                   {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
                 </div>
               </div>
@@ -233,7 +234,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
           {isStructure ? (
             <TabList className="mt-[30px]">
-              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && user.role !== ROLES.HEAD_CENTER && (
+              {young.status !== YOUNG_STATUS.WAITING_CORRECTION && young.status !== YOUNG_STATUS.WAITING_VALIDATION && !isResponsableDeCentre(user) && (
                 <Tab isActive={tab === "candidature"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}`)}>
                   <div className="flex items-center">
                     Candidature{getNotesByPhase(PHASE_2).length > 0 && <NoteIcon id={PHASE_2} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_2)} />}
@@ -243,7 +244,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               <Tab isActive={tab === "dossier"} onClick={() => history.push(`/volontaire/${young._id}/phase2/application/${applicationId}/dossier`)}>
                 <div className="flex items-center">
                   Dossier d&apos;inscription
-                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
+                  {!isResponsableDeCentre(user) && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
                     <NoteIcon id={PHASE_INSCRIPTION} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
                   )}
                 </div>
@@ -254,7 +255,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               <Tab isActive={tab === "file"} onClick={() => history.push(`/volontaire/${young._id}`)}>
                 <div className="flex items-center">
                   Dossier d&apos;inscription
-                  {user.role !== ROLES.HEAD_CENTER && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
+                  {!isResponsableDeCentre(user) && getNotesByPhase(PHASE_INSCRIPTION).length > 0 && (
                     <NoteIcon id={PHASE_INSCRIPTION} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_INSCRIPTION)} />
                   )}
                 </div>
@@ -266,7 +267,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                       Phase 1{getNotesByPhase(PHASE_1).length > 0 && <NoteIcon id={PHASE_1} className="ml-1 block" onClick={setViewedNoteParPhase(PHASE_1)} />}
                     </div>
                   </Tab>
-                  {user.role !== ROLES.HEAD_CENTER && (
+                  {!isResponsableDeCentre(user) && (
                     <>
                       {canManageMig(user) && (
                         <Tab isActive={tab === "phase2"} onClick={() => history.push(`/volontaire/${young._id}/phase2`)}>
@@ -286,7 +287,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   )}
                 </>
               )}
-              {user.role !== ROLES.HEAD_CENTER && (
+              {!isResponsableDeCentre(user) && (
                 <Tab isActive={tab === "historique"} onClick={() => history.push(`/volontaire/${young._id}/historique`)}>
                   <div className="flex items-center">
                     <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
@@ -299,7 +300,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   Notifications
                 </Tab>
               ) : null}
-              {user.role !== ROLES.HEAD_CENTER && canViewNotes(user) && (
+              {!isResponsableDeCentre(user) && canViewNotes(user) && (
                 <Tab isActive={tab === "notes"} onClick={() => history.push(`/volontaire/${young._id}/notes`)}>
                   {`(${young.notes?.length || 0}) Notes internes`}
                 </Tab>
@@ -307,7 +308,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
             </TabList>
           )}
         </div>
-        {!isStructure && user.role !== ROLES.HEAD_CENTER && (
+        {!isStructure && !isResponsableDeCentre(user) && (
           <div className="w-[300px] self-end">
             <div className="relative mb-[15px]">
               <div className="absolute top-[-45px]">

@@ -35,11 +35,12 @@ export function buildRequest<Route extends BasicRoute>({
 }
 
 type WithFile<T> = T & {
-  payload?: File;
+  file: File;
 };
 
 export function buildFileRequest<Route extends BasicRoute>({
-  payload: file,
+  file,
+  payload,
   params,
   path,
   method,
@@ -60,7 +61,7 @@ export function buildFileRequest<Route extends BasicRoute>({
 
   switch (method) {
     case "POST":
-      return async () => api.postFile(url, file);
+      return async () => api.postFile(url, file, payload);
     default:
       throw new Error("Method not supported");
   }
