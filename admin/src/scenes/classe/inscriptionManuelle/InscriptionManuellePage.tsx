@@ -22,17 +22,17 @@ export default function InscriptionManuellePage() {
 
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
 
-  const handleSubmit = async (data: FormValues, formId: number) => {
+  const handleSubmit = async (form: FormValues, formId: number) => {
     if (!id) return;
 
     try {
       setIsSubmitting(true);
 
       const payload = {
-        prenom: data.firstName,
-        nom: data.lastName,
-        dateDeNaissance: data.birthDate,
-        sexe: data.gender,
+        prenom: form.firstName,
+        nom: form.lastName,
+        dateDeNaissance: form.birthDate,
+        sexe: form.gender.value,
       };
 
       try {

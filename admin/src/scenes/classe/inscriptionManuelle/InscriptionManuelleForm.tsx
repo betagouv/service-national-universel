@@ -7,7 +7,7 @@ import { Label, Select } from "@snu/ds/admin";
 type FormValues = {
   lastName: string;
   firstName: string;
-  gender: string;
+  gender: { value: string; label: string };
   birthDate: string;
 };
 
@@ -26,7 +26,7 @@ const InscriptionManuelleForm = ({ onSubmit, isSubmitting = false, isSuccess = f
     defaultValues: {
       lastName: "",
       firstName: "",
-      gender: "",
+      gender: { value: "", label: "" },
       birthDate: "",
     },
   });
