@@ -66,28 +66,7 @@ export class CampagneMongoRepository implements CampagneGateway {
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]> {
-        const cleanedFilter = Object.entries(filter ?? {})
-            .filter(([key, value]) =>
-                !["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"].includes(key) || value !== undefined
-            )
-            .reduce<Record<string, unknown>>((acc, [key, value]) => {
-                acc[key] = value;
-                return acc;
-            }, {});
-
-        let mongoFilter = { ...cleanedFilter };
-        if ("isLinkedToGenericCampaign" in mongoFilter) {
-            mongoFilter = {
-                ...mongoFilter,
-                campagneGeneriqueId: mongoFilter.isLinkedToGenericCampaign
-                    ? { $ne: null }
-                    : { $eq: null },
-            };
-
-            const { isLinkedToGenericCampaign, ...rest } = mongoFilter;
-            mongoFilter = rest;
-        }
-
+        const mongoFilter = this.buildMongoFilter(filter);
         const campagnes = await this.campagneModel.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
         return Promise.all(
             campagnes.map(async (campagne) => {
@@ -275,5 +254,30 @@ export class CampagneMongoRepository implements CampagneGateway {
         );
 
         return results.filter((item): item is CampagneSpecifiqueModelWithRefAndGeneric => item !== null);
+    }
+
+    private buildMongoFilter(filter?: Record<string, any>): Record<string, unknown> {
+        const cleanedFilter = Object.entries(filter ?? {})
+            .filter(([key, value]) =>
+                !["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"].includes(key) || value !== undefined
+            )
+            .reduce<Record<string, unknown>>((acc, [key, value]) => {
+                acc[key] = value;
+                return acc;
+            }, {});
+
+        let mongoFilter = { ...cleanedFilter };
+        if ("isLinkedToGenericCampaign" in mongoFilter) {
+            mongoFilter = {
+                ...mongoFilter,
+                campagneGeneriqueId: mongoFilter.isLinkedToGenericCampaign
+                    ? { $ne: null }
+                    : { $eq: null },
+            };
+
+            const { isLinkedToGenericCampaign, ...rest } = mongoFilter;
+            mongoFilter = rest;
+        }
+        return mongoFilter;
     }
 }
