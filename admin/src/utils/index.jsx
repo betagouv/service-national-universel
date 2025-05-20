@@ -448,6 +448,25 @@ export const getRandomId = () => `${Math.floor(Math.random() * 100000)}-${Date.n
 
 export const desktopBreakpoint = 1024;
 
+export function getAuthorTooltip(user) {
+  function getRole(user) {
+    if (!user) return "";
+    if (user.role) {
+      return translate(user.role);
+    } else {
+      return "Script";
+    }
+  }
+  function getFullName(user) {
+    if (!user) return "Auteur inconnu";
+    if (user.firstName && user.lastName) return `${user.firstName} ${user.lastName.toUpperCase()}`;
+    if (user.firstName && !user.lastName) return user.firstName;
+  }
+
+  const fullName = getFullName(user);
+  const role = getRole(user);
+  return `${fullName} ${role}`;
+}
 export const isResponsableDeCentre = (user) => {
   if (!user || !user.role) return false;
   return user.role === ROLES.HEAD_CENTER || user.role === ROLES.HEAD_CENTER_ADJOINT || user.role === ROLES.REFERENT_SANITAIRE;

@@ -9,14 +9,14 @@ import { capture } from "@/sentry";
 import api from "@/services/api";
 import { IoWarningOutline } from "react-icons/io5";
 import ReactTooltip from "react-tooltip";
+import { useUpdateEligibilityMutation } from "@/scenes/settings/general/hooks/useCohortUpdate";
 
 type EligibilityTabsProps = {
-  cohort?: CohortDto;
+  cohort: CohortDto;
   readOnly?: boolean;
-  getCohort: () => void;
 };
 
-type EligibilityForm = {
+export type EligibilityForm = {
   zones: string[];
   schoolLevels: string[];
   bornAfter: Date | null;
@@ -33,7 +33,7 @@ type ErrorForm = {
 
 region2department["Étranger"] = ["Etranger"]; // Add Etranger to the list of regions because eligibility can be set to Etranger
 
-export default function EligibilityTab({ cohort, readOnly, getCohort }: EligibilityTabsProps) {
+export default function EligibilityTab({ cohort, readOnly }: EligibilityTabsProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<ErrorForm>({});
   const [formValues, setFormValues] = useState<EligibilityForm>({
@@ -42,6 +42,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
     bornAfter: null,
     bornBefore: null,
   });
+  const updateEligibilityMutation = useUpdateEligibilityMutation();
 
   useEffect(() => {
     setFormValues({
@@ -53,6 +54,7 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
   }, [cohort]);
 
   const onSubmit = async () => {
+    if (!cohort._id) return;
     try {
       const err: ErrorForm = {};
       if (!formValues.bornAfter) err.bornAfter = "La date est obligatoire";
@@ -69,18 +71,13 @@ export default function EligibilityTab({ cohort, readOnly, getCohort }: Eligibil
         return toastr.warning("Information", "Veuillez corriger les erreurs dans le formulaire");
       }
 
-      setIsLoading(true);
-      const { ok, code } = await api.put(`/cohort/${cohort?._id?.toString()}/eligibility`, formValues);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la mise à jour de l'élégibilité", translate(code));
-      }
-      toastr.success("Information", "La session a bien été mise à jour");
+      updateEligibilityMutation.mutate({
+        cohortId: cohort._id.toString(),
+        data: formValues,
+      });
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la mise à jour de la session", "");
-    } finally {
-      await getCohort();
-      setIsLoading(false);
     }
   };
 
