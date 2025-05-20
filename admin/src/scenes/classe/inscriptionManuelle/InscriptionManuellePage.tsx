@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { useParams } from "react-router-dom";
-import { ROLES } from "snu-lib";
+import { FunctionalException, ROLES, translate, translateInscriptionManuelle } from "snu-lib";
 import { BsPeopleFill, BsPersonPlusFill } from "react-icons/bs";
 import { FiPlus } from "react-icons/fi";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
@@ -32,14 +32,18 @@ export default function InscriptionManuellePage() {
         prenom: data.firstName,
         nom: data.lastName,
         dateDeNaissance: data.birthDate,
-        sexe: data.gender === "male" ? "masculin" : "feminin",
+        sexe: data.gender,
       };
 
       try {
         await ClasseService.inscrireEleveManuellement(id, payload);
         setSuccessFormIds((prev) => [...prev, formId]);
       } catch (err) {
-        toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
+        if (err instanceof FunctionalException) {
+          toastr.error("Erreur", translateInscriptionManuelle(err.message));
+        } else {
+          toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
+        }
       }
     } catch (error) {
       toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");

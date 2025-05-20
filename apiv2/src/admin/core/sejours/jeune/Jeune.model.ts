@@ -77,3 +77,8 @@ export type JeuneWithMinimalDataModel = Pick<JeuneModel, "prenom" | "nom" | "dat
     dateNaissance: Date;
     genre: string;
 };
+
+export enum JeuneGenre {
+    MALE = "male",
+    FEMALE = "female",
+}
