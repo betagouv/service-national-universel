@@ -19,6 +19,7 @@ import { ClassesRoutes, FeatureFlagName, MIME_TYPES, ModifierReferentDto } from 
 import {
     InscriptionEnMasseImportPayloadDto,
     InscriptionEnMasseValidationPayloadDto,
+    InscriptionManuellePayloadDto,
     ModifierReferentPayloadDto,
 } from "./Classe.validation";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -31,6 +32,8 @@ import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { TaskModel } from "@task/core/Task.model";
+import { InscrireEleveManuellement } from "@admin/core/sejours/cle/classe/useCase/InscrireEleveManuellement";
+import { JeuneWithMinimalDataModel } from "@admin/core/sejours/jeune/Jeune.model";
 
 @Controller("classe")
 export class ClasseController {
@@ -42,6 +45,7 @@ export class ClasseController {
         private readonly featureFlagService: FeatureFlagService,
         private readonly classeImportService: ClasseImportService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
+        private readonly inscrireEleveManuellement: InscrireEleveManuellement,
     ) {}
 
     @Post(":id/verify")
@@ -149,5 +153,20 @@ export class ClasseController {
             statusDate: statut.statusDate?.toISOString(),
             lastCompletedAt: statut.lastCompletedAt?.toISOString(),
         };
+    }
+
+    @Post(":id/inscription-manuelle")
+    @UseGuards(ClasseAdminCleGuard)
+    async inscriptionManuelle(
+        @Param("id") classeId: string,
+        @Body() data: InscriptionManuellePayloadDto,
+    ): Promise<ClassesRoutes["InscriptionManuelle"]["response"]> {
+        const jeune: JeuneWithMinimalDataModel = {
+            prenom: data.prenom,
+            nom: data.nom,
+            dateNaissance: data.dateDeNaissance,
+            genre: data.sexe,
+        };
+        return this.inscrireEleveManuellement.execute(jeune, classeId);
     }
 }

@@ -1,8 +1,10 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { CreateJeuneModel, JeuneModel } from "./Jeune.model";
+import { CreateJeuneModel, JeuneModel, JeuneWithMinimalDataModel } from "./Jeune.model";
 import { JeuneGateway } from "./Jeune.gateway";
-import { YOUNG_SOURCE } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
 import { ClasseService } from "../cle/classe/Classe.service";
+import { CryptoGateway } from "@shared/core/Crypto.gateway";
+import { ClasseModel } from "../cle/classe/Classe.model";
 
 @Injectable()
 export class JeuneService {
@@ -10,6 +12,8 @@ export class JeuneService {
         @Inject(JeuneGateway)
         private readonly jeuneGateway: JeuneGateway,
         private readonly classeService: ClasseService,
+        @Inject(CryptoGateway)
+        private readonly cryptoGateway: CryptoGateway,
     ) {}
 
     async create(jeune: CreateJeuneModel): Promise<JeuneModel> {
@@ -30,5 +34,44 @@ export class JeuneService {
             await this.classeService.updatePlacesPrises(jeuneUpdated.classeId);
         }
         return jeuneUpdated;
+    }
+
+    async findByPrenomAndNomDateNaissanceAndClasseId(
+        prenom: string,
+        nom: string,
+        dateNaissance: Date,
+        classeId: string,
+    ): Promise<JeuneModel | null> {
+        return this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(nom, prenom, dateNaissance, classeId);
+    }
+
+    buildJeuneCleWithMinimalData(jeune: JeuneWithMinimalDataModel, classe: ClasseModel): CreateJeuneModel {
+        return {
+            nom: jeune.nom,
+            prenom: jeune.prenom,
+            dateNaissance: jeune.dateNaissance,
+            genre: jeune.genre,
+            statut: YOUNG_STATUS.IN_PROGRESS,
+            statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            email: `${jeune.prenom}.${jeune.nom}@localhost-${this.cryptoGateway.getUuid().slice(0, 6)}`
+                .toLowerCase()
+                .replace(/\s/g, ""),
+            sessionId: classe.sessionId,
+            sessionNom: classe.sessionNom,
+            youngPhase1Agreement: "true",
+            classeId: classe.id,
+            etablissementId: classe.etablissementId,
+            scolarise: "true",
+            psh: "false",
+            departement: classe.departement,
+            region: classe.region,
+            consentement: "true",
+            acceptCGU: "true",
+            parentAllowSNU: "true",
+            parent1AllowSNU: "true",
+            parent1AllowImageRights: "true",
+            imageRight: "true",
+            source: YOUNG_SOURCE.CLE,
+        };
     }
 }

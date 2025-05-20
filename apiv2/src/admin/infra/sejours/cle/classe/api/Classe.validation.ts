@@ -28,3 +28,21 @@ export class InscriptionEnMasseImportPayloadDto {
     @IsString()
     fileKey: string;
 }
+
+export class InscriptionManuellePayloadDto {
+    @IsNotEmpty()
+    @IsString()
+    prenom: string;
+
+    @IsNotEmpty()
+    @IsString()
+    nom: string;
+
+    @IsNotEmpty()
+    @IsString()
+    dateDeNaissance: Date;
+
+    @IsNotEmpty()
+    @IsString()
+    sexe: string;
+}

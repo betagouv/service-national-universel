@@ -9,18 +9,43 @@ import Loader from "@/components/Loader";
 import useClass from "../utils/useClass";
 import InscriptionManuelleForm, { FormValues } from "./InscriptionManuelleForm";
 import { HiAcademicCap } from "react-icons/hi2";
+import { toastr } from "react-redux-toastr";
+import { ClasseService } from "@/services/classeService";
 
 export default function InscriptionManuellePage() {
   const { id } = useParams<{ id: string }>();
   // @ts-expect-error property does not exist
   const user = useSelector((state) => state.Auth.user);
   const [forms, setForms] = useState<number[]>([0]);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+  const [successFormIds, setSuccessFormIds] = useState<number[]>([]);
 
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
 
-  const handleSubmit = (data: FormValues) => {
-    // TODO: Implement student registration
-    console.log(data);
+  const handleSubmit = async (data: FormValues, formId: number) => {
+    if (!id) return;
+
+    try {
+      setIsSubmitting(true);
+
+      const payload = {
+        prenom: data.firstName,
+        nom: data.lastName,
+        dateDeNaissance: data.birthDate,
+        sexe: data.gender === "male" ? "masculin" : "feminin",
+      };
+
+      try {
+        await ClasseService.inscrireEleveManuellement(id, payload);
+        setSuccessFormIds((prev) => [...prev, formId]);
+      } catch (err) {
+        toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
+      }
+    } catch (error) {
+      toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const addNewForm = () => {
@@ -81,12 +106,12 @@ export default function InscriptionManuellePage() {
         <div className="bg-white p-4">
           {forms.map((formId) => (
             <div key={formId} className={formId > 0 ? "mt-10 pt-10 border-t border-gray-200" : ""}>
-              <InscriptionManuelleForm onSubmit={handleSubmit} />
+              <InscriptionManuelleForm onSubmit={(data) => handleSubmit(data, formId)} isSubmitting={isSubmitting} isSuccess={successFormIds.includes(formId)} />
             </div>
           ))}
 
           <div className="border-t border-gray-200 mt-12 pt-6 flex justify-center">
-            <Button type="wired" onClick={addNewForm} leftIcon={<FiPlus className="mr-2" />} title="Ajouter un élève" />
+            <Button type="wired" onClick={addNewForm} leftIcon={<FiPlus className="mr-2" />} title="Ajouter un élève" disabled={isSubmitting} />
           </div>
         </div>
       </Container>
