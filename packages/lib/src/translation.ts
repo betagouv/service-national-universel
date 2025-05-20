@@ -359,6 +359,10 @@ const translateRoles = (role) => {
       return "Responsable";
     case "head_center":
       return "Chef de centre";
+    case "head_center_adjoint":
+      return "Chef de centre adjoint";
+    case "referent_sanitaire":
+      return "Référent sanitaire";
     case "administrateur_cle":
       return "Administrateur CLE";
     case "referent_classe":

@@ -1,7 +1,8 @@
 import useAuth from "@/services/useAuth";
 import useCohort from "@/services/useCohort";
-import { permissionPhase1 } from "@/utils";
-import { canApplyToPhase2, canViewPhase2, hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { cohortAssignmentAnnouncementsIsOpenForYoung } from "@/utils/cohorts";
+import { hasAccessToReinscription, YOUNG_SOURCE, YOUNG_STATUS, canCreateApplications, canCreateEquivalences, canViewMissions } from "snu-lib";
+import { canViewPhase2, permissionPhase1 } from "@/utils";
 
 export default function usePermissions() {
   const { young } = useAuth();
@@ -13,8 +14,11 @@ export default function usePermissions() {
     canModifyInscription: cohort.inscriptionModificationEndDate ? new Date() < new Date(cohort.inscriptionModificationEndDate) : false,
     hasAccessToReinscription: hasAccessToReinscription(young),
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status as any),
+    canUpdatePSC1: !cohortAssignmentAnnouncementsIsOpenForYoung(cohort),
     canViewPhase1: permissionPhase1(young),
     canViewPhase2: canViewPhase2(young, cohort),
-    canApplyToPhase2: canApplyToPhase2(young, cohort),
+    canViewMissions: canViewMissions(young, cohort),
+    canCreateApplications: canCreateApplications(young, cohort),
+    canCreateEquivalences: canCreateEquivalences(young),
   };
 }

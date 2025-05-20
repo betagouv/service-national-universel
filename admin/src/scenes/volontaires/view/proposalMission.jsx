@@ -1,15 +1,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canApplyToPhase2 } from "snu-lib";
+import { canCreateApplications } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, debounce } from "../../../utils";
+import { debounce } from "../../../utils";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import CardMission from "../components/CardMission";
 import { useSelector } from "react-redux";
+import useCreateApplicationForYoung from "@/scenes/missions/view/propose-mission/useCreateApplicationForYoung";
 
 export default function ProposeMission({ young, onSend }) {
   const cohortList = useSelector((state) => state.Cohorts);
@@ -18,6 +19,7 @@ export default function ProposeMission({ young, onSend }) {
   const [paramData, setParamData] = useState({ page: 0 });
   const [data, setData] = useState([]);
   const [size, setSize] = useState(10);
+  const { mutate: createApplicationForYoung } = useCreateApplicationForYoung();
 
   const cohort = cohortList.find((c) => c.name === young.cohort);
 
@@ -57,40 +59,8 @@ export default function ProposeMission({ young, onSend }) {
     updateOnParamChange(selectedFilters, paramData);
   }, [selectedFilters, paramData.page]);
 
-  const handleProposal = async (mission) => {
-    const application = {
-      status: APPLICATION_STATUS.WAITING_ACCEPTATION,
-      youngId: young._id,
-      youngFirstName: young.firstName,
-      youngLastName: young.lastName,
-      youngEmail: young.email,
-      youngBirthdateAt: young.birthdateAt,
-      youngCity: young.city,
-      youngDepartment: young.department,
-      youngCohort: young.cohort,
-      missionId: mission._id,
-      missionName: mission.name,
-      missionDepartment: mission.department,
-      missionRegion: mission.region,
-      structureId: mission.structureId,
-      tutorId: mission.tutorId,
-      tutorName: mission.tutorName,
-    };
-    const { ok, code } = await api.post(`/application`, application);
-    if (!ok) return toastr.error("Oups, une erreur est survenue lors de la candidature", code);
-
-    //send mail
-    const { ok: okMail, code: codeMail } = await api.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION}`, {
-      missionName: mission.name,
-      structureName: mission.structureName,
-    });
-    if (!okMail) {
-      toastr.error("Oups, une erreur est survenue lors de l'envoi du mail", codeMail);
-      capture(codeMail);
-      return;
-    }
-    setMissionIds([...missionIds, mission._id]);
-    toastr.success("Email envoyé !");
+  const handleProposal = (mission) => {
+    createApplicationForYoung({ young, mission }, { onSuccess: () => setMissionIds([...missionIds, mission._id]) });
   };
 
   return (
@@ -115,7 +85,7 @@ export default function ProposeMission({ young, onSend }) {
             Proposer une mission à {young.firstName} {young.lastName}
           </h1>
         </div>
-        {canApplyToPhase2(young, cohort) ? (
+        {canCreateApplications(young, cohort) ? (
           <>
             <div className="h-[38px] w-1/3 mx-auto overflow-hidden rounded-md border-[1px] border-gray-300 px-2.5">
               <input

@@ -13,7 +13,7 @@ import useClass from "@/scenes/cle/useClass";
 const AccountSchoolSituationPage = () => {
   const { young, isCLE } = useAuth();
   const { isPending, isError, data: classe } = useClass(young?.classeId);
-  if (isError) toastr.error("Impossible de joindre le service.");
+  if (isError) toastr.error("Erreur", "Impossible de joindre le service.");
 
   const values = {
     situation: young.situation || "",
@@ -52,7 +52,7 @@ const AccountSchoolSituationPage = () => {
                     <p className=" text-xs leading-4 text-gray-500">Niveau scolaire</p>
                     <div className="flex flex-wrap flex-col gap-2">
                       {classe.grades.map((grade, index) => (
-                        <span disabled key={index} className="w-full bg-white text-sm text-gray-400 pl-1">
+                        <span key={index} className="w-full bg-white text-sm text-gray-400 pl-1">
                           {translateGrade(grade)}
                         </span>
                       ))}

@@ -12,6 +12,7 @@ import {
   canCreateOrUpdateCohesionCenter,
   canPutSpecificDateOnSessionPhase1,
   CohesionCenterType,
+  ROLES,
   isAdmin,
   isSessionEditionOpen,
   isSuperAdmin,
@@ -36,6 +37,7 @@ import PedagoProject from "../PedagoProject";
 import { getDefaultSession } from "@/utils/session";
 import SyncPlacesButton from "./SyncPlacesButton";
 import SessionVolontairesButton from "./SessionVolontairesButton";
+import { isResponsableDeCentre } from "@/utils";
 
 type Props = {
   center: CohesionCenterType;
@@ -169,48 +171,57 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
     history.push(`?cohorte=${cohortName}`);
   };
 
+  const canEdit = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
+  const cannotSelectSEssion = isResponsableDeCentre(user);
+
   return (
     <div className="mx-8 my-4 space-y-4">
       <form onSubmit={handleSubmit} id="session-form">
         <div className="flex items-center justify-between mb-3">
           <Title>Par séjour</Title>
-          <SelectCohort cohort={session?.cohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
+          {!cannotSelectSEssion && (
+            <SelectCohort cohort={session?.cohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
+          )}
         </div>
         <Container
           title="Détails"
-          actions={[
-            values ? (
-              <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                  onClick={() => {
-                    setValues(null);
-                    setErrors({});
-                  }}
-                  disabled={loading}>
-                  Annuler
-                </button>
-                <button
-                  className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                  type="submit"
-                  form="session-form"
-                  disabled={!values || loading}>
-                  <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                  Enregistrer les changements
-                </button>
-              </div>
-            ) : (
-              <button
-                type="button"
-                className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                onClick={() => setValues(session)}
-                disabled={loading}>
-                <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                Modifier
-              </button>
-            ),
-          ]}>
+          actions={
+            canEdit
+              ? [
+                  values ? (
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => {
+                          setValues(null);
+                          setErrors({});
+                        }}
+                        disabled={loading}>
+                        Annuler
+                      </button>
+                      <button
+                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                        type="submit"
+                        form="session-form"
+                        disabled={!values || loading}>
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                        Enregistrer les changements
+                      </button>
+                    </div>
+                  ) : (
+                    <button
+                      type="button"
+                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
+                      onClick={() => setValues(session)}
+                      disabled={loading}>
+                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
+                      Modifier
+                    </button>
+                  ),
+                ]
+              : []
+          }>
           <div className="flex flex-row">
             <div className="w-[45%]">
               <div className="rounded-lg bg-white mb-4">
