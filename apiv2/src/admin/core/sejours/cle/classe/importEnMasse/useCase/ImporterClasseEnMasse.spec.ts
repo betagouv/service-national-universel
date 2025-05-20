@@ -10,6 +10,7 @@ import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model"
 import { ImporterClasseEnMasse } from "./ImporterClasseEnMasse";
 import { Logger } from "@nestjs/common";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { JeuneGenre } from "@admin/core/sejours/jeune/Jeune.model";
 
 describe("ImporterClasseEnMasse", () => {
     let importerClasseEnMasse: ImporterClasseEnMasse;
@@ -143,7 +144,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
                 classeId: "class-001",
                 departement: "75",
                 region: "IDF",
@@ -180,7 +181,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
                 classeId: "class-001",
             }),
         );
@@ -200,7 +201,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
             }),
         );
 
