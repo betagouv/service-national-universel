@@ -166,7 +166,11 @@ const formatDateTimeZone = (date) => {
 const formatDateForInput = (dateString: string | Date | null | undefined): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toISOString().slice(0, 16);
+  // "sv-SE" => YYYY-MM-DD HH:mm:ss (standard inputs HTML).
+  return date.toLocaleString("sv-SE", {
+    timeZone: "Europe/Paris",
+    hour12: false
+  }).replace(" ", "T").slice(0, 16);
 };
 
 const setToEndOfDay = (date: Date): Date => {
