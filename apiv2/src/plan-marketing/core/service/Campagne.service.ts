@@ -13,6 +13,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { ProgrammationService } from "./Programmation.service";
 import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 @Injectable()
 export class CampagneService {
     private readonly logger: Logger = new Logger(CampagneService.name);
@@ -22,6 +23,7 @@ export class CampagneService {
         @Inject(PlanMarketingGateway) private readonly PlanMarketingGateway: PlanMarketingGateway,
         private readonly programmationService: ProgrammationService,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
 
     async findById(id: string) {
@@ -209,6 +211,9 @@ export class CampagneService {
 
         const sessionObj = session as Record<string, unknown>;
 
+        // Validation date is optional, if not set, we compute it from the dateStart and daysToValidate
+        const validationDate = sessionObj.validationDate ? sessionObj.validationDate as Date : this.clockGateway.addDays(new Date(sessionObj.dateStart as Date), sessionObj.daysToValidate as number);
+
         return {
             dateStart: sessionObj.dateStart as Date,
             dateEnd: sessionObj.dateEnd as Date,
@@ -216,7 +221,7 @@ export class CampagneService {
             inscriptionEndDate: sessionObj.inscriptionEndDate as Date,
             inscriptionModificationEndDate: sessionObj.inscriptionModificationEndDate as Date,
             instructionEndDate: sessionObj.instructionEndDate as Date,
-            validationDate: sessionObj.validationDate as Date,
+            validationDate,
         };
     }
 

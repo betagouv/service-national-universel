@@ -107,6 +107,15 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
   });
 
   const isDirty = () => {
+    const programmationsChanged =
+      formData.programmations?.length !== state.programmations?.length ||
+      (formData.programmations &&
+        state.programmations &&
+        formData.programmations.some((p, i) => {
+          const other = state.programmations?.[i];
+          return JSON.stringify(p) !== JSON.stringify(other);
+        }));
+
     return (
       formData.destinataires?.join(",") !== state.destinataires?.join(",") ||
       formData.templateId !== state.templateId ||
@@ -115,7 +124,7 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
       formData.type !== state.type ||
       formData.listeDiffusionId !== state.listeDiffusionId ||
       formData.isProgrammationActive !== state.isProgrammationActive ||
-      formData.programmations?.length !== state.programmations?.length
+      programmationsChanged
     );
   };
 
