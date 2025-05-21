@@ -40,3 +40,32 @@ export function buildRequestQueryString(query: BasicRoute["query"] = {}): string
   }
   return `?${qs.stringify(query)}`;
 }
+
+export const hashToFormData = <T extends Record<string, unknown>>(hash: T, path: string): FormData => {
+  const formData = new FormData();
+
+  Object.entries(hash).forEach(([key, value]) => {
+    if (Array.isArray(value)) {
+      value.forEach((arrayValue) => {
+        formData.append(`${path}[${key}][]`, typeof arrayValue === "object" && arrayValue !== null ? JSON.stringify(arrayValue) : String(arrayValue));
+      });
+    } else if (value instanceof Date) {
+      formData.append(`${path}[${key}]`, value.toISOString());
+    } else if (value instanceof Blob || value instanceof File) {
+      formData.append(`${path}[${key}]`, value, "file");
+    } else if (typeof value === "object" && value !== null) {
+      Object.entries(value).forEach(([hashKey, hashValue]) => {
+        if (Array.isArray(hashValue)) {
+          hashValue.forEach((arrayValue) => {
+            formData.append(`${path}[${key}][${hashKey}][]`, typeof arrayValue === "object" && arrayValue !== null ? JSON.stringify(arrayValue) : String(arrayValue));
+          });
+        } else {
+          formData.append(`${path}[${key}][${hashKey}]`, String(hashValue));
+        }
+      });
+    } else if (value !== undefined) {
+      formData.append(`${path}[${key}]`, String(value));
+    }
+  });
+  return formData;
+};
