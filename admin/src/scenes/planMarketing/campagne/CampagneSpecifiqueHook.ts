@@ -4,6 +4,7 @@ import { CampagneEnvoi, HttpError, translateMarketing } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import { CampagneSpecifiqueFormData, ValidationErrors } from "./CampagneSpecifiqueForm";
 import { CampagneSpecifiqueMapper } from "./mapper/CampagneSpecifiqueMapper";
+import { CampagneSpecifiqueFilters } from "../components/filters/PlanMarketingFilters";
 
 const CAMPAGNE_SPECIFIQUE_QUERY_KEY = "campagnes-specifiques";
 const DEFAULT_SORT = "DESC";
@@ -24,7 +25,7 @@ const mapErrorCodeToValidationErrors = (errorCode: string): ValidationErrors => 
   return errors;
 };
 
-export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
+export const useCampagneSpecifique = ({ sessionId, filters }: { sessionId: string; filters?: CampagneSpecifiqueFilters }) => {
   const queryClient = useQueryClient();
 
   const { mutate: saveCampagne } = useMutation({
@@ -37,7 +38,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     onSuccess: (campagne, variables) => {
       // Force la récupération des campagnes spécifiques
       // pour mettre à jour la liste des campagnes spécifiques avec la référence à la campagne générique
-      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId] });
+      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId, filters] });
       toastr.clean();
       toastr.success("Succès", "Campagne sauvegardée avec succès", { timeOut: 5000 });
 
@@ -82,7 +83,7 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
       return PlanMarketingService.toggleArchivage(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId] });
+      queryClient.invalidateQueries({ queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId, filters] });
       toastr.clean();
       toastr.success("Succès", "Statut d'archivage de la campagne modifié avec succès", { timeOut: 5000 });
     },
@@ -93,11 +94,27 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
   });
 
   const { data: campagnes, isLoading } = useQuery<(CampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] })[]>({
-    queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
+    queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId, filters],
     enabled: true,
     refetchOnWindowFocus: false,
     queryFn: async () => {
-      const response = await PlanMarketingService.search({ generic: false, sort: DEFAULT_SORT, cohortId: sessionId });
+      const queryParams: {
+        generic: boolean;
+        sort: "ASC" | "DESC";
+        cohortId: string;
+        isArchived?: boolean;
+        isProgrammationActive?: boolean;
+        isLinkedToGenericCampaign?: boolean;
+      } = {
+        generic: false,
+        sort: DEFAULT_SORT as "ASC" | "DESC",
+        cohortId: sessionId,
+        isArchived: filters?.isArchived,
+        isProgrammationActive: filters?.isProgrammationActive,
+        isLinkedToGenericCampaign: filters?.hasGenericLink,
+      };
+
+      const response = await PlanMarketingService.search(queryParams);
       return response.map(CampagneSpecifiqueMapper.toFormData);
     },
   });

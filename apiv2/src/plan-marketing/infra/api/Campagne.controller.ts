@@ -65,8 +65,18 @@ export class CampagneController {
         cohortId?: string,
         @Query("isArchived", new ParseBoolPipe({ optional: true }))
         isArchived?: boolean,
+        @Query("isProgrammationActive", new ParseBoolPipe({ optional: true }))
+        isProgrammationActive?: boolean,
+        @Query("isLinkedToGenericCampaign", new ParseBoolPipe({ optional: true }))
+        isLinkedToGenericCampaign?: boolean,
     ): Promise<CampagneModel[]> {
-        return await this.campagneService.search({ generic, cohortId, isArchived }, sort);
+        return await this.campagneService.search({
+            generic,
+            cohortId,
+            isArchived,
+            isProgrammationActive,
+            isLinkedToGenericCampaign,
+        }, sort);
     }
 
     @Put(":id")

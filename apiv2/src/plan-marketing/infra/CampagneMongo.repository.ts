@@ -10,6 +10,7 @@ import {
 import { CampagneEnvoi } from "@plan-marketing/core/Campagne.model";
 import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "./CampagneMongo.provider";
 import { CampagneMapper } from "./Campagne.mapper";
+import { buildFilter } from "./PlanMarketingFilterBuilder.util";
 import { isCampagneSansRef, isCampagneWithRef } from "snu-lib";
 
 @Injectable()
@@ -67,13 +68,8 @@ export class CampagneMongoRepository implements CampagneGateway {
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]> {
-        const searchFilter = { ...filter };
-
-        if (searchFilter && searchFilter.isArchived === undefined) {
-            delete searchFilter.isArchived;
-        }
-
-        const campagnes = await this.campagneEntity.find(searchFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
+        const mongoFilter = this.buildMongoFilter(filter);
+        const campagnes = await this.campagneEntity.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
         return Promise.all(
             campagnes.map(async (campagne) => {
                 const campagneModel = CampagneMapper.toModel(campagne);
@@ -260,5 +256,21 @@ export class CampagneMongoRepository implements CampagneGateway {
         );
 
         return results.filter((item): item is CampagneSpecifiqueModelWithRefAndGeneric => item !== null);
+    }
+
+    private buildMongoFilter(filter?: Record<string, any>): Record<string, unknown> {
+        const cleanedFilter = buildFilter(filter, ["isArchived", "isProgrammationActive", "isLinkedToGenericCampaign"]);
+        let mongoFilter = { ...cleanedFilter };
+        if ("isLinkedToGenericCampaign" in mongoFilter) {
+            mongoFilter = {
+                ...mongoFilter,
+                campagneGeneriqueId: mongoFilter.isLinkedToGenericCampaign
+                    ? { $ne: null }
+                    : { $eq: null },
+            };
+            const { isLinkedToGenericCampaign, ...rest } = mongoFilter;
+            mongoFilter = rest;
+        }
+        return mongoFilter;
     }
 }

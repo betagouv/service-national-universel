@@ -329,4 +329,18 @@ describe("CampagneService", () => {
             expect(result).not.toContainEqual(processedCampagnes[1]);
         });
     });
+
+    it("should pass isLinkedToGenericCampaign filter to the repository", async () => {
+        const mockCampagnes = [{ id: "CAMP-001" }];
+        mockCampagneGateway.search.mockResolvedValue(mockCampagnes);
+
+        const filter = { isLinkedToGenericCampaign: true };
+        const result = await service.search(filter, "ASC");
+
+        expect(mockCampagneGateway.search).toHaveBeenCalledWith(
+            filter,
+            "ASC"
+        );
+        expect(result).toEqual(mockCampagnes);
+    });
 });

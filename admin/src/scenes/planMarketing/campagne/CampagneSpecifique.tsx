@@ -9,6 +9,8 @@ import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagn
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 import { HiOutlineExclamation } from "react-icons/hi";
+import PlanMarketingFilters, { CampagneSpecifiqueFilters } from "../components/filters/PlanMarketingFilters";
+import { usePlanMarketingFilters } from "../components/filters/PlanMarketingFiltersHook";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -20,7 +22,12 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, sendCampagne, isLoading, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({ sessionId });
+
+  const { filters, setFilters } = usePlanMarketingFilters<CampagneSpecifiqueFilters>(() => {}, {});
+  const { campagnes, saveCampagne, sendCampagne, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({
+    sessionId,
+    filters,
+  });
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
   const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
@@ -32,7 +39,8 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
   const listeDiffusionOptions = useMemo(() => {
     return listesDiffusion.map((liste) => ({
       value: liste.id,
-      label: liste.nom,
+      label: liste.nom + (liste.isArchived ? " (Archivée)" : ""),
+      disabled: liste.isArchived,
     }));
   }, [listesDiffusion]);
 
@@ -64,6 +72,10 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
       cohortId: sessionId,
     };
     setDraftCampagne(newCampagne);
+  };
+
+  const handleFiltersChange = (newFilters: CampagneSpecifiqueFilters) => {
+    setFilters(newFilters);
   };
 
   const handleImportCampagneGenerique = (data: CampagnesGeneriquesImportData) => {
@@ -136,20 +148,13 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
-
   return (
     <>
       <div className="flex flex-col gap-6">
         <div className="flex items-center justify-between pb-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Marketing</div>
           <div className="flex items-center gap-4">
+            <PlanMarketingFilters<CampagneSpecifiqueFilters> onChange={handleFiltersChange} filterType="specifique" filters={filters} />
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNouvelleCampagneDisabled} onClick={createNewCampagne} className="h-[50px] w-[300px]">
               Nouvelle campagne

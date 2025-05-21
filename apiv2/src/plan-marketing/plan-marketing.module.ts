@@ -38,6 +38,7 @@ import { ProgrammationService } from "./core/service/Programmation.service";
 import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
 import { BasculerArchivageCampagne } from "./core/useCase/BasculerArchivageCampagne";
 import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/MettreAJourActivationProgrammationSpecifique";
+import { BasculerArchivageListeDiffusion } from "./core/useCase/BasculerArchivageListeDiffusion";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
@@ -85,6 +86,7 @@ import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/Met
         EnvoyerCampagneProgrammee,
         BasculerArchivageCampagne,
         MettreAJourActivationProgrammationSpecifique,
+        BasculerArchivageListeDiffusion,
     ],
     exports: [
         EnvoyerCampagneProgrammee,
@@ -101,6 +103,7 @@ import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/Met
             useClass: ListeDiffusionMongoRepository,
         },
         planMarketingFactory,
+        BasculerArchivageListeDiffusion,
     ],
 })
 export class PlanMarketingModule {}
