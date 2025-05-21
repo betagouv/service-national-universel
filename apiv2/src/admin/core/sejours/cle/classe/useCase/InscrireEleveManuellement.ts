@@ -34,7 +34,8 @@ export class InscrireEleveManuellement implements UseCase<JeuneModel> {
             throw new FunctionalException(FunctionalExceptionCode.JEUNE_ALREADY_EXISTS);
         }
 
-        // Vérifier le format de la date de naissance
+        // TODO: Contrôle sur le statut de la classe ?
+        // => RG : Validation automatique du dossier après inscription
 
         const jeuneToCreate = this.jeuneService.buildJeuneCleWithMinimalData(jeune, classe);
         const createdJeune = await this.jeuneService.create(jeuneToCreate);

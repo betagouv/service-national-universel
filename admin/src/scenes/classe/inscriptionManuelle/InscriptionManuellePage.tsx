@@ -1,59 +1,65 @@
+import Loader from "@/components/Loader";
+import { ClasseService } from "@/services/classeService";
+import { Button, Container, Header, Page } from "@snu/ds/admin";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
-import { useSelector } from "react-redux";
-import { useParams } from "react-router-dom";
-import { FunctionalException, ROLES, translate, translateInscriptionManuelle } from "snu-lib";
 import { BsPeopleFill, BsPersonPlusFill } from "react-icons/bs";
 import { FiPlus } from "react-icons/fi";
-import { Button, Container, Header, Page } from "@snu/ds/admin";
-import Loader from "@/components/Loader";
+import { HiAcademicCap } from "react-icons/hi2";
+import { useSelector } from "react-redux";
+import { toastr } from "react-redux-toastr";
+import { useParams } from "react-router-dom";
+import { ClassesRoutes, FunctionalException, ROLES, translateInscriptionManuelle } from "snu-lib";
 import useClass from "../utils/useClass";
 import InscriptionManuelleForm, { FormValues } from "./InscriptionManuelleForm";
-import { HiAcademicCap } from "react-icons/hi2";
-import { toastr } from "react-redux-toastr";
-import { ClasseService } from "@/services/classeService";
+
+interface InscriptionManuelleFormStatus {
+  formId: number;
+  isSuccess: boolean;
+}
 
 export default function InscriptionManuellePage() {
   const { id } = useParams<{ id: string }>();
   // @ts-expect-error property does not exist
   const user = useSelector((state) => state.Auth.user);
-  const [forms, setForms] = useState<number[]>([0]);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [successFormIds, setSuccessFormIds] = useState<number[]>([]);
+  const [forms, setForms] = useState<InscriptionManuelleFormStatus[]>([{ formId: 0, isSuccess: false }]);
 
   const { data: classe, isLoading: isClasseLoading } = useClass(id);
+
+  const inscriptionMutation = useMutation({
+    mutationFn: async ({ payload, formId }: { payload: any; formId: number }) => {
+      if (!id) throw new Error("ID de classe manquant");
+      return ClasseService.inscrireEleveManuellement(id, payload);
+    },
+    onSuccess: (_, variables: { payload: ClassesRoutes["InscriptionManuelle"]["payload"]; formId: number }) => {
+      toastr.clean();
+      setForms((prev) => prev.map((form) => (form.formId === variables.formId ? { ...form, isSuccess: true } : form)));
+    },
+    onError: (error) => {
+      toastr.clean();
+      if (error instanceof FunctionalException) {
+        toastr.error("Erreur", translateInscriptionManuelle(error.message));
+      } else {
+        toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
+      }
+    },
+  });
 
   const handleSubmit = async (form: FormValues, formId: number) => {
     if (!id) return;
 
-    try {
-      setIsSubmitting(true);
+    const payload = {
+      prenom: form.firstName,
+      nom: form.lastName,
+      dateDeNaissance: form.birthDate,
+      sexe: form.gender.value,
+    };
 
-      const payload = {
-        prenom: form.firstName,
-        nom: form.lastName,
-        dateDeNaissance: form.birthDate,
-        sexe: form.gender.value,
-      };
-
-      try {
-        await ClasseService.inscrireEleveManuellement(id, payload);
-        setSuccessFormIds((prev) => [...prev, formId]);
-      } catch (err) {
-        if (err instanceof FunctionalException) {
-          toastr.error("Erreur", translateInscriptionManuelle(err.message));
-        } else {
-          toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
-        }
-      }
-    } catch (error) {
-      toastr.error("Erreur", "Une erreur est survenue lors de l'inscription");
-    } finally {
-      setIsSubmitting(false);
-    }
+    inscriptionMutation.mutate({ payload, formId });
   };
 
   const addNewForm = () => {
-    setForms((prev) => [...prev, prev.length]);
+    setForms((prev) => [...prev, { formId: prev.length, isSuccess: false }]);
   };
 
   if (isClasseLoading) return <Loader />;
@@ -108,14 +114,14 @@ export default function InscriptionManuellePage() {
         </div>
 
         <div className="bg-white p-4">
-          {forms.map((formId) => (
-            <div key={formId} className={formId > 0 ? "mt-10 pt-10 border-t border-gray-200" : ""}>
-              <InscriptionManuelleForm onSubmit={(data) => handleSubmit(data, formId)} isSubmitting={isSubmitting} isSuccess={successFormIds.includes(formId)} />
+          {forms.map((form) => (
+            <div key={form.formId} className={form.formId > 0 ? "mt-10 pt-10 border-t border-gray-200" : ""}>
+              <InscriptionManuelleForm onSubmit={(data) => handleSubmit(data, form.formId)} isSubmitting={inscriptionMutation.isPending} isSuccess={form.isSuccess} />
             </div>
           ))}
 
           <div className="border-t border-gray-200 mt-12 pt-6 flex justify-center">
-            <Button type="wired" onClick={addNewForm} leftIcon={<FiPlus className="mr-2" />} title="Ajouter un élève" disabled={isSubmitting} />
+            <Button type="wired" onClick={addNewForm} leftIcon={<FiPlus className="mr-2" />} title="Ajouter un élève" disabled={inscriptionMutation.isPending} />
           </div>
         </div>
       </Container>

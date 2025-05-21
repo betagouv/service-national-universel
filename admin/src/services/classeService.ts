@@ -30,15 +30,7 @@ const ClasseService = {
     })();
   },
 
-  inscrireEleveManuellement: async (
-    id: ClassesRoutes["InscriptionManuelle"]["params"]["id"],
-    payload: {
-      prenom: string;
-      nom: string;
-      dateDeNaissance: string;
-      sexe: string;
-    },
-  ) => {
+  inscrireEleveManuellement: async (id: ClassesRoutes["InscriptionManuelle"]["params"]["id"], payload: ClassesRoutes["InscriptionManuelle"]["payload"]) => {
     return buildRequest<ClassesRoutes["InscriptionManuelle"]>({
       path: "/classe/{id}/inscription-manuelle",
       method: "POST",
