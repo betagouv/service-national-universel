@@ -53,7 +53,9 @@ export default function Modal({
               <Dialog.Panel
                 className={`relative w-full transform transition-all ${className}`}
               >
-                <div className={"p-8 rounded-md bg-white " + classNameContent}>
+                <div
+                  className={cx("p-8 rounded-md bg-white", classNameContent)}
+                >
                   {header && <div className="mb-6">{header}</div>}
                   {content}
                   {footer && <div className="mt-6">{footer}</div>}

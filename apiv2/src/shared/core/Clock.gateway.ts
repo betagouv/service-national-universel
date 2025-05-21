@@ -3,6 +3,7 @@ export interface ClockGateway {
     now(options?: { timeZone: string }): Date;
     getZonedDate(date: Date, timeZone?: string);
     isValidDate(date: Date): boolean;
+    isValidDateFormat(date: string, format: string): boolean;
     formatShort(date: Date): string;
     formatDateTime(date: Date): string;
     formatSafeDateTime(date: Date): string;
@@ -12,6 +13,9 @@ export interface ClockGateway {
     computeAge(dateNaissance: Date);
     addHours(date: Date, hours: number): Date;
     addDays(date: Date, days: number): Date;
+    parseDate(date: string, format: string): Date;
+    parseDateNaissance(date: string): Date;
+    isValidFrenchDate(date: string): boolean;
 }
 
 export const ClockGateway = Symbol("ClockGateway");

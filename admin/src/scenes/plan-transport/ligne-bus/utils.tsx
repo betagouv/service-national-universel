@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import API from "@/services/api";
-import { ROLES } from "snu-lib";
+import { isResponsableDeCentre } from "@/utils";
 
 export function useCohortHasPDT(cohortName: string) {
   return useQuery({
@@ -14,7 +14,7 @@ export function useCohortHasPDT(cohortName: string) {
 }
 
 export function getInitialCohort(user, cohorts, sessionPhase1) {
-  if (user.role === ROLES.HEAD_CENTER && sessionPhase1) {
+  if (isResponsableDeCentre(user) && sessionPhase1) {
     return sessionPhase1.cohort;
   }
   const urlParams = new URLSearchParams(window.location.search);

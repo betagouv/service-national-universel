@@ -89,4 +89,16 @@ export class ClasseRepository implements ClasseGateway {
         });
         return ClasseMapper.toModels(classes);
     }
+
+    async updatePlacesPrises(classeId: string, placesPrises: number): Promise<ClasseModel> {
+        const classe = await this.classeMongooseEntity.findByIdAndUpdate(
+            classeId,
+            { seatsTaken: placesPrises },
+            { new: true },
+        );
+        if (!classe) {
+            throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
+        }
+        return ClasseMapper.toModel(classe);
+    }
 }

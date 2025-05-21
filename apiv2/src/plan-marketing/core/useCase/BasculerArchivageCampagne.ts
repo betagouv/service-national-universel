@@ -15,6 +15,7 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
 
+        // TODO: supprimer le lien si campagne avec ref puis faire le toggle
         if (isCampagneWithRef(campagne)) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_WITH_REF_CANNOT_BE_ARCHIVED);
         }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useId } from "react";
 import ReactLoading from "react-loading";
 import ReactTooltip, { TooltipProps } from "react-tooltip";
 
@@ -50,7 +50,8 @@ export default function Button({
   tooltipClassName,
 }: OwnProps) {
   const styles = getStyles({ type });
-  const tooltipId = `tooltip-${title}`;
+  const id = useId();
+  const tooltipId = `tooltip-${title}-${id}`;
 
   return (
     <button

@@ -1,3 +1,5 @@
+import { UserSaved } from "snu-lib";
+
 export type Rights = {
   canEdit: boolean;
   canEditCohort: boolean;
@@ -34,7 +36,7 @@ export type ClassePatchesType = {
   modelName: "classe";
   ref: string;
   date: string;
-  user?: { firstName: string; lastName?: string };
+  user?: UserSaved;
 };
 
 export type ClasseYoungPatchesType = {
@@ -43,7 +45,7 @@ export type ClasseYoungPatchesType = {
   modelName: "young";
   ref: string;
   date: string;
-  user?: { firstName: string; lastName?: string; role?: string; email?: string };
+  user?: UserSaved;
   young: { firstName: string; lastName: string };
   oldStudent?: boolean;
 };

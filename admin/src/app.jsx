@@ -9,7 +9,9 @@ import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-ro
 import { QueryClientProvider } from "@tanstack/react-query";
 import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD } from "snu-lib";
 import * as Sentry from "@sentry/react";
+import { isResponsableDeCentre } from "@/utils";
 import { getImpersonationChannel } from "./utils/broadcastChannel";
+
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
@@ -133,14 +135,14 @@ const Home = () => {
   const renderDashboardV2 = () => {
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user?.role)) return <DashboardV2 />;
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <DashboardResponsibleV2 />;
-    if (user?.role === ROLES.HEAD_CENTER) return <DashboardHeadCenterV2 />;
+    if (isResponsableDeCentre(user)) return <DashboardHeadCenterV2 />;
     if (user?.role === ROLES.VISITOR) return <DashboardVisitorV2 />;
     return null;
   };
 
   const renderVolontaire = () => {
     if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user?.role)) return <VolontairesResponsible />;
-    if (user?.role === ROLES.HEAD_CENTER) return <VolontairesHeadCenter />;
+    if (isResponsableDeCentre(user)) return <VolontairesHeadCenter />;
     if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user?.role)) return <Volontaires />;
     return null;
   };
@@ -160,7 +162,7 @@ const Home = () => {
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });
 
         //Load session phase 1 for head center before stop loading
-        if (res.user?.role !== ROLES.HEAD_CENTER) setLoading(false);
+        if (!isResponsableDeCentre(res.user)) setLoading(false);
       } catch (e) {
         console.log(e);
         setLoading(false);
@@ -174,7 +176,7 @@ const Home = () => {
   useEffect(() => {
     if (!user) return;
 
-    if (user.role === ROLES.HEAD_CENTER) {
+    if (isResponsableDeCentre(user)) {
       (async () => {
         try {
           const { ok, data, code } = await api.get(`/referent/${user._id}/session-phase1?with_cohesion_center=true`);

@@ -58,7 +58,14 @@ import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 import { Phase1Service } from "@admin/core/sejours/phase1/Phase1.service";
 import { DesistementController } from "@admin/infra/sejours/phase1/desistement/api/Desistement.controller";
+import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
+import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
+import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
+import { SharedModule } from "@shared/Shared.module";
+import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
+import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
+
 export interface SetupOptions {
     newContainer: boolean;
 }
@@ -146,6 +153,10 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             ...serviceProvider,
             ...academieMongoProviders,
             ...departementMongoProviders,
+            FeatureFlagService,
+            { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
+            ...featureFlagMongoProviders,
+            ClasseImportService,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

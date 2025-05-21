@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useHistory } from "react-router-dom";
+import { useHistory, Redirect } from "react-router-dom";
 import { Spinner } from "reactstrap";
 import { toastr } from "react-redux-toastr";
 import { useSelector } from "react-redux";
@@ -48,6 +48,9 @@ export default function Wrapper({ mission, tab, children, getMission }) {
   };
 
   if (!mission || !user) return null;
+  if ([ROLES.SUPERVISOR, ROLES.RESPONSIBLE].includes(user.role) && tab === "propose-mission") {
+    return <Redirect to={`/mission/${mission._id}`} />;
+  }
   return (
     <div style={{ flex: tab === "missions" ? "0%" : 2, position: "relative" }}>
       <div className=" my-7 flex flex-row flex-wrap-reverse justify-between gap-4 border-b border-gray-200 px-8">
