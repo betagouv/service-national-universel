@@ -32,11 +32,11 @@ const limitedAccess = {
 };
 
 const PERMISSIONS_BY_ROUTE = {
-  "/injep-export": [{ ressource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
-  "/dsnj-export": [{ ressource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }],
-  "/profil": [{ ressource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
-  "/besoin-d-aide": [{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
-  "/dashboard": [{ ressource: PERMISSION_RESOURCES.DASHBOARD, action: PERMISSION_ACTIONS.READ }],
+  "/injep-export": [{ resource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
+  "/dsnj-export": [{ resource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }],
+  "/profil": [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
+  "/besoin-d-aide": [{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
+  "/dashboard": [{ resource: PERMISSION_RESOURCES.DASHBOARD, action: PERMISSION_ACTIONS.READ }],
 };
 
 const DEFAULT_ROUTE_BY_ROLE = {
@@ -61,8 +61,7 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
 
   const route = Object.keys(PERMISSIONS_BY_ROUTE).find((route) => pathname.startsWith(route));
   if (!matchRoute && route && PERMISSIONS_BY_ROUTE[route]) {
-    console.log("PERMISSIONS_BY_ROUTE[route]", PERMISSIONS_BY_ROUTE[route], user.acl);
-    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].some((permission) => isAuthorized({ user, ressource: permission.ressource, action: permission.action }));
+    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].some((permission) => isAuthorized({ user, resource: permission.resource, action: permission.action }));
     if (!routeAuthorized) {
       console.log(`user does not have permission for ${pathname}`);
       if (pathname === defaultRoute) {

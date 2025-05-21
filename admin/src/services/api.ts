@@ -4,7 +4,7 @@ import { capture } from "../sentry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload, ERRORS, RouteResponseBody } from "snu-lib";
 
-export const JWT_TOKEN_KEY = "jwt_token";
+const JWT_TOKEN_KEY = "jwt_token";
 
 export function getJwtToken(): string | null {
   return localStorage.getItem(JWT_TOKEN_KEY) || null;

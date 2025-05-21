@@ -24,7 +24,7 @@ describe("getAcl", () => {
     const role = await createRole(ROLES.ADMIN);
 
     // Create a permission
-    const permission = await createPermission("CodePermission", [role.code], "ressource", PERMISSION_ACTIONS.READ);
+    const permission = await createPermission("CodePermission", [role.code], "resource", PERMISSION_ACTIONS.READ);
 
     const result = await getAcl({ roles: [ROLES.ADMIN] });
 
@@ -40,7 +40,7 @@ describe("getAcl", () => {
     await createRole(SUB_ROLES.manager_department, role.code);
 
     // Create a permission
-    const permission = await createPermission("CodePermission", [ROLES.ADMIN], "ressource", PERMISSION_ACTIONS.READ);
+    const permission = await createPermission("CodePermission", [ROLES.ADMIN], "resource", PERMISSION_ACTIONS.READ);
 
     const user = { roles: [ROLES.ADMIN, SUB_ROLES.manager_department] };
     const result = await getAcl(user);
@@ -54,8 +54,8 @@ describe("getAcl", () => {
     await createRole(ROLES.REFERENT_DEPARTMENT);
 
     // Create permissions
-    const adminPermission = await createPermission("AdminPermission", [ROLES.ADMIN], "ressource", PERMISSION_ACTIONS.READ);
-    const referentPermission = await createPermission("ReferentPermission", [ROLES.REFERENT_DEPARTMENT], "ressource", PERMISSION_ACTIONS.READ);
+    const adminPermission = await createPermission("AdminPermission", [ROLES.ADMIN], "resource", PERMISSION_ACTIONS.READ);
+    const referentPermission = await createPermission("ReferentPermission", [ROLES.REFERENT_DEPARTMENT], "resource", PERMISSION_ACTIONS.READ);
 
     const user = { roles: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT] };
     const result = await getAcl(user);

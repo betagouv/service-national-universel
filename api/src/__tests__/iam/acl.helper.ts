@@ -10,11 +10,11 @@ export async function createRole(code: string, parent?: string) {
   return role;
 }
 
-export async function createPermission(code: string, roles: string[], ressource: string, action: string) {
+export async function createPermission(code: string, roles: string[], resource: string, action: string) {
   const permission = await new PermissionModel({
     code,
     roles,
-    ressource,
+    resource,
     action,
     titre: code,
   }).save({ fromUser: { firstName: "test" } });

@@ -116,7 +116,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                   <Popover.Panel className="absolute transform left-[100%] bottom-1/2 ">
                     <div className="!ml-2 px-[1px] py-[1px] bg-white shadow-md rounded-lg w-[275px] z-20 flex flex-col">
                       {/* Header */}
-                      {isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.REFERENT }) && (
+                      {isReadAuthorized({ user, resource: PERMISSION_RESOURCES.REFERENT }) && (
                         <Link className="group flex items-center h-[62px] rounded-t-md py-[14px] pl-[15px] pr-[13px] hover:bg-[#EEEFF5]" to={"/profil"}>
                           <div className="flex items-center justify-center w-[26px] h-[26px]">
                             <User className="text-[#30345B]" />
@@ -142,7 +142,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                           <NavItem Icon={() => <HiOutlineMail size={22} />} title="Marketing" link={"/plan-marketing/campagnes-generiques"} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Message} title="Messages d'alerte" link={"/alerte"} />}
-                        {isWriteAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT }) && (
+                        {isWriteAuthorized({ user, resource: PERMISSION_RESOURCES.SUPPORT }) && (
                           <NavItem Icon={Support} title="Besoin d'aide ?" link={`/besoin-d-aide?from=${from}`} />
                         )}
                       </div>

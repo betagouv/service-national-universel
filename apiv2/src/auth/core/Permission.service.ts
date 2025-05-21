@@ -17,11 +17,11 @@ export class PermissionService {
         const rolesCodes = getUserRoles(user);
         const roles = await this.roleGateway.findByCodesAndParent(rolesCodes);
         const permissions = await this.permissionGateway.findByRoles(roles.map((role) => role.code));
-        // TODO: compute whitelist of ressources (by department, structure, ...)
+        // TODO: compute whitelist of resources (by department, structure, ...)
         return permissions.map((permission) => ({
             code: permission.code,
             action: permission.action,
-            ressource: permission.ressource,
+            resource: permission.resource,
             policy: permission.policy || [],
         }));
     }

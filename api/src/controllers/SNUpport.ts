@@ -23,7 +23,7 @@ import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { permissionAccesControlMiddleware } from "../middlewares/permissionAccesControlMiddleware";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
 interface File {
   name: string;
@@ -72,7 +72,7 @@ const router = express.Router();
 router.get(
   "/tickets",
   authMiddleware(["referent", "young"]),
-  permissionAccesControlMiddleware([{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
   async (req: UserRequest, res) => {
     try {
       const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
@@ -163,7 +163,7 @@ router.post("/tickets", authMiddleware(["referent", "young"]), async (req: UserR
 router.get(
   "/ticketscount",
   authMiddleware("referent"),
-  permissionAccesControlMiddleware([{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.READ }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res) => {
     try {
       const user = await ReferentModel.findById(req.user._id);
@@ -225,7 +225,7 @@ router.get("/ticket/:id", authMiddleware(["referent", "young"]), async (req: Use
 router.post(
   "/ticket",
   authMiddleware(["referent", "young"]),
-  permissionAccesControlMiddleware([{ ressource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
   async (req: UserRequest, res) => {
     try {
       const obj = {

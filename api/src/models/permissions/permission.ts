@@ -29,7 +29,7 @@ schema.plugin(patchHistory, {
   excludes: ["/updatedAt"],
 });
 
-// schema.index({ ressource: 1, action: 1 });
+// schema.index({ resource: 1, action: 1 });
 
 type PermissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
 export type PermissionDocument<T = {}> = DocumentExtended<PermissionType & T>;

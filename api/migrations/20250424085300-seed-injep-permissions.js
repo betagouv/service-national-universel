@@ -8,14 +8,14 @@ module.exports = {
       titre: "Export INJEP",
       action: PERMISSION_ACTIONS.EXECUTE,
       roles: [ROLES.INJEP, ROLES.ADMIN],
-      ressource: PERMISSION_RESOURCES.EXPORT_INJEP,
+      resource: PERMISSION_RESOURCES.EXPORT_INJEP,
     });
     await PermissionModel.create({
       code: PERMISSION_CODES.PROFILE,
       titre: "Profil",
       action: PERMISSION_ACTIONS.READ,
       roles: ROLES_LIST,
-      ressource: PERMISSION_RESOURCES.REFERENT,
+      resource: PERMISSION_RESOURCES.REFERENT,
       policy: {
         where: [
           {
@@ -30,14 +30,14 @@ module.exports = {
       titre: "Voir ses tickets support",
       action: PERMISSION_ACTIONS.READ,
       roles: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
-      ressource: PERMISSION_RESOURCES.SUPPORT,
+      resource: PERMISSION_RESOURCES.SUPPORT,
     });
     await PermissionModel.create({
       code: PERMISSION_CODES.SUPPORT_WRITE,
       titre: "Créer un ticket support (Besoin d'aide)",
       action: PERMISSION_ACTIONS.WRITE,
       roles: REFERENT_AND_JEUNE_ROLES_LIST,
-      ressource: PERMISSION_RESOURCES.SUPPORT,
+      resource: PERMISSION_RESOURCES.SUPPORT,
     });
   },
 

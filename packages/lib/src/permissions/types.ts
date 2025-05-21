@@ -4,7 +4,7 @@ import { UserDto } from "../dto";
 export interface HasPermissionParams {
   user: UserDto;
   action?: PermissionType["action"];
-  ressource: PermissionType["ressource"];
+  resource: PermissionType["resource"];
   context?: PermissionContext;
 }
 
@@ -13,9 +13,9 @@ export interface PermissionContext {
   [key: string]: Record<string, string> | undefined;
 }
 
-export interface HasPermissionsParams extends Omit<HasPermissionParams, "ressource" | "action"> {
+export interface HasPermissionsParams extends Omit<HasPermissionParams, "resource" | "action"> {
   permissions: {
-    ressource: PermissionType["ressource"];
+    resource: PermissionType["resource"];
     action?: PermissionType["action"];
   }[];
 }

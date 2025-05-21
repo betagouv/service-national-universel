@@ -10,10 +10,10 @@ export const PermissionRepository = {
     return permissions;
   },
 
-  findByCodesRolesResourceAndActions: async (codes: string[], roles: string[], ressource: string, actions: string[]): Promise<PermissionDocument[]> => {
+  findByCodesRolesResourceAndActions: async (codes: string[], roles: string[], resource: string, actions: string[]): Promise<PermissionDocument[]> => {
     const permissions = await PermissionModel.find({
       code: { $in: codes },
-      ressource,
+      resource,
       action: { $in: actions },
       roles: { $in: roles },
     });

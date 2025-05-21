@@ -8,7 +8,7 @@ module.exports = {
       titre: "Export DSNJ",
       action: PERMISSION_ACTIONS.EXECUTE,
       roles: [ROLES.DSNJ, ROLES.ADMIN],
-      ressource: PERMISSION_RESOURCES.EXPORT_DSNJ,
+      resource: PERMISSION_RESOURCES.EXPORT_DSNJ,
     });
   },
 

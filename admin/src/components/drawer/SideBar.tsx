@@ -91,7 +91,7 @@ const SideBar = ({ sessionsList }) => {
         console.log(error);
       }
     };
-    if (isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT })) {
+    if (isReadAuthorized({ user, resource: PERMISSION_RESOURCES.SUPPORT })) {
       getTickets();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -289,10 +289,10 @@ const SideBar = ({ sessionsList }) => {
 
     // clean la construction du menu qui est différente en fonction du rôle
     if (!items.includes(SejoursAdmin) && !items.includes(SejoursGod)) {
-      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
+      if (isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
         items.push(ExportInjep);
       }
-      if (isExecuteAuthorized({ user, ressource: PERMISSION_RESOURCES.EXPORT_DSNJ })) {
+      if (isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.EXPORT_DSNJ })) {
         items.push(ExportDsnj);
       }
     }
@@ -315,7 +315,7 @@ const SideBar = ({ sessionsList }) => {
       )}>
       <div className="flex flex-col justify-between h-full min-h-full">
         <Header open={open} setOpen={setOpen} onDemoChange={toggleDemo} />
-        {isReadAuthorized({ user, ressource: PERMISSION_RESOURCES.SUPPORT }) && <Tickets />}
+        {isReadAuthorized({ user, resource: PERMISSION_RESOURCES.SUPPORT }) && <Tickets />}
         {isResponsableDeCentre(user) && <Session />}
         <div className={cx("flex flex-col flex-[1_1_auto]", { "overflow-y-hidden": open })}>
           <div className={cx("flex-1 max-h-full", { "overflow-y-auto no-scrollbar": open })}>

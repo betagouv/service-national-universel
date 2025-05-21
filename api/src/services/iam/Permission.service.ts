@@ -7,11 +7,11 @@ export async function getAcl(user: Partial<ReferentType>) {
   const rolesCodes = getUserRoles(user);
   const roles = await RoleRepository.findByCodesAndParent(rolesCodes);
   const permissions = await PermissionRepository.findByRoles(roles.map((role) => role.code));
-  // TODO: compute whitelist of ressources (by department, structure, ...)
+  // TODO: compute whitelist of resources (by department, structure, ...)
   return permissions.map((permission) => ({
     code: permission.code,
     action: permission.action,
-    ressource: permission.ressource,
+    resource: permission.resource,
     policy: permission.policy,
   }));
 }

@@ -4,6 +4,7 @@ import { PermissionDto } from "./PermissionDto";
 export type UserDto = {
   _id: string;
   role: (typeof ROLES)[keyof typeof ROLES];
+  roles?: (typeof ROLES)[keyof typeof ROLES][];
   email: string;
   firstName: string;
   lastName: string;

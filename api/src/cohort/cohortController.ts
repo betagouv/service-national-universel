@@ -13,7 +13,7 @@ import { validateCohortGeneralDto, validateCohortInscriptionDto, validateCohortP
 import { UserRequest } from "../controllers/request";
 import { validateId } from "../utils/validator";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { permissionAccesControlMiddleware } from "../middlewares/permissionAccesControlMiddleware";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router({ mergeParams: true });
 
@@ -300,7 +300,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
 router.get(
   "/:id/export-dsnj/:exportKey",
   authMiddleware("referent"),
-  permissionAccesControlMiddleware([{ ressource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error: exportDateKeyError, value: exportKey } = Joi.string()
@@ -369,7 +369,7 @@ router.get(
 router.get(
   "/:id/export-injep/:exportKey",
   authMiddleware("referent"),
-  permissionAccesControlMiddleware([{ ressource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error: exportDateKeyError, value: exportKey } = Joi.string()

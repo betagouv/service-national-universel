@@ -17,7 +17,7 @@ describe("isAuthorized", () => {
   it("should return false when user is not defined", () => {
     const result = isAuthorized({
       user: null as any,
-      ressource: PERMISSION_RESOURCES.REFERENT,
+      resource: PERMISSION_RESOURCES.REFERENT,
       action: PERMISSION_ACTIONS.READ,
     });
     expect(result).toBe(false);
@@ -28,7 +28,7 @@ describe("isAuthorized", () => {
         ...mockUser,
         acl: undefined,
       },
-      ressource: PERMISSION_RESOURCES.REFERENT,
+      resource: PERMISSION_RESOURCES.REFERENT,
       action: PERMISSION_ACTIONS.READ,
     });
     expect(result).toBe(false);
@@ -40,14 +40,14 @@ describe("isAuthorized", () => {
           ...mockUser,
           acl: [
             {
-              ressource: PERMISSION_RESOURCES.REFERENT,
+              resource: PERMISSION_RESOURCES.REFERENT,
               action: PERMISSION_ACTIONS.READ,
               code: "referent:read",
               policy: [],
             },
           ],
         },
-        ressource: PERMISSION_RESOURCES.REFERENT,
+        resource: PERMISSION_RESOURCES.REFERENT,
         action: PERMISSION_ACTIONS.READ,
       });
       expect(result).toBe(true);
@@ -58,14 +58,14 @@ describe("isAuthorized", () => {
           ...mockUser,
           acl: [
             {
-              ressource: PERMISSION_RESOURCES.REFERENT,
+              resource: PERMISSION_RESOURCES.REFERENT,
               action: PERMISSION_ACTIONS.FULL,
               code: "referent:full",
               policy: [],
             },
           ],
         },
-        ressource: PERMISSION_RESOURCES.REFERENT,
+        resource: PERMISSION_RESOURCES.REFERENT,
         action: PERMISSION_ACTIONS.READ,
       });
       expect(result).toBe(true);
@@ -78,7 +78,7 @@ describe("isAuthorized", () => {
           ...mockUser,
           acl: [
             {
-              ressource: PERMISSION_RESOURCES.REFERENT,
+              resource: PERMISSION_RESOURCES.REFERENT,
               action: PERMISSION_ACTIONS.FULL,
               code: "referent:full",
               policy: [
@@ -96,7 +96,7 @@ describe("isAuthorized", () => {
             },
           ],
         },
-        ressource: PERMISSION_RESOURCES.REFERENT,
+        resource: PERMISSION_RESOURCES.REFERENT,
         action: PERMISSION_ACTIONS.READ,
         context: { referent: { department: "75" } },
       });
@@ -108,7 +108,7 @@ describe("isAuthorized", () => {
           ...mockUser,
           acl: [
             {
-              ressource: PERMISSION_RESOURCES.REFERENT,
+              resource: PERMISSION_RESOURCES.REFERENT,
               action: PERMISSION_ACTIONS.FULL,
               code: "referent:full",
               policy: [
@@ -126,7 +126,7 @@ describe("isAuthorized", () => {
             },
           ],
         },
-        ressource: PERMISSION_RESOURCES.REFERENT,
+        resource: PERMISSION_RESOURCES.REFERENT,
         action: PERMISSION_ACTIONS.READ,
       });
       expect(result).toBe(true);
@@ -138,7 +138,7 @@ describe("isAuthorized", () => {
           department: "13",
           acl: [
             {
-              ressource: PERMISSION_RESOURCES.REFERENT,
+              resource: PERMISSION_RESOURCES.REFERENT,
               action: PERMISSION_ACTIONS.FULL,
               code: "referent:full",
               policy: [
@@ -156,7 +156,7 @@ describe("isAuthorized", () => {
             },
           ],
         },
-        ressource: PERMISSION_RESOURCES.REFERENT,
+        resource: PERMISSION_RESOURCES.REFERENT,
         action: PERMISSION_ACTIONS.READ,
         context: { referent: { department: "13" } },
       });

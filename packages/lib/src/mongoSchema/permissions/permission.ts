@@ -7,7 +7,7 @@ export const PermissionPolicyWhereSchema = {
     type: String,
     required: true,
     documentation: {
-      description: "Resourse field (permission ressource) to filter on (ex: 'departement')",
+      description: "Resourse field (permission resource) to filter on (ex: 'departement')",
     },
   },
   value: {
@@ -45,7 +45,7 @@ export const PermissionPolicySchema = {
     optional: true,
     default: [],
     documentation: {
-      description: "List of ressources to exclude from the policy (ex: { blackList: ['Provence-Alpes-Côte d'Azur'] }",
+      description: "List of resources to exclude from the policy (ex: { blackList: ['Provence-Alpes-Côte d'Azur'] }",
     },
   },
   whitelist: {
@@ -53,7 +53,7 @@ export const PermissionPolicySchema = {
     optional: true,
     default: [],
     documentation: {
-      description: "List of ressources to include in the policy (ex: { whiteList: ['Loire-Atlantique'] }",
+      description: "List of resources to include in the policy (ex: { whiteList: ['Loire-Atlantique'] }",
     },
   },
   // TODO: add $in column
@@ -75,7 +75,7 @@ export const PermissionSchema = {
       description: "Liste des codes rôles où cette permission s'applique",
     },
   },
-  ressource: {
+  resource: {
     type: String,
     required: true,
     documentation: {
@@ -94,7 +94,7 @@ export const PermissionSchema = {
     type: [PermissionPolicySchema],
     optional: true,
     documentation: {
-      description: "Policy for a specific ressource or a script",
+      description: "Policy for a specific resource or a script",
     },
   },
   titre: {
