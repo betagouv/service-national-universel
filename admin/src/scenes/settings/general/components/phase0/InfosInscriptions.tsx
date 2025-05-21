@@ -66,12 +66,16 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
     if (isDirty) {
       console.log("Form is dirty. Dirty fields:", dirtyFields);
       console.log("Original values:", {
-        reInscriptionStartDate: cohort.reInscriptionStartDate,
-        reInscriptionEndDate: cohort.reInscriptionEndDate,
+        inscriptionStartDate: cohort.inscriptionStartDate,
+        inscriptionEndDate: cohort.inscriptionEndDate,
+        inscriptionModificationEndDate: cohort.inscriptionModificationEndDate,
+        instructionEndDate: cohort.instructionEndDate,
       });
       console.log("Current form values:", {
-        reInscriptionStartDate: control._formValues.reInscriptionStartDate,
-        reInscriptionEndDate: control._formValues.reInscriptionEndDate,
+        inscriptionStartDate: control._formValues.inscriptionStartDate,
+        inscriptionEndDate: control._formValues.inscriptionEndDate,
+        inscriptionModificationEndDate: control._formValues.inscriptionModificationEndDate,
+        instructionEndDate: control._formValues.instructionEndDate,
       });
     }
   }, [isDirty, dirtyFields, cohort, control._formValues]);
