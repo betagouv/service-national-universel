@@ -43,7 +43,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
     reset,
   } = useForm<InscriptionsFormData>({
     defaultValues: {
-      inscriptionStartDate: cohort.inscriptionStartDate,
+      inscriptionStartDate: cohort.inscriptionStartDate ? dayjs(cohort.inscriptionStartDate).local().toDate() : undefined,
       inscriptionEndDate: cohort.inscriptionEndDate,
       reInscriptionStartDate: cohort.reInscriptionStartDate,
       reInscriptionEndDate: cohort.reInscriptionEndDate,
@@ -118,9 +118,9 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     label="Ouverture"
                     placeholder="Date et heure"
                     // @ts-ignore
-                    value={field.value ? dayjs(field.value).local().toDate() : null}
+                    value={field.value ? dayjs(field.value).toDate() : null}
                     error={errors.inscriptionStartDate?.message}
-                    onChange={(value) => field.onChange(value)}
+                    onChange={(value) => field.onChange(value ? dayjs(value).format() : undefined)}
                     readOnly={readOnly}
                     disabled={isSubmitting}
                   />
