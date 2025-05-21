@@ -6,7 +6,6 @@ import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
 import { BiLoaderAlt } from "react-icons/bi";
 import { toastr } from "react-redux-toastr";
 import { capture } from "@/sentry";
-import api from "@/services/api";
 import { IoWarningOutline } from "react-icons/io5";
 import ReactTooltip from "react-tooltip";
 import { useUpdateEligibilityMutation } from "@/scenes/settings/general/hooks/useCohortUpdate";

@@ -3,6 +3,7 @@ import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
+import cx from "classnames";
 
 import { COHORT_TYPE, CohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 import { Button, Container } from "@snu/ds/admin";
@@ -76,7 +77,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   };
 
   return (
-    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
+    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex flex-col w-full gap-8">
         <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
         <div className="flex">
