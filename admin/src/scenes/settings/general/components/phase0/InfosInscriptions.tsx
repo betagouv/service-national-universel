@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
@@ -63,27 +63,6 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(!!(cohort.reInscriptionStartDate || cohort.reInscriptionEndDate));
   const updateCohorteInscriptionsMutation = useUpdateCohortInscriptions();
 
-  useEffect(() => {
-    console.log("Normalized default values:", normalizedDefaultValues);
-    if (isDirty) {
-      console.log("Form is dirty. Dirty fields:", dirtyFields);
-      console.log("Original values:", {
-        inscriptionStartDate: cohort.inscriptionStartDate,
-        inscriptionEndDate: cohort.inscriptionEndDate,
-        inscriptionModificationEndDate: cohort.inscriptionModificationEndDate,
-        instructionEndDate: cohort.instructionEndDate,
-      });
-      console.log("Current form values:", {
-        inscriptionStartDate: control._formValues.inscriptionStartDate,
-        inscriptionEndDate: control._formValues.inscriptionEndDate,
-        inscriptionModificationEndDate: control._formValues.inscriptionModificationEndDate,
-        instructionEndDate: control._formValues.instructionEndDate,
-      });
-    } else {
-      console.log("Form is NOT dirty - solution appears to be working!");
-    }
-  }, [isDirty, dirtyFields, cohort, control._formValues]);
-
   function normalizeDate(dateValue) {
     if (!dateValue) return undefined;
     return new Date(dateValue);
@@ -133,10 +112,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     // @ts-ignore
                     value={field.value}
                     error={errors.inscriptionStartDate?.message}
-                    onChange={(value) => {
-                      console.log("Date changed:", value);
-                      field.onChange(value);
-                    }}
+                    onChange={(value) => field.onChange(value)}
                     readOnly={readOnly}
                     disabled={isSubmitting}
                   />
@@ -153,7 +129,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     label="Fermeture"
                     placeholder="Date et heure"
                     // @ts-ignore
-                    value={field.value ? dayjs(field.value).local().toDate() : null}
+                    value={field.value}
                     onChange={(value) => field.onChange(value)}
                     readOnly={readOnly}
                     disabled={isSubmitting}
@@ -172,7 +148,6 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                 disabled={isSubmitting || readOnly}
                 value={!!showSpecificDatesReInscription}
                 onChange={(v) => {
-                  console.log("Toggle changed to:", v, "Previous state:", showSpecificDatesReInscription);
                   if (v == false) {
                     setValue("reInscriptionStartDate", null, { shouldDirty: true });
                     setValue("reInscriptionEndDate", null, { shouldDirty: true });
@@ -193,7 +168,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                         label="Ouverture"
                         placeholder="Date et heure"
                         // @ts-ignore
-                        value={field.value ? dayjs(field.value).local().toDate() : null}
+                        value={field.value}
                         error={errors.reInscriptionStartDate?.message}
                         onChange={(value) => field.onChange(value)}
                         readOnly={readOnly}
@@ -211,7 +186,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                         label="Fermeture"
                         placeholder="Date et heure"
                         // @ts-ignore
-                        value={field.value ? dayjs(field.value).local().toDate() : null}
+                        value={field.value}
                         error={errors.reInscriptionEndDate?.message}
                         onChange={(value) => field.onChange(value)}
                         readOnly={readOnly}
@@ -254,7 +229,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                       label="Fermeture"
                       placeholder="Date"
                       // @ts-ignore
-                      value={field.value ? dayjs(field.value).local().toDate() : null}
+                      value={field.value}
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}
@@ -287,7 +262,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                       label="Fermeture"
                       placeholder="Date"
                       // @ts-ignore
-                      value={field.value ? dayjs(field.value).local().toDate() : null}
+                      value={field.value}
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}
