@@ -120,7 +120,10 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     // @ts-ignore
                     value={field.value}
                     error={errors.inscriptionStartDate?.message}
-                    onChange={(value) => field.onChange(value)}
+                    onChange={(value) => {
+                      console.log("Date changed:", value);
+                      field.onChange(value);
+                    }}
                     readOnly={readOnly}
                     disabled={isSubmitting}
                   />
