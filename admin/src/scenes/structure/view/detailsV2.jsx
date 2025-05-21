@@ -17,7 +17,8 @@ import Select from "../../../components/forms/Select";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import CardRepresentant from "../components/cards/CardRepresentant";
 import TeamCard from "../components/cards/TeamCard";
-import StructureView, { ActionButton } from "./wrapperv2";
+import StructureView from "./wrapperv2";
+import { ActionButton } from "./ActionButton";
 
 export default function DetailsView({ ...props }) {
   const [structure, setStructure] = useState(null);
