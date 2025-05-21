@@ -56,11 +56,13 @@ export type SelectProps = {
     | GroupBase<string>[]
     | (() => Promise<GroupBase<string>[]>);
   size?: "sm" | "md" | "lg";
+  isOptionDisabled?: (option: SelectOption & { disabled?: boolean }) => boolean;
 };
 
 export default function SelectButton(props: SelectProps) {
   const {
     options,
+    isOptionDisabled,
     value,
     defaultValue,
     className,
@@ -106,7 +108,11 @@ export default function SelectButton(props: SelectProps) {
     return (
       <components.Option {...props}>
         <div className="flex items-center justify-between w-full">
-          <div className="w-full cursor-pointer">{props.label}</div>
+          <div
+            className={cx("w-full", props.isDisabled && "cursor-not-allowed")}
+          >
+            {props.label}
+          </div>
           {props.isSelected && (
             <BsCheckLg size={20} className="text-blue-600 my-auto" />
           )}
@@ -203,6 +209,7 @@ export default function SelectButton(props: SelectProps) {
             onMenuOpen={onMenuOpen}
             onMenuClose={onMenuClose}
             menuIsOpen={isOpen}
+            {...(isOptionDisabled ? { isOptionDisabled } : {})}
           />
         ) : (
           <Select
@@ -227,6 +234,7 @@ export default function SelectButton(props: SelectProps) {
             onMenuOpen={onMenuOpen}
             onMenuClose={onMenuClose}
             menuIsOpen={isOpen}
+            {...(isOptionDisabled ? { isOptionDisabled } : {})}
           />
         )}
         {error && (
