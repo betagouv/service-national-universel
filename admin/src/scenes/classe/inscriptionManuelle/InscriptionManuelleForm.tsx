@@ -1,8 +1,8 @@
+import { Button, InputText, Select } from "@snu/ds/admin";
 import React from "react";
-import { useForm, Controller } from "react-hook-form";
-import { BsPersonPlusFill, BsCheckCircleFill } from "react-icons/bs";
-import { Button, InputText } from "@snu/ds/admin";
-import { Label, Select } from "@snu/ds/admin";
+import { Controller, useForm } from "react-hook-form";
+import { BsCheckCircleFill, BsPersonPlusFill } from "react-icons/bs";
+import { validateNoSpecialChars } from "snu-lib";
 
 type FormValues = {
   lastName: string;
@@ -36,33 +36,44 @@ const InscriptionManuelleForm = ({ onSubmit, isSubmitting = false, isSuccess = f
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         <div>
           <h3 className="text-lg font-medium mb-4">Identité</h3>
-          <div className="mb-4">
-            <Label title="Nom" name="lastName" />
-            <Controller
-              name="lastName"
-              control={control}
-              rules={{ required: "Le nom est requis" }}
-              render={({ field }) => <InputText {...field} placeholder="Nom" error={errors.lastName?.message} disabled={isSuccess} />}
-            />
-          </div>
-          <div className="mb-4">
-            <Label title="Prénom" name="firstName" />
-            <Controller
-              name="firstName"
-              control={control}
-              rules={{ required: "Le prénom est requis" }}
-              render={({ field }) => <InputText {...field} placeholder="Prénom" error={errors.firstName?.message} disabled={isSuccess} />}
-            />
+          <div className="flex flex-row gap-4 justify-between">
+            <div className="mb-4 flex-1">
+              <Controller
+                name="lastName"
+                control={control}
+                rules={{
+                  required: "Le nom est requis",
+                  validate: (text) => (validateNoSpecialChars(text) ? true : "Le nom ne doit pas comporter de caractères spéciaux"),
+                }}
+                render={({ field }) => <InputText {...field} label="Nom" placeholder="Nom" error={errors.lastName?.message} disabled={isSuccess} />}
+              />
+            </div>
+            <div className="mb-4 flex-1">
+              <Controller
+                name="firstName"
+                control={control}
+                rules={{
+                  required: "Le prénom est requis",
+                  validate: (text) => (validateNoSpecialChars(text) ? true : "Le prénom ne doit pas comporter de caractères spéciaux"),
+                }}
+                render={({ field }) => <InputText {...field} label="Prénom" placeholder="Prénom" error={errors.firstName?.message} disabled={isSuccess} />}
+              />
+            </div>
           </div>
           <div>
-            <Label title="Sexe" name="gender" />
             <Controller
               name="gender"
               control={control}
-              rules={{ required: "Le sexe est requis" }}
+              rules={{
+                required: "Le sexe est requis",
+                validate: (options) => {
+                  return options.value === "" ? "Le sexe est requis" : true;
+                },
+              }}
               render={({ field }) => (
                 <Select
                   {...field}
+                  label="Sexe"
                   placeholder="Sélectionner"
                   error={errors.gender?.message}
                   options={[
@@ -80,7 +91,6 @@ const InscriptionManuelleForm = ({ onSubmit, isSubmitting = false, isSuccess = f
         <div>
           <h3 className="text-lg font-medium mb-4">Date de naissance</h3>
           <div>
-            <Label title="Date de naissance" name="birthDate" />
             <Controller
               name="birthDate"
               control={control}

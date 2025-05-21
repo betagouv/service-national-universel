@@ -162,8 +162,8 @@ export class ClasseController {
         @Body() data: InscriptionManuellePayloadDto,
     ): Promise<ClassesRoutes["InscriptionManuelle"]["response"]> {
         const jeune: JeuneWithMinimalDataModel = {
-            prenom: data.prenom,
-            nom: data.nom,
+            prenom: data.prenom.trim(),
+            nom: data.nom.trim(),
             dateNaissance: data.dateDeNaissance,
             genre: data.sexe,
         };

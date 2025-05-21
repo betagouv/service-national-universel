@@ -36,7 +36,7 @@ export class JeuneService {
         return jeuneUpdated;
     }
 
-    async findByPrenomAndNomDateNaissanceAndClasseId(
+    async findByNomPrenomDateDeNaissanceAndClasseId(
         prenom: string,
         nom: string,
         dateNaissance: Date,

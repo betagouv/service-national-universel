@@ -17,14 +17,12 @@ export class InscrireEleveManuellement implements UseCase<JeuneModel> {
     async execute(jeune: JeuneWithMinimalDataModel, classeId: string): Promise<JeuneModel> {
         const classe = await this.classeService.findById(classeId);
 
-        // Place disponible dans la classe
         const maxJeune = classe.placesTotal || 100;
         if (classe.placesPrises + 1 > maxJeune) {
             throw new FunctionalException(FunctionalExceptionCode.CLASSE_FULL);
         }
 
-        // Vérifier si le jeune existe déjà
-        const existingJeune = await this.jeuneService.findByPrenomAndNomDateNaissanceAndClasseId(
+        const existingJeune = await this.jeuneService.findByNomPrenomDateDeNaissanceAndClasseId(
             jeune.prenom,
             jeune.nom,
             jeune.dateNaissance,
