@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
@@ -61,6 +61,20 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   const isNotSaved = isDirty && !isSubmitting;
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(!!(cohort.reInscriptionStartDate || cohort.reInscriptionEndDate));
   const updateCohorteInscriptionsMutation = useUpdateCohortInscriptions();
+
+  useEffect(() => {
+    if (isDirty) {
+      console.log("Form is dirty. Dirty fields:", dirtyFields);
+      console.log("Original values:", {
+        reInscriptionStartDate: cohort.reInscriptionStartDate,
+        reInscriptionEndDate: cohort.reInscriptionEndDate,
+      });
+      console.log("Current form values:", {
+        reInscriptionStartDate: control._formValues.reInscriptionStartDate,
+        reInscriptionEndDate: control._formValues.reInscriptionEndDate,
+      });
+    }
+  }, [isDirty, dirtyFields, cohort, control._formValues]);
 
   const handleOnCancel = () => {
     reset();
@@ -142,6 +156,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                 disabled={isSubmitting || readOnly}
                 value={!!showSpecificDatesReInscription}
                 onChange={(v) => {
+                  console.log("Toggle changed to:", v, "Previous state:", showSpecificDatesReInscription);
                   if (v == false) {
                     setValue("reInscriptionStartDate", null, { shouldDirty: true });
                     setValue("reInscriptionEndDate", null, { shouldDirty: true });
