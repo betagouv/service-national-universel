@@ -26,10 +26,9 @@ export default function DatePickerWrapper({ label, value, onChange, disabled = f
 
   useEffect(() => {
     handleChange(value);
-  }, [time, value]);
+  }, [time]);
 
   const handleChange = (date) => {
-    console.log("DatePickerWrapper handleChange called with:", date);
     if (!date) return undefined;
     if (!isTime || mode !== "single") return onChange(date);
 

@@ -35,6 +35,20 @@ interface InscriptionsProps {
 }
 
 export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProps) {
+  const normalizedDefaultValues = {
+    inscriptionStartDate: normalizeDate(cohort.inscriptionStartDate),
+    inscriptionEndDate: normalizeDate(cohort.inscriptionEndDate),
+    reInscriptionStartDate: normalizeDate(cohort.reInscriptionStartDate),
+    reInscriptionEndDate: normalizeDate(cohort.reInscriptionEndDate),
+    inscriptionModificationEndDate: normalizeDate(cohort.inscriptionModificationEndDate),
+    instructionEndDate: normalizeDate(cohort.instructionEndDate),
+    youngHTSBasculeLPDisabled: cohort.youngHTSBasculeLPDisabled,
+    objectifLevel: cohort.objectifLevel,
+    inscriptionOpenForReferentRegion: cohort.inscriptionOpenForReferentRegion,
+    inscriptionOpenForReferentDepartment: cohort.inscriptionOpenForReferentDepartment,
+    inscriptionOpenForReferentClasse: cohort.inscriptionOpenForReferentClasse,
+    inscriptionOpenForAdministrateurCle: cohort.inscriptionOpenForAdministrateurCle,
+  };
   const {
     control,
     setValue,
@@ -42,20 +56,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
     formState: { errors, isDirty, isSubmitting, dirtyFields },
     reset,
   } = useForm<InscriptionsFormData>({
-    defaultValues: {
-      inscriptionStartDate: cohort.inscriptionStartDate,
-      inscriptionEndDate: cohort.inscriptionEndDate,
-      reInscriptionStartDate: cohort.reInscriptionStartDate,
-      reInscriptionEndDate: cohort.reInscriptionEndDate,
-      inscriptionModificationEndDate: cohort.inscriptionModificationEndDate,
-      instructionEndDate: cohort.instructionEndDate,
-      youngHTSBasculeLPDisabled: cohort.youngHTSBasculeLPDisabled,
-      objectifLevel: cohort.objectifLevel,
-      inscriptionOpenForReferentRegion: cohort.inscriptionOpenForReferentRegion,
-      inscriptionOpenForReferentDepartment: cohort.inscriptionOpenForReferentDepartment,
-      inscriptionOpenForReferentClasse: cohort.inscriptionOpenForReferentClasse,
-      inscriptionOpenForAdministrateurCle: cohort.inscriptionOpenForAdministrateurCle,
-    },
+    defaultValues: normalizedDefaultValues,
     mode: "onChange",
   });
   const isNotSaved = isDirty && !isSubmitting;
@@ -63,6 +64,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   const updateCohorteInscriptionsMutation = useUpdateCohortInscriptions();
 
   useEffect(() => {
+    console.log("Normalized default values:", normalizedDefaultValues);
     if (isDirty) {
       console.log("Form is dirty. Dirty fields:", dirtyFields);
       console.log("Original values:", {
@@ -77,8 +79,15 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
         inscriptionModificationEndDate: control._formValues.inscriptionModificationEndDate,
         instructionEndDate: control._formValues.instructionEndDate,
       });
+    } else {
+      console.log("Form is NOT dirty - solution appears to be working!");
     }
   }, [isDirty, dirtyFields, cohort, control._formValues]);
+
+  function normalizeDate(dateValue) {
+    if (!dateValue) return undefined;
+    return new Date(dateValue);
+  }
 
   const handleOnCancel = () => {
     reset();
