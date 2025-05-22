@@ -25,6 +25,8 @@ const ROLES = {
   REFERENT_CLASSE: "referent_classe",
 };
 
+export const ROLE_JEUNE = "jeune";
+
 const SUB_ROLES = {
   manager_department: "manager_department",
   assistant_manager_department: "assistant_manager_department",
@@ -77,6 +79,7 @@ const CENTER_ROLES = {
 };
 
 const ROLES_LIST = Object.values(ROLES);
+export const REFERENT_AND_JEUNE_ROLES_LIST = [...ROLES_LIST, ROLE_JEUNE];
 const SUB_ROLES_LIST = Object.values(SUB_ROLES);
 const SUPPORT_ROLES_LIST = Object.keys(SUPPORT_ROLES);
 const VISITOR_SUB_ROLES_LIST = Object.keys(VISITOR_SUBROLES);
@@ -544,6 +547,7 @@ function canSendPlanDeTransport(user) {
 interface UserRoles {
   role?: ReferentType["role"];
   subRole?: ReferentType["subRole"];
+  roles?: ReferentType["roles"];
 }
 
 function isAdmin(user: UserRoles) {

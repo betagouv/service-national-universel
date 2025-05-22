@@ -1,15 +1,19 @@
-import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { NextFunction, Response } from "express";
+import { ClsService } from "nestjs-cls";
+import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { AuthProvider } from "./Auth.provider";
-import { ClsService } from "nestjs-cls";
+import { PermissionService } from "@auth/core/Permission.service";
+import { ReferentModel } from "@admin/core/iam/Referent.model";
+import { ReferentMapper } from "../repository/mongo/Referent.mapper";
 
 @Injectable()
 export class AddUserToRequestMiddleware implements NestMiddleware {
     constructor(
         @Inject(ReferentGateway) private referentGateway: ReferentGateway,
         @Inject(AuthProvider) private authProvider: AuthProvider,
+        @Inject(PermissionService) private permissionService: PermissionService,
         private readonly cls: ClsService,
     ) {}
 
@@ -24,7 +28,11 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         if (!user) {
             throw new UnauthorizedException();
         }
-        req.user = user;
+        const acl = await this.permissionService.getAcl(ReferentMapper.toEntity(user as ReferentModel));
+        req.user = {
+            ...user,
+            acl,
+        };
 
         this.cls.set("user", {
             id: user?.id,
@@ -32,6 +40,7 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             lastName: user?.nom,
             role: user?.role,
             subRole: user?.sousRole,
+            acl,
         });
         next();
     }

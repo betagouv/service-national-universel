@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone, setToEndOfDay } from "snu-lib";
+import { ROLES, isSuperAdmin, COHORT_TYPE, formatDateTimeZone, setToEndOfDay, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 
 import { CohortModel, ClasseModel, YoungModel, SessionPhase1Model } from "../models";
 import ClasseStateManager from "../cle/classe/stateManager";
@@ -12,6 +12,8 @@ import { decrypt } from "../cryptoUtils";
 import { validateCohortGeneralDto, validateCohortInscriptionDto, validateCohortPreparationDto, validateCohortAffectationDto, validateCohortCLEDto } from "./cohortValidator";
 import { UserRequest } from "../controllers/request";
 import { validateId } from "../utils/validator";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router({ mergeParams: true });
 
@@ -295,129 +297,139 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
   }
 });
 
-router.get("/:id/export-dsnj/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.DSNJ], { session: false }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: exportDateKeyError, value: exportKey } = Joi.string()
-      .valid(...exportDateKeys)
-      .required()
-      .validate(req.params.exportKey, { stripUnknown: true });
+router.get(
+  "/:id/export-dsnj/:exportKey",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error: exportDateKeyError, value: exportKey } = Joi.string()
+        .valid(...exportDateKeys)
+        .required()
+        .validate(req.params.exportKey, { stripUnknown: true });
 
-    const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
 
-    if (exportDateKeyError) {
-      capture(exportDateKeyError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (exportDateKeyError) {
+        capture(exportDateKeyError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (idError) {
+        capture(idError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      let cohort = await CohortModel.findById(id);
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
+      const exportAvailableFrom = new Date(cohort.dsnjExportDates![exportKey].setHours(0, 0, 0, 0));
+      const exportAvailableUntil = new Date(cohort.dsnjExportDates![exportKey]);
+      exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
+      const now = new Date();
+
+      if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
+
+      let file, fileName;
+      if (exportKey === EXPORT_COHESION_CENTERS) {
+        file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_COHESION_CENTERS}.xlsx`);
+        fileName = `DSNJ - Fichier des centres-${cohort.snuId}-${formattedDate}.xlsx`;
+      }
+
+      if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
+        file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
+        fileName = `DSNJ - Fichier volontaire-${cohort.snuId}-${formattedDate}.xlsx`;
+      }
+      if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
+        file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
+        fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
+      }
+
+      const decryptedBuffer = decrypt(file.Body) as any;
+
+      return res.status(200).send({
+        data: Buffer.from(decryptedBuffer, "base64"),
+        mimeType: xlsxMimetype,
+        fileName,
+        ok: true,
+      });
+    } catch (err) {
+      capture(err);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    if (idError) {
-      capture(idError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.get(
+  "/:id/export-injep/:exportKey",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error: exportDateKeyError, value: exportKey } = Joi.string()
+        .valid(...exportDateKeys)
+        .required()
+        .validate(req.params.exportKey, { stripUnknown: true });
+
+      const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+
+      if (exportDateKeyError) {
+        capture(exportDateKeyError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (idError) {
+        capture(idError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      let cohort = await CohortModel.findById(id);
+      if (!cohort) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
+
+      const exportAvailableFrom = new Date(cohort.injepExportDates![exportKey].setHours(0, 0, 0, 0));
+      const exportAvailableUntil = new Date(cohort.injepExportDates![exportKey]);
+      exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
+      const now = new Date();
+
+      if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
+
+      let file, fileName;
+
+      if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
+        file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
+        fileName = `${formattedDate}-INJEP-${cohort.snuId}-avant-sejour.xlsx`;
+      }
+      if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
+        file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
+        fileName = `${formattedDate}-INJEP-${cohort.snuId}-apres-sejour.xlsx`;
+      }
+
+      const decryptedBuffer = decrypt(file.Body) as any;
+
+      return res.status(200).send({
+        data: Buffer.from(decryptedBuffer, "base64"),
+        mimeType: xlsxMimetype,
+        fileName,
+        ok: true,
+      });
+    } catch (err) {
+      capture(err);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    let cohort = await CohortModel.findById(id);
-    if (!cohort) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    const exportAvailableFrom = new Date(cohort.dsnjExportDates![exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.dsnjExportDates![exportKey]);
-    exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
-    const now = new Date();
-
-    if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
-
-    let file, fileName;
-    if (exportKey === EXPORT_COHESION_CENTERS) {
-      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_COHESION_CENTERS}.xlsx`);
-      fileName = `DSNJ - Fichier des centres-${cohort.snuId}-${formattedDate}.xlsx`;
-    }
-
-    if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
-      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire-${cohort.snuId}-${formattedDate}.xlsx`;
-    }
-    if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
-      file = await getFile(`dsnj/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
-      fileName = `DSNJ - Fichier volontaire avec validation-${cohort.snuId}-${formattedDate}.xlsx`;
-    }
-
-    const decryptedBuffer = decrypt(file.Body) as any;
-
-    return res.status(200).send({
-      data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: xlsxMimetype,
-      fileName,
-      ok: true,
-    });
-  } catch (err) {
-    capture(err);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.get("/:id/export-injep/:exportKey", passport.authenticate([ROLES.ADMIN, ROLES.INJEP], { session: false }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: exportDateKeyError, value: exportKey } = Joi.string()
-      .valid(...exportDateKeys)
-      .required()
-      .validate(req.params.exportKey, { stripUnknown: true });
-
-    const { error: idError, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-
-    if (exportDateKeyError) {
-      capture(exportDateKeyError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    if (idError) {
-      capture(idError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    let cohort = await CohortModel.findById(id);
-    if (!cohort) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    const exportAvailableFrom = new Date(cohort.injepExportDates![exportKey].setHours(0, 0, 0, 0));
-    const exportAvailableUntil = new Date(cohort.injepExportDates![exportKey]);
-    exportAvailableUntil.setMonth(exportAvailableUntil.getMonth() + 1);
-    const now = new Date();
-
-    if (!exportAvailableFrom || now < exportAvailableFrom || now > exportAvailableUntil) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    const formattedDate = exportAvailableFrom.toLocaleDateString("fr-FR");
-
-    let file, fileName;
-
-    if (exportKey === EXPORT_YOUNGS_BEFORE_SESSION) {
-      file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_BEFORE_SESSION}.xlsx`);
-      fileName = `${formattedDate}-INJEP-${cohort.snuId}-avant-sejour.xlsx`;
-    }
-    if (exportKey === EXPORT_YOUNGS_AFTER_SESSION) {
-      file = await getFile(`injep/${cohort.snuId}/${EXPORT_YOUNGS_AFTER_SESSION}.xlsx`);
-      fileName = `${formattedDate}-INJEP-${cohort.snuId}-apres-sejour.xlsx`;
-    }
-
-    const decryptedBuffer = decrypt(file.Body) as any;
-
-    return res.status(200).send({
-      data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: xlsxMimetype,
-      fileName,
-      ok: true,
-    });
-  } catch (err) {
-    capture(err);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/:id/general", passport.authenticate([ROLES.ADMIN], { session: false }), async (req: UserRequest, res: Response) => {
   try {

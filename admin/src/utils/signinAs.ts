@@ -1,4 +1,4 @@
-import api from "@/services/api";
+import api, { setJwtToken } from "@/services/api";
 import plausibleEvent from "@/services/plausible";
 import store from "@/redux/store";
 import { setUser } from "@/redux/auth/actions";
@@ -10,7 +10,7 @@ export const signinAs = async (type: "referent" | "young", userId: string) => {
   if (!data) throw new Error("Erreur : aucune données d'utilisateur");
   if (!token) throw new Error("Erreur : aucun token");
   if (type === "referent") {
-    api.setToken(token);
+    setJwtToken(token);
     getImpersonationChannel().postMessage({ action: "impersonation_started" });
   }
 
@@ -22,7 +22,7 @@ export const restorePreviousSignin = async () => {
     const { ok, data, token } = await api.get("/referent/restore_signin");
     if (!ok || !data || !token) throw new Error("Une erreur est survenue lors de la reconnexion");
 
-    api.setToken(token);
+    setJwtToken(token);
     store.dispatch(setUser(data));
     getImpersonationChannel().postMessage({ action: "impersonation_stopped" });
     plausibleEvent("Admin - Reprendre sa place");

@@ -74,6 +74,7 @@ import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
 import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
+import { AuthModule } from "@auth/Auth.module";
 
 @Module({
     imports: [
@@ -91,6 +92,7 @@ import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
         TaskModule,
         DatabaseModule,
         ReferentielModule,
+        AuthModule,
     ],
     providers: [
         Logger,
