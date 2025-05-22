@@ -3,6 +3,7 @@ import { MdInfoOutline } from "react-icons/md";
 import { HiOutlineExclamation } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
+import cx from "classnames";
 
 import { COHORT_TYPE, COHORT_STATUS, CohortDto } from "snu-lib";
 import InputText from "@/components/ui/forms/InputText";
@@ -64,7 +65,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
   ];
 
   return (
-    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
+    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
         <div className="flex">

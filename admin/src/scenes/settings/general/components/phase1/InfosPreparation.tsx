@@ -3,6 +3,7 @@ import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
+import cx from "classnames";
 
 import { COHORT_TYPE, CohortDto } from "snu-lib";
 import { Button, Container } from "@snu/ds/admin";
@@ -88,7 +89,7 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
     reset(data);
   };
   return (
-    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
+    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Préparation des affectations et des transports (phase 1)</p>
         <div className="flex">
