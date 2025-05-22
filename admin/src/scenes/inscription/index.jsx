@@ -8,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource } from "snu-lib";
+import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, FeatureFlagName } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -216,7 +216,10 @@ export default function Inscription() {
   const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
   const cohorts = useSelector((state) => state.Cohorts);
   const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
-  const baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  let baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
+    baseInscriptionPath = `/classes/${selectedClassId}/inscription-manuelle`;
+  }
   const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
 
   if (isLabelsPending) return <Loader />;

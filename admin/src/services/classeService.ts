@@ -30,6 +30,16 @@ const ClasseService = {
     })();
   },
 
+  inscrireEleveManuellement: async (id: ClassesRoutes["InscriptionManuelle"]["params"]["id"], payload: ClassesRoutes["InscriptionManuelle"]["payload"]) => {
+    return buildRequest<ClassesRoutes["InscriptionManuelle"]>({
+      path: "/classe/{id}/inscription-manuelle",
+      method: "POST",
+      params: { id },
+      payload,
+      target: "API_V2",
+    })();
+  },
+
   mapDtoToView: (classeDto): NonNullable<ClassesRoutes["GetOne"]["response"]["data"]> => {
     return {
       _id: classeDto.id,

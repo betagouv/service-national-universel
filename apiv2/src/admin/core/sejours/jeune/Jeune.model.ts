@@ -70,3 +70,15 @@ export type JeuneModel = {
 };
 
 export type CreateJeuneModel = Omit<JeuneModel, "id" | "createdAt" | "updatedAt">;
+
+export type JeuneWithMinimalDataModel = Pick<JeuneModel, "prenom" | "nom" | "dateNaissance" | "genre"> & {
+    prenom: string;
+    nom: string;
+    dateNaissance: Date;
+    genre: string;
+};
+
+export enum JeuneGenre {
+    MALE = "male",
+    FEMALE = "female",
+}
