@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { CreateJeuneModel, JeuneModel, JeuneWithMinimalDataModel } from "./Jeune.model";
 import { JeuneGateway } from "./Jeune.gateway";
-import { YOUNG_STATUS_PHASE1, YOUNG_SOURCE, YOUNG_STATUS } from "snu-lib";
+import { YOUNG_STATUS_PHASE1, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_ACCOUNT_STATUS } from "snu-lib";
 import { ClasseService } from "../cle/classe/Classe.service";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { ClasseModel } from "../cle/classe/Classe.model";
@@ -72,6 +72,7 @@ export class JeuneService {
             parent1AllowImageRights: "true",
             imageRight: "true",
             source: YOUNG_SOURCE.CLE,
+            statutCompte: YOUNG_ACCOUNT_STATUS.PRECOMPTE,
         };
     }
 }
