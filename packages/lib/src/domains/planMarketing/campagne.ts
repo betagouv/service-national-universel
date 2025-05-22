@@ -20,6 +20,8 @@ export interface CampagneComplete extends CampagneBase {
   listeDiffusionId: string;
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
+  isProgrammationActive: boolean;
+  isArchived?: boolean;
 }
 
 /**

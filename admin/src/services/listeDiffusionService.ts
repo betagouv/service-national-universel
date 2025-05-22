@@ -27,6 +27,14 @@ const ListeDiffusionService = {
       query,
     })();
   },
+  toggleArchivage: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["ListeDiffusionRoutes"]["ToggleArchivageListeDiffusionRoute"]>({
+      path: `/liste-diffusion/{id}/toggle-archivage`,
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+    })();
+  },
 };
 
 export default ListeDiffusionService;

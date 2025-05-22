@@ -2,6 +2,7 @@ import { CohortType } from "snu-lib";
 
 import { SessionDocument } from "../provider/SessionMongo.provider";
 import { CreateSessionModel, SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { DatesSession } from "@plan-marketing/core/Programmation.model";
 
 type SessionType = Omit<
     CohortType,

@@ -118,12 +118,17 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
                       name={`checkbox-${campagne.id}`}
                       checked={selectedCampaigns.includes(campagne.id)}
                       onChange={(e) => toggleSelectCampaign(campagne.id, e.target.checked)}
-                      disabled={disabled}
+                      disabled={disabled || campagne.isArchived}
                       label={campagne.nom}
                     />
                     {disabled && (
                       <div>
                         <span className="text-sm font-normal text-gray-400">Déjà importée</span>
+                      </div>
+                    )}
+                    {campagne.isArchived && (
+                      <div>
+                        <span className="text-sm font-normal text-gray-400">Archivée</span>
                       </div>
                     )}
                   </div>

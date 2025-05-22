@@ -4,8 +4,10 @@ import {
     CreateCampagneSpecifiqueModelWithRef,
     CreateCampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
-import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, PlanMarketingRoutes } from "snu-lib";
 import { IsArray, IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString, IsNumber } from "class-validator";
+import { CampagneProgrammation } from "@plan-marketing/core/Programmation.model";
+import { ParseBoolPipe } from "@nestjs/common";
 
 class BaseCampagneDto {
     @IsString()
@@ -35,12 +37,24 @@ class BaseCampagneDto {
     @IsEnum(CampagneJeuneType)
     @IsNotEmpty()
     type: CampagneJeuneType;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isProgrammationActive: boolean = false;
+
+    @IsBoolean()
+    @IsOptional()
+    isArchived?: boolean = false;
 }
 
 export class CreateCampagneGeneriqueDto extends BaseCampagneDto implements CreateCampagneGeneriqueModel {
     @IsBoolean()
     @IsNotEmpty()
     generic: true = true;
+
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class CreateCampagneSpecifiqueWithoutRefDto
@@ -54,6 +68,10 @@ export class CreateCampagneSpecifiqueWithoutRefDto
     @IsString()
     @IsNotEmpty()
     cohortId: string;
+
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifiqueModelWithRef {
@@ -68,6 +86,13 @@ export class CreateCampagneSpecifiqueWithRefDto implements CreateCampagneSpecifi
     @IsString()
     @IsNotEmpty()
     campagneGeneriqueId: string;
+
+    @IsBoolean()
+    @IsNotEmpty()
+    isProgrammationActive: boolean = false;
+    @IsArray()
+    @IsNotEmpty()
+    programmations: CampagneProgrammation[];
 }
 
 export class UpdateCampagneGeneriqueDto
@@ -89,6 +114,12 @@ export class UpdateCampagneSpecifiqueWithRefDto extends CreateCampagneSpecifique
     @IsString()
     @IsNotEmpty()
     id: string;
+}
+
+export class EnvoyerCampagneDto {
+    @IsBoolean()
+    @IsOptional()
+    isProgrammationActive?: boolean;
 }
 
 export type CreateCampagneDto =

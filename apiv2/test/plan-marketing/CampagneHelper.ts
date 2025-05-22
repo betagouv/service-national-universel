@@ -1,18 +1,20 @@
-import { CampagneModel } from "@plan-marketing/core/Campagne.model";
+import { CampagneModel, CreateCampagneModel } from "@plan-marketing/core/Campagne.model";
 import { getPlanMarketingTestModuleRef } from "./setUpPlanMarketingTest";
 import { CampagneGateway } from "@plan-marketing/core/gateway/Campagne.gateway";
 
-export async function createCampagne(data: Partial<CampagneModel>): Promise<CampagneModel> {
+export async function createCampagne(data: Partial<CreateCampagneModel>): Promise<CampagneModel> {
     const planMarketingTestModule = getPlanMarketingTestModuleRef();
     const campagneGateway = planMarketingTestModule.get<CampagneGateway>(CampagneGateway);
-    const defaultCampagne: Partial<CampagneModel> = {
+    const defaultCampagne: Partial<CreateCampagneModel> = {
         nom: "Test Campaign",
         objet: "Test Subject",
         templateId: 1,
         generic: true,
         destinataires: [],
-        ...data,
-    } as Partial<CampagneModel>;
+        isProgrammationActive: false,
+        programmations: [],
+        ...(data as any),
+    };
 
-    return campagneGateway.save(defaultCampagne as CampagneModel);
+    return campagneGateway.save(defaultCampagne as CreateCampagneModel);
 }
