@@ -43,7 +43,7 @@ export default function ProgrammationList({ campagne, onChange, isCampagneGeneri
             onChange={(value) => onChange({ isProgrammationActive: value })}
             disabled={campagne.isArchived}
           />
-          <Button type="icon" leftIcon={<HiOutlinePlusSm size={20} />} onClick={handleAdd} disabled={campagne.isArchived} />
+          <Button type="icon" leftIcon={<HiOutlinePlusSm size={20} />} onClick={handleAdd} disabled={campagne.isArchived || !campagne.isProgrammationActive} />
         </div>
       </div>
       <div className="space-y-4">
@@ -57,7 +57,7 @@ export default function ProgrammationList({ campagne, onChange, isCampagneGeneri
               }}
               isEnabled={campagne.isProgrammationActive && !prog.sentAt}
               isCampagneGenerique={isCampagneGenerique}
-              isRemovable={!prog.sentAt}
+              isRemovable={!prog.sentAt && campagne.isProgrammationActive}
               onDelete={() => handleDelete(index)}
               onChange={(data) => handleChange(index, data)}
             />

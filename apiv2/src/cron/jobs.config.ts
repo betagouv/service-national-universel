@@ -15,5 +15,10 @@ export const cronJobs: CronJob[] = [
     {
         name: CronJobName.ENVOYER_CAMPAGNES_PROGRAMMEES,
         pattern: "0 8-18 * * *",
+        opts: {
+            repeat: {
+                tz: "Europe/Paris",
+            },
+        },
     },
 ];

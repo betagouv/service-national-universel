@@ -9,6 +9,7 @@ describe("CampagneService", () => {
     let mockPlanMarketingGateway: any;
     let mockProgrammationService: any;
     let mockSessionGateway: any;
+    let mockClockGateway: any;
     let loggerSpy: jest.SpyInstance;
 
     beforeEach(() => {
@@ -26,12 +27,20 @@ describe("CampagneService", () => {
         mockSessionGateway = {
             findById: jest.fn(),
         };
+        mockClockGateway = {
+            addDays: (date: Date, days: number) => {
+                const newDate = new Date(date);
+                newDate.setDate(newDate.getDate() + days);
+                return newDate;
+            },
+        };
 
         service = new CampagneService(
             mockCampagneGateway,
             mockPlanMarketingGateway,
             mockProgrammationService,
             mockSessionGateway,
+            mockClockGateway
         );
 
         loggerSpy = jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});
@@ -342,5 +351,31 @@ describe("CampagneService", () => {
             "ASC"
         );
         expect(result).toEqual(mockCampagnes);
+    });
+
+    describe("createDatesSessionFromSession", () => {
+        it("calcule validationDate avec clockGateway.addDays si sessionObj.validationDate est undefined", () => {
+            const dateStart = new Date("2024-01-01T00:00:00.000Z");
+            const daysToValidate = 5;
+            const expectedValidationDate = new Date("2024-01-06T00:00:00.000Z");
+            const session = {
+                dateStart,
+                dateEnd: new Date("2024-01-10T00:00:00.000Z"),
+                inscriptionStartDate: new Date("2023-12-01T00:00:00.000Z"),
+                inscriptionEndDate: new Date("2023-12-31T00:00:00.000Z"),
+                inscriptionModificationEndDate: new Date("2023-12-20T00:00:00.000Z"),
+                instructionEndDate: new Date("2023-12-15T00:00:00.000Z"),
+                daysToValidate,
+                // No validationDate in session for this test
+            };
+            const addDaysSpy = jest.spyOn(mockClockGateway, "addDays");
+            addDaysSpy.mockReturnValue(expectedValidationDate);
+
+            // @ts-ignore accès à la méthode privée
+            const result = service.createDatesSessionFromSession(session);
+
+            expect(addDaysSpy).toHaveBeenCalledWith(dateStart, daysToValidate);
+            expect(result.validationDate).toEqual(expectedValidationDate);
+        });
     });
 });
