@@ -174,7 +174,7 @@ function StructureForm({ structure, setStructure }) {
                   isVerified={data.addressVerified === true}
                   buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                   verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
-                  verifyButtonText="Vérifier l'adresse du centre"
+                  verifyButtonText="Vérifier l'adresse de la structure"
                 />
                 {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
               </div>
