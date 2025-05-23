@@ -57,7 +57,7 @@ describe("InscrireEleveManuellement", () => {
                 {
                     provide: JeuneService,
                     useValue: {
-                        findByNomPrenomDateDeNaissanceAndClasseId: jest.fn(),
+                        exists: jest.fn(),
                         buildJeuneCleWithMinimalData: jest.fn(),
                         create: jest.fn(),
                         update: jest.fn(),
@@ -80,7 +80,7 @@ describe("InscrireEleveManuellement", () => {
     it("should successfully add a student to a class", async () => {
         // Arrange
         jest.spyOn(classeService, "findById").mockResolvedValue(mockClasse);
-        jest.spyOn(jeuneService, "findByNomPrenomDateDeNaissanceAndClasseId").mockResolvedValue(null);
+        jest.spyOn(jeuneService, "exists").mockResolvedValue(false);
         jest.spyOn(jeuneService, "buildJeuneCleWithMinimalData").mockReturnValue(mockCreatedJeune);
         jest.spyOn(jeuneService, "create").mockResolvedValue(mockCreatedJeune);
         jest.spyOn(jeuneService, "update").mockResolvedValue({ ...mockCreatedJeune, statut: YOUNG_STATUS.VALIDATED });
@@ -90,12 +90,7 @@ describe("InscrireEleveManuellement", () => {
 
         // Assert
         expect(classeService.findById).toHaveBeenCalledWith(mockClasse.id);
-        expect(jeuneService.findByNomPrenomDateDeNaissanceAndClasseId).toHaveBeenCalledWith(
-            mockJeuneInput.prenom,
-            mockJeuneInput.nom,
-            mockJeuneInput.dateNaissance,
-            mockClasse.id,
-        );
+        expect(jeuneService.exists).toHaveBeenCalledWith(mockJeuneInput, mockClasse.id);
         expect(jeuneService.buildJeuneCleWithMinimalData).toHaveBeenCalledWith(mockJeuneInput, mockClasse);
         expect(jeuneService.create).toHaveBeenCalledWith(mockCreatedJeune);
         expect(jeuneService.update).toHaveBeenCalledWith({
@@ -120,7 +115,7 @@ describe("InscrireEleveManuellement", () => {
     it("should throw an exception when the student already exists", async () => {
         // Arrange
         jest.spyOn(classeService, "findById").mockResolvedValue(mockClasse);
-        jest.spyOn(jeuneService, "findByNomPrenomDateDeNaissanceAndClasseId").mockResolvedValue(mockCreatedJeune);
+        jest.spyOn(jeuneService, "exists").mockResolvedValue(true);
 
         // Act & Assert
         await expect(useCase.execute(mockJeuneInput, mockClasse.id)).rejects.toThrow(

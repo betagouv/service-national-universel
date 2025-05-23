@@ -22,13 +22,8 @@ export class InscrireEleveManuellement implements UseCase<JeuneModel> {
             throw new FunctionalException(FunctionalExceptionCode.CLASSE_FULL);
         }
 
-        const existingJeune = await this.jeuneService.findByNomPrenomDateDeNaissanceAndClasseId(
-            jeune.prenom,
-            jeune.nom,
-            jeune.dateNaissance,
-            classeId,
-        );
-        if (existingJeune) {
+        const jeuneExists = await this.jeuneService.exists(jeune, classeId);
+        if (jeuneExists) {
             throw new FunctionalException(FunctionalExceptionCode.JEUNE_ALREADY_EXISTS);
         }
 

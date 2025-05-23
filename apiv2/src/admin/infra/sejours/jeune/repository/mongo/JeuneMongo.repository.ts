@@ -42,15 +42,18 @@ export class JeuneRepository implements JeuneGateway {
         nom: string,
         prenom: string,
         dateDeNaissance: Date,
-        classeId: string,
-    ): Promise<JeuneModel | null> {
-        const jeune = await this.jeuneMongooseEntity.findOne({
+        classeId?: string,
+    ): Promise<JeuneModel[]> {
+        let query = {
             firstName: prenom,
             lastName: nom,
             birthdateAt: dateDeNaissance,
-            classeId,
-        });
-        return jeune ? JeuneMapper.toModel(jeune) : null;
+        };
+        if (classeId) {
+            query["classeId"] = classeId;
+        }
+        const jeunes = await this.jeuneMongooseEntity.find(query).collation({ locale: "fr", strength: 1 });
+        return jeunes.map((jeune) => JeuneMapper.toModel(jeune));
     }
 
     async create(jeune: JeuneModel): Promise<JeuneModel> {

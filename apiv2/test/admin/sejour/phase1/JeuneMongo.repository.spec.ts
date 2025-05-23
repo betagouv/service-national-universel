@@ -84,4 +84,69 @@ describe("JeuneGateway", () => {
             expect(result.length).toBe(4);
         });
     });
+
+    describe("findByNomPrenomDateDeNaissanceAndClasseId", () => {
+        it("should find a jeune by nom, prenom, date de naissance", async () => {
+            const session = await createSession();
+            const jeune1 = await createJeune({
+                prenom: "Émilie",
+                nom: "Dupont",
+                dateNaissance: new Date("2005-01-15"),
+                statut: YOUNG_STATUS.VALIDATED,
+                sessionId: session.id,
+                sessionNom: session.nom,
+            });
+            await createJeune({
+                prenom: "EMILIE",
+                nom: "DUPONT",
+                dateNaissance: new Date("2005-01-15"),
+                statut: YOUNG_STATUS.VALIDATED,
+                sessionId: session.id,
+                sessionNom: session.nom,
+            });
+
+            const prenom = "emilie";
+            const result = await jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
+                jeune1.nom!,
+                prenom,
+                jeune1.dateNaissance!,
+            );
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(2);
+        });
+
+        it("should find a jeune by nom, prenom, date de naissance and classe id", async () => {
+            const session = await createSession();
+            const jeune1 = await createJeune({
+                prenom: "Émilie",
+                nom: "Dupont",
+                dateNaissance: new Date("2005-01-15"),
+                statut: YOUNG_STATUS.VALIDATED,
+                sessionId: session.id,
+                sessionNom: session.nom,
+                classeId: "classe-id-1",
+            });
+            await createJeune({
+                prenom: "EMILIE",
+                nom: "DUPONT",
+                dateNaissance: new Date("2005-01-15"),
+                statut: YOUNG_STATUS.VALIDATED,
+                sessionId: session.id,
+                sessionNom: session.nom,
+                classeId: "classe-id-2",
+            });
+
+            const prenom = "emilie";
+            const result = await jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
+                jeune1.nom!,
+                prenom,
+                jeune1.dateNaissance!,
+                "classe-id-1",
+            );
+
+            expect(result).toBeDefined();
+            expect(result.length).toBe(1);
+        });
+    });
 });

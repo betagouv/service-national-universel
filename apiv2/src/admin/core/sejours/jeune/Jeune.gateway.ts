@@ -36,8 +36,8 @@ export interface JeuneGateway {
         nom: string,
         prenom: string,
         dateDeNaissance: Date,
-        classeId: string,
-    ): Promise<JeuneModel | null>;
+        classeId?: string,
+    ): Promise<JeuneModel[]>;
 }
 
 export const JeuneGateway = Symbol("JeuneGateway");

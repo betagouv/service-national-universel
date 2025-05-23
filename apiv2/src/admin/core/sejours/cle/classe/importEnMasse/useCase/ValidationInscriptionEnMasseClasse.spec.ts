@@ -14,11 +14,13 @@ import { EtablissementGateway } from "../../../etablissement/Etablissement.gatew
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
 import { ClasseModel } from "../../Classe.model";
 import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 
 describe("ValidationFileInscriptionEnMasseClasse", () => {
     let validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse;
     let fileGateway: jest.Mocked<FileGateway>;
     let classeGateway: jest.Mocked<ClasseGateway>;
+    let jeuneService: jest.Mocked<JeuneService>;
 
     const mockFile = {
         fileName: "test.xls",
@@ -56,6 +58,12 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
                     },
                 },
                 {
+                    provide: JeuneService,
+                    useValue: {
+                        exists: jest.fn().mockResolvedValue(false),
+                    },
+                },
+                {
                     provide: FileGateway,
                     useValue: {
                         parseXLS: jest.fn(),
@@ -75,6 +83,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
         );
         fileGateway = module.get(FileGateway);
         classeGateway = module.get(ClasseGateway);
+        jeuneService = module.get(JeuneService);
     });
 
     it("should return an error if the file is empty", async () => {
@@ -353,5 +362,45 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
         const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
         expect(results.isValid).toEqual(true);
         expect(results.errors.length).toEqual(0);
+    });
+
+    it("should return an error if jeune already exists in the classe", async () => {
+        fileGateway.parseXLS.mockResolvedValueOnce([
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "M",
+                "Date de naissance": "01/01/2010",
+            },
+        ]);
+
+        jeuneService.exists.mockResolvedValueOnce(true);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+
+        expect(results.isValid).toEqual(false);
+        expect(results.errors.length).toBeGreaterThan(0);
+        expect(
+            results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST),
+        ).toBeDefined();
+    });
+
+    it("should not return an error if jeune doesn't exist in the classe", async () => {
+        fileGateway.parseXLS.mockResolvedValueOnce([
+            {
+                ["Nom de famille"]: "John",
+                ["Prénom 1"]: "Doe",
+                Sexe: "M",
+                "Date de naissance": "01/01/2010",
+            },
+        ]);
+
+        jeuneService.exists.mockResolvedValueOnce(false);
+
+        const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
+
+        expect(
+            results.errors.find((error) => error.code === CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST),
+        ).toBeUndefined();
     });
 });
