@@ -6,16 +6,18 @@ export interface HasPermissionParams {
   action?: PermissionType["action"];
   resource: PermissionType["resource"];
   context?: PermissionContext;
+  ignorePolicy?: boolean;
 }
 
 export interface PermissionContext {
   referent?: Record<string, string>;
-  [key: string]: Record<string, string> | undefined;
+  [key: string]: Record<string, string> | null | undefined;
 }
 
 export interface HasPermissionsParams extends Omit<HasPermissionParams, "resource" | "action"> {
   permissions: {
     resource: PermissionType["resource"];
     action?: PermissionType["action"];
+    ignorePolicy?: boolean;
   }[];
 }
