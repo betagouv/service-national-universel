@@ -1,27 +1,28 @@
-const path = require("path");
-const { logger } = require("../logger");
-const { Writable } = require("node:stream");
-const { Buffer } = require("node:buffer");
-const { finished } = require("node:stream/promises");
-const fs = require("fs").promises;
-const { config } = require("../config");
-const { getFile } = require("../utils");
-const { ERRORS } = require("./index");
-const { MINISTRES } = require("snu-lib");
+import { ContractType, YoungType, MINISTRES } from "snu-lib";
+import path from "path";
+import { logger } from "../logger";
+import { Writable } from "node:stream";
+import { Buffer } from "node:buffer";
+import { finished } from "node:stream/promises";
+import fs from "fs/promises";
+import { config } from "../config";
+import { getFile } from "../utils";
+import { ERRORS } from "./index";
 
-const { generateCertifPhase1 } = require("../templates/certificate/phase1");
-const { generateCertifPhase2 } = require("../templates/certificate/phase2");
-const { generateCertifPhase3 } = require("../templates/certificate/phase3");
-const { generateCertifSNU } = require("../templates/certificate/snu");
-const { generateDroitImage, generateBatchDroitImage } = require("../templates/droitImage/droitImage");
-const { generateCohesion, generateBatchCohesion } = require("../templates/convocation/cohesion");
-const { generateContractPhase2 } = require("../templates/contract/phase2");
-const { generateBatchConsentement } = require("../templates/consent/consent");
+import { generateCertifPhase1 } from "../templates/certificate/phase1";
+import { generateCertifPhase2 } from "../templates/certificate/phase2";
+import { generateCertifPhase3 } from "../templates/certificate/phase3";
+import { generateCertifSNU } from "../templates/certificate/snu";
+import { generateDroitImage, generateBatchDroitImage } from "../templates/droitImage/droitImage";
+import { generateCohesion, generateBatchCohesion } from "../templates/convocation/cohesion";
+import { generateContractPhase2 } from "../templates/contract/phase2";
+import { generateBatchConsentement } from "../templates/consent/consent";
 
 class InMemoryWritable extends Writable {
+  chunks: Buffer[] = [];
+
   constructor(options) {
     super(options);
-    this.chunks = [];
   }
 
   toBuffer() {
@@ -34,7 +35,7 @@ class InMemoryWritable extends Writable {
   }
 }
 
-export async function generatePdfIntoStream(outStream, { type, template, young, contract }) {
+export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
   if (type === "certificate" && template === "1" && young) {
     return await generateCertifPhase1(outStream, young);
   }

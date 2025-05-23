@@ -194,7 +194,7 @@ function render(
   doc.text(`Nous vous félicitons pour votre engagement et vous souhaitons un excellent séjour de cohésion.`);
 }
 
-async function generateCohesion(outStream, young) {
+export async function generateCohesion(outStream, young) {
   const timer = logger.startTimer();
   const data = await fetchDataForYoungCertificate(young);
   const doc = initDocument(75, 30, MARGIN, MARGIN, {});
@@ -205,7 +205,7 @@ async function generateCohesion(outStream, young) {
   timer.done({ message: "RENDERING", level: "debug" });
 }
 
-async function generateBatchCohesion(outStream, youngs) {
+export async function generateBatchCohesion(outStream, youngs) {
   const timer = logger.startTimer();
   let commonYoungData = await getYoungCommonData(youngs);
   const doc = initDocument(75, 30, MARGIN, MARGIN, { autoFirstPage: false });
@@ -222,5 +222,3 @@ async function generateBatchCohesion(outStream, youngs) {
 async function getYoungCommonData(youngs) {
   return await fetchDataForYoungCertificate(youngs[0]);
 }
-
-module.exports = { generateCohesion, generateBatchCohesion };

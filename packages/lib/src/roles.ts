@@ -2,7 +2,7 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
+import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore } from "date-fns";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
@@ -503,7 +503,7 @@ function canSendImageRightsForSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
-function canCreateOrModifyMission(user, mission, structure) {
+function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure?: StructureType | null) {
   if (user.role === ROLES.SUPERVISOR) {
     return user.structureId === mission.structureId || user.structureId === structure?.networkId;
   }
@@ -514,23 +514,8 @@ function canCreateOrUpdateProgram(user, program) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
   return (
     isAdminOrReferent &&
-    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
+    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
   );
-}
-function canModifyStructure(user: UserDto, structure: StructureType, modifyStructure?: StructureType) {
-  const isAdmin = user.role === ROLES.ADMIN;
-  const isResponsible = user.role === ROLES.RESPONSIBLE;
-  const isReferentRegionFromSameRegion = user.role === ROLES.REFERENT_REGION && user.region === structure.region;
-  const isReferentDepartmentFromSameDepartment = user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(structure.department!);
-  const isResponsibleModifyingOwnStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && structure._id.toString() === user.structureId;
-  const isSupervisorModifyingChild = user.role === ROLES.SUPERVISOR && user.structureId === structure.networkId;
-
-  // un responsable ne peux pas passer en tête de réseau la structure
-  if (isResponsible && modifyStructure && structure.isNetwork !== "true" && modifyStructure.isNetwork === "true") {
-    return false;
-  }
-
-  return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment || isResponsibleModifyingOwnStructure || isSupervisorModifyingChild;
 }
 
 function canCreateStructure(user) {
@@ -650,10 +635,6 @@ const canSendFileByMailToYoung = (actor, young) => {
   return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment;
 };
 
-function canSearchAssociation(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
 function canViewCohesionCenter(actor: UserDto) {
   return [
     ROLES.ADMIN,
@@ -765,20 +746,6 @@ function canCreateBus(actor) {
 
 function canViewMission(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canViewStructures(actor) {
-  if (actor.constructor.modelName === "young") return true;
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.RESPONSIBLE,
-    ROLES.SUPERVISOR,
-  ].includes(actor.role);
 }
 
 function canModifyMissionStructureId(actor) {
@@ -970,25 +937,6 @@ function canShareSessionPhase1(actor) {
   );
 }
 
-function canCreateAlerteMessage(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
-}
-
-function canReadAlerteMessage(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.RESPONSIBLE,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.SUPERVISOR,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
-}
-
 function canViewTableDeRepartition(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
@@ -1017,19 +965,6 @@ function canDeleteSchemaDeRepartition(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canViewLigneBus(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.TRANSPORTER,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
-}
 function canUpdateLigneBus(actor) {
   return [
     ROLES.ADMIN,
@@ -1322,12 +1257,10 @@ export {
   FORCE_DISABLED_ASSIGN_MEETING_POINT,
   canAssignCohesionCenter,
   canAssignMeetingPoint,
-  canModifyStructure,
   canDeleteStructure,
   canSigninAs,
   canSendFileByMailToYoung,
   canCreateEvent,
-  canSearchAssociation,
   canCreateStructure,
   canViewCohesionCenter,
   canSearchSessionPhase1,
@@ -1350,7 +1283,6 @@ export {
   canUpdateBus,
   canCreateBus,
   canViewMission,
-  canViewStructures,
   canModifyMissionStructureId,
   canViewStructureChildren,
   canSendTemplateToYoung,
@@ -1367,8 +1299,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canCreateAlerteMessage,
-  canReadAlerteMessage,
   canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
@@ -1377,7 +1307,6 @@ export {
   canEditSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
   canViewNotes,
-  canViewLigneBus,
   canUpdateLigneBus,
   canCreateLigneBus,
   canDeleteLigneBus,

@@ -103,7 +103,7 @@ function render(doc, young) {
   doc.moveDown();
 }
 
-function generateBatchConsentement(outStream, youngs) {
+export function generateBatchConsentement(outStream, youngs) {
   const timer = logger.startTimer();
   const doc = initDocument(100, 30, 50, 50, { autoFirstPage: false });
   withPipeStream(doc, outStream, () => {
@@ -114,5 +114,3 @@ function generateBatchConsentement(outStream, youngs) {
   });
   timer.done({ message: "RENDERING", level: "debug" });
 }
-
-module.exports = { generateBatchConsentement };

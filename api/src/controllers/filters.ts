@@ -1,19 +1,30 @@
-/**
- * ROUTES:
- *  POST    /filters               => create a new filter
- *  GET    /filters/:page          => get all filters for the given page
- */
+import express, { Response } from "express";
+import { ERRORS } from "../utils";
+import { capture } from "../sentry";
+import Joi from "joi";
+import { FiltersModel } from "../models";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { UserRequest } from "./request";
 
-const express = require("express");
 const router = express.Router();
-const { ERRORS } = require("../utils");
-const { capture } = require("../sentry");
-const Joi = require("joi");
-const passport = require("passport");
 
-const { FiltersModel } = require("../models");
+interface FilterBody {
+  page: string;
+  url: string;
+  name: string;
+}
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+interface FilterParams {
+  id?: string;
+  page?: string;
+}
+
+interface Filter {
+  userId: string;
+  deleteOne: () => Promise<void>;
+}
+
+router.post("/", authMiddleware(["referent"]), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       page: Joi.string().required(),
@@ -23,7 +34,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const { page, url, name } = value;
+    const { page, url, name } = value as FilterBody;
 
     //check if filter already exists
     const filter = await FiltersModel.findOne({ page, name, userId: req.user._id });
@@ -38,7 +49,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.get("/:page", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:page", authMiddleware(["referent"]), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       page: Joi.string().required(),
@@ -46,7 +57,7 @@ router.get("/:page", passport.authenticate("referent", { session: false, failWit
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const { page } = value;
+    const { page } = value as FilterParams;
 
     const filters = await FiltersModel.find({ page, userId: req.user._id });
 
@@ -57,7 +68,7 @@ router.get("/:page", passport.authenticate("referent", { session: false, failWit
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", authMiddleware(["referent"]), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       id: Joi.string().required(),
@@ -65,9 +76,9 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const { id } = value;
+    const { id } = value as FilterParams;
 
-    const filter = await FiltersModel.findById(id);
+    const filter = (await FiltersModel.findById(id)) as Filter | null;
     if (!filter) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (filter.userId.toString() !== req.user._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -81,4 +92,4 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-module.exports = router;
+export default router;

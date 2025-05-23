@@ -2,9 +2,9 @@ import crypto from "crypto";
 import { Types } from "mongoose";
 import request from "supertest";
 
-import { YoungType, ROLES } from "snu-lib";
+import { YoungType, ROLES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ROLE_JEUNE } from "snu-lib";
 
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewContractFixture from "./fixtures/contract";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -12,6 +12,8 @@ import getNewYoungFixture from "./fixtures/young";
 import { createApplication, getApplicationByIdHelper } from "./helpers/application";
 import { getYoungByIdHelper, createYoungHelper } from "./helpers/young";
 import { expectContractToEqual, getContractByIdHelper, createContractHelper } from "./helpers/contract";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
 
 const { ObjectId } = Types;
 
@@ -35,11 +37,22 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
+beforeAll(async () => {
+  await dbConnect();
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
+  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.CONTRACT, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.CONTRACT, PERMISSION_ACTIONS.READ, [
+    {
+      where: [{ field: "youngId", source: "_id" }],
+      blacklist: [],
+      whitelist: [],
+    },
+  ]);
+});
 afterAll(dbClose);
 afterEach(resetAppAuth);
 
-describe("Structure", () => {
+describe("Contract", () => {
   describe("POST /contract", () => {
     it("should return 400 when contract ID is not a valid ID", async () => {
       const res = await request(getAppHelper()).post("/contract").send({ _id: "not-an-id" });
@@ -260,11 +273,15 @@ describe("Structure", () => {
 
   describe("POST /contract/:id/download", () => {
     it("should return 404 not found", async () => {
-      const resDownload = await request(getAppHelper()).post(`/contract/${new ObjectId()}/download`).send();
+      const resDownload = await request(await getAppHelperWithAcl())
+        .post(`/contract/${new ObjectId()}/download`)
+        .send();
       expect(resDownload.status).toBe(404);
     });
     it("should return 400 when not an ID", async () => {
-      const resDownload = await request(getAppHelper()).post(`/contract/2/download`).send();
+      const resDownload = await request(await getAppHelperWithAcl())
+        .post(`/contract/2/download`)
+        .send();
       expect(resDownload.status).toBe(400);
     });
     it("should return 200", async () => {
@@ -272,7 +289,9 @@ describe("Structure", () => {
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
 
-      const resDownload = await request(getAppHelper()).post(`/contract/${contract._id}/download`).send();
+      const resDownload = await request(await getAppHelperWithAcl())
+        .post(`/contract/${contract._id}/download`)
+        .send();
       expect(resDownload.status).toBe(200);
     });
 
@@ -292,7 +311,9 @@ describe("Structure", () => {
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
 
-      const resDownload = await request(getAppHelper(young)).post(`/contract/${contract._id}/download`).send();
+      const resDownload = await request(await getAppHelperWithAcl(young, "young"))
+        .post(`/contract/${contract._id}/download`)
+        .send();
       expect(resDownload.status).toBe(200);
     });
   });
