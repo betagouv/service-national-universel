@@ -520,21 +520,6 @@ function canCreateOrUpdateProgram(user, program) {
     !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
   );
 }
-function canModifyStructure(user: UserDto, structure: StructureType, modifyStructure?: StructureType) {
-  const isAdmin = user.role === ROLES.ADMIN;
-  const isResponsible = user.role === ROLES.RESPONSIBLE;
-  const isReferentRegionFromSameRegion = user.role === ROLES.REFERENT_REGION && user.region === structure.region;
-  const isReferentDepartmentFromSameDepartment = user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(structure.department!);
-  const isResponsibleModifyingOwnStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && structure._id.toString() === user.structureId;
-  const isSupervisorModifyingChild = user.role === ROLES.SUPERVISOR && user.structureId === structure.networkId;
-
-  // un responsable ne peux pas passer en tête de réseau la structure
-  if (isResponsible && modifyStructure && structure.isNetwork !== "true" && modifyStructure.isNetwork === "true") {
-    return false;
-  }
-
-  return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment || isResponsibleModifyingOwnStructure || isSupervisorModifyingChild;
-}
 
 function canCreateStructure(user) {
   return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
@@ -768,20 +753,6 @@ function canCreateBus(actor) {
 
 function canViewMission(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canViewStructures(actor) {
-  if (actor.constructor.modelName === "young") return true;
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.RESPONSIBLE,
-    ROLES.SUPERVISOR,
-  ].includes(actor.role);
 }
 
 function canModifyMissionStructureId(actor) {
@@ -1325,7 +1296,6 @@ export {
   FORCE_DISABLED_ASSIGN_MEETING_POINT,
   canAssignCohesionCenter,
   canAssignMeetingPoint,
-  canModifyStructure,
   canDeleteStructure,
   canSigninAs,
   canSendFileByMailToYoung,
@@ -1353,7 +1323,6 @@ export {
   canUpdateBus,
   canCreateBus,
   canViewMission,
-  canViewStructures,
   canModifyMissionStructureId,
   canViewStructureChildren,
   canSendTemplateToYoung,

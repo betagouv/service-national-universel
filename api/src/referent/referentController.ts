@@ -80,7 +80,6 @@ import {
   canRefuseMilitaryPreparation,
   canChangeYoungCohort,
   canSendTutorTemplate,
-  canModifyStructure,
   canSearchSessionPhase1,
   canCreateOrUpdateSessionPhase1,
   SENDINBLUE_TEMPLATES,
@@ -112,6 +111,8 @@ import {
   ReferentType,
   PermissionDto,
   ROLE_JEUNE,
+  PERMISSION_RESOURCES,
+  isWriteAuthorized,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -1674,7 +1675,14 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const structure = await StructureModel.findById(checkedStructureId);
     const referent = await ReferentModel.findById(checkedId);
     if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canModifyStructure(req.user, structure) || !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })) {
+    if (
+      !isWriteAuthorized({
+        user: req.user,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        context: { structure: structure.toJSON() },
+      }) ||
+      !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })
+    ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
