@@ -1,6 +1,5 @@
 import express from "express";
 import Joi from "joi";
-import passport from "passport";
 import { capture } from "../sentry";
 import { logger } from "../logger";
 
@@ -8,17 +7,20 @@ import { StructureModel, MissionModel, ReferentModel, ApplicationModel } from ".
 import { ERRORS } from "../utils";
 import {
   ROLES,
-  canModifyStructure,
   canDeleteStructure,
   canCreateStructure,
   canViewMission,
-  canViewStructures,
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
   SENDINBLUE_TEMPLATES,
   StructureType,
   UserDto,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
+  isReadAuthorized,
+  isWriteAuthorized,
+  isResponsible,
 } from "snu-lib";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
@@ -29,7 +31,8 @@ import { allRecords } from "../es/utils";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
-import { UserRequest } from "./request";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
 const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
@@ -105,7 +108,7 @@ async function updateResponsibleAndSupervisorRole(structure: StructureType, from
 
 const router = express.Router();
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.post("/", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value: checkedStructure } = validateStructure(req.body);
     if (error) {
@@ -132,38 +135,55 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
-  try {
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+router.put(
+  "/:id",
+  authMiddleware(["referent"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const structure = await StructureModel.findById(req.validatedParams.id);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (
+        !isWriteAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: structure.toJSON() },
+        })
+      ) {
+        return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
-    const structure = await StructureModel.findById(checkedId);
-    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
+      if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
+      // un responsable ne peux pas passer en tête de réseau la structure
+      if (isResponsible(req.user) && checkedStructure && structure.isNetwork !== "true" && checkedStructure.isNetwork === "true") {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      // Only admin user can change the networkId of a structure
+      if (!isAdmin(req.user)) {
+        delete checkedStructure.networkId;
+      }
 
-    if (!canModifyStructure(req.user, structure, checkedStructure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    // Only admin user can change the networkId of a structure
-    if (!isAdmin(req.user)) {
-      delete checkedStructure.networkId;
+      structure.set(checkedStructure);
+      await structure.save({ fromUser: req.user });
+      await updateNetworkName(structure, req.user);
+      await updateMissionStructureName(structure, req.user);
+      await updateResponsibleAndSupervisorRole(structure, req.user);
+      return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    structure.set(checkedStructure);
-    await structure.save({ fromUser: req.user });
-    await updateNetworkName(structure, req.user);
-    await updateMissionStructureName(structure, req.user);
-    await updateResponsibleAndSupervisorRole(structure, req.user);
-    return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.get("/networks", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.get("/networks", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const data = await StructureModel.find({ isNetwork: "true" }).sort("name");
     if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -174,7 +194,7 @@ router.get("/networks", passport.authenticate("referent", { session: false, fail
   }
 });
 
-router.get("/:id/children", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.get("/:id/children", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -192,7 +212,7 @@ router.get("/:id/children", passport.authenticate("referent", { session: false, 
   }
 });
 
-router.get("/:id/mission", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.get("/:id/mission", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -239,62 +259,76 @@ router.get(
   },
 );
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
-  try {
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.get(
+  "/:id",
+  authMiddleware(["referent", "young"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const checkedId = req.validatedParams.id;
 
-    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const data = await StructureModel.findById(checkedId);
+      if (!data) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, context: { structure: { _id: data._id.toString() } } })) {
+        return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
-    const data = await StructureModel.findById(checkedId);
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    let structure = serializeStructure(data, req.user);
+      let structure = serializeStructure(data, req.user);
+      if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
+        let promises: Promise<any[]>[] = [];
 
-    if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
-      let promises: Promise<any[]>[] = [];
+        if (req.query.withMissions) promises.push(populateWithMissions([structure]));
+        //   @ts-ignore
+        else promises.push(async () => [structure]);
 
-      if (req.query.withMissions) promises.push(populateWithMissions([structure]));
-      //   @ts-ignore
-      else promises.push(async () => [structure]);
+        if (req.query.withReferents && structure.department) promises.push(populateWithReferents([structure]));
+        //   @ts-ignore
+        else promises.push(async () => [structure]);
 
-      if (req.query.withReferents && structure.department) promises.push(populateWithReferents([structure]));
-      //   @ts-ignore
-      else promises.push(async () => [structure]);
+        if (req.query.withTeam) promises.push(populateWithTeam([structure]));
+        //   @ts-ignore
+        else promises.push(async () => [structure]);
 
-      if (req.query.withTeam) promises.push(populateWithTeam([structure]));
-      //   @ts-ignore
-      else promises.push(async () => [structure]);
+        const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
+        const populatedStructures = [structure].map((item, index) => ({
+          ...item,
+          missions: responseWithMissions[index]?.missions || [],
+          referents: responseWithReferents[index]?.referents || [],
+          team: responseWithTeam[index]?.team || [],
+        }));
 
-      const [responseWithMissions, responseWithReferents, responseWithTeam] = await Promise.all(promises);
-      const populatedStructures = [structure].map((item, index) => ({
-        ...item,
-        missions: responseWithMissions[index]?.missions || [],
-        referents: responseWithReferents[index]?.referents || [],
-        team: responseWithTeam[index]?.team || [],
-      }));
+        structure = populatedStructures[0];
+      }
 
-      structure = populatedStructures[0];
+      return res.status(200).json({ ok: true, data: structure });
+    } catch (error) {
+      capture(error);
+      res.status(500).json({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    return res.status(200).send({ ok: true, data: structure });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+router.get(
+  "/",
+  authMiddleware(["referent"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const data = await StructureModel.find({});
+      return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
-router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
-  try {
-    if (!canViewStructures(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await StructureModel.find({});
-    return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.delete("/:id", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -328,34 +362,47 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.post("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
-  try {
-    const { error, value } = validateStructureManager(req.body);
-    if (error) {
+router.post(
+  "/:id/representant",
+  authMiddleware(["referent"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const { error, value } = validateStructureManager(req.body);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+
+      const structure = await StructureModel.findById(req.validatedParams.id);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (
+        !isWriteAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: structure.toJSON() },
+        })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      structure.set({ structureManager: value });
+      await structure.save({ fromUser: req.user });
+      return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    const { error: errorId, value: structureId } = validateId(req.params.id);
-    if (errorId) {
-      capture(errorId);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
+  },
+);
 
-    const structure = await StructureModel.findById(structureId);
-    if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    structure.set({ structureManager: value });
-    await structure.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.delete("/:id/representant", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: express.Response) => {
+router.delete("/:id/representant", authMiddleware(["referent"]), async (req: UserRequest, res: express.Response) => {
   try {
     const { error, value } = validateId(req.params.id);
     if (error) {
@@ -365,7 +412,15 @@ router.delete("/:id/representant", passport.authenticate("referent", { session: 
 
     const structure = await StructureModel.findById(value);
     if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canModifyStructure(req.user, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (
+      !isWriteAuthorized({
+        user: req.user,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        context: { structure: structure.toJSON() },
+      })
+    ) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     structure.set({ structureManager: undefined });
     await structure.save({ fromUser: req.user });
