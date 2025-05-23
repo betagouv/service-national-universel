@@ -1,6 +1,6 @@
 import { Types } from "mongoose";
 import request from "supertest";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { mockEsClient } from "./helpers/es";
 import {
   SchemaDeRepartitionModel,
@@ -20,7 +20,7 @@ import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/poi
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getBusTeamFixture from "./fixtures/busTeam";
-import { ERRORS, ROLES, youngCleExportFields } from "snu-lib";
+import { ERRORS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import getNewLigneToPointFixture from "./fixtures/PlanDeTransport/ligneToPoint";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
@@ -28,6 +28,8 @@ import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
 import getNewCohortFixture from "./fixtures/cohort";
 import getPlanDeTransportFixture from "./fixtures/PlanDeTransport/planDeTransport";
 import * as ligneDeBusService from "../planDeTransport/ligneDeBus/ligneDeBusService";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
 
 const ObjectId = Types.ObjectId;
 
@@ -97,7 +99,11 @@ const userSuperAdmin = {
   subRole: "god",
 };
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.LIGNE_BUS, PERMISSION_ACTIONS.READ);
+});
 afterAll(dbClose);
 afterEach(resetAppAuth);
 
@@ -106,7 +112,9 @@ describe("LigneDeBus", () => {
     it("should return 200 when export is successful", async () => {
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).post("/elasticsearch/lignebus/export").send({ filters: {}, exportFields: [] });
+      const res = await request(await getAppHelperWithAcl(user))
+        .post("/elasticsearch/lignebus/export")
+        .send({ filters: {}, exportFields: [] });
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBeGreaterThan(0);
     });
@@ -122,8 +130,9 @@ describe("LigneDeBus", () => {
       const PointDeRassemblement = getNewPointDeRassemblementFixture({ code });
       const { ligneToPoint } = await createPointDeRassemblementWithBus(PointDeRassemblement, ligneBus.centerId, ligneBus.sessionId);
 
-      const res = await request(getAppHelper()).get("/ligne-de-bus/all");
+      const res = await request(await getAppHelperWithAcl()).get("/ligne-de-bus/all");
 
+      expect(res.status).toBe(200);
       expect(res.body.data.meetingPoints.length).toBe(1);
       expect(res.body.data.meetingPoints[0].code).toBe(PointDeRassemblement.code);
       expect(res.body.data.meetingPoints[0].cohorts).toEqual(PointDeRassemblement.cohorts);
@@ -143,7 +152,9 @@ describe("LigneDeBus", () => {
       mockModelMethodWithError(LigneBusModel, "find");
       let res;
       try {
-        res = await request(getAppHelper()).get("/ligne-de-bus/all").send();
+        res = await request(await getAppHelperWithAcl())
+          .get("/ligne-de-bus/all")
+          .send();
       } catch (error) {
         console.error(error);
       }
@@ -178,7 +189,7 @@ describe("LigneDeBus", () => {
       const ligneBus = await LigneBusModel.create(getNewLigneBusFixture({ centerId: center._id, cohort, busId: "bus_id_1" }));
       await LigneBusModel.create(getNewLigneBusFixture({ centerId: center._id, cohort, busId: "bus_id_2" }));
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/cohort/${cohort}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/ligne-de-bus/cohort/${cohort}`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -189,7 +200,7 @@ describe("LigneDeBus", () => {
     it("should return 403 when user is not authorized", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture() });
 
-      const res = await request(getAppHelper(young)).get("/ligne-de-bus/cohort/Février 2023 - C");
+      const res = await request(await getAppHelperWithAcl(young)).get("/ligne-de-bus/cohort/Février 2023 - C");
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -201,7 +212,7 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get("/ligne-de-bus/cohort/Février 2023 - C");
+      const res = await request(await getAppHelperWithAcl()).get("/ligne-de-bus/cohort/Février 2023 - C");
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -225,7 +236,7 @@ describe("LigneDeBus", () => {
       ligneBus.team.push(getBusTeamFixture());
       await ligneBus.save();
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${ligneBus._id}`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${ligneBus._id}`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -249,7 +260,7 @@ describe("LigneDeBus", () => {
     it("should return 404 when ligneBus with the given id is not found", async () => {
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/123456789012345678901234`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/123456789012345678901234`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -265,7 +276,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${ligneBus._id}`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${ligneBus._id}`);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -283,7 +294,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${ligneBus._id}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/ligne-de-bus/${ligneBus._id}`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -374,7 +385,7 @@ describe("LigneDeBus", () => {
         busId: ligneBus._id,
       });
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${ligneBus._id}/availablePDR`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${ligneBus._id}/availablePDR`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -386,7 +397,7 @@ describe("LigneDeBus", () => {
     it("should return 404 when ligneBus is not found", async () => {
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -414,7 +425,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(young)).get(`/ligne-de-bus/${ligneBus._id}/availablePDR`);
+      const res = await request(await getAppHelperWithAcl(young)).get(`/ligne-de-bus/${ligneBus._id}/availablePDR`);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -426,7 +437,7 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
+      const res = await request(await getAppHelperWithAcl()).get(`/ligne-de-bus/${new ObjectId()}/availablePDR`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -466,7 +477,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(young)).get(`/ligne-de-bus/${ligneBus._id}/ligne-to-points`);
+      const res = await request(await getAppHelperWithAcl(young)).get(`/ligne-de-bus/${ligneBus._id}/ligne-to-points`);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -478,7 +489,7 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId()}/ligne-to-points`);
+      const res = await request(await getAppHelperWithAcl()).get(`/ligne-de-bus/${new ObjectId()}/ligne-to-points`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -501,7 +512,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -519,7 +530,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${ligneBus._id}/data-for-check`);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -529,7 +540,7 @@ describe("LigneDeBus", () => {
     it("should return 404 when ligneBus is not found", async () => {
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/${new ObjectId()}/data-for-check`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/${new ObjectId()}/data-for-check`);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -540,7 +551,9 @@ describe("LigneDeBus", () => {
       mockModelMethodWithError(LigneBusModel, "find");
       let res;
       try {
-        res = await request(getAppHelper()).get(`/ligne-de-bus/${new ObjectId().toString()}/data-for-check`).send();
+        res = await request(await getAppHelperWithAcl())
+          .get(`/ligne-de-bus/${new ObjectId().toString()}/data-for-check`)
+          .send();
       } catch (error) {
         console.error(error);
       }
@@ -566,7 +579,7 @@ describe("LigneDeBus", () => {
         }),
       );
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/cohort/${ligneBus.cohort}/hasValue`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/cohort/${ligneBus.cohort}/hasValue`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -576,7 +589,7 @@ describe("LigneDeBus", () => {
     it("should return false when a ligne bus with the given cohort does not exist", async () => {
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -586,7 +599,7 @@ describe("LigneDeBus", () => {
     it("should return 403 when user is not authorized to view the ligne bus", async () => {
       const user = { _id: "123", role: "other" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -600,7 +613,7 @@ describe("LigneDeBus", () => {
 
       const user = { _id: "123", role: "admin" };
 
-      const res = await request(getAppHelper(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
+      const res = await request(await getAppHelperWithAcl(user)).get(`/ligne-de-bus/cohort/Février 2023 - C/hasValue`);
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -624,19 +637,21 @@ describe("LigneDeBus", () => {
 
       await ligneBus.save();
 
-      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/info`).send({
-        busId: "new_bus_id",
-        departuredDate: new Date(),
-        returnDate: new Date(),
-        youngCapacity: 15,
-        totalCapacity: 25,
-        followerCapacity: 5,
-        travelTime: "02:00",
-        lunchBreak: false,
-        lunchBreakReturn: false,
-        delayedForth: "00:10",
-        delayedBack: "00:15",
-      });
+      const res = await request(await getAppHelperWithAcl(user))
+        .put(`/ligne-de-bus/${ligneBus._id}/info`)
+        .send({
+          busId: "new_bus_id",
+          departuredDate: new Date(),
+          returnDate: new Date(),
+          youngCapacity: 15,
+          totalCapacity: 25,
+          followerCapacity: 5,
+          travelTime: "02:00",
+          lunchBreak: false,
+          lunchBreakReturn: false,
+          delayedForth: "00:10",
+          delayedBack: "00:15",
+        });
 
       expect(res.status).toBe(403);
       expect(res.body.ok).toBe(false);
@@ -646,19 +661,21 @@ describe("LigneDeBus", () => {
     it("should return 404 when the ligneBus with the given id is not found", async () => {
       const user = { _id: "1234", role: "admin" };
 
-      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/123456789012345678901234/info`).send({
-        busId: "new_bus_id",
-        departuredDate: new Date(),
-        returnDate: new Date(),
-        youngCapacity: 15,
-        totalCapacity: 25,
-        followerCapacity: 5,
-        travelTime: "02:00",
-        lunchBreak: false,
-        lunchBreakReturn: false,
-        delayedForth: "00:10",
-        delayedBack: "00:15",
-      });
+      const res = await request(await getAppHelperWithAcl(user))
+        .put(`/ligne-de-bus/123456789012345678901234/info`)
+        .send({
+          busId: "new_bus_id",
+          departuredDate: new Date(),
+          returnDate: new Date(),
+          youngCapacity: 15,
+          totalCapacity: 25,
+          followerCapacity: 5,
+          travelTime: "02:00",
+          lunchBreak: false,
+          lunchBreakReturn: false,
+          delayedForth: "00:10",
+          delayedBack: "00:15",
+        });
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -680,19 +697,21 @@ describe("LigneDeBus", () => {
         throw new Error("test error");
       });
 
-      const res = await request(getAppHelper(user)).put(`/ligne-de-bus/${ligneBus._id}/info`).send({
-        busId: "new_bus_id",
-        departuredDate: new Date(),
-        returnDate: new Date(),
-        youngCapacity: 15,
-        totalCapacity: 25,
-        followerCapacity: 5,
-        travelTime: "02:00",
-        lunchBreak: false,
-        lunchBreakReturn: false,
-        delayedForth: "00:10",
-        delayedBack: "00:15",
-      });
+      const res = await request(await getAppHelperWithAcl(user))
+        .put(`/ligne-de-bus/${ligneBus._id}/info`)
+        .send({
+          busId: "new_bus_id",
+          departuredDate: new Date(),
+          returnDate: new Date(),
+          youngCapacity: 15,
+          totalCapacity: 25,
+          followerCapacity: 5,
+          travelTime: "02:00",
+          lunchBreak: false,
+          lunchBreakReturn: false,
+          delayedForth: "00:10",
+          delayedBack: "00:15",
+        });
 
       expect(res.status).toBe(500);
       expect(res.body.ok).toBe(false);
@@ -755,7 +774,7 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 403 if user is not an admin or a transporter", async () => {
-      const res = await request(getAppHelper({ role: ROLES.REFERENT_DEPARTMENT }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT }))
         .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
         .send(payload);
 
@@ -766,7 +785,9 @@ describe("LigneDeBus", () => {
 
     it("should return 404 if ligne bus is not found", async () => {
       const fakeLigneBus = new LigneBusModel(getNewLigneBusFixture());
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`).send(payload);
+      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
+        .put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`)
+        .send(payload);
 
       expect(res.status).toBe(404);
       expect(res.body.ok).toBe(false);
@@ -774,7 +795,7 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 400 if meeting hour is after departure hour", async () => {
-      const res = await request(getAppHelper(userSuperAdmin))
+      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
         .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
         .send({ ...payload, meetingHour: "09:00", departureHour: "08:30" });
 
@@ -784,7 +805,7 @@ describe("LigneDeBus", () => {
     });
 
     it("should return 400 if bus arrival hour is after departure hour", async () => {
-      const res = await request(getAppHelper(userSuperAdmin))
+      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
         .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
         .send({ ...payload, busArrivalHour: "09:00", departureHour: "08:30" });
 
@@ -794,7 +815,9 @@ describe("LigneDeBus", () => {
     });
 
     it("should update PDR for line successfully", async () => {
-      const res = await request(getAppHelper(userSuperAdmin)).put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`).send(payload);
+      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
+        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
+        .send(payload);
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -805,7 +828,7 @@ describe("LigneDeBus", () => {
     it("should send email campaign when sendEmailCampaign is true", async () => {
       const updatePDRForLineSpy = jest.spyOn(ligneDeBusService, "updatePDRForLine").mockResolvedValue(ligneBus);
       (sendTemplate as jest.Mock).mockResolvedValue({});
-      const res = await request(getAppHelper(userSuperAdmin))
+      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
         .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
         .send({ ...payload, sendEmailCampaign: true });
 
