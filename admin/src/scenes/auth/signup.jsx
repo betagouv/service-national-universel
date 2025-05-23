@@ -9,7 +9,7 @@ import LoadingButton from "../../components/buttons/LoadingButton";
 import MultiSelect from "../../components/Multiselect";
 import PasswordEye from "../../components/PasswordEye";
 import { setUser } from "../../redux/auth/actions";
-import api from "../../services/api";
+import api, { setJwtToken } from "../../services/api";
 import Header from "./components/header";
 
 import { requiredMessage } from "../../components/errorMessage";
@@ -80,7 +80,7 @@ export default function Signup() {
               return toastr.error("Un problème est survenu lors de la création de votre compte.", translate(code));
             }
             setNewUser(user);
-            if (token) api.setToken(token);
+            if (token) setJwtToken(token);
           } catch (e) {
             if (e && e.code === "USER_ALREADY_REGISTERED") return toastr.error("Le compte existe déja. Veuillez vous connecter");
             capture(e);

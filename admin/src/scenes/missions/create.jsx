@@ -23,9 +23,10 @@ import api from "../../services/api";
 import plausibleEvent from "@/services/plausible";
 
 export default function Create(props) {
-  const structureIdFromParams = props?.match?.params?.id;
   const urlParams = new URLSearchParams(window.location.search);
   const duplicate = urlParams.get("duplicate");
+  const structureRattacheeId = urlParams.get("structureRattacheeId");
+  const structureIdFromParams = structureRattacheeId ? structureRattacheeId : props?.match?.params?.id;
   const [values, setValues] = useState({
     structureId: structureIdFromParams,
   });

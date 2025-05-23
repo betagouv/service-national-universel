@@ -58,7 +58,7 @@ export default function Import({ cohort, onFileVerified, addLigne }: Props) {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
       } else if (!res.ok) {
         if (res.code === "INVALID_BODY" && res.errors) {
-          setImportErrors(res.errors);
+          setImportErrors(!!res.errors);
         } else {
           capture(res.code);
           setUploadError("Une erreur s'est produite lors du téléversement de votre fichier (vérifiez que l'onglet ALLER-RETOUR existe bien)");

@@ -18,6 +18,7 @@ import VerifyAddress from "../../phase0/components/VerifyAddress";
 import CardRepresentant from "../components/cards/CardRepresentant";
 import TeamCard from "../components/cards/TeamCard";
 import StructureView from "./wrapperv2";
+import { ActionButton } from "./ActionButton";
 
 export default function DetailsView({ ...props }) {
   const [structure, setStructure] = useState(null);
@@ -34,7 +35,7 @@ export default function DetailsView({ ...props }) {
   if (!structure) return <Loader />;
 
   return (
-    <StructureView tab="details" structure={structure}>
+    <StructureView tab="details" structure={structure} actionButton={<ActionButton structureRattacheeId={structure._id} />}>
       <div className="my-4 flex gap-6">
         <CardRepresentant structure={structure} setStructure={setStructure} />
         <TeamCard structure={structure} />
@@ -174,7 +175,7 @@ function StructureForm({ structure, setStructure }) {
                   isVerified={data.addressVerified === true}
                   buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                   verifyText="Pour vérifier l'adresse vous devez remplir les champs adresse, code postal et ville."
-                  verifyButtonText="Vérifier l'adresse du centre"
+                  verifyButtonText="Vérifier l'adresse de la structure"
                 />
                 {errors?.addressVerified && <div className="text-[#EF4444]">{errors.addressVerified}</div>}
               </div>
