@@ -10,6 +10,7 @@ import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model"
 import { ImporterClasseEnMasse } from "./ImporterClasseEnMasse";
 import { Logger } from "@nestjs/common";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { JeuneGenre } from "@admin/core/sejours/jeune/Jeune.model";
 
 describe("ImporterClasseEnMasse", () => {
     let importerClasseEnMasse: ImporterClasseEnMasse;
@@ -36,6 +37,9 @@ describe("ImporterClasseEnMasse", () => {
         id: "class-001",
         departement: "75",
         region: "IDF",
+        sessionId: "session-001",
+        sessionNom: "Session Test",
+        etablissementId: "etab-001",
     };
 
     const mockXlsData = [
@@ -77,6 +81,33 @@ describe("ImporterClasseEnMasse", () => {
         const mockJeuneService = {
             create: jest.fn().mockImplementation((jeune) => Promise.resolve({ ...jeune, id: "young-001" })),
             update: jest.fn().mockImplementation((jeune) => Promise.resolve(jeune)),
+            buildJeuneCleWithMinimalData: jest.fn().mockImplementation((jeune, classe) => {
+                return {
+                    nom: jeune.nom,
+                    prenom: jeune.prenom,
+                    dateNaissance: jeune.dateNaissance,
+                    genre: jeune.genre,
+                    statut: YOUNG_STATUS.IN_PROGRESS,
+                    statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+                    email: `${jeune.prenom}.${jeune.nom}@localhost-abcdef`.toLowerCase().replace(/\s/g, ""),
+                    sessionId: classe.sessionId,
+                    sessionNom: classe.sessionNom,
+                    youngPhase1Agreement: "true",
+                    classeId: classe.id,
+                    etablissementId: classe.etablissementId,
+                    scolarise: "true",
+                    psh: "false",
+                    departement: classe.departement,
+                    region: classe.region,
+                    consentement: "true",
+                    acceptCGU: "true",
+                    parentAllowSNU: "true",
+                    parent1AllowSNU: "true",
+                    parent1AllowImageRights: "true",
+                    imageRight: "true",
+                    source: YOUNG_SOURCE.CLE,
+                };
+            }),
         };
 
         const mockFileGateway = {
@@ -143,7 +174,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
                 classeId: "class-001",
                 departement: "75",
                 region: "IDF",
@@ -180,7 +211,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
                 classeId: "class-001",
             }),
         );
@@ -200,7 +231,7 @@ describe("ImporterClasseEnMasse", () => {
             expect.objectContaining({
                 nom: "Doe",
                 prenom: "John",
-                genre: "M",
+                genre: JeuneGenre.MALE,
             }),
         );
 

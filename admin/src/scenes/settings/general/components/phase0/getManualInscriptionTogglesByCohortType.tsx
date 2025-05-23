@@ -1,8 +1,9 @@
 import React from "react";
 import { Controller } from "react-hook-form";
-import { CohortDto, COHORT_TYPE } from "snu-lib";
+import { CohortDto, COHORT_TYPE, FeatureFlagName } from "snu-lib";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
-
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 type ToggleItem = {
   label: string;
   value: boolean;
@@ -17,6 +18,8 @@ interface ManualInscriptionCLETogglesProps {
 }
 
 const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const toggles: ToggleItem[] = [
     {
       label: "Référents régionaux",
@@ -28,16 +31,20 @@ const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnl
       value: cohort.inscriptionOpenForReferentDepartment ?? false,
       field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
     },
-    {
-      label: "Référents de classe",
-      value: cohort.inscriptionOpenForReferentClasse ?? false,
-      field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
-    },
-    {
-      label: "Administrateurs CLE",
-      value: cohort.inscriptionOpenForAdministrateurCle ?? false,
-      field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
-    },
+    ...(!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]
+      ? [
+          {
+            label: "Référents de classe",
+            value: cohort.inscriptionOpenForReferentClasse ?? false,
+            field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
+          },
+          {
+            label: "Administrateurs CLE",
+            value: cohort.inscriptionOpenForAdministrateurCle ?? false,
+            field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
+          },
+        ]
+      : []),
   ];
 
   return (

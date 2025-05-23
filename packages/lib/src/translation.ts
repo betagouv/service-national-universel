@@ -1402,6 +1402,15 @@ export const translateClasseImportEnMasse = (name: string, column?: string) => {
   }
 };
 
+export const translateInscriptionManuelle = (name: string) => {
+  switch (name) {
+    case "JEUNE_ALREADY_EXISTS":
+      return "Cet élève est déjà inscrit dans cette classe.";
+    default:
+      return name;
+  }
+};
+
 export {
   translate,
   translateState,

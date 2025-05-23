@@ -5,6 +5,7 @@ import { SPECIFIC_SITUATIONS_KEY } from "../commons";
 import Minus from "../../../assets/icons/Minus";
 import ConfirmationModal from "./ConfirmationModal";
 import CorrectedRequest from "./CorrectedRequest";
+import { YoungDto } from "snu-lib";
 
 interface ConfirmModalOptions {
   icon?: ReactNode;
@@ -19,7 +20,7 @@ interface FieldSituationsParticulieresProps {
   group?: { hover?: boolean } | null;
   name: string;
   label?: string;
-  young: boolean;
+  young?: YoungDto;
   mode: "correction" | "edition" | "readonly";
   className?: string;
   onStartRequest?: (value: string) => void;
@@ -108,7 +109,7 @@ export default function FieldSituationsParticulieres({
   // --- tags
   const tags: ReactNode[] = [];
   for (const key of SPECIFIC_SITUATIONS_KEY) {
-    if (young[key] === "true") {
+    if (young?.[key] === "true") {
       tags.push(
         <div className="mr-[8px] mb-[8px] inline-flex" key={key}>
           <div className="rounded-[100px] bg-[#3B82F6] px-[10px] py-[1px] text-[12px] leading-[22px] text-[#FFFFFF]">{translateSpecialSituation(key)}</div>
@@ -125,7 +126,7 @@ export default function FieldSituationsParticulieres({
   }
   if (mode === "edition") {
     for (const key of SPECIFIC_SITUATIONS_KEY) {
-      if (young[key] !== "true" && !["qpv"].includes(key)) {
+      if (young?.[key] !== "true" && !["qpv"].includes(key)) {
         tags.push(
           <div className="mr-[8px] mb-[8px] inline-flex" key={key}>
             <div

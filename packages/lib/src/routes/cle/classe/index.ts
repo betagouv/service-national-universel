@@ -6,6 +6,7 @@ import { ModifierReferentClasseRoute } from "./modifierReferent";
 import { InscriptionEnMasseValiderRoute } from "./InscriptionEnMasseValider";
 import { InscriptionEnMasseImporterRoute } from "./InscriptionEnMasseImporter";
 import { InscriptionEnMasseStatutRoute } from "./InscriptionEnMasseStatut";
+import { InscriptionManuelleRoute } from "./InscriptionManuelle";
 
 export type ClassesRoutes = {
   Create: CreateClasseRoute;
@@ -16,4 +17,5 @@ export type ClassesRoutes = {
   InscriptionEnMasseValider: InscriptionEnMasseValiderRoute;
   InscriptionEnMasseImporter: InscriptionEnMasseImporterRoute;
   InscriptionEnMasseStatut: InscriptionEnMasseStatutRoute;
+  InscriptionManuelle: InscriptionManuelleRoute;
 };

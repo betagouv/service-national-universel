@@ -65,6 +65,8 @@ import { SharedModule } from "@shared/Shared.module";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { InscrireEleveManuellement } from "@admin/core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -157,6 +159,8 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
             ...featureFlagMongoProviders,
             ClasseImportService,
+            InscrireEleveManuellement,
+            JeuneService,
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

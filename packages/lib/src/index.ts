@@ -44,4 +44,5 @@ export * from "./utils/file";
 export * from "./utils/location";
 export * from "./utils/parseEnv";
 export * from "./utils/request";
+export * from "./utils/string";
 export * from "./young";

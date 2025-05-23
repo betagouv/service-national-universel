@@ -74,6 +74,8 @@ import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFla
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
+import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
+import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 
 @Module({
     imports: [
@@ -152,6 +154,8 @@ import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/Cla
         ...featureFlagMongoProviders,
         FeatureFlagService,
         ClasseImportService,
+        JeuneService,
+        InscrireEleveManuellement,
     ],
     exports: [
         ClsModule,

@@ -1,12 +1,12 @@
 import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
-import { CreateJeuneModel } from "@admin/core/sejours/jeune/Jeune.model";
+import { CreateJeuneModel, JeuneGenre, JeuneWithMinimalDataModel } from "@admin/core/sejours/jeune/Jeune.model";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
+import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_STATUS } from "snu-lib";
 import { ClasseService } from "../../Classe.service";
 import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
@@ -51,35 +51,21 @@ export class ImporterClasseEnMasse implements UseCase<void> {
             const dateNaissance = this.clockGateway.parseDateNaissance(
                 jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE],
             );
-            const jeuneToCreate: CreateJeuneModel = {
-                nom: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
+            let genre = JeuneGenre.FEMALE;
+            if (jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE] === "M") {
+                genre = JeuneGenre.MALE;
+            }
+            const jeuneWithMinimalData: JeuneWithMinimalDataModel = {
                 prenom: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
+                nom: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
                 dateNaissance: dateNaissance,
-                genre: jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE],
-                statut: YOUNG_STATUS.IN_PROGRESS,
-                statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-                email: `${jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]}.${
-                    jeune[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]
-                }@localhost-${this.cryptoGateway.getUuid().slice(0, 6)}`
-                    .toLowerCase()
-                    .replace(/\s/g, ""),
-                sessionId: classe.sessionId,
-                sessionNom: classe.sessionNom,
-                youngPhase1Agreement: "true",
-                classeId: classe.id,
-                etablissementId: classe.etablissementId,
-                scolarise: "true",
-                psh: "false",
-                departement: classe.departement,
-                region: classe.region,
-                consentement: "true",
-                acceptCGU: "true",
-                parentAllowSNU: "true",
-                parent1AllowSNU: "true",
-                parent1AllowImageRights: "true",
-                imageRight: "true",
-                source: YOUNG_SOURCE.CLE,
+                genre: genre,
             };
+            const jeuneToCreate: CreateJeuneModel = this.jeuneService.buildJeuneCleWithMinimalData(
+                jeuneWithMinimalData,
+                classe,
+            );
+
             this.logger.log(`Création du jeune: ${jeuneToCreate.prenom} ${jeuneToCreate.nom} ${dateNaissance}`);
             const jeuneCreated = await this.jeuneService.create(jeuneToCreate);
 

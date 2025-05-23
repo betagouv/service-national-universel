@@ -12,6 +12,7 @@ import ButtonManualInvite from "./ButtonManualInvite";
 import ButtonLinkInvite from "./ButtonLinkInvite";
 import ButtonHandleInscription from "./ButtonHandleInscription";
 import ButtonInscriptionEnMasse from "./ButtonInscriptionEnMasse";
+import ButtonInscriptionManuelle from "./ButtonInscriptionManuelle";
 import ButtonDownloadEmptyFile from "./ButtonDownloadEmptyFile";
 import ButtonCertificateDownload from "./ButtonCertificateDownload";
 import DeleteButton from "./DeleteButton";
@@ -103,15 +104,23 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
           key: "link",
           render: <ButtonLinkInvite key="invite" url={url} />,
         },
-        {
-          key: "manual",
-          render: <ButtonManualInvite key="manual" id={id} />,
-        },
+        ...(!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]
+          ? [
+              {
+                key: "manual",
+                render: <ButtonManualInvite key="manual" id={id} />,
+              },
+            ]
+          : []),
         ...(isReferentRegDep(user) || (isAdmin(user) && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE])
           ? [
               {
                 key: "bulk",
                 render: <ButtonInscriptionEnMasse key="bulk" id={id} />,
+              },
+              {
+                key: "inscription-manuelle",
+                render: <ButtonInscriptionManuelle key="inscription-manuelle" id={id} />,
               },
             ]
           : []),

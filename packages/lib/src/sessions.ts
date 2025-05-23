@@ -23,7 +23,7 @@ const getSchoolYear = (etablissement?: EtablissementDto) => {
   return schoolYears[schoolYears.length - 1];
 };
 
-const getCohortYear = (cohort?: CohortType) => cohort?.dateStart?.toString().slice(0, 4);
+const getCohortYear = (cohort?: Pick<CohortType, "dateStart">) => cohort?.dateStart?.toString().slice(0, 4);
 
 const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
   if (!cohort?.dateStart || !cohort?.dateEnd) return cohort?.name || cohort;

@@ -1,4 +1,5 @@
 import React from "react";
+import cx from "classnames";
 
 import { PHONE_ZONES, translate } from "snu-lib";
 
@@ -15,6 +16,7 @@ interface SectionIdentiteContactProps {
   onStartRequest: any;
   requests: any;
   onCorrectionRequestChange: any;
+  isPrecompte?: boolean;
   className?: string;
   onChange: any;
 }
@@ -26,6 +28,7 @@ export default function SectionIdentiteContact({
   onStartRequest,
   requests,
   onCorrectionRequestChange,
+  isPrecompte,
   className,
   onChange,
 }: SectionIdentiteContactProps) {
@@ -86,7 +89,7 @@ export default function SectionIdentiteContact({
         label="Email"
         value={young.email}
         mode={globalMode}
-        className="mb-[16px]"
+        className={cx("mb-[16px]", { hidden: isPrecompte })}
         onStartRequest={onStartRequest}
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "email")}
@@ -108,6 +111,7 @@ export default function SectionIdentiteContact({
         currentRequest={currentRequest}
         correctionRequest={getCorrectionRequest(requests, "phone")}
         onCorrectionRequestChange={onCorrectionRequestChange}
+        className={cx({ hidden: isPrecompte })}
       />
     </div>
   );

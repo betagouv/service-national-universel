@@ -1,4 +1,5 @@
-import { IsEmail, IsNotEmpty, IsObject, IsOptional, IsString } from "class-validator";
+import { JeuneGenre } from "@admin/core/sejours/jeune/Jeune.model";
+import { IsEmail, IsEnum, IsNotEmpty, IsObject, IsOptional, IsString, MaxLength } from "class-validator";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS } from "snu-lib";
 
 export class ModifierReferentPayloadDto {
@@ -27,4 +28,24 @@ export class InscriptionEnMasseImportPayloadDto {
     @IsNotEmpty()
     @IsString()
     fileKey: string;
+}
+
+export class InscriptionManuellePayloadDto {
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(255)
+    prenom: string;
+
+    @IsNotEmpty()
+    @IsString()
+    @MaxLength(255)
+    nom: string;
+
+    @IsNotEmpty()
+    @IsString()
+    dateDeNaissance: Date;
+
+    @IsNotEmpty()
+    @IsEnum(JeuneGenre)
+    sexe: JeuneGenre;
 }

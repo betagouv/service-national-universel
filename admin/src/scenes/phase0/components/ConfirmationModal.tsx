@@ -8,7 +8,7 @@ interface ConfirmationModalProps {
   size?: "sm" | "md" | "lg";
   icon?: ReactNode;
   title: string;
-  message: string;
+  message: string | ReactNode;
   children?: ReactNode;
   onCancel: () => void;
   onConfirm: () => void;
