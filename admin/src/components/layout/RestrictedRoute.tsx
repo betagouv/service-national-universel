@@ -27,16 +27,80 @@ const limitedAccess = {
     authorised: ["/dashboard", "/profil", "/volontaire", "/ligne-de-bus", "/besoin-d-aide", "/centre", "/point-de-rassemblement", "/contenu", "/user"],
     default: "/dashboard",
   },
-  [ROLES.RESPONSIBLE]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
+  // [ROLES.RESPONSIBLE]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
   [ROLES.SUPERVISOR]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
 };
 
 const PERMISSIONS_BY_ROUTE = {
-  "/injep-export": [{ resource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
-  "/dsnj-export": [{ resource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }],
-  "/profil": [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
-  "/besoin-d-aide": [{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
-  "/dashboard": [{ resource: PERMISSION_RESOURCES.DASHBOARD, action: PERMISSION_ACTIONS.READ }],
+  "/injep-export": {
+    permissions: [{ resource: PERMISSION_RESOURCES.EXPORT_INJEP, action: PERMISSION_ACTIONS.EXECUTE }],
+  },
+  "/dsnj-export": {
+    permissions: [{ resource: PERMISSION_RESOURCES.EXPORT_DSNJ, action: PERMISSION_ACTIONS.EXECUTE }],
+  },
+  "/profil": {
+    permissions: [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/besoin-d-aide": {
+    permissions: [{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }],
+  },
+  "/dashboard": {
+    permissions: [{ resource: PERMISSION_RESOURCES.DASHBOARD, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/mission": {
+    ignorePolicy: true, // should have read permission but not specific to a mission
+    permissions: [{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/structure/": {
+    params: { id: "structure._id" },
+    permissions: [{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/association": {
+    permissions: [{ resource: PERMISSION_RESOURCES.ASSOCIATION, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/contenu": {
+    permissions: [{ resource: PERMISSION_RESOURCES.PROGRAM, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/school": {
+    permissions: [{ resource: PERMISSION_RESOURCES.ETABLISSEMENT, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/etablissement": {
+    permissions: [{ resource: PERMISSION_RESOURCES.ETABLISSEMENT, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/point-de-rassemblement": {
+    permissions: [{ resource: PERMISSION_RESOURCES.POINT_DE_RASSEMBLEMENT, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/ligne-de-bus": {
+    permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/volontaire/create": {
+    permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.CREATE }],
+  },
+  "/volontaire": {
+    ignorePolicy: true, // should have read permission but not specific to a young
+    permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/inscription": {
+    ignorePolicy: true, // should have read permission but not specific to a young
+    permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/alerte": {
+    permissions: [{ resource: PERMISSION_RESOURCES.ALERTE_MESSAGE, action: PERMISSION_ACTIONS.WRITE }],
+  },
+  "/settings": {
+    permissions: [
+      { resource: PERMISSION_RESOURCES.COHORT, action: PERMISSION_ACTIONS.EXECUTE },
+      { resource: PERMISSION_RESOURCES.COHORT, action: PERMISSION_ACTIONS.WRITE },
+    ],
+  },
+  "/user": {
+    ignorePolicy: true, // should have write permission but not specific to a referent
+    permissions: [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE }],
+  },
+  "/user/": {
+    params: { id: "referent._id" },
+    permissions: [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE }],
+  },
 };
 
 const DEFAULT_ROUTE_BY_ROLE = {
@@ -60,8 +124,15 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
   }
 
   const route = Object.keys(PERMISSIONS_BY_ROUTE).find((route) => pathname.startsWith(route));
-  if (!matchRoute && route && PERMISSIONS_BY_ROUTE[route]) {
-    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].some((permission) => isAuthorized({ user, resource: permission.resource, action: permission.action }));
+  if (!matchRoute && route && PERMISSIONS_BY_ROUTE[route]?.permissions) {
+    const id = pathname.match(/[0-9a-fA-F]{24}/)?.[0];
+    const context = {};
+    if (id && PERMISSIONS_BY_ROUTE[route].params?.id) {
+      setAttributeFromPath(PERMISSIONS_BY_ROUTE[route].params.id, context, id);
+    }
+    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].permissions.some((permission) =>
+      isAuthorized({ user, resource: permission.resource, action: permission.action, context, ignorePolicy: PERMISSIONS_BY_ROUTE[route].ignorePolicy }),
+    );
     if (!routeAuthorized) {
       console.log(`user does not have permission for ${pathname}`);
       if (pathname === defaultRoute) {
@@ -93,4 +164,19 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
   }
 
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
+};
+
+const setAttributeFromPath = (path: string, obj: object, value: string) => {
+  const pathParts = path.split(".");
+  let current = obj;
+  pathParts.forEach((part, index) => {
+    if (index < pathParts.length - 1) {
+      if (!current[part]) {
+        current[part] = {};
+      }
+      current = current[part];
+    } else {
+      current[part] = value;
+    }
+  });
 };

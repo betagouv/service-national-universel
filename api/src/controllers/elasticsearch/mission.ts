@@ -1,19 +1,136 @@
-const passport = require("passport");
-const express = require("express");
+import passport from "passport";
+import express, { Response } from "express";
+import { capture } from "../../sentry";
+import esClient from "../../es";
+import { ERRORS } from "../../utils";
+import { allRecords } from "../../es/utils";
+import { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext } from "./utils";
+import { serializeMissions } from "../../utils/es-serializer";
+import Joi from "joi";
+import { UserRequest } from "../request";
+import { MissionType, PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+
+interface ExportFields {
+  tutorId?: boolean;
+  structureId?: boolean;
+}
+
+interface CustomQuery {
+  (query: any, value: any): any;
+}
+
+interface ElasticSearchResponse {
+  body: {
+    hits: {
+      hits: any[];
+      total: { value: number };
+    };
+    aggregations?: Record<string, any>;
+  };
+}
+
 const router = express.Router();
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
-const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
-const { joiElasticSearch, buildNdJson, buildRequestBody, buildMissionContext } = require("./utils");
-const { serializeMissions } = require("../../utils/es-serializer");
-const Joi = require("joi");
 
-router.post("/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post(
+  "/:action(search|export)",
+  authMiddleware(["young", "referent"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { user, body } = req;
+      // Configuration
+      const searchFields = ["name", "structureName", "city", "zip"] as const;
+      const filterFields = [
+        "region.keyword",
+        "department.keyword",
+        "status.keyword",
+        "isJvaMission.keyword",
+        "visibility.keyword",
+        "mainDomain.keyword",
+        "placesLeft",
+        "tutorName.keyword",
+        "isMilitaryPreparation.keyword",
+        "hebergement.keyword",
+        "hebergementPayant.keyword",
+        "placesStatus.keyword",
+        "applicationStatus.keyword",
+        "structureName.keyword",
+        "fromDate",
+        "toDate",
+      ] as const;
+      const sortFields = ["createdAt", "placesLeft", "name.keyword"] as const;
+
+      // Body params validation
+      const { queryFilters, page, sort, error, size, exportFields } = joiElasticSearch({
+        filterFields: filterFields as unknown as string[],
+        sortFields: sortFields as unknown as string[],
+        body,
+      });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+      if (missionContextError) {
+        return res.status(missionContextError.status).send(missionContextError.body);
+      }
+
+      // Context filters
+      const contextFilters = missionContextFilters ? [...missionContextFilters] : [];
+
+      // Build request body
+      const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
+        searchFields: searchFields as unknown as string[],
+        filterFields: filterFields as unknown as string[],
+        queryFilters: queryFilters || {},
+        customQueries: {
+          fromDate: ((query: any, value: any) => {
+            const date = new Date(value);
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+            query.bool.must.push({ range: { startAt: { gte: date } } }, { range: { endAt: { gte: null } } });
+            return query;
+          }) as CustomQuery,
+          toDate: ((query: any, value: any) => {
+            const date = new Date(value);
+            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
+            query.bool.must.push({ range: { startAt: { gte: null } } }, { range: { endAt: { lte: date } } });
+            return query;
+          }) as CustomQuery,
+        },
+        page,
+        sort,
+        contextFilters,
+        size,
+      });
+
+      let response: any;
+
+      if (req.params.action === "export") {
+        response = await allRecords("mission", hitsRequestBody.query);
+      } else {
+        response = (await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) })) as ElasticSearchResponse;
+      }
+
+      if (req.params.action === "export") {
+        // fill the missions with the tutor info
+        response = await fillMissions(response, (exportFields as ExportFields) || {});
+
+        return res.status(200).send({ ok: true, data: serializeMissions(response) });
+      } else {
+        return res.status(200).send(serializeMissions(response.body));
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
+
+router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["name", "structureName", "city", "zip"];
+    const searchFields = ["name", "structureName", "city", "zip"] as const;
     const filterFields = [
       "region.keyword",
       "department.keyword",
@@ -28,97 +145,17 @@ router.post("/:action(search|export)", passport.authenticate(["young", "referent
       "hebergementPayant.keyword",
       "placesStatus.keyword",
       "applicationStatus.keyword",
-      "structureName.keyword",
       "fromDate",
       "toDate",
-    ];
-    const sortFields = ["createdAt", "placesLeft", "name.keyword"];
+    ] as const;
+    const sortFields = ["createdAt", "placesLeft", "name.keyword"] as const;
 
     // Body params validation
-    const { queryFilters, page, sort, error, size, exportFields } = joiElasticSearch({ filterFields, sortFields, body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const { missionContextFilters, missionContextError } = await buildMissionContext(user);
-    if (missionContextError) {
-      return res.status(missionContextError.status).send(missionContextError.body);
-    }
-
-    // Context filters
-    const contextFilters = [...missionContextFilters];
-
-    // Build request body
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
-      queryFilters: queryFilters || {},
-      customQueries: {
-        fromDate: (query, value) => {
-          const date = new Date(value);
-          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-          query.bool.must.push({ range: { startAt: { gte: date } } }, { range: { endAt: { gte: null } } });
-          return query;
-        },
-        toDate: (query, value) => {
-          const date = new Date(value);
-          date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-          query.bool.must.push({ range: { startAt: { gte: null } } }, { range: { endAt: { lte: date } } });
-          return query;
-        },
-      },
-      page,
-      sort,
-      contextFilters,
-      size,
+    const { queryFilters, page, sort, size, error } = joiElasticSearch({
+      filterFields: filterFields as unknown as string[],
+      sortFields: sortFields as unknown as string[],
+      body,
     });
-
-    let response;
-
-    if (req.params.action === "export") {
-      response = await allRecords("mission", hitsRequestBody.query);
-    } else {
-      response = await esClient.msearch({ index: "mission", body: buildNdJson({ index: "mission", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-    }
-
-    if (req.params.action === "export") {
-      // fill the missions with the tutor info
-      response = await fillMissions(response, exportFields);
-
-      return res.status(200).send({ ok: true, data: serializeMissions(response) });
-    } else {
-      return res.status(200).send(serializeMissions(response.body));
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    // Configuration
-    const searchFields = ["name", "structureName", "city", "zip"];
-    const filterFields = [
-      "region.keyword",
-      "department.keyword",
-      "status.keyword",
-      "isJvaMission.keyword",
-      "visibility.keyword",
-      "mainDomain.keyword",
-      "placesLeft",
-      "tutorName.keyword",
-      "isMilitaryPreparation.keyword",
-      "hebergement.keyword",
-      "hebergementPayant.keyword",
-      "placesStatus.keyword",
-      "applicationStatus.keyword",
-      "fromDate",
-      "toDate",
-    ];
-    const sortFields = ["createdAt", "placesLeft", "name.keyword"];
-
-    // Body params validation
-    const { queryFilters, page, sort, size, error } = joiElasticSearch({ filterFields, sortFields, body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { missionContextFilters, missionContextError } = await buildMissionContext(user);
@@ -127,12 +164,12 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
     }
 
     // Context filters
-    const contextFilters = [...missionContextFilters, { terms: { "structureId.keyword": [req.params.id] } }];
+    const contextFilters = [...(missionContextFilters || []), { terms: { "structureId.keyword": [req.params.id] } }];
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
+      searchFields: searchFields as unknown as string[],
+      filterFields: filterFields as unknown as string[],
       queryFilters,
       customQueries: {
         fromDate: (query, value) => {
@@ -167,16 +204,20 @@ router.post("/by-structure/:id/:action(search|export)", passport.authenticate(["
   }
 });
 
-router.post("/propose/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/propose/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = ["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"];
-    const filterFields = [];
-    const sortFields = [];
+    const searchFields = ["name.folded^10", "description", "justifications", "contraintes", "frequence", "period"] as const;
+    const filterFields = [] as const;
+    const sortFields = [] as const;
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error } = joiElasticSearch({
+      filterFields: filterFields as unknown as string[],
+      sortFields: sortFields as unknown as string[],
+      body,
+    });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { missionContextFilters, missionContextError } = await buildMissionContext(user);
@@ -186,7 +227,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
 
     // Context filters
     const contextFilters = [
-      ...missionContextFilters,
+      ...(missionContextFilters || []),
       {
         bool: {
           must: [
@@ -218,8 +259,8 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
+      searchFields: searchFields as unknown as string[],
+      filterFields: filterFields as unknown as string[],
       queryFilters,
       page,
       sort,
@@ -239,7 +280,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
   }
 });
 
-router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
+router.post("/young/search/", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const schema = Joi.object({
       filters: Joi.object({
@@ -276,7 +317,7 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
     }
     const { filters, page, size, sort } = value;
 
-    let body = {
+    let body: any = {
       query: {
         bool: {
           must: [
@@ -374,16 +415,20 @@ router.post("/young/search/", passport.authenticate("young", { session: false, f
   }
 });
 
-router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { user, body } = req;
     // Configuration
-    const searchFields = [];
-    const filterFields = [];
-    const sortFields = [];
+    const searchFields = [] as const;
+    const filterFields = [] as const;
+    const sortFields = [] as const;
 
     // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+    const { queryFilters, page, sort, error } = joiElasticSearch({
+      filterFields: filterFields as unknown as string[],
+      sortFields: sortFields as unknown as string[],
+      body,
+    });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const { missionContextFilters, missionContextError } = await buildMissionContext(user);
@@ -392,12 +437,12 @@ router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["refe
     }
 
     // Context filters
-    const contextFilters = [...missionContextFilters, { terms: { "tutorId.keyword": [req.params.id] } }];
+    const contextFilters = [...(missionContextFilters || []), { terms: { "tutorId.keyword": [req.params.id] } }];
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
-      searchFields,
-      filterFields,
+      searchFields: searchFields as unknown as string[],
+      filterFields: filterFields as unknown as string[],
       queryFilters,
       page,
       sort,
@@ -418,13 +463,13 @@ router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["refe
   }
 });
 
-const fillMissions = async (missions, exportFields) => {
-  if (exportFields.includes("tutorId")) {
+const fillMissions = async (missions: MissionType[], exportFields: ExportFields): Promise<MissionType[]> => {
+  if (exportFields.tutorId) {
     const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
     const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
     missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
   }
-  if (exportFields.includes("structureId")) {
+  if (exportFields.structureId) {
     const structureIds = [...new Set(missions.map((item) => item.structureId).filter((e) => e))];
     const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
     missions = missions.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
@@ -432,4 +477,4 @@ const fillMissions = async (missions, exportFields) => {
   return missions;
 };
 
-module.exports = router;
+export default router;
