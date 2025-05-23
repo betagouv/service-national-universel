@@ -11,6 +11,8 @@ import { UserRequest } from "../../controllers/request";
 import getNewReferentFixture from "../fixtures/referent";
 import { isReferent, isYoung } from "../../utils";
 import { ReferentDocument, YoungDocument } from "../../models";
+import { getAcl } from "../../services/iam/Permission.service";
+import { ROLES } from "snu-lib";
 
 export function resetAppAuth() {
   // @ts-ignore
@@ -20,6 +22,15 @@ export function resetAppAuth() {
   // @ts-ignore
   passport.authStrategy = undefined;
   // passport.lastTypeCalledOnAuthenticate = undefined;
+}
+
+export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & { subRole?: any }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {
+  if (user) {
+    const userWithAcl: any = { ...user, acl: await getAcl(user as any) };
+    return getAppHelper(userWithAcl, authStrategy);
+  } else {
+    return getAppHelper({ role: ROLES.ADMIN, acl: await getAcl({ role: ROLES.ADMIN }) } as any, authStrategy);
+  }
 }
 
 function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {

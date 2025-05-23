@@ -1,4 +1,5 @@
-const express = require("express");
+import express from "express";
+
 const router = express.Router();
 
 router.use("/cohesioncenter", require("./cohesioncenter"));
@@ -10,7 +11,7 @@ router.use("/structure", require("./structure"));
 router.use("/pointderassemblement", require("./pointderassemblement"));
 router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
-router.use("/mission", require("./mission"));
+router.use("/mission", require("./mission").default);
 router.use("/missionapi", require("./missionapi"));
 router.use("/email", require("./email"));
 router.use("/application", require("./application"));
@@ -19,4 +20,4 @@ router.use("/dashboard", require("./dashboard/index"));
 router.use("/association", require("./association"));
 router.use("/cle", require("./cle"));
 
-module.exports = router;
+export default router;

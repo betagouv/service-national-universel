@@ -1,28 +1,41 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const Joi = require("joi");
+import express, { Response } from "express";
+import passport from "passport";
+import Joi from "joi";
 
-const { capture } = require("../sentry");
-const { logger } = require("../logger");
-const { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } = require("../models");
-// eslint-disable-next-line no-unused-vars
-const { ERRORS, isYoung } = require("../utils/index");
-const { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } = require("../application/applicationService");
-const { getTutorName } = require("../services/mission");
-const { validateId, validateMission, idSchema } = require("../utils/validator");
-const { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, canCreateOrModifyMission, canViewMission, canModifyMissionStructureId } = require("snu-lib");
-const { serializeMission, serializeApplication } = require("../utils/serializer");
-const patches = require("./patches");
-const { sendTemplate } = require("../brevo");
-const { config } = require("../config");
-const { getNearestLocation } = require("../services/gouv.fr/api-adresse");
-const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
-const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+import { capture } from "../sentry";
+import { logger } from "../logger";
+import { MissionModel, ApplicationModel, StructureModel, ReferentModel, CohortModel } from "../models";
+import { ERRORS, isYoung } from "../utils/index";
+import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } from "../application/applicationService";
+import { getTutorName } from "../services/mission";
+import { validateId, validateMission, idSchema } from "../utils/validator";
+import {
+  SENDINBLUE_TEMPLATES,
+  MISSION_STATUS,
+  ROLES,
+  canCreateOrModifyMission,
+  canViewMission,
+  canModifyMissionStructureId,
+  StructureType,
+  YoungType,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
+} from "snu-lib";
+import { serializeMission, serializeApplication } from "../utils/serializer";
+import patches from "./patches";
+import { sendTemplate } from "../brevo";
+import { config } from "../config";
+import { getNearestLocation } from "../services/gouv.fr/api-adresse";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+
+const router = express.Router();
 
 //@todo: temporary fix for avoiding date inconsistencies (only works for French metropolitan timezone)
-const fixDate = (dateString) => {
+const fixDate = (dateString: string): string => {
   const date = new Date(dateString);
   if (date.getUTCHours() >= 22) {
     const hoursToAdd = 24 - date.getUTCHours();
@@ -32,7 +45,7 @@ const fixDate = (dateString) => {
   return dateString;
 };
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedMission } = validateMission(req.body);
     if (error) {
@@ -40,7 +53,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
 
-    let structure = {};
+    let structure: StructureType | null = null;
     let responsible;
     if (checkedMission.tutorId) {
       responsible = await ReferentModel.findById(checkedMission.tutorId);
@@ -48,7 +61,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     if (req.user.role === ROLES.SUPERVISOR) structure = await StructureModel.findById(checkedMission.structureId);
 
-    if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.FORBIDDEN });
+    if (!canCreateOrModifyMission(req.user, checkedMission, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     if (checkedMission.mainDomain) {
       if (!checkedMission.domains) checkedMission.domains = [];
@@ -109,7 +122,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -117,7 +130,8 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
     const mission = await MissionModel.findById(checkedId);
     if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (req.user.role === ROLES.SUPERVISOR) var structure = await StructureModel.findById(mission.structureId);
+    let structure: StructureType | null = null;
+    if (req.user.role === ROLES.SUPERVISOR) structure = await StructureModel.findById(mission.structureId);
 
     if (!canCreateOrModifyMission(req.user, mission, structure)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -239,7 +253,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.post("/multiaction/change-tutor", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/multiaction/change-tutor", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       ids: Joi.array().items(Joi.string().required()).required(),
@@ -276,47 +290,52 @@ router.post("/multiaction/change-tutor", passport.authenticate("referent", { ses
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id",
+  authMiddleware(["referent", "young"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const missionId = req.validatedParams.id;
+      const mission = await MissionModel.findById(missionId);
+      if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      //   if (!isYoung(req.user) && !canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      // Add tutor info.
+      let missionTutor;
+      if (mission.tutorId) {
+        const tutor = await ReferentModel.findById(mission.tutorId);
+        if (tutor) missionTutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
+      }
+
+      // Add application for young.
+      if (isYoung(req.user)) {
+        const application = await ApplicationModel.findOne({ missionId, youngId: req.user._id });
+        const cohort = await CohortModel.findById(req.user.cohortId);
+        if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        return res.status(200).send({
+          ok: true,
+          data: {
+            ...serializeMission(mission),
+            tutor: missionTutor,
+            application: application ? serializeApplication(application) : null,
+            ...(await getAuthorizationToApply(mission, req.user as unknown as YoungType, cohort)),
+          },
+        });
+      }
+      return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    const mission = await MissionModel.findById(checkedId);
-    if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!isYoung(req.user) && !canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Add tutor info.
-    let missionTutor;
-    if (mission.tutorId) {
-      const tutor = await ReferentModel.findById(mission.tutorId);
-      if (tutor) missionTutor = { firstName: tutor.firstName, lastName: tutor.lastName, email: tutor.email, id: tutor._id };
-    }
-
-    // Add application for young.
-    if (isYoung(req.user)) {
-      const application = await ApplicationModel.findOne({ missionId: checkedId, youngId: req.user._id });
-      const cohort = await CohortModel.findById(req.user.cohortId);
-      if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      return res.status(200).send({
-        ok: true,
-        data: {
-          ...serializeMission(mission),
-          tutor: missionTutor,
-          application: application ? serializeApplication(application) : null,
-          ...(await getAuthorizationToApply(mission, req.user, cohort)),
-        },
-      });
-    }
-    return res.status(200).send({ ok: true, data: { ...serializeMission(mission), tutor: missionTutor } });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get(
   "/:id/patches",
@@ -327,7 +346,7 @@ router.get(
     }),
     accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
-  async (req, res) => {
+  async (req: UserRequest, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -345,7 +364,7 @@ router.get(
   },
 );
 
-router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id/application", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = Joi.string().required().validate(req.params.id);
     if (error) {
@@ -355,7 +374,7 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 
     if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const where = { missionId: id };
+    const where: any = { missionId: id };
     if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
       where.status = { $ne: "WAITING_ACCEPTATION " };
     }
@@ -372,7 +391,7 @@ router.get("/:id/application", passport.authenticate("referent", { session: fals
 });
 
 // Change the structure of a mission.
-router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id/structure/:structureId", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
@@ -390,6 +409,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
       if (missionReferent.length > 1) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
       const referent = await ReferentModel.findById(mission.tutorId);
+      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       referent.set({ structureId: structure._id });
       await referent.save({ fromUser: req.user });
     }
@@ -410,7 +430,7 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -435,4 +455,4 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-module.exports = router;
+export default router;
