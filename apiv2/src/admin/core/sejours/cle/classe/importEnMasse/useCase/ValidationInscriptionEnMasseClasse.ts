@@ -234,7 +234,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                         ),
                         genre: row[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE],
                     };
-                    const jeuneExists = await this.jeuneService.exists(jeuneToCheck, classe.id);
+                    const jeuneExists = await this.jeuneService.existsByPersonalIdentifiers(jeuneToCheck, classe.id);
                     if (jeuneExists) {
                         errors.push({
                             column: CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM,

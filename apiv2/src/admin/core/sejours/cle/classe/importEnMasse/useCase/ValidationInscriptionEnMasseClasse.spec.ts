@@ -60,7 +60,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
                 {
                     provide: JeuneService,
                     useValue: {
-                        exists: jest.fn().mockResolvedValue(false),
+                        existsByPersonalIdentifiers: jest.fn().mockResolvedValue(false),
                     },
                 },
                 {
@@ -374,7 +374,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        jeuneService.exists.mockResolvedValueOnce(true);
+        jeuneService.existsByPersonalIdentifiers.mockResolvedValueOnce(true);
 
         const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 
@@ -395,7 +395,7 @@ describe("ValidationFileInscriptionEnMasseClasse", () => {
             },
         ]);
 
-        jeuneService.exists.mockResolvedValueOnce(false);
+        jeuneService.existsByPersonalIdentifiers.mockResolvedValueOnce(false);
 
         const results = await validationInscriptionEnMasseClasse.execute("classeId", null, mockFile);
 

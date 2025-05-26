@@ -77,7 +77,10 @@ export class JeuneService {
         };
     }
 
-    async exists(jeune: JeuneModel | JeuneWithMinimalDataModel, classeId?: string): Promise<boolean> {
+    async existsByPersonalIdentifiers(
+        jeune: JeuneModel | JeuneWithMinimalDataModel,
+        classeId?: string,
+    ): Promise<boolean> {
         if (!jeune.nom || !jeune.prenom || !jeune.dateNaissance) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_ENOUGH_DATA,
