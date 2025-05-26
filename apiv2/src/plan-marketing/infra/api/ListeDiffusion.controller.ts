@@ -1,12 +1,15 @@
-import { Body, Controller, Delete, Get, Param, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, Post, Put, Query } from "@nestjs/common";
 import { ListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionService } from "@plan-marketing/core/service/ListeDiffusion.service";
 import { CreateListeDiffusionDto, UpdateListeDiffusionDto } from "./ListeDiffusion.validation";
+import { BasculerArchivageListeDiffusion } from "@plan-marketing/core/useCase/BasculerArchivageListeDiffusion";
 
 @Controller("liste-diffusion")
 export class ListeDiffusionController {
     constructor(
-        private readonly listeDiffusionService: ListeDiffusionService) {}
+        private readonly listeDiffusionService: ListeDiffusionService,
+        private readonly basculerArchivageListeDiffusion: BasculerArchivageListeDiffusion,
+    ) {}
 
     @Post()
     async create(@Body() listeDiffusionDto: CreateListeDiffusionDto): Promise<ListeDiffusionModel> {
@@ -20,8 +23,10 @@ export class ListeDiffusionController {
 
     @Get()
     // TODO : add filter on archive and unarchive
-    async search(@Query("sort") sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
-        return await this.listeDiffusionService.searchListesDiffusion(undefined, sort);
+    async search(
+        @Query("isArchived", new ParseBoolPipe({ optional: true })) isArchived?: boolean,
+        @Query("sort") sort?: "ASC" | "DESC"): Promise<ListeDiffusionModel[]> {
+        return await this.listeDiffusionService.searchListesDiffusion({ isArchived }, sort);
     }
 
     @Put(":id")
@@ -34,4 +39,8 @@ export class ListeDiffusionController {
         await this.listeDiffusionService.deleteListeDiffusion(id);
     }
 
+    @Post(":id/toggle-archivage")
+    async toggleArchivage(@Param("id") id: string): Promise<ListeDiffusionModel | null> {
+        return await this.basculerArchivageListeDiffusion.execute(id);
+    }
 }

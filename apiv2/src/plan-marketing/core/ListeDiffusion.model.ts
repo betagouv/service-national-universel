@@ -1,4 +1,3 @@
-import exp from "constants";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 
 export interface ListeDiffusionModel {
@@ -8,6 +7,7 @@ export interface ListeDiffusionModel {
     filters: ListeDiffusionFiltres;
     createdAt?: Date;
     updatedAt?: Date;
+    isArchived?: boolean;
 }
 
 export type CreateListeDiffusionModel = Omit<ListeDiffusionModel, "id" | "createdAt" | "updatedAt">;
