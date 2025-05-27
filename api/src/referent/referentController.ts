@@ -548,7 +548,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
