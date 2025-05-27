@@ -3,6 +3,7 @@ import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
+import cx from "classnames";
 
 import { COHORT_TYPE, CohortDto } from "snu-lib";
 import NumberInput from "@/components/ui/forms/NumberInput";
@@ -93,7 +94,7 @@ export default function InfosAffectations({ cohort, readOnly }: AffectationsProp
   };
 
   return (
-    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
+    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Affectation et pointage (phase 1)</p>
         <div className="flex">

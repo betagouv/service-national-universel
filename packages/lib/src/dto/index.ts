@@ -13,3 +13,4 @@ export * from "./referentiel/ReferentielTaskDto";
 export * from "./taskDto";
 export * from "./userDto";
 export * from "./youngDto";
+export * from "./PermissionDto";
