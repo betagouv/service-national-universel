@@ -3,7 +3,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { ROLES, translate, SUB_ROLE_GOD, isWriteAuthorized, isReadAuthorized, PERMISSION_RESOURCES } from "snu-lib";
+import { ROLES, translate, SUB_ROLE_GOD, isWriteAuthorized, isReadAuthorized, PERMISSION_RESOURCES, isCreateAuthorized } from "snu-lib";
 import { setUser } from "@/redux/auth/actions";
 import api from "@/services/api";
 import AddUser from "../icons/AddUser";
@@ -133,7 +133,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                         {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
                           <NavItemAction Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
                         )}
-                        {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && user.structureId && (
+                        {isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) && (
                           <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
                         )}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}

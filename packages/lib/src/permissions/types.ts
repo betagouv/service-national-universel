@@ -6,6 +6,7 @@ export interface HasPermissionParams {
   action?: PermissionType["action"];
   resource: PermissionType["resource"];
   context?: PermissionContext;
+  ignorePolicy?: boolean;
 }
 
 export interface PermissionContext {
@@ -17,5 +18,6 @@ export interface HasPermissionsParams extends Omit<HasPermissionParams, "resourc
   permissions: {
     resource: PermissionType["resource"];
     action?: PermissionType["action"];
+    ignorePolicy?: boolean;
   }[];
 }
