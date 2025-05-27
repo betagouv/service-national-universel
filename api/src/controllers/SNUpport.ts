@@ -174,18 +174,14 @@ router.get(
       let query = {};
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
         query = {
-          department: user.department,
-          subject: "J'ai une question",
-          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-          canal: { $in: ["PLATFORM", "MAIL"] },
+          type: "department",
+          value: user.department,
         };
       }
       if (user.role === ROLES.REFERENT_REGION) {
         query = {
-          region: user.region,
-          subject: "J'ai une question",
-          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-          canal: { $in: ["PLATFORM", "MAIL"] },
+          type: "region",
+          value: user.region,
         };
       }
 
