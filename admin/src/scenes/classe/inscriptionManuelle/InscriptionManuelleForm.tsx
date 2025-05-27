@@ -99,13 +99,13 @@ const InscriptionManuelleForm = ({ onSubmit, isSubmitting = false, isSuccess = f
             />
           </div>
 
-          <div className="mt-10">
-            {isSuccess ? (
-              <div className="flex items-center bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-lg">
-                <BsCheckCircleFill className="text-green-500 mr-2" size={20} />
-                <span>Nouvel élève enregistré</span>
-              </div>
-            ) : (
+          {isSuccess ? (
+            <div className="mt-4 flex items-center bg-green-50 border border-green-100 text-green-700 px-4 py-3 rounded-lg">
+              <BsCheckCircleFill className="text-green-500 mr-2" size={20} />
+              <span>Nouvel élève enregistré</span>
+            </div>
+          ) : (
+            <div className="mt-10">
               <Button
                 type="primary"
                 leftIcon={<BsPersonPlusFill className="mr-2" />}
@@ -114,8 +114,8 @@ const InscriptionManuelleForm = ({ onSubmit, isSubmitting = false, isSuccess = f
                 loading={isSubmitting}
                 disabled={isSubmitting}
               />
-            )}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     </form>

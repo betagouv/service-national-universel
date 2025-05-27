@@ -31,21 +31,22 @@ const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnl
       value: cohort.inscriptionOpenForReferentDepartment ?? false,
       field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
     },
-    ...(!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]
-      ? [
-          {
-            label: "Référents de classe",
-            value: cohort.inscriptionOpenForReferentClasse ?? false,
-            field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
-          },
-          {
-            label: "Administrateurs CLE",
-            value: cohort.inscriptionOpenForAdministrateurCle ?? false,
-            field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
-          },
-        ]
-      : []),
   ];
+
+  if (!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
+    toggles.push(
+      {
+        label: "Référents de classe",
+        value: cohort.inscriptionOpenForReferentClasse ?? false,
+        field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
+      },
+      {
+        label: "Administrateurs CLE",
+        value: cohort.inscriptionOpenForAdministrateurCle ?? false,
+        field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
+      },
+    );
+  }
 
   return (
     <>
