@@ -144,22 +144,6 @@ router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, re
   }
 });
 
-router.post("/tickets", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
-  try {
-    const { ok, data } = await SNUpport.api(`/v0/ticket/search`, {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(req.body),
-    });
-    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.get(
   "/ticketscount",
   authMiddleware("referent"),
@@ -397,35 +381,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
   }
 });
 
-router.put("/ticket/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { error: validationError, value } = Joi.object({
-      status: Joi.string().required(),
-    }).validate(req.body, { stripUnknown: true });
-    if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { status } = value;
-
-    const response = await SNUpport.api(`/v0/ticket/${checkedId}`, {
-      method: "PATCH",
-      credentials: "include",
-      body: JSON.stringify({
-        status,
-      }),
-    });
-    if (!response.id) return res.status(400).send({ ok: false });
-    return res.status(200).send({ ok: true, data: response });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
@@ -576,5 +531,11 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   }
   return true;
 };
+
+/*
+Routes deleted as not used :
+POST /SNUpport/tickets
+PUT /SNUpport/ticket/id
+*/
 
 export default router;
