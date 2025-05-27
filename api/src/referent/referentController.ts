@@ -523,6 +523,14 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       acceptCGU,
     });
 
+    if (!referent.roles) {
+      if (referent.subRole) {
+        referent.set({ roles: [referent.role, referent.subRole] });
+      } else {
+        referent.set({ roles: [referent.role] });
+      }
+    }
+
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
@@ -548,7 +556,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
