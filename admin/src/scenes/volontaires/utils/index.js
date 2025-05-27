@@ -366,6 +366,9 @@ export async function transformVolontaires(data, values) {
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
     const allFields = {
+      emailDeConnexion: {
+        "Email de connexion": data.emailDeConnexion,
+      },
       psc1Info: {
         PSC1: translate(data?.psc1Info) || "Non renseigné",
       },
