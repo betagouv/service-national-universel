@@ -358,7 +358,7 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
+    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -371,7 +371,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       message,
       email,
       parcours,
-      clientId,
       subject,
       firstName,
       lastName,
