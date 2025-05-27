@@ -412,7 +412,7 @@ router.put("/ticket/:id", authMiddleware(["referent", "young"]), async (req: Use
     const { status } = value;
 
     const response = await SNUpport.api(`/v0/ticket/${checkedId}`, {
-      method: "PUT",
+      method: "PATCH",
       credentials: "include",
       body: JSON.stringify({
         status,
