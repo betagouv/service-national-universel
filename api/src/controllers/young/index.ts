@@ -151,7 +151,7 @@ router.post("/signup_invite", async (req: UserRequest, res) => {
     return res.status(200).send({ data: serializeYoung(young, young), token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

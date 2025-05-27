@@ -116,7 +116,7 @@ import {
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
-import { UserRequest } from "../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -523,6 +523,14 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       acceptCGU,
     });
 
+    if (!referent.roles) {
+      if (referent.subRole) {
+        referent.set({ roles: [referent.role, referent.subRole] });
+      } else {
+        referent.set({ roles: [referent.role] });
+      }
+    }
+
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
@@ -548,7 +556,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -1746,40 +1754,47 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id/session-phase1",
+  authMiddleware(["referent"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+      query: Joi.object({
+        with_cohesion_center: Joi.string(),
+      }),
+    }),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      if (!canSearchSessionPhase1(req.user)) {
+        return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const referentId = req.validatedParams.id;
+      const referent = await ReferentModel.findById(referentId);
+      if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = [];
+      if (referent.role === ROLES.HEAD_CENTER) {
+        sessions = await SessionPhase1Model.find({ headCenterId: referentId });
+      } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(referent.role!)) {
+        sessions = await SessionPhase1Model.find({ adjointsIds: { $in: [referentId] } });
+      }
+      const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
+      if (req.validatedQuery.with_cohesion_center === "true") {
+        sessions = sessions.map((s) => {
+          s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
+          return s;
+        });
+      }
+      return res.status(200).json({ ok: true, data: sessions.map(serializeSessionPhase1) });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).json({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    const JoiQueryWithCohesionCenter = Joi.string().validate(req.query.with_cohesion_center);
-    if (JoiQueryWithCohesionCenter.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    if (!canSearchSessionPhase1(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = [];
-    if (req.user.role === ROLES.HEAD_CENTER) {
-      sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
-    } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
-      sessions = await SessionPhase1Model.find({ adjointsIds: { $in: [checkedId] } });
-    }
-    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
-    if (JoiQueryWithCohesionCenter.value === "true") {
-      sessions = sessions.map((s) => {
-        s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
-        return s;
-      });
-    }
-    return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
