@@ -5,6 +5,7 @@ import { YOUNG_STATUS_PHASE1, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_ACCOUNT_STATUS }
 import { ClasseService } from "../cle/classe/Classe.service";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { ClasseModel } from "../cle/classe/Classe.model";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 @Injectable()
 export class JeuneService {
@@ -41,7 +42,7 @@ export class JeuneService {
         nom: string,
         dateNaissance: Date,
         classeId: string,
-    ): Promise<JeuneModel | null> {
+    ): Promise<JeuneModel[]> {
         return this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(nom, prenom, dateNaissance, classeId);
     }
 
@@ -74,5 +75,24 @@ export class JeuneService {
             source: YOUNG_SOURCE.CLE,
             statutCompte: YOUNG_ACCOUNT_STATUS.PRECOMPTE,
         };
+    }
+
+    async existsByPersonalIdentifiers(
+        jeune: JeuneModel | JeuneWithMinimalDataModel,
+        classeId?: string,
+    ): Promise<boolean> {
+        if (!jeune.nom || !jeune.prenom || !jeune.dateNaissance) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                "Jeune missing data to check if it exists",
+            );
+        }
+        const jeunesInClasse = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
+            jeune.nom,
+            jeune.prenom,
+            jeune.dateNaissance,
+            classeId,
+        );
+        return jeunesInClasse.length > 0;
     }
 }
