@@ -149,12 +149,14 @@ describe("DesistementService", () => {
                     statut: YOUNG_STATUS.WITHDRAWN,
                     statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                     desistementMotif: "Non confirmation de la participation au séjour",
+                    desistementMessage: "Script de désistement en masse pour non confirmation de la participation",
                 },
                 {
                     ...jeunes[1],
                     statut: YOUNG_STATUS.WITHDRAWN,
                     statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                     desistementMotif: "Non confirmation de la participation au séjour",
+                    desistementMessage: "Script de désistement en masse pour non confirmation de la participation",
                 },
             ]);
         });

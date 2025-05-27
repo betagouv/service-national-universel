@@ -106,7 +106,8 @@ export class DesisterClasses implements UseCase<ClasseDesisterRapport[]> {
                 statut: YOUNG_STATUS.WITHDRAWN,
                 statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
                 lastStatusAt: new Date(),
-                desistementMotif: "other",
+                desistementMotif: "Désistement de la classe",
+                desistementMessage: "Script de désistement des classes",
             };
 
             // reset des informations d'affectation
