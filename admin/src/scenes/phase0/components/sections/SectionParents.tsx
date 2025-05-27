@@ -557,165 +557,167 @@ export default function SectionParents({
             </div>
           </div>
           <div className="my-[73px] w-[1px] flex-[0_0_1px] bg-[#E5E7EB]" />
-          <div className="flex-[1_0_50%] pl-[56px]">
-            <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
-            <div className={cx("mt-[32px]", { hidden: isPrecompte })}>
-              <Field
-                name={`parent${currentParent}Status`}
-                label="Statut"
-                value={youngFiltered[`parent${currentParent}Status`]}
-                transformer={translate}
-                mode={sectionMode}
-                className="mb-[16px]"
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Status`)}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={PARENT_STATUS_OPTIONS}
-                onChange={(value) => onLocalChange(`parent${currentParent}Status`, value)}
-                young={young}
-              />
-              <div className="mb-[16px] flex">
+          {!isPrecompte && (
+            <div className="flex-[1_0_50%] pl-[56px]">
+              <Tabs tabs={tabs} selected={currentParent} onChange={onParrentTabChange} />
+              <div className={cx("mt-[32px]", { hidden: isPrecompte })}>
                 <Field
-                  name={`parent${currentParent}LastName`}
-                  label="Nom"
-                  value={youngFiltered[`parent${currentParent}LastName`]}
+                  name={`parent${currentParent}Status`}
+                  label="Statut"
+                  value={youngFiltered[`parent${currentParent}Status`]}
+                  transformer={translate}
                   mode={sectionMode}
-                  className="mr-[8px] flex-[1_1_50%]"
+                  className="mb-[16px]"
                   onStartRequest={onStartRequest}
                   currentRequest={currentRequest}
-                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}LastName`)}
+                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Status`)}
                   onCorrectionRequestChange={onCorrectionRequestChange}
-                  onChange={(value) => onLocalChange(`parent${currentParent}LastName`, value)}
+                  type="select"
+                  options={PARENT_STATUS_OPTIONS}
+                  onChange={(value) => onLocalChange(`parent${currentParent}Status`, value)}
                   young={young}
                 />
+                <div className="mb-[16px] flex">
+                  <Field
+                    name={`parent${currentParent}LastName`}
+                    label="Nom"
+                    value={youngFiltered[`parent${currentParent}LastName`]}
+                    mode={sectionMode}
+                    className="mr-[8px] flex-[1_1_50%]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, `parent${currentParent}LastName`)}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    onChange={(value) => onLocalChange(`parent${currentParent}LastName`, value)}
+                    young={young}
+                  />
+                  <Field
+                    name={`parent${currentParent}FirstName`}
+                    label="Prénom"
+                    value={youngFiltered[`parent${currentParent}FirstName`]}
+                    mode={sectionMode}
+                    className="ml-[8px] flex-[1_1_50%]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, `parent${currentParent}FirstName`)}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    onChange={(value) => onLocalChange(`parent${currentParent}FirstName`, value)}
+                    young={young}
+                  />
+                </div>
                 <Field
-                  name={`parent${currentParent}FirstName`}
-                  label="Prénom"
-                  value={youngFiltered[`parent${currentParent}FirstName`]}
+                  name={`parent${currentParent}Email`}
+                  label="Email"
+                  value={youngFiltered[`parent${currentParent}Email`]}
                   mode={sectionMode}
-                  className="ml-[8px] flex-[1_1_50%]"
+                  className="mb-[16px]"
                   onStartRequest={onStartRequest}
                   currentRequest={currentRequest}
-                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}FirstName`)}
+                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Email`)}
                   onCorrectionRequestChange={onCorrectionRequestChange}
-                  onChange={(value) => onLocalChange(`parent${currentParent}FirstName`, value)}
+                  onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
                   young={young}
+                  copy={true}
                 />
-              </div>
-              <Field
-                name={`parent${currentParent}Email`}
-                label="Email"
-                value={youngFiltered[`parent${currentParent}Email`]}
-                mode={sectionMode}
-                className="mb-[16px]"
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Email`)}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                onChange={(value) => onLocalChange(`parent${currentParent}Email`, value)}
-                young={young}
-                copy={true}
-              />
-              <PhoneField
-                name={`parent${currentParent}Phone`}
-                className="mb-[16px]"
-                young={young}
-                value={youngFiltered[`parent${currentParent}Phone`]}
-                onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
-                zoneValue={youngFiltered[`parent${currentParent}PhoneZone`]}
-                onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
-                mode={sectionMode}
-                placeholder={PHONE_ZONES[youngFiltered[`parent${currentParent}PhoneZone`]]?.example}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-              />
-              <Field
-                name={`parent${currentParent}OwnAddress`}
-                label="Adresse différente de celle du volontaire"
-                value={youngFiltered[`parent${currentParent}OwnAddress`]}
-                transformer={translate}
-                mode={sectionMode === "edition" ? "edition" : "readonly"}
-                onStartRequest={onStartRequest}
-                currentRequest={currentRequest}
-                correctionRequest={getCorrectionRequest(requests, `parent${currentParent}OwnAddress`)}
-                onCorrectionRequestChange={onCorrectionRequestChange}
-                type="select"
-                options={BOOLEAN_OPTIONS}
-                onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
-                young={young}
-              />
-              {youngFiltered[`parent${currentParent}OwnAddress`] === "true" && (
-                // @ts-ignore
-                <FieldsGroup
-                  name={`parent${currentParent}Address`}
+                <PhoneField
+                  name={`parent${currentParent}Phone`}
+                  className="mb-[16px]"
+                  young={young}
+                  value={youngFiltered[`parent${currentParent}Phone`]}
+                  onChange={(value) => onLocalChange(`parent${currentParent}Phone`, value)}
+                  zoneValue={youngFiltered[`parent${currentParent}PhoneZone`]}
+                  onChangeZone={(value) => onLocalChange(`parent${currentParent}PhoneZone`, value)}
+                  mode={sectionMode}
+                  placeholder={PHONE_ZONES[youngFiltered[`parent${currentParent}PhoneZone`]]?.example}
+                  onStartRequest={onStartRequest}
+                  currentRequest={currentRequest}
+                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Phone`)}
+                  onCorrectionRequestChange={onCorrectionRequestChange}
+                />
+                <Field
+                  name={`parent${currentParent}OwnAddress`}
+                  label="Adresse différente de celle du volontaire"
+                  value={youngFiltered[`parent${currentParent}OwnAddress`]}
+                  transformer={translate}
                   mode={sectionMode === "edition" ? "edition" : "readonly"}
-                  title="Adresse"
-                  noflex
-                  className="mt-[16px]"
                   onStartRequest={onStartRequest}
                   currentRequest={currentRequest}
-                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
+                  correctionRequest={getCorrectionRequest(requests, `parent${currentParent}OwnAddress`)}
                   onCorrectionRequestChange={onCorrectionRequestChange}
-                  young={young}>
-                  <Field
+                  type="select"
+                  options={BOOLEAN_OPTIONS}
+                  onChange={(value) => onLocalChange(`parent${currentParent}OwnAddress`, value)}
+                  young={young}
+                />
+                {youngFiltered[`parent${currentParent}OwnAddress`] === "true" && (
+                  // @ts-ignore
+                  <FieldsGroup
                     name={`parent${currentParent}Address`}
-                    label="Adresse"
-                    value={youngFiltered[`parent${currentParent}Address`] || ""}
-                    mode={sectionMode}
-                    className="mb-[16px]"
-                    onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
-                    young={young}
-                  />
-                  <Field
-                    name={`parent${currentParent}Zip`}
-                    label="Code postal"
-                    value={youngFiltered[`parent${currentParent}Zip`] || ""}
-                    mode={sectionMode}
-                    className="mr-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
-                    onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
-                    young={young}
-                  />
-                  <Field
-                    name={`parent${currentParent}City`}
-                    label="Ville"
-                    value={youngFiltered[`parent${currentParent}City`] || ""}
-                    mode={sectionMode}
-                    className="ml-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
-                    onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
-                    young={young}
-                  />
-                  <Field
-                    name={`parent${currentParent}Country`}
-                    label="Pays"
-                    value={youngFiltered[`parent${currentParent}Country`] || ""}
-                    mode={sectionMode}
-                    className="mb-[16px]"
-                    type="select"
-                    options={countryOptions}
-                    filterOnType
-                    onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
-                    young={young}
-                  />
-                </FieldsGroup>
-              )}
-              {youngFiltered[`parent${currentParent}FromFranceConnect`] === "true" && (
-                <div className="mt-[16px] flex items-center rounded-[7px] bg-[#F9FAFB] p-[18px]">
-                  <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
-                  <div>
-                    <div className="text-bold mb-[6px] text-[14px] leading-[20px] text-[#242526]">Attestation des représentants légaux</div>
-                    <div className="grow text-[12px] leading-[20px] text-[#000000]">
-                      Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s'identifier et consentir, ce qui permet de
-                      s'affranchir du formulaire de consentement numérique.
+                    mode={sectionMode === "edition" ? "edition" : "readonly"}
+                    title="Adresse"
+                    noflex
+                    className="mt-[16px]"
+                    onStartRequest={onStartRequest}
+                    currentRequest={currentRequest}
+                    correctionRequest={getCorrectionRequest(requests, `parent${currentParent}Address`)}
+                    onCorrectionRequestChange={onCorrectionRequestChange}
+                    young={young}>
+                    <Field
+                      name={`parent${currentParent}Address`}
+                      label="Adresse"
+                      value={youngFiltered[`parent${currentParent}Address`] || ""}
+                      mode={sectionMode}
+                      className="mb-[16px]"
+                      onChange={(value) => onLocalChange(`parent${currentParent}Address`, value)}
+                      young={young}
+                    />
+                    <Field
+                      name={`parent${currentParent}Zip`}
+                      label="Code postal"
+                      value={youngFiltered[`parent${currentParent}Zip`] || ""}
+                      mode={sectionMode}
+                      className="mr-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
+                      onChange={(value) => onLocalChange(`parent${currentParent}Zip`, value)}
+                      young={young}
+                    />
+                    <Field
+                      name={`parent${currentParent}City`}
+                      label="Ville"
+                      value={youngFiltered[`parent${currentParent}City`] || ""}
+                      mode={sectionMode}
+                      className="ml-[8px] mb-[16px] inline-block w-[calc(50%-8px)]"
+                      onChange={(value) => onLocalChange(`parent${currentParent}City`, value)}
+                      young={young}
+                    />
+                    <Field
+                      name={`parent${currentParent}Country`}
+                      label="Pays"
+                      value={youngFiltered[`parent${currentParent}Country`] || ""}
+                      mode={sectionMode}
+                      className="mb-[16px]"
+                      type="select"
+                      options={countryOptions}
+                      filterOnType
+                      onChange={(value) => onLocalChange(`parent${currentParent}Country`, value)}
+                      young={young}
+                    />
+                  </FieldsGroup>
+                )}
+                {youngFiltered[`parent${currentParent}FromFranceConnect`] === "true" && (
+                  <div className="mt-[16px] flex items-center rounded-[7px] bg-[#F9FAFB] p-[18px]">
+                    <FranceConnect className="mr-[28px] flex-[0_0_100px]" />
+                    <div>
+                      <div className="text-bold mb-[6px] text-[14px] leading-[20px] text-[#242526]">Attestation des représentants légaux</div>
+                      <div className="grow text-[12px] leading-[20px] text-[#000000]">
+                        Consentement parental validé via FranceConnect. Les représentants légaux ont utilisé FranceConnect pour s'identifier et consentir, ce qui permet de
+                        s'affranchir du formulaire de consentement numérique.
+                      </div>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
-          </div>
+          )}
         </div>
         {oldCohort && (
           <div className="mt-[32px] flex">

@@ -54,7 +54,7 @@ export class JeuneService {
             genre: jeune.genre,
             statut: YOUNG_STATUS.IN_PROGRESS,
             statutPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-            email: `${jeune.prenom}.${jeune.nom}@localhost-${this.cryptoGateway.getUuid().slice(0, 6)}`
+            email: `${jeune.prenom}.${jeune.nom}@localhost-${this.cryptoGateway.getUuid().slice(0, 6)}.fr`
                 .toLowerCase()
                 .replace(/\s/g, ""),
             sessionId: classe.sessionId,
@@ -74,6 +74,14 @@ export class JeuneService {
             imageRight: "true",
             source: YOUNG_SOURCE.CLE,
             statutCompte: YOUNG_ACCOUNT_STATUS.PRECOMPTE,
+            adresse: "fake address",
+            ville: "fake city",
+            villeNaissance: "fake city",
+            codePostalNaissance: "fake code postal",
+            paysNaissance: "fake country",
+            pays: "fake country",
+            telephone: "0600000000",
+            codePostal: "fake code postal",
         };
     }
 

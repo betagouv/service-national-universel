@@ -49,6 +49,12 @@ export type JeuneModel = {
     imageRight?: string;
     acceptCGU?: string;
     parentAllowSNU?: string;
+    adresse?: string;
+    ville?: string;
+    villeNaissance?: string;
+    codePostalNaissance?: string;
+    paysNaissance?: string;
+    pays?: string;
     // Parent 1 Information
     parent1Prenom?: string;
     parent1Nom?: string;
