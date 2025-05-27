@@ -207,7 +207,8 @@ router.post("/", passport.authenticate(["young", "referent"], { session: false, 
       await notifySupervisorMilitaryPreparationFilesValidated(data);
     }
 
-    if (mission.isMilitaryPreparation !== "true") {
+    // on ne notifie pas le responsable si c'est une candidature proposée par un ref
+    if (mission.isMilitaryPreparation !== "true" && value.status !== APPLICATION_STATUS.WAITING_ACCEPTATION) {
       await notifyReferentNewApplication(data, young);
     }
 
