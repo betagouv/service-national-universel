@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS, SENDINBLUE_TEMPLATES, isCle, CohortDto, YoungDto, YOUNG_ACCOUNT_STATUS } from "snu-lib";
+import { translate, YOUNG_STATUS, SENDINBLUE_TEMPLATES, isCle, CohortDto, YoungDto, YOUNG_ACCOUNT_STATUS, FeatureFlagName } from "snu-lib";
 
 import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
@@ -270,7 +270,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
-          readonly={isResponsableDeCentre(user)}
+          readonly={isResponsableDeCentre(user) || user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]}
         />
         {oldCohort ? (
           <SectionOldConsentements young={young} />

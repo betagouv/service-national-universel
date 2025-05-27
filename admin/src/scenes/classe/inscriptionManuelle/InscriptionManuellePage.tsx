@@ -1,7 +1,7 @@
 import Loader from "@/components/Loader";
 import { ClasseService } from "@/services/classeService";
 import { Button, Container, Header, Page } from "@snu/ds/admin";
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { BsPeopleFill, BsPersonPlusFill } from "react-icons/bs";
 import { FiPlus } from "react-icons/fi";
@@ -63,7 +63,7 @@ export default function InscriptionManuellePage() {
   };
 
   if (isClasseLoading) return <Loader />;
-  if (!classe) return <Container>Classe non trouvée</Container>;
+  if (!classe) return <Container>Impossible d'inscrire un élève dans cette classe.</Container>;
 
   if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(user.role)) {
     return <Container>Vous n'avez pas les droits pour accéder à cette page.</Container>;
@@ -71,7 +71,7 @@ export default function InscriptionManuellePage() {
 
   return (
     <Page>
-      <div className="relative">
+      <div className="2xl:flex-row sm:flex-col relative">
         <Header
           title={"Inscrire un élève manuellement"}
           breadcrumb={[
@@ -87,10 +87,10 @@ export default function InscriptionManuellePage() {
             { title: "Inscrire un élève manuellement" },
           ]}
         />
-        <div className="absolute top-0 right-8 py-4 flex gap-2">
+        <div className="2xl:mt-2 2xl:absolute top-0 right-8 py-4 flex gap-2 pl-8 sm:relative sm:-mt-8 sm:-mb-4">
           <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm border border-gray-200">
             <HiAcademicCap size={20} className="text-pink-500" />
-            <span className="text-gray-500 font-normal text-sm">{classe.etablissement?.name}</span>
+            <span className="text-gray-500 font-normal text-sm max-w-[300px] truncate">{classe.etablissement?.name}</span>
           </div>
           <div className="flex items-center gap-2 rounded-full bg-white px-4 py-2 shadow-sm border border-gray-200">
             <BsPeopleFill size={20} className="text-pink-500" />

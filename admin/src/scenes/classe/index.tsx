@@ -43,6 +43,9 @@ export default function Index() {
             toastr.error("Identifiant invalide : " + id, "");
             return <SentryRoute component={NotFound} />;
           }
+          if (!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
+            return <SentryRoute component={NotFound} />;
+          }
           return <SentryRoute component={InscriptionManuellePage} />;
         }}
       />
