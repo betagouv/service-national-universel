@@ -245,7 +245,7 @@ const youngExportFields = [
       "engaged",
       "engagedDescription",
       "desiredLocation",
-      "roadCodeRefund"
+      "roadCodeRefund",
     ],
   },
   {
@@ -265,6 +265,12 @@ const youngExportFields = [
     title: "PSC1",
     desc: ["Titulaire du PSC1"],
     fields: ["psc1Info"],
+  },
+  {
+    id: "emailDeConnexion",
+    title: "Email de connexion",
+    desc: ["Email de connexion"],
+    fields: ["emailDeConnexion"],
   },
 ];
 

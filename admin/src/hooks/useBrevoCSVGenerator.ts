@@ -27,6 +27,7 @@ export const useBrevoCSVGenerator = () => {
     "PDR_RETOUR_ADRESSE",
     "DATE_RETOUR",
     "HEURE_RETOUR",
+    "EMAIL_DE_CONNEXION",
   ];
 
   const generateCsv = async (recipients: BrevoRecipient[], fileName: string) => {

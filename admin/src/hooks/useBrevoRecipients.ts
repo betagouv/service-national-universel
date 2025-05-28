@@ -50,6 +50,7 @@ export interface BrevoRecipient {
   PDR_RETOUR_ADRESSE?: string;
   DATE_RETOUR?: string;
   HEURE_RETOUR?: string;
+  EMAIL_DE_CONNEXION?: string;
 }
 
 type YoungCustomType = YoungType & {
@@ -250,6 +251,7 @@ const fillCommonFields = (young: YoungCustomType): Omit<BrevoRecipient, "type" |
     PDR_RETOUR_ADRESSE: young.meetingPoint?.city || "",
     DATE_RETOUR: young.bus?.returnDate ? formatDateFR(young.bus.returnDate) : "",
     HEURE_RETOUR: young.ligneToPoint?.returnHour || "",
+    EMAIL_DE_CONNEXION: young.email || "",
   };
 };
 
