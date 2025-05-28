@@ -4,12 +4,15 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { isCampagneWithRef } from "snu-lib";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { logger } from "../../../../../api/src/logger";
 
 @Injectable()
 export class CampagneService {
     constructor(
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         @Inject(PlanMarketingGateway) private readonly PlanMarketingGateway: PlanMarketingGateway,
+        @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
     ) {}
 
     async findById(id: string) {
@@ -46,12 +49,41 @@ export class CampagneService {
     }
 
     async updateAndRemoveRef(campagne: CampagneModel) {
-        if (("templateId" in campagne)) {
+        if ("templateId" in campagne) {
             const template = await this.PlanMarketingGateway.findTemplateById(campagne.templateId);
             if (!template) {
                 throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
             }
         }
         return this.campagneGateway.updateAndRemoveRef(campagne);
+    }
+
+    async sendMailTest(id: string, mail: string) {
+        const campagne = await this.campagneGateway.findById(id);
+        if (!campagne) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+        }
+        let templateId: number;
+        if ("templateId" in campagne) {
+            templateId = campagne.templateId;
+        } else {
+            const genericCampagne = await this.campagneGateway.findSpecifiqueWithRefById(campagne.id);
+            if (!genericCampagne) {
+                throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+            }
+            templateId = genericCampagne.templateId;
+        }
+        logger.info(`Sending test email to ${mail} for campagne ${id} with templateId ${templateId}`);
+        await this.notificationGateway.sendEmail(
+            {
+                to: [
+                    {
+                        email: mail,
+                        //name: `${referent.prenom} ${referent.nom}`,
+                    },
+                ],
+            },
+            templateId,
+        );
     }
 }

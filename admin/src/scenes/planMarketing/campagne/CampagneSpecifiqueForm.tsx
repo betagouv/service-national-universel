@@ -53,6 +53,7 @@ export interface CampagneSpecifiqueFormProps {
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
   onSend: (id: string) => void;
+  onSendTest: (id: string) => void;
   forceOpen?: boolean;
 }
 
@@ -70,7 +71,7 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, onSendTest, forceOpen = false }, ref) => {
     const {
       control,
       handleSubmit,
@@ -165,6 +166,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       setIsSendCampagneModalOpen(false);
       if (campagneData.id) {
         onSend(campagneData.id);
+      }
+    };
+
+    const handleSendTest = () => {
+      if (campagneData.id) {
+        onSendTest(campagneData.id);
       }
     };
 
@@ -286,11 +293,16 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     )}
                   />
                   {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-                  <div className="block mt-2">
+                  <div className="flex mt-2 justify-between">
                     <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center">
                       Voir l'aperçu
                       <HiOutlineEye className="ml-1" size={18} />
                     </a>
+                    {campagneData.id && (
+                      <p onClick={handleSendTest} className="text-blue-600 inline-flex items-center hover:text-blue-800 hover:cursor-pointer">
+                        Envoyer un test
+                      </p>
+                    )}
                   </div>
                 </div>
               </div>
