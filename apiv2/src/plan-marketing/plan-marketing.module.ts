@@ -35,7 +35,9 @@ import { CampagneContactBuilderService } from "./core/service/CampagneContactBui
 import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
 import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
 import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
-import { NotificationModule } from "../notification/Notification.module";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { NotificationProducer } from "@notification/infra/Notification.producer";
+import { NotificationModule } from "@notification/Notification.module";
 
 @Module({
     imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule, NotificationModule],
@@ -74,6 +76,7 @@ import { NotificationModule } from "../notification/Notification.module";
             provide: SearchYoungGateway,
             useClass: SearchYoungElasticRepository,
         },
+        { provide: NotificationGateway, useClass: NotificationProducer },
         PreparerEnvoiCampagne,
         EnvoyerCampagne,
         CampagneContactBuilderService,
