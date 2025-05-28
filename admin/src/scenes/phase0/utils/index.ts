@@ -37,6 +37,7 @@ export function filterDataForYoungSection(data: any, section: "identite" | "pare
       cohort: data.cohort,
       parentStatementOfHonorInvalidId: data.parentStatementOfHonorInvalidId,
       parent1Email: data.parent1Email,
+      accountStatus: data.accountStatus,
     };
   } else if (section === "parent") {
     bodyYoungSection = {
