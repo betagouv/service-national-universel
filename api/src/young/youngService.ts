@@ -272,7 +272,7 @@ async function getContactsCLE(classeId: string) {
   return await ReferentModel.find({ _id: { $in: contactCLEId } });
 }
 
-export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: CohortType, withdrawnReason: string, actor: UserDto) {
+export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: CohortType, withdrawnReason: string, withdrawnMessage: string, actor: UserDto) {
   const oldStatusPhase1 = young.statusPhase1;
 
   // We notify the ref dep and the young
@@ -353,7 +353,10 @@ export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: Coh
 
     await sendTemplate(template, {
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-      params: { message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "" },
+      params: {
+        message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
+        motifPersonnalise: withdrawnMessage || "",
+      },
       cc: getCcOfYoung({ template, young }),
     });
   } catch (e) {

@@ -127,6 +127,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
+import { addMonths } from "date-fns";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -719,8 +720,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (newYoung.status === YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.WITHDRAWN) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const { withdrawnReason } = newYoung;
-      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
+      const { withdrawnReason, withdrawnMessage } = newYoung;
+      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, withdrawnMessage, req.user);
       newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
       // reset des informations d'affectation
       newYoung.cohesionCenterId = undefined;
@@ -1923,4 +1924,31 @@ router.post("/exist", passport.authenticate(["referent"], { session: false, fail
   }
 });
 
+router.post(
+  "/:id/renew-invitation",
+  authMiddleware(["referent"]),
+  accessControlMiddleware([ROLES.ADMIN]),
+  requestValidatorMiddleware({
+    params: Joi.object({ id: idSchema().required() }),
+  }),
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const referent = await ReferentModel.findById(req.validatedParams.id);
+      if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (!referent.invitationExpires || !referent.invitationToken) {
+        return res.status(400).json({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const invitationExpires = addMonths(new Date(), 1);
+      referent.set({ invitationExpires });
+      await referent.save({ fromUser: req.user });
+
+      return res.status(200).json({ ok: true, data: { invitationExpires } });
+    } catch (error) {
+      capture(error);
+      res.status(500).json({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 export default router;
