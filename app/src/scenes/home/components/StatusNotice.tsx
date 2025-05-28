@@ -73,7 +73,7 @@ function WaitingList() {
   return (
     <Notice>
       <p className="font-bold">Votre inscription au SNU est bien validée.</p>
-      <p>Nous vous recontacterons dès qu’une place se libère dans les prochains jours</p>
+      <p>Nous vous recontacterons si une place venait à se libérer</p>
     </Notice>
   );
 }
