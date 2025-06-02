@@ -22,7 +22,6 @@ export default function CampagnesGeneriques() {
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
   const { filters, setFilters } = usePlanMarketingFilters<CampagneGeneriqueFilters>(() => {}, {
     isArchived: false,
-    isProgrammationActive: true,
   });
 
   const { toggleArchivageCampagne, isToggleArchivagePending } = useCampagneForm(
