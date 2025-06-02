@@ -1,7 +1,7 @@
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards, Request } from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
-import { CampagneModel } from "../../core/Campagne.model";
+import { CampagneModel, DestinataireTest } from "../../core/Campagne.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
@@ -67,10 +67,14 @@ export class CampagneController {
         @Request() request: CustomRequest,
         @Param("id") campagneId: string,
     ): Promise<PlanMarketingRoutes["EnvoyerTestPlanMarketingRoute"]["response"]> {
-        const mail = request.user.email;
-        if (!mail) {
+        if (!request.user.email) {
             throw new Error("User email is required for sending test emails");
         }
-        return await this.campagneService.sendMailTest(campagneId, mail);
+        const destinataire: DestinataireTest = {
+            prenom: request.user.prenom || "Prenom",
+            nom: request.user.nom || "Nom",
+            email: request.user.email,
+        };
+        return await this.campagneService.sendMailTest(campagneId, destinataire);
     }
 }

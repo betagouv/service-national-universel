@@ -1,5 +1,5 @@
 import { Inject, Injectable } from "@nestjs/common";
-import { CampagneModel, CreateCampagneModel } from "@plan-marketing/core/Campagne.model";
+import { CampagneModel, CreateCampagneModel, DestinataireTest } from "@plan-marketing/core/Campagne.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
@@ -58,7 +58,7 @@ export class CampagneService {
         return this.campagneGateway.updateAndRemoveRef(campagne);
     }
 
-    async sendMailTest(id: string, mail: string) {
+    async sendMailTest(id: string, auteur: DestinataireTest) {
         const campagne = await this.campagneGateway.findById(id);
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
@@ -77,8 +77,8 @@ export class CampagneService {
             {
                 to: [
                     {
-                        email: mail,
-                        name: "Destinataire Test",
+                        email: auteur.email,
+                        name: auteur.prenom + " " + auteur.nom,
                     },
                 ],
             },

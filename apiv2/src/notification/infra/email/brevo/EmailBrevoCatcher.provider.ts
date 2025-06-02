@@ -1,7 +1,7 @@
 import * as brevo from "@getbrevo/brevo";
 
 import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 // import nodemailer from "nodemailer";
@@ -31,11 +31,10 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
         apiKey.apiKey = apiKeyConfig;
     }
 
-    async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
-        Logger.debug(
-            `Sending email template "${template}" to ${JSON.stringify(emailParams.to)}`,
-            EmailBrevoCatcherProvider.name,
-        );
+    async send(
+        template: EmailTemplate | string,
+        emailParams: EmailParams,
+    ): Promise<{ response: object; body: object }> {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         const brevoHtmlTemplate = await this.findTemplateById(brevoParams.templateId);
         const subject = this.replaceTemplateParams(brevoHtmlTemplate.subject, brevoParams);

@@ -35,7 +35,10 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         setApiKey(this.contactsApi, apiKey);
     }
 
-    async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
+    async send(
+        template: EmailTemplate | string,
+        emailParams: EmailParams,
+    ): Promise<{ response: object; body: object }> {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         const sendSmtpEmail = new brevo.SendSmtpEmail();
 

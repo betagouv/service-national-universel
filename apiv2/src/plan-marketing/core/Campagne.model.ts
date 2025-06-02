@@ -84,3 +84,9 @@ export type CreateCampagneSpecifiqueModel =
     | CreateCampagneSpecifiqueModelWithoutRef
     | CreateCampagneSpecifiqueModelWithRef;
 export type CreateCampagneModel = CreateCampagneGeneriqueModel | CreateCampagneSpecifiqueModel;
+
+export type DestinataireTest = {
+    email: string;
+    prenom?: string;
+    nom?: string;
+};
