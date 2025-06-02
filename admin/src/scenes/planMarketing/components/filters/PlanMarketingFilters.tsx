@@ -119,10 +119,50 @@ function getLiaisonNodes(selectedItems: Set<string>): Record<string, TreeNodeFil
   };
 }
 
+function getSelectedItemsFromFilters(filters: PlanMarketingFiltersBase, filterType: CampagneFilterType): Set<string> {
+  const selected = new Set<string>();
+
+  if (filterType === "liste-diffusion") {
+    if (filters.isArchived === true) {
+      selected.add("campagnes-inactives");
+    }
+    if (filters.isArchived === false) {
+      selected.add("campagnes-actives");
+    }
+    return selected;
+  }
+
+  if (filters.isArchived === true) {
+    selected.add("campagnes-inactives");
+  }
+  if (filters.isArchived === false) {
+    selected.add("campagnes-actives");
+  }
+
+  if (filters.isProgrammationActive === true) {
+    selected.add("programmations-actives");
+  }
+  if (filters.isProgrammationActive === false) {
+    selected.add("programmations-inactives");
+  }
+
+  if (filterType === "specifique") {
+    const spec = filters as CampagneSpecifiqueFilters;
+    if (spec.hasGenericLink === true) {
+      selected.add("liaison-oui");
+    }
+    if (spec.hasGenericLink === false) {
+      selected.add("liaison-non");
+    }
+  }
+
+  return selected;
+}
+
 function PlanMarketingFilters<T extends PlanMarketingFiltersBase>(props: CampagneFiltersProps<T> & { filters: T }) {
   const { onChange, additionalFilters, filters, filterType } = props;
 
-  const [selectedItems, setSelectedItems] = useState<Set<string>>(new Set(Object.keys(filters)));
+  const [selectedItems, setSelectedItems] = useState<Set<string>>(() => getSelectedItemsFromFilters(filters, filterType));
 
   const handleSelectionChange = (newSelectedItems: Set<string>) => {
     setSelectedItems(new Set(newSelectedItems));

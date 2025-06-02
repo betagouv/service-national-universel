@@ -20,7 +20,10 @@ export default function CampagnesGeneriques() {
   const [isArchiveToggleModalOpen, setIsArchiveToggleModalOpen] = useState<boolean>(false);
   const [selectedCampagne, setSelectedCampagne] = useState<DraftCampagneDataProps | null>(null);
   const campagneRefs = useRef<{ [key: string]: HTMLDivElement | null }>({});
-  const { filters, setFilters } = usePlanMarketingFilters<CampagneGeneriqueFilters>(() => {}, {});
+  const { filters, setFilters } = usePlanMarketingFilters<CampagneGeneriqueFilters>(() => {}, {
+    isArchived: false,
+    isProgrammationActive: true,
+  });
 
   const { toggleArchivageCampagne, isToggleArchivagePending } = useCampagneForm(
     selectedCampagne || {
@@ -203,12 +206,12 @@ export default function CampagnesGeneriques() {
             {selectedCampagne?.isArchived ? (
               <div>
                 <p>La campagne générique sera désarchivée, mais la programmation restera désactivée.</p>
-                <p>Les programmations des campagnes spécifiques resteront désactivées.</p>
+                <p>Les campagnes spécifiques seront désarchivées et leurs programmations resteront désactivées.</p>
               </div>
             ) : (
               <div>
                 <p>La campagne générique sera archivée et la programmation sera désactivée.</p>
-                <p>Les campagnes spécifiques ne seront pas archivées, mais leurs programmations seront désactivées.</p>
+                <p>Les campagnes spécifiques seront archivées et leurs programmations seront désactivées.</p>
               </div>
             )}
           </div>
