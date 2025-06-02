@@ -33,6 +33,9 @@ interface ListeDiffusionFormProps {
 }
 
 export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel, forceOpen = false, onToggleArchive, isToggleArchivagePending }: ListeDiffusionFormProps) => {
+  const isFirstRender = React.useRef(true);
+  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+
   const {
     control,
     handleSubmit,
@@ -43,22 +46,43 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   } = useForm<ListeDiffusionDataProps>({
     defaultValues: {
       type: ListeDiffusionEnum.VOLONTAIRES,
-      filters: listeDiffusionData.filters ?? {},
+      filters: selectedFilters,
       ...listeDiffusionData,
     },
   });
 
-  const isFirstRender = React.useRef(true);
-
   // Update the form when the listeDiffusionData changes
   useEffect(() => {
-    reset({
-      type: ListeDiffusionEnum.VOLONTAIRES,
-      ...listeDiffusionData,
-    });
+    if (isFirstRender.current) {
+      isFirstRender.current = false;
+      return;
+    }
+
+    reset(
+      {
+        type: ListeDiffusionEnum.VOLONTAIRES,
+        filters: selectedFilters,
+        ...listeDiffusionData,
+      },
+      {
+        keepDirty: false,
+        keepErrors: false,
+      },
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listeDiffusionData, reset]);
 
-  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+  const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
+    const currentFilters = watch("filters");
+    if (JSON.stringify(currentFilters) !== JSON.stringify(filters)) {
+      setValue("filters", filters, {
+        shouldDirty: !isFirstRender.current,
+        shouldTouch: true,
+        shouldValidate: true,
+      });
+      setSelectedFilters(filters);
+    }
+  };
 
   const isEditing = listeDiffusionData.id !== undefined;
   const isOpen = listeDiffusionData.id === undefined || forceOpen;
@@ -69,20 +93,20 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   };
 
   const handleOnSave = (data: ListeDiffusionDataProps) => {
-    onSave({ ...data, filters: selectedFilters });
-    reset(data);
+    const dataToSave = { ...data, filters: selectedFilters };
+    onSave(dataToSave);
+
+    reset(dataToSave, {
+      keepDirty: false,
+      keepErrors: false,
+    });
   };
 
-  const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
-    const currentFilters = watch("filters");
-    if (JSON.stringify(currentFilters) !== JSON.stringify(filters)) {
-      setValue("filters", filters, { shouldDirty: !isFirstRender.current });
-      setSelectedFilters(filters);
+  useEffect(() => {
+    if (listeDiffusionData.filters) {
+      setSelectedFilters(listeDiffusionData.filters);
     }
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-    }
-  };
+  }, [listeDiffusionData.filters]);
 
   watch((currentState, { name }) => {
     if (name === "type") {
