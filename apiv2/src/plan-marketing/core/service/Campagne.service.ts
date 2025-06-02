@@ -5,7 +5,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { isCampagneWithRef } from "snu-lib";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
-import { logger } from "../../../../../api/src/logger";
+import { EmailParams } from "@notification/core/Notification";
 
 @Injectable()
 export class CampagneService {
@@ -73,17 +73,16 @@ export class CampagneService {
             }
             templateId = genericCampagne.templateId;
         }
-        logger.info(`Sending test email to ${mail} for campagne ${id} with templateId ${templateId}`);
-        await this.notificationGateway.sendEmail(
+        await this.notificationGateway.sendEmail<EmailParams>(
             {
                 to: [
                     {
                         email: mail,
-                        //name: `${referent.prenom} ${referent.nom}`,
+                        name: "Destinataire Test",
                     },
                 ],
             },
-            templateId,
+            templateId.toString(),
         );
     }
 }

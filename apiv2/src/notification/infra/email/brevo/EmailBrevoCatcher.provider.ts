@@ -32,6 +32,10 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
     }
 
     async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
+        Logger.debug(
+            `Sending email template "${template}" to ${JSON.stringify(emailParams.to)}`,
+            EmailBrevoCatcherProvider.name,
+        );
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
         const brevoHtmlTemplate = await this.findTemplateById(brevoParams.templateId);
         const subject = this.replaceTemplateParams(brevoHtmlTemplate.subject, brevoParams);

@@ -299,14 +299,14 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                       <HiOutlineEye className="ml-1" size={18} />
                     </a>
                     {campagneData.id && (
-                      <>
+                      <div className="flex items-center gap-2">
                         <p onClick={handleSendTest} className="text-blue-600 inline-flex items-center hover:text-blue-800 hover:cursor-pointer">
                           Envoyer un test
                         </p>
-                        <Tooltip id="id-send-mail-test" title="Le test sera envoyé sur l’adresse mail de votre compte." className="mb-1.5">
+                        <Tooltip id="id-send-mail-test" title="Le test sera envoyé sur l’adresse mail de votre compte.">
                           <HiOutlineInformationCircle className="text-blue-600" size={18} />
                         </Tooltip>
-                      </>
+                      </div>
                     )}
                   </div>
                 </div>

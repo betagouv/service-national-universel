@@ -8,7 +8,6 @@ import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCam
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
 import { CustomRequest } from "@shared/infra/CustomRequest";
-import { logger } from "../../../../../api/src/logger";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -72,7 +71,6 @@ export class CampagneController {
         if (!mail) {
             throw new Error("User email is required for sending test emails");
         }
-        logger.info(`Sending test email to ${mail} for campagne ${campagneId}`);
         return await this.campagneService.sendMailTest(campagneId, mail);
     }
 }
