@@ -567,7 +567,14 @@ export async function transformVolontaires(data, values) {
   });
 }
 
-export async function transformInscription(data) {
+export function mapInscriptionFields(inscriptions) {
+  return transformInscription(inscriptions).map((inscription) => ({
+    ...inscription,
+    "Email de connexion": inscription["Email"],
+  }));
+}
+
+export function transformInscription(data) {
   let all = data;
   return all.map((data) => {
     return {

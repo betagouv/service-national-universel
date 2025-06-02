@@ -51,7 +51,7 @@ async function populateYoungExport(data, exportFields) {
     data = data.map((item) => ({ ...item, etablissement: etablissements?.find((e) => e._id.toString() === item.etablissementId) }));
   }
 
-  if (exportFields.includes("emailDeConnexion")) {
+  if (exportFields.includes("emailDeConnexion") || exportFields === "*") {
     data = data.map((item) => ({ ...item, emailDeConnexion: item.email }));
   }
 
