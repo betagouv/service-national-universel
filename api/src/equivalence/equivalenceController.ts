@@ -200,6 +200,12 @@ router.delete("/:idEquivalence", passport.authenticate("young", { session: false
     if (!isYoungFn(req.user) || equivalence.youngId!.toString() !== req.user._id.toString() || equivalence.status !== EQUIVALENCE_STATUS.WAITING_VERIFICATION) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message: "Unauthorized to delete this equivalence" });
     }
+
+    const young = await YoungModel.findById(req.user._id);
+    if (!young) {
+      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Young not found" });
+    }
+
     const files = await listFiles(`app/young/${req.user._id}/equivalenceFiles/`);
     const missionEquivalencesFiles = equivalence.files;
     const equivalenceFilesArray = files
@@ -211,6 +217,19 @@ router.delete("/:idEquivalence", passport.authenticate("young", { session: false
       await deleteFilesByList(equivalenceFilesArray);
     }
     await equivalence.deleteOne();
+
+    young.set({ status_equivalence: undefined });
+    await young.save({ fromUser: req.user });
+
+    const mostRecentEquivalence = await MissionEquivalenceModel.findOne({
+      youngId: young._id.toString(),
+    }).sort({ createdAt: -1 });
+
+    if (mostRecentEquivalence) {
+      // on save 2 fois pour garder une trace dans l'historique
+      young.set({ status_equivalence: mostRecentEquivalence.status });
+      await young.save({ fromUser: req.user });
+    }
 
     return res.status(200).send({ ok: true, message: "Equivalence deleted successfully" });
   } catch (error) {
