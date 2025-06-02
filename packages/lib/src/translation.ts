@@ -1265,6 +1265,8 @@ export const translateMarketing = (name: string) => {
       return "La liste de diffusion est introuvable";
     case "NO_CONTACTS":
       return "La liste de diffusion est vide";
+    case "CAMPAIGN_ALREADY_EXISTS_FOR_COHORT":
+      return "Une campagne spécifique existe déjà pour cette cohorte";
     default:
       return name;
   }

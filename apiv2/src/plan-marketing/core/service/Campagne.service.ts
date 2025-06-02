@@ -5,6 +5,8 @@ import {
     CreateCampagneModel,
     CampagneComplete,
     CampagneModelWithNomSession,
+    CreateCampagneSpecifiqueModelWithRef,
+    CreateCampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
 import { DatesSession } from "@plan-marketing/core/Programmation.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -82,6 +84,7 @@ export class CampagneService {
 
     async creerCampagne(campagne: CreateCampagneModel) {
         if (isCampagneWithRef(campagne)) {
+            await this.checkCampagneSpecifiqueExists(campagne);
             return this.campagneGateway.save(campagne);
         }
 
@@ -89,6 +92,7 @@ export class CampagneService {
         if (!template) {
             throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
         }
+
         return this.campagneGateway.save(campagne);
     }
 
@@ -194,6 +198,31 @@ export class CampagneService {
         return this.campagneGateway.updateProgrammationSentDate(campagneId, programmationId, sentDate);
     }
 
+    async findCampagneSpecifiquesByCampagneGeneriqueId(
+        campagneGeneriqueId: string,
+    ): Promise<CampagneModelWithNomSession[]> {
+        const campagnes = await this.campagneGateway.findCampagneSpecifiquesByCampagneGeneriqueId(campagneGeneriqueId);
+
+        if (campagnes.length === 0) {
+            return [];
+        }
+
+        const sessionIdsInCampagnes = this.extractSessionIds(campagnes);
+
+        const sessionsMap = new Map<string, SessionModel>();
+        await Promise.all(
+            Array.from(sessionIdsInCampagnes).map(async (id) => {
+                const session = await this.sessionGateway.findById(id);
+                if (session) sessionsMap.set(id, session);
+            }),
+        );
+
+        return campagnes.map((campagne) => {
+            const session = sessionsMap.get(campagne.cohortId);
+            return { ...campagne, nomSession: session?.nom || "" };
+        });
+    }
+
     private extractSessionIds(campagnes: CampagneModel[]): Set<string> {
         const sessionIds = new Set<string>();
         campagnes.forEach((campagne) => {
@@ -225,28 +254,18 @@ export class CampagneService {
         };
     }
 
-    async findCampagneSpecifiquesByCampagneGeneriqueId(
-        campagneGeneriqueId: string,
-    ): Promise<CampagneModelWithNomSession[]> {
-        const campagnes = await this.campagneGateway.findCampagneSpecifiquesByCampagneGeneriqueId(campagneGeneriqueId);
-
-        if (campagnes.length === 0) {
-            return [];
+    private async checkCampagneSpecifiqueExists(campagneSpecifique: CreateCampagneSpecifiqueModelWithRef | CreateCampagneSpecifiqueModelWithoutRef) {
+        if (!campagneSpecifique.campagneGeneriqueId) {
+            return;
         }
 
-        const sessionIdsInCampagnes = this.extractSessionIds(campagnes);
-
-        const sessionsMap = new Map<string, SessionModel>();
-        await Promise.all(
-            Array.from(sessionIdsInCampagnes).map(async (id) => {
-                const session = await this.sessionGateway.findById(id);
-                if (session) sessionsMap.set(id, session);
-            }),
+        const campagnesSpecifiques = await this.campagneGateway.findCampagneSpecifiquesByCampagneGeneriqueId(campagneSpecifique.campagneGeneriqueId);
+        const campagneExiste = campagnesSpecifiques.some(
+            (campagneSpecifiqueExistante) => campagneSpecifiqueExistante.cohortId === campagneSpecifique.cohortId
         );
 
-        return campagnes.map((campagne) => {
-            const session = sessionsMap.get(campagne.cohortId);
-            return { ...campagne, nomSession: session?.nom || "" };
-        });
+        if (campagneExiste) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_ALREADY_EXISTS_FOR_COHORT);
+        }
     }
 }
