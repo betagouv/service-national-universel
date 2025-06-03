@@ -8,6 +8,7 @@ import { CampagneSpecifiqueFormData, CampagneSpecifiqueForm, DraftCampagneSpecif
 import { ModalImportCampagneBrevo } from "@/components/modals/ModalImportCampagneBrevo";
 import { useToggle } from "react-use";
 import { useSearchTerm } from "../hooks/useSearchTerm";
+import { useSendMailTest } from "../hooks/SendMailTest";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -19,7 +20,8 @@ export interface CampagnesGeneriquesImportData {
 
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
-  const { campagnes, saveCampagne, sendCampagne, sendTest, isLoading } = useCampagneSpecifique({ sessionId });
+  const { campagnes, saveCampagne, sendCampagne, isLoading } = useCampagneSpecifique({ sessionId });
+  const { sendTest } = useSendMailTest();
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
   const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());

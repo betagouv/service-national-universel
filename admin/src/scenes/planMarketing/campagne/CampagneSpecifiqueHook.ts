@@ -77,23 +77,6 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     },
   });
 
-  const { mutate: sendTest } = useMutation({
-    mutationFn: (id: string) => {
-      return PlanMarketingService.envoyerTest(id);
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries();
-      toastr.clean();
-      toastr.success("Succès", "Mail test envoyé avec succès", { timeOut: 5000 });
-    },
-    onError: (error: HttpError) => {
-      if (error?.statusCode === 422) {
-        toastr.clean();
-        toastr.error("Erreur", translateMarketing(error.message) || "Une erreur est survenue lors de l'envoi du mail test", { timeOut: 5000 });
-      }
-    },
-  });
-
   const { data: campagnes, isLoading } = useQuery<(CampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] })[]>({
     queryKey: [CAMPAGNE_SPECIFIQUE_QUERY_KEY, DEFAULT_SORT, sessionId],
     enabled: true,
@@ -109,6 +92,5 @@ export const useCampagneSpecifique = ({ sessionId }: { sessionId: string }) => {
     isLoading,
     saveCampagne,
     sendCampagne,
-    sendTest,
   };
 };

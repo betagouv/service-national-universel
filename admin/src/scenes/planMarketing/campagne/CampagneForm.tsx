@@ -36,6 +36,7 @@ export interface CampagneFormProps {
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: (campagneId: string) => void;
   onDuplicate: (campagneData: CampagneDataProps) => void;
+  onSendTest: (id: string) => void;
   forceOpen?: boolean;
 }
 
@@ -49,7 +50,7 @@ const recipientOptions = [
 ];
 
 export default React.memo(
-  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false }: CampagneFormProps) {
+  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, onSendTest, forceOpen = false }: CampagneFormProps) {
     const { state, handleChange, saveCampagne, isPending, isDirty } = useCampagneForm(campagneData, onSave);
     const { errors, validateForm } = useCampagneError(state);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
@@ -76,6 +77,12 @@ export default React.memo(
 
     const closeModal = () => {
       setIsConfirmModalOpen(false);
+    };
+
+    const handleSendTest = () => {
+      if (campagneData.id) {
+        onSendTest(campagneData.id);
+      }
     };
 
     const ErrorMessage = ({ message }: { message?: string }) => {
@@ -152,10 +159,22 @@ export default React.memo(
                   />
                   <ErrorMessage message={errors.templateId} />
                   <ErrorMessage message={templateErrorMessage} />
-                  <a href={`/email-preview/${state.templateId}`} target="_blank" rel="noreferrer" className="text-blue-600  inline-flex items-center">
-                    Voir l'aperçu
-                    <HiOutlineEye className="ml-1" size={18} />
-                  </a>
+                  <div className="flex mt-2 justify-between">
+                    <a href={`/email-preview/${state.templateId}`} target="_blank" rel="noreferrer" className="text-blue-600  inline-flex items-center">
+                      Voir l'aperçu
+                      <HiOutlineEye className="ml-1" size={18} />
+                    </a>
+                    {campagneData.id && (
+                      <div className="flex items-center gap-2">
+                        <p onClick={handleSendTest} className="text-blue-600 inline-flex items-center hover:text-blue-800 hover:cursor-pointer">
+                          Envoyer un test
+                        </p>
+                        <Tooltip id="id-send-mail-test" title="Le test sera envoyé sur l’adresse mail de votre compte.">
+                          <HiOutlineInformationCircle className="text-blue-600" size={18} />
+                        </Tooltip>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
 
