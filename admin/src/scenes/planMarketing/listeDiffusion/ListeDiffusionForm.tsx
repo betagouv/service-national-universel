@@ -88,13 +88,27 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   const isOpen = listeDiffusionData.id === undefined || forceOpen;
 
   const handleOnCancel = () => {
-    reset();
+    setIsArchiveModalOpen(false);
+    console.log("handleOnCancel");
+    console.log(listeDiffusionData);
+    console.log(selectedFilters);
+    reset(
+      { ...listeDiffusionData, filters: selectedFilters },
+      {
+        keepDirty: false,
+        keepErrors: false,
+      },
+    );
     onCancel();
   };
 
   const handleOnSave = (data: ListeDiffusionDataProps) => {
     const dataToSave = { ...data, filters: selectedFilters };
     onSave(dataToSave);
+
+    console.log("handleOnSave");
+    console.log(dataToSave);
+    console.log(selectedFilters);
 
     reset(dataToSave, {
       keepDirty: false,
@@ -247,7 +261,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
         }
         footer={
           <div className="flex items-center justify-between gap-6">
-            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsArchiveModalOpen(false)} disabled={isToggleArchivagePending} />
+            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={handleOnCancel} disabled={isSubmitting} />
             <Button
               title={listeDiffusionData.isArchived ? "Désarchiver" : "Archiver"}
               onClick={() => {
