@@ -8,7 +8,7 @@ import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { environment } from "../../config";
 import { setUser } from "../../redux/auth/actions";
-import api from "../../services/api";
+import api, { setJwtToken } from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
@@ -65,7 +65,7 @@ export default function Signin() {
                     } else if (code === "VERIFICATION_REQUIRED") {
                       return history.push(signinRedirect);
                     }
-                    if (token) api.setToken(token);
+                    if (token) setJwtToken(token);
                     if (user) {
                       plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));

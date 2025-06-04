@@ -46,6 +46,7 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
       ...referent,
       role,
       subRole,
+      roles: [role, subRole],
       invitationToken,
       invitationExpires: inSevenDays(),
       department: etablissement.department,

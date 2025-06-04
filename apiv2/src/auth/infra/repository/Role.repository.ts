@@ -19,6 +19,13 @@ export class RoleRepository implements RoleGateway {
         return RoleMapper.toModel(role);
     }
 
+    async findByCodesAndParent(codes: string[]): Promise<RoleModel[]> {
+        const roles = await this.roleMongooseEntity.find({
+            $or: [{ code: { $in: codes } }, { parent: { $in: codes } }],
+        });
+        return roles.map((role) => RoleMapper.toModel(role));
+    }
+
     async create(role: RoleModel): Promise<RoleModel> {
         const roleDocument = await this.roleMongooseEntity.create(role);
         return RoleMapper.toModel(roleDocument);

@@ -366,6 +366,9 @@ export async function transformVolontaires(data, values) {
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
     const allFields = {
+      emailDeConnexion: {
+        "Email de connexion": data.emailDeConnexion,
+      },
       psc1Info: {
         PSC1: translate(data?.psc1Info) || "Non renseigné",
       },
@@ -564,7 +567,14 @@ export async function transformVolontaires(data, values) {
   });
 }
 
-export async function transformInscription(data) {
+export function mapInscriptionFields(inscriptions) {
+  return transformInscription(inscriptions).map((inscription) => ({
+    ...inscription,
+    "Email de connexion": inscription["Email"],
+  }));
+}
+
+export function transformInscription(data) {
   let all = data;
   return all.map((data) => {
     return {

@@ -1,8 +1,7 @@
 import React from "react";
 import { Controller } from "react-hook-form";
-import { CohortDto, COHORT_TYPE } from "snu-lib";
+import { CohortDto, COHORT_TYPE, FeatureFlagName } from "snu-lib";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
-
 type ToggleItem = {
   label: string;
   value: boolean;
@@ -14,9 +13,10 @@ interface ManualInscriptionCLETogglesProps {
   control: any;
   isLoading: boolean;
   readOnly: boolean;
+  user: any;
 }
 
-const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnly, user }: ManualInscriptionCLETogglesProps) => {
   const toggles: ToggleItem[] = [
     {
       label: "Référents régionaux",
@@ -28,17 +28,22 @@ const renderManualInscriptionCLEToggles = ({ cohort, control, isLoading, readOnl
       value: cohort.inscriptionOpenForReferentDepartment ?? false,
       field: "inscriptionOpenForReferentDepartment" as keyof CohortDto,
     },
-    {
-      label: "Référents de classe",
-      value: cohort.inscriptionOpenForReferentClasse ?? false,
-      field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
-    },
-    {
-      label: "Administrateurs CLE",
-      value: cohort.inscriptionOpenForAdministrateurCle ?? false,
-      field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
-    },
   ];
+
+  if (!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
+    toggles.push(
+      {
+        label: "Référents de classe",
+        value: cohort.inscriptionOpenForReferentClasse ?? false,
+        field: "inscriptionOpenForReferentClasse" as keyof CohortDto,
+      },
+      {
+        label: "Administrateurs CLE",
+        value: cohort.inscriptionOpenForAdministrateurCle ?? false,
+        field: "inscriptionOpenForAdministrateurCle" as keyof CohortDto,
+      },
+    );
+  }
 
   return (
     <>
@@ -81,13 +86,13 @@ const renderManualInscriptionHTSToggles = ({ cohort, control, isLoading, readOnl
   );
 };
 
-export const getManualInscriptionTogglesByCohortType = ({ cohort, control, isLoading, readOnly }: ManualInscriptionCLETogglesProps) => {
+export const getManualInscriptionTogglesByCohortType = ({ cohort, control, isLoading, readOnly, user }: ManualInscriptionCLETogglesProps) => {
   const cohortType = cohort.type as (typeof COHORT_TYPE)[keyof typeof COHORT_TYPE];
   switch (cohortType) {
     case COHORT_TYPE.CLE:
-      return renderManualInscriptionCLEToggles({ cohort, control, isLoading, readOnly });
+      return renderManualInscriptionCLEToggles({ cohort, control, isLoading, readOnly, user });
     case COHORT_TYPE.VOLONTAIRE:
-      return renderManualInscriptionHTSToggles({ cohort, control, isLoading, readOnly });
+      return renderManualInscriptionHTSToggles({ cohort, control, isLoading, readOnly, user });
     default:
       return null;
   }

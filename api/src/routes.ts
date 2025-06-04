@@ -38,7 +38,7 @@ export function injectRoutes(app) {
   app.use("/young", require("./controllers/young/index").default);
   app.use("/young", require("./young/youngController").default);
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
-  app.use("/SNUpport", require("./controllers/SNUpport"));
+  app.use("/SNUpport", require("./controllers/SNUpport").default);
   app.use("/cle", require("./cle").default);
   app.use("/preinscription", require("./preinscription/preinscriptionController"));
   app.use("/filter-label", require("./filterLabel/filterLabelController"));
