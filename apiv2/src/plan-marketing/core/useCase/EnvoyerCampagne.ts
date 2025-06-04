@@ -4,7 +4,7 @@ import { AssocierListeDiffusionToCampagne } from "./AssocierListeDiffusionToCamp
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
-import { EnvoiCampagneStatut, isCampagneGenerique } from "snu-lib";
+import { EnvoiCampagneStatut, isCampagneWithRef } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { MettreAJourCampagne } from "./MettreAJourCampagne";
 import { CampagneModel } from "../Campagne.model";
@@ -41,7 +41,7 @@ export class EnvoyerCampagne implements UseCase<void> {
         });
 
         const campagne: CampagneModel | null = await this.campagneGateway.findById(campagneId);
-        if (campagne !== null && isCampagneGenerique(campagne)) {
+        if (campagne !== null && isCampagneWithRef(campagne)) {
             // Appel de mettreAJourCampagne pour supprimer la référence à la campagne spécifique
             await this.mettreAJourCampagne.execute(campagne);
         }
