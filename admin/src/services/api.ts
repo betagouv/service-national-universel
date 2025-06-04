@@ -2,31 +2,33 @@ import fetchRetry from "fetch-retry";
 
 import { capture } from "../sentry";
 import { apiURL } from "../config";
-import { createFormDataForFileUpload, ERRORS } from "snu-lib";
-import { apiv2 } from "./apiv2";
+import { createFormDataForFileUpload, ERRORS, RouteResponseBody } from "snu-lib";
+
+const JWT_TOKEN_KEY = "jwt_token";
+
+export function getJwtToken(): string | null {
+  return localStorage.getItem(JWT_TOKEN_KEY) || null;
+}
+
+export function setJwtToken(token: string | null) {
+  return localStorage.setItem(JWT_TOKEN_KEY, token || "");
+}
 
 let fetch = window.fetch;
 
 class api {
+  headers = {};
+
   constructor() {
-    this.token = "";
     this.headers = { "x-user-timezone": new Date().getTimezoneOffset() };
   }
 
   goToAuth() {
     if (window?.location?.pathname !== "/auth") return (window.location.href = "/auth?unauthorized=1");
+    return;
   }
 
-  getToken() {
-    return this.token;
-  }
-
-  setToken(token) {
-    this.token = token;
-    apiv2.setToken(token);
-  }
-
-  checkToken(shouldRefresh) {
+  checkToken(shouldRefresh = false): Promise<RouteResponseBody<any> & { user?: any; token?: string }> {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -35,13 +37,14 @@ class api {
         window.addEventListener("beforeunload", () => controller.abort());
 
         const response = await fetch(`${apiURL}/referent/${shouldRefresh ? "refresh_token" : "signin_token"}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           signal,
         });
         const res = await response.json();
@@ -51,7 +54,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extra: { path: "CHECK TOKEN", token: this.token } });
+          capture(e, { extra: { path: "CHECK TOKEN", token: getJwtToken() } });
           reject(e);
         }
       }
@@ -73,14 +76,14 @@ class api {
 
     if (response.aggregations[keys[0]].value !== undefined) return response.aggregations[keys[0]].value;
 
-    let obj = {};
+    const obj: any = {};
     for (let i = 0; i < response.aggregations[keys[0]].buckets.length; i++) {
       obj[response.aggregations[keys[0]].buckets[i].key] = response.aggregations[keys[0]].buckets[i].doc_count;
     }
     return obj;
   }
 
-  async openpdf(path, body) {
+  async openpdf(path: string, body: any) {
     let response;
     try {
       const controller = new AbortController();
@@ -89,13 +92,15 @@ class api {
       window.addEventListener("beforeunload", () => controller.abort());
 
       response = await fetch(`${apiURL}${path}`, {
+        // @ts-ignore
+        // @ts-ignore
         retries: 3,
         retryDelay: 1000,
         retryOn: [502, 503, 504],
         mode: "cors",
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+        headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
         body: typeof body === "string" ? body : JSON.stringify(body),
         signal,
       });
@@ -123,7 +128,7 @@ class api {
     }
   }
 
-  get(path, params = {}) {
+  get(path: string, params = {}): Promise<RouteResponseBody<any> & { token?: string; status?: number }> {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -136,13 +141,14 @@ class api {
         const url = `${apiURL}${path}${queryString ? `?${queryString}` : ""}`;
 
         const response = await fetch(url, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           signal,
         });
         if (response.status === 401) {
@@ -165,7 +171,7 @@ class api {
     });
   }
 
-  put(path, body) {
+  put(path: string, body?: any): Promise<RouteResponseBody<any>> {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -174,13 +180,14 @@ class api {
         window.addEventListener("beforeunload", () => controller.abort());
 
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });
@@ -204,8 +211,8 @@ class api {
     });
   }
 
-  putFormData(path, body, files) {
-    let formData = new FormData();
+  putFormData(path: string, body: any, files: any[]): Promise<RouteResponseBody<any>> {
+    const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
     }
@@ -214,13 +221,14 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           body: formData,
         });
         if (response.status === 401) {
@@ -238,8 +246,8 @@ class api {
     });
   }
 
-  postFormData(path, body, files) {
-    let formData = new FormData();
+  postFormData(path: string, body: any, files: any[]): Promise<RouteResponseBody<any>> {
+    const formData = new FormData();
     for (let i = 0; i < files.length; i++) {
       formData.append(files[i].name, files[i], files[i].name);
     }
@@ -248,6 +256,7 @@ class api {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
@@ -272,17 +281,18 @@ class api {
     });
   }
 
-  remove(path, body) {
+  remove(path: string, body?: any): Promise<RouteResponseBody<any>> {
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           credentials: "include",
           method: "DELETE",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
         });
         if (response.status === 401) {
@@ -300,18 +310,19 @@ class api {
     });
   }
 
-  uploadFiles(path, arr, properties = {}, retries = 3) {
+  uploadFiles(path: string, arr: any[], properties = {}, retries = 3): Promise<RouteResponseBody<any> & { mimeType: string; fileName: string; errors: any[] }> {
     const formData = createFormDataForFileUpload(arr, properties);
     return new Promise(async (resolve, reject) => {
       try {
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           body: formData,
         });
 
@@ -330,7 +341,7 @@ class api {
     });
   }
 
-  post(path, body) {
+  post(path: string, body?: any): Promise<RouteResponseBody<any> & { token?: string; hits?: any; aggregations?: any; responses?: any; young?: any; took?: number }> {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -339,13 +350,14 @@ class api {
         window.addEventListener("beforeunload", () => controller.abort());
 
         const response = await fetch(`${apiURL}${path}`, {
+          // @ts-ignore
           retries: 3,
           retryDelay: 1000,
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${this.token}`, ...this.headers },
+          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });

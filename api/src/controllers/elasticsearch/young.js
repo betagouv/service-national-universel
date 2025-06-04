@@ -485,6 +485,9 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       size,
     });
     if (req.params.action === "export") {
+      if (!exportFields.includes("email") && exportFields.includes("emailDeConnexion")) {
+        exportFields.push("email");
+      }
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
       let data = serializeYoungs(response);
       data = await populateYoungExport(data, exportFields);

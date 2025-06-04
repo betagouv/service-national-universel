@@ -181,6 +181,15 @@ export const ReferentSchema = {
     },
   },
 
+  roles: {
+    type: [String],
+    enum: [...ROLES_LIST, ...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD],
+    documentation: {
+      description: "Rôles et sous rôles de l'utilisateur",
+    },
+  },
+
+  // legacy
   role: {
     type: String,
     enum: ROLES_LIST,
@@ -189,6 +198,7 @@ export const ReferentSchema = {
     },
   },
 
+  // legacy
   subRole: {
     type: String,
     enum: [...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD],

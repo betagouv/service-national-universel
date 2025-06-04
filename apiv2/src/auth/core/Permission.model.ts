@@ -1,12 +1,12 @@
-import { PERMISSION_ACTIONS_LIST, PERMISSION_RESOURCES_LIST } from "snu-lib";
+import { PERMISSION_ACTIONS_LIST } from "snu-lib";
 
 export type PermissionModel = {
     id: string;
     code: string;
     roles: string[];
-    ressource: string;
+    resource: string;
     action: (typeof PERMISSION_ACTIONS_LIST)[number];
-    policy: PermissionPolicy[];
+    policy?: PermissionPolicy[];
     titre: string;
     description?: string;
     createdAt: Date;

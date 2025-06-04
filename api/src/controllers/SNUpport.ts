@@ -1,48 +1,97 @@
-const express = require("express");
-const passport = require("passport");
-const fileUpload = require("express-fileupload");
-const fs = require("fs");
-const Joi = require("joi");
-const { v4: uuid } = require("uuid");
+import express, { CookieOptions } from "express";
+import passport from "passport";
+import fileUpload from "express-fileupload";
+import fs from "fs";
+import Joi from "joi";
+import { v4 as uuid } from "uuid";
 
-const { ROLES, SENDINBLUE_TEMPLATES } = require("snu-lib");
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
-const slack = require("../slack");
-const { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } = require("../cookie-options");
-const { capture } = require("../sentry");
-const SNUpport = require("../SNUpport");
-const { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } = require("../utils");
-const { config } = require("../config");
-const { sendTemplate } = require("../brevo");
-const { YoungModel, ClasseModel, ReferentModel } = require("../models");
-const { validateId } = require("../utils/validator");
-const { encrypt, decrypt } = require("../cryptoUtils");
-const { getUserAttributes } = require("../services/support");
-const optionalAuth = require("../middlewares/optionalAuth");
-const { scanFile } = require("../utils/virusScanner");
-const { getMimeFromFile } = require("../utils/file");
+import slack from "../slack";
+import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
+import { capture } from "../sentry";
+import SNUpport from "../SNUpport";
+import { ERRORS, isYoung, uploadFile, getFile, SUPPORT_BUCKET_CONFIG } from "../utils";
+import { config } from "../config";
+import { sendTemplate } from "../brevo";
+import { YoungModel, ClasseModel, ReferentModel } from "../models";
+import { validateId } from "../utils/validator";
+import { encrypt, decrypt } from "../cryptoUtils";
+import { getUserAttributes } from "../services/support";
+import optionalAuth from "../middlewares/optionalAuth";
+import { scanFile } from "../utils/virusScanner";
+import { getMimeFromFile } from "../utils/file";
+import { UserRequest } from "./request";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+
+interface File {
+  name: string;
+  url: string;
+  path: string;
+}
+
+interface Ticket {
+  id?: string;
+  status?: string;
+  contactEmail?: string;
+}
+
+interface Message {
+  message: string;
+  email: string;
+  subject: string;
+  firstName: string;
+  lastName: string;
+  source: string;
+  parcours?: string;
+  author?: string;
+  formSubjectStep1?: string;
+  formSubjectStep2?: string;
+  attributes?: Array<{ name: string; value: string }>;
+  files?: File[];
+  ticketId?: string;
+  classe?: any;
+  clientId?: string;
+}
+
+interface UploadResponse {
+  Location: string;
+  key: string;
+}
+
+interface UploadedFile {
+  name: string;
+  data: Buffer;
+  tempFilePath?: string;
+  mimetype?: string;
+}
 
 const router = express.Router();
 
-router.get("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
-    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+router.get(
+  "/tickets",
+  authMiddleware(["referent", "young"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
+  async (req: UserRequest, res) => {
+    try {
+      const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+      if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
-router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const hasMessage = Array.isArray(data) && data.length > 0;
-    // Count the number of tickets with status "NEW"
-    const newStatusCount = Array.isArray(data) ? data.filter((ticket) => ticket.status === "OPEN").length : 0;
+    const newStatusCount = Array.isArray(data) ? data.filter((ticket: Ticket) => ticket.status === "OPEN").length : 0;
 
     return res.status(200).send({ ok: true, data: { hasMessage, newStatusCount } });
   } catch (error) {
@@ -51,12 +100,16 @@ router.get("/ticketsInfo", passport.authenticate(["referent", "young"], { sessio
   }
 });
 
-router.get("/signin", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
     const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    res.cookie("jwtzamoud", token, cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS));
+    const options: CookieOptions = {
+      ...cookieOptions(COOKIE_SNUPPORT_MAX_AGE_MS),
+      sameSite: "lax" as const,
+    };
+    res.cookie("jwtzamoud", token, options);
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -64,7 +117,7 @@ router.get("/signin", passport.authenticate(["referent"], { session: false, fail
   }
 });
 
-router.get("/knowledgeBase/search", async (req, res) => {
+router.get("/knowledgeBase/search", async (req: UserRequest, res) => {
   try {
     const { ok, data } = await SNUpport.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -75,7 +128,7 @@ router.get("/knowledgeBase/search", async (req, res) => {
   }
 });
 
-router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
+router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, res) => {
   try {
     const { ok, data } = await SNUpport.api(`/feedback`, {
       method: "POST",
@@ -91,7 +144,7 @@ router.post("/knowledgeBase/feedback", optionalAuth, async (req, res) => {
   }
 });
 
-router.post("/tickets", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/tickets", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { ok, data } = await SNUpport.api(`/v0/ticket/search`, {
       method: "POST",
@@ -100,8 +153,6 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
     });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // TODO : JOI - verif body coté SUPPORT
-
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
@@ -109,41 +160,51 @@ router.post("/tickets", passport.authenticate(["referent", "young"], { session: 
   }
 });
 
-router.get("/ticketscount", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const user = await ReferentModel.findById(req.user._id);
-    let query = {};
-    if (user.role === ROLES.REFERENT_DEPARTMENT)
-      query = {
-        department: user.department,
-        subject: "J'ai une question",
-        role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-        canal: { $in: ["PLATFORM", "MAIL"] },
-      };
-    if (user.role === ROLES.REFERENT_REGION)
-      query = {
-        region: user.region,
-        subject: "J'ai une question",
-        role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-        canal: { $in: ["PLATFORM", "MAIL"] },
-      };
+router.get(
+  "/ticketscount",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.READ }]),
+  async (req: UserRequest, res) => {
+    try {
+      const user = await ReferentModel.findById(req.user._id);
+      if (!user) {
+        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      }
 
-    const { ok, data } = await SNUpport.api(`/v0/ticket/count`, {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(query),
-    });
-    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      let query = {};
+      if (user.role === ROLES.REFERENT_DEPARTMENT) {
+        query = {
+          department: user.department,
+          subject: "J'ai une question",
+          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
+          canal: { $in: ["PLATFORM", "MAIL"] },
+        };
+      }
+      if (user.role === ROLES.REFERENT_REGION) {
+        query = {
+          region: user.region,
+          subject: "J'ai une question",
+          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
+          canal: { $in: ["PLATFORM", "MAIL"] },
+        };
+      }
 
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      const { ok, data } = await SNUpport.api(`/v0/ticket/count`, {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify(query),
+      });
+      if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-// Get one tickets with its messages.
-router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
+
+router.get("/ticket/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -161,81 +222,84 @@ router.get("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-// Create a new ticket while authenticated
-router.post("/ticket", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const obj = {
-      subject: req.body.subject,
-      message: req.body.message,
-      parcours: req.body.parcours,
-      fromPage: req.body.fromPage,
-      author: req.body.subjectStep0,
-      formSubjectStep1: req.body.subjectStep1,
-      formSubjectStep2: req.body.subjectStep2,
-      files: req.body.files,
-    };
+router.post(
+  "/ticket",
+  authMiddleware(["referent", "young"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.SUPPORT, action: PERMISSION_ACTIONS.WRITE }]),
+  async (req: UserRequest, res) => {
+    try {
+      const obj = {
+        subject: req.body.subject,
+        message: req.body.message,
+        parcours: req.body.parcours,
+        fromPage: req.body.fromPage,
+        author: req.body.subjectStep0,
+        formSubjectStep1: req.body.subjectStep1,
+        formSubjectStep2: req.body.subjectStep2,
+        files: req.body.files,
+      };
 
-    const { error, value } = Joi.object({
-      subject: Joi.string().required(),
-      message: Joi.string().required(),
-      parcours: Joi.string(),
-      fromPage: Joi.string().allow(null),
-      author: Joi.string(),
-      formSubjectStep1: Joi.string(),
-      formSubjectStep2: Joi.string(),
-      files: Joi.array().items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-          path: Joi.string().required(),
+      const { error, value } = Joi.object({
+        subject: Joi.string().required(),
+        message: Joi.string().required(),
+        parcours: Joi.string(),
+        fromPage: Joi.string().allow(null),
+        author: Joi.string(),
+        formSubjectStep1: Joi.string(),
+        formSubjectStep2: Joi.string(),
+        files: Joi.array().items(
+          Joi.object().keys({
+            name: Joi.string().required(),
+            url: Joi.string().required(),
+            path: Joi.string().required(),
+          }),
+        ),
+      })
+        .unknown()
+        .validate(obj);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+      const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
+      const userAttributes = await getUserAttributes(req.user);
+      const response = await SNUpport.api("/v0/message", {
+        method: "POST",
+        credentials: "include",
+        body: JSON.stringify({
+          message,
+          email: req.user.email,
+          subject,
+          firstName: req.user.firstName,
+          lastName: req.user.lastName,
+          source: "PLATFORM",
+          parcours,
+          author,
+          formSubjectStep1,
+          formSubjectStep2,
+          attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
+          files,
         }),
-      ),
-    })
-      .unknown()
-      .validate(obj);
-    if (error) {
+      });
+      if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
+      else if (isYoung(req.user) && subject.includes("J'ai une question")) {
+        const isNotified = await notifyReferent(response.data, req.body.message);
+        if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
+      }
+      if (!response.ok) return res.status(400).send({ ok: false, code: response });
+      return res.status(200).send({ ok: true, data: response });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
-    const userAttributes = await getUserAttributes(req.user);
-    const response = await SNUpport.api("/v0/message", {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify({
-        message,
-        email: req.user.email,
-        subject,
-        firstName: req.user.firstName,
-        lastName: req.user.lastName,
-        source: "PLATFORM",
-        parcours,
-        author,
-        formSubjectStep1,
-        formSubjectStep2,
-        attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
-        files,
-      }),
-    });
-    if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
-    else if (isYoung(req.user && subject.includes("J'ai une question"))) {
-      const isNotified = await notifyReferent(response.data, req.body.message);
-      if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
-    }
-    if (!response.ok) return res.status(400).send({ ok: false, code: response });
-    return res.status(200).send({ ok: true, data: response });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
-//create ticket for non authenticated users
-router.post("/ticket/form", async (req, res) => {
+router.post("/ticket/form", async (req: UserRequest, res) => {
   try {
-    let author;
+    let author: string | undefined;
 
-    const checkRole = async (role, email, findObject) => {
+    const checkRole = async (role: string, email: string, findObject: any) => {
       const existing = await findObject.findOne({ email: email.toLowerCase() });
       return existing ? `${role} exterior` : "unknown";
     };
@@ -303,7 +367,7 @@ router.post("/ticket/form", async (req, res) => {
       { name: "page précédente", value: fromPage },
     ];
 
-    let body = {
+    let body: Message = {
       message,
       email,
       parcours,
@@ -338,8 +402,7 @@ router.post("/ticket/form", async (req, res) => {
   }
 });
 
-// Update one ticket.
-router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.put("/ticket/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -347,10 +410,10 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { errorBody, value } = Joi.object({
+    const { error: validationError, value } = Joi.object({
       status: Joi.string().required(),
     }).validate(req.body, { stripUnknown: true });
-    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { status } = value;
 
     const response = await SNUpport.api(`/v0/ticket/${checkedId}`, {
@@ -368,7 +431,7 @@ router.put("/ticket/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -376,7 +439,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const { errorBody, value } = Joi.object({
+    const { error: validationError, value } = Joi.object({
       message: Joi.string().allow(null, ""),
       files: Joi.array().items(
         Joi.object().keys({
@@ -386,7 +449,7 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
         }),
       ),
     }).validate(req.body, { stripUnknown: true });
-    if (errorBody) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { message, files } = value;
 
     const userAttributes = await getUserAttributes(req.user);
@@ -411,21 +474,23 @@ router.post("/ticket/:id/message", passport.authenticate(["referent", "young"], 
   }
 });
 
-router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }), async (req, res) => {
+router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }), async (req: UserRequest, res) => {
   try {
     const { error: filesError, value: files } = Joi.array()
       .items(
         Joi.alternatives().try(
-          Joi.object({
+          Joi.object<UploadedFile>({
             name: Joi.string().required(),
             data: Joi.binary().required(),
             tempFilePath: Joi.string().allow("").optional(),
+            mimetype: Joi.string(),
           }).unknown(),
           Joi.array().items(
-            Joi.object({
+            Joi.object<UploadedFile>({
               name: Joi.string().required(),
               data: Joi.binary().required(),
               tempFilePath: Joi.string().allow("").optional(),
+              mimetype: Joi.string(),
             }).unknown(),
           ),
         ),
@@ -436,10 +501,9 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       );
     if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const responseData = [];
+    const responseData: File[] = [];
 
     for (let currentFile of files) {
-      // If multiple file with same names are provided, currentFile is an array. We just take the latest.
       if (Array.isArray(currentFile)) {
         currentFile = currentFile[currentFile.length - 1];
       }
@@ -452,7 +516,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
         "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
         "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
       ];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers!))) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
@@ -465,7 +529,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
       const data = fs.readFileSync(tempFilePath);
       const path = getS3Path(name);
       const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
-      const response = await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG);
+      const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
       responseData.push({ name, url: response.Location, path: response.key });
       fs.unlinkSync(tempFilePath);
     }
@@ -478,7 +542,7 @@ router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useT
   }
 });
 
-router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/s3file/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
     const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
     const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
@@ -489,12 +553,12 @@ router.get("/s3file/:id", passport.authenticate(["referent", "young"], { session
   }
 });
 
-const getS3Path = (fileName) => {
+const getS3Path = (fileName: string): string => {
   const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
   return `message/${uuid()}.${extension}`;
 };
 
-const notifyReferent = async (ticket, message) => {
+const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean> => {
   if (!ticket) return false;
   let ticketCreator = await YoungModel.findOne({ email: ticket.contactEmail });
   if (!ticketCreator) return false;
@@ -518,4 +582,4 @@ const notifyReferent = async (ticket, message) => {
   return true;
 };
 
-module.exports = router;
+export default router;

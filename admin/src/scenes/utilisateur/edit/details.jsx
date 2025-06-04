@@ -21,8 +21,10 @@ import {
   regionList,
   ROLES,
   translate,
+  isSuperAdmin,
   VISITOR_SUBROLES,
-} from "@/utils";
+} from "snu-lib";
+
 import dayjs from "@/utils/dayjs.utils";
 import UserHeader from "../composants/UserHeader";
 import { Session, CohortSelect, AddButton, SubRoleAndRegionOrDep } from "../composants";
@@ -35,6 +37,7 @@ import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
 import { isResponsableDeCentre } from "@/utils";
+import RenewInvitation from "./partials/RenewInvitation";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
@@ -577,6 +580,7 @@ export default function Details({ user, setUser, currentUser }) {
 
         {canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
           <div className="flex items-center justify-center">
+            {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} />}
             <BorderButton mode="red" className="mt-3" onClick={onClickDelete}>
               Supprimer le compte
             </BorderButton>

@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-
-import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE, getSchoolYear } from "snu-lib";
+import cx from "classnames";
+import { translate, YOUNG_STATUS, ROLES, getCohortPeriod, getCohortYear, YOUNG_SOURCE, getSchoolYear, CohortDto } from "snu-lib";
+import { YoungDto, EtablissementDto } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
 
@@ -22,7 +23,24 @@ import Section from "../../Section";
 import CheckRead from "./partials/CheckRead";
 import ForceConsentement from "./partials/ForceConsentement";
 
-const PARENT_STATUS_NAME = {
+interface SectionConsentementsProps {
+  young: YoungDto;
+  onChange?: (options?: any) => void;
+  readonly?: boolean;
+  isPrecompte?: boolean;
+  cohort?: CohortDto;
+}
+
+interface ConfirmModalState {
+  icon?: React.ReactNode;
+  title: string;
+  message: React.ReactNode;
+  confirmLabel?: string;
+  confirmColor?: string;
+  confirm: () => void;
+}
+
+const PARENT_STATUS_NAME: Record<string, string> = {
   father: "Le père",
   mother: "La mère",
   representant: "Le représentant légal",
@@ -30,25 +48,25 @@ const PARENT_STATUS_NAME = {
 
 const PENDING_ACCORD = "en attente";
 
-export default function SectionConsentements({ young, onChange, readonly = false, cohort }) {
-  const [confirmModal, setConfirmModal] = useState(null);
-  const [pdfDownloading, setPdfDownloading] = useState("");
+export default function SectionConsentements({ young, onChange, readonly = false, isPrecompte, cohort }: SectionConsentementsProps) {
+  const [confirmModal, setConfirmModal] = useState<ConfirmModalState | null>(null);
+  const [pdfDownloading, setPdfDownloading] = useState<string>("");
 
-  const user = useSelector((state) => state.Auth.user);
+  const user = useSelector((state: any) => state.Auth.user);
   const consent = young.parentAllowSNU === "true" ? "Autorise " : "N'autorise pas ";
-  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissement) : getCohortYear(young.cohort);
+  const cohortYear = young.source === YOUNG_SOURCE.CLE ? getSchoolYear(young.etablissementId as unknown as EtablissementDto) : getCohortYear(cohort);
 
-  async function handleConfirmConsent(participationConsent, imageRights) {
+  async function handleConfirmConsent(participationConsent: string, imageRights: string) {
     try {
       setConfirmModal(null);
       await api.put(`/young-edition/${young._id}/ref-allow-snu`, {
         consent: participationConsent,
         imageRights: imageRights,
       });
-      toastr.success("Le consentement a été pris en compte. Le jeune a été notifié.");
+      toastr.success("Le consentement a été pris en compte. Le jeune a été notifié.", "");
       onChange && onChange();
     } catch (err) {
-      toastr.error("Nous n'avons pas pu enregistrer le consentement. Veuillez réessayer dans quelques instants.");
+      toastr.error("Nous n'avons pas pu enregistrer le consentement. Veuillez réessayer dans quelques instants.", "");
     }
   }
 
@@ -76,23 +94,23 @@ export default function SectionConsentements({ young, onChange, readonly = false
         parent: 2,
         allow: false,
       });
-      toastr.success("Le refus a été pris en compte. Le jeune a été notifié.");
+      toastr.success("Le refus a été pris en compte. Le jeune a été notifié.", "");
       onChange && onChange();
     } catch (err) {
-      toastr.error("Nous n'avons pas pu enregistrer le refus. Veuillez réessayer dans quelques instants.");
+      toastr.error("Nous n'avons pas pu enregistrer le refus. Veuillez réessayer dans quelques instants.", "");
     }
   }
 
-  function confirmImageRightsChange(parentId, event) {
+  function confirmImageRightsChange(parentId: number, event: React.MouseEvent<HTMLAnchorElement>) {
     event.preventDefault();
 
     const parent = {
-      firstName: young[`parent${parentId}FirstName`],
-      lastName: young[`parent${parentId}LastName`],
+      firstName: young[`parent${parentId}FirstName` as keyof YoungDto] as string,
+      lastName: young[`parent${parentId}LastName` as keyof YoungDto] as string,
     };
 
     setConfirmModal({
-      title: "Modification de l’accord de droit à l’image",
+      title: "Modification de l'accord de droit à l'image",
       message: (
         <div>
           Vous vous apprêtez à envoyer à {parent.firstName} {parent.lastName} une demande de modification de son accord de droit à l&apos;image.
@@ -104,13 +122,13 @@ export default function SectionConsentements({ young, onChange, readonly = false
     });
   }
 
-  async function changeImagesRights(parentId) {
+  async function changeImagesRights(parentId: number) {
     try {
       const result = await api.put(`/young-edition/${young._id}/parent-image-rights-reset`, { parentId });
       if (!result.ok) {
         toastr.error("Erreur !", "Nous n'avons pu modifier le droit à l'image pour ce représentant légal. Veuillez réessayer dans quelques instants.");
       } else {
-        toastr.success("Le droit à l'image a été remis à zéro. Un email a été envoyé au représentant légal.");
+        toastr.success("Le droit à l'image a été remis à zéro. Un email a été envoyé au représentant légal.", "");
         onChange && onChange(result.data);
       }
     } catch (err) {
@@ -136,11 +154,11 @@ export default function SectionConsentements({ young, onChange, readonly = false
 
   async function resetParentsAllowSNU() {
     try {
-      let result = await api.put(`/young-edition/${young._id}/parent-allow-snu-reset`);
+      const result = await api.put(`/young-edition/${young._id}/parent-allow-snu-reset`);
       if (!result.ok) {
         toastr.error("Erreur !", "Nous n'avons pu réinitialiser le consentement pour les représentants légaux. Veuillez réessayer dans quelques instants.");
       } else {
-        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal 1.");
+        toastr.success("Le consentement a été réinitialisé. Un email a été envoyé au représentant légal 1.", "");
         onChange && onChange(result.data);
       }
     } catch (err) {
@@ -158,9 +176,13 @@ export default function SectionConsentements({ young, onChange, readonly = false
     setPdfDownloading("");
   }
 
+  if (isPrecompte) {
+    return null;
+  }
+
   return (
     <Section title="Consentements" collapsable>
-      <div className="flex-[1_0_50%] pr-[56px]">
+      <div className={cx("flex-[1_0_50%] pr-[56px]", { hidden: isPrecompte })}>
         <div className="text-[16px] font-bold leading-[24px] text-[#242526]">
           Le volontaire{" "}
           <span className="font-normal text-[#6B7280]">
@@ -188,7 +210,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
       <div className="flex-[1_0_50%] pl-[56px] pb-[32px]">
         <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
           <div className="grow">
-            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            {PARENT_STATUS_NAME[young.parent1Status as keyof typeof PARENT_STATUS_NAME]}{" "}
             <span className="font-normal text-[#6B7280]">
               {young.parent1FirstName} {young.parent1LastName}
             </span>
@@ -239,12 +261,12 @@ export default function SectionConsentements({ young, onChange, readonly = false
             <b>
               {young.firstName} {young.lastName}{" "}
             </b>
-            dans le cadre d’une mission d’intérêt public.
+            dans le cadre d'une mission d'intérêt public.
           </CheckRead>
         </div>
         <div className="mb-[16px] mt-4 flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
           <div className="grow">
-            {PARENT_STATUS_NAME[young.parent1Status]}{" "}
+            {PARENT_STATUS_NAME[young.parent1Status as keyof typeof PARENT_STATUS_NAME]}{" "}
             <span className="font-normal text-[#6B7280]">
               {young.parent1FirstName} {young.parent1LastName}
             </span>
@@ -257,7 +279,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
             <CheckRead value={young.parent1AllowImageRights === "true"}>
               <b>Droit à l&apos;image : </b>
-              {translate(young.parent1AllowImageRights) || PENDING_ACCORD}
+              {translate(young.parent1AllowImageRights || "") || PENDING_ACCORD}
             </CheckRead>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && young.parent1Email && (
@@ -312,7 +334,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
             <div className="grow text-[14px] leading-[20px] text-[#374151]">
               <CheckRead value={young.parent1AllowSNU === "true"}>
                 <b>Consentement à la participation : </b>
-                {translate(young.parent1AllowSNU) || PENDING_ACCORD}
+                {translate(young.parent1AllowSNU || "") || PENDING_ACCORD}
               </CheckRead>
             </div>
           </div>
@@ -353,7 +375,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <div className="mt-[24px] border-t-[1px] border-t-[#E5E7EB] pt-[24px]">
             <div className="mb-[16px] flex items-center justify-between text-[16px] font-bold leading-[24px] text-[#242526]">
               <div className="grow">
-                {PARENT_STATUS_NAME[young.parent2Status]}{" "}
+                {PARENT_STATUS_NAME[young.parent2Status as keyof typeof PARENT_STATUS_NAME]}{" "}
                 <span className="font-normal text-[#6B7280]">
                   {young.parent2FirstName} {young.parent2LastName}
                 </span>
@@ -368,7 +390,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
                   <div className="grow text-[14px] leading-[20px] text-[#374151]">
                     <CheckRead value={young.parent2AllowImageRights === "true"}>
                       <b>Droit à l&apos;image : </b>
-                      {translate(young.parent2AllowImageRights) || PENDING_ACCORD}
+                      {translate(young.parent2AllowImageRights || "") || PENDING_ACCORD}
                     </CheckRead>
                   </div>
                   {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && young.parent2Email && (
@@ -458,7 +480,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
                 )
             }
             {[YOUNG_STATUS.VALIDATED, YOUNG_STATUS.WAITING_VALIDATION, YOUNG_STATUS.WAITING_LIST, YOUNG_STATUS.WAITING_CORRECTION, YOUNG_STATUS.NOT_AUTORISED].includes(
-              young.status,
+              young.status as any,
             ) ? (
               <div className="mt-[16px] flex items-center justify-between">
                 <div className="flex-column flex grow justify-center text-[14px] leading-[20px] text-[#374151]">
@@ -481,7 +503,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
             ) : null}
           </div>
         )}
-        {[YOUNG_STATUS.IN_PROGRESS].includes(young.status) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && young.parentAllowSNU !== "true" && (
+        {[YOUNG_STATUS.IN_PROGRESS].includes(young.status as any) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role) && young.parentAllowSNU !== "true" && (
           <ForceConsentement young={young} onConfirmConsent={handleConfirmConsent} />
         )}
       </div>

@@ -89,7 +89,7 @@ export default function Historic() {
         .filter((key) => query[key] && query[key].length > 0)
         .map((key) => key + "=" + query[key])
         .join("&");
-      const { ok, data, pagination } = await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`);
+      const { ok, data, pagination } = (await API.get(`/ligne-de-bus/patches/${cohort}?${queryString}`)) as any;
       if (!ok) return null;
       if (forExport) {
         return data;
