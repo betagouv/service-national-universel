@@ -1,10 +1,12 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useMemo } from "react";
 import { MdInfoOutline } from "react-icons/md";
 
-import { COHORT_TYPE, CohortDto } from "snu-lib";
+import { COHORT_TYPE, CohortDto, FeatureFlagName } from "snu-lib";
 import { Tooltip } from "@snu/ds/admin";
 
 import { getManualInscriptionTogglesByCohortType } from "./getManualInscriptionTogglesByCohortType";
+import { useSelector } from "react-redux";
+import { AuthState } from "@/redux/auth/reducer";
 
 interface ManualInscriptionSettingsProps {
   cohort: CohortDto;
@@ -14,8 +16,10 @@ interface ManualInscriptionSettingsProps {
 }
 
 export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps> = ({ cohort, control, isLoading, readOnly }) => {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
   const renderedManualInscriptionTogglesByCohortType = useMemo(
-    () => getManualInscriptionTogglesByCohortType({ cohort, control, isLoading, readOnly }),
+    () => getManualInscriptionTogglesByCohortType({ cohort, control, isLoading, readOnly, user }),
     // Disabled exhaustive-deps because we don't want to re-render the component when the all props data changes only specific fields should trigger a re-render
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -24,6 +28,7 @@ export const ManualInscriptionSettings: React.FC<ManualInscriptionSettingsProps>
       cohort.inscriptionOpenForReferentDepartment,
       cohort.inscriptionOpenForReferentClasse,
       cohort.inscriptionOpenForAdministrateurCle,
+      user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE],
       isLoading,
       readOnly,
     ],

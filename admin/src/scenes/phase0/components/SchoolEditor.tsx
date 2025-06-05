@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import Field from "./Field";
 import api from "../../../services/api";
-import { SchoolRAMSESType, YoungType } from "snu-lib";
+import { SchoolRAMSESType, YoungDto } from "snu-lib";
 
 interface SchoolChanges {
   schoolName?: string;
@@ -16,7 +16,7 @@ interface SchoolChanges {
 }
 
 interface SchoolEditorProps {
-  young: YoungType;
+  young: YoungDto;
   className?: string;
   showBackgroundColor?: boolean;
   onChange?: (values: SchoolChanges) => void;

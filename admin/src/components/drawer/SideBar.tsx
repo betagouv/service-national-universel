@@ -188,16 +188,19 @@ const SideBar = ({ sessionsList }) => {
       setCurrentOpen={setDropDownOpen}
     />
   );
-  const CentresHeadCenter = () => (
-    <SimpleNavItem
-      sideBarOpen={open}
-      Icon={SejourIcon}
-      title="Centre"
-      link={`/centre/${sessionPhase1?.cohesionCenterId}`}
-      active={centerHeadCenterRegex.test(exactPath)}
-      setCurrentOpen={setDropDownOpen}
-    />
-  );
+  const CentresHeadCenter = () => {
+    const buildCentreLink = () => {
+      const baseUrl = `/centre/${sessionPhase1?.cohesionCenterId}`;
+      if (sessionPhase1?.cohort) {
+        return `${baseUrl}?cohorte=${encodeURIComponent(sessionPhase1.cohort)}`;
+      }
+      return baseUrl;
+    };
+
+    return (
+      <SimpleNavItem sideBarOpen={open} Icon={SejourIcon} title="Centre" link={buildCentreLink()} active={centerHeadCenterRegex.test(exactPath)} setCurrentOpen={setDropDownOpen} />
+    );
+  };
   const Institution = () => (
     <SimpleNavItem
       sideBarOpen={open}

@@ -13,7 +13,6 @@ async function populateYoungExport(data, exportFields) {
     const centerIds = [...new Set(data.map((item) => item.cohesionCenterId).filter(Boolean))];
     const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
     data = data.map((item) => ({ ...item, center: centers?.find((e) => e._id.toString() === item.cohesionCenterId) }));
-
   }
 
   // sessionPhase1
@@ -50,6 +49,10 @@ async function populateYoungExport(data, exportFields) {
     const etablissementIds = [...new Set(data.map((item) => item.etablissementId).filter(Boolean))];
     const etablissements = await allRecords("etablissement", { bool: { must: { ids: { values: etablissementIds } } } });
     data = data.map((item) => ({ ...item, etablissement: etablissements?.find((e) => e._id.toString() === item.etablissementId) }));
+  }
+
+  if (exportFields.includes("emailDeConnexion") || exportFields === "*") {
+    data = data.map((item) => ({ ...item, emailDeConnexion: item.email }));
   }
 
   return data;
