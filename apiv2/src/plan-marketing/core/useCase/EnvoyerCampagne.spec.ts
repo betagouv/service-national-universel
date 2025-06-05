@@ -19,11 +19,6 @@ describe("EnvoyerCampagne", () => {
 
     const now = new Date();
 
-    const mockCampagneGenerique = {
-        id: "campagne-gen-1",
-        generic: true,
-    };
-
     const mockCampagneSpecifique = {
         id: "campagne-spec-1",
         generic: false,
@@ -90,19 +85,23 @@ describe("EnvoyerCampagne", () => {
         expect(mettreAJourCampagne.execute).not.toHaveBeenCalled();
     });
 
-    it("should successfully send a generic campaign and trigger update", async () => {
-        campagneGateway.findById.mockResolvedValue(mockCampagneGenerique as CampagneModel);
+    it("should successfully send a specific campaign and trigger update", async () => {
+        const campagneSpecifiqueWithRef = {
+            ...mockCampagneSpecifique,
+            campagneGeneriqueId: "campagne-gen-1",
+        };
+        campagneGateway.findById.mockResolvedValue(campagneSpecifiqueWithRef as CampagneModel);
 
-        await useCase.execute("liste-1", mockCampagneGenerique.id, "provider-1");
+        await useCase.execute("liste-1", campagneSpecifiqueWithRef.id, "provider-1");
 
         expect(associerListeDiffusionToCampagne.execute).toHaveBeenCalledWith("liste-1", "provider-1");
         expect(planMarketingGateway.sendCampagneNow).toHaveBeenCalledWith("provider-1");
-        expect(campagneGateway.addEnvoiToCampagneById).toHaveBeenCalledWith(mockCampagneGenerique.id, {
+        expect(campagneGateway.addEnvoiToCampagneById).toHaveBeenCalledWith(campagneSpecifiqueWithRef.id, {
             date: now,
             statut: EnvoiCampagneStatut.TERMINE,
         });
-        expect(campagneGateway.findById).toHaveBeenCalledWith(mockCampagneGenerique.id);
-        expect(mettreAJourCampagne.execute).toHaveBeenCalledWith(mockCampagneGenerique as CampagneModel);
+        expect(campagneGateway.findById).toHaveBeenCalledWith(campagneSpecifiqueWithRef.id);
+        expect(mettreAJourCampagne.execute).toHaveBeenCalledWith(campagneSpecifiqueWithRef as CampagneModel);
     });
 
     it("should throw when nomListe is undefined", async () => {
