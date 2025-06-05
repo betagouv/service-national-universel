@@ -16,12 +16,17 @@ export class EmailConsumer extends WorkerHost {
     ) {
         super();
     }
-    async process(job: Job<EmailParams, any, EmailTemplateData>): Promise<ConsumerResponse> {
+    async process(
+        job: Job<EmailParams & { __emailType?: "template" | "default" }, any, EmailTemplateData>,
+    ): Promise<ConsumerResponse> {
         this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
 
-        const emailPromise = this.isEmailTemplate(job.name)
-            ? this.emailProvider.send(job.name, job.data)
-            : this.emailProvider.sendDefault(job.name, job.data);
+        const { __emailType, ...emailParams } = job.data;
+
+        const emailPromise =
+            __emailType === "template"
+                ? this.emailProvider.send(job.name as EmailTemplate, emailParams)
+                : this.emailProvider.sendDefault(job.name, emailParams);
 
         return emailPromise
             .then(() => {
@@ -36,9 +41,5 @@ export class EmailConsumer extends WorkerHost {
                 );
                 throw error;
             });
-    }
-
-    private isEmailTemplate(template: string): template is EmailTemplate {
-        return Object.values(EmailTemplate).includes(template as EmailTemplate);
     }
 }
