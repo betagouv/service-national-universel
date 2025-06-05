@@ -55,7 +55,7 @@ export default function ProgrammationList({ campagne, onChange, isCampagneGeneri
                 ...prog,
                 label: index === 0 ? "Premier envoi" : `Relance n°${index}`,
               }}
-              isEnabled={campagne.isProgrammationActive && (!prog.sentAt || isCampagneGenerique)}
+              isEnabled={campagne.isProgrammationActive && !prog.sentAt}
               isCampagneGenerique={isCampagneGenerique}
               isRemovable={!prog.sentAt && campagne.isProgrammationActive}
               onDelete={() => handleDelete(index)}

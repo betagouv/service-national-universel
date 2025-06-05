@@ -89,9 +89,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
 
   const handleOnCancel = () => {
     setIsArchiveModalOpen(false);
-    console.log("handleOnCancel");
-    console.log(listeDiffusionData);
-    console.log(selectedFilters);
     reset(
       { ...listeDiffusionData, filters: selectedFilters },
       {
@@ -105,10 +102,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   const handleOnSave = (data: ListeDiffusionDataProps) => {
     const dataToSave = { ...data, filters: selectedFilters };
     onSave(dataToSave);
-
-    console.log("handleOnSave");
-    console.log(dataToSave);
-    console.log(selectedFilters);
 
     reset(dataToSave, {
       keepDirty: false,

@@ -172,31 +172,11 @@ export class CampagneMongoRepository implements CampagneGateway {
         sentDate: Date,
     ): Promise<CampagneModel | null> {
         const campagne = await this.campagneEntity.findById(campagneId);
-        if (!campagne) {
-            return null;
-        }
-        // Si la campagne est spécifique avec référence, on met à jour la programmation sur la campagne générique
-        if (isCampagneWithRef(campagne)) {
-            const campagneGenerique = await this.campagneEntity.findById(campagne.campagneGeneriqueId);
-            if (!campagneGenerique || !campagneGenerique.programmations || campagneGenerique.programmations.length === 0) {
-                return null;
-            }
-            const programmation = campagneGenerique.programmations.find(
-                (prog) => prog._id.toString() === programmationId,
-            );
-            if (!programmation) {
-                return null;
-            }
-            programmation.sentAt = sentDate;
-            const updated = await campagneGenerique.save();
-            return updated ? CampagneMapper.toModel(updated) : null;
-        }
-        // Pour les autres cas, on met à jour la programmation de la campagne spécifique envoyée
-        if (!campagne.programmations || campagne.programmations.length === 0) {
+        if (!campagne || !campagne.programmations || campagne.programmations.length === 0) {
             return null;
         }
         const programmation = campagne.programmations.find(
-            (prog) => prog._id.toString() === programmationId,
+            (programmation) => programmation._id.toString() === programmationId,
         );
         if (!programmation) {
             return null;
