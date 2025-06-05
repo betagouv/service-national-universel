@@ -177,6 +177,7 @@ export class AdminModule {
             .exclude({ path: "/", method: RequestMethod.GET })
             .exclude({ path: "/queues(.*)", method: RequestMethod.GET })
             .exclude({ path: "/queues(.*)retry/(.*)", method: RequestMethod.PUT })
+            .exclude({ path: "/queues(.*)clean", method: RequestMethod.PUT })
             .forRoutes("*");
     }
 }
