@@ -11,10 +11,7 @@ import {
 import { EmailProviderParams } from "./EmailBrevo.provider";
 
 export class EmailBrevoMapper {
-    static mapEmailParamsToBrevoByTemplate(
-        template: EmailTemplate | string,
-        emailParams: EmailParams,
-    ): EmailProviderParams {
+    static mapEmailParamsToBrevoByTemplate(template: EmailTemplate, emailParams: EmailParams): EmailProviderParams {
         switch (template) {
             case EmailTemplate.VERIFIER_CLASSE_EMAIL_ADMIN_CLE: {
                 return this.mapVerifierClasseAdminCleToBrevo(
@@ -46,19 +43,8 @@ export class EmailBrevoMapper {
             case EmailTemplate.DESISTEMENT_PAR_TIERS:
                 return this.mapEmailWithMessageToBrevo(template, emailParams as EmailWithMessage);
 
-            default: {
-                const params: Record<string, any> = {};
-
-                Object.keys(emailParams).forEach((key) => {
-                    params[key] = (emailParams as any)[key];
-                });
-
-                return {
-                    to: emailParams.to,
-                    params,
-                    templateId: Number(template),
-                };
-            }
+            default:
+                throw new Error(`Template ${template} not supported`);
         }
     }
 

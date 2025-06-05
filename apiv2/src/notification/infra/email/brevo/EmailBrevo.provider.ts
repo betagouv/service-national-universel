@@ -35,11 +35,40 @@ export class EmailBrevoProvider implements EmailProvider, ContactProvider {
         setApiKey(this.contactsApi, apiKey);
     }
 
-    async send(
-        template: EmailTemplate | string,
-        emailParams: EmailParams,
-    ): Promise<{ response: object; body: object }> {
+    async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
+        const sendSmtpEmail = new brevo.SendSmtpEmail();
+
+        const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail };
+
+        if (emailParams.attachments && emailParams.attachments.length > 0) {
+            const attachments: SendSmtpEmailAttachmentInner[] = [];
+            for (const attachment of emailParams.attachments) {
+                const file = await this.fileGateway.downloadFile(attachment.filePath);
+                attachments.push({ content: file.Body.toString("base64"), name: file.FileName });
+            }
+            smtpEmailWithData.attachment = attachments;
+        }
+
+        return await this.emailsApi.sendTransacEmail(smtpEmailWithData);
+    }
+
+    async sendDefault(template: string, emailParams: EmailParams): Promise<{ response: object; body: object }> {
+        const createBrevoParams = (): EmailProviderParams => {
+            const params: Record<string, any> = {};
+
+            Object.keys(emailParams).forEach((key) => {
+                params[key] = emailParams[key];
+            });
+
+            return {
+                to: emailParams.to,
+                params,
+                templateId: Number(template),
+            };
+        };
+
+        const brevoParams = createBrevoParams();
         const sendSmtpEmail = new brevo.SendSmtpEmail();
 
         const smtpEmailWithData: SendSmtpEmail = { ...brevoParams, ...sendSmtpEmail };

@@ -73,7 +73,7 @@ export class CampagneService {
             }
             templateId = genericCampagne.templateId;
         }
-        await this.notificationGateway.sendEmail<EmailParams>(
+        await this.notificationGateway.sendDefaultEmail<EmailParams>(
             {
                 to: [
                     {

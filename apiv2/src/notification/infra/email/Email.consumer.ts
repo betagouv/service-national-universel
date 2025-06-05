@@ -17,8 +17,13 @@ export class EmailConsumer extends WorkerHost {
         super();
     }
     async process(job: Job<EmailParams, any, EmailTemplateData>): Promise<ConsumerResponse> {
-        return this.emailProvider
-            .send(job.name, job.data)
+        this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
+
+        const emailPromise = this.isEmailTemplate(job.name)
+            ? this.emailProvider.send(job.name, job.data)
+            : this.emailProvider.sendDefault(job.name, job.data);
+
+        return emailPromise
             .then(() => {
                 return ConsumerResponse.SUCCESS;
             })
@@ -31,5 +36,9 @@ export class EmailConsumer extends WorkerHost {
                 );
                 throw error;
             });
+    }
+
+    private isEmailTemplate(template: string): template is EmailTemplate {
+        return Object.values(EmailTemplate).includes(template as EmailTemplate);
     }
 }
