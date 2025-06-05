@@ -6,6 +6,8 @@ import { EmailParams, EmailTemplate } from "../../core/Notification";
 import { QueueName } from "@shared/infra/Queue";
 import { EmailProvider } from "./Email.provider";
 
+type EmailTemplateData = EmailTemplate | string;
+
 @Processor(QueueName.EMAIL)
 export class EmailConsumer extends WorkerHost {
     constructor(
@@ -14,10 +16,19 @@ export class EmailConsumer extends WorkerHost {
     ) {
         super();
     }
-    async process(job: Job<EmailParams, any, EmailTemplate>): Promise<ConsumerResponse> {
+    async process(
+        job: Job<EmailParams & { __emailType?: "template" | "default" }, any, EmailTemplateData>,
+    ): Promise<ConsumerResponse> {
         this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
-        return this.emailProvider
-            .send(job.name, job.data)
+
+        const { __emailType, ...emailParams } = job.data;
+
+        const emailPromise =
+            __emailType === "template"
+                ? this.emailProvider.send(job.name as EmailTemplate, emailParams)
+                : this.emailProvider.sendDefault(job.name, emailParams);
+
+        return emailPromise
             .then(() => {
                 return ConsumerResponse.SUCCESS;
             })

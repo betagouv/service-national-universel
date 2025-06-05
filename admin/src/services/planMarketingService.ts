@@ -38,6 +38,15 @@ const PlanMarketingService = {
       target: "API_V2",
     })();
   },
+
+  envoyerTest: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["EnvoyerTestPlanMarketingRoute"]>({
+      path: "/campagne/{id}/envoyerTest",
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+    })();
+  },
 };
 
 export default PlanMarketingService;

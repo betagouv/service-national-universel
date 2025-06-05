@@ -21,6 +21,17 @@ export class EmailBrevoMockProvider implements EmailProvider, ContactProvider {
         });
     }
 
+    async sendDefault(template: string, emailParams: EmailParams): Promise<{ response: object; body: object }> {
+        return new Promise((resolve, reject) => {
+            resolve({
+                response: {},
+                body: {
+                    message: "Email sent successfully (local mock)",
+                },
+            });
+        });
+    }
+
     async syncJeune(jeune): Promise<ConsumerResponse> {
         return ConsumerResponse.SUCCESS;
     }

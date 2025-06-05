@@ -1,7 +1,7 @@
 import * as brevo from "@getbrevo/brevo";
 
 import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 // import nodemailer from "nodemailer";
@@ -33,6 +33,52 @@ export class EmailBrevoCatcherProvider implements EmailProvider, ContactProvider
 
     async send(template: EmailTemplate, emailParams: EmailParams): Promise<{ response: object; body: object }> {
         const brevoParams = EmailBrevoMapper.mapEmailParamsToBrevoByTemplate(template, emailParams);
+        const brevoHtmlTemplate = await this.findTemplateById(brevoParams.templateId);
+        const subject = this.replaceTemplateParams(brevoHtmlTemplate.subject, brevoParams);
+        const html = this.replaceTemplateParams(brevoHtmlTemplate.htmlContent, brevoParams);
+        const transporter = nodemailer.createTransport({
+            host: this.config.get("email.smtpHost"),
+            port: Number(this.config.get("email.smtpPort")),
+            secure: false,
+        });
+        const attachments: Mail.Attachment[] = [];
+        if (emailParams.attachments && emailParams.attachments.length > 0) {
+            for (const attachment of emailParams.attachments) {
+                const file = await this.fileGateway.downloadFile(attachment.filePath);
+                attachments.push({ content: file.Body, filename: file.FileName, contentType: file.ContentType });
+            }
+        }
+        const mailOptions: Mail.Options = {
+            to: brevoParams.to.map((to) => to.email).join(","),
+            cc: brevoParams.cc?.map((cc) => cc.email).join(","),
+            bcc: brevoParams.bcc?.map((bcc) => bcc.email).join(","),
+            subject,
+            html,
+            attachments,
+        };
+        const messageSent = await transporter.sendMail(mailOptions);
+        return {
+            response: { response: messageSent.response },
+            body: { body: messageSent.response },
+        };
+    }
+
+    async sendDefault(template: string, emailParams: EmailParams): Promise<{ response: object; body: object }> {
+        const createBrevoParams = (): EmailProviderParams => {
+            const params: Record<string, any> = {};
+
+            Object.keys(emailParams).forEach((key) => {
+                params[key] = emailParams[key];
+            });
+
+            return {
+                to: emailParams.to,
+                params,
+                templateId: Number(template),
+            };
+        };
+
+        const brevoParams = createBrevoParams();
         const brevoHtmlTemplate = await this.findTemplateById(brevoParams.templateId);
         const subject = this.replaceTemplateParams(brevoHtmlTemplate.subject, brevoParams);
         const html = this.replaceTemplateParams(brevoHtmlTemplate.htmlContent, brevoParams);
