@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toastr } from "react-redux-toastr";
 import validator from "validator";
-
+import cx from "classnames";
 import { isPhoneNumberWellFormated, PHONE_ZONES, ERRORS, translate, YOUNG_STATUS, YOUNG_SOURCE, GRADES, YoungDto, CohortDto, CorrectionRequest, ROLES } from "snu-lib";
 
 import api from "@/services/api";
@@ -26,6 +26,7 @@ import { User } from "@/types";
 interface SectionIdentiteProps {
   young: YoungDto;
   cohort: CohortDto;
+  isPrecompte?: boolean;
   onStartRequest: (fieldName: any) => void;
   currentRequest: string;
   onCorrectionRequestChange: (fieldName: any, message: any, reason: any) => Promise<void>;
@@ -45,6 +46,7 @@ interface ErrorInterface {
 export default function SectionIdentite({
   young,
   cohort,
+  isPrecompte,
   onStartRequest,
   currentRequest,
   onCorrectionRequestChange,
@@ -203,6 +205,7 @@ export default function SectionIdentite({
               )}
               <SectionIdentiteContact
                 young={youngFiltered}
+                isPrecompte={isPrecompte}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -215,6 +218,7 @@ export default function SectionIdentite({
             <>
               <SectionIdentiteContact
                 young={youngFiltered}
+                isPrecompte={isPrecompte}
                 globalMode={sectionMode}
                 requests={requests}
                 onStartRequest={onStartRequest}
@@ -259,7 +263,7 @@ export default function SectionIdentite({
               <Field name="birth_month" label="Mois" value={birthDate.month} className="mr-[14px] flex-[1_1_42%]" />
               <Field name="birth_year" label="Année" value={birthDate.year} className="flex-[1_1_35%]" />
             </FieldsGroup>
-            <div className="mb-[16px] flex">
+            <div className={cx("mb-[16px] flex", { hidden: isPrecompte })}>
               <Field
                 name="birthCity"
                 label="Ville de naissance"
@@ -278,7 +282,7 @@ export default function SectionIdentite({
                 label="Code postal de naissance"
                 value={youngFiltered.birthCityZip}
                 mode={sectionMode}
-                className="ml-[8px] flex-[1_1_50%]"
+                className={cx("ml-[8px] flex-[1_1_50%]", { hidden: isPrecompte })}
                 onStartRequest={onStartRequest}
                 currentRequest={currentRequest}
                 correctionRequest={getCorrectionRequest(requests, "birthCityZip")}
@@ -301,10 +305,11 @@ export default function SectionIdentite({
               filterOnType
               onChange={(value) => onLocalChange("birthCountry", value)}
               young={young}
+              className={cx({ hidden: isPrecompte })}
             />
           </div>
           {young.source === YOUNG_SOURCE.CLE && (
-            <div className="mt-[32px]">
+            <div className={cx("mt-[32px]", { hidden: isPrecompte })}>
               <MiniTitle>Nationalité Française</MiniTitle>
               <Field
                 name="frenchNationality"
@@ -324,7 +329,7 @@ export default function SectionIdentite({
               />
             </div>
           )}
-          <div className="mt-[32px]">
+          <div className={cx("mt-[32px]", { hidden: isPrecompte })}>
             <MiniTitle>Adresse de résidence</MiniTitle>
             <Field
               name="address"

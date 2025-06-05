@@ -6,7 +6,7 @@ import ChevronDown from "@/assets/icons/ChevronDown";
 import { RoundButton } from "./Buttons";
 
 interface SectionProps {
-  step?: string;
+  step?: string | null;
   title: string;
   editable?: boolean;
   collapsable?: boolean;

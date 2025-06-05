@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { translate, YOUNG_STATUS, ROLES, SENDINBLUE_TEMPLATES, isCle, CohortDto, YoungDto } from "snu-lib";
+import { translate, YOUNG_STATUS, SENDINBLUE_TEMPLATES, isCle, CohortDto, YoungDto, YOUNG_ACCOUNT_STATUS, FeatureFlagName } from "snu-lib";
 
 import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
@@ -19,6 +19,7 @@ import { YoungFooterPending } from "./YoungFooterPending";
 import { YoungFooterSent } from "./YoungFooterSent";
 import { YoungFooterNoRequest } from "./YoungFooterNoRequest";
 import { ConfirmModalContentData } from "./YoungConfirmationModal";
+import InfoMessage from "../dashboardV2/components/ui/InfoMessage";
 
 interface VolontairePhase0ViewProps {
   young: YoungDto;
@@ -37,6 +38,8 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
   const [oldCohort, setOldCohort] = useState(true);
   const [footerMode, setFooterMode] = useState<"PENDING" | "WAITING" | "NO_REQUEST">("NO_REQUEST");
   const [footerClass, setFooterClass] = useState("");
+
+  const isPrecompte = young.accountStatus === YOUNG_ACCOUNT_STATUS.PRECOMPTE;
 
   useEffect(() => {
     const handleStorageChange = (event) => {
@@ -234,6 +237,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
     <>
       <YoungHeader young={young} tab="file" onChange={onChange} />
       <div className="p-[30px]">
+        {isPrecompte && <InfoMessage title="Cet élève pourra activer son compte à partir du module d’Engagement lors de son séjour." />}
         {(young.status === YOUNG_STATUS.WAITING_CORRECTION || young.status === YOUNG_STATUS.WAITING_VALIDATION) && (
           <div className="pb-[30px]">
             <h1 className="mb-[8px] text-center text-[30px] font-bold">Veuillez vérifier le dossier</h1>
@@ -245,6 +249,7 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
         )}
         <SectionIdentite
           cohort={cohort}
+          isPrecompte={isPrecompte}
           young={young}
           globalMode={globalMode}
           requests={requests}
@@ -256,7 +261,8 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           user={user}
         />
         <SectionParents
-          young={young}
+          young={young as any}
+          isPrecompte={isPrecompte}
           globalMode={globalMode}
           requests={requests}
           onStartRequest={onStartRequest}
@@ -264,9 +270,13 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
           onCorrectionRequestChange={onCorrectionRequestChange}
           onChange={onChange}
           oldCohort={oldCohort}
-          readonly={isResponsableDeCentre(user)}
+          readonly={isResponsableDeCentre(user) || user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]}
         />
-        {oldCohort ? <SectionOldConsentements young={young} /> : <SectionConsentements young={young} onChange={onChange} readonly={isResponsableDeCentre(user)} cohort={cohort} />}
+        {oldCohort ? (
+          <SectionOldConsentements young={young} />
+        ) : (
+          <SectionConsentements young={young} onChange={onChange} readonly={isResponsableDeCentre(user)} isPrecompte={isPrecompte} cohort={cohort} />
+        )}
       </div>
       {globalMode === "correction" && (
         <>

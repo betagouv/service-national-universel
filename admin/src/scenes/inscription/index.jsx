@@ -8,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource } from "snu-lib";
+import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, FeatureFlagName } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -18,7 +18,7 @@ import { appURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
-import { transformInscription } from "../volontaires/utils";
+import { transformInscription, mapInscriptionFields } from "../volontaires/utils";
 import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import { toastr } from "react-redux-toastr";
@@ -216,7 +216,10 @@ export default function Inscription() {
   const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
   const cohorts = useSelector((state) => state.Cohorts);
   const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
-  const baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  let baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
+  if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
+    baseInscriptionPath = `/classes/${selectedClassId}/inscription-manuelle`;
+  }
   const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
 
   if (isLabelsPending) return <Loader />;
@@ -263,7 +266,7 @@ export default function Inscription() {
                 button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                 loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
               }}
-              transform={async (data) => transformInscription(data)}
+              transform={async (data) => mapInscriptionFields(data)}
             />
             {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
               <ExportComponent

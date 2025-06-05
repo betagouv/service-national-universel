@@ -3,6 +3,7 @@ import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation } from "react-icons/hi";
+import cx from "classnames";
 
 import { COHORT_TYPE, CohortDto, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 import { Button, Container } from "@snu/ds/admin";
@@ -34,6 +35,20 @@ interface InscriptionsProps {
 }
 
 export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProps) {
+  const normalizedDefaultValues = {
+    inscriptionStartDate: normalizeDate(cohort.inscriptionStartDate),
+    inscriptionEndDate: normalizeDate(cohort.inscriptionEndDate),
+    reInscriptionStartDate: normalizeDate(cohort.reInscriptionStartDate),
+    reInscriptionEndDate: normalizeDate(cohort.reInscriptionEndDate),
+    inscriptionModificationEndDate: normalizeDate(cohort.inscriptionModificationEndDate),
+    instructionEndDate: normalizeDate(cohort.instructionEndDate),
+    youngHTSBasculeLPDisabled: cohort.youngHTSBasculeLPDisabled,
+    objectifLevel: cohort.objectifLevel,
+    inscriptionOpenForReferentRegion: cohort.inscriptionOpenForReferentRegion,
+    inscriptionOpenForReferentDepartment: cohort.inscriptionOpenForReferentDepartment,
+    inscriptionOpenForReferentClasse: cohort.inscriptionOpenForReferentClasse,
+    inscriptionOpenForAdministrateurCle: cohort.inscriptionOpenForAdministrateurCle,
+  };
   const {
     control,
     setValue,
@@ -41,25 +56,17 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
     formState: { errors, isDirty, isSubmitting, dirtyFields },
     reset,
   } = useForm<InscriptionsFormData>({
-    defaultValues: {
-      inscriptionStartDate: cohort.inscriptionStartDate,
-      inscriptionEndDate: cohort.inscriptionEndDate,
-      reInscriptionStartDate: cohort.reInscriptionStartDate,
-      reInscriptionEndDate: cohort.reInscriptionEndDate,
-      inscriptionModificationEndDate: cohort.inscriptionModificationEndDate,
-      instructionEndDate: cohort.instructionEndDate,
-      youngHTSBasculeLPDisabled: cohort.youngHTSBasculeLPDisabled,
-      objectifLevel: cohort.objectifLevel,
-      inscriptionOpenForReferentRegion: cohort.inscriptionOpenForReferentRegion,
-      inscriptionOpenForReferentDepartment: cohort.inscriptionOpenForReferentDepartment,
-      inscriptionOpenForReferentClasse: cohort.inscriptionOpenForReferentClasse,
-      inscriptionOpenForAdministrateurCle: cohort.inscriptionOpenForAdministrateurCle,
-    },
+    defaultValues: normalizedDefaultValues,
     mode: "onChange",
   });
   const isNotSaved = isDirty && !isSubmitting;
   const [showSpecificDatesReInscription, setShowSpecificDatesReInscription] = useState(!!(cohort.reInscriptionStartDate || cohort.reInscriptionEndDate));
   const updateCohorteInscriptionsMutation = useUpdateCohortInscriptions();
+
+  function normalizeDate(dateValue) {
+    if (!dateValue) return undefined;
+    return new Date(dateValue);
+  }
 
   const handleOnCancel = () => {
     reset();
@@ -76,7 +83,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
   };
 
   return (
-    <Container className={`${isDirty && "outline outline-2 outline-blue-600"}`}>
+    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex flex-col w-full gap-8">
         <p className="text-gray-900 leading-5 text-lg font-medium">Inscriptions (phase 0)</p>
         <div className="flex">
@@ -103,7 +110,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     label="Ouverture"
                     placeholder="Date et heure"
                     // @ts-ignore
-                    value={field.value ? dayjs(field.value).local().toDate() : null}
+                    value={field.value}
                     error={errors.inscriptionStartDate?.message}
                     onChange={(value) => field.onChange(value)}
                     readOnly={readOnly}
@@ -122,7 +129,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                     label="Fermeture"
                     placeholder="Date et heure"
                     // @ts-ignore
-                    value={field.value ? dayjs(field.value).local().toDate() : null}
+                    value={field.value}
                     onChange={(value) => field.onChange(value)}
                     readOnly={readOnly}
                     disabled={isSubmitting}
@@ -161,7 +168,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                         label="Ouverture"
                         placeholder="Date et heure"
                         // @ts-ignore
-                        value={field.value ? dayjs(field.value).local().toDate() : null}
+                        value={field.value}
                         error={errors.reInscriptionStartDate?.message}
                         onChange={(value) => field.onChange(value)}
                         readOnly={readOnly}
@@ -179,7 +186,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                         label="Fermeture"
                         placeholder="Date et heure"
                         // @ts-ignore
-                        value={field.value ? dayjs(field.value).local().toDate() : null}
+                        value={field.value}
                         error={errors.reInscriptionEndDate?.message}
                         onChange={(value) => field.onChange(value)}
                         readOnly={readOnly}
@@ -222,7 +229,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                       label="Fermeture"
                       placeholder="Date"
                       // @ts-ignore
-                      value={field.value ? dayjs(field.value).local().toDate() : null}
+                      value={field.value}
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}
@@ -255,7 +262,7 @@ export default function InfosInscriptions({ cohort, readOnly }: InscriptionsProp
                       label="Fermeture"
                       placeholder="Date"
                       // @ts-ignore
-                      value={field.value ? dayjs(field.value).local().toDate() : null}
+                      value={field.value}
                       onChange={(value) => field.onChange(value)}
                       readOnly={readOnly}
                       disabled={isSubmitting}

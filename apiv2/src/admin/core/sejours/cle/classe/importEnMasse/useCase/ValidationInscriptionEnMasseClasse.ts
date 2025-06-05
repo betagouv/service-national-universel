@@ -15,7 +15,7 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClasseModel } from "../../Classe.model";
 import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
 import { EtablissementModel } from "../../../etablissement/Etablissement.model";
-import { JeuneGateway } from "@admin/core/sejours/jeune/Jeune.gateway";
+import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 
 @Injectable()
 export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportEnMasseValidationDto> {
@@ -23,7 +23,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
     constructor(
         @Inject(ClasseGateway) private readonly classeGateway: ClasseGateway,
         @Inject(EtablissementGateway) private readonly etablissementGateway: EtablissementGateway,
-        @Inject(JeuneGateway) private readonly jeuneGateway: JeuneGateway,
+        private readonly jeuneService: JeuneService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
@@ -60,7 +60,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
             };
         }
 
-        // Lorsque l’effectif ajusté est renseigné, vérifier que le nb d’élèves inscrits après l’import est inférieur ou égal à l’effectif ajusté.
+        // Lorsque l'effectif ajusté est renseigné, vérifier que le nb d'élèves inscrits après l'import est inférieur ou égal à l'effectif ajusté.
         const maxJeune = classe.placesTotal || 100;
         if (dataToImport.length + classe.placesPrises > maxJeune) {
             return {
@@ -201,7 +201,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                     errors.push({
                         column: CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI,
                         code: CLASSE_IMPORT_EN_MASSE_ERRORS.UAI_NOT_MATCH,
-                        message: `L’UAI renseigné ne correspond pas à l’établissement associé à cette classe. Merci de vérifier que le fichier correspond bien à cette classe.`,
+                        message: `L'UAI renseigné ne correspond pas à l'établissement associé à cette classe. Merci de vérifier que le fichier correspond bien à cette classe.`,
                         line,
                     });
                 }
@@ -226,13 +226,16 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
                 }
                 // check already exist
                 try {
-                    const jeune = await this.jeuneGateway.findByNomPrenomDateDeNaissanceAndClasseId(
-                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
-                        row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
-                        this.clockGateway.parseDateNaissance(row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]),
-                        classe.id,
-                    );
-                    if (jeune) {
+                    const jeuneToCheck = {
+                        nom: row[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM],
+                        prenom: row[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM],
+                        dateNaissance: this.clockGateway.parseDateNaissance(
+                            row[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE],
+                        ),
+                        genre: row[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE],
+                    };
+                    const jeuneExists = await this.jeuneService.existsByPersonalIdentifiers(jeuneToCheck, classe.id);
+                    if (jeuneExists) {
                         errors.push({
                             column: CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM,
                             code: CLASSE_IMPORT_EN_MASSE_ERRORS.ALREADY_EXIST,

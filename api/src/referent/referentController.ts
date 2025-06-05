@@ -109,11 +109,14 @@ import {
   canValidateYoungToLP,
   FILE_STATUS_PHASE1,
   ERRORS as ERRORS_LIB,
+  ReferentType,
+  PermissionDto,
+  ROLE_JEUNE,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
-import { UserRequest } from "../controllers/request";
+import { RouteRequest, RouteResponse, UserRequest } from "../controllers/request";
 import { mightAddInProgressStatus, shouldSwitchYoungByIdToLC, switchYoungByIdToLC } from "../young/youngService";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 import { getCompletionObjectifs } from "../services/inscription-goal";
@@ -123,6 +126,8 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
+import { getAcl } from "../services/iam/Permission.service";
+import { addMonths } from "date-fns";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -270,10 +275,13 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     const { id, type } = params;
 
     let user: ReferentDocument | YoungDocument | null = null;
+    let acl: PermissionDto[] | null = null;
     if (type === "referent") {
       user = await ReferentModel.findById(id);
+      acl = await getAcl(user as any);
     } else if (type === "young") {
       user = await YoungModel.findById(id);
+      acl = await getAcl({ roles: [ROLE_JEUNE] } as any);
     }
     if (!user) {
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
@@ -298,6 +306,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
 
     let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
     userToReturn.impersonateId = req.user._id;
+    userToReturn.acl = acl;
 
     return res.status(200).json({ ok: true, token, data: userToReturn });
   } catch (error) {
@@ -325,7 +334,9 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
-    return res.status(200).send({ ok: true, token, data: serializeReferent(user) });
+    const userSerialized = serializeReferent(user);
+    userSerialized.acl = await getAcl(user);
+    return res.status(200).send({ ok: true, token, data: userSerialized });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -363,12 +374,18 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
-    const referentProperties: any = {};
+    const referentProperties: Partial<ReferentType> = { roles: [] };
     if (email) referentProperties.email = email.trim().toLowerCase();
     if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
     if (lastName) referentProperties.lastName = lastName.toUpperCase();
-    if (role) referentProperties.role = role;
-    if (subRole) referentProperties.subRole = subRole;
+    if (role) {
+      referentProperties.role = role;
+      referentProperties.roles = [role];
+    }
+    if (subRole) {
+      referentProperties.subRole = subRole;
+      referentProperties.roles = [...referentProperties.roles!, subRole];
+    }
     if (region) referentProperties.region = region;
     if (department) referentProperties.department = department;
     if (structureId) referentProperties.structureId = structureId;
@@ -385,15 +402,19 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
 
     const invitation_token = crypto.randomBytes(20).toString("hex");
     referentProperties.invitationToken = invitation_token;
+    // @ts-ignore
     referentProperties.invitationExpires = inSevenDays();
 
-    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) referentProperties.subRole = SUB_ROLES.referent_etablissement;
+    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
+      referentProperties.subRole = SUB_ROLES.referent_etablissement;
+      referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
+    }
 
     const referent = await ReferentModel.create(referentProperties);
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role)) {
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
       // fixme: update url
       cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
     }
@@ -503,6 +524,14 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       acceptCGU,
     });
 
+    if (!referent.roles) {
+      if (referent.subRole) {
+        referent.set({ roles: [referent.role, referent.subRole] });
+      } else {
+        referent.set({ roles: [referent.role] });
+      }
+    }
+
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
 
@@ -528,7 +557,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
   } catch (error) {
     capture(error);
-    return res.sendStatus(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -691,8 +720,8 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (newYoung.status === YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.WITHDRAWN) {
       if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const { withdrawnReason } = newYoung;
-      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, req.user);
+      const { withdrawnReason, withdrawnMessage } = newYoung;
+      await handleNotifForYoungWithdrawn(young, cohort, withdrawnReason, withdrawnMessage, req.user);
       newYoung.statusPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ? YOUNG_STATUS_PHASE1.WAITING_AFFECTATION : young.statusPhase1;
       // reset des informations d'affectation
       newYoung.cohesionCenterId = undefined;
@@ -1603,6 +1632,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     referent.set(value);
     referent.set(cleanReferentData(referent));
+    referent.set({ roles: [referent.role, referent.subRole] });
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
@@ -1632,7 +1662,12 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     user.set(cleanReferentData(user));
     await user.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(user, req.user);
-    res.status(200).send({ ok: true, data: user });
+
+    const userSerialized = serializeReferent(user);
+    userSerialized.impersonateId = req.user.impersonateId;
+    userSerialized.acl = await getAcl(user);
+
+    res.status(200).send({ ok: true, data: userSerialized });
   } catch (error) {
     capture(error);
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
@@ -1720,40 +1755,47 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-router.get("/:id/session-phase1", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id/session-phase1",
+  authMiddleware(["referent"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+      query: Joi.object({
+        with_cohesion_center: Joi.string(),
+      }),
+    }),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      if (!canSearchSessionPhase1(req.user)) {
+        return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const referentId = req.validatedParams.id;
+      const referent = await ReferentModel.findById(referentId);
+      if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
+
+      let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = [];
+      if (referent.role === ROLES.HEAD_CENTER) {
+        sessions = await SessionPhase1Model.find({ headCenterId: referentId });
+      } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(referent.role!)) {
+        sessions = await SessionPhase1Model.find({ adjointsIds: { $in: [referentId] } });
+      }
+      const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
+      if (req.validatedQuery.with_cohesion_center === "true") {
+        sessions = sessions.map((s) => {
+          s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
+          return s;
+        });
+      }
+      return res.status(200).json({ ok: true, data: sessions.map(serializeSessionPhase1) });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).json({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    const JoiQueryWithCohesionCenter = Joi.string().validate(req.query.with_cohesion_center);
-    if (JoiQueryWithCohesionCenter.error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    if (!canSearchSessionPhase1(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    let sessions: SessionPhase1Document<{ cohesionCenter?: CohesionCenterDocument }>[] = [];
-    if (req.user.role === ROLES.HEAD_CENTER) {
-      sessions = await SessionPhase1Model.find({ headCenterId: checkedId });
-    } else if ([ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
-      sessions = await SessionPhase1Model.find({ adjointsIds: { $in: [checkedId] } });
-    }
-    const cohesionCenters = await CohesionCenterModel.find({ _id: { $in: sessions.map((s) => s.cohesionCenterId?.toString()) } });
-    if (JoiQueryWithCohesionCenter.value === "true") {
-      sessions = sessions.map((s) => {
-        s._doc!.cohesionCenter = cohesionCenters.find((c) => c._id.toString() === s.cohesionCenterId?.toString());
-        return s;
-      });
-    }
-    return res.status(200).send({ ok: true, data: sessions.map(serializeSessionPhase1) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -1882,4 +1924,31 @@ router.post("/exist", passport.authenticate(["referent"], { session: false, fail
   }
 });
 
+router.post(
+  "/:id/renew-invitation",
+  authMiddleware(["referent"]),
+  accessControlMiddleware([ROLES.ADMIN]),
+  requestValidatorMiddleware({
+    params: Joi.object({ id: idSchema().required() }),
+  }),
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const referent = await ReferentModel.findById(req.validatedParams.id);
+      if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (!referent.invitationExpires || !referent.invitationToken) {
+        return res.status(400).json({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const invitationExpires = addMonths(new Date(), 1);
+      referent.set({ invitationExpires });
+      await referent.save({ fromUser: req.user });
+
+      return res.status(200).json({ ok: true, data: { invitationExpires } });
+    } catch (error) {
+      capture(error);
+      res.status(500).json({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 export default router;

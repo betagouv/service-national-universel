@@ -4,6 +4,7 @@ import { useHistory, useParams } from "react-router-dom";
 import { CiSettings } from "react-icons/ci";
 import { MdOutlinePlace } from "react-icons/md";
 import { HiOutlineLightningBolt, HiOutlineMail } from "react-icons/hi";
+import { useQueryClient } from "@tanstack/react-query";
 
 import { isSuperAdmin, ROLES } from "snu-lib";
 import { NavbarControlled } from "@snu/ds/admin";
@@ -31,7 +32,7 @@ export default function Settings() {
   const { tab } = useParams<{ tab: string }>();
   const { user } = useSelector((state: AuthState) => state.Auth);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
-
+  const queryClient = useQueryClient();
   const currentTab = (tab || "general") as "general" | "eligibility" | "operations" | "marketing";
 
   const urlParams = new URLSearchParams(window.location.search);
@@ -48,6 +49,20 @@ export default function Settings() {
     },
     enabled: !!currentCohortName,
   });
+
+  const onCohortChange = (cohortName: string) => {
+    queryClient.removeQueries({ queryKey: ["cohort", currentCohortName] });
+
+    history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` });
+
+    queryClient.prefetchQuery({
+      queryKey: ["cohort", cohortName],
+      queryFn: async () => {
+        const { data } = await api.get(`/cohort/${encodeURIComponent(cohortName)}`);
+        return data;
+      },
+    });
+  };
 
   if (!cohort) return <Loader />;
 
@@ -110,7 +125,7 @@ export default function Settings() {
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
           <div className="flex items-center">
             <ExportContactConvocation session={cohort} />
-            <SelectCohort cohort={currentCohortName} onChange={(cohortName) => history.replace({ search: `?cohort=${encodeURIComponent(cohortName)}` })} showArchived />
+            <SelectCohort cohort={currentCohortName} onChange={onCohortChange} showArchived />
           </div>
         </div>
         <NavbarControlled tabs={tabs} active={currentTab} onTabChange={(id: typeof currentTab) => history.push(`/settings/${id}?cohort=${currentCohortName}`)} />

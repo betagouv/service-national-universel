@@ -115,12 +115,16 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
 
   const onSelectStatus = (status) => {
     setWithdrawn({ reason: "", message: "", error: null });
+    let message = "";
+    if (status === YOUNG_STATUS.WITHDRAWN) {
+      message = `Êtes-vous sûr(e) de vouloir désister ce profil? Les représentants légaux et le volontaire recevront automatiquement une notification avec le motif du désistement et le message personnalisé.`;
+    } else {
+      message = `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil? Un email sera automatiquement envoyé à l'utilisateur.`;
+    }
     setConfirmModal({
       icon: <Warning className="h-[36px] w-[36px] text-[#D1D5DB]" />,
       title: status === YOUNG_STATUS.WITHDRAWN ? "Désistement" : "Modification de statut",
-      message: `${
-        status === YOUNG_STATUS.WITHDRAWN ? `Êtes-vous sûr(e) de vouloir désister ce profil?` : `Êtes-vous sûr(e) de vouloir modifier le statut de ce profil?`
-      } Un email sera automatiquement envoyé à l'utilisateur.`,
+      message,
       type: status,
     });
   };
@@ -378,7 +382,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 }}
                 className="w-[100%] rounded-[6px] border-[1px] border-[#D1D5DB] bg-white p-[15px]"
                 rows="5"
-                placeholder="Précisez la raison de votre refus ici"
+                placeholder="Ajoutez un message personnalisé au motif du désistement"
               />
               {withdrawn.error && <div className="text-[#EF4444]">{withdrawn.error}</div>}
             </div>
