@@ -1,6 +1,6 @@
 import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Button, Collapsable, Container, Label, Modal } from "@snu/ds/admin";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { HiOutlineExclamation, HiOutlineFolderOpen } from "react-icons/hi";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
@@ -33,8 +33,9 @@ interface ListeDiffusionFormProps {
 }
 
 export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel, forceOpen = false, onToggleArchive, isToggleArchivagePending }: ListeDiffusionFormProps) => {
-  const isFirstRender = React.useRef(true);
   const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const initialFiltersRef = useRef<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
 
   const {
     control,
@@ -46,18 +47,11 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   } = useForm<ListeDiffusionDataProps>({
     defaultValues: {
       type: ListeDiffusionEnum.VOLONTAIRES,
-      filters: selectedFilters,
       ...listeDiffusionData,
     },
   });
 
-  // Update the form when the listeDiffusionData changes
   useEffect(() => {
-    if (isFirstRender.current) {
-      isFirstRender.current = false;
-      return;
-    }
-
     reset(
       {
         type: ListeDiffusionEnum.VOLONTAIRES,
@@ -69,14 +63,21 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
         keepErrors: false,
       },
     );
+    setSelectedFilters(selectedFilters || {});
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [listeDiffusionData, reset]);
+
+  watch((currentState, { name }) => {
+    if (name === "type") {
+      handleSelectedFiltersChange({});
+    }
+  });
 
   const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
     const currentFilters = watch("filters");
     if (JSON.stringify(currentFilters) !== JSON.stringify(filters)) {
       setValue("filters", filters, {
-        shouldDirty: !isFirstRender.current,
+        shouldDirty: true,
         shouldTouch: true,
         shouldValidate: true,
       });
@@ -89,13 +90,19 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
 
   const handleOnCancel = () => {
     setIsArchiveModalOpen(false);
+    const initialFilters = initialFiltersRef.current;
     reset(
-      { ...listeDiffusionData, filters: selectedFilters },
+      {
+        ...listeDiffusionData,
+        filters: initialFilters,
+      },
       {
         keepDirty: false,
         keepErrors: false,
       },
     );
+
+    setSelectedFilters(initialFilters);
     onCancel();
   };
 
@@ -108,20 +115,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
       keepErrors: false,
     });
   };
-
-  useEffect(() => {
-    if (listeDiffusionData.filters) {
-      setSelectedFilters(listeDiffusionData.filters);
-    }
-  }, [listeDiffusionData.filters]);
-
-  watch((currentState, { name }) => {
-    if (name === "type") {
-      handleSelectedFiltersChange({});
-    }
-  });
-
-  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
