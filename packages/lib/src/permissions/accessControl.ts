@@ -1,7 +1,7 @@
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
 
-export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context }: HasPermissionParams): boolean {
+export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
     console.warn(`user is not defined`);
     return false;
@@ -12,8 +12,12 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
   }
   const permissions = user.acl.filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
   if (permissions?.length) {
+    if (ignorePolicy) {
+      return true;
+    }
     const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
-    if (!permissionWithpolicies.length) {
+    if (permissions.length > permissionWithpolicies.length) {
+      // au moins une permission sans policy
       return true;
     }
     const contextUpdated = { referent: user, ...context };
@@ -23,9 +27,9 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         if (policy.where?.length) {
           for (const where of policy.where) {
             if (where.source) {
-              authorized.push(contextUpdated[resource]?.[where.field] === user[where.source]);
+              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(user[where.source]));
             } else if (where.value) {
-              authorized.push(contextUpdated[resource]?.[where.field] === where.value);
+              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(where.value));
             } else {
               authorized.push(false);
             }
