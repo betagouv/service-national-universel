@@ -44,13 +44,7 @@ export class EnvoyerCampagneProgrammee implements UseCase<void> {
                 this.logger.log(
                     `Préparation de l'envoi de la campagne ${campagneId} pour la programmation ${programmationId}`,
                 );
-                await this.preparerEnvoiCampagne.execute(campagneId);
-
-                await this.campagneService.updateProgrammationSentDate(
-                    campagneId,
-                    programmationId,
-                    this.clockGateway.now(),
-                );
+                await this.preparerEnvoiCampagne.execute(campagneId, programmationId);
             }
         }
     }

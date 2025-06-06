@@ -29,7 +29,6 @@ describe("EnvoyerCampagneProgrammee", () => {
                     provide: CampagneService,
                     useValue: {
                         findActivesCampagnesWithProgrammationBetweenDates: jest.fn(),
-                        updateProgrammationSentDate: jest.fn(),
                     },
                 },
                 {
@@ -106,7 +105,6 @@ describe("EnvoyerCampagneProgrammee", () => {
             return prog.id === "prog-1" || prog.id === "prog-2";
         });
         preparerEnvoiCampagne.execute.mockResolvedValue(undefined);
-        campagneService.updateProgrammationSentDate.mockResolvedValue({} as any);
 
         await useCase.execute();
 
@@ -115,11 +113,8 @@ describe("EnvoyerCampagneProgrammee", () => {
         expect(campagneService.findActivesCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
         expect(programmationService.shouldProgrammationBeSent).toHaveBeenCalledTimes(2);
         expect(preparerEnvoiCampagne.execute).toHaveBeenCalledTimes(2);
-        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1");
-        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-2");
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(2);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith("campaign-1", "prog-1", now);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith("campaign-2", "prog-2", now);
+        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1", "prog-1");
+        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-2", "prog-2");
     });
 
     it("should do nothing if no campaigns are found", async () => {
@@ -135,7 +130,6 @@ describe("EnvoyerCampagneProgrammee", () => {
 
         expect(campagneService.findActivesCampagnesWithProgrammationBetweenDates).toHaveBeenCalledWith(yesterday, now);
         expect(preparerEnvoiCampagne.execute).not.toHaveBeenCalled();
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalled();
     });
 
     it("should not send campaign if programmation should not be sent", async () => {
@@ -173,7 +167,6 @@ describe("EnvoyerCampagneProgrammee", () => {
 
         expect(programmationService.shouldProgrammationBeSent).toHaveBeenCalledWith(prog1, yesterday, now);
         expect(preparerEnvoiCampagne.execute).not.toHaveBeenCalled();
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalled();
     });
 
     it("should throw error if preparerEnvoiCampagne fails", async () => {
@@ -213,50 +206,6 @@ describe("EnvoyerCampagneProgrammee", () => {
         await expect(useCase.execute()).rejects.toThrow(expectedError);
 
         expect(preparerEnvoiCampagne.execute).toHaveBeenCalledTimes(1);
-        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1");
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalled();
-    });
-
-    it("should throw error if updateProgrammationSentDate fails", async () => {
-        const now = new Date("2023-01-02T12:00:00Z");
-        const yesterday = new Date("2023-01-01T12:00:00Z");
-
-        clockGateway.now.mockReturnValue(now);
-        clockGateway.addDays.mockReturnValue(yesterday);
-
-        const prog1: CampagneProgrammation = {
-            id: "prog-1",
-            joursDecalage: 1,
-            type: TypeEvenement.AUCUN,
-            createdAt: new Date(),
-        };
-
-        const mockCampagnes: CampagneComplete[] = [
-            {
-                id: "campaign-1",
-                nom: "Campagne 1",
-                objet: "Objet campagne 1",
-                templateId: 1,
-                listeDiffusionId: "liste-1",
-                destinataires: [] as DestinataireListeDiffusion[],
-                type: CampagneJeuneType.VOLONTAIRE,
-                programmations: [prog1],
-                isProgrammationActive: true,
-            },
-        ];
-
-        campagneService.findActivesCampagnesWithProgrammationBetweenDates.mockResolvedValue(mockCampagnes);
-        programmationService.shouldProgrammationBeSent.mockReturnValue(true);
-        preparerEnvoiCampagne.execute.mockResolvedValue(undefined);
-
-        const expectedError = new Error("Test error");
-        campagneService.updateProgrammationSentDate.mockRejectedValueOnce(expectedError);
-
-        await expect(useCase.execute()).rejects.toThrow(expectedError);
-
-        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledTimes(1);
-        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1");
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(1);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith("campaign-1", "prog-1", now);
+        expect(preparerEnvoiCampagne.execute).toHaveBeenCalledWith("campaign-1", "prog-1");
     });
 });

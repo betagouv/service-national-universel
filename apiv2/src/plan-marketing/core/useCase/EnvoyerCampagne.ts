@@ -25,6 +25,7 @@ export class EnvoyerCampagne implements UseCase<void> {
         nomListe: string | undefined,
         campagneId: string | undefined,
         campagneProviderId: string | undefined,
+        programmationId?: string,
     ): Promise<void> {
         if (nomListe === undefined || campagneId === undefined || campagneProviderId === undefined) {
             throw new FunctionalException(
@@ -44,6 +45,13 @@ export class EnvoyerCampagne implements UseCase<void> {
         if (campagne !== null && isCampagneWithRef(campagne)) {
             // Appel de mettreAJourCampagne pour supprimer la référence à la campagne spécifique
             await this.mettreAJourCampagne.execute(campagne);
+        }
+        if (programmationId) {
+            await this.campagneGateway.updateProgrammationSentDate(
+                campagneId,
+                programmationId,
+                this.clockGateway.now(),
+            );
         }
     }
 }

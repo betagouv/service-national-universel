@@ -14,7 +14,6 @@ describe("EnvoyerCampagne", () => {
     let associerListeDiffusionToCampagne: jest.Mocked<AssocierListeDiffusionToCampagne>;
     let planMarketingGateway: jest.Mocked<PlanMarketingGateway>;
     let campagneGateway: jest.Mocked<CampagneGateway>;
-    let clockGateway: jest.Mocked<ClockGateway>;
     let mettreAJourCampagne: jest.Mocked<MettreAJourCampagne>;
 
     const now = new Date();
@@ -45,6 +44,7 @@ describe("EnvoyerCampagne", () => {
                     useValue: {
                         addEnvoiToCampagneById: jest.fn(),
                         findById: jest.fn(),
+                        updateProgrammationSentDate: jest.fn(),
                     },
                 },
                 {
@@ -66,7 +66,6 @@ describe("EnvoyerCampagne", () => {
         associerListeDiffusionToCampagne = module.get(AssocierListeDiffusionToCampagne);
         planMarketingGateway = module.get(PlanMarketingGateway);
         campagneGateway = module.get(CampagneGateway);
-        clockGateway = module.get(ClockGateway);
         mettreAJourCampagne = module.get(MettreAJourCampagne);
     });
 
@@ -83,6 +82,7 @@ describe("EnvoyerCampagne", () => {
         });
         expect(campagneGateway.findById).toHaveBeenCalledWith(mockCampagneSpecifique.id);
         expect(mettreAJourCampagne.execute).not.toHaveBeenCalled();
+        expect(campagneGateway.updateProgrammationSentDate).not.toHaveBeenCalled();
     });
 
     it("should successfully send a specific campaign and trigger update", async () => {
@@ -144,5 +144,17 @@ describe("EnvoyerCampagne", () => {
         });
         expect(campagneGateway.findById).toHaveBeenCalledWith("campagne-nonexistent");
         expect(mettreAJourCampagne.execute).not.toHaveBeenCalled();
+    });
+
+    it("should update programmation sent date if programmationId is provided", async () => {
+        campagneGateway.findById.mockResolvedValue(mockCampagneSpecifique as CampagneModel);
+
+        await useCase.execute("liste-1", mockCampagneSpecifique.id, "provider-1", "programmation-1");
+
+        expect(campagneGateway.updateProgrammationSentDate).toHaveBeenCalledWith(
+            mockCampagneSpecifique.id,
+            "programmation-1",
+            now,
+        );
     });
 });
