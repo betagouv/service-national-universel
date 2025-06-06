@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { CampagneModel, CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";
+import { CampagneModel, CampagneSpecifiqueModelWithoutRef, CampagneSpecifiqueModelWithRefAndGeneric } from "../Campagne.model";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { isCampagneGenerique, isCampagneWithRef } from "snu-lib";
 import { CampagneService } from "../service/Campagne.service";
@@ -37,7 +37,7 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
                 envois: campagneGenerique.envois,
                 programmations: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).programmations,
                 isProgrammationActive: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).isProgrammationActive,
-                isArchived: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).isArchived,
+                isArchived: !(campagne as CampagneSpecifiqueModelWithRefAndGeneric).isArchived,
             };
 
             return await this.campagneService.updateAndRemoveRef(campagneSpecifiqueWithRefToCampagneSpecifiqueWithouRef);

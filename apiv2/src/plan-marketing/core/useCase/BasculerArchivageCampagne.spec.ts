@@ -5,6 +5,7 @@ import {
     CampagneGeneriqueModel,
     CampagneSpecifiqueModelWithRef,
     CampagneSpecifiqueModelWithoutRef,
+    CampagneSpecifiqueModelWithRefAndGeneric,
 } from "../Campagne.model";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -74,14 +75,22 @@ describe("BasculerArchivageCampagne", () => {
             );
         });
 
-        it("should convert to specific campaign without reference and update", async () => {
-            const campagneSpecifiqueWithRef: CampagneSpecifiqueModelWithRef = {
+        it("should archive a specific campaign with reference when it was not archived", async () => {
+            const campagneSpecifiqueWithRef: CampagneSpecifiqueModelWithRefAndGeneric = {
                 id: "specific-ref-id",
                 generic: false,
                 cohortId: "cohort1",
                 campagneGeneriqueId: "generic-id",
                 createdAt: new Date(),
                 updatedAt: new Date(),
+                isArchived: false,
+                nom: "Campagne Spécifique",
+                objet: "Objet Test",
+                templateId: 42,
+                listeDiffusionId: "list1",
+                destinataires: [DestinataireListeDiffusion.JEUNES],
+                type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
             };
 
             const campagneGenerique: CampagneGeneriqueModel = {
@@ -112,7 +121,68 @@ describe("BasculerArchivageCampagne", () => {
                 envois: campagneGenerique.envois,
                 programmations: campagneGenerique.programmations,
                 isProgrammationActive: campagneGenerique.isProgrammationActive,
-                isArchived: campagneGenerique.isArchived,
+                isArchived: true,
+            };
+
+            campagneGateway.findById
+                .mockResolvedValueOnce(campagneSpecifiqueWithRef)
+                .mockResolvedValueOnce(campagneGenerique);
+
+            campagneService.updateAndRemoveRef.mockResolvedValue(expectedCampagneSpecifiqueWithoutRef);
+
+            const result = await useCase.execute("specific-ref-id");
+
+            expect(result).toEqual(expectedCampagneSpecifiqueWithoutRef);
+            expect(campagneService.updateAndRemoveRef).toHaveBeenCalledWith(expectedCampagneSpecifiqueWithoutRef);
+        });
+
+        it("should unarchive a specific campaign with reference when it was archived", async () => {
+            const campagneSpecifiqueWithRef: CampagneSpecifiqueModelWithRefAndGeneric = {
+                id: "specific-ref-id",
+                generic: false,
+                cohortId: "cohort1",
+                campagneGeneriqueId: "generic-id",
+                createdAt: new Date(),
+                updatedAt: new Date(),
+                isArchived: true,
+                nom: "Campagne Spécifique",
+                objet: "Objet Test",
+                templateId: 42,
+                listeDiffusionId: "list1",
+                destinataires: [DestinataireListeDiffusion.JEUNES],
+                type: CampagneJeuneType.VOLONTAIRE,
+                isProgrammationActive: true,
+            };
+
+            const campagneGenerique: CampagneGeneriqueModel = {
+                id: "generic-id",
+                generic: true,
+                nom: "Campagne Générique",
+                objet: "Objet Test",
+                templateId: 42,
+                listeDiffusionId: "list1",
+                destinataires: [DestinataireListeDiffusion.JEUNES],
+                type: CampagneJeuneType.VOLONTAIRE,
+                programmations: [],
+                isProgrammationActive: true,
+                isArchived: true,
+            };
+
+            const expectedCampagneSpecifiqueWithoutRef: CampagneSpecifiqueModelWithoutRef = {
+                id: "specific-ref-id",
+                generic: false,
+                cohortId: "cohort1",
+                originalCampagneGeneriqueId: "generic-id",
+                nom: campagneGenerique.nom,
+                objet: campagneGenerique.objet,
+                templateId: campagneGenerique.templateId,
+                listeDiffusionId: campagneGenerique.listeDiffusionId,
+                destinataires: campagneGenerique.destinataires,
+                type: campagneGenerique.type,
+                envois: campagneGenerique.envois,
+                programmations: campagneGenerique.programmations,
+                isProgrammationActive: campagneGenerique.isProgrammationActive,
+                isArchived: false,
             };
 
             campagneGateway.findById
