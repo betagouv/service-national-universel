@@ -9,11 +9,10 @@ type Ttype =
   | "wired"
   | "modify"
   | "cancel"
-  | "danger";
+  | "danger"
+  | "icon";
 
-type OwnProps = {
-  title: React.ReactNode;
-  type?: Ttype;
+type BaseButtonProps = {
   className?: string;
   leftIcon?: React.ReactNode;
   rightIcon?: React.ReactNode;
@@ -24,6 +23,18 @@ type OwnProps = {
   tooltipProps?: TooltipProps;
   tooltipClassName?: string;
 };
+
+type IconButtonProps = BaseButtonProps & {
+  type: "icon";
+  title?: React.ReactNode;
+};
+
+type RegularButtonProps = BaseButtonProps & {
+  type?: Exclude<Ttype, "icon">;
+  title: React.ReactNode;
+};
+
+type OwnProps = IconButtonProps | RegularButtonProps;
 
 export default function Button({
   title,
@@ -45,8 +56,12 @@ export default function Button({
   return (
     <button
       type="button"
-      className={`flex w-fit min-w-[100px] gap-2 items-center justify-center rounded-md font-marianne px-[17px] ${
-        leftIcon && "pl-[15px]"
+      className={`flex ${
+        title ? "w-fit min-w-[100px]" : "w-fit min-w-[32px]"
+      } gap-2 items-center justify-center rounded-md font-marianne ${
+        title ? "px-[17px]" : "p-2"
+      } ${
+        leftIcon && title && "pl-[15px]"
       } font-medium focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-blue-600 ${
         styles.native
       } ${disabled || loading ? styles.disabled : styles.base} ${className}`}
@@ -85,7 +100,7 @@ export default function Button({
       ) : (
         <>
           {leftIcon}
-          <span className="truncate">{title}</span>
+          {title && <span className="truncate">{title}</span>}
           {rightIcon}
         </>
       )}
@@ -136,6 +151,13 @@ const getStyles = ({ type }: { type: Ttype }) => {
         base: "text-white bg-red-600 hover:bg-red-700",
         disabled: "text-white bg-red-600/60",
         loaderColor: "#ffffff",
+      };
+    case "icon":
+      return {
+        native: "h-[38px] py-[9px] text-sm",
+        base: "text-gray-700 border !border-gray-300 bg-white hover:bg-gray-50",
+        disabled: "text-gray-700/60 border !border-gray-300/60 bg-white/60",
+        loaderColor: "#374151",
       };
     default:
       return {

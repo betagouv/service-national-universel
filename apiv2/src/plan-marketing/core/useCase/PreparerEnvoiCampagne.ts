@@ -18,7 +18,7 @@ export class PreparerEnvoiCampagne implements UseCase<void> {
         private readonly importerContacts: ImporterContacts,
         private readonly configService: ConfigService,
     ) {}
-    async execute(campagneId: string): Promise<void> {
+    async execute(campagneId: string, programmationId?: string): Promise<void> {
         const campagne = (await this.campagneGateway.findById(campagneId)) as CampagneSpecifiqueModelWithRefAndGeneric;
         if (!campagne) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
@@ -44,6 +44,6 @@ export class PreparerEnvoiCampagne implements UseCase<void> {
         }
         // Créer la liste de diffusion et importer les contacts sur le fournisseur
         const contacts = await this.creerListeDiffusion.execute(campagneId);
-        await this.importerContacts.execute(campagneId, campagneFournisseur.id!, contacts);
+        await this.importerContacts.execute(campagneId, campagneFournisseur.id!, contacts, programmationId);
     }
 }

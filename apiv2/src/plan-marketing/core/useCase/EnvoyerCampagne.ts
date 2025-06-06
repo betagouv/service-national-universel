@@ -4,8 +4,10 @@ import { AssocierListeDiffusionToCampagne } from "./AssocierListeDiffusionToCamp
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
-import { EnvoiCampagneStatut } from "snu-lib";
+import { EnvoiCampagneStatut, isCampagneWithRef } from "snu-lib";
 import { ClockGateway } from "@shared/core/Clock.gateway";
+import { MettreAJourCampagne } from "./MettreAJourCampagne";
+import { CampagneModel } from "../Campagne.model";
 
 @Injectable()
 export class EnvoyerCampagne implements UseCase<void> {
@@ -17,11 +19,13 @@ export class EnvoyerCampagne implements UseCase<void> {
         @Inject(PlanMarketingGateway) private readonly planMarketingGateway: PlanMarketingGateway,
         @Inject(CampagneGateway) private readonly campagneGateway: CampagneGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
+        @Inject(MettreAJourCampagne) private readonly mettreAJourCampagne: MettreAJourCampagne,
     ) {}
     async execute(
         nomListe: string | undefined,
         campagneId: string | undefined,
         campagneProviderId: string | undefined,
+        programmationId?: string,
     ): Promise<void> {
         if (nomListe === undefined || campagneId === undefined || campagneProviderId === undefined) {
             throw new FunctionalException(
@@ -36,5 +40,18 @@ export class EnvoyerCampagne implements UseCase<void> {
             date: this.clockGateway.now(),
             statut: EnvoiCampagneStatut.TERMINE,
         });
+
+        const campagne: CampagneModel | null = await this.campagneGateway.findById(campagneId);
+        if (campagne !== null && isCampagneWithRef(campagne)) {
+            // Appel de mettreAJourCampagne pour supprimer la référence à la campagne spécifique
+            await this.mettreAJourCampagne.execute(campagne);
+        }
+        if (programmationId) {
+            await this.campagneGateway.updateProgrammationSentDate(
+                campagneId,
+                programmationId,
+                this.clockGateway.now(),
+            );
+        }
     }
 }

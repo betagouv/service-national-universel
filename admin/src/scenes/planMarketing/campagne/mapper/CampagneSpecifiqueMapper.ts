@@ -1,4 +1,4 @@
-import { PlanMarketingRoutes, isCampagneSpecifique, hasCampagneGeneriqueId, CampagneEnvoi } from "snu-lib";
+import { PlanMarketingRoutes, isCampagneSpecifique, hasCampagneGeneriqueId, CampagneEnvoi, Programmation } from "snu-lib";
 import { CampagneSpecifiqueFormData } from "../CampagneSpecifiqueForm";
 
 type CampagneApiResponse = NonNullable<PlanMarketingRoutes["SearchPlanMarketingRoute"]["response"]>[number];
@@ -20,6 +20,8 @@ interface CampagneComplete extends CampagneBase {
   destinataires: NonNullable<CampagneSpecifiqueFormData["destinataires"]>;
   type: NonNullable<CampagneSpecifiqueFormData["type"]>;
   envois?: CampagneEnvoi[];
+  isProgrammationActive: boolean;
+  programmations?: Programmation[];
 }
 
 interface CampagneSpecifiqueBase extends CampagneBase {
@@ -59,6 +61,9 @@ export class CampagneSpecifiqueMapper {
       envois: campagne.envois,
       createdAt: campagne.createdAt,
       updatedAt: campagne.updatedAt,
+      isProgrammationActive: campagne.isProgrammationActive,
+      programmations: campagne.programmations,
+      isArchived: campagne.isArchived,
     };
   }
 
@@ -88,6 +93,8 @@ export class CampagneSpecifiqueMapper {
       cohortId: formData.cohortId,
       generic: false,
       envois: formData.envois,
+      isProgrammationActive: formData.isProgrammationActive || false,
+      programmations: formData.programmations || [],
     };
     return payload;
   }
@@ -113,6 +120,8 @@ export class CampagneSpecifiqueMapper {
       envois: formData.envois,
       createdAt: formData.createdAt || now,
       updatedAt: now,
+      isProgrammationActive: formData.isProgrammationActive || false,
+      programmations: formData.programmations || [],
     };
     return payload;
   }

@@ -23,7 +23,12 @@ export class ImporterContacts implements UseCase<void> {
         @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
         private readonly config: ConfigService,
     ) {}
-    async execute(campagneId: string, campagneFournisseurId: number, contacts: string): Promise<void> {
+    async execute(
+        campagneId: string,
+        campagneFournisseurId: number,
+        contacts: string,
+        programmationId?: string,
+    ): Promise<void> {
         this.logger.log(`campagneId: ${campagneId}`);
         const campagne = (await this.campagneGateway.findById(campagneId)) as CampagneSpecifiqueModelWithRefAndGeneric;
         if (!campagne) {
@@ -48,6 +53,7 @@ export class ImporterContacts implements UseCase<void> {
                     nomListe: nomListe,
                     campagneId: campagneId,
                     campagneProviderId: String(campagneFournisseurId),
+                    programmationId: programmationId,
                 },
             },
         };
