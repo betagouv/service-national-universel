@@ -380,5 +380,27 @@ describe("CampagneGateway", () => {
 
             expect(results.some((c) => c.id === campagneOutsideRange.id)).toBeFalsy();
         });
+
+        it("should not updateCampagne when updateProgrammationSentDate", async () => {
+            const campagne = (await createCampagne({
+                nom: "Campagne To Update",
+                generic: false,
+                programmations: [
+                    {
+                        joursDecalage: 1,
+                        type: TypeEvenement.DATE_DEBUT_SEJOUR,
+                        envoiDate: new Date(),
+                    },
+                ],
+            })) as CampagneSpecifiqueModelWithoutRef;
+
+            const sentDate = new Date();
+            const result = (await campagneGateway.updateProgrammationSentDate(
+                campagne.id,
+                campagne.programmations?.[0]?.id!,
+                sentDate,
+            )) as CampagneSpecifiqueModelWithoutRef;
+            expect(result?.programmations?.[0].sentAt).toEqual(sentDate);
+        });
     });
 });

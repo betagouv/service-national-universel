@@ -133,7 +133,6 @@ describe("EnvoyerCampagneProgrammee", () => {
         })) as CampagneComplete;
 
         jest.spyOn(campagneService, "findActivesCampagnesWithProgrammationBetweenDates");
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
 
         await envoyerCampagneProgrammee.execute();
 
@@ -148,24 +147,14 @@ describe("EnvoyerCampagneProgrammee", () => {
 
         expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(2);
 
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(2);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne1.id,
-            campagne1.programmations?.[0].id,
-            fixedDate,
-        );
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne2.id,
-            campagne2.programmations?.[0].id,
-            fixedDate,
-        );
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne1.id, campagne1.programmations?.[0].id);
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne2.id, campagne2.programmations?.[0].id);
 
         const callArgs = preparerEnvoiCampagneMock.execute.mock.calls.map((call) => call[0]);
         expect(callArgs).toContain(campagne1.id);
         expect(callArgs).toContain(campagne2.id);
 
         const sentCampagne = (await campagneService.findById(campagne1.id)) as CampagneComplete;
-        expect(sentCampagne?.programmations?.[0].sentAt).toEqual(fixedDate);
     });
 
     it("should not call preparerEnvoiCampagne when no campaigns are found", async () => {
@@ -175,7 +164,6 @@ describe("EnvoyerCampagneProgrammee", () => {
         await envoyerCampagneProgrammee.execute();
 
         expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalled();
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalled();
     });
 
     it("should call preparerEnvoiCampagne for campaigns with programmation in yesterday's date", async () => {
@@ -207,17 +195,10 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
-
         await envoyerCampagneProgrammee.execute();
 
         expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(1);
-        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne.id,
-            campagne.programmations?.[0].id,
-            fixedDate,
-        );
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id, campagne.programmations?.[0].id);
     });
 
     it("should skip programmations that should not be sent", async () => {
@@ -290,28 +271,11 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
-
         await envoyerCampagneProgrammee.execute();
 
         expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(2);
-        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id);
-
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(2);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne.id,
-            campagne.programmations?.[0].id,
-            fixedDate,
-        );
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne.id,
-            campagne.programmations?.[1].id,
-            fixedDate,
-        );
-
-        const sentCampagne = (await campagneService.findById(campagne.id)) as CampagneComplete;
-        expect(sentCampagne?.programmations?.[0].sentAt).toEqual(fixedDate);
-        expect(sentCampagne?.programmations?.[1].sentAt).toEqual(fixedDate);
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id, campagne.programmations?.[0].id);
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id, campagne.programmations?.[1].id);
     });
 
     it("should not send a campagne when a programmation was already sent", async () => {
@@ -345,16 +309,11 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
-
         await envoyerCampagneProgrammee.execute();
 
-        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(campagne.id);
-
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalledWith(
+        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(
             campagne.id,
             campagne.programmations?.[0].id,
-            expect.any(Date),
         );
     });
 
@@ -394,26 +353,14 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
-
         await envoyerCampagneProgrammee.execute();
 
-        // Verify preparerEnvoiCampagne is called once for this campaign
         expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(1);
-        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id);
-
-        // Verify updateProgrammationSentDate is only called for the unsent programmation
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(1);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
-            campagne.id,
-            campagne.programmations?.[1].id,
-            fixedDate,
-        );
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalledWith(
+        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(
             campagne.id,
             campagne.programmations?.[0].id,
-            expect.any(Date),
         );
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(campagne.id, campagne.programmations?.[1].id);
     });
 
     it("should not call preparerEnvoiCampagne when campagne.isProgrammationActive === false with programmations dates in range", async () => {
@@ -465,26 +412,13 @@ describe("EnvoyerCampagneProgrammee", () => {
             ],
         })) as CampagneComplete;
 
-        jest.spyOn(campagneService, "updateProgrammationSentDate");
-
         await envoyerCampagneProgrammee.execute();
 
-        // Verify preparerEnvoiCampagne is called only for the active campaign
         expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledTimes(1);
-        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(activeCampagne.id);
-        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(inactiveCampagne.id);
-
-        // Verify updateProgrammationSentDate is only called for the active campaign
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledTimes(1);
-        expect(campagneService.updateProgrammationSentDate).toHaveBeenCalledWith(
+        expect(preparerEnvoiCampagneMock.execute).toHaveBeenCalledWith(
             activeCampagne.id,
             activeCampagne.programmations?.[0].id,
-            fixedDate,
         );
-        expect(campagneService.updateProgrammationSentDate).not.toHaveBeenCalledWith(
-            inactiveCampagne.id,
-            inactiveCampagne.programmations?.[0].id,
-            expect.any(Date),
-        );
+        expect(preparerEnvoiCampagneMock.execute).not.toHaveBeenCalledWith(inactiveCampagne.id);
     });
 });
