@@ -5,7 +5,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { isCampagneWithRef } from "snu-lib";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
-import { EmailParams } from "@notification/core/Notification";
+import { EmailTestParams, EmailTemplate } from "@notification/core/Notification";
 
 @Injectable()
 export class CampagneService {
@@ -73,7 +73,7 @@ export class CampagneService {
             }
             templateId = genericCampagne.templateId;
         }
-        await this.notificationGateway.sendDefaultEmail<EmailParams>(
+        await this.notificationGateway.sendEmail<EmailTestParams>(
             {
                 to: [
                     {
@@ -81,8 +81,9 @@ export class CampagneService {
                         name: auteur.prenom + " " + auteur.nom,
                     },
                 ],
+                templateId: templateId.toString(),
             },
-            templateId.toString(),
+            EmailTemplate.ENVOYER_MAIL_TEST,
         );
     }
 }

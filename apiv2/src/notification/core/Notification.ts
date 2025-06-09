@@ -51,7 +51,13 @@ export interface BasculeJeuneParams extends EmailParams {
     nouvelleSessionNom?: string;
 }
 
+export interface EmailTestParams extends EmailParams {
+    templateId: string;
+}
+
 export enum EmailTemplate {
+    // GENERIQUE
+    ENVOYER_MAIL_TEST = "test",
     // CLE
     VERIFIER_CLASSE_EMAIL_ADMIN_CLE = "2084",
     VERIFIER_CLASSE_EMAIL_REFERENT_DEP_REG = "2085",

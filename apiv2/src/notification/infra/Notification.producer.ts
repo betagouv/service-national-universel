@@ -9,16 +9,6 @@ import { Queue } from "bullmq";
 export class NotificationProducer implements NotificationGateway {
     constructor(@InjectQueue(QueueName.EMAIL) private emailQueue: Queue) {}
     async sendEmail<T>(params: T, template: EmailTemplate): Promise<void> {
-        await this.emailQueue.add(template, {
-            ...params,
-            __emailType: "template" as const,
-        });
-    }
-
-    async sendDefaultEmail<T>(params: T, template: string): Promise<void> {
-        await this.emailQueue.add(template, {
-            ...params,
-            __emailType: "default" as const,
-        });
+        await this.emailQueue.add(template, params);
     }
 }
