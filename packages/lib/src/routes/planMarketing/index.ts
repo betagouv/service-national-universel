@@ -95,9 +95,9 @@ interface EnvoyerPlanMarketingRoute extends BasicRoute {
   response: RouteResponseBodyV2<void>;
 }
 
-interface EnvoyerTestPlanMarketingRoute extends BasicRoute {
+interface EnvoyerEmailTestPlanMarketingRoute extends BasicRoute {
   method: "POST";
-  path: "/campagne/{id}/envoyerTest";
+  path: "/campagne/{id}/envoyer-email-test";
   response: RouteResponseBodyV2<void>;
 }
 
@@ -110,5 +110,5 @@ export type PlanMarketingRoutes = {
   CreateDistributionList: CreateDistributionListBrevoRoute;
   ListeDiffusionRoutes: ListeDiffusionRoutes;
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
-  EnvoyerTestPlanMarketingRoute: EnvoyerTestPlanMarketingRoute;
+  EnvoyerTestPlanMarketingRoute: EnvoyerEmailTestPlanMarketingRoute;
 };

@@ -8,7 +8,7 @@ export const useSendMailTest = () => {
 
   const { mutate: sendTest } = useMutation({
     mutationFn: (id: string) => {
-      return PlanMarketingService.envoyerTest(id);
+      return PlanMarketingService.envoyerEmailTest(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries();
