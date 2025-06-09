@@ -110,5 +110,5 @@ export type PlanMarketingRoutes = {
   CreateDistributionList: CreateDistributionListBrevoRoute;
   ListeDiffusionRoutes: ListeDiffusionRoutes;
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
-  EnvoyerTestPlanMarketingRoute: EnvoyerEmailTestPlanMarketingRoute;
+  EnvoyerEmailTestPlanMarketingRoute: EnvoyerEmailTestPlanMarketingRoute;
 };
