@@ -16,7 +16,6 @@ export class EmailConsumer extends WorkerHost {
     }
     async process(job: Job<EmailParams, any, EmailTemplate>): Promise<ConsumerResponse> {
         this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
-
         return this.emailProvider
             .send(job.name, job.data)
             .then(() => {
