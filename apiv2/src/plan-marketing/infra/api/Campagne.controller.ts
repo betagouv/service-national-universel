@@ -67,7 +67,7 @@ export class CampagneController {
     async envoyerTest(
         @Request() request: CustomRequest,
         @Param("id") campagneId: string,
-    ): Promise<PlanMarketingRoutes["EnvoyerTestPlanMarketingRoute"]["response"]> {
+    ): Promise<PlanMarketingRoutes["EnvoyerEmailTestPlanMarketingRoute"]["response"]> {
         if (!request.user.email) {
             throw new Error("User email is required for sending test emails");
         }
