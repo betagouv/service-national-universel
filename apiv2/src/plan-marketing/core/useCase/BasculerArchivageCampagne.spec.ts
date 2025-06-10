@@ -120,7 +120,7 @@ describe("BasculerArchivageCampagne", () => {
                 type: campagneGenerique.type,
                 envois: campagneGenerique.envois,
                 programmations: campagneGenerique.programmations,
-                isProgrammationActive: campagneGenerique.isProgrammationActive,
+                isProgrammationActive: false,
                 isArchived: true,
             };
 
@@ -151,7 +151,7 @@ describe("BasculerArchivageCampagne", () => {
                 listeDiffusionId: "list1",
                 destinataires: [DestinataireListeDiffusion.JEUNES],
                 type: CampagneJeuneType.VOLONTAIRE,
-                isProgrammationActive: true,
+                isProgrammationActive: false,
             };
 
             const campagneGenerique: CampagneGeneriqueModel = {
@@ -165,7 +165,7 @@ describe("BasculerArchivageCampagne", () => {
                 type: CampagneJeuneType.VOLONTAIRE,
                 programmations: [],
                 isProgrammationActive: true,
-                isArchived: true,
+                isArchived: false,
             };
 
             const expectedCampagneSpecifiqueWithoutRef: CampagneSpecifiqueModelWithoutRef = {
@@ -181,7 +181,7 @@ describe("BasculerArchivageCampagne", () => {
                 type: campagneGenerique.type,
                 envois: campagneGenerique.envois,
                 programmations: campagneGenerique.programmations,
-                isProgrammationActive: campagneGenerique.isProgrammationActive,
+                isProgrammationActive: false,
                 isArchived: false,
             };
 

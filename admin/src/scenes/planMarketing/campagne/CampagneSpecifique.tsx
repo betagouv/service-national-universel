@@ -215,7 +215,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             ) : (
               <div>
                 <p>La campagne spécifique sera archivée et la programmation sera désactivée.</p>
-                <p>La campagne spécifique sera détachée de la campagne générique</p>
+                {selectedCampagne?.campagneGeneriqueId && <p>La campagne spécifique sera détachée de la campagne générique</p>}
               </div>
             )}
           </div>

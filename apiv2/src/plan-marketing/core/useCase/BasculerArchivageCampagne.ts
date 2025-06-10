@@ -23,6 +23,9 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
                 throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
             }
 
+            const basculerIsArchived = !(campagne as CampagneSpecifiqueModelWithRefAndGeneric).isArchived;
+            const basculerIsProgrammationActive = false;
+
             const campagneSpecifiqueWithRefToCampagneSpecifiqueWithouRef: CampagneSpecifiqueModelWithoutRef = {
                 id: campagne.id,
                 generic: false,
@@ -36,8 +39,8 @@ export class BasculerArchivageCampagne implements UseCase<CampagneModel | null> 
                 type: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).type,
                 envois: campagneGenerique.envois,
                 programmations: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).programmations,
-                isProgrammationActive: (campagneGenerique as CampagneSpecifiqueModelWithoutRef).isProgrammationActive,
-                isArchived: !(campagne as CampagneSpecifiqueModelWithRefAndGeneric).isArchived,
+                isProgrammationActive: basculerIsProgrammationActive,
+                isArchived: basculerIsArchived,
             };
 
             return await this.campagneService.updateAndRemoveRef(campagneSpecifiqueWithRefToCampagneSpecifiqueWithouRef);
