@@ -1,12 +1,14 @@
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Inject, Param, Post, Put, Query, UseGuards, Request } from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel } from "../../core/Campagne.model";
+import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
 import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvoiCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
+import { CustomRequest } from "@shared/infra/CustomRequest";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -59,5 +61,22 @@ export class CampagneController {
         @Param("id") campagneId: string,
     ): Promise<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]["response"]> {
         return await this.preparerEnvoiCampagne.execute(campagneId);
+    }
+
+    @Post(":id/envoyer-email-test")
+    async envoyerTest(
+        @Request() request: CustomRequest,
+        @Param("id") campagneId: string,
+    ): Promise<PlanMarketingRoutes["EnvoyerEmailTestPlanMarketingRoute"]["response"]> {
+        if (!request.user.email) {
+            throw new Error("User email is required for sending test emails");
+        }
+        const destinataire: ReferentModelLight = {
+            id: request.user.id || "id",
+            prenom: request.user.prenom || "Prenom",
+            nom: request.user.nom || "Nom",
+            email: request.user.email,
+        };
+        return await this.campagneService.sendMailTest(campagneId, destinataire);
     }
 }

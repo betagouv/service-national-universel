@@ -8,6 +8,7 @@ import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import { useLocation } from "react-router-dom";
 import { useSearchTerm } from "../hooks/useSearchTerm";
+import { useSendMailTest } from "../hooks/SendMailTest";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
@@ -20,6 +21,7 @@ export default function CampagnesGeneriques() {
     filteredItems: filteredCampagnes,
   } = useSearchTerm<CampagneDataProps>(campagnes as CampagneDataProps[], (campagne) => campagne.nom, { sortBy: "createdAt" });
 
+  const { sendTest } = useSendMailTest();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const targetId = searchParams.get("id");
@@ -128,6 +130,7 @@ export default function CampagnesGeneriques() {
                 refetchCampagnes();
               }}
               onDuplicate={(campagneData) => handleDuplicate(campagneData)}
+              onSendTest={sendTest}
               forceOpen={campagne.id === openCampagneId || (campagne.id ? keepOpenCampagneIds.has(campagne.id) : false)}
             />
           </div>

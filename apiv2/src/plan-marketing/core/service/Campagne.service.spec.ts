@@ -5,6 +5,7 @@ describe("CampagneService", () => {
     let service: CampagneService;
     let mockCampagneGateway: any;
     let mockPlanMarketingGateway: any;
+    let mockNotificationGateway: any;
 
     beforeEach(() => {
         mockCampagneGateway = {
@@ -15,7 +16,7 @@ describe("CampagneService", () => {
             findTemplateById: jest.fn(),
         };
 
-        service = new CampagneService(mockCampagneGateway, mockPlanMarketingGateway);
+        service = new CampagneService(mockCampagneGateway, mockPlanMarketingGateway, mockNotificationGateway);
     });
 
     it("should create a campaign successfully", async () => {
