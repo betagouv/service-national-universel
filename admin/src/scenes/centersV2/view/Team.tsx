@@ -198,6 +198,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
       const responseSession = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, {
         referentId: responseInvitation?.data?._id,
+        role: responseInvitation?.data?.role,
       });
 
       if (!responseSession?.ok) throw new Error(responseSession?.code);
