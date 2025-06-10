@@ -65,8 +65,12 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
     return filteredCampaigns.filter((campagne) => !isCampaignDisabled(campagne.id));
   }, [filteredCampaigns, isCampaignDisabled]);
 
+  const selectableCampaignsNonArchived = useMemo(() => {
+    return allSelectableCampaigns.filter((campagne) => !campagne.isArchived);
+  }, [allSelectableCampaigns]);
+
   const toggleSelectAll = (checked: boolean) => {
-    setSelectedCampaigns(checked ? allSelectableCampaigns.filter((campagne) => !campagne.isArchived).map((campagne) => campagne.id) : []);
+    setSelectedCampaigns(checked ? selectableCampaignsNonArchived.map((campagne) => campagne.id) : []);
   };
 
   const toggleSelectCampaign = (campaignId: string, checked: boolean) => {
@@ -105,7 +109,7 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
               <div className="flex items-center gap-2">
                 <InputCheckbox
                   name="selectAll"
-                  checked={selectedCampaigns.length === allSelectableCampaigns.length && allSelectableCampaigns.length > 0}
+                  checked={selectedCampaigns.length === selectableCampaignsNonArchived.length && selectableCampaignsNonArchived.length > 0}
                   onChange={(e) => toggleSelectAll(e.target.checked)}
                   label="Tout sélectionner"
                 />

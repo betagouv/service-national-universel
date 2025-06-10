@@ -74,15 +74,12 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   });
 
   const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
-    const currentFilters = watch("filters");
-    if (JSON.stringify(currentFilters) !== JSON.stringify(filters)) {
-      setValue("filters", filters, {
-        shouldDirty: true,
-        shouldTouch: true,
-        shouldValidate: true,
-      });
-      setSelectedFilters(filters);
-    }
+    setValue("filters", filters, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+    setSelectedFilters(filters);
   };
 
   const isEditing = listeDiffusionData.id !== undefined;

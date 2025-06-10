@@ -112,8 +112,10 @@ export const useCampagneForm = (formData: DraftCampagneDataProps, onSave: (campa
       (formData.programmations &&
         state.programmations &&
         formData.programmations.some((p, i) => {
-          const other = state.programmations?.[i];
-          return JSON.stringify(p) !== JSON.stringify(other);
+          const stateProgrammation = state.programmations?.[i];
+          if (!stateProgrammation) return true;
+
+          return p.joursDecalage !== stateProgrammation.joursDecalage || p.type !== stateProgrammation.type || p.envoiDate?.getTime() !== stateProgrammation.envoiDate?.getTime();
         }));
 
     return (
