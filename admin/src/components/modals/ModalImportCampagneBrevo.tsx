@@ -66,7 +66,7 @@ export const ModalImportCampagneBrevo = ({ isOpen, onClose, onConfirm, cohort, c
   }, [filteredCampaigns, isCampaignDisabled]);
 
   const toggleSelectAll = (checked: boolean) => {
-    setSelectedCampaigns(checked ? allSelectableCampaigns.map((campagne) => campagne.id) : []);
+    setSelectedCampaigns(checked ? allSelectableCampaigns.filter((campagne) => !campagne.isArchived).map((campagne) => campagne.id) : []);
   };
 
   const toggleSelectCampaign = (campaignId: string, checked: boolean) => {
