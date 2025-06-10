@@ -37,6 +37,7 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
   const initialFiltersRef = useRef<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
 
+
   const {
     control,
     handleSubmit,
@@ -52,10 +53,11 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   });
 
   useEffect(() => {
+    const filtersToUse = listeDiffusionData.filters || {};
     reset(
       {
         type: ListeDiffusionEnum.VOLONTAIRES,
-        filters: selectedFilters,
+        filters: filtersToUse,
         ...listeDiffusionData,
       },
       {
@@ -63,9 +65,10 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
         keepErrors: false,
       },
     );
-    setSelectedFilters(selectedFilters || {});
+
+    setSelectedFilters(filtersToUse);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listeDiffusionData, reset]);
+  }, [listeDiffusionData, reset, forceOpen]);
 
   watch((currentState, { name }) => {
     if (name === "type") {
@@ -95,9 +98,10 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
   };
 
   const handleOnSave = (data: ListeDiffusionDataProps) => {
-    const dataToSave = { ...data, filters: selectedFilters };
+    const dataToSave = { ...data, filters: { ...selectedFilters, ...data.filters } };
     initialFiltersRef.current = selectedFilters;
-    setSelectedFilters(selectedFilters);
+    reset();
+    setSelectedFilters(initialFiltersRef.current);
     onSave(dataToSave);
   };
 
