@@ -59,6 +59,7 @@ export interface YoungDto {
   cohortChangeReason?: string;
   cohortDetailedChangeReason?: string;
   phase?: string;
+  accountStatus?: string;
   status?: string;
   statusPhase1?: string;
   statusPhase1Tmp?: string;
@@ -328,4 +329,5 @@ export interface YoungDto {
   presenceJDM?: string;
   departSejourAt?: string;
   cohesionStayMedicalFileReceived?: string;
+  acceptCGU?: string;
 }

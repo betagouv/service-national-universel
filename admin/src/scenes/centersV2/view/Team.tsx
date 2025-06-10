@@ -170,6 +170,10 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         });
         return {};
       }
+      if (referent.role !== teamate.role) {
+        toastr.error("Erreur", "Ce membre a déjà un rôle sur la plateforme. Un utilisateur ne peut pas avoir plusieurs rôles.");
+        return {};
+      }
 
       return setDirectionCenterMutation.mutate(referent._id);
     } catch (e) {
