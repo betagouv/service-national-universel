@@ -63,7 +63,7 @@ export class CampagneController {
         return await this.preparerEnvoiCampagne.execute(campagneId);
     }
 
-    @Post(":id/envoyerTest")
+    @Post(":id/envoyer-email-test")
     async envoyerTest(
         @Request() request: CustomRequest,
         @Param("id") campagneId: string,
