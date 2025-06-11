@@ -166,7 +166,10 @@ const formatDateTimeZone = (date) => {
 const formatDateForInput = (dateString: string | Date | null | undefined): string => {
   if (!dateString) return "";
   const date = new Date(dateString);
-  return date.toISOString().slice(0, 16);
+
+  // Format pour les inputs HTML datetime-local (YYYY-MM-DDTHH:mm)
+  const parisDate = getZonedDate(date, "Europe/Paris");
+  return parisDate.toISOString().slice(0, 16);
 };
 
 const setToEndOfDay = (date: Date): Date => {

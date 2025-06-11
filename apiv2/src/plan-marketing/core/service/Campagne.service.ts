@@ -5,6 +5,8 @@ import {
     CreateCampagneModel,
     CampagneComplete,
     CampagneModelWithNomSession,
+    CreateCampagneSpecifiqueModelWithRef,
+    CreateCampagneSpecifiqueModelWithoutRef,
 } from "@plan-marketing/core/Campagne.model";
 import { DatesSession } from "@plan-marketing/core/Programmation.model";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
@@ -13,6 +15,7 @@ import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { ProgrammationService } from "./Programmation.service";
 import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
+import { ClockGateway } from "@shared/core/Clock.gateway";
 @Injectable()
 export class CampagneService {
     private readonly logger: Logger = new Logger(CampagneService.name);
@@ -22,6 +25,7 @@ export class CampagneService {
         @Inject(PlanMarketingGateway) private readonly PlanMarketingGateway: PlanMarketingGateway,
         private readonly programmationService: ProgrammationService,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
+        @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
     ) {}
 
     async findById(id: string) {
@@ -80,6 +84,7 @@ export class CampagneService {
 
     async creerCampagne(campagne: CreateCampagneModel) {
         if (isCampagneWithRef(campagne)) {
+            await this.checkCampagneSpecifiqueExists(campagne);
             return this.campagneGateway.save(campagne);
         }
 
@@ -87,6 +92,7 @@ export class CampagneService {
         if (!template) {
             throw new FunctionalException(FunctionalExceptionCode.TEMPLATE_NOT_FOUND);
         }
+
         return this.campagneGateway.save(campagne);
     }
 
@@ -192,34 +198,6 @@ export class CampagneService {
         return this.campagneGateway.updateProgrammationSentDate(campagneId, programmationId, sentDate);
     }
 
-    private extractSessionIds(campagnes: CampagneModel[]): Set<string> {
-        const sessionIds = new Set<string>();
-        campagnes.forEach((campagne) => {
-            if ("cohortId" in campagne) {
-                sessionIds.add(campagne.cohortId);
-            }
-        });
-        return sessionIds;
-    }
-
-    private createDatesSessionFromSession(session: unknown): DatesSession {
-        if (!session || typeof session !== "object") {
-            throw new Error("Invalid session object");
-        }
-
-        const sessionObj = session as Record<string, unknown>;
-
-        return {
-            dateStart: sessionObj.dateStart as Date,
-            dateEnd: sessionObj.dateEnd as Date,
-            inscriptionStartDate: sessionObj.inscriptionStartDate as Date,
-            inscriptionEndDate: sessionObj.inscriptionEndDate as Date,
-            inscriptionModificationEndDate: sessionObj.inscriptionModificationEndDate as Date,
-            instructionEndDate: sessionObj.instructionEndDate as Date,
-            validationDate: sessionObj.validationDate as Date,
-        };
-    }
-
     async findCampagneSpecifiquesByCampagneGeneriqueId(
         campagneGeneriqueId: string,
     ): Promise<CampagneModelWithNomSession[]> {
@@ -243,5 +221,51 @@ export class CampagneService {
             const session = sessionsMap.get(campagne.cohortId);
             return { ...campagne, nomSession: session?.nom || "" };
         });
+    }
+
+    private extractSessionIds(campagnes: CampagneModel[]): Set<string> {
+        const sessionIds = new Set<string>();
+        campagnes.forEach((campagne) => {
+            if ("cohortId" in campagne) {
+                sessionIds.add(campagne.cohortId);
+            }
+        });
+        return sessionIds;
+    }
+
+    private createDatesSessionFromSession(session: unknown): DatesSession {
+        if (!session || typeof session !== "object") {
+            throw new Error("Invalid session object");
+        }
+
+        const sessionObj = session as Record<string, unknown>;
+
+        // Validation date is optional, if not set, we compute it from the dateStart and daysToValidate
+        const validationDate = sessionObj.validationDate ? sessionObj.validationDate as Date : this.clockGateway.addDays(new Date(sessionObj.dateStart as Date), sessionObj.daysToValidate as number);
+
+        return {
+            dateStart: sessionObj.dateStart as Date,
+            dateEnd: sessionObj.dateEnd as Date,
+            inscriptionStartDate: sessionObj.inscriptionStartDate as Date,
+            inscriptionEndDate: sessionObj.inscriptionEndDate as Date,
+            inscriptionModificationEndDate: sessionObj.inscriptionModificationEndDate as Date,
+            instructionEndDate: sessionObj.instructionEndDate as Date,
+            validationDate,
+        };
+    }
+
+    private async checkCampagneSpecifiqueExists(campagneSpecifique: CreateCampagneSpecifiqueModelWithRef | CreateCampagneSpecifiqueModelWithoutRef) {
+        if (!campagneSpecifique.campagneGeneriqueId) {
+            return;
+        }
+
+        const campagnesSpecifiques = await this.campagneGateway.findCampagneSpecifiquesByCampagneGeneriqueId(campagneSpecifique.campagneGeneriqueId);
+        const campagneExiste = campagnesSpecifiques.some(
+            (campagneSpecifiqueExistante) => campagneSpecifiqueExistante.cohortId === campagneSpecifique.cohortId
+        );
+
+        if (campagneExiste) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_ALREADY_EXISTS_FOR_COHORT);
+        }
     }
 }

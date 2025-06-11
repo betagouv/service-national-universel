@@ -14,7 +14,7 @@ export default function ListeDiffusion() {
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
   const [keepOpenListeIds, setKeepOpenListeIds] = useState<Set<string>>(new Set());
   const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions } = useListeDiffusionFilters({});
-  const { filters, setFilters } = usePlanMarketingFilters<ListeDiffusionFilters>(() => {}, {});
+  const { filters, setFilters } = usePlanMarketingFilters<ListeDiffusionFilters>(() => {}, { isArchived: false });
   const { listesDiffusion, saveListeDiffusion, toggleArchivageListeDiffusion, isToggleArchivagePending } = useListeDiffusion(filters);
 
   const allListes = useMemo(() => {

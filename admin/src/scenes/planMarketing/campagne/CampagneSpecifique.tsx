@@ -23,7 +23,7 @@ export interface CampagnesGeneriquesImportData {
 export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps) {
   const sessionId = session._id!;
 
-  const { filters, setFilters } = usePlanMarketingFilters<CampagneSpecifiqueFilters>(() => {}, {});
+  const { filters, setFilters } = usePlanMarketingFilters<CampagneSpecifiqueFilters>(() => {}, { isArchived: false });
   const { campagnes, saveCampagne, sendCampagne, toggleArchivageCampagne, isToggleArchivagePending } = useCampagneSpecifique({
     sessionId,
     filters,
@@ -215,6 +215,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
             ) : (
               <div>
                 <p>La campagne spécifique sera archivée et la programmation sera désactivée.</p>
+                {selectedCampagne?.campagneGeneriqueId && <p>La campagne spécifique sera détachée de la campagne générique</p>}
               </div>
             )}
           </div>

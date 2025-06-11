@@ -11,7 +11,7 @@ import { CampagneEnvoi } from "@plan-marketing/core/Campagne.model";
 import { CAMPAGNE_MONGOOSE_ENTITY, CampagneDocument } from "./CampagneMongo.provider";
 import { CampagneMapper } from "./Campagne.mapper";
 import { buildFilter } from "./PlanMarketingFilterBuilder.util";
-import { isCampagneSansRef, isCampagneWithRef } from "snu-lib";
+import { isCampagneSansRef, isCampagneWithRef, isCampagneGenerique } from "snu-lib";
 
 @Injectable()
 export class CampagneMongoRepository implements CampagneGateway {
@@ -68,9 +68,10 @@ export class CampagneMongoRepository implements CampagneGateway {
         return updated ? CampagneMapper.toModel(updated) : null;
     }
     async search(filter?: Record<string, any>, sort?: "ASC" | "DESC"): Promise<CampagneModel[]> {
-        const mongoFilter = this.buildMongoFilter(filter);
+        const { isArchived, isProgrammationActive, ...restFilter } = filter || {};
+        const mongoFilter = this.buildMongoFilter(restFilter);
         const campagnes = await this.campagneEntity.find(mongoFilter).sort({ createdAt: sort === "ASC" ? 1 : -1 });
-        return Promise.all(
+        const campagnesModels = await Promise.all(
             campagnes.map(async (campagne) => {
                 const campagneModel = CampagneMapper.toModel(campagne);
                 if (isCampagneWithRef(campagneModel)) {
@@ -92,8 +93,26 @@ export class CampagneMongoRepository implements CampagneGateway {
                     }
                 }
                 return campagneModel;
-            }),
+            })
         );
+
+        return campagnesModels.filter((campagne) => {
+            if (typeof isArchived === "boolean") {
+                if (isCampagneGenerique(campagne) || isCampagneWithRef(campagne) || isCampagneSansRef(campagne)) {
+                    if ((campagne as any).isArchived !== isArchived) {
+                        return false;
+                    }
+                }
+            }
+            if (typeof isProgrammationActive === "boolean") {
+                if (isCampagneGenerique(campagne) || isCampagneWithRef(campagne) || isCampagneSansRef(campagne)) {
+                    if ((campagne as any).isProgrammationActive !== isProgrammationActive) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        });
     }
 
     async save(campagne: CreateCampagneModel): Promise<CampagneModel> {
@@ -163,7 +182,6 @@ export class CampagneMongoRepository implements CampagneGateway {
             return null;
         }
         programmation.sentAt = sentDate;
-
         const updated = await campagne.save();
         return updated ? CampagneMapper.toModel(updated) : null;
     }
