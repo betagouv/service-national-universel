@@ -35,6 +35,9 @@ describe("CampagneService", () => {
                 return newDate;
             },
         };
+        mockNotificationGateway = {
+            sendEmail: jest.fn(),
+        };
 
         service = new CampagneService(
             mockCampagneGateway,

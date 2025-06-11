@@ -20,6 +20,7 @@ import { PlanMarketingMockProvider } from "@plan-marketing/infra/provider/PlanMa
 import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ClockProvider } from "@shared/infra/Clock.provider";
 import { QueueName } from "@shared/infra/Queue";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 export interface SetupOptions {
     newContainer: boolean;
@@ -47,6 +48,10 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
         add: jest.fn(),
     };
 
+    const mockNotificationGateway: any = {
+        sendEmail: jest.fn(),
+    };
+
     planMarketingTestModule = await Test.createTestingModule({
         imports: [
             ClsModule.forRoot({}),
@@ -66,6 +71,7 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
             ProgrammationService,
             CampagneService,
             { provide: ClockGateway, useClass: ClockProvider },
+            { provide: NotificationGateway, useValue: mockNotificationGateway },
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))
