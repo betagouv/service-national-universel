@@ -10,10 +10,12 @@ import {
     Put,
     Query,
     UseGuards,
+    Request,
     ParseBoolPipe,
 } from "@nestjs/common";
 import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
 import { CampagneModel, CampagneModelWithNomSession } from "../../core/Campagne.model";
+import { ReferentModelLight } from "@admin/core/iam/Referent.model";
 import { CampagneGateway } from "../../core/gateway/Campagne.gateway";
 import { CreateCampagneDto, EnvoyerCampagneDto, UpdateCampagneDto } from "./Campagne.validation";
 import { MettreAJourCampagne } from "@plan-marketing/core/useCase/MettreAJourCampagne";
@@ -21,6 +23,7 @@ import { PreparerEnvoiCampagne } from "@plan-marketing/core/useCase/PreparerEnvo
 import { BasculerArchivageCampagne } from "@plan-marketing/core/useCase/BasculerArchivageCampagne";
 import { PlanMarketingRoutes } from "snu-lib";
 import { MettreAJourActivationProgrammationSpecifique } from "@plan-marketing/core/useCase/MettreAJourActivationProgrammationSpecifique";
+import { CustomRequest } from "@shared/infra/CustomRequest";
 
 @Controller("campagne")
 @UseGuards(SuperAdminGuard)
@@ -101,5 +104,22 @@ export class CampagneController {
     @Post(":id/toggle-archivage")
     async toggleArchivage(@Param("id") id: string): Promise<CampagneModel | null> {
         return await this.basculerArchivageCampagne.execute(id);
+    }
+
+    @Post(":id/envoyer-email-test")
+    async envoyerTest(
+        @Request() request: CustomRequest,
+        @Param("id") campagneId: string,
+    ): Promise<PlanMarketingRoutes["EnvoyerEmailTestPlanMarketingRoute"]["response"]> {
+        if (!request.user.email) {
+            throw new Error("User email is required for sending test emails");
+        }
+        const destinataire: ReferentModelLight = {
+            id: request.user.id || "id",
+            prenom: request.user.prenom || "Prenom",
+            nom: request.user.nom || "Nom",
+            email: request.user.email,
+        };
+        return await this.campagneService.sendMailTest(campagneId, destinataire);
     }
 }

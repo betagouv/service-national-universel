@@ -3,7 +3,7 @@ name: Anonymize (CRON)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "23 2 * * 3" # Every wednesday at 02:23 UTC
+    - cron: "23 2 * * 4" # Every thursday at 02:23 UTC - TODO : switch to wednesday
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}

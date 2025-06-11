@@ -58,6 +58,7 @@ export interface CampagneSpecifiqueFormProps {
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
   onSend: (id: string, disableProgrammation?: boolean) => void;
+  onSendTest: (id: string) => void;
   forceOpen?: boolean;
   onToggleArchive?: (campagne: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined }) => void;
 }
@@ -76,7 +77,7 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false, onToggleArchive }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false, onToggleArchive, onSendTest }, ref) => {
     const {
       control,
       handleSubmit,
@@ -185,6 +186,12 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
       }
     };
 
+    const handleSendTest = () => {
+      if (campagneData.id) {
+        onSendTest(campagneData.id);
+      }
+    };
+
     const isNotSaved = isDirty && !isSubmitting;
     const hasCampagneGenerique = hasCampagneGeneriqueId(campagneData);
     const templateErrorMessage = errors.templateId?.type === "api" ? errors.templateId.message : undefined;
@@ -288,11 +295,21 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     )}
                   />
                   {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-                  <div className="block mt-2">
+                  <div className="flex mt-2 justify-between">
                     <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center">
                       Voir l'aperçu
                       <HiOutlineEye className="ml-1" size={18} />
                     </a>
+                    {campagneData.id && (
+                      <div className="flex items-center gap-2">
+                        <p onClick={handleSendTest} className="text-blue-600 inline-flex items-center hover:text-blue-800 hover:cursor-pointer">
+                          Envoyer un test
+                        </p>
+                        <Tooltip id="id-send-mail-test" title="Le test sera envoyé sur l’adresse mail de votre compte.">
+                          <HiOutlineInformationCircle className="text-blue-600" size={18} />
+                        </Tooltip>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>

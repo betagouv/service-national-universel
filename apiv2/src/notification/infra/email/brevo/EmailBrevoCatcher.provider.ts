@@ -1,7 +1,7 @@
 import * as brevo from "@getbrevo/brevo";
 
 import { ReferentModel } from "@admin/core/iam/Referent.model";
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { Inject, Injectable } from "@nestjs/common";
 import { EmailParams, EmailTemplate } from "@notification/core/Notification";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 // import nodemailer from "nodemailer";

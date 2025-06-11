@@ -11,6 +11,7 @@ describe("CampagneService", () => {
     let mockSessionGateway: any;
     let mockClockGateway: any;
     let loggerSpy: jest.SpyInstance;
+    let mockNotificationGateway: any;
 
     beforeEach(() => {
         mockCampagneGateway = {
@@ -40,7 +41,8 @@ describe("CampagneService", () => {
             mockPlanMarketingGateway,
             mockProgrammationService,
             mockSessionGateway,
-            mockClockGateway
+            mockClockGateway,
+            mockNotificationGateway
         );
 
         loggerSpy = jest.spyOn(Logger.prototype, "log").mockImplementation(() => {});

@@ -123,6 +123,12 @@ interface GetCampagneSpecifiquesByCampagneGeneriqueIdRoute extends BasicRoute {
   response: RouteResponseBodyV2<CampagneModelWithNomSession[]>;
 }
 
+interface EnvoyerEmailTestPlanMarketingRoute extends BasicRoute {
+  method: "POST";
+  path: "/campagne/{id}/envoyer-email-test";
+  response: RouteResponseBodyV2<void>;
+}
+
 export type PlanMarketingRoutes = {
   GetPlanMarketingRoute: GetPlanMarketingRoute;
   CreatePlanMarketingRoute: CreatePlanMarketingRoute;
@@ -134,4 +140,5 @@ export type PlanMarketingRoutes = {
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
   ToggleArchivagePlanMarketingRoute: ToggleArchivagePlanMarketingRoute;
   GetCampagneSpecifiquesByCampagneGeneriqueIdRoute: GetCampagneSpecifiquesByCampagneGeneriqueIdRoute;
+  EnvoyerEmailTestPlanMarketingRoute: EnvoyerEmailTestPlanMarketingRoute;
 };

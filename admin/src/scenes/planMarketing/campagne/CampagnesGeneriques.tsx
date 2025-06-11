@@ -12,6 +12,7 @@ import { useCampagneForm } from "./CampagneFormHook";
 import { useSearchTerm } from "../hooks/useSearchTerm";
 import PlanMarketingFilters, { CampagneGeneriqueFilters } from "../components/filters/PlanMarketingFilters";
 import { usePlanMarketingFilters } from "../components/filters/PlanMarketingFiltersHook";
+import { useSendMailTest } from "../hooks/SendMailTest";
 
 export default function CampagnesGeneriques() {
   const [campagnes, setCampagnes] = useState<DraftCampagneDataProps[]>([]);
@@ -43,6 +44,7 @@ export default function CampagnesGeneriques() {
     filteredItems: filteredCampagnes,
   } = useSearchTerm<CampagneDataProps>(campagnes as CampagneDataProps[], (campagne) => campagne.nom, { sortBy: "createdAt" });
 
+  const { sendTest } = useSendMailTest();
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
   const targetId = searchParams.get("id");
@@ -170,7 +172,7 @@ export default function CampagnesGeneriques() {
           <div className="p-8 text-center text-gray-500">Aucune campagne trouvée</div>
         ) : (
           filteredCampagnes.map((campagne) => (
-            <div key={`campagne-${campagne.id || Math.random()}`} ref={campagne.id ? refCallbacks[campagne.id] : null}>
+            <div key={`campagne-${campagne.id}`} ref={campagne.id ? refCallbacks[campagne.id] : null}>
               <CampagneForm
                 campagneData={campagne}
                 isDupliquerCampagneDisabled={isNouvelleCampagneDisabled}
@@ -184,6 +186,7 @@ export default function CampagnesGeneriques() {
                 onDuplicate={(campagneData) => handleDuplicate(campagneData)}
                 forceOpen={campagne.id === openCampagneId || (campagne.id ? keepOpenCampagneIds.has(campagne.id) : false)}
                 onToggleArchive={handleToggleArchivageCampagne}
+                onSendTest={sendTest}
               />
             </div>
           ))

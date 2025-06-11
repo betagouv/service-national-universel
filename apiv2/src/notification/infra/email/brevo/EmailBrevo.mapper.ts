@@ -1,6 +1,7 @@
 import {
     BasculeJeuneParams,
     EmailParams,
+    EmailTestParams,
     EmailWithMessage,
     EmailTemplate,
     InviterReferentClasseParams,
@@ -42,6 +43,11 @@ export class EmailBrevoMapper {
 
             case EmailTemplate.DESISTEMENT_PAR_TIERS:
                 return this.mapEmailWithMessageToBrevo(template, emailParams as EmailWithMessage);
+
+            case EmailTemplate.ENVOYER_MAIL_TEST:
+                const testParams = emailParams as EmailTestParams;
+                const dynamicTemplate = testParams.templateId as EmailTemplate;
+                return this.mapGenericEmailToBrevo(dynamicTemplate, emailParams);
 
             default:
                 throw new Error(`Template ${template} not supported`);

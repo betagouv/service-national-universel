@@ -39,9 +39,12 @@ import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagnePr
 import { BasculerArchivageCampagne } from "./core/useCase/BasculerArchivageCampagne";
 import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/MettreAJourActivationProgrammationSpecifique";
 import { BasculerArchivageListeDiffusion } from "./core/useCase/BasculerArchivageListeDiffusion";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { NotificationProducer } from "@notification/infra/Notification.producer";
+import { NotificationModule } from "@notification/Notification.module";
 
 @Module({
-    imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule],
+    imports: [ConfigModule, TaskModule, DatabaseModule, AnalyticsModule, AdminModule, NotificationModule],
     controllers: [PlanMarketingController, CampagneController, ListeDiffusionController],
     providers: [
         Logger,
@@ -77,6 +80,7 @@ import { BasculerArchivageListeDiffusion } from "./core/useCase/BasculerArchivag
             provide: SearchYoungGateway,
             useClass: SearchYoungElasticRepository,
         },
+        { provide: NotificationGateway, useClass: NotificationProducer },
         PreparerEnvoiCampagne,
         EnvoyerCampagne,
         CampagneContactBuilderService,

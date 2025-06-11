@@ -46,7 +46,7 @@ export const findOrCreateReferent = async (referent, { etablissement, role, subR
       ...referent,
       role,
       subRole,
-      roles: [role, subRole],
+      roles: [role, subRole].filter(Boolean), // filter removes null, undefined or ""
       invitationToken,
       invitationExpires: inSevenDays(),
       department: etablissement.department,

@@ -11,6 +11,7 @@ import { useSearchTerm } from "../hooks/useSearchTerm";
 import { HiOutlineExclamation } from "react-icons/hi";
 import PlanMarketingFilters, { CampagneSpecifiqueFilters } from "../components/filters/PlanMarketingFilters";
 import { usePlanMarketingFilters } from "../components/filters/PlanMarketingFiltersHook";
+import { useSendMailTest } from "../hooks/SendMailTest";
 
 interface CampagneSpecifiqueProps {
   session: CohortDto;
@@ -28,6 +29,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
     sessionId,
     filters,
   });
+  const { sendTest } = useSendMailTest();
   const [draftCampagne, setDraftCampagne] = useState<DraftCampagneSpecifiqueFormData | null>(null);
   const [isImportCampagneSpecifique, setIsImportCampagneSpecifique] = useToggle(false);
   const [keepOpenCampagneIds, setKeepOpenCampagneIds] = useState<Set<string>>(new Set());
@@ -178,6 +180,7 @@ export default function CampagneSpecifique({ session }: CampagneSpecifiqueProps)
               setDraftCampagne(null);
             }}
             onSend={handleSend}
+            onSendTest={sendTest}
             forceOpen={campagne.id ? keepOpenCampagneIds.has(campagne.id) : false}
             onToggleArchive={handleToggleArchivageCampagne}
           />

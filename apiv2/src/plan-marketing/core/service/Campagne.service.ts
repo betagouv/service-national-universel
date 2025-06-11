@@ -16,6 +16,10 @@ import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { ProgrammationService } from "./Programmation.service";
 import { SessionModel } from "@admin/core/sejours/phase1/session/Session.model";
 import { ClockGateway } from "@shared/core/Clock.gateway";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { EmailTestParams, EmailTemplate } from "@notification/core/Notification";
+import { ReferentModelLight } from "@admin/core/iam/Referent.model";
+
 @Injectable()
 export class CampagneService {
     private readonly logger: Logger = new Logger(CampagneService.name);
@@ -26,6 +30,7 @@ export class CampagneService {
         private readonly programmationService: ProgrammationService,
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
+        @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
     ) {}
 
     async findById(id: string) {
@@ -267,5 +272,34 @@ export class CampagneService {
         if (campagneExiste) {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_ALREADY_EXISTS_FOR_COHORT);
         }
+    }
+
+    async sendMailTest(id: string, auteur: ReferentModelLight) {
+        const campagne = await this.campagneGateway.findById(id);
+        if (!campagne) {
+            throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+        }
+        let templateId: number;
+        if ("templateId" in campagne) {
+            templateId = campagne.templateId;
+        } else {
+            const genericCampagne = await this.campagneGateway.findSpecifiqueWithRefById(campagne.id);
+            if (!genericCampagne) {
+                throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
+            }
+            templateId = genericCampagne.templateId;
+        }
+        await this.notificationGateway.sendEmail<EmailTestParams>(
+            {
+                to: [
+                    {
+                        email: auteur.email,
+                        name: auteur.prenom + " " + auteur.nom,
+                    },
+                ],
+                templateId: templateId.toString(),
+            },
+            EmailTemplate.ENVOYER_MAIL_TEST,
+        );
     }
 }
