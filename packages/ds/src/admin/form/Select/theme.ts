@@ -18,13 +18,14 @@ export default function useReactSelectTheme({
   size,
 }: SelectProps) {
   const paddingStyle = label ? "16px 0 0 0" : "0";
+  const disabledColor = "#F9FAFB";
 
   const styles: CustomStyles = {
     control: (styles, state) => ({
       ...styles,
-      cursor: "pointer",
+      cursor: state.isDisabled ? "not-allowed" : "pointer",
       boxShadow: "0 0 0 0 rgb(0 0 0 / 0.05)",
-      backgroundColor: disabled ? "#F9FAFB" : "white",
+      backgroundColor: disabled ? disabledColor : "white",
       border: cx({
         "1px solid #EF4444": error,
         "2px solid #3B82F6": !error && isActive,
@@ -47,18 +48,23 @@ export default function useReactSelectTheme({
       ...(controlCustomStyle || {}),
       ...(size === "sm" && { minHeight: 32, height: 32 }),
     }),
-    option: (styles, { isSelected, isFocused }) => {
+    option: (styles, { isSelected, isFocused, isDisabled }) => {
       return {
         ...styles,
-        backgroundColor: isSelected ? "rgb(239 246 255)" : "white",
-        color: "black",
-        cursor: "pointer",
+        backgroundColor: isSelected
+          ? isDisabled
+            ? disabledColor
+            : "rgb(239 246 255)"
+          : "white",
+        color: isDisabled ? "#6B7280" : "black",
+        cursor: isDisabled ? "not-allowed" : "pointer",
         fontWeight: isSelected ? "700" : "400",
+        fontStyle: isDisabled ? "italic" : "normal",
         ":hover": {
-          background: "#e5e7eb",
+          background: isDisabled ? disabledColor : "#e5e7eb",
         },
         ...(isFocused && {
-          backgroundColor: "#e5e7eb",
+          backgroundColor: isDisabled ? disabledColor : "#e5e7eb",
         }),
         ...(optionCustomStyle || {}),
       };
@@ -69,10 +75,10 @@ export default function useReactSelectTheme({
         padding: paddingStyle,
       };
     },
-    input: (styles) => ({
+    input: (styles, { isDisabled }) => ({
       ...styles,
       height: size === "sm" ? 24 : size === "md" ? 29 : 46,
-      cursor: "pointer",
+      cursor: isDisabled ? "not-allowed" : "pointer",
       padding: paddingStyle,
     }),
     singleValue: (styles) => ({
@@ -96,7 +102,7 @@ export default function useReactSelectTheme({
     }),
     dropdownIndicator: (styles) => ({
       ...styles,
-      cursor: "pointer",
+      cursor: disabled || readOnly ? "not-allowed" : "pointer",
       padding: 0,
       paddingRight: 12,
       paddingLeft: badge ? 6 : 12,

@@ -34,7 +34,11 @@ import { EnvoyerCampagne } from "./core/useCase/EnvoyerCampagne";
 import { CampagneContactBuilderService } from "./core/service/CampagneContactBuilder.service";
 import { CampagneProcessorService } from "./core/service/CampagneProcessor.service";
 import { CampagneDataFetcherService } from "./core/service/CampagneDataFetcher.service";
+import { ProgrammationService } from "./core/service/Programmation.service";
 import { EnvoyerCampagneProgrammee } from "./core/useCase/cron/EnvoyerCampagneProgrammee";
+import { BasculerArchivageCampagne } from "./core/useCase/BasculerArchivageCampagne";
+import { MettreAJourActivationProgrammationSpecifique } from "./core/useCase/MettreAJourActivationProgrammationSpecifique";
+import { BasculerArchivageListeDiffusion } from "./core/useCase/BasculerArchivageListeDiffusion";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { NotificationProducer } from "@notification/infra/Notification.producer";
 import { NotificationModule } from "@notification/Notification.module";
@@ -82,11 +86,16 @@ import { NotificationModule } from "@notification/Notification.module";
         CampagneContactBuilderService,
         CampagneProcessorService,
         CampagneDataFetcherService,
+        ProgrammationService,
         EnvoyerCampagneProgrammee,
+        BasculerArchivageCampagne,
+        MettreAJourActivationProgrammationSpecifique,
+        BasculerArchivageListeDiffusion,
     ],
     exports: [
         EnvoyerCampagneProgrammee,
         PreparerEnvoiCampagne,
+        BasculerArchivageCampagne,
         CreerListeDiffusion,
         ImporterContacts,
         {
@@ -98,6 +107,7 @@ import { NotificationModule } from "@notification/Notification.module";
             useClass: ListeDiffusionMongoRepository,
         },
         planMarketingFactory,
+        BasculerArchivageListeDiffusion,
     ],
 })
 export class PlanMarketingModule {}

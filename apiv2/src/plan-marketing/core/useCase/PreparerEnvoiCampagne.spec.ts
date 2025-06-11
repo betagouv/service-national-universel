@@ -84,7 +84,12 @@ describe("PreparerEnvoiCampagne", () => {
             templateId: mockCampagne.templateId,
             subject: mockCampagne.objet,
         });
-        expect(importerContacts.execute).toHaveBeenCalledWith("campaign-1", "provider-campaign-1", mockContacts);
+        expect(importerContacts.execute).toHaveBeenCalledWith(
+            "campaign-1",
+            "provider-campaign-1",
+            mockContacts,
+            undefined,
+        );
     });
 
     it("should throw when campaign is not found", async () => {

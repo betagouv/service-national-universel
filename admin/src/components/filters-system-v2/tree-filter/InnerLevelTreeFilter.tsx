@@ -2,14 +2,14 @@ import React, { useRef, useState } from "react";
 import { BsTrash } from "react-icons/bs";
 import { useTreeFilter } from "./TreeFilterContext";
 import { TreeNodeFilter } from "./TreeNodeFilter";
-import { useClickOutside } from "./hooks/useClickOutside";
+import { useClickAway } from "react-use";
 
-export function InnerLevelTreeFilter({ nodeId }: { nodeId: string }) {
+export function InnerLevelTreeFilter({ nodeId, showSearchBar }: { nodeId: string; showSearchBar?: boolean }) {
   const { id, getNode, deleteNode } = useTreeFilter();
   const [isOpen, setIsOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
   const ref = useRef<HTMLDivElement>(null);
-  useClickOutside(ref, () => setIsOpen(false));
+  useClickAway(ref, () => setIsOpen(false));
 
   const item = getNode(nodeId);
   if (!item) return null;
@@ -39,24 +39,28 @@ export function InnerLevelTreeFilter({ nodeId }: { nodeId: string }) {
       </div>
       {isOpen && (
         <div className={`absolute left-full top-0 z-10 ml-2 w-64 max-h-[1500px] ${isLeaf ? "overflow-y-auto" : ""} rounded-md bg-white shadow-lg ring-1 ring-black ring-opacity-5`}>
-          <div className="flex content-center gap-2 justify-between px-3 py-2 pt-3 ">
-            <div className="text-xs font-light leading-5 text-gray-700 ">{item?.label}</div>
-            <BsTrash
-              className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer"
-              onClick={(e) => {
-                e.stopPropagation();
-                deleteNode(nodeId);
-              }}
-            />
-          </div>
-          <div className="flex items-center gap-2 pt-2 px-3">
-            <input
-              type="text"
-              placeholder={`Recherche ${item?.label}`}
-              className="border border-gray-300 rounded-md px-2 py-1 text-xs w-full"
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
+          {showSearchBar && (
+            <>
+              <div className="flex content-center gap-2 justify-between px-3 py-2 pt-3 ">
+                <div className="text-xs font-light leading-5 text-gray-700 ">{item?.label}</div>
+                <BsTrash
+                  className="h-4 w-4 text-red-500 hover:text-red-700 cursor-pointer"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    deleteNode(nodeId);
+                  }}
+                />
+              </div>
+              <div className="flex items-center gap-2 pt-2 px-3">
+                <input
+                  type="text"
+                  placeholder={`Recherche ${item?.label}`}
+                  className="border border-gray-300 rounded-md px-2 py-1 text-xs w-full"
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                />
+              </div>
+            </>
+          )}
           <div className="flex flex-col py-2 v-gap-2">{filteredIds?.map((childId) => <InnerLevelTreeFilter key={`itl-${id}-nl-${childId}`} nodeId={childId} />)}</div>
         </div>
       )}

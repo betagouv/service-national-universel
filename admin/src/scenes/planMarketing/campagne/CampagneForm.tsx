@@ -2,10 +2,12 @@ import RadioButton from "@/scenes/phase0/components/RadioButton";
 import { Checkbox } from "@snu/ds";
 import { Button, Collapsable, Container, InputText, Modal, Select, SelectOption, Tooltip } from "@snu/ds/admin";
 import React, { useState } from "react";
-import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineDocumentDuplicate, HiOutlineExclamation, HiOutlineEye, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { CampagneJeuneType, DestinataireListeDiffusion } from "snu-lib";
-import { useCampagneForm } from "./CampagneFormHook";
+import { useCampagneForm, useCampagnesSpecifiques } from "./CampagneFormHook";
 import { useCampagneError } from "./CampagneHookError";
+import ProgrammationList from "./ProgrammationList";
+import { ProgrammationProps } from "./ProgrammationForm";
 
 interface ListeDiffusionOption {
   value: string;
@@ -24,10 +26,16 @@ export interface CampagneDataProps {
   contexte?: string;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+  programmations: ProgrammationProps[];
+  isProgrammationActive: boolean;
+  isArchived?: boolean;
 }
 
-export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic">> {
+export interface DraftCampagneDataProps extends Partial<Omit<CampagneDataProps, "generic" | "isProgrammationActive" | "programmations">> {
   generic: boolean;
+  isProgrammationActive: boolean;
+  programmations?: ProgrammationProps[];
+  isArchived?: boolean;
 }
 
 export interface CampagneFormProps {
@@ -38,6 +46,7 @@ export interface CampagneFormProps {
   onDuplicate: (campagneData: CampagneDataProps) => void;
   onSendTest: (id: string) => void;
   forceOpen?: boolean;
+  onToggleArchive?: (campagne: DraftCampagneDataProps) => void;
 }
 
 const recipientOptions = [
@@ -50,18 +59,24 @@ const recipientOptions = [
 ];
 
 export default React.memo(
-  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, onSendTest, forceOpen = false }: CampagneFormProps) {
+  function CampagneForm({ campagneData, isDupliquerCampagneDisabled, listeDiffusionOptions, onSave, onDuplicate, forceOpen = false, onToggleArchive, onSendTest }: CampagneFormProps) {
     const { state, handleChange, saveCampagne, isPending, isDirty } = useCampagneForm(campagneData, onSave);
+    const { campagnesSpecifiques, isLoading } = useCampagnesSpecifiques(campagneData.id);
     const { errors, validateForm } = useCampagneError(state);
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
 
+    React.useEffect(() => {
+      if (campagneData.id) {
+        handleChange("reset");
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [campagneData.isArchived, campagneData.isProgrammationActive]);
+
     const handleSubmit = () => {
-      if (validateForm()) {
-        if (!campagneData.id) {
-          confirmSubmit();
-        } else {
-          setIsConfirmModalOpen(true);
-        }
+      if (validateForm() && campagneData.id) {
+        setIsConfirmModalOpen(true);
+      } else if (validateForm()) {
+        confirmSubmit();
       }
     };
 
@@ -70,13 +85,28 @@ export default React.memo(
       const payload = {
         ...stateWithoutErrorTemplate,
         id: campagneData.id,
+        isProgrammationActive: state.isProgrammationActive ?? false,
       } as CampagneDataProps;
       saveCampagne({ id: campagneData.id, payload });
       setIsConfirmModalOpen(false);
     };
 
+    const handleToggleArchive = () => {
+      if (campagneData.id && onToggleArchive) {
+        onToggleArchive(campagneData);
+      }
+    };
+
     const closeModal = () => {
       setIsConfirmModalOpen(false);
+    };
+
+    const handleProgrammationChange = (value: ProgrammationProps[] | { isProgrammationActive: boolean }) => {
+      if (Array.isArray(value)) {
+        handleChange("programmations", value);
+      } else {
+        handleChange("isProgrammationActive", value.isProgrammationActive);
+      }
     };
 
     const handleSendTest = () => {
@@ -138,6 +168,7 @@ export default React.memo(
                     options={listeDiffusionOptions}
                     className={`mt-2 ${errors.listeDiffusion ? "border-red-500" : ""}`}
                     closeMenuOnSelect={true}
+                    isOptionDisabled={(option) => !!option.disabled}
                   />
                   <ErrorMessage message={errors.listeDiffusion} />
                 </div>
@@ -222,10 +253,37 @@ export default React.memo(
                   <ErrorMessage message={errors.objet} />
                 </div>
               </div>
+
+              <hr className="border-t border-gray-200" />
+
+              <div className="gap-16">
+                <ProgrammationList
+                  campagne={
+                    {
+                      ...state,
+                      programmations: state.programmations || [],
+                    } as CampagneDataProps
+                  }
+                  onChange={handleProgrammationChange}
+                  isCampagneGenerique={campagneData.generic}
+                />
+              </div>
             </div>
 
             <hr className="border-t border-gray-200" />
             <div className="flex justify-end mt-4 gap-2">
+              <div className="flex-1 flex">
+                {campagneData.id && onToggleArchive && (
+                  <Button
+                    leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                    onClick={handleToggleArchive}
+                    type="secondary"
+                    className="mr-auto"
+                    title={campagneData.isArchived ? "Désarchiver" : "Archiver"}
+                    disabled={isPending}
+                  />
+                )}
+              </div>
               {isNotSaved && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <HiOutlineExclamation className="w-5 h-5" />
@@ -258,7 +316,24 @@ export default React.memo(
               <h3 className="text-xl font-medium">Modification de la campagne générique</h3>
             </div>
           }
-          content={<div className="text-gray-700">La mise à jour de cette campagne générique entrainera la modification des campagnes spécifiques associées.</div>}
+          content={
+            <div>
+              <div className="text-gray-700 mb-4">La mise à jour de cette campagne générique va modifier les campagnes spécifiques des séjours suivant :</div>
+              {isLoading ? (
+                <div className="text-center py-4">Chargement des campagnes spécifiques...</div>
+              ) : campagnesSpecifiques.length > 0 ? (
+                <ul className="list-disc pl-6 space-y-1 max-h-60 overflow-y-auto">
+                  {campagnesSpecifiques.map((campagne) => (
+                    <li key={campagne.id} className="text-gray-800 font-bold">
+                      {campagne.nomSession}
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <div className="text-center py-2 text-gray-500">Aucune campagne spécifique liée</div>
+              )}
+            </div>
+          }
           footer={
             <div className="flex items-center justify-between gap-6">
               <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={closeModal} disabled={isPending} />
@@ -269,8 +344,21 @@ export default React.memo(
       </>
     );
   },
-
   (prevProps, nextProps) => {
+    if (prevProps.campagneData.isArchived !== nextProps.campagneData.isArchived) {
+      return false;
+    }
+
+    if (prevProps.campagneData.isProgrammationActive !== nextProps.campagneData.isProgrammationActive) {
+      return false;
+    }
+
+    const prevLength = prevProps.campagneData.programmations?.length || 0;
+    const nextLength = nextProps.campagneData.programmations?.length || 0;
+    if (prevLength !== nextLength) {
+      return false;
+    }
+
     return prevProps.campagneData === nextProps.campagneData && prevProps.isDupliquerCampagneDisabled === nextProps.isDupliquerCampagneDisabled;
   },
 );
