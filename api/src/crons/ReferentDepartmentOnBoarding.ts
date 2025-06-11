@@ -3,7 +3,7 @@ import { capture } from "../sentry";
 import slack from "../slack";
 import { ReferentModel, ReferentDocument } from "../models";
 import { sendTemplate } from "../brevo";
-import { SENDINBLUE_TEMPLATES } from "snu-lib";
+import { ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
 
 interface ReminderData {
   sevenDaysReferents: ReferentDocument[];
@@ -30,6 +30,7 @@ async function getReferentsForReminder(): Promise<ReminderData> {
 
   try {
     const sevenDaysReferents = await ReferentModel.find({
+      role: ROLES.REFERENT_DEPARTMENT,
       registredAt: {
         $gte: sevenDaysAgo,
         $lte: sevenDaysAgoEnd,
@@ -37,6 +38,7 @@ async function getReferentsForReminder(): Promise<ReminderData> {
     });
 
     const twentyOneDaysReferents = await ReferentModel.find({
+      role: ROLES.REFERENT_DEPARTMENT,
       registredAt: {
         $gte: twentyOneDaysAgo,
         $lte: twentyOneDaysAgoEnd,
