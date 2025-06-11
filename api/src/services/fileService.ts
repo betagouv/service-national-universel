@@ -1,7 +1,7 @@
 import { format } from "@fast-csv/format";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
 import { Transform } from "stream";
-import xlsx from "xlsx";
+import * as XLSX from "xlsx";
 import fs from "fs";
 
 import { ERRORS } from "snu-lib";
@@ -26,11 +26,11 @@ export function streamToBuffer(stream: Transform): Promise<Buffer> {
 }
 
 export function XLSXToCSVBuffer(filePath: string): Buffer {
-  const workbook = xlsx.readFile(filePath);
+  const workbook = XLSX.readFile(filePath);
   const sheetName = workbook.SheetNames[0];
   const worksheet = workbook.Sheets[sheetName];
 
-  const csvData = xlsx.utils.sheet_to_csv(worksheet, { FS: "," });
+  const csvData = XLSX.utils.sheet_to_csv(worksheet, { FS: "," });
 
   return Buffer.from(csvData, "utf-8");
 }
@@ -38,14 +38,14 @@ export function XLSXToCSVBuffer(filePath: string): Buffer {
 export function getHeadersFromXLSX(filePath: string): string[] {
   const fileBuffer = fs.readFileSync(filePath);
 
-  const workbook = xlsx.read(fileBuffer, { type: "buffer" });
+  const workbook = XLSX.read(fileBuffer, { type: "buffer" });
   const sheetName = workbook.SheetNames[0];
   if (!sheetName) {
     throw new Error("The workbook has no sheets.");
   }
   const sheet = workbook.Sheets[sheetName];
 
-  const headers = xlsx.utils.sheet_to_json(sheet, { header: 1 })[0];
+  const headers = XLSX.utils.sheet_to_json(sheet, { header: 1 })[0];
   if (!Array.isArray(headers)) {
     throw new Error("Failed to extract headers from the Excel file.");
   }
@@ -54,11 +54,11 @@ export function getHeadersFromXLSX(filePath: string): string[] {
 }
 
 export async function parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]> {
-  const workbook = xlsx.read(buffer, { type: "buffer" });
+  const workbook = XLSX.read(buffer, { type: "buffer" });
   const sheetName = options?.sheetName || workbook.SheetNames[options?.sheetIndex || 0];
   const worksheet = workbook.Sheets[sheetName];
 
-  return await xlsx.utils.sheet_to_json<T>(worksheet, { defval: options?.defval });
+  return await XLSX.utils.sheet_to_json<T>(worksheet, { defval: options?.defval });
 }
 
 export function readCSVBuffer<T>(buffer: Buffer, options: ParserOptionsArgs = { headers: true }): Promise<T[]> {
