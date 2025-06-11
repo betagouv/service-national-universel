@@ -1,16 +1,18 @@
 import React, { useEffect, useState, useImperativeHandle, forwardRef, useCallback, useMemo } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlineEye, HiPencil, HiOutlineInformationCircle, HiOutlineFolderOpen } from "react-icons/hi";
 import { LuSend } from "react-icons/lu";
 
 import { Checkbox } from "@snu/ds";
-import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Badge } from "@snu/ds/admin";
+import { Button, Collapsable, Container, Label, Select, SelectOption, Tooltip, Modal, Switcher } from "@snu/ds/admin";
 
-import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, EnvoiCampagneStatut, CampagneEnvoi, formatDateFRTimezoneUTC, formatLongDateFR } from "snu-lib";
+import { CampagneJeuneType, DestinataireListeDiffusion, hasCampagneGeneriqueId, CampagneEnvoi, Programmation, CAMPAGNE_TYPE_COLORS } from "snu-lib";
 
 import { useListeDiffusion } from "../listeDiffusion/ListeDiffusionHook";
 import DestinataireCount from "./partials/DestinataireCount";
 import DestinataireLink from "./partials/DestinataireLink";
+import ProgrammationList from "./ProgrammationList";
+import { CampagneEnvoiStatus } from "./partials/CampagneEnvoiStatus";
 
 export interface ValidationErrors {
   templateId?: boolean;
@@ -36,6 +38,9 @@ export interface CampagneSpecifiqueFormData {
   readonly createdAt?: string;
   readonly updatedAt?: string;
   validationErrors?: ValidationErrors;
+  isProgrammationActive?: boolean;
+  programmations?: Programmation[];
+  isArchived?: boolean;
 }
 
 export type DraftCampagneSpecifiqueFormData = Partial<CampagneSpecifiqueFormData> & {
@@ -52,8 +57,10 @@ export interface CampagneSpecifiqueFormProps {
   listeDiffusionOptions: ListeDiffusionOption[];
   onSave: (data: CampagneSpecifiqueFormData & { generic: false }) => void;
   onCancel: () => void;
-  onSend: (id: string) => void;
+  onSend: (id: string, disableProgrammation?: boolean) => void;
+  onSendTest: (id: string) => void;
   forceOpen?: boolean;
+  onToggleArchive?: (campagne: DraftCampagneSpecifiqueFormData & { envois?: CampagneEnvoi[] | undefined }) => void;
 }
 
 export interface CampagneSpecifiqueFormRefMethods {
@@ -70,13 +77,14 @@ const recipientOptions = [
 ];
 
 export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethods, CampagneSpecifiqueFormProps>(
-  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false }, ref) => {
+  ({ campagneData, listeDiffusionOptions, onSave, onCancel, onSend, forceOpen = false, onToggleArchive, onSendTest }, ref) => {
     const {
       control,
       handleSubmit,
       formState: { errors, isDirty, isSubmitting },
       reset,
       watch,
+      setValue,
       setError,
       clearErrors,
     } = useForm<CampagneSpecifiqueFormData>({
@@ -92,6 +100,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const [isConfirmModalOpen, setIsConfirmModalOpen] = useState(false);
     const [isSendCampagneModalOpen, setIsSendCampagneModalOpen] = useState(false);
+    const [keepProgrammationActive, setKeepProgrammationActive] = useState(campagneData.isProgrammationActive);
 
     const setApiErrors = useCallback(
       (validationErrors?: ValidationErrors) => {
@@ -163,8 +172,23 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
 
     const handleConfirmSendCampagne = () => {
       setIsSendCampagneModalOpen(false);
+      if (campagneData.id && campagneData.programmations && campagneData.programmations.length > 0) {
+        onSend(campagneData.id, keepProgrammationActive);
+      }
+      if (campagneData.id && campagneData.programmations && campagneData.programmations.length === 0) {
+        onSend(campagneData.id, undefined);
+      }
+    };
+
+    const handleToggleArchive = () => {
+      if (campagneData.id && onToggleArchive) {
+        onToggleArchive(campagneData);
+      }
+    };
+
+    const handleSendTest = () => {
       if (campagneData.id) {
-        onSend(campagneData.id);
+        onSendTest(campagneData.id);
       }
     };
 
@@ -195,47 +219,31 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   />
                   {errors.nom && <span className="text-red-500 text-sm mt-1">{errors.nom.message}</span>}
                   {hasCampagneGenerique ? (
-                    <a
-                      href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
-                      className="text-blue-600 hover:underline text-sm flex items-center gap-1">
-                      Editer la campagne globale
-                      <HiPencil className="my-2 w-4 h-4" />
-                    </a>
-                  ) : null}
+                    <div className="flex items-center mt-2 gap-2">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.GENERIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.GENERIQUE.TEXT }}>
+                        GÉNÉRIQUE
+                      </div>
+                      <a
+                        href={`/plan-marketing/campagnes-generiques?id=${campagneData.campagneGeneriqueId}`}
+                        className="text-blue-600 hover:underline text-sm flex items-center gap-1">
+                        Editer la campagne globale
+                        <HiPencil className="my-2 w-4 h-4" />
+                      </a>
+                    </div>
+                  ) : (
+                    <div className="flex items-center mt-2 ">
+                      <div
+                        className="flex flex-row justify-center items-center px-1.5 py-1.5 rounded text-xs"
+                        style={{ backgroundColor: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.BACKGROUND, color: CAMPAGNE_TYPE_COLORS.SPECIFIQUE.TEXT }}>
+                        SPECIFIQUE
+                      </div>
+                    </div>
+                  )}
                 </div>
                 <div className="flex-1">
-                  <div className="flex-1 flex flex-row gap-4">
-                    <div>
-                      {campagneData.envois
-                        ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
-                        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                        .slice(0, 1)
-                        .map((envoi, index) => <Badge key={index} title={`Envoyée le ${formatDateFRTimezoneUTC(envoi.date)}`} status={"VALIDATED"} />)}
-                    </div>
-                    <div>
-                      {(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) > 1 && (
-                        <div className="text-sm text-gray-500">
-                          <span>{(campagneData?.envois?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)?.length || 0) - 1} relances</span>
-                          <div className="flex items-center gap-1">
-                            {campagneData?.envois
-                              ?.filter((envoi) => envoi.statut === EnvoiCampagneStatut.TERMINE)
-                              .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
-                              .slice(1)
-                              ?.map((envoi, index, array) => (
-                                <React.Fragment key={(campagneData.id ?? "id") + envoi.date}>
-                                  <span>
-                                    <Tooltip id={`id-envoi-campagne-${campagneData.id}-${index}`} title={`Envoyée le ${formatLongDateFR(envoi.date)}`}>
-                                      {formatDateFRTimezoneUTC(envoi.date)}
-                                    </Tooltip>
-                                  </span>
-                                  {index < array.length - 1 && <span>•</span>}
-                                </React.Fragment>
-                              ))}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <CampagneEnvoiStatus envois={campagneData.envois} campagneId={campagneData.id} />
                 </div>
               </div>
             }>
@@ -257,6 +265,7 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                         placeholder="Sélectionner une liste de diffusion"
                         className={`mt-2 ${errors.listeDiffusionId ? "border-red-500" : ""}`}
                         closeMenuOnSelect={true}
+                        isOptionDisabled={(option) => !!option.disabled}
                       />
                     )}
                   />
@@ -286,11 +295,21 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                     )}
                   />
                   {errors.templateId && <span className="text-red-500 text-sm mt-1">{errors.templateId.message}</span>}
-                  <div className="block mt-2">
+                  <div className="flex mt-2 justify-between">
                     <a href={`/email-preview/${watch("templateId")}`} target="_blank" rel="noreferrer" className="text-blue-600 inline-flex items-center">
                       Voir l'aperçu
                       <HiOutlineEye className="ml-1" size={18} />
                     </a>
+                    {campagneData.id && (
+                      <div className="flex items-center gap-2">
+                        <p onClick={handleSendTest} className="text-blue-600 inline-flex items-center hover:text-blue-800 hover:cursor-pointer">
+                          Envoyer un test
+                        </p>
+                        <Tooltip id="id-send-mail-test" title="Le test sera envoyé sur l’adresse mail de votre compte.">
+                          <HiOutlineInformationCircle className="text-blue-600" size={18} />
+                        </Tooltip>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -359,10 +378,40 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
                   {errors.objet && <span className="text-red-500 text-sm mt-1">{errors.objet.message}</span>}
                 </div>
               </div>
+
+              <div className="col-span-2 mt-6">
+                <ProgrammationList
+                  campagne={{
+                    ...watch(),
+                    id: campagneData.id || "",
+                    programmations: watch("programmations") || [],
+                    isProgrammationActive: watch("isProgrammationActive") || false,
+                  }}
+                  onChange={(value) => {
+                    if (Array.isArray(value)) {
+                      setValue("programmations", value, { shouldDirty: true });
+                    } else {
+                      setValue("isProgrammationActive", value.isProgrammationActive, { shouldDirty: true });
+                    }
+                  }}
+                />
+              </div>
             </div>
 
             <hr className="border-t border-gray-200" />
             <div className="flex justify-end mt-4 gap-2">
+              <div className="flex-1 flex">
+                {campagneData.id && onToggleArchive && (
+                  <Button
+                    leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                    onClick={handleToggleArchive}
+                    type="secondary"
+                    className="mr-auto"
+                    title={campagneData.isArchived ? "Désarchiver" : "Archiver"}
+                    disabled={isSubmitting}
+                  />
+                )}
+              </div>
               {isNotSaved && (
                 <div className="flex items-center gap-2 text-gray-500">
                   <HiOutlineExclamation className="w-5 h-5" />
@@ -419,18 +468,28 @@ export const CampagneSpecifiqueForm = forwardRef<CampagneSpecifiqueFormRefMethod
           header={
             <div className="text-center">
               <HiOutlineExclamation className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
-              <h3 className="text-xl font-medium">Confirmez l'envoi de la campagne</h3>
+              <h3 className="text-xl font-medium">Envoi manuel de la campagne spécifique</h3>
             </div>
           }
           content={
             <div className="text-center my-4">
               <p>Vous êtes sur le point d'envoyer la campagne {campagneData.nom}</p>
+              {campagneData.programmations && campagneData.programmations.length > 0 && (
+                <div className="mt-6">
+                  <p className="mb-4">
+                    {campagneData.isProgrammationActive ? "La programmation de la campagne doit-elle rester active ?" : "La programmation de la campagne doit-elle être activée ?"}
+                  </p>
+                  <div className="flex justify-center">
+                    <Switcher label="Active" value={campagneData.isProgrammationActive} onChange={(value) => setKeepProgrammationActive(value)} />
+                  </div>
+                </div>
+              )}
             </div>
           }
           footer={
             <div className="flex items-center justify-between gap-6">
               <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={() => setIsSendCampagneModalOpen(false)} disabled={isSubmitting} />
-              <Button title="Confirmer l'envoi" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
+              <Button title="Envoyer la campagne" className="flex-1" onClick={handleSubmit(handleConfirmSendCampagne)} loading={isSubmitting} />
             </div>
           }
         />

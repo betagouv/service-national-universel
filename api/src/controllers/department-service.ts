@@ -12,7 +12,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { UserRequest, RouteRequest, RouteResponse } from "./request";
-import XLSX from "xlsx";
+import * as XLSX from "xlsx";
 import { idSchema } from "../utils/validator";
 const router = express.Router();
 

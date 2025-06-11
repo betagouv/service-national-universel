@@ -1,18 +1,27 @@
 import configuration from "@config/testConfiguration";
+import { getQueueToken } from "@nestjs/bullmq";
 import { Logger, ValidationPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsModule } from "nestjs-cls";
-import { getQueueToken } from "@nestjs/bullmq";
 
-import { QueueModule } from "@infra/Queue.module";
-import { QueueName } from "@shared/infra/Queue";
+import { SessionGateway } from "@admin/core/sejours/phase1/session/Session.gateway";
+import { sessionMongoProviders } from "@admin/infra/sejours/phase1/session/provider/SessionMongo.provider";
+import { SessionRepository } from "@admin/infra/sejours/phase1/session/repository/mongo/SessionMongo.repository";
 import { DATABASE_CONNECTION } from "@infra/Database.provider";
-import { testDatabaseProviders } from "../testDatabaseProvider";
+import { QueueModule } from "@infra/Queue.module";
 import { CampagneGateway } from "@plan-marketing/core/gateway/Campagne.gateway";
-import { CampagneMongoRepository } from "@plan-marketing/infra/CampagneMongo.repository";
+import { PlanMarketingGateway } from "@plan-marketing/core/gateway/PlanMarketing.gateway";
+import { CampagneService } from "@plan-marketing/core/service/Campagne.service";
+import { ProgrammationService } from "@plan-marketing/core/service/Programmation.service";
 import { campagneMongoProviders } from "@plan-marketing/infra/CampagneMongo.provider";
-
+import { CampagneMongoRepository } from "@plan-marketing/infra/CampagneMongo.repository";
+import { PlanMarketingMockProvider } from "@plan-marketing/infra/provider/PlanMarketingMock.provider";
+import { ClockGateway } from "@shared/core/Clock.gateway";
+import { ClockProvider } from "@shared/infra/Clock.provider";
+import { QueueName } from "@shared/infra/Queue";
+import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { testDatabaseProviders } from "../testDatabaseProvider";
 export interface SetupOptions {
     newContainer: boolean;
 }
@@ -39,6 +48,10 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
         add: jest.fn(),
     };
 
+    const mockNotificationGateway: any = {
+        sendEmail: jest.fn(),
+    };
+
     planMarketingTestModule = await Test.createTestingModule({
         imports: [
             ClsModule.forRoot({}),
@@ -50,8 +63,15 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
         providers: [
             Logger,
             ...campagneMongoProviders,
+            ...sessionMongoProviders,
             testDatabaseProviders(setupOptions.newContainer),
             { provide: CampagneGateway, useClass: CampagneMongoRepository },
+            { provide: PlanMarketingGateway, useClass: PlanMarketingMockProvider },
+            { provide: SessionGateway, useClass: SessionRepository },
+            ProgrammationService,
+            CampagneService,
+            { provide: ClockGateway, useClass: ClockProvider },
+            { provide: NotificationGateway, useValue: mockNotificationGateway },
         ],
     })
         .overrideProvider(getQueueToken(QueueName.EMAIL))

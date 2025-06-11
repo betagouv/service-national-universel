@@ -4,6 +4,8 @@ import {
     hasCampagneGeneriqueId,
     isCampagneGenerique,
     EnvoiCampagneStatut,
+    TypeEvenement,
+    CampagneProgrammationType,
 } from "snu-lib";
 import {
     CampagneModel,
@@ -11,6 +13,8 @@ import {
     CampagneGeneriqueModel,
     CreateCampagneModel,
 } from "../core/Campagne.model";
+import { CampagneProgrammation, CreateCampagneProgrammation } from "@plan-marketing/core/Programmation.model";
+import mongoose from "mongoose";
 
 export class CampagneMapper {
     /**
@@ -28,7 +32,7 @@ export class CampagneMapper {
                 campagneGeneriqueId: document.campagneGeneriqueId,
                 createdAt: document.createdAt,
                 updatedAt: document.updatedAt,
-                envois: document.envois.map((envoi) => ({
+                envois: document.envois?.map((envoi) => ({
                     date: envoi.date,
                     statut: EnvoiCampagneStatut[envoi.statut],
                 })),
@@ -46,6 +50,9 @@ export class CampagneMapper {
             destinataires: document.destinataires,
             type: document.type,
             envois: document.envois,
+            programmations: document.programmations?.map(CampagneMapper.toModelProgrammation),
+            isProgrammationActive: document.isProgrammationActive || false,
+            isArchived: document.isArchived || false,
             createdAt: document.createdAt,
             updatedAt: document.updatedAt,
         };
@@ -63,6 +70,7 @@ export class CampagneMapper {
             ...baseModel,
             generic: false,
             cohortId: document.cohortId!,
+            originalCampagneGeneriqueId: document.originalCampagneGeneriqueId,
         } as CampagneSpecifiqueModel;
     }
 
@@ -94,6 +102,11 @@ export class CampagneMapper {
             type: model.type,
             generic: model.generic,
             envois: model.envois || [],
+            programmations: model.programmations?.map((programmation) =>
+                CampagneMapper.toEntityProgrammation(programmation),
+            ),
+            isProgrammationActive: model.isProgrammationActive,
+            isArchived: model.isArchived || false,
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -121,14 +134,22 @@ export class CampagneMapper {
      */
     static toEntityCreate(
         model: CreateCampagneModel,
-    ): Omit<CampagneType, "_id" | "createdAt" | "updatedAt" | "envois"> {
+    ): Omit<CampagneType, "_id" | "createdAt" | "updatedAt" | "envois" | "programmations"> {
+        // & {
+        //     programmations: Omit<CampagneProgrammationType, "_id" | "createdAt">[];
+        // }
         // Cas 1 : Campagne spécifique avec référence - uniquement les champs minimaux
         if (isCampagneWithRef(model)) {
             return {
                 generic: false,
                 cohortId: model.cohortId,
                 campagneGeneriqueId: model.campagneGeneriqueId,
-            } as Omit<CampagneType, "_id" | "createdAt" | "updatedAt">;
+                // TODO: Est-ce qu'une campagne avec référence peut avoir une programmation active ?
+                // isProgrammationActive: model.isProgrammationActive,
+                // programmations: model.programmations?.map((programmation) =>
+                //     CampagneMapper.toEntityProgrammationCreate(programmation),
+                // ),
+            };
         }
 
         // Champs communs pour les autres cas
@@ -141,6 +162,11 @@ export class CampagneMapper {
             destinataires: model.destinataires,
             type: model.type,
             generic: model.generic,
+            programmations: model.programmations.map((programmation) =>
+                CampagneMapper.toEntityProgrammationCreate(programmation),
+            ),
+            isProgrammationActive: model.isProgrammationActive || false,
+            isArchived: model.isArchived || false,
         };
 
         // Cas 2 : Campagne générique - tous les champs sans cohortId ni référence
@@ -157,6 +183,39 @@ export class CampagneMapper {
             ...baseEntity,
             cohortId: model.cohortId,
             campagneGeneriqueId: undefined,
+        };
+    }
+
+    static toEntityProgrammation(programmation: CampagneProgrammation): CampagneProgrammationType {
+        return {
+            _id: new mongoose.Types.ObjectId(programmation.id),
+            joursDecalage: programmation.joursDecalage,
+            type: programmation.type,
+            envoiDate: programmation.envoiDate,
+            createdAt: programmation.createdAt,
+            sentAt: programmation.sentAt,
+        };
+    }
+
+    static toEntityProgrammationCreate(
+        programmation: CreateCampagneProgrammation,
+    ): Omit<CampagneProgrammationType, "_id" | "createdAt"> {
+        return {
+            joursDecalage: programmation.joursDecalage,
+            type: programmation.type,
+            envoiDate: programmation.envoiDate,
+            sentAt: programmation.sentAt,
+        };
+    }
+
+    static toModelProgrammation(programmation: CampagneProgrammationType): CampagneProgrammation {
+        return {
+            id: programmation._id.toString(),
+            joursDecalage: programmation.joursDecalage,
+            type: TypeEvenement[programmation.type],
+            envoiDate: programmation.envoiDate,
+            createdAt: programmation.createdAt,
+            sentAt: programmation.sentAt,
         };
     }
 }

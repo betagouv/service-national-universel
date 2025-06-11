@@ -1,8 +1,8 @@
 import RadioButton from "@/scenes/phase0/components/RadioButton";
-import { Button, Collapsable, Container, Label } from "@snu/ds/admin";
-import React, { useEffect, useState } from "react";
+import { Button, Collapsable, Container, Label, Modal } from "@snu/ds/admin";
+import React, { useEffect, useRef, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import { HiOutlineExclamation } from "react-icons/hi";
+import { HiOutlineExclamation, HiOutlineFolderOpen } from "react-icons/hi";
 import { ListeDiffusionEnum, ListeDiffusionFiltres } from "snu-lib";
 import ListeDiffusionFiltersWrapper from "./filters/ListeDiffusionFiltersWrapper";
 
@@ -13,6 +13,7 @@ export interface ListeDiffusionDataProps {
   filters: ListeDiffusionFiltres;
   readonly createdAt?: string;
   readonly updatedAt?: string;
+  isArchived?: boolean;
 }
 interface ListeDiffusionFiltersView {
   paramData: any;
@@ -27,9 +28,16 @@ interface ListeDiffusionFormProps {
   onSave: (data: ListeDiffusionDataProps) => void;
   onCancel: () => void;
   forceOpen?: boolean;
+  onToggleArchive?: () => void;
+  isToggleArchivagePending?: boolean;
 }
 
-export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel, forceOpen = false }: ListeDiffusionFormProps) => {
+export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCancel, forceOpen = false, onToggleArchive, isToggleArchivagePending }: ListeDiffusionFormProps) => {
+  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+  const [isArchiveModalOpen, setIsArchiveModalOpen] = useState(false);
+  const initialFiltersRef = useRef<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
+
+
   const {
     control,
     handleSubmit,
@@ -44,39 +52,58 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     },
   });
 
-  // Update the form when the listeDiffusionData changes
   useEffect(() => {
-    reset({
-      type: ListeDiffusionEnum.VOLONTAIRES,
-      ...listeDiffusionData,
-    });
-  }, [listeDiffusionData, reset]);
+    const filtersToUse = listeDiffusionData.filters || {};
+    reset(
+      {
+        type: ListeDiffusionEnum.VOLONTAIRES,
+        filters: filtersToUse,
+        ...listeDiffusionData,
+      },
+      {
+        keepDirty: false,
+        keepErrors: false,
+      },
+    );
 
-  const [selectedFilters, setSelectedFilters] = useState<ListeDiffusionFiltres>(listeDiffusionData.filters || {});
-
-  const isEditing = listeDiffusionData.id !== undefined;
-  const isOpen = listeDiffusionData.id === undefined || forceOpen;
-
-  const handleOnCancel = () => {
-    reset();
-    onCancel();
-  };
-
-  const handleOnSave = (data: ListeDiffusionDataProps) => {
-    onSave({ ...data, filters: selectedFilters });
-    reset(data);
-  };
-
-  const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
-    setValue("filters", filters, { shouldDirty: true });
-    setSelectedFilters(filters);
-  };
+    setSelectedFilters(filtersToUse);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [listeDiffusionData, reset, forceOpen]);
 
   watch((currentState, { name }) => {
     if (name === "type") {
       handleSelectedFiltersChange({});
     }
   });
+
+  const handleSelectedFiltersChange = (filters: ListeDiffusionFiltres) => {
+    setValue("filters", filters, {
+      shouldDirty: true,
+      shouldTouch: true,
+      shouldValidate: true,
+    });
+    setSelectedFilters(filters);
+  };
+
+  const isEditing = listeDiffusionData.id !== undefined;
+  const isOpen = listeDiffusionData.id === undefined || forceOpen;
+
+  const handleOnCancel = () => {
+    setIsArchiveModalOpen(false);
+    const initialFilters = initialFiltersRef.current;
+    reset();
+
+    setSelectedFilters(initialFilters);
+    onCancel();
+  };
+
+  const handleOnSave = (data: ListeDiffusionDataProps) => {
+    const dataToSave = { ...data, filters: { ...selectedFilters, ...data.filters } };
+    initialFiltersRef.current = selectedFilters;
+    reset();
+    setSelectedFilters(initialFiltersRef.current);
+    onSave(dataToSave);
+  };
 
   return (
     <Container className={`pb-2 pt-2 mb-2 ${isDirty ? "border-2 border-blue-600" : "border-2"}`}>
@@ -153,6 +180,27 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
 
         <hr className="border-t border-gray-200" />
         <div className="flex justify-end mt-4 gap-2">
+          <div className="flex-1 flex">
+            {isEditing && (
+              <div className="flex items-center justify-end min-w-[120px]">
+                <Button
+                  leftIcon={<HiOutlineFolderOpen className="text-gray-600" />}
+                  type="secondary"
+                  className="ml-auto"
+                  title={listeDiffusionData.isArchived ? "Désarchiver" : "Archiver"}
+                  onClick={() => setIsArchiveModalOpen(true)}
+                  loading={isToggleArchivagePending}
+                  disabled={isToggleArchivagePending}
+                />
+              </div>
+            )}
+          </div>
+          {isDirty && (
+            <div className="flex items-center gap-2 text-gray-500">
+              <HiOutlineExclamation className="w-5 h-5" />
+              <span>Non enregistrée</span>
+            </div>
+          )}
           <Button title="Annuler" type="secondary" className="flex justify-center" onClick={handleOnCancel} disabled={isSubmitting} />
           <Button
             disabled={isSubmitting}
@@ -160,14 +208,48 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
             title="Enregistrer"
             onClick={handleSubmit(handleOnSave)}
           />
-          {isDirty && (
-            <div className="flex items-center gap-2 text-gray-500">
-              <HiOutlineExclamation className="w-5 h-5" />
-              <span>Non enregistrée</span>
-            </div>
-          )}
         </div>
       </Collapsable>
+
+      <Modal
+        isOpen={isArchiveModalOpen}
+        onClose={() => setIsArchiveModalOpen(false)}
+        className="md:max-w-[600px] text-center"
+        header={
+          <div className="text-center">
+            <HiOutlineFolderOpen className="bg-gray-100 rounded-full p-2 text-gray-900 mx-auto mb-2" size={48} />
+            <h3 className="text-xl font-medium">{listeDiffusionData.isArchived ? "Désarchivage de la liste de diffusion" : "Archivage de la liste de diffusion"}</h3>
+          </div>
+        }
+        content={
+          <div className="text-gray-700">
+            {listeDiffusionData.isArchived ? (
+              <div>
+                <p>La liste de diffusion sera désarchivée et pourra de nouveau être utilisée.</p>
+              </div>
+            ) : (
+              <div>
+                <p>La liste de diffusion sera archivée et ne pourra plus être utilisée dans les campagnes.</p>
+              </div>
+            )}
+          </div>
+        }
+        footer={
+          <div className="flex items-center justify-between gap-6">
+            <Button title="Annuler" type="secondary" className="flex-1 justify-center" onClick={handleOnCancel} disabled={isSubmitting} />
+            <Button
+              title={listeDiffusionData.isArchived ? "Désarchiver" : "Archiver"}
+              onClick={() => {
+                setIsArchiveModalOpen(false);
+                onToggleArchive?.();
+              }}
+              className="flex-1"
+              loading={isToggleArchivagePending}
+              disabled={isToggleArchivagePending}
+            />
+          </div>
+        }
+      />
     </Container>
   );
 };

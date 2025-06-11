@@ -7,13 +7,15 @@ import { useListeDiffusion } from "./ListeDiffusionHook";
 import { ListeDiffusionEnum } from "snu-lib";
 import { useListeDiffusionFilters } from "./filters/ListeDiffusionFiltersHook";
 import { useSearchTerm } from "../hooks/useSearchTerm";
+import PlanMarketingFilters, { ListeDiffusionFilters } from "../components/filters/PlanMarketingFilters";
+import { usePlanMarketingFilters } from "../components/filters/PlanMarketingFiltersHook";
 
 export default function ListeDiffusion() {
-  const { listesDiffusion, saveListeDiffusion, isLoading } = useListeDiffusion();
   const [draftListe, setDraftListe] = useState<DraftListeDiffusionDataProps | null>(null);
   const [keepOpenListeIds, setKeepOpenListeIds] = useState<Set<string>>(new Set());
-
-  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions, isPending } = useListeDiffusionFilters({});
+  const { dataVolontaires, filtersVolontaires, dataInscriptions, filtersInscriptions } = useListeDiffusionFilters({});
+  const { filters, setFilters } = usePlanMarketingFilters<ListeDiffusionFilters>(() => {}, { isArchived: false });
+  const { listesDiffusion, saveListeDiffusion, toggleArchivageListeDiffusion, isToggleArchivagePending } = useListeDiffusion(filters);
 
   const allListes = useMemo(() => {
     return draftListe ? [draftListe, ...listesDiffusion] : listesDiffusion;
@@ -57,17 +59,13 @@ export default function ListeDiffusion() {
     setDraftListe(null);
   };
 
+  const handleFiltersChange = (newFilters: ListeDiffusionFilters) => {
+    setFilters(newFilters);
+  };
+
   const isNewListeDiffusion = useMemo(() => {
     return draftListe !== null;
   }, [draftListe]);
-
-  if (isLoading || isPending) {
-    return (
-      <div className="flex justify-center items-center h-full">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-      </div>
-    );
-  }
 
   return (
     <>
@@ -75,6 +73,7 @@ export default function ListeDiffusion() {
         <div className="flex items-center justify-between pb-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Listes de diffusion</div>
           <div className="flex items-center gap-4">
+            <PlanMarketingFilters<ListeDiffusionFilters> filters={filters} onChange={handleFiltersChange} filterType="liste-diffusion" />
             <InputText value={searchTerm} onChange={(e) => setSearchTerm(e.target.value)} placeholder="Rechercher" className="w-[200px]" name="search" />
             <ButtonPrimary disabled={isNewListeDiffusion} onClick={createNewListeDiffusion} className="h-[50px] w-[300px]">
               Nouvelle liste de diffusion
@@ -95,6 +94,8 @@ export default function ListeDiffusion() {
             onSave={handleOnSave}
             onCancel={handleOnCancel}
             forceOpen={liste.id ? keepOpenListeIds.has(liste.id) : false}
+            onToggleArchive={liste.id ? () => toggleArchivageListeDiffusion(liste.id!) : undefined}
+            isToggleArchivagePending={isToggleArchivagePending}
           />
         ))}
       </div>

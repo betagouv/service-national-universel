@@ -1633,7 +1633,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     referent.set(value);
     referent.set(cleanReferentData(referent));
-    referent.set({ roles: [referent.role, referent.subRole] });
+    referent.set({ roles: [referent.role, referent.subRole].filter(Boolean) }); // filter removes null, undefined or ""
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);

@@ -28,9 +28,13 @@ export class CronJobSchedulerService implements OnModuleInit {
 
         for (const job of cronJobs) {
             this.logger.log(`Adding/updating job ${job.name} with pattern ${job.pattern}`);
+
             await this.jobQueue.upsertJobScheduler(
                 job.name,
-                { pattern: job.pattern },
+                {
+                    pattern: job.pattern,
+                    tz: job.tz,
+                },
                 {
                     name: job.name,
                     data: job.data,

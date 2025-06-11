@@ -30,9 +30,37 @@ const PlanMarketingService = {
     })();
   },
 
-  envoyer: async (id: string) => {
+  getCampagneSpecifiques: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["GetCampagneSpecifiquesByCampagneGeneriqueIdRoute"]>({
+      path: "/campagne/{id}/campagnes-specifiques",
+      params: { id },
+      method: "GET",
+      target: "API_V2",
+    })();
+  },
+
+  envoyer: async (id: string, isProgrammationActive?: boolean) => {
     return await buildRequest<PlanMarketingRoutes["EnvoyerPlanMarketingRoute"]>({
       path: "/campagne/{id}/envoyer",
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+      payload: { isProgrammationActive },
+    })();
+  },
+
+  toggleArchivage: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["ToggleArchivagePlanMarketingRoute"]>({
+      path: "/campagne/{id}/toggle-archivage",
+      params: { id },
+      method: "POST",
+      target: "API_V2",
+    })();
+  },
+
+  envoyerEmailTest: async (id: string) => {
+    return await buildRequest<PlanMarketingRoutes["EnvoyerEmailTestPlanMarketingRoute"]>({
+      path: "/campagne/{id}/envoyer-email-test",
       params: { id },
       method: "POST",
       target: "API_V2",

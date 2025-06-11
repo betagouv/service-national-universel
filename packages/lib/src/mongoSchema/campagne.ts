@@ -1,6 +1,15 @@
-import { InferSchemaType, Schema } from "mongoose";
+import mongoose from "mongoose";
 import { InterfaceExtended } from ".";
-import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut } from "../domains/planMarketing/constants";
+import { CampagneJeuneType, DestinataireListeDiffusion, EnvoiCampagneStatut, TypeEvenement } from "../domains/planMarketing/constants";
+
+const programmation = {
+  _id: { type: mongoose.Schema.Types.ObjectId, required: true, default: () => new mongoose.Types.ObjectId() },
+  joursDecalage: { type: Number },
+  type: { type: String, enum: TypeEvenement, required: true },
+  createdAt: { type: Date, required: true, default: Date.now },
+  envoiDate: { type: Date },
+  sentAt: { type: Date },
+};
 
 export const CampagneSchema = {
   campagneGeneriqueId: {
@@ -52,9 +61,49 @@ export const CampagneSchema = {
       },
     ],
   },
+  programmations: {
+    type: [programmation],
+    required: false,
+  },
+  isProgrammationActive: {
+    type: Boolean,
+  },
+  isArchived: {
+    type: Boolean,
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };
 
-const schema = new Schema(CampagneSchema);
-export type CampagneType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export interface CampagneProgrammationType {
+  _id: mongoose.Types.ObjectId;
+  joursDecalage?: number;
+  type: TypeEvenement;
+  createdAt: Date;
+  envoiDate?: Date;
+  sentAt?: Date;
+}
+
+export interface CampagneType
+  extends InterfaceExtended<{
+    campagneGeneriqueId?: string;
+    originalCampagneGeneriqueId?: string;
+    nom?: string;
+    objet?: string;
+    contexte?: string;
+    templateId?: number;
+    listeDiffusionId?: string;
+    generic: boolean;
+    destinataires?: DestinataireListeDiffusion[];
+    type?: CampagneJeuneType;
+    cohortId?: string;
+    envois?: Array<{
+      date: Date;
+      statut: EnvoiCampagneStatut;
+    }>;
+    programmations?: CampagneProgrammationType[];
+    isProgrammationActive?: boolean;
+    isArchived?: boolean;
+    createdAt?: Date;
+    updatedAt?: Date;
+  }> {}
