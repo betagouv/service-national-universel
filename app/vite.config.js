@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
         org: "sentry",
         project: "snu-moncompte",
         authToken: env.SENTRY_AUTH_TOKEN,
-        url: "https://sentry.selego.co/",
+        url: "https://sentry.incubateur.net/",
         environment: mode,
         release: {
           name: env.VITE_RELEASE,
