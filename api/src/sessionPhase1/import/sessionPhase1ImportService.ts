@@ -210,11 +210,6 @@ const createSession = async (
   foundCohort: CohortDocument,
 ): Promise<SessionCohesionCenterImportReport> => {
   let warning = "";
-  if (sessionCenter.sessionPlaces > foundCenter.placesTotal!) {
-    logger.warn(`Session with wrong place number (${sessionCenter.sessionPlaces} > ${foundCenter.placesTotal}) center ${foundCenter.matricule} and cohort ${foundCohort.snuId}`);
-    sessionCenter.sessionPlaces = foundCenter.placesTotal!;
-    warning = "session places > center places";
-  }
 
   const foundSession = await SessionPhase1Model.findOne({ cohesionCenterId: foundCenter._id, cohortId: foundCohort.id });
   if (foundSession?._id) {
