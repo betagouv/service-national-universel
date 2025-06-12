@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { CohortType, ERRORS, ROLES, SENDINBLUE_TEMPLATES, PlanTransportType } from "snu-lib";
+import { CohortType, ERRORS, ROLES, SENDINBLUE_TEMPLATES, PlanTransportType, COHORT_TYPE } from "snu-lib";
 import { ClasseDocument, EtablissementModel, LigneBusDocument, ReferentModel, YoungDocument } from "../../models";
 import { sendTemplate } from "../../brevo";
 
@@ -17,7 +17,11 @@ export async function notifyYoungsAndRlsPDRWasUpdated({ youngs, cohort, date, me
     isBeforeDeparture = true;
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
   } else if (new Date() < new Date(cohort.dateEnd)) {
-    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
+    if (cohort.type === COHORT_TYPE.CLE) {
+      templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN_CLE;
+    } else if (cohort.type === COHORT_TYPE.VOLONTAIRE) {
+      templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN_HTS;
+    }
   }
 
   if (!templateId) throw new Error("Modification date is out of range, no email sent.");

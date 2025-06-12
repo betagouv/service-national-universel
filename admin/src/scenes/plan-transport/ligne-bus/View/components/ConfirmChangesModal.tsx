@@ -42,7 +42,11 @@ export default function ConfirmChangesModal({
   } else if (isBeforeDeparture) {
     templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_DEPARTURE;
   } else if (new Date() < new Date(cohort.dateEnd)) {
-    templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN;
+    if (isCohortCLE) {
+      templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN_CLE;
+    } else {
+      templateId = SENDINBLUE_TEMPLATES.young.CHANGE_PDR_BEFORE_RETURN_HTS;
+    }
   }
 
   const templateIdForCLE = SENDINBLUE_TEMPLATES.CLE.PHASE_1_MODIFICATION_LIGNE;
