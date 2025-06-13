@@ -10,7 +10,7 @@ type Action = {
 export type CohortState = {
   // TODO: use API route response
   Cohort: {
-    cohort: CohortType;
+    cohort?: CohortType;
   };
 };
 

@@ -30,7 +30,7 @@ export default function Affected() {
   const { areAllStepsDone } = useSteps();
   const [showInfoMessage, setShowInfoMessage] = useState(false);
   const title = `Mon séjour de cohésion ${getCohortPeriod(cohort)}`;
-  const shouldDisplayContactConvocation = isPast(subDays(cohort.dateStart, 1)) && !!contacts?.length;
+  const shouldDisplayContactConvocation = isPast(subDays(cohort?.dateStart ?? new Date(), 1)) && !!contacts?.length;
 
   if (areAllStepsDone) {
     window.scrollTo(0, 0);

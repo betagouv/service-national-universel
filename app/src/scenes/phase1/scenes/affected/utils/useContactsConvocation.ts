@@ -11,6 +11,6 @@ export default function useContactsConvocation() {
     queryFn: () => getDepartmentService(young.department!),
     enabled: !!young.department,
   });
-  const data = res.data?.contacts.filter((contact) => contact.cohort === cohort.name);
+  const data = res.data?.contacts.filter((contact) => contact.cohort === cohort?.name);
   return { ...res, data };
 }

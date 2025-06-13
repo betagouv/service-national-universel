@@ -126,7 +126,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-const isCohortTooOld = (cohort: CohortType) => {
+const isCohortTooOld = (cohort?: CohortType) => {
   return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
@@ -146,12 +146,12 @@ const hasValidatedPhase1 = (young: YoungType) =>
 const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
 
 // Les volontaires peuvent voir les missions dès qu'ils sont pointés et tant que leur cohorte n'est pas archivée
-function canViewMissions(young: YoungType, cohort: CohortType) {
+function canViewMissions(young: YoungType, cohort?: CohortType) {
   return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
 }
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
-function canCreateApplications(young: YoungType, cohort: CohortType) {
+function canCreateApplications(young: YoungType, cohort?: CohortType) {
   return hasValidatedPhase1(young) && !isCohortTooOld(cohort);
 }
 

@@ -13,11 +13,11 @@ export default function CorrectionRequests() {
   const { canModifyInscription } = usePermissions();
   const correctionRequests = young?.correctionRequests as unknown as CorrectionRequestType[];
   const filteredRequests = correctionRequests.filter((c) => ["SENT", "REMINDED"].includes(c.status as any));
-
+  const correctionDate = cohort?.inscriptionModificationEndDate ?? new Date();
   return (
     <section id="corrections">
       {canModifyInscription ? (
-        <p className="my-4 font-bold">Correction(s) à apporter avant le {new Date(cohort.inscriptionModificationEndDate!).toLocaleDateString("fr-FR")}&nbsp;:</p>
+        <p className="my-4 font-bold">Correction(s) à apporter avant le {new Date(correctionDate).toLocaleDateString("fr-FR")}&nbsp;:</p>
       ) : (
         <p className="my-4 font-bold">Les corrections demandées n’ont pas été effectuées à temps.</p>
       )}

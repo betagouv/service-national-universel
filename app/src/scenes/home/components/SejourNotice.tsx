@@ -4,7 +4,7 @@ import { HiArrowRight } from "react-icons/hi";
 import { Link } from "react-router-dom";
 import { CohortType, getCohortPeriod, YOUNG_STATUS } from "snu-lib";
 
-export default function SejourNotice({ cohort }: { cohort: CohortType }) {
+export default function SejourNotice({ cohort }: { cohort?: CohortType }) {
   const { young, isHTS } = useAuth();
 
   return (

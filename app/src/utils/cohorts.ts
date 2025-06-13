@@ -1,11 +1,11 @@
 import { CohortType } from "snu-lib";
 import { apiURL } from "@/config";
 
-export function cohortAssignmentAnnouncementsIsOpenForYoung(cohort: CohortType): boolean {
+export function cohortAssignmentAnnouncementsIsOpenForYoung(cohort?: CohortType): boolean {
   return cohort?.isAssignmentAnnouncementsOpenForYoung === true;
 }
 
-export function getMeetingPointChoiceLimitDateForCohort(cohort: CohortType): Date | null {
+export function getMeetingPointChoiceLimitDateForCohort(cohort?: CohortType): Date | null {
   if (cohort?.pdrChoiceLimitDate) {
     return cohort.pdrChoiceLimitDate;
   } else {
@@ -14,7 +14,7 @@ export function getMeetingPointChoiceLimitDateForCohort(cohort: CohortType): Dat
 }
 
 // start of the cohort's last day
-export function isCohortDone(cohort: CohortType, extraDays = 0): boolean {
+export function isCohortDone(cohort?: CohortType, extraDays = 0): boolean {
   if (!cohort?.dateEnd) return false;
   const dateEnd = new Date(cohort.dateEnd);
   const endDateDayStart = new Date(dateEnd.getUTCFullYear(), dateEnd.getUTCMonth(), dateEnd.getUTCDate(), 0, 0, 0);
@@ -22,9 +22,9 @@ export function isCohortDone(cohort: CohortType, extraDays = 0): boolean {
   return endDateDayStart.valueOf() < Date.now();
 }
 
-export function isCohortNeedJdm(cohort: CohortType): boolean {
+export function isCohortNeedJdm(cohort?: CohortType): boolean {
   const needTheJDMPresenceTrue = ["Février 2023 - C", "Avril 2023 - A", "Avril 2023 - B", "Février 2022", "2021", "2022", "2020"];
-  if (needTheJDMPresenceTrue.includes(cohort?.name)) {
+  if (cohort?.name && needTheJDMPresenceTrue.includes(cohort?.name)) {
     return true;
   } else {
     return false;
