@@ -162,5 +162,106 @@ describe("isAuthorized", () => {
       });
       expect(result).toBe(false);
     });
+    it("should return false when policy has no where clause", () => {
+      const result = isAuthorized({
+        user: {
+          ...mockUser,
+          acl: [
+            {
+              resource: PERMISSION_RESOURCES.REFERENT,
+              action: PERMISSION_ACTIONS.FULL,
+              code: "referent:full",
+              policy: [
+                {
+                  where: [],
+                  blacklist: [],
+                  whitelist: [],
+                },
+              ],
+            },
+          ],
+        },
+        resource: PERMISSION_RESOURCES.REFERENT,
+        action: PERMISSION_ACTIONS.READ,
+      });
+      expect(result).toBe(false);
+    });
+    it("should return false when where clause has neither source nor value", () => {
+      const result = isAuthorized({
+        user: {
+          ...mockUser,
+          acl: [
+            {
+              resource: PERMISSION_RESOURCES.REFERENT,
+              action: PERMISSION_ACTIONS.FULL,
+              code: "referent:full",
+              policy: [
+                {
+                  where: [
+                    {
+                      field: "department",
+                    },
+                  ],
+                  blacklist: [],
+                  whitelist: [],
+                },
+              ],
+            },
+          ],
+        },
+        resource: PERMISSION_RESOURCES.REFERENT,
+        action: PERMISSION_ACTIONS.READ,
+      });
+      expect(result).toBe(false);
+    });
+    it("should return false when user has no matching permissions", () => {
+      const result = isAuthorized({
+        user: {
+          ...mockUser,
+          acl: [
+            {
+              resource: PERMISSION_RESOURCES.REFERENT,
+              action: PERMISSION_ACTIONS.WRITE,
+              code: "referent:write",
+              policy: [],
+            },
+          ],
+        },
+        resource: PERMISSION_RESOURCES.REFERENT,
+        action: PERMISSION_ACTIONS.READ,
+      });
+      expect(result).toBe(false);
+    });
+    it("should return true when ignorePolicy is true, even if policy conditions are not met", () => {
+      const result = isAuthorized({
+        user: {
+          ...mockUser,
+          department: "13",
+          acl: [
+            {
+              resource: PERMISSION_RESOURCES.REFERENT,
+              action: PERMISSION_ACTIONS.FULL,
+              code: "referent:full",
+              policy: [
+                {
+                  where: [
+                    {
+                      field: "department",
+                      value: "75",
+                    },
+                  ],
+                  blacklist: [],
+                  whitelist: [],
+                },
+              ],
+            },
+          ],
+        },
+        resource: PERMISSION_RESOURCES.REFERENT,
+        action: PERMISSION_ACTIONS.READ,
+        ignorePolicy: true,
+      });
+      expect(result).toBe(true);
+    });
   });
 });
