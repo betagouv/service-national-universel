@@ -38,6 +38,7 @@ export interface ColumnCsvName {
     PDR_RETOUR_ADRESSE?: string;
     DATE_RETOUR?: string;
     HEURE_RETOUR?: string;
+    EMAIL_DE_CONNEXION?: string;
 }
 
 export const COLUMN_CSV_HEADERS: (keyof ColumnCsvName)[] = [
@@ -64,6 +65,7 @@ export const COLUMN_CSV_HEADERS: (keyof ColumnCsvName)[] = [
     "PDR_RETOUR_ADRESSE",
     "DATE_RETOUR",
     "HEURE_RETOUR",
+    "EMAIL_DE_CONNEXION",
 ];
 
 export enum ColumnType {
