@@ -99,9 +99,10 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
 
   const handleOnSave = (data: ListeDiffusionDataProps) => {
     const dataToSave = { ...data, filters: { ...selectedFilters, ...data.filters } };
-    initialFiltersRef.current = selectedFilters;
+    initialFiltersRef.current = dataToSave.filters;
     reset();
-    setSelectedFilters(initialFiltersRef.current);
+
+    setSelectedFilters(dataToSave.filters);
     onSave(dataToSave);
   };
 
