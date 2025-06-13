@@ -166,9 +166,9 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
 };
 
-const setAttributeFromPath = (path: string, obj: object, value: string) => {
+const setAttributeFromPath = (path: string, targetObject: object, value: string) => {
   const pathParts = path.split(".");
-  let current = obj;
+  let current = targetObject;
   pathParts.forEach((part, index) => {
     if (index < pathParts.length - 1) {
       if (!current[part]) {
