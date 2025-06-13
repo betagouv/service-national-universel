@@ -184,7 +184,6 @@ describe("CampagneContactBuilderService", () => {
                 NOM_RL1: "",
                 PRENOM_RL2: "",
                 NOM_RL2: "",
-                EMAIL_DE_CONNEXION: "john.doe@example.com",
             });
 
             expect(mockClockGateway.isValidDate).toHaveBeenCalledTimes(2);
@@ -233,7 +232,6 @@ describe("CampagneContactBuilderService", () => {
             expect(result.PRENOM_RL2).toBe("");
             expect(result.NOM_RL2).toBe("");
             expect(result.EMAIL).toBe("parent1@example.com");
-            expect(result.EMAIL_DE_CONNEXION).toBe("john.doe@example.com");
         });
 
         it("should create a contact row for parent2", () => {
@@ -253,7 +251,6 @@ describe("CampagneContactBuilderService", () => {
             expect(result.PRENOM_RL2).toBe("Parent2First");
             expect(result.NOM_RL2).toBe("Parent2Last");
             expect(result.EMAIL).toBe("parent2@example.com");
-            expect(result.EMAIL_DE_CONNEXION).toBe("john.doe@example.com");
         });
     });
 

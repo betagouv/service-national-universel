@@ -46,7 +46,6 @@ export class CampagneContactBuilderService {
             NOM_RL1: "",
             PRENOM_RL2: "",
             NOM_RL2: "",
-            EMAIL_DE_CONNEXION: young.email,
         };
     }
 
@@ -59,7 +58,6 @@ export class CampagneContactBuilderService {
             PRENOM_RL2: !isParent1 ? young.parent2FirstName : "",
             NOM_RL2: !isParent1 ? young.parent2LastName : "",
             EMAIL: isParent1 ? young.parent1Email : young.parent2Email,
-            EMAIL_DE_CONNEXION: young.email,
         };
     }
 
