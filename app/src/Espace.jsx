@@ -19,7 +19,6 @@ const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisa
 const ChangeSejour = lazy(() => import("./scenes/changeSejour"));
 const Candidature = lazy(() => import("./scenes/candidature"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
-const Diagoriente = lazy(() => import("./scenes/diagoriente"));
 const Echanges = lazy(() => import("./scenes/echanges"));
 const Engagement = lazy(() => import("./scenes/home/components/Engagement"));
 const Home = lazy(() => import("./scenes/home"));
@@ -87,7 +86,6 @@ const Espace = () => {
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
-          <SentryRoute path="/diagoriente" component={Diagoriente} />
           <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
