@@ -11,7 +11,6 @@ import { shouldForceRedirectToInscription } from "./utils/navigation";
 import usePermissions from "./hooks/usePermissions";
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
-import Diagoriente from "./components/layout/navbar/components/Diagoriente";
 import ModalCGU from "./components/modals/ModalCGU";
 import ModalRI from "./components/modals/ModalRI";
 
@@ -20,6 +19,7 @@ const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisa
 const ChangeSejour = lazy(() => import("./scenes/changeSejour"));
 const Candidature = lazy(() => import("./scenes/candidature"));
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
+const Diagoriente = lazy(() => import("./scenes/diagoriente"));
 const Echanges = lazy(() => import("./scenes/echanges"));
 const Engagement = lazy(() => import("./scenes/home/components/Engagement"));
 const Home = lazy(() => import("./scenes/home"));
