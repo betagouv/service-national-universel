@@ -36,8 +36,8 @@ export default function ListeDiffusionFilters({ filters, selectedFilters, onFilt
 
   // Initialization
   useEffect(() => {
-    const defaultFilters = getDefaultFilters();
-    onFiltersChange({ ...defaultFilters, ...selectedFilters });
+    // Ne pas normaliser automatiquement les filtres pour éviter le isDirty
+    // La normalisation ne se fera que lors d'interactions utilisateur
 
     // Click outside handler (close popover)
     const handleClickOutside = (event) => {

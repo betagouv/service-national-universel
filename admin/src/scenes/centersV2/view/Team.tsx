@@ -87,7 +87,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
   const focusedSession = fetchedSession || focusedSessionfromProps;
 
   const addTeamate = async (teamate: TeamMate) => {
-    if ([CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire].includes(teamate.role)) {
+    if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(teamate.role)) {
       setDirectionCenter(teamate);
     } else {
       updateTeamMemberMutation.mutate({
@@ -99,6 +99,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
   const updateTeamMemberMutation = useMutation<MutationResponse, Error, UpdateTeamParams>({
     mutationFn: async ({ action, member }) => {
+      member.role = CENTER_ROLES[member.role] || member.role;
       let updatedTeam;
 
       if (action === "add") {
@@ -133,8 +134,8 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
   });
 
   const setDirectionCenterMutation = useMutation({
-    mutationFn: async (referentId: string) => {
-      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId });
+    mutationFn: async ({ referentId, role }: { referentId: string; role: string }) => {
+      const { ok, data, code } = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, { referentId, role });
       if (!ok) throw new Error(code);
       return data;
     },
@@ -170,12 +171,13 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         });
         return {};
       }
+
       if (referent.role !== teamate.role) {
         toastr.error("Erreur", "Ce membre a déjà un rôle sur la plateforme. Un utilisateur ne peut pas avoir plusieurs rôles.");
         return {};
       }
 
-      return setDirectionCenterMutation.mutate(referent._id);
+      return setDirectionCenterMutation.mutate({ referentId: referent._id, role: teamate.role });
     } catch (e) {
       console.log(e);
       capture(e);
@@ -185,22 +187,8 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
   const inviteDirectionCenterMutation = useMutation({
     mutationFn: async (user: TeamMate) => {
-      let newRole = "";
-      switch (user.role) {
-        case CENTER_ROLES.chef:
-          newRole = ROLES.HEAD_CENTER;
-          break;
-        case CENTER_ROLES.adjoint:
-          newRole = ROLES.HEAD_CENTER_ADJOINT;
-          break;
-        case CENTER_ROLES.referent_sanitaire:
-          newRole = ROLES.REFERENT_SANITAIRE;
-          break;
-      }
-
-      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[newRole]}`, {
+      const responseInvitation = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[user.role]}`, {
         ...user,
-        role: newRole,
         cohorts: [focusedSession?.cohort],
         cohesionCenterId: focusedSession?.cohesionCenterId,
         cohesionCenterName: focusedSession?.nameCentre,
@@ -210,6 +198,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
 
       const responseSession = await api.put(`/session-phase1/${focusedSession._id}/directionTeam`, {
         referentId: responseInvitation?.data?._id,
+        role: responseInvitation?.data?.role,
       });
 
       if (!responseSession?.ok) throw new Error(responseSession?.code);
@@ -240,7 +229,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
       <Breadcrumbs items={[{ title: "Séjours" }, { label: "Centres", to: "/centre" }, { label: "Fiche du centre", to: `/centre/${id}` }, { label: "Equipe" }]} />
       <Container className="mt-2">
         <div className="flex px-6 py-4">
-          <div className="flex flex-col w-1/2">
+          <div className="flex flex-col w-[45%]">
             <ChefCenterBlock headCenter={focusedSession.headCenter} />
             <TeamBlock team={focusedSession.team} deleteTeamate={deleteTeamate} adjoints={focusedSession.adjoints} />
           </div>
@@ -277,7 +266,7 @@ const ChefCenterBlock = ({ headCenter }: ChefCenterBlockProps) => {
         {headCenter.firstName} {headCenter.lastName}&nbsp;›
       </Link>
       <div className="flex flex-col gap-4 mt-2 w-3/4">
-        <div className="flex items-center justify-between">
+        <div className="flex flex-col">
           <b>E-mail :</b>
           <p style={{ margin: 0 }}>{headCenter?.email}</p>
         </div>
@@ -301,20 +290,21 @@ const ChefCenterBlock = ({ headCenter }: ChefCenterBlockProps) => {
 const TeamBlock = ({ team, deleteTeamate, adjoints }: TeamBlockProps) => {
   return (
     <div>
-      <h4>Équipe ({team.length + (adjoints?.length || 0)})</h4>
-      {team.length === 0 && adjoints?.length === 0 && <p className="italic">Aucun membre</p>}
+      <h4>Adjoints ({adjoints?.length || 0})</h4>
+      {adjoints?.length === 0 && <p className="italic">Aucun adjoint</p>}
 
-      {Object.values(CENTER_ROLES)
-        .filter((e) => e === CENTER_ROLES.adjoint || e === CENTER_ROLES.referent_sanitaire)
+      {Object.values(ROLES)
+        .filter((e) => e === ROLES.HEAD_CENTER_ADJOINT || e === ROLES.REFERENT_SANITAIRE)
         .map((role, index) => {
           return <GroupAdjoints key={index} adjoints={adjoints} role={role} />;
         })}
 
-      {Object.values(CENTER_ROLES)
-        .filter((e) => e !== CENTER_ROLES.chef && e !== CENTER_ROLES.adjoint && e !== CENTER_ROLES.referent_sanitaire)
-        .map((role, index) => {
-          return <GroupTeam key={index} team={team} role={role} deleteTeamate={deleteTeamate} />;
-        })}
+      <h4>Équipe ({team.length})</h4>
+      {team.length === 0 && <p className="italic">Aucun membre</p>}
+
+      {Object.values(CENTER_ROLES).map((role, index) => {
+        return <GroupTeam key={index} team={team} role={role} deleteTeamate={deleteTeamate} />;
+      })}
     </div>
   );
 };
@@ -328,12 +318,12 @@ const GroupAdjoints = ({ adjoints, role }: GroupAdjointsProps) => {
     );
   }
   const adjointsFiltered =
-    role === CENTER_ROLES.adjoint ? adjoints.filter((e) => e.role === ROLES.HEAD_CENTER_ADJOINT) : adjoints.filter((e) => e.role === ROLES.REFERENT_SANITAIRE);
+    role === ROLES.HEAD_CENTER_ADJOINT ? adjoints.filter((e) => e.role === ROLES.HEAD_CENTER_ADJOINT) : adjoints.filter((e) => e.role === ROLES.REFERENT_SANITAIRE);
 
   return (
     <div className="mt-2 mb-4">
       <h6>
-        {role}&nbsp;({adjointsFiltered.length})
+        {translate(role)}&nbsp;({adjointsFiltered.length})
       </h6>
       {adjointsFiltered.map((user, index) => (
         <Link to={`/user/${user._id}`} target="_blank" key={index} className="hover:text-blue-600">
@@ -390,17 +380,34 @@ const GroupTeam = ({ team, role, deleteTeamate }: GroupTeamProps) => {
 };
 
 const AddBlock = ({ onConfirm, user }: AddBlockProps) => {
-  const limitedRoles = [CENTER_ROLES.chef, CENTER_ROLES.adjoint, CENTER_ROLES.referent_sanitaire];
+  const getListRoleByRole = () => {
+    if ([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+      const listRole = Object.entries(CENTER_ROLES).map(([key, label]) => ({ value: key, label }));
+      listRole.push(
+        { value: ROLES.HEAD_CENTER, label: "Chef de centre" },
+        { value: ROLES.HEAD_CENTER_ADJOINT, label: "Chef de centre adjoint" },
+        { value: ROLES.REFERENT_SANITAIRE, label: "Référent sanitaire" },
+      );
 
-  const listRoles = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
-    ? Object.values(CENTER_ROLES)
-    : Object.values(CENTER_ROLES).filter((role) => !limitedRoles.includes(role));
+      return listRole;
+    } else {
+      return Object.entries(CENTER_ROLES).map(([key, label]) => ({ value: key, label }));
+    }
+  };
+
+  const listRoles = getListRoleByRole();
 
   return (
-    <div>
+    <div className="w-[55%]">
       <h4>Ajouter un nouveau membre à l’équipe</h4>
       <p className="text-gray-500">Renseignez les membres de l’équipe d’encadrement du centre de séjour de cohésion.</p>
-      <h6 className="uppercase text-gray-600">
+      <div className="my-2 p-2 text-sm leading-5 font-medium bg-amber-50 text-amber-600 border-amber-500 rounded-md">
+        <p>
+          Un utilisateur ne peut pas avoir deux rôles sur le même compte. Si un utilisateur souhaite être à la fois chef de centre et chef de centre adjoint il doit alors avoir
+          deux comptes distincts avec deux adresses mail différentes.
+        </p>
+      </div>
+      <h6 className="uppercase text-gray-600 mt-6">
         informations <span className="text-red-500">*</span>
       </h6>
       <Formik
@@ -467,8 +474,8 @@ const AddBlock = ({ onConfirm, user }: AddBlockProps) => {
                 onChange={handleChange}
                 style={{ width: "100%", height: "auto", padding: "1rem", marginTop: "1rem", borderRadius: "7px", border: "solid 1px #ccc" }}>
                 <option disabled value="" label="Rôle" />
-                {listRoles.map((e) => (
-                  <option value={e} key={e} label={e} />
+                {listRoles.map((roleOption) => (
+                  <option value={roleOption.value} key={roleOption.value} label={roleOption.label} />
                 ))}
               </Field>
               <div className="flex items-center justify-center">

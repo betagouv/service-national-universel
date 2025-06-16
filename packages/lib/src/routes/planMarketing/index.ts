@@ -1,4 +1,4 @@
-import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, RouteResponseBodyV2 } from "../..";
+import { BasicRoute, CampagneEnvoi, CampagneJeuneType, DestinataireListeDiffusion, Programmation, RouteResponseBodyV2 } from "../..";
 import { CreateDistributionListBrevoRoute } from "./createDistributionList";
 import { ImportContactsBrevoRoute } from "./importContacts";
 import { ListeDiffusionRoutes } from "./listeDiffusion";
@@ -19,6 +19,9 @@ interface CampagneComplete extends CampagneBase {
   destinataires: DestinataireListeDiffusion[];
   type: CampagneJeuneType;
   envois?: CampagneEnvoi[];
+  isProgrammationActive: boolean;
+  programmations?: Programmation[];
+  isArchived?: boolean;
 }
 
 // Types pour les campagnes génériques
@@ -46,6 +49,7 @@ export type CreateCampagneSpecifiqueWithoutRefPayload = OmitBaseFields<CampagneS
 export type CreateCampagneSpecifiqueWithRefPayload = OmitBaseFields<CampagneSpecifiqueWithRefPayload>;
 export type CreateCampagnePayload = CreateCampagneGeneriquePayload | CreateCampagneSpecifiqueWithoutRefPayload | CreateCampagneSpecifiqueWithRefPayload;
 
+export type CampagneModelWithNomSession = CampagneGeneriquePayload & { nomSession: string };
 export type CampagneResponse = CampagneComplete &
   CampagneSpecifiqueWithRefPayload & {
     createdAt: string;
@@ -85,6 +89,9 @@ interface SearchPlanMarketingRoute extends BasicRoute {
     generic?: boolean;
     sort?: "ASC" | "DESC";
     cohortId?: string;
+    isArchived?: boolean;
+    isProgrammationActive?: boolean;
+    isLinkedToGenericCampaign?: boolean;
   };
   response: RouteResponseBodyV2<CampagneResponse[]>;
 }
@@ -92,6 +99,33 @@ interface SearchPlanMarketingRoute extends BasicRoute {
 interface EnvoyerPlanMarketingRoute extends BasicRoute {
   method: "POST";
   path: "/campagne/{id}/envoyer";
+  response: RouteResponseBodyV2<void>;
+  payload: {
+    isProgrammationActive?: boolean;
+  };
+}
+
+interface ToggleArchivagePlanMarketingRoute extends BasicRoute {
+  method: "POST";
+  path: "/campagne/{id}/toggle-archivage";
+  params: {
+    id: string;
+  };
+  response: RouteResponseBodyV2<CampagneResponse>;
+}
+
+interface GetCampagneSpecifiquesByCampagneGeneriqueIdRoute extends BasicRoute {
+  method: "GET";
+  path: "/campagne/{id}/campagnes-specifiques";
+  params: {
+    id: string;
+  };
+  response: RouteResponseBodyV2<CampagneModelWithNomSession[]>;
+}
+
+interface EnvoyerEmailTestPlanMarketingRoute extends BasicRoute {
+  method: "POST";
+  path: "/campagne/{id}/envoyer-email-test";
   response: RouteResponseBodyV2<void>;
 }
 
@@ -104,4 +138,7 @@ export type PlanMarketingRoutes = {
   CreateDistributionList: CreateDistributionListBrevoRoute;
   ListeDiffusionRoutes: ListeDiffusionRoutes;
   EnvoyerPlanMarketingRoute: EnvoyerPlanMarketingRoute;
+  ToggleArchivagePlanMarketingRoute: ToggleArchivagePlanMarketingRoute;
+  GetCampagneSpecifiquesByCampagneGeneriqueIdRoute: GetCampagneSpecifiquesByCampagneGeneriqueIdRoute;
+  EnvoyerEmailTestPlanMarketingRoute: EnvoyerEmailTestPlanMarketingRoute;
 };

@@ -261,15 +261,9 @@ router.put("/:id/directionTeam", passport.authenticate("referent", { session: fa
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!canModifyDirectionCenterTeam(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { error, value: newReferent } = Joi.object({
-      referentId: Joi.string(),
+    const { error, value: payload } = Joi.object({
+      referentId: Joi.string().required(),
+      role: Joi.string().valid(ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE).required(),
     }).validate(req.body, { stripUnknown: true });
 
     if (error) {
@@ -277,9 +271,19 @@ router.put("/:id/directionTeam", passport.authenticate("referent", { session: fa
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findById(newReferent.referentId);
+    if (!canModifyDirectionCenterTeam(req.user)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
+    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    const referent = await ReferentModel.findById(payload.referentId);
     if (!referent) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    }
+    if (!referent.role || referent.role !== payload.role || ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(referent.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     if (referent.role === ROLES.HEAD_CENTER) {

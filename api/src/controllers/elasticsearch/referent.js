@@ -55,7 +55,7 @@ async function buildReferentContext(user) {
           },
           {
             bool: {
-              must: [{ term: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE] } }, { terms: { "department.keyword": user.department } }],
+              must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE] } }, { terms: { "department.keyword": user.department } }],
             },
           },
         ],

@@ -70,9 +70,6 @@ const SUPPORT_ROLES = {
 // /!\ n'est pas un role pour un referent
 // uniquement le champ "team" des sessions phase 1
 const CENTER_ROLES = {
-  chef: "Chef de centre",
-  adjoint: "Chef de centre adjoint",
-  referent_sanitaire: "Référent sanitaire",
   cadre_specialise: "Cadre spécialisé",
   cadre_compagnie: "Cadre de compagnie",
   tuteur: "Tuteur de maisonnée",

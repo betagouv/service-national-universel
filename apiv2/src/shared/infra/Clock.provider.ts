@@ -68,6 +68,9 @@ export class ClockProvider implements ClockGateway {
     addDaysToNow(days: number): Date {
         return add(new Date(), { days });
     }
+    addDays(date: Date, days: number): Date {
+        return add(date, { days });
+    }
     // Legacy format for compatibility
     parseDateNaissance(date: string): Date {
         return new Date(`${date.split("/")[2]}-${date.split("/")[1]}-${date.split("/")[0]}T00:00:00.000+00:00`);

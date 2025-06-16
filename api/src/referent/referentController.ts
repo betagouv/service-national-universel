@@ -411,6 +411,7 @@ router.post("/signup_invite/:template", passport.authenticate("referent", { sess
     }
 
     const referent = await ReferentModel.create(referentProperties);
+    if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
 
     let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
@@ -1632,7 +1633,7 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     referent.set(value);
     referent.set(cleanReferentData(referent));
-    referent.set({ roles: [referent.role, referent.subRole] });
+    referent.set({ roles: [referent.role, referent.subRole].filter(Boolean) }); // filter removes null, undefined or ""
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
