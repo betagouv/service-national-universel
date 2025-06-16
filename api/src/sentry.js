@@ -7,7 +7,7 @@ const { logger } = require("./logger");
 function initSentry() {
   if (config.ENABLE_SENTRY) {
     init({
-      dsn: "https://584ccb2737f20b13078d0b80b9eeacab@sentry.selego.co/160",
+      dsn: "https://f6de4fc0bffdc6392b2700fd0c2d16a3@sentry.incubateur.net/243",
       environment: config.ENVIRONMENT,
       release: config.RELEASE,
       normalizeDepth: 16,
