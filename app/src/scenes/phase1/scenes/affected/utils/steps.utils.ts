@@ -7,12 +7,12 @@ import { CohortType, YoungType } from "snu-lib";
 export const ALONE_ARRIVAL_HOUR = "16h";
 export const ALONE_DEPARTURE_HOUR = "11h";
 
-export const pdrChoiceLimitDate = (cohort: CohortType): string => {
+export const pdrChoiceLimitDate = (cohort?: CohortType): string => {
   const date = getMeetingPointChoiceLimitDateForCohort(cohort);
   return date ? dayjs(date).locale("fr").format("D MMMM YYYY") : "?";
 };
 
-export const pdrChoiceExpired = (cohort: CohortType): boolean => {
+export const pdrChoiceExpired = (cohort?: CohortType): boolean => {
   const date = getMeetingPointChoiceLimitDateForCohort(cohort);
   return date ? dayjs.utc().isAfter(dayjs(date)) : false;
 };
@@ -26,7 +26,7 @@ export const STEPS = {
   MEDICAL_FILE: "MEDICAL_FILE",
 };
 
-export function isStepDone(step: string, young: YoungType, cohort: CohortType): boolean {
+export function isStepDone(step: string, young: YoungType, cohort?: CohortType): boolean {
   switch (step) {
     case STEPS.PDR:
       return hasPDR(young) || pdrChoiceExpired(cohort);
@@ -41,11 +41,11 @@ export function isStepDone(step: string, young: YoungType, cohort: CohortType): 
   }
 }
 
-export const countOfStepsDone = (young: YoungType, cohort: CohortType): number => {
+export const countOfStepsDone = (young: YoungType, cohort?: CohortType): number => {
   return Object.values(STEPS).filter((step) => isStepDone(step, young, cohort)).length;
 };
 
-export const areAllStepsDone = (young: YoungType, cohort: CohortType): boolean => {
+export const areAllStepsDone = (young: YoungType, cohort?: CohortType): boolean => {
   return countOfStepsDone(young, cohort) === Object.values(STEPS).length;
 };
 
