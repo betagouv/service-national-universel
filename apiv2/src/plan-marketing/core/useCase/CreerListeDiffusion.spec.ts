@@ -176,7 +176,7 @@ describe("CreerListeDiffusion", () => {
             // Setup
             const campaignId = "campaign-id";
             const youngsList = {
-                hits: [{ id: "young1", firstName: "John", lastName: "Doe" }],
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", email: "john.doe@example.com" }],
                 total: 1,
             };
 
@@ -206,6 +206,7 @@ describe("CreerListeDiffusion", () => {
                 PRENOM_RL1: "Parent1",
                 NOM_RL1: "One",
                 EMAIL: "parent1@example.com",
+                EMAIL_DE_CONNEXION: "john.doe@example.com",
             } as unknown as ColumnCsvName;
 
             const parent2Contact = {
@@ -213,6 +214,7 @@ describe("CreerListeDiffusion", () => {
                 PRENOM_RL2: "Parent2",
                 NOM_RL2: "Two",
                 EMAIL: "parent2@example.com",
+                EMAIL_DE_CONNEXION: "john.doe@example.com",
             } as unknown as ColumnCsvName;
 
             const csvFilePath = "path/to/csv/file.csv";
@@ -240,6 +242,10 @@ describe("CreerListeDiffusion", () => {
             expect(mockContactBuilderService.buildParentContactRow).toHaveBeenCalledTimes(2);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, parent1Contact, parent2Contact],
+                expect.any(Object),
+            );
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                expect.arrayContaining([expect.objectContaining({ EMAIL_DE_CONNEXION: expect.anything() })]),
                 expect.any(Object),
             );
             expect(result).toBe(csvFilePath);
@@ -532,6 +538,62 @@ describe("CreerListeDiffusion", () => {
             // Execute & Assert
             await expect(useCase.execute(campaignId)).rejects.toThrow(
                 new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
+            );
+        });
+
+        it("should not include EMAIL_DE_CONNEXION when JEUNES nor REPRESENTANTS_LEGAUX are in destinataires", async () => {
+            // Setup
+            const campaignId = "campaign-id";
+            const youngsList = {
+                hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
+                total: 1,
+            };
+
+            const relatedData = {
+                centres: [{ id: "centre1" }],
+                pointDeRassemblements: [{ id: "pdr1" }],
+                lignes: [{ id: "ligne1" }],
+                segmentDeLignes: [{ id: "segment1" }],
+                classes: [{ id: "classe1", etablissementId: "etab1" }],
+                referentsClasse: [],
+                etablissements: [{ id: "etab1", coordinateurIds: ["coord1"] }],
+                chefsEtablissement: [],
+                coordinateursCle: [{ id: "coord1", prenom: "Coordinateur", nom: "CLE" }],
+                sejours: [],
+                chefsDeCentre: [],
+            } as unknown as RelatedDataResult;
+
+            const youngContact = {
+                type: ColumnType.jeunes,
+                PRENOM: "John",
+                NOM: "Doe",
+                EMAIL: "john.doe@example.com",
+            } as unknown as ColumnCsvName;
+
+            const coordCleContact = {
+                type: ColumnType.administrateurs,
+                PRENOM: "Coordinateur",
+                NOM: "CLE",
+                EMAIL: "coordinateur@example.com",
+            } as unknown as ColumnCsvName;
+
+            mockCampaignProcessorService.validateAndProcessCampaign.mockResolvedValue({
+                destinataires: [DestinataireListeDiffusion.COORDINATEURS_CLE],
+                youngs: youngsList,
+                contactsQuery: {},
+            } as unknown as CampaignProcessorResult);
+
+            mockDataFetcherService.fetchRelatedData.mockResolvedValue(relatedData);
+            mockContactBuilderService.buildYoungContactRow.mockReturnValue(youngContact);
+            mockContactBuilderService.buildCoordinateurCleContactRow.mockReturnValue(coordCleContact);
+
+            // Execute
+            await useCase.execute(campaignId);
+
+            // the array should not contain EMAIL_DE_CONNEXION
+            expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
+                expect.arrayContaining([expect.not.objectContaining({ EMAIL_DE_CONNEXION: expect.anything() })]),
+                expect.any(Object),
             );
         });
     });

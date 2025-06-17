@@ -5,7 +5,6 @@ import { environment, knowledgebaseURL } from "../../../../config";
 import { hasAccessToPhase3, permissionPhase1, permissionPhase3 } from "../../../../utils";
 import plausibleEvent from "@/services/plausible";
 
-import Diagoriente from "./Diagoriente";
 import IconHome from "../assets/IconHome";
 import IconPhase1 from "../assets/IconPhase1";
 import IconPhase2 from "../assets/IconPhase2";
@@ -60,7 +59,6 @@ export default function NavigationMenu({ onClose = () => {} }) {
         {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
         {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
       </ul>
-      <Diagoriente />
       <Socials />
     </nav>
   );
