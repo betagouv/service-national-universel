@@ -11,7 +11,6 @@ import { shouldForceRedirectToInscription } from "./utils/navigation";
 import usePermissions from "./hooks/usePermissions";
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
-import Diagoriente from "./components/layout/navbar/components/Diagoriente";
 import ModalCGU from "./components/modals/ModalCGU";
 import ModalRI from "./components/modals/ModalRI";
 
@@ -87,7 +86,6 @@ const Espace = () => {
           <SentryRoute path="/mission" component={Missions} />
           <SentryRoute path="/candidature" component={Candidature} />
           {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <SentryRoute path="/design-system" component={DesignSystemPage} />}
-          <SentryRoute path="/diagoriente" component={Diagoriente} />
           <SentryRoute path="/changer-de-sejour" component={ChangeSejour} />
           {ENABLE_PM && <SentryRoute path="/ma-preparation-militaire" component={MilitaryPreparation} />}
           <Redirect to="/" />
