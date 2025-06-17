@@ -227,9 +227,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
     }
 
-    const cohesionCenter = await CohesionCenterModel.findById(sessionPhase1.cohesionCenterId);
-    if ((cohesionCenter?.placesTotal || 0) < value.placesTotal) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
     let oldHeadCenterId = sessionPhase1.headCenterId;
     const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
 
