@@ -169,3 +169,8 @@ const normalizeColumnName = (name) => {
     .trim()
     .toLowerCase();
 };
+
+export function findLast5Digits(str: string) {
+  const matches = str.match(/\d{5}/g);
+  return matches ? matches[matches.length - 1] : null;
+}
