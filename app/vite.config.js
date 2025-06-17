@@ -31,10 +31,10 @@ export default defineConfig(({ mode }) => {
     plugins.push(
       // Put the Sentry vite plugin after all other plugins
       sentryVitePlugin({
-        org: "sentry",
+        org: "betagouv",
         project: "snu-moncompte",
         authToken: env.SENTRY_AUTH_TOKEN,
-        url: "https://sentry.selego.co/",
+        url: "https://sentry.incubateur.net",
         environment: mode,
         release: {
           name: env.VITE_RELEASE,

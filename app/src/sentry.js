@@ -24,7 +24,7 @@ function initSentry() {
   if (environment !== "development") {
     // Evite le spam sentry en local
     init({
-      dsn: "https://9f62b6f87edc757e44b10d7728db5913@sentry.selego.co/143",
+      dsn: "https://7f390fc516b1f0df60cd7e01f34291f8@sentry.incubateur.net/244",
       environment,
       release: RELEASE,
       normalizeDepth: 16,
