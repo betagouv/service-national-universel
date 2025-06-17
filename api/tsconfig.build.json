@@ -15,5 +15,5 @@
   },
   "references": [{ "path": "../packages/lib" }],
   "include": ["src/**/*.ts"],
-  "exclude": ["**/node_modules/*", "src/__tests__/*"]
+  "exclude": ["**/node_modules/*", "src/__tests__/*", "src/service-national-universel-scripts/*"]
 }
