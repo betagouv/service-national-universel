@@ -18,7 +18,7 @@
     "clean": "rm -fr node_modules public/dsfr .turbo build .swc"
   },
   "devDependencies": {
-    "@swc/plugin-styled-components": "1.5.111",
+    "@swc/plugin-styled-components": "^8.0.0",
     "@types/react-redux-toastr": "^7.0.0",
     "@vitejs/plugin-react-swc": "^3.3.2",
     "eslint": "^8.56.0",
