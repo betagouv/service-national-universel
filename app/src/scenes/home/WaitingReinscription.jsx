@@ -6,6 +6,7 @@ import { YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../assets/hero/home.png";
+import Engagement from "./components/Engagement";
 
 export default function WaitingReinscription() {
   const young = useSelector((state) => state.Auth.young);
@@ -37,6 +38,8 @@ export default function WaitingReinscription() {
           </Link>
         </div>
       </HomeHeader>
+      <br />
+      <Engagement />
     </HomeContainer>
   );
 }
