@@ -26,7 +26,19 @@ export default defineConfig(({ mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
-  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
+  const plugins = [
+    react({
+      plugins: [
+        [
+          "@swc/plugin-styled-components",
+          {
+            displayName: true,
+            ssr: false,
+          },
+        ],
+      ],
+    }),
+  ];
   if (mode !== "development") {
     plugins.push(
       // Put the Sentry vite plugin after all other plugins
