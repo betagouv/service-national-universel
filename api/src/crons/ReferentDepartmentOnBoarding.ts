@@ -1,3 +1,4 @@
+import { startOfDay, endOfDay, subDays } from "date-fns";
 import { logger } from "../logger";
 import { capture } from "../sentry";
 import slack from "../slack";
@@ -14,19 +15,11 @@ async function getReferentsForReminder(): Promise<ReminderData> {
   const now = new Date();
 
   // Calculate dates for 7 days ago and 21 days ago
-  const sevenDaysAgo = new Date(now);
-  sevenDaysAgo.setDate(now.getDate() - 7);
-  sevenDaysAgo.setHours(0, 0, 0, 0);
+  const sevenDaysAgo = startOfDay(subDays(now, 7));
+  const sevenDaysAgoEnd = endOfDay(subDays(now, 7));
 
-  const sevenDaysAgoEnd = new Date(sevenDaysAgo);
-  sevenDaysAgoEnd.setHours(23, 59, 59, 999);
-
-  const twentyOneDaysAgo = new Date(now);
-  twentyOneDaysAgo.setDate(now.getDate() - 21);
-  twentyOneDaysAgo.setHours(0, 0, 0, 0);
-
-  const twentyOneDaysAgoEnd = new Date(twentyOneDaysAgo);
-  twentyOneDaysAgoEnd.setHours(23, 59, 59, 999);
+  const twentyOneDaysAgo = startOfDay(subDays(now, 21));
+  const twentyOneDaysAgoEnd = endOfDay(subDays(now, 21));
 
   try {
     const sevenDaysReferents = await ReferentModel.find({
