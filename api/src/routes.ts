@@ -11,7 +11,6 @@ export function injectRoutes(app) {
   app.use("/dashboard/engagement", require("./controllers/dashboard/engagement"));
   app.use("/demande-de-modification", require("./controllers/planDeTransport/demande-de-modification"));
   app.use("/department-service", require("./controllers/department-service"));
-  app.use("/diagoriente", require("./controllers/diagoriente"));
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport"));
   app.use("/elasticsearch", require("./controllers/elasticsearch"));
   app.use("/email", require("./controllers/email"));

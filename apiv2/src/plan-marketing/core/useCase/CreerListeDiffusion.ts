@@ -40,10 +40,12 @@ export class CreerListeDiffusion implements UseCase<string> {
             );
 
             if (destinataires.includes(DestinataireListeDiffusion.JEUNES)) {
+                baseRow.EMAIL_DE_CONNEXION = young.email;
                 contactsForListeDiffusion.push(baseRow);
             }
 
             if (destinataires.includes(DestinataireListeDiffusion.REPRESENTANTS_LEGAUX)) {
+                baseRow.EMAIL_DE_CONNEXION = young.email;
                 contactsForListeDiffusion.push(
                     this.contactBuilderService.buildParentContactRow(baseRow, young, true),
                     this.contactBuilderService.buildParentContactRow(baseRow, young, false),

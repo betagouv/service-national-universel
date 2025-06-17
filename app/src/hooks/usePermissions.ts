@@ -9,9 +9,9 @@ export default function usePermissions() {
   const { cohort } = useCohort();
 
   return {
-    hasAccessToAVenir: young.source === YOUNG_SOURCE.VOLONTAIRE && cohort.name !== "à venir",
+    hasAccessToAVenir: young.source === YOUNG_SOURCE.VOLONTAIRE && cohort?.name !== "à venir",
     hasAccessToDesistement: young.status !== YOUNG_STATUS.WITHDRAWN && young.status !== YOUNG_STATUS.ABANDONED,
-    canModifyInscription: cohort.inscriptionModificationEndDate ? new Date() < new Date(cohort.inscriptionModificationEndDate) : false,
+    canModifyInscription: cohort?.inscriptionModificationEndDate ? new Date() < new Date(cohort?.inscriptionModificationEndDate) : false,
     hasAccessToReinscription: hasAccessToReinscription(young),
     hasAccessToNavigation: ![YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status as any),
     canUpdatePSC1: !cohortAssignmentAnnouncementsIsOpenForYoung(cohort),
