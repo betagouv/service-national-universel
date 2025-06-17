@@ -27,19 +27,7 @@ export default defineConfig(({ command, mode }) => {
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
 
-  const plugins = [
-    react({
-      plugins: [
-        [
-          "@swc/plugin-styled-components",
-          {
-            displayName: true,
-            ssr: false,
-          },
-        ],
-      ],
-    }),
-  ];
+  const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
 
   if (mode !== "development") {
     plugins.push(
