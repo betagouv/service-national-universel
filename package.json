@@ -9,7 +9,7 @@
     "test": "turbo run test --filter=$APP_NAME",
     "lint": "turbo run lint --continue --filter=$APP_NAME",
     "check-types": "turbo run check-types --continue --filter=$APP_NAME",
-    "clean": "turbo run clean",
+    "clean": "turbo run clean && rm -rf node_modules .turbo",
     "endpoints": "export env_name=$(devops/scripts/cc-environment-name.sh $(git rev-parse --abbrev-ref HEAD)) && echo \"https://api.$env_name.ci.beta-snu.dev\nhttps://admin.$env_name.ci.beta-snu.dev\nhttps://moncompte.$env_name.ci.beta-snu.dev\""
   },
   "dependencies": {
