@@ -169,7 +169,7 @@ export const GROUPSTEPS = {
 
 export async function exportLigneBus(cohort) {
   try {
-    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
+    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export`, {
       filters: { cohort: [cohort] },
     });
     if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
