@@ -652,6 +652,47 @@ describe("LigneDeBus", () => {
   });
 
   describe("POST /elasticsearch/lignebus/export", () => {
+    beforeEach(() => {
+      mockEsClient({
+        lignebus: [
+          {
+            _id: "ligneId",
+            busId: "BUS001",
+            meetingPointsIds: ["pdr1", "pdr2"],
+            centerId: "center1",
+          },
+        ],
+        pointderassemblement: [
+          {
+            _id: "pdr1",
+            region: "Île-de-France",
+            department: "Paris",
+          },
+          {
+            _id: "pdr2",
+            region: "Île-de-France",
+            department: "Paris",
+          },
+        ],
+        cohesioncenter: [
+          {
+            _id: "center1",
+            name: "Test Center",
+          },
+        ],
+        young: [
+          {
+            _id: "young1",
+            ligneId: "ligneId",
+            status: "VALIDATED",
+          },
+        ],
+      });
+
+      jest.mock("../utils/es-serializer", () => ({
+        serializeYoungs: jest.fn().mockReturnValue([]),
+      }));
+    });
     it("should return 200 when export is successful", async () => {
       const user = { _id: "123", role: "admin" };
 
