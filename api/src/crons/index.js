@@ -31,6 +31,7 @@ const checkCoherence = require("./checkCoherence");
 const checkClasseCoherence = require("./checkClasseCoherence");
 const autoValidatePhase1 = require("./autoValidatePhase1");
 const checkMissingInProgressWhenValidated = require("./checkMissingInProgress");
+const referentDepartmentOnBoarding = require("./ReferentDepartmentOnBoarding");
 
 // doubt ? -> https://crontab.guru/
 
@@ -115,6 +116,7 @@ const CRONS = [
   cron("checkClasseCoherence", "35 7,12,16 * * *", checkClasseCoherence.handler),
   cron("checkMissingInProgressWhenValidated", "42 1 * * *", checkMissingInProgressWhenValidated.handler),
   cron("autoValidatePhase1", "20 1 * * *", autoValidatePhase1.handler),
+  cron("referentDepartmentOnBoarding", "0 10 * * *", referentDepartmentOnBoarding.handler),
 ];
 
 module.exports = CRONS;

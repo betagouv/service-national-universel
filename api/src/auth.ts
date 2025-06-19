@@ -31,6 +31,7 @@ import {
   isReferentClasse,
   YOUNG_STATUS,
   ROLE_JEUNE,
+  ROLES,
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
@@ -1003,6 +1004,9 @@ class Auth {
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       const match = await user.comparePassword(password);
       if (match) return res.status(401).send({ ok: false, code: ERRORS.NEW_PASSWORD_IDENTICAL_PASSWORD });
+      if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && !user.registredAt) {
+        user.registredAt = Date.now();
+      }
 
       user.password = password;
       user.forgotPasswordResetToken = "";
