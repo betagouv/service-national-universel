@@ -17,7 +17,7 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   VISITOR_SUBROLES,
-} from "../../../utils";
+} from "snu-lib";
 
 import { Footer } from "../../modals/Modal";
 import ModalButton from "../../buttons/ModalButton";

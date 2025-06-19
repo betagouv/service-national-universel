@@ -3,7 +3,7 @@ import ReactLoading from "react-loading";
 import { GrCircleInformation } from "react-icons/gr";
 import { HiOutlineChevronDown, HiOutlineDocumentAdd } from "react-icons/hi";
 
-import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION } from "snu-lib";
+import { MIME_TYPES, PDT_IMPORT_ERRORS_TRANSLATION, PdtErrors } from "snu-lib";
 
 import api from "@/services/api";
 import { capture } from "@/sentry";
@@ -22,7 +22,7 @@ interface Props {
 
 export default function Import({ cohort, onFileVerified, addLigne }: Props) {
   const [isLoading, setIsLoading] = useState(false);
-  const [importErrors, setImportErrors] = useState<boolean | null>(false);
+  const [importErrors, setImportErrors] = useState<PdtErrors | null>(null);
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
   const [importedFileName, setImportedFileName] = useState<string | null>(null);
@@ -35,6 +35,10 @@ export default function Import({ cohort, onFileVerified, addLigne }: Props) {
       fileInput.current.click();
     }
   }
+
+  const isPdtErrors = (errors: any): errors is PdtErrors => {
+    return errors && typeof errors === "object" && !Array.isArray(errors);
+  };
 
   async function handleUpload(e: ChangeEvent<HTMLInputElement>) {
     if (!e?.target?.files?.length) return;
@@ -57,8 +61,8 @@ export default function Import({ cohort, onFileVerified, addLigne }: Props) {
       if (res.code === "FILE_CORRUPTED") {
         setUploadError("Le fichier semble corrompu. Pouvez-vous changer le format ou regénérer votre fichier ? Si vous rencontrez toujours le problème, contactez le support.");
       } else if (!res.ok) {
-        if (res.code === "INVALID_BODY" && res.errors) {
-          setImportErrors(!!res.errors);
+        if (res.code === "INVALID_BODY" && res.errors && isPdtErrors(res.errors)) {
+          setImportErrors(res.errors);
         } else {
           capture(res.code);
           setUploadError("Une erreur s'est produite lors du téléversement de votre fichier (vérifiez que l'onglet ALLER-RETOUR existe bien)");
@@ -99,7 +103,7 @@ export default function Import({ cohort, onFileVerified, addLigne }: Props) {
               className="flex items-center gap-3 rounded-md border !border-blue-600 bg-white py-2 px-4 text-sm font-medium text-blue-700 hover:shadow"
               onClick={() => {
                 setIsLoading(false);
-                setImportErrors(false);
+                setImportErrors(null);
               }}>
               Importer un nouveau fichier
             </button>
