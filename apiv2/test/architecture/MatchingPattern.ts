@@ -21,6 +21,7 @@ export enum MatchingPattern {
 
     TASK_CORE = "..task.core..",
     SHARED_CORE = "..shared.core..",
+    ANALYTICS_CORE = "..analytics.core..",
 
     NESTJS_COMMON = "@nestjs.common",
     NESTJS_CONFIG = "@nestjs.config",

@@ -69,12 +69,27 @@ import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/
 import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
 import { ImporterClasseEnMasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
-import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
-import { JeuneRepository } from "./infra/sejours/jeune/repository/mongo/JeuneMongo.repository";
-import { JeuneGateway } from "./core/sejours/jeune/Jeune.gateway";
 import { AuthModule } from "@auth/Auth.module";
+import { AdminTaskEngagementSelectorService } from "./infra/task/AdminTaskEngagementSelector";
+import { ExporterMissionCanditatures } from "./core/engagement/mission/ExporterMissionCanditatures";
+import { ExporterMissions } from "./core/engagement/mission/ExporterMissions";
+import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
+import { SearchMissionElasticRepository } from "@analytics/infra/SearchMissionElastic.repository";
+import { AnalyticsModule } from "@analytics/analytics.module";
+import { SearchApplicationGateway } from "@analytics/core/SearchApplication.gateway";
+import { SearchApplicationElasticRepository } from "@analytics/infra/SearchApplicationElastic.repository";
+import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
+import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElastic.repository";
+import { SearchReferentGateway } from "@analytics/core/SearchReferent.gateway";
+import { SearchStructureGateway } from "@analytics/core/SearchStructure.gateway";
+import { SearchReferentElasticRepository } from "@analytics/infra/SearchReferentElastic.repository";
+import { SearchStructureElasticRepository } from "@analytics/infra/SearchStructureElastic.repository";
+import { structureMongoProviders } from "./infra/engagement/structure/provider/StructureMongo.provider";
+import { StructureGateway } from "./core/engagement/structure/Structure.gateway";
+import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
+import { ExportMissionService } from "./core/engagement/mission/ExportMission.service";
 
 @Module({
     imports: [
@@ -93,6 +108,7 @@ import { AuthModule } from "@auth/Auth.module";
         DatabaseModule,
         ReferentielModule,
         AuthModule,
+        AnalyticsModule,
     ],
     providers: [
         Logger,
@@ -111,10 +127,11 @@ import { AuthModule } from "@auth/Auth.module";
         ...sejourMongoProviders,
         ...sessionMongoProviders,
         ...taskMongoProviders,
+        ...historyProvider,
+        ...structureMongoProviders,
         // ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
-        ...historyProvider,
         { provide: ClasseGateway, useClass: ClasseRepository },
         { provide: ReferentGateway, useClass: ReferentRepository },
         { provide: EtablissementGateway, useClass: EtablissementRepository },
@@ -123,6 +140,12 @@ import { AuthModule } from "@auth/Auth.module";
         { provide: FileGateway, useClass: FileProvider },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: ClockGateway, useClass: ClockProvider },
+        { provide: StructureGateway, useClass: StructureRepository },
+        { provide: SearchYoungGateway, useClass: SearchYoungElasticRepository },
+        { provide: SearchMissionGateway, useClass: SearchMissionElasticRepository },
+        { provide: SearchApplicationGateway, useClass: SearchApplicationElasticRepository },
+        { provide: SearchReferentGateway, useClass: SearchReferentElasticRepository },
+        { provide: SearchStructureGateway, useClass: SearchStructureElasticRepository },
         // add use case here
         AffectationService,
         InscriptionService,
@@ -148,12 +171,16 @@ import { AuthModule } from "@auth/Auth.module";
         ValiderBasculeJeunesService,
         ValiderBasculeJeunesValides,
         ValiderBasculeJeunesNonValides,
+        ExporterMissionCanditatures,
+        ExporterMissions,
         ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
+        AdminTaskEngagementSelectorService,
         ImporterClasseEnMasse,
         ClasseService,
         JeuneService,
+        ExportMissionService,
     ],
 })
 export class AdminJobModule {

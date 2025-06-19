@@ -38,7 +38,7 @@ export default function ModalConfirm({
         {showHeaderIcon ? <RoundWarning style={{ marginBottom: "1.5rem" }} /> : null}
         <Content>
           <h1>{title}</h1>
-          <p>{message}</p>
+          <p className="whitespace-pre-wrap">{message}</p>
           {children}
         </Content>
         <Footer>

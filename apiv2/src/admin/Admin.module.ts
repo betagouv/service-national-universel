@@ -76,6 +76,7 @@ import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service
 import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
+import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
 
 @Module({
     imports: [
@@ -109,6 +110,7 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
         HistoryController,
         ReferentController,
         DesistementController,
+        MissionController,
     ],
     providers: [
         ClasseService,

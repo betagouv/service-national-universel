@@ -30,6 +30,15 @@ export interface FileGateway {
     generateCSV(data: Record<string, any>[], options: CsvOptions): Promise<string>;
     parseXLS<T>(buffer: Buffer, options?: { sheetIndex?: number; sheetName?: string; defval?: any }): Promise<T[]>;
     generateExcel(excelSheets: { [sheet: string]: any[] }): Promise<Buffer>;
+    generateExcelFromValues({
+        columnsName,
+        values,
+        sheetName,
+    }: {
+        columnsName: string[];
+        values: any[][];
+        sheetName: string;
+    }): Promise<Buffer>;
     uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },

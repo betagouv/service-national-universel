@@ -14,6 +14,7 @@ import { AdminTaskAffectationSelectorService } from "./AdminTaskAffectationSelec
 import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelector.service";
 import { ImportClasseEnMasseTaskModel } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.model";
 import { ImporterClasseEnMasse } from "@admin/core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
+import { AdminTaskEngagementSelectorService } from "./AdminTaskEngagementSelector";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -22,6 +23,7 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly adminTaskRepository: AdminTaskRepository,
         private readonly adminTaskAffectationSelectorService: AdminTaskAffectationSelectorService,
         private readonly adminTaskInscriptionSelectorService: AdminTaskInscriptionSelectorService,
+        private readonly adminTaskEngagementSelectorService: AdminTaskEngagementSelectorService,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
         private readonly importerClasseEnMasse: ImporterClasseEnMasse,
         private readonly cls: ClsService,
@@ -79,6 +81,10 @@ export class AdminTaskConsumer extends WorkerHost {
                         const importTaskClassesEnMasse: ImportClasseEnMasseTaskModel = task;
                         this.logger.log(`Processing task "${TaskName.IMPORT_CLASSE_EN_MASSE}"`, AdminTaskConsumer.name);
                         await this.importerClasseEnMasse.execute(importTaskClassesEnMasse.metadata?.parameters);
+                        break;
+                    case TaskName.MISSION_EXPORT_CANDIDATURES:
+                    case TaskName.MISSION_EXPORT:
+                        results = await this.adminTaskEngagementSelectorService.handleEngagement(job, task);
                         break;
                     default:
                         throw new Error(`Task "${job.name}" not handle yet`);

@@ -1,5 +1,5 @@
 import { InferSchemaType, Schema } from "mongoose";
-import { InterfaceExtended } from "../../mongoSchema";
+import { ApplicationType, InterfaceExtended, ReferentType, StructureType, YoungType } from "../../mongoSchema";
 
 export const MissionSchema = {
   name: {
@@ -306,4 +306,9 @@ export const MissionSchema = {
 };
 
 const schema = new Schema(MissionSchema);
-export type MissionType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type MissionType = InterfaceExtended<InferSchemaType<typeof schema>> & {
+  structure?: StructureType;
+  tutor?: ReferentType;
+  candidatures?: ApplicationType[];
+  youngs?: YoungType[];
+};
