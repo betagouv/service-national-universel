@@ -138,7 +138,7 @@ const Signin: React.FC = () => {
             <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
             <div className="flex w-full justify-center">
               <a
-                href="https://www.snu.gouv.fr/?utm_source=moncompte&utm_medium=website&utm_campaign=fin+inscriptions+2023&utm_content=cta+notifier#formulaire"
+                href="https://www.snu.gouv.fr/inscriptions-cloturees/"
                 target="_blank"
                 rel="noreferrer"
                 className="text-[#161616]"
