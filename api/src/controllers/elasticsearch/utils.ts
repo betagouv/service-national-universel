@@ -1,15 +1,31 @@
-const Joi = require("joi");
-const { ROLES, canSearchInElasticSearch } = require("snu-lib");
-const { capture } = require("../../sentry");
-const { ERRORS, isYoung, isReferent } = require("../../utils");
-const { StructureModel } = require("../../models");
+import Joi from "joi";
+import { ROLES, canSearchInElasticSearch } from "snu-lib";
+import { capture } from "../../sentry";
+import { ERRORS, isYoung, isReferent } from "../../utils";
+import { StructureModel } from "../../models";
+import { UserDto } from "snu-lib";
 
 const ES_NO_LIMIT = 10000;
 
-function searchSubQuery([value], fields) {
+type SearchFields = string[];
+type FilterFields = string[];
+type QueryFilters = {
+  searchbar?: string[];
+  [key: string]: string[] | number[] | undefined;
+};
+type ContextFilters = any[];
+type CustomQueries = {
+  [key: string]: (query: any, value?: any) => any;
+};
+type Sort = {
+  field: string;
+  order: "asc" | "desc";
+} | null;
+
+function searchSubQuery([value]: string[], fields: SearchFields) {
   const words = value?.trim().split(" ");
 
-  const shouldClauses = words.map((word, index) => {
+  const shouldClauses = words.map((word) => {
     return [
       {
         multi_match: {
@@ -32,7 +48,7 @@ function searchSubQuery([value], fields) {
   };
 }
 
-function hitsSubQuery(query, key, value, customQueries) {
+function hitsSubQuery(query: any, key: string, value: any[], customQueries?: CustomQueries) {
   const keyWithoutKeyword = key.replace(".keyword", "");
   if (customQueries?.[keyWithoutKeyword]) {
     query = customQueries[keyWithoutKeyword](query, value);
@@ -44,8 +60,8 @@ function hitsSubQuery(query, key, value, customQueries) {
   return query;
 }
 
-function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, customQueries) {
-  let aggs = {};
+function aggsSubQuery(keys: FilterFields, aggsSearchQuery: any, queryFilters: QueryFilters, contextFilters: ContextFilters, customQueries?: CustomQueries) {
+  let aggs: Record<string, any> = {};
   for (const key of keys) {
     const keyWithoutKeyword = key.replace(".keyword", "");
     let filter = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
@@ -55,7 +71,7 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
       const subKeyWithoutKeyword = subKey.replace(".keyword", "");
       if (subKey === key) continue;
       if (!queryFilters[subKeyWithoutKeyword]?.length) continue;
-      filter = hitsSubQuery(filter, subKey, queryFilters[subKeyWithoutKeyword], customQueries);
+      filter = hitsSubQuery(filter, subKey, queryFilters[subKeyWithoutKeyword]!, customQueries);
     }
 
     if (customQueries?.[keyWithoutKeyword + "Aggs"]) {
@@ -69,32 +85,43 @@ function aggsSubQuery(keys, aggsSearchQuery, queryFilters, contextFilters, custo
   return aggs;
 }
 
-function buildSort(sort) {
+function buildSort(sort: Sort) {
   if (!sort) return [{ createdAt: { order: "desc" } }];
   return [{ [sort.field]: { order: sort.order } }];
 }
 
-function unsafeStrucuredClone(obj) {
+function unsafeStrucuredClone(obj: any) {
   return JSON.parse(JSON.stringify(obj));
 }
 
-function buildNdJson(header, hitsQuery, aggsQuery = null) {
+function buildNdJson(header: any, hitsQuery: any, aggsQuery: any = null): string {
   if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hitsQuery)].join("\n") + "\n";
   return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
 }
 
-function buildArbitratyNdJson(...args) {
+function buildArbitratyNdJson(...args: any[]): string {
   return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
 }
 
-function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 10 }) {
+interface RequestBodyParams {
+  searchFields: SearchFields;
+  filterFields: FilterFields;
+  queryFilters: QueryFilters;
+  page: number;
+  sort: Sort;
+  contextFilters: ContextFilters;
+  customQueries?: CustomQueries;
+  size?: number;
+}
+
+function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, customQueries, size = 10 }: RequestBodyParams) {
   // We always need a fresh query to avoid side effects.
   const getMainQuery = () => unsafeStrucuredClone({ bool: { must: [{ match_all: {} }], filter: contextFilters } });
   // Search query
   const searchbar = queryFilters?.searchbar || [];
   const search = searchbar.filter((e) => e.trim()).length ? searchSubQuery(searchbar, searchFields) : null;
   // Hits request body
-  const hitsRequestBody = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
+  const hitsRequestBody: any = { query: getMainQuery(), size, from: page * size, sort: buildSort(sort) };
   let countAggsQuery = unsafeStrucuredClone({ bool: { must: [], filter: contextFilters } });
   if (search) {
     hitsRequestBody.query.bool.must.push(search);
@@ -107,7 +134,7 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
     if (!queryFilters[keyWithoutKeyword]?.length) continue;
     // Special case for seatsTaken
     if (keyWithoutKeyword === "seatsTaken") {
-      const seatsTakenFilter = queryFilters.seatsTaken;
+      const seatsTakenFilter = queryFilters.seatsTaken as number[];
       if (seatsTakenFilter.includes(0)) {
         hitsRequestBody.query.bool.must.push({ term: { seatsTaken: 0 } });
         countAggsQuery.bool.must.push({ term: { seatsTaken: 0 } });
@@ -117,8 +144,8 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
       }
     } else {
       // Comportement par default pour les autres filtres
-      hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword], customQueries);
-      countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword], customQueries);
+      hitsRequestBody.query = hitsSubQuery(hitsRequestBody.query, key, queryFilters[keyWithoutKeyword]!, customQueries);
+      countAggsQuery = hitsSubQuery(countAggsQuery, key, queryFilters[keyWithoutKeyword]!, customQueries);
     }
   }
   // Aggs request body
@@ -128,7 +155,22 @@ function buildRequestBody({ searchFields, filterFields, queryFilters, page, sort
   return { hitsRequestBody, aggsRequestBody };
 }
 
-function joiElasticSearch({ filterFields, sortFields = [], body }) {
+interface JoiElasticSearchParams {
+  filterFields: FilterFields;
+  sortFields?: string[];
+  body: any;
+}
+
+interface JoiElasticSearchResult {
+  queryFilters: QueryFilters;
+  page: number;
+  sort: Sort;
+  exportFields: string[] | "*" | null;
+  size: number;
+  error?: Joi.ValidationError;
+}
+
+function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSearchParams): JoiElasticSearchResult {
   const schema = Joi.object({
     filters: Joi.object(
       ["searchbar", ...filterFields].reduce((acc, field) => {
@@ -167,8 +209,16 @@ function joiElasticSearch({ filterFields, sortFields = [], body }) {
   return { queryFilters: value.filters, page: value.page, sort: value.sort, exportFields: value.exportFields, size: value.size, error };
 }
 
-async function buildMissionContext(user) {
-  const contextFilters = [];
+interface MissionContextResult {
+  missionContextFilters?: ContextFilters;
+  missionContextError?: {
+    status: number;
+    body: { ok: boolean; code: string };
+  };
+}
+
+async function buildMissionContext(user: UserDto): Promise<MissionContextResult> {
+  const contextFilters: ContextFilters = [];
 
   // A young can only see validated missions.
   if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
@@ -190,8 +240,16 @@ async function buildMissionContext(user) {
   return { missionContextFilters: contextFilters };
 }
 
-async function buildApplicationContext(user) {
-  const contextFilters = [];
+interface ApplicationContextResult {
+  applicationContextFilters?: ContextFilters;
+  applicationContextError?: {
+    status: number;
+    body: { ok: boolean; code: string };
+  };
+}
+
+async function buildApplicationContext(user: UserDto): Promise<ApplicationContextResult> {
+  const contextFilters: ContextFilters = [];
 
   if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
 
@@ -213,8 +271,12 @@ async function buildApplicationContext(user) {
   return { applicationContextFilters: contextFilters };
 }
 
-function buildDashboardUserRoleContext(user) {
-  const contextFilters = [];
+interface DashboardUserRoleContextResult {
+  dashboardUserRoleContextFilters: ContextFilters;
+}
+
+function buildDashboardUserRoleContext(user: UserDto): DashboardUserRoleContextResult {
+  const contextFilters: ContextFilters = [];
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
     contextFilters.push({ terms: { "department.keyword": user.department } });
   }
@@ -224,7 +286,7 @@ function buildDashboardUserRoleContext(user) {
   return { dashboardUserRoleContextFilters: contextFilters };
 }
 
-function getResponsibleCenterField(role) {
+function getResponsibleCenterField(role: string | undefined): string | null {
   if (!role) return null;
   let field = "";
   if (role === ROLES.HEAD_CENTER) {
@@ -235,7 +297,7 @@ function getResponsibleCenterField(role) {
   return field;
 }
 
-module.exports = {
+export {
   buildNdJson,
   buildArbitratyNdJson,
   buildRequestBody,

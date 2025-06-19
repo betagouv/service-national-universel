@@ -1,5 +1,5 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import { getAppHelperWithAcl } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { createPointDeRassemblementWithBus, notExistingMeetingPointId } from "./helpers/PlanDeTransport/pointDeRassemblement";
 import { createSessionPhase1 } from "./helpers/sessionPhase1";
@@ -8,8 +8,15 @@ import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointD
 import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import { PointDeRassemblementModel, LigneToPointModel } from "../models";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.LIGNE_BUS, PERMISSION_ACTIONS.READ);
+});
 afterAll(dbClose);
 
 describe("Ligne To Point", () => {
@@ -30,19 +37,25 @@ describe("Ligne To Point", () => {
 
   describe("GET meeting-point/:meetingPointId", () => {
     it("should return 404 and NOT_FOUND code if meetingPointId is not existing", async () => {
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${notExistingMeetingPointId}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .get(`/ligne-to-point/meeting-point/${notExistingMeetingPointId}`)
+        .send();
       expect(res.status).toBe(404);
       expect(res.body).toStrictEqual({ ok: false, code: "NOT_FOUND" });
     });
 
     it("should return 404 if meetingPoint is not found", async () => {
       await PointDeRassemblementModel.deleteMany();
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`)
+        .send();
       expect(res.status).toBe(404);
     });
 
     it("should return the ligneToPoint and meetingPoint data if everything is valid", async () => {
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`)
+        .send();
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
       expect(res.body.data).toEqual(
@@ -55,7 +68,9 @@ describe("Ligne To Point", () => {
       );
     });
     it("should return 400 and INVALID_PARAMS code if meetingPointId is not the good format", async () => {
-      res = await request(getAppHelper()).get("/ligne-to-point/meeting-point/123").send();
+      res = await request(await getAppHelperWithAcl())
+        .get("/ligne-to-point/meeting-point/123")
+        .send();
       expect(res.status).toBe(400);
       expect(res.body).toStrictEqual({ ok: false, code: "INVALID_PARAMS" });
     });
@@ -64,7 +79,9 @@ describe("Ligne To Point", () => {
       // Force a server error here e.g. by using a mock to throw an error when a model method is called
       jest.spyOn(LigneToPointModel, "findOne").mockRejectedValue(new Error("Mock server error"));
 
-      res = await request(getAppHelper()).get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .get(`/ligne-to-point/meeting-point/${ligneToPoint.meetingPointId}`)
+        .send();
       expect(res.status).toBe(500);
       expect(res.body).toStrictEqual({ ok: false, code: "SERVER_ERROR" });
 
@@ -75,20 +92,26 @@ describe("Ligne To Point", () => {
   describe("DELETE /:id", () => {
     // Modifier la route pour valider id: Joi.string().length(24).hex().required() et mettre un id trop cour en param ????
     it("should return 400 and INVALID_PARAMS code if id is not provided", async () => {
-      res = await request(getAppHelper()).delete("/ligne-to-point/123").send();
+      res = await request(await getAppHelperWithAcl())
+        .delete("/ligne-to-point/123")
+        .send();
       expect(res.status).toBe(400);
       expect(res.body).toStrictEqual({ ok: false, code: "INVALID_PARAMS" });
     });
 
     it("should return 404 and NOT_FOUND code if id does not exist", async () => {
-      res = await request(getAppHelper()).delete(`/ligne-to-point/${notExistingMeetingPointId}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .delete(`/ligne-to-point/${notExistingMeetingPointId}`)
+        .send();
       expect(res.status).toBe(404);
       expect(res.body).toStrictEqual({ ok: false, code: "NOT_FOUND" });
     });
 
     it("should return 500 and SERVER_ERROR code on server error", async () => {
       jest.spyOn(LigneToPointModel, "findById").mockRejectedValue(new Error("Mock server error"));
-      res = await request(getAppHelper()).delete(`/ligne-to-point/${ligneToPoint._id}`).send();
+      res = await request(await getAppHelperWithAcl())
+        .delete(`/ligne-to-point/${ligneToPoint._id}`)
+        .send();
       expect(res.status).toBe(500);
       expect(res.body).toStrictEqual({ ok: false, code: "SERVER_ERROR" });
 
