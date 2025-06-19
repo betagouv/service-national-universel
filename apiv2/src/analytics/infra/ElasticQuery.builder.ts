@@ -30,7 +30,7 @@ export class ElasticsearchQueryBuilder<T> {
         if (!field) {
             return this;
         }
-        const sortObject = { [`${field}.keyword`]: { order } };
+        const sortObject = { [field]: { order } };
         this.query.body.sort?.push(sortObject);
         return this;
     }
@@ -83,6 +83,51 @@ export class ElasticsearchQueryBuilder<T> {
                         [`${key}.keyword`]: Array.isArray(value) ? value : [value],
                     },
                 });
+            }
+        });
+        return this;
+    }
+
+    setMusts(musts: Record<string, string | string[]> | undefined): this {
+        if (!musts) {
+            return this;
+        }
+        if (!this.query.body.query.bool.must) {
+            this.query.body.query.bool.must = [];
+        }
+        Object.entries(musts).forEach(([key, value]) => {
+            if (value?.length > 0) {
+                this.query.body.query.bool.must!.push({
+                    [key]: {
+                        values: Array.isArray(value) ? value : [value],
+                    },
+                });
+            }
+        });
+        return this;
+    }
+
+    setRanges(ranges: Record<string, { from?: Date; to?: Date }> | undefined): this {
+        if (!ranges) {
+            return this;
+        }
+        if (!this.query.body.query.bool.must) {
+            this.query.body.query.bool.must = [];
+        }
+        Object.entries(ranges).forEach(([key, value]) => {
+            if (value.from) {
+                value.from.setMinutes(value.from.getMinutes() - value.from.getTimezoneOffset());
+                this.query.body.query.bool.must.push(
+                    { range: { [key]: { gte: value.from } } },
+                    { range: { [key]: { gte: null } } },
+                );
+            }
+            if (value.to) {
+                value.to.setMinutes(value.to.getMinutes() - value.to.getTimezoneOffset());
+                this.query.body.query.bool.must.push(
+                    { range: { [key]: { gte: null } } },
+                    { range: { [key]: { lte: value.to } } },
+                );
             }
         });
         return this;

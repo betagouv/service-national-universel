@@ -1,6 +1,6 @@
 import { Schema, InferSchemaType } from "mongoose";
 
-import { InterfaceExtended } from "..";
+import { InterfaceExtended, YoungType } from "..";
 
 export const ApplicationSchema = {
   apiEngagementId: {
@@ -207,4 +207,6 @@ export const ApplicationSchema = {
 };
 
 const schema = new Schema(ApplicationSchema);
-export type ApplicationType = InterfaceExtended<InferSchemaType<typeof schema>>;
+export type ApplicationType = InterfaceExtended<InferSchemaType<typeof schema>> & {
+  young?: YoungType;
+};
