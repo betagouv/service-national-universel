@@ -8,8 +8,7 @@ const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
 const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
-const { default: isBoolean } = require("validator/lib/isBoolean");
-const { Response } = require("aws-sdk");
+const logger = require("../../logger");
 
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -179,25 +178,19 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
 
     let response = await allRecords("lignebus", hitsRequestBody.query, esClient, exportFields);
 
-    let promise = [];
-    if (req.query?.needYoungInfo) {
-      promise.push(populateWithYoungInfo(response, req.user));
-    }
-    if (req.query?.needCohesionCenterInfo) {
-      promise.push(populateWithCohesionCenterInfo(response));
-    }
-    if (req.query?.needMeetingPointsInfo) {
-      promise.push(populateWithMeetingPointsInfo(response));
-    }
-    if (promise.length) {
-      const [responseWithYoungInfo, responseWithCenterInfo, responseWithMeetingPoints] = await Promise.all(promise);
+    const sharedData = await prepareSharedData(response);
 
-      response = responseWithYoungInfo.map((item, index) => ({
-        ...item,
-        center: responseWithCenterInfo[index].center,
-        meetingPoints: responseWithMeetingPoints[index].meetingPoints,
-      }));
-    }
+    const [responseWithYoungInfo, responseWithCenterInfo, responseWithMeetingPoints] = await Promise.all([
+      populateWithYoungInfo(response, req.user, sharedData),
+      populateWithCohesionCenterInfo(response, sharedData),
+      populateWithMeetingPointsInfo(response, sharedData),
+    ]);
+
+    response = responseWithYoungInfo.map((item, index) => ({
+      ...item,
+      center: responseWithCenterInfo[index].center,
+      meetingPoints: responseWithMeetingPoints[index].meetingPoints,
+    }));
 
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
@@ -206,52 +199,96 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
   }
 });
 
-const populateWithYoungInfo = async (ligneBus, user) => {
-  const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
-  const contextFilters = [{ terms: { "ligneId.keyword": ligneIds } }, { term: { "status.keyword": "VALIDATED" } }];
-  if (user.role === ROLES.REFERENT_REGION) {
-    contextFilters.push({ term: { "region.keyword": user.region } });
-  }
-  if (user.role === ROLES.REFERENT_DEPARTMENT) {
-    contextFilters.push({ terms: { "department.keyword": user.department } });
-  }
+const prepareSharedData = async (ligneBus) => {
+  const [meetingPoints, centers] = await Promise.all([
+    (async () => {
+      const meetingPointsIds = [...new Set(ligneBus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []).filter(Boolean))];
 
-  const youngs = await allRecords("young", {
-    bool: {
-      must: contextFilters,
-      must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
-    },
-  });
-  const youngData = serializeYoungs(youngs);
+      if (meetingPointsIds.length > 0) {
+        return await allRecords("pointderassemblement", {
+          bool: { must: { ids: { values: meetingPointsIds } } },
+        });
+      }
+      return [];
+    })(),
 
-  ligneBus = ligneBus.map((item) => ({
-    ...item,
-    youngs: youngData?.filter((e) => e.ligneId.toString() === item._id),
-  }));
-  return ligneBus;
+    (async () => {
+      const centerIds = [...new Set(ligneBus.map((item) => item.centerId).filter(Boolean))];
+
+      if (centerIds.length > 0) {
+        return await allRecords("cohesioncenter", {
+          bool: { must: { ids: { values: centerIds } } },
+        });
+      }
+      return [];
+    })(),
+  ]);
+
+  return { meetingPoints, centers };
 };
 
-const populateWithCohesionCenterInfo = async (ligneBus) => {
-  const centerIds = [...new Set(ligneBus.map((item) => item.centerId).filter(Boolean))];
-  const centers = await allRecords("cohesioncenter", { bool: { must: { ids: { values: centerIds } } } });
+const populateWithYoungInfo = async (ligneBus, user, sharedData) => {
+  try {
+    const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
+    const pointDeRassemblements = sharedData.meetingPoints || [];
 
-  ligneBus = ligneBus.map((item) => ({
-    ...item,
-    center: centers?.find((e) => e._id.toString() === item.centerId),
-  }));
-  return ligneBus;
+    const contextFilters = [{ terms: { "ligneId.keyword": ligneIds } }, { term: { "status.keyword": "VALIDATED" } }];
+
+    if (user.role === ROLES.REFERENT_REGION) {
+      const pdrFilterIds = pointDeRassemblements.filter((pdr) => pdr.region === user.region).map((e) => e._id);
+      contextFilters.push({ terms: { "meetingPointId.keyword": pdrFilterIds } });
+    }
+
+    if (user.role === ROLES.REFERENT_DEPARTMENT) {
+      const pdrFilterIds = pointDeRassemblements.filter((pdr) => user.department.includes(pdr.department)).map((e) => e._id);
+      contextFilters.push({ terms: { "meetingPointId.keyword": pdrFilterIds } });
+    }
+
+    const youngs = await allRecords("young", {
+      bool: {
+        must: contextFilters,
+        must_not: [{ term: { "cohesionStayPresence.keyword": "false" } }, { term: { "departInform.keyword": "true" } }],
+      },
+    });
+
+    const youngData = serializeYoungs(youngs);
+
+    return ligneBus.map((item) => ({
+      ...item,
+      youngs: youngData?.filter((e) => e.ligneId.toString() === item._id) || [],
+    }));
+  } catch (error) {
+    logger.error("Error populating young info:", error);
+    return ligneBus.map((item) => ({ ...item, youngs: [] }));
+  }
 };
 
-const populateWithMeetingPointsInfo = async (ligneBus) => {
-  const meetingPointsIds = [...new Set(ligneBus.reduce((prev, item) => [...prev, ...item.meetingPointsIds], []).filter(Boolean))];
-  const meetingPoints = await allRecords("pointderassemblement", { bool: { must: { ids: { values: meetingPointsIds } } } });
+const populateWithCohesionCenterInfo = async (ligneBus, sharedData) => {
+  try {
+    const centers = sharedData.centers || [];
 
-  ligneBus = ligneBus.map((item) => ({
-    ...item,
-    meetingPoints: meetingPoints?.filter((e) => item.meetingPointsIds.includes(e._id.toString())),
-  }));
+    return ligneBus.map((item) => ({
+      ...item,
+      center: centers?.find((e) => e._id.toString() === item.centerId) || null,
+    }));
+  } catch (error) {
+    logger.error("Error populating cohesion center info:", error);
+    return ligneBus.map((item) => ({ ...item, center: null }));
+  }
+};
 
-  return ligneBus;
+const populateWithMeetingPointsInfo = async (ligneBus, sharedData) => {
+  try {
+    const meetingPoints = sharedData.meetingPoints || [];
+
+    return ligneBus.map((item) => ({
+      ...item,
+      meetingPoints: meetingPoints?.filter((e) => item.meetingPointsIds.includes(e._id.toString())) || [],
+    }));
+  } catch (error) {
+    logger.error("Error populating meeting points info:", error);
+    return ligneBus.map((item) => ({ ...item, meetingPoints: [] }));
+  }
 };
 
 module.exports = router;
