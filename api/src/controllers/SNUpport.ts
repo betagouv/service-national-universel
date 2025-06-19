@@ -144,22 +144,6 @@ router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, re
   }
 });
 
-router.post("/tickets", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
-  try {
-    const { ok, data } = await SNUpport.api(`/v0/ticket/search`, {
-      method: "POST",
-      credentials: "include",
-      body: JSON.stringify(req.body),
-    });
-    if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.get(
   "/ticketscount",
   authMiddleware("referent"),
@@ -174,18 +158,14 @@ router.get(
       let query = {};
       if (user.role === ROLES.REFERENT_DEPARTMENT) {
         query = {
-          department: user.department,
-          subject: "J'ai une question",
-          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-          canal: { $in: ["PLATFORM", "MAIL"] },
+          type: "department",
+          value: user.department,
         };
       }
       if (user.role === ROLES.REFERENT_REGION) {
         query = {
-          region: user.region,
-          subject: "J'ai une question",
-          role: { $in: ["young", "young exterior", "parent", "responsible", "unknown"] },
-          canal: { $in: ["PLATFORM", "MAIL"] },
+          type: "region",
+          value: user.region,
         };
       }
 
@@ -358,7 +338,7 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, clientId, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
+    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -371,7 +351,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       message,
       email,
       parcours,
-      clientId,
       subject,
       firstName,
       lastName,
@@ -395,35 +374,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       body: JSON.stringify(body),
     });
     if (!response.ok) return res.status(400).send({ ok: false, code: response });
-    return res.status(200).send({ ok: true, data: response });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/ticket/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { error: validationError, value } = Joi.object({
-      status: Joi.string().required(),
-    }).validate(req.body, { stripUnknown: true });
-    if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { status } = value;
-
-    const response = await SNUpport.api(`/v0/ticket/${checkedId}`, {
-      method: "PUT",
-      credentials: "include",
-      body: JSON.stringify({
-        status,
-      }),
-    });
-    if (!response.id) return res.status(400).send({ ok: false });
     return res.status(200).send({ ok: true, data: response });
   } catch (error) {
     capture(error);
@@ -581,5 +531,11 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   }
   return true;
 };
+
+/*
+Routes deleted as not used :
+POST /SNUpport/tickets
+PUT /SNUpport/ticket/id
+*/
 
 export default router;

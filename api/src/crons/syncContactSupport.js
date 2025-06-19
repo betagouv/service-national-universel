@@ -1,5 +1,5 @@
 const { YoungModel, ReferentModel } = require("../models");
-const SNUpport = require("../SNUpport").default;
+const SNUpport = require("../SNUpport");
 const { capture } = require("../sentry");
 const slack = require("../slack");
 const { getUserAttributes } = require("../services/support");
@@ -22,7 +22,12 @@ exports.handler = async () => {
       for await (const contact of cursor) {
         contact.email = contact.email.toLowerCase();
         const attributes = await getUserAttributes(contact);
-        contactsWithAttributes.push({ ...contact.toObject(), attributes });
+        contactsWithAttributes.push({
+          email: contact.email,
+          firstName: contact.firstName,
+          lastName: contact.lastName,
+          attributes,
+        });
 
         if (contactsWithAttributes.length % 100 === 0) {
           await syncContacts(contactsWithAttributes, type);
