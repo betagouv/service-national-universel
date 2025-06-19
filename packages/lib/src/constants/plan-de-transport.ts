@@ -18,6 +18,8 @@ const PDT_IMPORT_ERRORS = {
   CENTER_WITHOUT_SESSION: "CENTER_WITHOUT_SESSION",
   MISSING_COLUMN: "MISSING_COLUMN",
   UNEXPECTED_COLUMN: "UNEXPECTED_COLUMN",
+  CENTER_ZIP_MISMATCH: "CENTER_ZIP_MISMATCH",
+  PDR_ZIP_MISMATCH: "PDR_ZIP_MISMATCH",
 };
 
 const PDT_IMPORT_ERRORS_TRANSLATION = {
@@ -43,6 +45,8 @@ const PDT_IMPORT_ERRORS_TRANSLATION = {
   CENTER_WITHOUT_SESSION: { text: "Le centre %s n'a pas de session sur ce séjour", tooltip: "Demandez à un modérateur de créer la session sur le centre." },
   MISSING_COLUMN: { text: "Colonne manquante ou mal orthographiée", tooltip: "Veuillez vérifier que la colonne est présente / bien orthographiée dans le fichier." },
   UNEXPECTED_COLUMN: { text: "Colonne inattendue", tooltip: "Veuillez vérifier que la colonne n'est pas en trop dans le fichier." },
+  CENTER_ZIP_MISMATCH: { text: "Mauvaise adresse du centre", tooltip: "Attention, l’id et le nom+adresse du centre ne correspondent pas" },
+  PDR_ZIP_MISMATCH: { text: "Mauvaise adresse du PDR", tooltip: "Attention, l’id et le nom+adresse du PDR ne correspondent pas" },
 };
 
 const centersInJulyClosingEarly = [

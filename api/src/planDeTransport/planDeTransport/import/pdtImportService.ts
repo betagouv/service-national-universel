@@ -2,16 +2,23 @@ import * as XLSX from "xlsx";
 import mongoose from "mongoose";
 import { logger } from "../../../logger";
 
-import { PDT_IMPORT_ERRORS } from "snu-lib";
+import { PDT_IMPORT_ERRORS, PdtErrors } from "snu-lib";
 
 import { CohesionCenterModel, PointDeRassemblementModel, SessionPhase1Model, ClasseModel } from "../../../models";
 import { ERRORS } from "../../../utils";
 
-import { getLinePdrCount, getLinePdrIds, getMaxLinePdrCount, isValidBoolean, isValidDate, isValidDepartment, isValidNumber, isValidTime, mapLines } from "./pdtImportUtils";
-
-export interface PdtErrors {
-  [key: string]: { line: number; error: string; extra?: string }[];
-}
+import {
+  findLast5Digits,
+  getLinePdrCount,
+  getLinePdrIds,
+  getMaxLinePdrCount,
+  isValidBoolean,
+  isValidDate,
+  isValidDepartment,
+  isValidNumber,
+  isValidTime,
+  mapLines,
+} from "./pdtImportUtils";
 
 export interface PdtLine {
   [key: string]: string;
@@ -348,7 +355,7 @@ export const validatePdtFile = async (
       errors["ID CLASSE"].push({ line: index, error: PDT_IMPORT_ERRORS.DOUBLON_CLASSE, extra: line["ID CLASSE"] });
     }
   }
-  // Check if "ID CENTRE" exists in DB
+  // Check if "ID CENTRE" exists in DB, and if zip is the same as the center.
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     if (line["ID CENTRE"] && mongoose.Types.ObjectId.isValid(line["ID CENTRE"])) {
@@ -359,6 +366,17 @@ export const validatePdtFile = async (
       const session = await SessionPhase1Model.findOne({ cohort: cohortName, cohesionCenterId: line["ID CENTRE"]?.toLowerCase() });
       if (!session) {
         errors["ID CENTRE"].push({ line: index, error: PDT_IMPORT_ERRORS.CENTER_WITHOUT_SESSION, extra: line["ID CENTRE"] });
+      }
+      if (line["NOM + ADRESSE DU CENTRE"] && center) {
+        const centerZip = center.zip;
+        const lineCenterZip = findLast5Digits(line["NOM + ADRESSE DU CENTRE"]);
+        if (centerZip && lineCenterZip && centerZip !== lineCenterZip) {
+          errors["NOM + ADRESSE DU CENTRE"].push({
+            line: index,
+            error: PDT_IMPORT_ERRORS.CENTER_ZIP_MISMATCH,
+            extra: `${line["NOM + ADRESSE DU CENTRE"]}`,
+          });
+        }
       }
     }
   }
@@ -374,7 +392,7 @@ export const validatePdtFile = async (
       }
     }
   }
-  // Check if `ID PDR ${i}` exists in DB, and if departement is the same as the PDR.
+  // Check if `ID PDR ${i}` exists in DB, and if zip is the same as the PDR.
   for (const [i, line] of lines.entries()) {
     const index = i + FIRST_LINE_NUMBER_IN_EXCEL;
     for (let pdrNumber = 1; pdrNumber <= countPdr; pdrNumber++) {
@@ -383,6 +401,17 @@ export const validatePdtFile = async (
           const pdr = await PointDeRassemblementModel.findOne({ _id: line[`ID PDR ${pdrNumber}`]?.toLowerCase(), deletedAt: { $exists: false } });
           if (!pdr) {
             errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
+          }
+          if (line[`NOM + ADRESSE DU PDR ${pdrNumber}`] && pdr) {
+            const pdrZip = pdr.zip;
+            const linepdrZip = findLast5Digits(line[`NOM + ADRESSE DU PDR ${pdrNumber}`]);
+            if (pdrZip && linepdrZip && pdrZip !== linepdrZip) {
+              errors[`NOM + ADRESSE DU PDR ${pdrNumber}`].push({
+                line: index,
+                error: PDT_IMPORT_ERRORS.PDR_ZIP_MISMATCH,
+                extra: `${line[`NOM + ADRESSE DU PDR ${pdrNumber}`]}`,
+              });
+            }
           }
         } else if (!["correspondance aller", "correspondance retour", "correspondance"].includes(line[`ID PDR ${pdrNumber}`]?.toLowerCase())) {
           errors[`ID PDR ${pdrNumber}`].push({ line: index, error: PDT_IMPORT_ERRORS.BAD_PDR_ID, extra: line[`ID PDR ${pdrNumber}`] });
