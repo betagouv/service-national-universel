@@ -5,10 +5,8 @@ import { toastr } from "react-redux-toastr";
 
 export const useSendMailTest = () => {
   const queryClient = useQueryClient();
-  console.log("useSendMailTest hook initialized");
   const { mutate: sendTest } = useMutation({
     mutationFn: (id: string) => {
-      console.log("Sending test email for campaign ID:", id);
       return PlanMarketingService.envoyerEmailTest(id);
     },
     onSuccess: () => {
