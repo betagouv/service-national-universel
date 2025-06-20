@@ -1,3 +1,4 @@
+const { logger } = require("../src/logger");
 const { LigneBusModel, LigneToPointModel, PlanTransportModel, PointDeRassemblementModel } = require("../src/models");
 
 const nouveauPdrByLigneIds = {
@@ -68,7 +69,7 @@ module.exports = {
           await planTransport.save({ fromUser: { firstName: "904-nouveaux-pdr" } });
         }
 
-        console.log(`Ajout du PDR ${nouveauPDR._id} (${nouveauPDR.matricule}) sur la ligne ${ligneId} (${ligne.busId}) terminé`);
+        logger.info(`Ajout du PDR ${nouveauPDR._id} (${nouveauPDR.matricule}) sur la ligne ${ligneId} (${ligne.busId}) terminé`);
       }
     }
   },
@@ -77,14 +78,14 @@ module.exports = {
     for (const pdrId of Object.keys(nouveauPdrByLigneIds)) {
       const nouveauPDR = await PointDeRassemblementModel.findById(pdrId);
       if (!nouveauPDR) {
-        console.log(`PDR ${pdrId} non trouvé pour le rollback`);
+        logger.info(`PDR ${pdrId} non trouvé pour le rollback`);
         continue;
       }
 
       for (const ligneId of Object.keys(nouveauPdrByLigneIds[pdrId])) {
         const ligne = await LigneBusModel.findById(ligneId);
         if (!ligne) {
-          console.log(`Ligne ${ligneId} non trouvée pour le rollback`);
+          logger.info(`Ligne ${ligneId} non trouvée pour le rollback`);
           continue;
         }
 
@@ -106,7 +107,7 @@ module.exports = {
           await planTransport.save({ fromUser: { firstName: "904-nouveaux-pdr-rollback" } });
         }
 
-        console.log(`Suppression du PDR ${nouveauPDR._id} de la ligne ${ligneId} terminée`);
+        logger.info(`Suppression du PDR ${nouveauPDR._id} de la ligne ${ligneId} terminée`);
       }
     }
   },
