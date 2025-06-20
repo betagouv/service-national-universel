@@ -17,9 +17,9 @@ interface ModalExportProps {
   isOpen: boolean;
   setIsOpen: React.Dispatch<React.SetStateAction<boolean>>;
   route: string;
-  transform: (data: any, value: any) => void;
+  transform: (data: any[], value: any) => Promise<any[]>;
   exportFields: ExportField[];
-  exportTitle?: string;
+  exportTitle: string;
   totalHits?: boolean;
   selectedFilters: { [key: string]: Filter };
 }
@@ -85,7 +85,6 @@ export default function ModalExport({ isOpen, setIsOpen, route, transform, expor
             exportTitle={exportTitle}
             route={route}
             transform={(data) => transform(data, selectedFields)}
-            // @ts-expect-error jsx component
             fieldsToExport={fieldsToExport}
             selectedFilters={selectedFilters}
             setIsOpen={setIsOpen}

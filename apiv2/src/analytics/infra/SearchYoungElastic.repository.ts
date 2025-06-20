@@ -22,6 +22,8 @@ export class SearchYoungElasticRepository implements SearchYoungGateway {
             .setPagination(params.page, params.size)
             .setSourceFields(params.sourceFields)
             .setFilters(params.filters)
+            .setMusts(params.musts)
+            .setRanges(params.ranges)
             .setSearchTerm(params.searchTerm)
             .setSort(params.sortField, params.sortOrder);
         const response = await this.elasticsearchService.search<ESSearchResponse<YoungType>>(queryBuilder.build());
@@ -44,6 +46,8 @@ export class SearchYoungElasticRepository implements SearchYoungGateway {
                 .setPagination(undefined, 10000)
                 .setSourceFields(params.sourceFields)
                 .setFilters(params.filters)
+                .setMusts(params.musts)
+                .setRanges(params.ranges)
                 .setSearchTerm(params.searchTerm)
                 .setSort(params.sortField, params.sortOrder, "_id")
                 .setPit(pit.body.id)

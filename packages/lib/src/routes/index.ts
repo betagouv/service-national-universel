@@ -46,3 +46,4 @@ export type { PlanMarketingRoutes } from "./planMarketing";
 export type { AnalyticsRoutes } from "./analytics";
 
 export * from "./phase1";
+export * from "./phase2";

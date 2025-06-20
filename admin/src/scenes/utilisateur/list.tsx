@@ -107,8 +107,7 @@ export default function List() {
             title="Exporter"
             exportTitle="Utilisateurs"
             route={`/elasticsearch/referent/export${isResponsableDeCentre(user) ? "?cohort=" + sessionPhase1?.cohort : ""}`}
-            // @ts-expect-error jsx component
-            filters={filterArray}
+            // filters={filterArray}
             selectedFilters={selectedFilters}
             setIsOpen={() => true}
             icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
@@ -117,7 +116,7 @@ export default function List() {
               button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
               loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
             }}
-            transform={(all) => {
+            transform={async (all) => {
               return all.map((data) => {
                 let structure: Partial<StructureType> = {};
                 if (data.structureId && structures) {

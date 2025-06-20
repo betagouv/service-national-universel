@@ -102,6 +102,7 @@ describe("Architecture test", () => {
                     MatchingPattern.TASK_CORE,
                     MatchingPattern.SHARED_CORE,
                     MatchingPattern.ADMIN_CORE,
+                    MatchingPattern.ANALYTICS_CORE,
                     MatchingPattern.NESTJS_COMMON,
                     MatchingPattern.NESTJS_TESTING,
                     MatchingPattern.NESTJS_CONFIG,

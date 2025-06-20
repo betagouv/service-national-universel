@@ -19,7 +19,7 @@ import * as basicAuth from "express-basic-auth";
                     url: config.getOrThrow("broker.url"),
                 },
                 prefix: config.getOrThrow("broker.queuePrefix"),
-                lockDuration: 1000 * 60 * 10, // 10 minutes
+                lockDuration: 1000 * 60 * 20, // 20 minutes
             }),
         }),
         BullModule.registerQueue({
