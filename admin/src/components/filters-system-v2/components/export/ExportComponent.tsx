@@ -72,7 +72,7 @@ export default function ExportComponent({
       onConfirm: () => setExporting(true),
       title: "Téléchargement",
       message:
-        "En téléchargeant ces informations3, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
+        "En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)",
     });
   };
 

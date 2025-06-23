@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
+import cx from "classnames";
 import { formatDateFR, getDepartmentNumber, MissionType, StructureType, translateApplication, translateMission, translateSource } from "snu-lib";
 import Img4 from "@/assets/JVA_round.png";
 import Img3 from "@/assets/logo-snu.png";
@@ -16,6 +17,7 @@ import { AuthState } from "@/redux/auth/reducer";
 import ExportCandidaturesModal from "./components/ExportCandidaturesModal";
 import { Filter } from "@/components/filters-system-v2/components/Filters";
 import ExportMissionsModal from "./components/ExportMissionsModal";
+import { Tooltip } from "@snu/ds/admin";
 
 interface MissionDto extends MissionType {
   structure: any;
@@ -36,7 +38,10 @@ export default function List() {
   const [data, setData] = useState<MissionDto[]>([]);
   const pageId = "missions-list";
   const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>({});
-  const [paramData, setParamData] = useState({
+  const [paramData, setParamData] = useState<{
+    page: number;
+    count?: number;
+  }>({
     page: 0,
   });
   const [size, setSize] = useState(10);
@@ -190,9 +195,20 @@ export default function List() {
                         key: "exportCandidature",
                         // @ts-ignore
                         action: () => {
-                          setIsExportCandidatureOpen(true);
+                          if (paramData?.count && paramData?.count <= 5000) {
+                            setIsExportCandidatureOpen(true);
+                          }
                         },
-                        render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de candidatures</div>,
+                        render: (
+                          <Tooltip
+                            title={`Vous ne pouvez pas exporter les candidatures pour plus de 5000 missions à la fois.
+                          Modifiez les filtres pour réduire le nombre de missions à exporter.`}
+                            disabled={!!paramData?.count && paramData?.count <= 5000}>
+                            <div className={cx("cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50", paramData?.count && paramData?.count > 5000 ? "opacity-50" : "")}>
+                              Informations de candidatures
+                            </div>
+                          </Tooltip>
+                        ),
                       },
                     ],
                   },

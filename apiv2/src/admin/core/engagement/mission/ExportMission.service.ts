@@ -9,13 +9,14 @@ import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
 
 @Injectable()
 export class ExportMissionService {
+    private readonly logger: Logger = new Logger(ExportMissionService.name);
+
     constructor(
         @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,
         @Inject(StructureGateway) private readonly structureGateway: StructureGateway,
         @Inject(SearchMissionGateway) private readonly searchMissionGateway: SearchMissionGateway,
         @Inject(SearchReferentGateway) private readonly searchReferentGateway: SearchReferentGateway,
         @Inject(SearchStructureGateway) private readonly searchStructureGateway: SearchStructureGateway,
-        private readonly logger: Logger,
     ) {}
 
     async searchMissions({
@@ -56,7 +57,7 @@ export class ExportMissionService {
             filters.structureId = structures.map((structure) => structure.id);
         }
 
-        this.logger.log(`${JSON.stringify({ filters, searchTerm }, null, 2)}`, ExportMissionService.name);
+        this.logger.log(`${JSON.stringify({ filters, searchTerm }, null, 2)}`);
 
         const missions = await this.searchMissionGateway.searchMission({
             filters: {
@@ -94,14 +95,14 @@ export class ExportMissionService {
             {} as Record<string, Partial<ReferentType>>,
         );
         const nbTutors = Object.keys(tutorsById).length;
-        this.logger.log(`tutors count: ${nbTutors}`, ExportMissionService.name);
+        this.logger.log(`tutors count: ${nbTutors}`);
 
         // search tutors data
         const tutors = await this.searchReferentGateway.searchReferent({
             musts: { ids: Object.keys(tutorsById) },
             full: true,
         });
-        this.logger.log(`tutors search count: ${tutors.hits.length}`, ExportMissionService.name);
+        this.logger.log(`tutors search count: ${tutors.hits.length}`);
         if (tutors.hits.length === 0) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_ENOUGH_DATA,
@@ -127,14 +128,14 @@ export class ExportMissionService {
             {} as Record<string, Partial<StructureType>>,
         );
         const nbStructures = Object.keys(structuresById).length;
-        this.logger.log(`structures count: ${nbStructures}`, ExportMissionService.name);
+        this.logger.log(`structures count: ${nbStructures}`);
 
         // search structures data
         const structures = await this.searchStructureGateway.searchStructure({
             musts: { ids: Object.keys(structuresById) },
             full: true,
         });
-        this.logger.log(`structures search count: ${structures.hits.length}`, ExportMissionService.name);
+        this.logger.log(`structures search count: ${structures.hits.length}`);
         if (structures.hits.length === 0) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_ENOUGH_DATA,

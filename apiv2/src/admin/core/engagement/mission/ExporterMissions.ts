@@ -33,13 +33,14 @@ export type ExporterMissionsResult = {
 
 @Injectable()
 export class ExporterMissions implements UseCase<ExporterMissionsResult> {
+    private readonly logger: Logger = new Logger(ExporterMissions.name);
+
     constructor(
         private readonly exportMissionService: ExportMissionService,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
-        private readonly logger: Logger,
     ) {}
 
     async execute({
@@ -48,7 +49,7 @@ export class ExporterMissions implements UseCase<ExporterMissionsResult> {
         searchTerm,
         auteur,
     }: ExportMissionsTaskParameters): Promise<ExporterMissionsResult> {
-        this.logger.log(`ExporterMissions: ${JSON.stringify(fields, null, 2)}`, ExporterMissions.name);
+        this.logger.log(`ExporterMissions: ${JSON.stringify(fields, null, 2)}`);
 
         const { missions, referent } = await this.exportMissionService.searchMissions({
             fields,
@@ -57,18 +58,18 @@ export class ExporterMissions implements UseCase<ExporterMissionsResult> {
             auteur,
         });
 
-        this.logger.log(`missions count: ${missions.hits.length}`, ExporterMissions.name);
+        this.logger.log(`missions count: ${missions.hits.length}`);
 
         const excelData = await this.generateRapport(missions.hits, fields, auteur);
 
-        this.logger.log(`Generate excel`, ExporterMissions.name);
+        this.logger.log(`Generate excel`);
         // création du fichier excel de rapport
         const fileBuffer = await this.fileGateway.generateExcelFromValues({
             ...excelData,
             sheetName: "data",
         });
 
-        this.logger.log(`Upload excel`, ExporterMissions.name);
+        this.logger.log(`Upload excel`);
         // upload du rapport du s3
         const timestamp = this.clockGateway.formatSafeDateTime(new Date());
         const fileName = `missions_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
@@ -120,7 +121,7 @@ export class ExporterMissions implements UseCase<ExporterMissionsResult> {
         const result: any[] = [];
         updatedMissions.forEach((mission, index) => {
             if (index % 1000 === 0) {
-                this.logger.log(`mapping ${index}/${updatedMissions.length}`, ExporterMissions.name);
+                this.logger.log(`mapping ${index}/${updatedMissions.length}`);
             }
             if (mission.tutorId) {
                 // @ts-ignore
@@ -150,7 +151,7 @@ export class ExporterMissions implements UseCase<ExporterMissionsResult> {
             result.push(mappedMission);
         });
 
-        this.logger.log(`result ${result.length}`, ExporterMissions.name);
+        this.logger.log(`result ${result.length}`);
 
         return {
             columnsName: Object.keys(result[0]),
