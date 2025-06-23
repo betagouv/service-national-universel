@@ -3,7 +3,7 @@ import Avion from "../../assets/icons/Avion";
 import Bus from "../../assets/icons/Bus";
 import Fusee from "../../assets/icons/Fusee";
 import Train from "./ligne-bus/components/Icons/Train";
-import { ROLES, translate, formatDateFRTimezoneUTC, departmentToAcademy, getDepartmentNumber } from "snu-lib";
+import { ROLES, translate, formatDateFRTimezoneUTC, departmentToAcademy, getDepartmentNumber, PlanTransportType } from "snu-lib";
 import FileSaver from "file-saver";
 import { toastr } from "react-redux-toastr";
 import dayjs from "@/utils/dayjs.utils";
@@ -25,14 +25,18 @@ export function formatRate(value, total, fractionDigit = 0, allowMoreThan100 = f
   }
 }
 
+type dataTransformType = {
+  key: string;
+  doc_count: number;
+};
 export function getFilterArray(role) {
   const translateLineFillingRate = (e) => {
     if (e == 0) return "Vide";
     if (e == 100) return "Rempli";
     return `${Math.floor(e / 10) * 10}-${Math.floor(e / 10) * 10 + 10}%`;
   };
-  const transformDataTaux = (data) => {
-    const newData = [];
+  const transformDataTaux = (data: dataTransformType[]) => {
+    const newData: dataTransformType[] = [];
     data.map((d) => {
       const dizaine = translateLineFillingRate(parseInt(d.key));
       const val = newData.find((e) => e.key === dizaine);
@@ -141,7 +145,7 @@ export const getTransportIcon = (transportType) => {
 };
 
 export function parseQuery(query) {
-  let result = {};
+  const result = {};
   if (query) {
     if (query.startsWith("?")) {
       query = query.substring(1);
@@ -149,6 +153,7 @@ export function parseQuery(query) {
     const params = query.split("&");
     for (const param of params) {
       const match = /([^=]+)=(.*)/.exec(param);
+      if (!match) continue;
       result[match[1]] = decodeURIComponent(match[2]);
     }
   }
@@ -169,12 +174,12 @@ export const GROUPSTEPS = {
 
 export async function exportLigneBus(cohort) {
   try {
-    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export?needYoungInfo=true&needCohesionCenterInfo=true&needMeetingPointsInfo=true`, {
+    const { ok, data: ligneBus } = await API.post(`/elasticsearch/lignebus/export`, {
       filters: { cohort: [cohort] },
     });
-    if (!ok || !ligneBus?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    if (!ok || !ligneBus?.length) return toastr.error("Erreur", "Aucun volontaire affecté n'a été trouvé");
 
-    let result = {};
+    const result = {};
 
     for (const ligne of ligneBus) {
       if (!ligne.youngs.length) continue;
@@ -267,7 +272,7 @@ function generateExcelWorkbook(data, filename) {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const wb = XLSX.utils.book_new();
   data.forEach((sheet) => {
-    let ws = XLSX.utils.json_to_sheet(sheet.data);
+    const ws = XLSX.utils.json_to_sheet(sheet.data);
     XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
   });
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -281,21 +286,21 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
       filters: {},
       exportFields: "*",
     });
-    if (!youngs?.data?.length) return toastr.error("Aucun volontaire affecté n'a été trouvé");
+    if (!youngs?.data?.length) return toastr.error("Erreur", "Aucun volontaire affecté n'a été trouvé");
 
     const session = await API.get(`/session-phase1/${youngs.data[0].sessionPhase1Id}`);
-    if (!session.ok) return toastr.error("Aucune session n'a été trouvée");
+    if (!session.ok) return toastr.error("Erreur", "Aucune session n'a été trouvée");
 
     const headcenter = await API.get(`/referent/${session.data.headCenterId}`);
-    if (!headcenter.ok) return toastr.error("Aucun chef de centre n'a été trouvé");
+    if (!headcenter.ok) return toastr.error("Erreur", "Aucun chef de centre n'a été trouvé");
 
     const refDepOrigine = await API.get(`/department-service/${youngs.data[0].department}`);
-    if (!refDepOrigine.ok) return toastr.error("Aucun référent n'a été trouvé dans le département d'origine");
+    if (!refDepOrigine.ok) return toastr.error("Erreur", "Aucun référent n'a été trouvé dans le département d'origine");
 
     const contactRefDepOrigine = refDepOrigine.data.contacts.filter((item) => item.cohort === cohort);
 
     const refDepAccueil = await API.get(`/department-service/${ligne.centerDetail.department}`);
-    if (!refDepAccueil.ok) return toastr.error("Aucun référent n'a été trouvé dans le département d'accueil");
+    if (!refDepAccueil.ok) return toastr.error("Erreur", "Aucun référent n'a été trouvé dans le département d'accueil");
 
     const contactRefDepAccueil = refDepAccueil.data.contacts.filter((item) => item.cohort === cohort);
 
@@ -311,7 +316,10 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
     const backTeamLeader = backTeam.filter((item) => item.role === "leader");
     const backTeamSupervisor = backTeam.filter((item) => item.role === "supervisor");
 
-    let excel = [
+    const excel: {
+      name: string;
+      data: any[];
+    }[] = [
       { name: "Aller", data: [] },
       { name: "Retour", data: [] },
     ];
@@ -437,7 +445,7 @@ export async function exportLigneBusJeune(cohort, ligne, travel, team) {
 export async function exportConvoyeur(cohort) {
   try {
     const resultat = await API.get(`/ligne-de-bus/cohort/${cohort}`);
-    if (!resultat.ok) return toastr.error("Aucune ligne de bus n'a été trouvée");
+    if (!resultat.ok) return toastr.error("Erreur", "Aucune ligne de bus n'a été trouvée");
 
     const ligneBus = resultat.data.ligneBus;
     const centers = resultat.data.centers;
@@ -483,7 +491,7 @@ export async function exportConvoyeur(cohort) {
       return team;
     };
 
-    let excel = [{ name: "Convoyeur", data: [] }];
+    const excel: { name: string; data: any }[] = [{ name: "Convoyeur", data: [] }];
 
     const maxSupervisor = ligneBus.reduce((acc, item) => {
       const supervisor = item.team.filter((member) => member.role === "supervisor");
@@ -528,3 +536,54 @@ export async function exportConvoyeur(cohort) {
     toastr.error("Erreur !", translate(e.code));
   }
 }
+
+export const transformPlanDeTransportForExport = async (all: PlanTransportType[]) => {
+  // Get the length of the longest array of PDRs
+  const maxPDRs = all.reduce((max, item) => (item.pointDeRassemblements.length > max ? item.pointDeRassemblements.length : max), 0);
+
+  return all.map((data) => {
+    const pdrs = {};
+
+    for (let i = 0; i < maxPDRs; i++) {
+      const pdr = data.pointDeRassemblements?.[i];
+      const num = i + 1;
+      pdrs[`N° DE DEPARTEMENT PDR ${num}`] = pdr?.department ? getDepartmentNumber(pdr.department) : "";
+      pdrs[`REGION DU PDR ${num}`] = pdr?.region || "";
+      pdrs[`ID PDR ${num}`] = pdr?.meetingPointId || "";
+      pdrs[`MATRICULE DU PDR ${num}`] = pdr?.matricule || "";
+      pdrs[`TYPE DE TRANSPORT PDR ${num}`] = pdr?.transportType || "";
+      pdrs[`NOM + ADRESSE DU PDR ${num}`] = pdr?.name ? pdr.name + " / " + pdr.address : "";
+      pdrs[`HEURE ALLER ARRIVÉE AU PDR ${num}`] = pdr?.busArrivalHour || "";
+      pdrs[`HEURE DE CONVOCATION AU PDR ${num}`] = pdr?.meetingHour || "";
+      pdrs[`HEURE DEPART DU PDR ${num}`] = pdr?.departureHour || "";
+      pdrs[`HEURE DE RETOUR ARRIVÉE AU PDR ${num}`] = pdr?.returnHour || "";
+    }
+
+    return {
+      "NUMERO DE LIGNE": data.busId,
+      "DATE DE TRANSPORT ALLER": data.departureString,
+      "DATE DE TRANSPORT RETOUR": data.returnString,
+      ...pdrs,
+      "N° DU DEPARTEMENT DU CENTRE": getDepartmentNumber(data.centerDepartment),
+      "REGION DU CENTRE": data.centerRegion,
+      "ID CENTRE": data.centerId,
+      "MATRICULE DU CENTRE": data.centerCode,
+      "NOM + ADRESSE DU CENTRE": data.centerName + " / " + data.centerAddress,
+      "HEURE D'ARRIVEE AU CENTRE": data.centerArrivalTime,
+      "HEURE DE DÉPART DU CENTRE": data.centerDepartureTime,
+
+      // * followerCapacity !== Total des followers mais c'est la sémantique ici
+      "TOTAL ACCOMPAGNATEURS": data.followerCapacity,
+
+      "CAPACITÉ VOLONTAIRE TOTALE": data.youngCapacity,
+      "CAPACITE TOTALE LIGNE": data.totalCapacity,
+      "PAUSE DÉJEUNER ALLER": data.lunchBreak ? "Oui" : "Non",
+      "PAUSE DÉJEUNER RETOUR": data.lunchBreakReturn ? "Oui" : "Non",
+      "TEMPS DE ROUTE": data.travelTime.includes(":") ? data.travelTime : `${data.travelTime}:00`,
+      "RETARD ALLER": data.delayedForth === "true" ? "Oui" : "Non",
+      "RETARD RETOUR": data.delayedBack === "true" ? "Oui" : "Non",
+      "LIGNES FUSIONNÉES": data.mergedBusIds?.join(",") || "",
+      "LIGNE MIROIR": data.mirrorBusId || "",
+    };
+  });
+};
