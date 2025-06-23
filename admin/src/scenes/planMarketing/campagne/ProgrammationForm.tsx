@@ -1,7 +1,8 @@
 import React, { useMemo } from "react";
 import { HiOutlineTrash } from "react-icons/hi";
-import { Select, InputText, Button } from "@snu/ds/admin";
+import { Select, Button } from "@snu/ds/admin";
 import { TypeEvenement, TypeRegleEnvoi, TYPE_EVENEMENT_LABELS, REGLE_ENVOI_CONFIG, formatDateForInput } from "snu-lib";
+import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 
 export type ProgrammationProps = {
   joursDecalage: number;
@@ -107,13 +108,14 @@ export default function ProgrammationForm({ programmation, isEnabled = true, onD
 
         {!isCampagneGenerique && (
           <div className="flex-1">
-            <InputText
-              name="envoiDate"
-              value={formatDateForInput(programmation.envoiDate)}
-              onChange={(e) => handleChange("envoiDate", new Date(e.target.value))}
-              type="datetime-local"
+            <DatePickerInput
+              mode="single"
+              isTime
+              label="Date d'envoi"
+              placeholder="Date"
               className="w-full"
-              placeholder="Date d'envoi"
+              value={programmation.envoiDate?.toString() ?? null}
+              onChange={(value) => handleChange("envoiDate", value)}
               disabled={!isEnabled || isEnvoiDateDisabled}
             />
           </div>

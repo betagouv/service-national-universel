@@ -58,12 +58,7 @@ export class CampagneDataFetcherService {
         const coordinateursCle = (await this.referentGateway.findByIds([...coordinateurCleIds])) || [];
 
         // Fetch center data
-        const sejourIds = new Set<string>();
-        for (const classe of classes) {
-            if (classe.sejourId) sejourIds.add(classe.sejourId);
-        }
-        const sejours = (await this.sejourGateway.findByIds([...sejourIds])) || [];
-
+        const sejours = (await this.sejourGateway.findByCohesionCenterIds([...cohesionCenterIds])) || [];
         // Fetch center chiefs
         const chefDeCentreIds = new Set<string>();
         for (const sejour of sejours) {

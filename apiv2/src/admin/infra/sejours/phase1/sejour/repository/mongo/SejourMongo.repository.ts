@@ -162,4 +162,9 @@ export class SejourRepository implements SejourGateway {
             },
         ]);
     }
+
+    async findByCohesionCenterIds(cohesionCenterIds: string[]): Promise<SejourModel[]> {
+        const sejours = await this.sejourMongooseEntity.find({ cohesionCenterId: { $in: cohesionCenterIds } });
+        return SejourMapper.toModels(sejours);
+    }
 }
