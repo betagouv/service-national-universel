@@ -20,7 +20,7 @@ import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/poi
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getBusTeamFixture from "./fixtures/busTeam";
-import { ERRORS, ROLES } from "snu-lib";
+import { ERRORS, ROLES, youngCleExportFields } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import getNewLigneToPointFixture from "./fixtures/PlanDeTransport/ligneToPoint";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
@@ -32,7 +32,44 @@ import * as ligneDeBusService from "../planDeTransport/ligneDeBus/ligneDeBusServ
 const ObjectId = Types.ObjectId;
 
 mockEsClient({
-  lignebus: [{ _id: "ligneId" }],
+  lignebus: [
+    {
+      _id: "ligneId",
+      _source: {
+        busId: "BUS001",
+        meetingPointsIds: ["pdr1", "pdr2"],
+        centerId: "center1",
+      },
+    },
+  ],
+  pointderassemblement: [
+    {
+      _id: "pdr1",
+      region: "Île-de-France",
+      department: "Paris",
+    },
+    {
+      _id: "pdr2",
+      region: "Île-de-France",
+      department: "Paris",
+    },
+  ],
+  cohesioncenter: [
+    {
+      _id: "center1",
+      name: "Test Center",
+    },
+  ],
+  young: [
+    {
+      _id: "young1",
+      ligneId: "ligneId",
+      meetingPointId: "pdr1",
+      status: "VALIDATED",
+      cohesionStayPresence: "false",
+      departInform: "true",
+    },
+  ],
 });
 // disable transaction for this test
 mockTransaction();
@@ -51,6 +88,10 @@ jest.mock("../brevo", () => ({
   sendTemplate: jest.fn(),
 }));
 
+jest.mock("../utils/es-serializer", () => ({
+  serializeYoungs: jest.fn().mockReturnValue([{ ligneId: "ligneId", firstName: "John", lastName: "Doe" }]),
+}));
+
 const userSuperAdmin = {
   role: ROLES.ADMIN,
   subRole: "god",
@@ -61,6 +102,16 @@ afterAll(dbClose);
 afterEach(resetAppAuth);
 
 describe("LigneDeBus", () => {
+  describe("POST /elasticsearch/lignebus/export", () => {
+    it("should return 200 when export is successful", async () => {
+      const user = { _id: "123", role: "admin" };
+
+      const res = await request(getAppHelper(user)).post("/elasticsearch/lignebus/export").send({ filters: {}, exportFields: [] });
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toBeGreaterThan(0);
+    });
+  });
+
   describe("GET /all", () => {
     afterEach(async () => {
       await Promise.all([LigneBusModel.deleteMany(), PointDeRassemblementModel.deleteMany(), LigneToPointModel.deleteMany()]);
@@ -648,18 +699,6 @@ describe("LigneDeBus", () => {
       expect(res.body.code).toBe("SERVER_ERROR");
 
       jest.spyOn(LigneBusModel, "findById").mockRestore();
-    });
-  });
-
-  describe("POST /elasticsearch/lignebus/export", () => {
-    it("should return 200 when export is successful", async () => {
-      const user = { _id: "123", role: "admin" };
-
-      const res = await request(getAppHelper(user))
-        .post("/elasticsearch/lignebus/export")
-        .send({ filters: {}, exportFields: ["busId"] });
-      expect(res.status).toBe(200);
-      expect(res.body.data.length).toBeGreaterThan(0);
     });
   });
 
