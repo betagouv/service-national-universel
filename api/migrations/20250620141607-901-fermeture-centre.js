@@ -19,7 +19,8 @@ module.exports = {
       young.statusPhase1 = YOUNG_STATUS_PHASE1.DONE;
       young.departSejourAt = new Date("2025-06-19");
       young.departSejourMotif = "Cas de force majeure pour le volontaire";
-      young.departSejourMotifComment = "Ce commentaire attend Mathilde";
+      young.departSejourMotifComment = "décision administrative de fermeture du centre";
+      young.statusPhase2OpenedAt = new Date();
 
       await young.save({ fromUser: { firstName: "901-fermeture-centre" } });
       updatedCount++;
