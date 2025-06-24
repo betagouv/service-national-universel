@@ -5,8 +5,9 @@ import { useHistory } from "react-router-dom";
 import {
   canManageMig,
   canValidateYoungToLP,
-  canViewEmailHistory,
   canViewNotes,
+  isReadAuthorized,
+  PERMISSION_RESOURCES,
   ROLES,
   translate,
   translateInscriptionStatus,
@@ -299,7 +300,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   </div>
                 </Tab>
               )}
-              {canViewEmailHistory(user) ? (
+              {isReadAuthorized({ user, resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS }) ? (
                 <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
                   Notifications
                 </Tab>

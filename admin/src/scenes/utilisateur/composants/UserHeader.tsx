@@ -4,28 +4,35 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
+import { canSigninAs, isReadAuthorized, PERMISSION_RESOURCES, translate, UserDto, ReferentType } from "snu-lib";
+import { Badge } from "@snu/ds/admin";
+import { signinAs } from "@/utils/signinAs";
+
 import History from "../../../assets/icons/History";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { setUser as setUserInRedux } from "../../../redux/auth/actions";
 import TabList from "../../../components/views/TabList";
 import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
-import { canSigninAs, ROLES, translate } from "../../../utils";
-import { Badge } from "@snu/ds/admin";
-import { signinAs } from "@/utils/signinAs";
 
-const getSubtitle = (user) => {
+interface UserHeaderProps {
+  user: ReferentType;
+  tab: string;
+  currentUser: UserDto;
+}
+
+const getSubtitle = (user: ReferentType): string => {
   const createdAt = new Date(user.createdAt);
   const diff = dayjs(createdAt).fromNow();
   return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
 };
 
-export default function UserHeader({ user, tab, currentUser }) {
+export default function UserHeader({ user, tab, currentUser }: UserHeaderProps): JSX.Element {
   const history = useHistory();
   const dispatch = useDispatch();
-  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState(false);
+  const [handleImpersonateLoading, setHandleImpersonateLoading] = useState<boolean>(false);
 
-  const handleImpersonate = async () => {
+  const handleImpersonate = async (): Promise<void> => {
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
@@ -47,7 +54,7 @@ export default function UserHeader({ user, tab, currentUser }) {
           <div className="mt-3 flex flex-col justify-between md:flex-row">
             <div className="mb-3 flex items-center md:mb-0">
               <span className="mr-2 text-2xl font-bold">{`${user.firstName} ${user.lastName}`}</span>
-              <Badge title={translate(user.role)} status="tertiary" className="border-gray-300 mr-2 mt-1" />
+              <Badge title={translate(user.role)} status="none" className="border-gray-300 mr-2 mt-1" />
               <span className="text-xs">{getSubtitle(user)}</span>
             </div>
             <div className="flex items-center">
@@ -66,18 +73,18 @@ export default function UserHeader({ user, tab, currentUser }) {
             <Tab isActive={tab === "profile"} onClick={() => history.push(`/user/${user._id}`)}>
               <div className="flex items-center">Profil</div>
             </Tab>
-            {![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(currentUser.role) && (
-              <>
-                <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
-                  Notifications
-                </Tab>
-                <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
-                  <div className="flex items-center">
-                    <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
-                    Historique
-                  </div>
-                </Tab>
-              </>
+            {isReadAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS }) && (
+              <Tab isActive={tab === "notifications"} onClick={() => history.push(`/user/${user._id}/notifications`)}>
+                Notifications
+              </Tab>
+            )}
+            {isReadAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.USER_HISTORY }) && (
+              <Tab isActive={tab === "historique"} onClick={() => history.push(`/user/${user._id}/historique`)}>
+                <div className="flex items-center">
+                  <History className="mr-[4px] block flex-[0_0_18px]" fill={tab === "historique" ? "#3B82F6" : "#9CA3AF"} />
+                  Historique
+                </div>
+              </Tab>
             )}
           </TabList>
         </div>

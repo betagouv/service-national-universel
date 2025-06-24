@@ -13,7 +13,7 @@ export function injectRoutes(app) {
   app.use("/department-service", require("./controllers/department-service"));
   app.use("/edit-transport", require("./controllers/planDeTransport/edit-transport").default);
   app.use("/elasticsearch", require("./controllers/elasticsearch").default);
-  app.use("/email", require("./controllers/email"));
+  app.use("/email", require("./controllers/email").default);
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters").default);
   app.use("/gouv.fr", require("./controllers/gouv.fr"));
