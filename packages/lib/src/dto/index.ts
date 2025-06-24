@@ -8,6 +8,7 @@ export * from "./etablissementDto";
 export * from "./filterLabelDto";
 export * from "./ligneDeBus";
 export * from "./phase1";
+export * from "./phase2";
 export * from "./referentDto";
 export * from "./referentiel/ReferentielTaskDto";
 export * from "./taskDto";
