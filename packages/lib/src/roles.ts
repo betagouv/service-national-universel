@@ -932,10 +932,6 @@ function canShareSessionPhase1(actor) {
   );
 }
 
-function canViewTableDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
 function canEditTableDeRepartitionDepartment(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
 }
@@ -1293,7 +1289,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
   canViewSchemaDeRepartition,

@@ -1,13 +1,17 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const { region2department, canViewTableDeRepartition, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion } = require("snu-lib");
-const { ERRORS } = require("../../utils");
-const { TableDeRepartitionModel } = require("../../models");
-const { capture } = require("../../sentry");
-const Joi = require("joi");
+import express, { Response } from "express";
+import passport from "passport";
+import { region2department, canEditTableDeRepartitionDepartment, canEditTableDeRepartitionRegion, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { ERRORS } from "../../utils";
+import { TableDeRepartitionModel } from "../../models";
+import { capture } from "../../sentry";
+import Joi from "joi";
+import { UserRequest } from "../request";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
-router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+const router = express.Router();
+
+router.post("/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -29,7 +33,7 @@ router.post("/region", passport.authenticate("referent", { session: false, failW
   }
 });
 
-router.post("/delete/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/delete/region", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -50,7 +54,7 @@ router.post("/delete/region", passport.authenticate("referent", { session: false
   }
 });
 
-router.post("/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -67,14 +71,11 @@ router.post("/department", passport.authenticate("referent", { session: false, f
 
     const existing = await TableDeRepartitionModel.find({ cohort, fromRegion, toRegion });
 
-    //si pas de fromRegion, toRegion, operation interdite
     if (existing.length === 0) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //si on a une seul entrée et ques les deux départements sont a null, on update
     if (existing.length === 1 && !existing[0].toDepartment && !existing[0].fromDepartment) {
       await TableDeRepartitionModel.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment, toDepartment } });
     } else {
-      //sinon on crée une nouvelle entrée avec check des doublons
       const doublon = await TableDeRepartitionModel.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
       if (doublon) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       TableDeRepartitionModel.create({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
@@ -86,7 +87,7 @@ router.post("/department", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.post("/delete/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/delete/department", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({
       cohort: Joi.string().required(),
@@ -104,19 +105,15 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
     const toDelete = await TableDeRepartitionModel.findOne({ cohort, fromRegion, toRegion, fromDepartment, toDepartment });
     const existing = await TableDeRepartitionModel.find({ cohort, fromRegion, toRegion });
 
-    //si rien a supprimer, on renvoie une erreur
     if (!toDelete) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //si on a une seul entrée dans la table, on update cette derniere
     if (existing.length === 1) {
-      //check si toDelete === existing[0] pour eviter de supprimer la mauvaise donnée
       if (toDelete._id.toString() === existing[0]._id.toString()) {
         await TableDeRepartitionModel.updateOne({ _id: existing[0]._id }, { $set: { fromDepartment: undefined, toDepartment: undefined } });
       } else {
         return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
     } else {
-      //sinon on supprime l'entrée
       toDelete.deleteOne();
     }
 
@@ -127,76 +124,86 @@ router.post("/delete/department", passport.authenticate("referent", { session: f
   }
 });
 
-router.get("/national/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.get(
+  "/national/:cohort",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION, action: PERMISSION_ACTIONS.READ }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({ cohort: Joi.string().required() }).validate(req.params, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const { cohort } = value;
+      const data = await TableDeRepartitionModel.find({ cohort });
 
-    const { cohort } = value;
-    const data = await TableDeRepartitionModel.find({ cohort });
+      const filteredData = data.filter((e, i) => {
+        return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
+      });
 
-    const filteredData = data.filter((e, i) => {
-      return i === data.findIndex((a) => a.fromRegion === e.fromRegion && a.toRegion === e.toRegion);
-    });
+      for (const dataToEdit of filteredData) {
+        let avancement =
+          (region2department[dataToEdit.fromRegion].reduce((acc, department) => {
+            if (!data.find((e) => e.fromDepartment === department)) return acc;
+            return (acc += 1);
+          }, 0) /
+            region2department[dataToEdit.fromRegion].length) *
+            100 || 0;
+        // @ts-ignore
+        dataToEdit._doc.avancement = Math.trunc(avancement);
+      }
 
-    for (const dataToEdit of filteredData) {
-      let avancement =
-        (region2department[dataToEdit.fromRegion].reduce((acc, department) => {
-          if (!data.find((e) => e.fromDepartment === department)) return acc;
-          return (acc += 1);
-        }, 0) /
-          region2department[dataToEdit.fromRegion].length) *
-          100 || 0;
-      dataToEdit._doc.avancement = Math.trunc(avancement);
+      return res.status(200).send({ ok: true, data: filteredData });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    return res.status(200).send({ ok: true, data: filteredData });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+router.get(
+  "/fromRegion/:cohort/:region",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION, action: PERMISSION_ACTIONS.READ }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({
+        cohort: Joi.string().required(),
+        region: Joi.string().required(),
+      }).validate(req.params, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-router.get("/fromRegion/:cohort/:region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      cohort: Joi.string().required(),
-      region: Joi.string().required(),
-    }).validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { cohort, region } = value;
+      const data = await TableDeRepartitionModel.find({ cohort, fromRegion: region });
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
-    const { cohort, region } = value;
-    const data = await TableDeRepartitionModel.find({ cohort, fromRegion: region });
+router.get(
+  "/toRegion/:cohort/:region",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION, action: PERMISSION_ACTIONS.READ }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({
+        cohort: Joi.string().required(),
+        region: Joi.string().required(),
+      }).validate(req.params, { stripUnknown: true });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+      const { cohort, region } = value;
+      const data = await TableDeRepartitionModel.find({ cohort, toRegion: region });
 
-router.get("/toRegion/:cohort/:region", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value } = Joi.object({
-      cohort: Joi.string().required(),
-      region: Joi.string().required(),
-    }).validate(req.params, { stripUnknown: true });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+  },
+);
 
-    if (!canViewTableDeRepartition(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { cohort, region } = value;
-    const data = await TableDeRepartitionModel.find({ cohort, toRegion: region });
-
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-module.exports = router;
+export default router;

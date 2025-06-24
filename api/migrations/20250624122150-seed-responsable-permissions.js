@@ -357,11 +357,58 @@ module.exports = {
     });
     // ligne-de-bus
     await PermissionModel.create({
+      code: PERMISSION_CODES.LIGNE_BUS_FULL,
+      titre: "Accès complet sur les lignes de bus",
+      resource: PERMISSION_RESOURCES.LIGNE_BUS,
+      action: PERMISSION_ACTIONS.FULL,
+      roles: [SUB_ROLE_GOD],
+    });
+    await PermissionModel.create({
       code: PERMISSION_CODES.LIGNE_BUS_READ,
       titre: "Accès en lecture sur les lignes de bus",
       resource: PERMISSION_RESOURCES.LIGNE_BUS,
       action: PERMISSION_ACTIONS.READ,
       roles: [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER],
+    });
+    // centre
+    await PermissionModel.create({
+      code: PERMISSION_CODES.COHESION_CENTER_READ,
+      titre: "Accès en lecture sur les centres de cohésion",
+      resource: PERMISSION_RESOURCES.COHESION_CENTER,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER],
+    });
+    // accueil
+    await PermissionModel.create({
+      code: PERMISSION_CODES.ACCUEIL_READ,
+      titre: "Accès en lecture sur l'accueil",
+      resource: PERMISSION_RESOURCES.ACCUEIL,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE],
+    });
+    // import si snu
+    await PermissionModel.create({
+      code: PERMISSION_CODES.IMPORT_SI_SNU_FULL,
+      titre: "Accès complet aux import SI SNU",
+      resource: PERMISSION_RESOURCES.IMPORT_SI_SNU,
+      action: PERMISSION_ACTIONS.FULL,
+      roles: [ROLES.SUB_ROLE_GOD],
+    });
+    // table de repartition
+    await PermissionModel.create({
+      code: PERMISSION_CODES.TABLE_DE_REPARTITION_READ,
+      titre: "Accès en lecture sur la table de repartition",
+      resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT],
+    });
+    // classe
+    await PermissionModel.create({
+      code: PERMISSION_CODES.CLASSE_READ,
+      titre: "Accès en lecture sur les classes",
+      resource: PERMISSION_RESOURCES.CLASSE,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.TRANSPORTER],
     });
   },
 
@@ -396,5 +443,11 @@ module.exports = {
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.POINT_DE_RASSEMBLEMENT_READ });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.LIGNE_BUS_READ });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.SETTINGS_FULL });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.COHESION_CENTER_READ });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.TABLE_DE_REPARTITION_READ });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.ACCUEIL_READ });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.IMPORT_SI_SNU_FULL });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.CLASSE_READ });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.LIGNE_BUS_FULL });
   },
 };
