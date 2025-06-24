@@ -47,7 +47,7 @@ export const config = {
   SENTRY_PROFILE_SAMPLE_RATE: _env(envFloat, "SENTRY_PROFILE_SAMPLE_RATE", 1),
   MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),
   JWT_SECRET: _env(envStr, "JWT_SECRET", "my-secret"),
-  SUPPORT_URL: _env(envStr, "SUPPORT_URL", "http://localhost:8084"),
+  SUPPORT_URL: _env(envStr, "SUPPORT_URL", "http://localhost:8090"),
   SUPPORT_FRONT_URL: _env(envStr, "SUPPORT_FRONT_URL", "http://localhost:8083"),
   SUPPORT_APIKEY: _env(envStr, "SUPPORT_APIKEY"),
   KNOWLEDGEBASE_URL: _env(envStr, "KNOWLEDGEBASE_URL", "https://support.beta-snu.dev"),

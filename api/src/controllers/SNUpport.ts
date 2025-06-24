@@ -102,7 +102,7 @@ router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: Us
 
 router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
-    const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${req.user.email}`, { method: "GET", credentials: "include" });
+    const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const options: CookieOptions = {
