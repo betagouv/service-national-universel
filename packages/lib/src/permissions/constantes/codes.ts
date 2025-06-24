@@ -30,6 +30,8 @@ export enum PERMISSION_CODES {
   SUPPORT_READ = "SupportRead",
   SUPPORT_WRITE = "SupportWrite",
   USER_FULL = "UserFull",
+  USER_HISTORY_READ = "UserHistoryRead",
+  USER_NOTIFICATIONS_READ = "UserNotificationsRead",
   USER_SAME_STRUCTURE_CREATE = "UserSameStructureCreate",
   USER_SAME_STRUCTURE_FULL = "UserSameStructureFull",
   YOUNG_FULL = "YoungFull",

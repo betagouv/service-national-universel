@@ -191,7 +191,7 @@ module.exports = {
         ],
       },
     });
-    // User
+    // user
     await PermissionModel.create({
       code: PERMISSION_CODES.USER_FULL,
       titre: "Accès complet sur les utilisateurs",
@@ -213,6 +213,20 @@ module.exports = {
           },
         ],
       },
+    });
+    await PermissionModel.create({
+      code: PERMISSION_CODES.USER_NOTIFICATIONS_READ,
+      titre: "Accès en lecture sur les notifications mail des utilisateurs",
+      resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE],
+    });
+    await PermissionModel.create({
+      code: PERMISSION_CODES.USER_HISTORY_READ,
+      titre: "Accès en lecture sur l'historique des utilisateurs",
+      resource: PERMISSION_RESOURCES.USER_HISTORY,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE],
     });
     // association
     await PermissionModel.create({
@@ -364,6 +378,8 @@ module.exports = {
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.USER_FULL });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.USER_SAME_STRUCTURE_FULL });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.USER_SAME_STRUCTURE_CREATE });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.USER_NOTIFICATIONS_READ });
+    await PermissionModel.deleteOne({ code: PERMISSION_CODES.USER_HISTORY_READ });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.CONTRACT_READ });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.CONTRACT_FULL });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.ASSOCIATION_READ });

@@ -248,11 +248,6 @@ function canDeletePatchesHistory(actor, target) {
   return isAdminOrReferent || isOwner;
 }
 
-function canViewEmailHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
-  return isAdminOrReferent;
-}
-
 function canViewNotes(actor) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
   return isAdminOrReferent;
@@ -1238,7 +1233,6 @@ export {
   canDeleteReferent,
   canViewPatchesHistory,
   canDeletePatchesHistory,
-  canViewEmailHistory,
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
