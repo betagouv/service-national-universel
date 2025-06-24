@@ -7,11 +7,10 @@ import React, { useEffect, useState, lazy, Suspense } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Redirect, BrowserRouter as Router, Switch, useLocation } from "react-router-dom";
 import { QueryClientProvider } from "@tanstack/react-query";
-import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD, ROLES } from "snu-lib";
+import { isFeatureEnabled, FEATURES_NAME, SUB_ROLE_GOD, ROLES, isWriteAuthorized, PERMISSION_RESOURCES } from "snu-lib";
 import * as Sentry from "@sentry/react";
 import { isResponsableDeCentre } from "@/utils";
 import { getImpersonationChannel } from "./utils/broadcastChannel";
-
 
 import { queryClient } from "./services/react-query";
 import { setSessionPhase1, setUser } from "./redux/auth/actions";
@@ -319,7 +318,7 @@ const Home = () => {
                   {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={PlanMarketing} /> : null}
 
                   {/* Plan de transport */}
-                  {user?.role === "admin" && user?.subRole === SUB_ROLE_GOD ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
+                  {isWriteAuthorized({ user, resource: PERMISSION_RESOURCES.LIGNE_BUS }) ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
                   {/* Table de répartition */}
                   <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
                   {/* Ligne de bus */}

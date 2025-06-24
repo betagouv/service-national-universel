@@ -73,6 +73,9 @@ const PERMISSIONS_BY_ROUTE = {
   "/ligne-de-bus": {
     permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }],
   },
+  "/edit-transport": {
+    permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.WRITE }],
+  },
   "/volontaire/create": {
     permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.CREATE }],
   },
@@ -101,11 +104,28 @@ const PERMISSIONS_BY_ROUTE = {
     params: { id: "referent._id" },
     permissions: [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE }],
   },
+  "/accueil": {
+    permissions: [{ resource: PERMISSION_RESOURCES.ACCUEIL, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/centre/liste/liste-centre": {
+    permissions: [{ resource: PERMISSION_RESOURCES.COHESION_CENTER, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/import-si-snu": {
+    permissions: [{ resource: PERMISSION_RESOURCES.IMPORT_SI_SNU, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/table-repartition": {
+    permissions: [{ resource: PERMISSION_RESOURCES.TABLE_DE_REPARTITION, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/classes": {
+    permissions: [{ resource: PERMISSION_RESOURCES.CLASSE, action: PERMISSION_ACTIONS.READ }],
+  },
 };
 
 const DEFAULT_ROUTE_BY_ROLE = {
   [ROLES.INJEP]: "/injep-export",
   [ROLES.DSNJ]: "/dsnj-export",
+  [ROLES.ADMINISTRATEUR_CLE]: "/accueil",
+  [ROLES.REFERENT_CLASSE]: "/accueil",
 };
 
 export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...rest }) => {
