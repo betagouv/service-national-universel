@@ -1,6 +1,8 @@
 export interface SearchParams {
   searchTerm?: SearchTerm;
   filters?: Record<string, string | string[]>;
+  musts?: Record<string, string | string[]>;
+  ranges?: Record<string, { from?: Date; to?: Date }>;
   existingFields?: string[];
   sourceFields?: string[];
   page?: number;

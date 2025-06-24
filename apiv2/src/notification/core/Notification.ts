@@ -51,6 +51,10 @@ export interface BasculeJeuneParams extends EmailParams {
     nouvelleSessionNom?: string;
 }
 
+export interface ExportMissionsParams extends EmailParams {
+    url: string;
+}
+
 export interface EmailTestParams extends EmailParams {
     templateId: string;
 }
@@ -73,4 +77,6 @@ export enum EmailTemplate {
     // DESISTEMENT
     DESISTEMENT_PAR_VOLONTAIRE = "1248",
     DESISTEMENT_PAR_TIERS = "2518",
+    // ENGAGEMENT
+    EXPORT_MISSION_CANDIDATURES = "2701",
 }

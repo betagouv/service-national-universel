@@ -38,6 +38,7 @@ export interface ESMustQuery {
     terms?: Record<string, string[]>;
     match?: Record<string, { query: string; fuzziness?: "AUTO" }>;
     exists?: { field: string };
+    range?: Record<string, { gte?: Date | null; lte?: Date | null }>;
 }
 
 export interface ESFilterQuery {

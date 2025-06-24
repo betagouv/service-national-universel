@@ -4,6 +4,10 @@ import { ElasticsearchModule } from "@nestjs/elasticsearch";
 import { SearchYoungGateway } from "./core/SearchYoung.gateway";
 import { SearchYoungElasticRepository } from "./infra/SearchYoungElastic.repository";
 import { SearchYoungController } from "./infra/api/SearchYoung.controller";
+import { SearchMissionElasticRepository } from "./infra/SearchMissionElastic.repository";
+import { SearchMissionGateway } from "./core/SearchMission.gateway";
+import { SearchApplicationGateway } from "./core/SearchApplication.gateway";
+import { SearchApplicationElasticRepository } from "./infra/SearchApplicationElastic.repository";
 
 @Module({
     imports: [
@@ -19,6 +23,14 @@ import { SearchYoungController } from "./infra/api/SearchYoung.controller";
         {
             provide: SearchYoungGateway,
             useClass: SearchYoungElasticRepository,
+        },
+        {
+            provide: SearchMissionGateway,
+            useClass: SearchMissionElasticRepository,
+        },
+        {
+            provide: SearchApplicationGateway,
+            useClass: SearchApplicationElasticRepository,
         },
     ],
     controllers: [SearchYoungController],

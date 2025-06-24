@@ -68,6 +68,20 @@ export class FileProvider implements FileGateway {
         return XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
     }
 
+    async generateExcelFromValues({
+        columnsName,
+        values,
+        sheetName = "data",
+    }: {
+        columnsName: string[];
+        values: any[][];
+        sheetName: string;
+    }): Promise<Buffer> {
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([columnsName, ...values]), sheetName);
+        return XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
+    }
+
     async uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },
