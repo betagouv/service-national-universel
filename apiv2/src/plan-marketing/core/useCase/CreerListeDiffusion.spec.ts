@@ -85,6 +85,7 @@ describe("CreerListeDiffusion", () => {
         it("should throw an exception when no contacts are found", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const emptyYoungs = {
                 hits: [],
                 total: 0,
@@ -96,7 +97,7 @@ describe("CreerListeDiffusion", () => {
             } as unknown as CampaignProcessorResult);
 
             // Execute & Assert
-            await expect(useCase.execute(campaignId)).rejects.toThrow(
+            await expect(useCase.execute(campaignId, cohortId)).rejects.toThrow(
                 new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
             );
         });
@@ -104,6 +105,7 @@ describe("CreerListeDiffusion", () => {
         it("should generate CSV for young contacts only", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [
                     { id: "young1", firstName: "John", lastName: "Doe" },
@@ -157,11 +159,11 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockCampaignProcessorService.validateAndProcessCampaign).toHaveBeenCalledWith(campaignId);
-            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact1, youngContact2],
@@ -175,6 +177,7 @@ describe("CreerListeDiffusion", () => {
         it("should include parent contacts when REPRESENTANTS_LEGAUX is in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", email: "john.doe@example.com" }],
                 total: 1,
@@ -235,11 +238,12 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(1);
             expect(mockContactBuilderService.buildParentContactRow).toHaveBeenCalledTimes(2);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, parent1Contact, parent2Contact],
                 expect.any(Object),
@@ -254,6 +258,7 @@ describe("CreerListeDiffusion", () => {
         it("should include referent contacts when REFERENTS_CLASSES is in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
                 total: 1,
@@ -303,11 +308,12 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for referent
             expect(mockContactBuilderService.buildReferentContactRow).toHaveBeenCalledTimes(1);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, referentContact],
                 expect.any(Object),
@@ -318,6 +324,7 @@ describe("CreerListeDiffusion", () => {
         it("should include chef establishment contacts when CHEFS_ETABLISSEMENT is in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
                 total: 1,
@@ -367,11 +374,12 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for chef
             expect(mockContactBuilderService.buildChefEtablissementContactRow).toHaveBeenCalledTimes(1);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, chefEtabContact],
                 expect.any(Object),
@@ -382,6 +390,7 @@ describe("CreerListeDiffusion", () => {
         it("should include chef centre contacts when CHEFS_CENTRES is in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
                 total: 1,
@@ -431,11 +440,12 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for chef
             expect(mockContactBuilderService.buildChefCentreContactRow).toHaveBeenCalledTimes(1);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, chefCentreContact],
                 expect.any(Object),
@@ -446,6 +456,7 @@ describe("CreerListeDiffusion", () => {
         it("should include coordinateur CLE contacts when COORDINATEURS_CLE is in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
                 total: 1,
@@ -495,11 +506,12 @@ describe("CreerListeDiffusion", () => {
             mockFileGateway.generateCSV.mockResolvedValue(csvFilePath);
 
             // Execute
-            const result = await useCase.execute(campaignId);
+            const result = await useCase.execute(campaignId, cohortId);
 
             // Assert
             expect(mockContactBuilderService.buildYoungContactRow).toHaveBeenCalledTimes(2); // Once for young and once for coord
             expect(mockContactBuilderService.buildCoordinateurCleContactRow).toHaveBeenCalledTimes(1);
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 [youngContact, coordCleContact],
                 expect.any(Object),
@@ -510,6 +522,7 @@ describe("CreerListeDiffusion", () => {
         it("should throw an exception when no contacts are generated", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe" }],
                 total: 1,
@@ -536,7 +549,7 @@ describe("CreerListeDiffusion", () => {
             } as unknown as RelatedDataResult);
 
             // Execute & Assert
-            await expect(useCase.execute(campaignId)).rejects.toThrow(
+            await expect(useCase.execute(campaignId, cohortId)).rejects.toThrow(
                 new FunctionalException(FunctionalExceptionCode.NO_CONTACTS),
             );
         });
@@ -544,6 +557,7 @@ describe("CreerListeDiffusion", () => {
         it("should not include EMAIL_DE_CONNEXION when JEUNES nor REPRESENTANTS_LEGAUX are in destinataires", async () => {
             // Setup
             const campaignId = "campaign-id";
+            const cohortId = "cohort-id";
             const youngsList = {
                 hits: [{ id: "young1", firstName: "John", lastName: "Doe", classeId: "classe1" }],
                 total: 1,
@@ -588,8 +602,10 @@ describe("CreerListeDiffusion", () => {
             mockContactBuilderService.buildCoordinateurCleContactRow.mockReturnValue(coordCleContact);
 
             // Execute
-            await useCase.execute(campaignId);
+            await useCase.execute(campaignId, cohortId);
 
+            // Assert
+            expect(mockDataFetcherService.fetchRelatedData).toHaveBeenCalledWith(youngsList.hits, cohortId);
             // the array should not contain EMAIL_DE_CONNEXION
             expect(mockFileGateway.generateCSV).toHaveBeenCalledWith(
                 expect.arrayContaining([expect.not.objectContaining({ EMAIL_DE_CONNEXION: expect.anything() })]),
