@@ -1,28 +1,29 @@
-import { Body, Controller, Delete, Get, Inject, Param, Post, Query, Request, UseGuards } from "@nestjs/common";
+import { Body, Controller, Inject, Post, Request } from "@nestjs/common";
 
-import { canSearchInElasticSearch, MissionRoutes, TaskName, TaskStatus } from "snu-lib";
+import { MissionRoutes, TaskName, TaskStatus } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { PostCandidaturesExportPayloadDto, PostMissionsExportPayloadDto } from "./Mission.validation";
 import { ExportMissionCandidaturesTaskParameters, ExportMissionsTaskParameters } from "snu-lib";
-import { TechnicalException, TechnicalExceptionType } from "@shared/infra/TechnicalException";
+import { UseAnyGuard } from "@admin/infra/iam/guard/Any.guard";
+import { ReferentRegionalGuard } from "@admin/infra/iam/guard/ReferentRegional.guard";
+import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { ReferentDepartementalGuard } from "@admin/infra/iam/guard/ReferentDepartemental.guard";
+import { ResponsableGuard } from "@admin/infra/iam/guard/Responsable.guard";
+import { SupervisorGuard } from "@admin/infra/iam/guard/Superviseur.guard";
 
 @Controller("mission")
 export class MissionController {
     constructor(@Inject(TaskGateway) private readonly taskGateway: TaskGateway) {}
 
     @Post("/candidatures/export")
+    @UseAnyGuard(AdminGuard, ReferentRegionalGuard, ReferentDepartementalGuard, ResponsableGuard, SupervisorGuard)
     async exportCandidatures(
         @Request() request: CustomRequest,
         @Body() payload: PostCandidaturesExportPayloadDto,
     ): Promise<MissionRoutes["PostCandidaturesExportRoute"]["response"]> {
-        // TODO: use permission guard
-        if (!canSearchInElasticSearch(request.user, "mission")) {
-            throw new TechnicalException(TechnicalExceptionType.UNAUTORIZED, "mission.not_found");
-        }
-
         const parameters: ExportMissionCandidaturesTaskParameters = {
             filters: payload.filters,
             fields: payload.fields,
@@ -46,15 +47,11 @@ export class MissionController {
     }
 
     @Post("/export")
+    @UseAnyGuard(AdminGuard, ReferentRegionalGuard, ReferentDepartementalGuard, ResponsableGuard, SupervisorGuard)
     async exportMissions(
         @Request() request: CustomRequest,
         @Body() payload: PostMissionsExportPayloadDto,
     ): Promise<MissionRoutes["PostMissionsExportRoute"]["response"]> {
-        // TODO: use permission guard
-        if (!canSearchInElasticSearch(request.user, "mission")) {
-            throw new TechnicalException(TechnicalExceptionType.UNAUTORIZED, "mission.not_found");
-        }
-
         const parameters: ExportMissionsTaskParameters = {
             filters: payload.filters,
             fields: payload.fields,
