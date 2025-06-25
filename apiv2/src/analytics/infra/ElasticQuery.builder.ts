@@ -1,11 +1,6 @@
 import { SearchTerm } from "snu-lib";
 import { ESSearchQuery } from "./ElasticQuery";
 
-export type ESFilterQuery =
-    | { terms: Record<string, string[]> }
-    | { exists: { field: string } }
-    | { bool: { must_not?: Array<{ exists: { field: string } }>, should?: any[], minimum_should_match?: number } };
-
 export class ElasticsearchQueryBuilder<T> {
     private query: ESSearchQuery<T>;
 
