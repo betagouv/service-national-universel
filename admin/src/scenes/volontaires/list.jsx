@@ -19,7 +19,7 @@ import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translateP
 import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
-import { getFilterArray, transformInscription, transformVolontaires } from "./utils";
+import { getFilterArray, transformVolontaires } from "./utils";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 import { Button } from "@snu/ds/admin";
@@ -101,7 +101,7 @@ export default function VolontaireList() {
                   button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                   loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
                 }}
-                transform={async (data) => transformInscription(data)}
+                // transform={async (data) => transformInscription(data)}
               />
             )}
           </div>

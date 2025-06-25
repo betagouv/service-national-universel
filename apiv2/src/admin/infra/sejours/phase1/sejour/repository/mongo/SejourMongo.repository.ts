@@ -170,4 +170,14 @@ export class SejourRepository implements SejourGateway {
         });
         return SejourMapper.toModels(sejours);
     }
+
+    async findByHeadCenterId(headCenterId: string): Promise<SejourModel[]> {
+        const sejours = await this.sejourMongooseEntity.find({ headCenterId });
+        return SejourMapper.toModels(sejours);
+    }
+
+    async findByAdjointsId(adjointsId: string): Promise<SejourModel[]> {
+        const sejours = await this.sejourMongooseEntity.find({ adjointsIds: adjointsId });
+        return SejourMapper.toModels(sejours);
+    }
 }

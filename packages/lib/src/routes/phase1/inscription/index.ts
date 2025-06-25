@@ -2,6 +2,7 @@ import { GetBasculeJeunesNonValidesRoute } from "./getBasculeJeunesNonValidesRou
 import { GetBasculeJeunesValidesRoute } from "./getBasculeJeunesValidesRoute";
 import { PostBasculeJeunesNonValidesRoute } from "./postBasculeJeunesNonValidesRoute";
 import { PostBasculeJeunesValidesRoute } from "./postBasculeJeunesValidesRoute";
+import { PostInscriptionsExportRoute } from "./postInscriptionsExportRoute";
 import { PostValiderBasculeJeunesValidesRoute } from "./postValiderBasculeJeunesValidesRoute";
 import { PostValiderBasculeJeunesNonValidesRoute } from "./postValiderBasculeNonJeunesValidesRoute";
 
@@ -12,4 +13,5 @@ export type InscriptionRoutes = {
   PostBasculeJeunesNonValides: PostBasculeJeunesNonValidesRoute;
   PostValiderBasculeJeunesValides: PostValiderBasculeJeunesValidesRoute;
   PostValiderBasculeJeunesNonValides: PostValiderBasculeJeunesNonValidesRoute;
+  PostInscriptionsExport: PostInscriptionsExportRoute;
 };

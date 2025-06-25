@@ -80,6 +80,7 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
 import { SharedModule } from "@shared/Shared.module";
 import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
 import { APP_FILTER } from "@nestjs/core";
+import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
 
 @Module({
     imports: [
@@ -114,6 +115,7 @@ import { APP_FILTER } from "@nestjs/core";
         HistoryController,
         ReferentController,
         DesistementController,
+        InscriptionController,
         MissionController,
     ],
     providers: [
