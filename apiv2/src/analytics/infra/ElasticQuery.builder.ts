@@ -67,7 +67,7 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
-    setFilters(filters: Record<string, string | string[]> | undefined): this {
+    setFilters(filters: Record<string, string | (string | undefined)[]> | undefined): this {
         if (!filters) {
             return this;
         }
@@ -84,7 +84,7 @@ export class ElasticsearchQueryBuilder<T> {
                 if (definedValues.length > 0 && !hasUndefined) {
                     this.query.body.query.bool.filter!.push({
                         terms: {
-                            [`${key}.keyword`]: definedValues,
+                            [`${key}.keyword`]: definedValues.filter((v): v is string => v !== undefined),
                         },
                     });
                 }
