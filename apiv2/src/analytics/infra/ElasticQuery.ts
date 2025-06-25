@@ -41,9 +41,10 @@ export interface ESMustQuery {
     range?: Record<string, { gte?: Date | null; lte?: Date | null }>;
 }
 
-export interface ESFilterQuery {
-    terms: Record<string, string[]>;
-}
+export type ESFilterQuery =
+    | { terms: Record<string, string[]> }
+    | { exists: { field: string } }
+    | { bool: { must_not?: Array<{ exists: { field: string } }>, should?: any[], minimum_should_match?: number } };
 
 export interface ESSearchResponse<T> {
     hits: {
