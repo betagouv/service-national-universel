@@ -52,6 +52,13 @@ export interface FileGateway {
         Key: string;
     }>;
     remoteFileExists(path: string): Promise<boolean>;
+    remoteListFiles(path: string): Promise<
+        {
+            Key: string;
+            LastModified: Date;
+            Size: number;
+        }[]
+    >;
     downloadFile(
         path: string,
     ): Promise<{ Body: Buffer; ContentLength?: number; ContentType?: string; FileName?: string }>;

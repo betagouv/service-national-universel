@@ -18,7 +18,7 @@ export const mapAvailableFiltersToTreeFilter = (
   availableItemsFilters: Record<string, { key: string }[]>,
   itemsWithChildren?: ItemWithChildren,
 ): Record<string, TreeNodeFilterType> => {
-  const filterArray = getFilterArray({});
+  const filterArray = getFilterArray({} as any, {});
   const flatTree: Record<string, TreeNodeFilterType> = {};
 
   // Initialize root node
