@@ -12,6 +12,8 @@ export interface SejourGateway {
     countPlaceOccupeesBySejourIds(
         sejourIds: string[],
     ): Promise<Array<Pick<SejourModel, "id"> & { placesOccupeesJeunes: number }>>;
+    findByHeadCenterId(headCenterId: string): Promise<SejourModel[]>;
+    findByAdjointsId(adjointsId: string): Promise<SejourModel[]>;
 }
 
 export const SejourGateway = Symbol("SejourGateway");

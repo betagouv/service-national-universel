@@ -77,6 +77,7 @@ import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/Cla
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
+import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
 
 @Module({
     imports: [
@@ -110,6 +111,7 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
         HistoryController,
         ReferentController,
         DesistementController,
+        InscriptionController,
         MissionController,
     ],
     providers: [

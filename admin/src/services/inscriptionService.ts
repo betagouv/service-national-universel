@@ -76,6 +76,15 @@ const InscriptionService = {
       payload,
     })();
   },
+
+  postInscriptionsExport: async (payload: InscriptionRoutes["PostInscriptionsExport"]["payload"]) => {
+    return await buildRequest<InscriptionRoutes["PostInscriptionsExport"]>({
+      path: "/inscription/export",
+      method: "POST",
+      target: "API_V2",
+      payload,
+    })();
+  },
 };
 
 export { InscriptionService };
