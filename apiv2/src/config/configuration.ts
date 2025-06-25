@@ -1,7 +1,7 @@
 /*
 Use SENTRY_DSN, SENTRY_ENVIRONMENT, SENTRY_RELEASE
 */
-import { envStr, envInt } from "snu-lib";
+import { envStr, envInt, envBool, envFloat } from "snu-lib";
 
 function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallback?: T) {
     try {
@@ -20,6 +20,11 @@ const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
 export default () => ({
     environment,
     release: _env(envStr, "RELEASE", "development"),
+    sentry: {
+        enabled: _env(envBool, "ENABLE_SENTRY", false),
+        dsn: _env(envStr, "SENTRY_DSN", ""),
+        tracingSampleRate: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 0.01),
+    },
     httpServer: {
         port: _env(envInt, "PORT", 8086),
     },

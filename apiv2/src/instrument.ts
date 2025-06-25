@@ -1,6 +1,23 @@
 import * as Sentry from "@sentry/nestjs";
+import { ConfigService } from "@nestjs/config";
 
-// Ensure to call this before importing any other modules!
-Sentry.init({
-    dsn: "https://2d5e4d8904f666d44cdf428e1fae427a@sentry.incubateur.net/250",
-});
+// This function will be called after the ConfigService is available
+export function initializeSentry(configService: ConfigService) {
+    const environment = configService.get<string>("environment");
+    const enableSentry = configService.get<boolean>("sentry.enabled");
+    const sentryDsn = configService.get<string>("sentry.dsn");
+    const sentryRelease = configService.get<string>("release");
+    const sentryTracingSampleRate = configService.get<number>("sentry.tracingSampleRate");
+
+    // Only initialize Sentry if explicitly enabled and in production environment
+    // This prevents noise from development, staging, CI, and other non-production environments
+    if (enableSentry && environment === "production") {
+        Sentry.init({
+            dsn: sentryDsn,
+            environment,
+            release: sentryRelease,
+            tracesSampleRate: sentryTracingSampleRate,
+            normalizeDepth: 16,
+        });
+    }
+}
