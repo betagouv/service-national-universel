@@ -1,6 +1,11 @@
 import { SearchTerm } from "snu-lib";
 import { ESSearchQuery } from "./ElasticQuery";
 
+export type ESFilterQuery =
+    | { terms: Record<string, string[]> }
+    | { exists: { field: string } }
+    | { bool: { must_not?: Array<{ exists: { field: string } }>, should?: any[], minimum_should_match?: number } };
+
 export class ElasticsearchQueryBuilder<T> {
     private query: ESSearchQuery<T>;
 
@@ -77,10 +82,44 @@ export class ElasticsearchQueryBuilder<T> {
         }
 
         Object.entries(filters).forEach(([key, value]) => {
-            if (value?.length > 0) {
+            if (Array.isArray(value)) {
+                const definedValues = value.filter((v) => v !== undefined);
+                const hasUndefined = value.some((v) => v === undefined);
+
+                if (definedValues.length > 0 && !hasUndefined) {
+                    this.query.body.query.bool.filter!.push({
+                        terms: {
+                            [`${key}.keyword`]: definedValues,
+                        },
+                    });
+                }
+                if (hasUndefined) {
+                    this.query.body.query.bool.filter!.push({
+                        bool: {
+                            should: [
+                                {
+                                    bool: {
+                                        must_not: {
+                                            exists: {
+                                                field: `${key}.keyword`,
+                                            },
+                                        },
+                                    },
+                                },
+                                {
+                                    terms: {
+                                        [key]: value.filter((e) => e !== undefined && e !== null && e !== "N/A")
+                                    },
+                                },
+                            ],
+                        },
+                    });
+                }
+            }
+            else {
                 this.query.body.query.bool.filter!.push({
                     terms: {
-                        [`${key}.keyword`]: Array.isArray(value) ? value : [value],
+                        [`${key}.keyword`]: [value],
                     },
                 });
             }
