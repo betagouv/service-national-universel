@@ -17,6 +17,7 @@ import { SimulationBasculeJeunes } from "@admin/core/sejours/phase1/inscription/
 import { SimulationBasculeJeunesTaskModel } from "@admin/core/sejours/phase1/inscription/SimulationBasculeJeunesTask.model";
 import { ValiderBasculeJeunesNonValidesTaskModel } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides.model";
 import { ValiderBasculeJeunesNonValides } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
+import { ExporterJeunes } from "@admin/core/sejours/phase1/jeune/ExporterJeunes";
 
 @Injectable()
 export class AdminTaskInscriptionSelectorService {
@@ -24,6 +25,7 @@ export class AdminTaskInscriptionSelectorService {
         private readonly simulationBasculeJeunes: SimulationBasculeJeunes,
         private readonly validerBasculeJeunesValides: ValiderBasculeJeunesValides,
         private readonly validerBasculeJeunesNonValides: ValiderBasculeJeunesNonValides,
+        private readonly exportJeunes: ExporterJeunes,
     ) {}
     async handleInscription(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
         let results = {} as Record<string, any>;
@@ -71,6 +73,13 @@ export class AdminTaskInscriptionSelectorService {
                     rapportKey: validationBasculeNonValidesSimulation.rapportFile.Key,
                     ...validationBasculeNonValidesSimulation.analytics,
                 } as ValiderBasculeJeunesNonValidesTaskResult;
+                break;
+            case TaskName.JEUNE_EXPORT:
+                const exportInscription = await this.exportJeunes.execute(task.metadata!.parameters!);
+                results = {
+                    rapportKey: exportInscription.rapportFile.Key,
+                    ...exportInscription.analytics,
+                };
                 break;
             default:
                 throw new Error(`Task of type ${job.name} not handle yet for inscription`);

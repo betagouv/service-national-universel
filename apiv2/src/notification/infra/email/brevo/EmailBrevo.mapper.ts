@@ -8,7 +8,7 @@ import {
     SupprimerClasseEngageeParams,
     VerifierClasseEmailAdminCleParams,
     VerifierClasseEmailReferentDepRegParams,
-    ExportMissionsParams,
+    ExportDownloadParams,
 } from "@notification/core/Notification";
 import { EmailProviderParams } from "./EmailBrevo.provider";
 
@@ -50,15 +50,15 @@ export class EmailBrevoMapper {
                 const dynamicTemplate = testParams.templateId as EmailTemplate;
                 return this.mapGenericEmailToBrevo(dynamicTemplate, emailParams);
 
-            case EmailTemplate.EXPORT_MISSION_CANDIDATURES:
-                return this.mapExportMission(template, emailParams as ExportMissionsParams);
+            case EmailTemplate.EXPORT_DOWNLOAD:
+                return this.mapExportDownload(template, emailParams as ExportDownloadParams);
 
             default:
                 throw new Error(`Template ${template} not supported`);
         }
     }
 
-    static mapExportMission(template: EmailTemplate, emailParams: ExportMissionsParams): EmailProviderParams {
+    static mapExportDownload(template: EmailTemplate, emailParams: ExportDownloadParams): EmailProviderParams {
         return {
             to: emailParams.to,
             params: {

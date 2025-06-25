@@ -80,6 +80,9 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
 import { SharedModule } from "@shared/Shared.module";
 import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
 import { APP_FILTER } from "@nestjs/core";
+import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
+import { JeuneController } from "./infra/sejours/phase1/api/Jeune.controller";
+import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
 
 @Module({
     imports: [
@@ -114,7 +117,9 @@ import { APP_FILTER } from "@nestjs/core";
         HistoryController,
         ReferentController,
         DesistementController,
+        InscriptionController,
         MissionController,
+        JeuneController,
     ],
     providers: [
         ClasseService,
@@ -126,6 +131,7 @@ import { APP_FILTER } from "@nestjs/core";
         DesistementService,
         ValiderDesisterPostAffectation,
         ValidationInscriptionEnMasseClasse,
+        ExporterJeuneService,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
         ...classeMongoProviders,

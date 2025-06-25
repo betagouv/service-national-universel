@@ -1,13 +1,16 @@
 import {
     add,
     addHours,
+    addMonths,
     differenceInYears,
+    endOfDay,
     format,
     isAfter as isAfterFns,
     isBefore as isBeforeFns,
     isValid,
     isWithinInterval as isWithinIntervalFns,
     parse,
+    startOfDay,
 } from "date-fns";
 
 import { getZonedDate } from "snu-lib";
@@ -70,6 +73,15 @@ export class ClockProvider implements ClockGateway {
     }
     addDays(date: Date, days: number): Date {
         return add(date, { days });
+    }
+    addMonths(date: Date, months: number): Date {
+        return addMonths(date, months);
+    }
+    endOfDay(date: Date): Date {
+        return endOfDay(date);
+    }
+    startOfDay(date: Date): Date {
+        return startOfDay(date);
     }
     // Legacy format for compatibility
     parseDateNaissance(date: string): Date {
