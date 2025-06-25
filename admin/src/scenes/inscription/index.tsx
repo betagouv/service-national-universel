@@ -1,38 +1,66 @@
-import dayjs from "dayjs";
 import React, { Fragment, useState } from "react";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
-import useDocumentTitle from "../../hooks/useDocumentTitle";
+import { Link, useHistory } from "react-router-dom";
+import { useToggle } from "react-use";
+import { toastr } from "react-redux-toastr";
+import dayjs from "dayjs";
 
 import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
-import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, FeatureFlagName, PERMISSION_RESOURCES, isCreateAuthorized } from "snu-lib";
+import {
+  canInviteYoung,
+  getDepartmentNumber,
+  isSuperAdmin,
+  translateCniExpired,
+  translateYoungSource,
+  FeatureFlagName,
+  PERMISSION_RESOURCES,
+  isCreateAuthorized,
+  UserDto,
+  YoungDto,
+} from "snu-lib";
+
+import { Button } from "@snu/ds/admin";
+
+import { AuthState } from "@/redux/auth/reducer";
+import { CohortState } from "@/redux/cohorts/reducer";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
+import { FiltersYoungsForExport } from "@/services/brevoRecipientsService";
+import Loader from "@/components/Loader";
+import { signinAs } from "@/utils/signinAs";
+import { getCohortGroups } from "@/services/cohort.service";
+import { useBrevoExport } from "@/hooks/useBrevoExport";
+import { ModalCreationListeBrevo, BrevoListData } from "@/components/modals/ModalCreationListeBrevo";
+
+import useDocumentTitle from "../../hooks/useDocumentTitle";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { orderCohort } from "../../components/filters-system-v2/components/filters/utils";
 import SelectStatus from "../../components/selectStatus";
 import { appURL } from "../../config";
 import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, formatStringLongDate, translate, translateInscriptionStatus } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
-import { transformInscription, mapInscriptionFields } from "../volontaires/utils";
-import DeletedInscriptionPanel from "./deletedPanel";
-import Panel from "./panel";
-import { toastr } from "react-redux-toastr";
-import Loader from "@/components/Loader";
-import { signinAs } from "@/utils/signinAs";
-import { getCohortGroups } from "@/services/cohort.service";
 import useClass from "../classe/utils/useClass";
 import useFilterLabels from "../volontaires/useFilterLabels";
-import { Button } from "@snu/ds/admin";
-import { useBrevoExport } from "@/hooks/useBrevoExport";
-import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
-import { useToggle } from "react-use";
+import DeletedInscriptionPanel from "./deletedPanel";
+import Panel from "./panel";
+import ExportInscriptionsButton from "./ExportInscriptionsButton";
+import ExportInscriptionsScolariseButton from "./ExportInscriptionsScolariseButton";
 
-export const getInscriptionFilterArray = (user, labels) => {
+interface ParamData {
+  page: number;
+  sort: {
+    label: string;
+    field: string;
+    order: string;
+  };
+  count?: number;
+}
+
+export const getInscriptionFilterArray = (user: UserDto, labels: { [key: string]: string }): Filter[] => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
     { title: "Autorisation de participation", name: "parentAllowSNU", parentGroup: "Général", missingLabel: "Non renseigné", translate: translate },
@@ -43,7 +71,7 @@ export const getInscriptionFilterArray = (user, labels) => {
       name: "classeId",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || "N/A - Supprimé";
       },
@@ -53,7 +81,7 @@ export const getInscriptionFilterArray = (user, labels) => {
       name: "etablissementId",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || "N/A - Supprimé";
       },
@@ -72,7 +100,7 @@ export const getInscriptionFilterArray = (user, labels) => {
       name: "department",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      translate: (e: string) => getDepartmentNumber(e) + " - " + e,
     },
     {
       title: "Note interne",
@@ -88,16 +116,17 @@ export const getInscriptionFilterArray = (user, labels) => {
       missingLabel: "Non renseigné",
       translate: translate,
     },
-    user.role === ROLES.REFERENT_DEPARTMENT
-      ? {
-          title: "Etablissement",
-          name: "schoolName",
-          parentGroup: "Dossier",
-          missingLabel: "Non renseigné",
-          translate: translate,
-        }
-      : null,
-
+    ...(user.role === ROLES.REFERENT_DEPARTMENT
+      ? [
+          {
+            title: "Etablissement",
+            name: "schoolName",
+            parentGroup: "Dossier",
+            missingLabel: "Non renseigné",
+            translate: translate,
+          },
+        ]
+      : []),
     {
       title: "Situation",
       name: "situation",
@@ -191,30 +220,32 @@ export const getInscriptionFilterArray = (user, labels) => {
       missingLabel: "Non renseigné",
       translate: translate,
     },
-  ].filter(Boolean);
+  ];
 };
-export default function Inscription() {
+
+export default function Inscription(): JSX.Element {
   useDocumentTitle("Inscriptions");
+  const history = useHistory();
   const pageId = "inscription-list";
-  const user = useSelector((state) => state.Auth.user);
-  const [young, setYoung] = useState(null);
+  const user = useSelector((state: AuthState) => state.Auth.user);
+  const [young, setYoung] = useState<YoungDto | null>(null);
   const { data: labels, isPending: isLabelsPending } = useFilterLabels(pageId);
   const [isCreationListeBrevo, setIsCreationListeBrevo] = useToggle(false);
 
   //List state
-  const [data, setData] = useState([]);
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [paramData, setParamData] = useState({
+  const [data, setData] = useState<YoungDto[]>([]);
+  const [selectedFilters, setSelectedFilters] = useState<{ [key: string]: Filter }>({});
+  const [paramData, setParamData] = useState<ParamData>({
     page: 0,
     sort: { label: "Nom (A > Z)", field: "lastName.keyword", order: "asc" },
   });
   const { exportToCsv, isProcessing: isLoadingExportRecipients } = useBrevoExport("inscription");
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState<number>(10);
 
   const hasFilterSelectedOneClass = selectedFilters?.classeId?.filter?.length === 1;
-  const selectedClassId = selectedFilters?.classeId?.filter[0];
+  const selectedClassId = selectedFilters?.classeId?.filter?.[0];
   const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
-  const cohorts = useSelector((state) => state.Cohorts);
+  const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
   let baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
   if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
@@ -224,15 +255,22 @@ export default function Inscription() {
 
   if (isLabelsPending) return <Loader />;
 
-  const handleClickInscription = () => {
+  const handleClickInscription = (): void => {
     plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
+    history.push(baseInscriptionPath);
   };
 
-  const handleBrevoContactCreationList = async (formValues /* BrevoListData */) => {
-    await exportToCsv(formValues, selectedFilters);
+  const handleBrevoContactCreationList = async (formValues: BrevoListData): Promise<void> => {
+    await exportToCsv(
+      formValues,
+      Object.entries(selectedFilters).reduce((acc, [key, value]) => {
+        acc[key] = value.filter as string[];
+        return acc;
+      }, {} as FiltersYoungsForExport),
+    );
   };
 
-  const filterArray = getInscriptionFilterArray(user, labels);
+  const filterArray = getInscriptionFilterArray(user, labels || {});
 
   return (
     <>
@@ -242,49 +280,18 @@ export default function Inscription() {
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
             {!isClassLoading && invitationState ? (
-              <Link
-                to={baseInscriptionPath}
+              <Button
                 onClick={handleClickInscription}
-                className="w-full ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out">
-                <AiOutlinePlus className="h-4 w-4 group-hover:!text-blue-600" />
-                <p>{selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}</p>
-              </Link>
+                leftIcon={<AiOutlinePlus className="h-4 w-4" />}
+                className="w-full ml-2"
+                title={selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}
+              />
             ) : null}
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
-            <ExportComponent
-              title="Exporter les inscriptions"
-              exportTitle="Volontaires"
-              route="/elasticsearch/young/export"
-              filters={filterArray}
-              selectedFilters={selectedFilters}
-              setIsOpen={() => true}
-              icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
-              customCss={{
-                override: true,
-                button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-                loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-              }}
-              transform={async (data) => mapInscriptionFields(data)}
-            />
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <ExportComponent
-                title={user.role === ROLES.REFERENT_DEPARTMENT ? "Exporter les volontaires scolarisés dans le département" : "Exporter les volontaires scolarisés dans la région"}
-                exportTitle="Volontaires"
-                route="/elasticsearch/young/young-having-school-in-dep-or-region/export"
-                filters={filterArray}
-                selectedFilters={selectedFilters}
-                setIsOpen={() => true}
-                icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
-                customCss={{
-                  override: true,
-                  button: `group flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-                  loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-                }}
-                transform={async (data) => transformInscription(data)}
-              />
-            )}
+            <ExportInscriptionsButton user={user} selectedFilters={selectedFilters} />
+            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && <ExportInscriptionsScolariseButton user={user} selectedFilters={selectedFilters} />}
           </div>
         </div>
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
@@ -292,11 +299,11 @@ export default function Inscription() {
             <Filters
               pageId={pageId}
               route="/elasticsearch/young/search"
-              setData={(value) => setData(value)}
+              setData={(value: YoungDto[]) => setData(value)}
               filters={filterArray}
               searchPlaceholder="Rechercher par prénom, nom, email, ville, code postal..."
               selectedFilters={selectedFilters}
-              setSelectedFilters={setSelectedFilters}
+              setSelectedFilters={(filters: any) => setSelectedFilters(filters)}
               paramData={paramData}
               setParamData={setParamData}
               size={size}
@@ -337,15 +344,15 @@ export default function Inscription() {
               <table className="mt-4 mb-2 w-full table-auto font-marianne">
                 <thead>
                   <tr className="border-y-[1px] border-y-gray-100 uppercase text-gray-400 text-sm">
-                    <th width="5%" className="pl-4 py-3">
+                    <th style={{ width: "5%" }} className="pl-4 py-3">
                       #
                     </th>
-                    <th width="35%" className="py-3">
+                    <th style={{ width: "35%" }} className="py-3">
                       Volontaire
                     </th>
                     <th className="text-center px-4 py-3">Cohorte</th>
                     <th className="text-center px-4 py-3">Statut</th>
-                    <th width="20%" className="text-center pr-4 py-3">
+                    <th style={{ width: "20%" }} className="text-center pr-4 py-3">
                       Actions
                     </th>
                   </tr>
@@ -369,16 +376,23 @@ export default function Inscription() {
         isOpen={isCreationListeBrevo}
         onClose={() => setIsCreationListeBrevo(false)}
         onConfirm={handleBrevoContactCreationList}
-        youngCountFiltered={paramData?.count}
+        youngCountFiltered={paramData!.count!}
         isLoadingProcess={isLoadingExportRecipients}
       />
     </>
   );
 }
 
-const Hit = ({ hit, index, onClick }) => {
-  const diffMaj = dayjs(new Date(hit.updatedAt)).fromNow();
-  const diffCreate = dayjs(new Date(hit.createdAt)).fromNow();
+interface HitProps {
+  hit: YoungDto;
+  index: number;
+  onClick: () => void;
+  selected: boolean;
+}
+
+const Hit: React.FC<HitProps> = ({ hit, index, onClick }) => {
+  const diffMaj = dayjs(new Date(hit.updatedAt || "")).fromNow();
+  const diffCreate = dayjs(new Date(hit.createdAt || "")).fromNow();
 
   return (
     <tr onClick={onClick} className="border-b-[1px] border-y-gray-100 hover:bg-gray-50">
@@ -392,7 +406,7 @@ const Hit = ({ hit, index, onClick }) => {
         ) : null}
       </td>
       <td className="text-center">
-        <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort} className={hit.status === "DELETED" ? "opacity-50" : ""} />
+        <Badge color="#3B82F6" backgroundColor="#EFF6FF" text={hit.cohort!} className={hit.status === "DELETED" ? "opacity-50" : ""} />
       </td>
       <td className="px-4 py-3 text-center" onClick={(e) => e.stopPropagation()}>
         <SelectStatus hit={hit} options={[]} disabled />
@@ -403,27 +417,32 @@ const Hit = ({ hit, index, onClick }) => {
     </tr>
   );
 };
-function classNames(...classes) {
+
+function classNames(...classes: (string | boolean | undefined)[]): string {
   return classes.filter(Boolean).join(" ");
 }
 
-const Action = ({ hit }) => {
-  const user = useSelector((state) => state.Auth.user);
+interface ActionProps {
+  hit: YoungDto;
+}
 
-  const onPrendreLaPlace = async (young_id) => {
-    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
+const Action: React.FC<ActionProps> = ({ hit }) => {
+  const user = useSelector((state: AuthState) => state.Auth.user);
+
+  const onPrendreLaPlace = async (young_id: string): Promise<void> => {
+    if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.", "");
 
     try {
       plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
     } catch (e) {
-      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");
+      toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.", "");
     }
   };
 
   return (
     <Listbox>
-      {({ open }) => (
+      {({ open }: { open: boolean }) => (
         <>
           <div className="relative w-4/5 mx-auto">
             <Listbox.Button className="relative w-full text-left">
@@ -443,16 +462,20 @@ const Action = ({ hit }) => {
             <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
               <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
                 <Link className="!cursor-pointer" to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")} target="_blank">
-                  <Listbox.Option className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}>
+                  {/* @ts-ignore */}
+                  <Listbox.Option className={"text-gray-900 relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600"}>
                     <span className={"block truncate font-normal text-xs"}>Consulter le profil</span>
                   </Listbox.Option>
                 </Link>
                 {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && hit.status !== YOUNG_STATUS.DELETED ? (
+                  // @ts-ignore
                   <Listbox.Option
-                    className={({ active }) => classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")}
+                    className={({ active }: { active: boolean }) =>
+                      classNames(active ? "bg-blue-600 text-white" : "text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9")
+                    }
                     onClick={() => {
                       window.open(appURL, "_blank");
-                      onPrendreLaPlace(hit._id);
+                      onPrendreLaPlace(hit._id!);
                     }}>
                     Prendre sa place
                   </Listbox.Option>

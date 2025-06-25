@@ -45,7 +45,7 @@ export default function List() {
 
   const { tabId } = useParams<{ tabId?: "general" | "consent" | "validation" | "image" }>();
   const currentTab = tabId || "general";
-  const filterArray = getFilterArray(labels);
+  const filterArray = getFilterArray(labels!);
 
   const { value: studentsCount } = useAsync(async () => {
     try {

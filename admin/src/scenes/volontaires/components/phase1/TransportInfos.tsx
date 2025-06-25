@@ -10,7 +10,7 @@ import {
   getZonedDate,
   YoungType,
   CohesionCenterType,
-  CohortType,
+  CohortDto,
   LigneBusType,
   LigneToPointType,
   PointDeRassemblementType,
@@ -36,7 +36,7 @@ interface Props {
   pointDeRassemblement: PointDeRassemblementType;
   young: YoungType;
   cohesionCenter: CohesionCenterType;
-  cohort: CohortType;
+  cohort: CohortDto;
   modalAffectations: ModalAffectationsType;
   setModalAffectation: (modalAffectations: ModalAffectationsType) => void;
   isOpenForAffectation: boolean;

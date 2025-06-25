@@ -1,4 +1,5 @@
 import {
+  FilterLabelDto,
   formatDateFR,
   formatDateFRTimezoneUTC,
   formatLongDateFR,
@@ -11,10 +12,12 @@ import {
   translatePhase1,
   translatePhase2,
 } from "snu-lib";
-import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
-import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 
-export const getFilterArray = (labels) => {
+import { formatPhoneE164 } from "@/utils/formatPhoneE164";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
+import { orderCohort } from "@/components/filters-system-v2/components/filters/utils";
+
+export const getFilterArray = (labels: FilterLabelDto): Filter[] => {
   return [
     {
       title: "Classe Engagée ID",
@@ -225,7 +228,7 @@ export const getFilterArray = (labels) => {
         return labels[item] || "N/A - Supprimé";
       },
     },
-  ].filter(Boolean);
+  ];
 };
 
 export async function transformVolontairesCLE(data, values) {

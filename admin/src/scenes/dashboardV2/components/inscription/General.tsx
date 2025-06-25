@@ -74,23 +74,27 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
   }, []);
 
   useEffect(() => {
-    const filters = [
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
-        : null,
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
-          }
-        : null,
+    const filters: Filter[] = [
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "region",
+              name: "Région",
+              fullValue: "Toutes",
+              options: regionOptions,
+            },
+          ]
+        : []),
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "academy",
+              name: "Académie",
+              fullValue: "Toutes",
+              options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
+            },
+          ]
+        : []),
       {
         id: "department",
         name: "Département",
@@ -103,9 +107,9 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
         name: "Cohorte",
         fullValue: "Toutes",
         options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e) => orderCohort(e),
+        sort: (e: any) => orderCohort(e) as any,
       },
-    ].filter((e) => e);
+    ];
     setFilterArray(filters);
   }, [departmentOptions]);
 

@@ -781,7 +781,7 @@ function canDownloadYoungDocuments(actor: UserDto, target?: UserDto, type?: stri
   }
 }
 
-function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
+function canInviteYoung(actor: UserDto, cohort?: CohortDto | null) {
   if (!cohort) return false;
 
   switch (actor.role) {
