@@ -12,6 +12,7 @@ export interface SejourGateway {
     countPlaceOccupeesBySejourIds(
         sejourIds: string[],
     ): Promise<Array<Pick<SejourModel, "id"> & { placesOccupeesJeunes: number }>>;
+    findByCohesionCenterIdsAndCohortId(cohesionCenterIds: string[], cohortId: string): Promise<SejourModel[]>;
 }
 
 export const SejourGateway = Symbol("SejourGateway");

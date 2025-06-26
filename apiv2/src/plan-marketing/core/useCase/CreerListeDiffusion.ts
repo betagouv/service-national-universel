@@ -19,14 +19,14 @@ export class CreerListeDiffusion implements UseCase<string> {
         private readonly campaignProcessorService: CampagneProcessorService,
     ) {}
 
-    async execute(campagneId: string): Promise<string> {
+    async execute(campagneId: string, cohortId: string): Promise<string> {
         const { destinataires, youngs } = await this.campaignProcessorService.validateAndProcessCampaign(campagneId);
 
         if (youngs.hits.length === 0) {
             throw new FunctionalException(FunctionalExceptionCode.NO_CONTACTS);
         }
 
-        const relatedData = await this.dataFetcherService.fetchRelatedData(youngs.hits);
+        const relatedData = await this.dataFetcherService.fetchRelatedData(youngs.hits, cohortId);
         const contactsForListeDiffusion: ColumnCsvName[] = [];
 
         // Build contacts for youngs
