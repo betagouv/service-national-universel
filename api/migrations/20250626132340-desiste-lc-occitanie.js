@@ -3,17 +3,17 @@ const { YOUNG_STATUS } = require("snu-lib");
 const { YoungModel } = require("../src/models");
 
 const cohortName = "2025 HTS 04 - Juillet";
-const region = "Occitanie";
 const reasonCode = "other";
 const reasonMessage = "TODO: En attente de la réponse de Mathilde";
+const regions = ["Occitanie", "Nouvelle-Aquitaine"];
 
-const fromUser = { firstName: `Désaffectation ${cohortName} ${region}` };
+const fromUser = { firstName: `Désaffectation ${cohortName} ${regions.join(", ")}` };
 
 module.exports = {
   async up() {
     const jeunes = await YoungModel.find({
       cohort: cohortName,
-      region,
+      region: { $in: regions },
       status: YOUNG_STATUS.WAITING_LIST,
     });
     logger.info(`Désaffectation ${cohortName}: ${jeunes.length} jeunes à desister`);
