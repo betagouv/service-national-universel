@@ -1,5 +1,5 @@
 import { ROLES, DASHBOARD_TODOS_FUNCTIONS } from "snu-lib";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import { is } from "date-fns/locale";
 
 const getNoteData = (key, user) => {

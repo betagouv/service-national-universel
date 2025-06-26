@@ -8,7 +8,7 @@ import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 import { IoFlashOutline } from "react-icons/io5";
 import { HiHome } from "react-icons/hi";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 export default function List() {
   const { user, sessionPhase1 } = useSelector((state) => state.Auth);

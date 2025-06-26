@@ -37,7 +37,7 @@ import PedagoProject from "../PedagoProject";
 import { getDefaultSession } from "@/utils/session";
 import SyncPlacesButton from "./SyncPlacesButton";
 import SessionVolontairesButton from "./SessionVolontairesButton";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 type Props = {
   center: CohesionCenterType;

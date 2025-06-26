@@ -15,7 +15,7 @@ import SelectCohort from "@/components/cohorts/SelectCohort";
 import DeletePDTButton from "../DeletePDTButton";
 import SyncPlacesPDTButton from "../SyncPlacesPDTButton";
 import HeaderExport from "./ButtonExport";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 interface Props {
   cohort: string;

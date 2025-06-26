@@ -527,20 +527,20 @@ interface UserRoles {
   roles?: ReferentType["roles"];
 }
 
-function isAdmin(user: UserRoles) {
+export function isAdmin(user: UserRoles) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferentReg(user: UserRoles) {
-  return ROLES.REFERENT_REGION === user.role;
+export function isReferentReg(user: UserRoles) {
+  return ROLES.REFERENT_REGION === user?.role;
 }
 
-function isReferentDep(user: UserRoles) {
-  return ROLES.REFERENT_DEPARTMENT === user.role;
+export function isReferentDep(user: UserRoles) {
+  return ROLES.REFERENT_DEPARTMENT === user?.role;
 }
 
-function isReferentRegDep(user: UserRoles) {
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
+export function isReferentRegDep(user: UserRoles) {
+  return isReferentReg(user) || isReferentDep(user);
 }
 
 export function isResponsible(user: UserRoles) {
@@ -555,36 +555,44 @@ export function isResponsibleOrSupervisor(user: UserRoles) {
   return isResponsible(user) || isSupervisor(user);
 }
 
-function isReferentOrAdmin(user: UserRoles) {
+export function isReferentOrAdmin(user: UserRoles) {
   return isAdmin(user) || isReferentRegDep(user);
 }
 
-function isAdminCle(user: UserRoles) {
+export function isAdminCle(user: UserRoles) {
   return user?.role === ROLES.ADMINISTRATEUR_CLE;
 }
 
-function isChefEtablissement(user: UserRoles) {
+export function isChefEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function isCoordinateurEtablissement(user: UserRoles) {
+export function isCoordinateurEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
 }
 
-function isReferentClasse(user: UserRoles) {
+export function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
-function isHeadCenter(user: UserRoles) {
+export function isHeadCenter(user: UserRoles) {
   return user?.role === ROLES.HEAD_CENTER;
 }
 
-function isHeadCenterAdjoint(user: UserRoles) {
+export function isHeadCenterAdjoint(user: UserRoles) {
   return user?.role === ROLES.HEAD_CENTER_ADJOINT;
 }
 
-function isReferentSanitaire(user: UserRoles) {
+export function isReferentSanitaire(user: UserRoles) {
   return user?.role === ROLES.REFERENT_SANITAIRE;
+}
+
+export function isResponsableDeCentre(user: UserRoles) {
+  return isReferentSanitaire(user) || isHeadCenter(user) || isHeadCenterAdjoint(user);
+}
+
+export function isVisiteur(user: UserRoles) {
+  return user?.role === ROLES.VISITOR;
 }
 
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
@@ -1039,7 +1047,7 @@ function canCreateTags(actor) {
   return [ROLES.ADMIN].includes(actor.role);
 }
 
-function isSuperAdmin(actor) {
+export function isSuperAdmin(actor) {
   if (!actor) return false;
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
@@ -1241,7 +1249,6 @@ export {
   canCreateOrModifyMission,
   canCreateOrUpdateProgram,
   canInviteYoung,
-  isReferentOrAdmin,
   isTemporaryAffected,
   FORCE_DISABLED_ASSIGN_COHESION_CENTER,
   FORCE_DISABLED_ASSIGN_MEETING_POINT,
@@ -1313,17 +1320,6 @@ export {
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
   canCreateTags,
-  isSuperAdmin,
-  isAdmin,
-  isReferentReg,
-  isReferentDep,
-  isAdminCle,
-  isChefEtablissement,
-  isCoordinateurEtablissement,
-  isReferentClasse,
-  isHeadCenter,
-  isHeadCenterAdjoint,
-  isReferentSanitaire,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
@@ -1357,6 +1353,5 @@ export {
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
-  isReferentRegDep,
   canModifyDirectionCenterTeam,
 };
