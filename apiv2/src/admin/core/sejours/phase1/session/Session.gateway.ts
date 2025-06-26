@@ -13,6 +13,7 @@ export interface SessionGateway {
             departement,
         }: { dateNaissance: Date; niveauScolaire: string; departement: string },
     ): Promise<SessionModel[]>;
+    findByDateEndAfter(date: Date): Promise<SessionModel[]>;
     create(session: CreateSessionModel): Promise<SessionModel>;
 }
 export const SessionGateway = Symbol("SessionGateway");

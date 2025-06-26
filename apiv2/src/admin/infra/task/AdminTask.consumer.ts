@@ -59,6 +59,7 @@ export class AdminTaskConsumer extends WorkerHost {
                     case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
                     case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
                     case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER:
+                    case TaskName.INSCRIPTION_EXPORT:
                         results = await this.adminTaskInscriptionSelectorService.handleInscription(job, task);
                         break;
                     case TaskName.REFERENTIEL_IMPORT:

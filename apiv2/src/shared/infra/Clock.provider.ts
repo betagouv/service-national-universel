@@ -1,6 +1,7 @@
 import {
     add,
     addHours,
+    addMonths,
     differenceInYears,
     format,
     isAfter as isAfterFns,
@@ -70,6 +71,9 @@ export class ClockProvider implements ClockGateway {
     }
     addDays(date: Date, days: number): Date {
         return add(date, { days });
+    }
+    addMonths(date: Date, months: number): Date {
+        return addMonths(date, months);
     }
     // Legacy format for compatibility
     parseDateNaissance(date: string): Date {
