@@ -61,7 +61,7 @@ describe("CampagneDataFetcherService", () => {
         } as unknown as jest.Mocked<EtablissementGateway>;
 
         mockSejourGateway = {
-            findByIds: jest.fn(),
+            findByCohesionCenterIdsAndCohortId: jest.fn(),
         } as unknown as jest.Mocked<SejourGateway>;
 
         const module: TestingModule = await Test.createTestingModule({
@@ -182,14 +182,14 @@ describe("CampagneDataFetcherService", () => {
                 .mockResolvedValueOnce(mockCoordinateursCle) // For coordinateursCle
                 .mockResolvedValueOnce(mockChefsDeCentre); // For chefsDeCentre
             mockEtablissementGateway.findByIds.mockResolvedValue(mockEtablissements);
-            mockSejourGateway.findByIds.mockResolvedValue(mockSejours);
+            mockSejourGateway.findByCohesionCenterIdsAndCohortId.mockResolvedValue(mockSejours);
             mockPointDeRassemblementGateway.findByIds.mockResolvedValue(mockPointDeRassemblements);
             mockLigneDeBusGateway.findByIds.mockResolvedValue(mockLignes);
             mockCentreGateway.findByIds.mockResolvedValue(mockCentres);
             mockSegmentDeLigneGateway.findByLigneDeBusIds.mockResolvedValue(mockSegmentDeLignes);
 
             // Execute the method
-            const result = await service.fetchRelatedData(mockYoungs);
+            const result = await service.fetchRelatedData(mockYoungs, "cohort123");
 
             // Verify the results
             expect(result).toEqual({
@@ -213,7 +213,7 @@ describe("CampagneDataFetcherService", () => {
             expect(mockEtablissementGateway.findByIds).toHaveBeenCalledWith(["etab1", "etab2"]);
             expect(mockReferentGateway.findByIds).toHaveBeenCalledWith(["chefEtab1", "chefEtab2"]);
             expect(mockReferentGateway.findByIds).toHaveBeenCalledWith(["coordCle1", "coordCle2"]);
-            expect(mockSejourGateway.findByIds).toHaveBeenCalledWith(["sejour1", "sejour2"]);
+            expect(mockSejourGateway.findByCohesionCenterIdsAndCohortId).toHaveBeenCalledWith(["centre1", "centre2"], "cohort123");
             expect(mockReferentGateway.findByIds).toHaveBeenCalledWith(["chefCentre1", "chefCentre2"]);
             expect(mockPointDeRassemblementGateway.findByIds).toHaveBeenCalledWith(["pdr1", "pdr2"]);
             expect(mockLigneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligne1", "ligne2"]);
@@ -245,14 +245,14 @@ describe("CampagneDataFetcherService", () => {
             mockClasseGateway.findReferentIdsByClasseIds.mockResolvedValue([]);
             mockReferentGateway.findByIds.mockResolvedValue([]);
             mockEtablissementGateway.findByIds.mockResolvedValue([]);
-            mockSejourGateway.findByIds.mockResolvedValue([]);
+            mockSejourGateway.findByCohesionCenterIdsAndCohortId.mockResolvedValue([]);
             mockPointDeRassemblementGateway.findByIds.mockResolvedValue([]);
             mockLigneDeBusGateway.findByIds.mockResolvedValue([]);
             mockCentreGateway.findByIds.mockResolvedValue([]);
             mockSegmentDeLigneGateway.findByLigneDeBusIds.mockResolvedValue([]);
 
             // Execute the method
-            const result = await service.fetchRelatedData(mockYoungs);
+            const result = await service.fetchRelatedData(mockYoungs, "cohort123");
 
             // Verify we get empty arrays
             expect(result).toEqual({
@@ -274,6 +274,7 @@ describe("CampagneDataFetcherService", () => {
             expect(mockPointDeRassemblementGateway.findByIds).toHaveBeenCalledWith(["pdr1"]);
             expect(mockLigneDeBusGateway.findByIds).toHaveBeenCalledWith(["ligne1"]);
             expect(mockCentreGateway.findByIds).toHaveBeenCalledWith(["centre2"]);
+            expect(mockSejourGateway.findByCohesionCenterIdsAndCohortId).toHaveBeenCalledWith(["centre2"], "cohort123");
         });
     });
 });

@@ -67,7 +67,7 @@ export class ElasticsearchQueryBuilder<T> {
         return this;
     }
 
-    setFilters(filters: Record<string, string | string[]> | undefined): this {
+    setFilters(filters: Record<string, string | (string | undefined)[]> | undefined): this {
         if (!filters) {
             return this;
         }
@@ -77,10 +77,44 @@ export class ElasticsearchQueryBuilder<T> {
         }
 
         Object.entries(filters).forEach(([key, value]) => {
-            if (value?.length > 0) {
+            if (Array.isArray(value)) {
+                const definedValues = value.filter((v) => v !== undefined);
+                const hasUndefined = value.some((v) => v === undefined);
+
+                if (definedValues.length > 0 && !hasUndefined) {
+                    this.query.body.query.bool.filter!.push({
+                        terms: {
+                            [`${key}.keyword`]: definedValues.filter((v): v is string => v !== undefined),
+                        },
+                    });
+                }
+                if (hasUndefined) {
+                    this.query.body.query.bool.filter!.push({
+                        bool: {
+                            should: [
+                                {
+                                    bool: {
+                                        must_not: {
+                                            exists: {
+                                                field: `${key}.keyword`,
+                                            },
+                                        },
+                                    },
+                                },
+                                {
+                                    terms: {
+                                        [key]: value.filter((e) => e !== undefined && e !== null && e !== "N/A")
+                                    },
+                                },
+                            ],
+                        },
+                    });
+                }
+            }
+            else {
                 this.query.body.query.bool.filter!.push({
                     terms: {
-                        [`${key}.keyword`]: Array.isArray(value) ? value : [value],
+                        [`${key}.keyword`]: [value],
                     },
                 });
             }

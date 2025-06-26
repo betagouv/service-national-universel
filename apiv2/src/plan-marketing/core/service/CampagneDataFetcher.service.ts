@@ -22,7 +22,7 @@ export class CampagneDataFetcherService {
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
     ) {}
 
-    async fetchRelatedData(youngs: YoungType[]) {
+    async fetchRelatedData(youngs: YoungType[], cohortId: string) {
         const classeIds = new Set<string>();
         const meetingPointIds = new Set<string>();
         const cohesionCenterIds = new Set<string>();
@@ -58,11 +58,7 @@ export class CampagneDataFetcherService {
         const coordinateursCle = (await this.referentGateway.findByIds([...coordinateurCleIds])) || [];
 
         // Fetch center data
-        const sejourIds = new Set<string>();
-        for (const classe of classes) {
-            if (classe.sejourId) sejourIds.add(classe.sejourId);
-        }
-        const sejours = (await this.sejourGateway.findByIds([...sejourIds])) || [];
+        const sejours = (await this.sejourGateway.findByCohesionCenterIdsAndCohortId([...cohesionCenterIds], cohortId)) || [];
 
         // Fetch center chiefs
         const chefDeCentreIds = new Set<string>();

@@ -74,13 +74,20 @@ export class CampagneProcessorService {
             throw new FunctionalException(FunctionalExceptionCode.LISTE_DIFFUSION_NOT_FOUND);
         }
         this.logger.log(`Liste de diffusion: ${listeDiffusion.id}`);
-        const filtreListeDiffusionWithCohortId: Record<string, string[]> = {
+        const filtreListeDiffusionWithCohortId: Record<string, (string | undefined)[]> = {
             ...(listeDiffusion.filters as Record<string, string[]>),
             cohortId: [campagne.cohortId],
         };
 
+        // Replace "N/A" value by undefined
+        Object.entries(filtreListeDiffusionWithCohortId).forEach(([key, value]) => {
+            if (value && value.includes("N/A")) {
+                filtreListeDiffusionWithCohortId[key] = value.map((v) => (v === "N/A" ? undefined : v));
+            }
+        });
+
         const contactsQuery: SearchParams = {
-            filters: filtreListeDiffusionWithCohortId,
+            filters: filtreListeDiffusionWithCohortId as Record<string, string | string[]>,
             sourceFields: [
                 "email",
                 "firstName",
