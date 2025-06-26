@@ -12,7 +12,7 @@ import dayjs from "@/utils/dayjs.utils";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 import { AuthState } from "@/redux/auth/reducer";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 import Loader from "../../components/Loader";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";

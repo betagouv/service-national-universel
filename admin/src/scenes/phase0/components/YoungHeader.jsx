@@ -47,7 +47,7 @@ import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
 import { useMutation } from "@tanstack/react-query";
 import { notifyYoungStatusChanged, updateYoung } from "../utils/service";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
