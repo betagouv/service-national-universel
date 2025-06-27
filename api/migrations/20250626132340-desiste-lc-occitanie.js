@@ -4,7 +4,7 @@ const { YoungModel } = require("../src/models");
 
 const cohortName = "2025 HTS 04 - Juillet";
 const reasonCode = "other";
-const reasonMessage = "TODO: En attente de la réponse de Mathilde";
+const reasonMessage = "À votre demande, votre inscription n'est plus positionnée sur la liste d'attente du séjour de cohésion de juillet.";
 const regions = ["Occitanie", "Nouvelle-Aquitaine"];
 
 const fromUser = { firstName: `Désaffectation ${cohortName} ${regions.join(", ")}` };
