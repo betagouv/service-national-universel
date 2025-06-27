@@ -1,6 +1,5 @@
 import { Logger, MiddlewareConsumer, Module, ParseEnumPipe } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
-import { SentryModule } from "@sentry/nestjs/setup";
 import configuration from "./config/configuration";
 
 import { QueueModule } from "@infra/Queue.module";
@@ -11,13 +10,13 @@ import { HealthCheckController } from "@infra/HealthCheck.controller";
 import { PlanMarketingModule } from "./plan-marketing/plan-marketing.module";
 import { AnalyticsModule } from "./analytics/analytics.module";
 import { RouterModule } from "@nestjs/core";
+import { SentryProvider as Sentry} from "@infra/shared/Sentry.provider";
 
 @Module({
     imports: [
         ConfigModule.forRoot({
             load: [configuration],
         }),
-        SentryModule.forRoot(),
         AdminModule,
         QueueModule,
         PlanMarketingModule,
@@ -30,7 +29,7 @@ import { RouterModule } from "@nestjs/core";
         ]),
     ],
     controllers: [HealthCheckController],
-    providers: [Logger],
+    providers: [Logger, Sentry],
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {
