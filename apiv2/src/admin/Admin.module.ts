@@ -170,16 +170,16 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
 })
 export class AdminModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(ClsMiddleware).forRoutes("*");
+        consumer.apply(ClsMiddleware).forRoutes("{*cls}");
         consumer
             .apply(AddUserToRequestMiddleware)
             .exclude({ path: "/referent/signin", method: RequestMethod.POST })
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })
-            .exclude({ path: "/queues(.*)", method: RequestMethod.GET })
-            .exclude({ path: "/queues(.*)retry/(.*)", method: RequestMethod.PUT })
-            .exclude({ path: "/queues(.*)clean", method: RequestMethod.PUT })
-            .forRoutes("*");
+            .exclude({ path: "/queues/*queues", method: RequestMethod.GET })
+            .exclude({ path: "/queues/*queues/retry/*retry", method: RequestMethod.PUT })
+            .exclude({ path: "/queues/*queues/clean", method: RequestMethod.PUT })
+            .forRoutes("{*all}");
     }
 }
