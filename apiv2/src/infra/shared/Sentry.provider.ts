@@ -7,15 +7,13 @@ export const SENTRY_PROVIDER = "SENTRY_PROVIDER";
 export const SentryProvider: Provider = {
     provide: SENTRY_PROVIDER,
     useFactory: (configService: ConfigService) => {
-        const environment = configService.get<string>("environment");
-        const enableSentry = configService.get<boolean>("sentry.enabled");
+        const environment =  configService.get<string>("environment");
         const sentryDsn = configService.get<string>("sentry.dsn");
         const sentryRelease = configService.get<string>("release");
         const sentryTracingSampleRate = configService.get<number>("sentry.tracingSampleRate");
 
-        console.log("Sentry configuration:", {
+        console.info("Sentry configuration:", {
             environment,
-            enableSentry,
             sentryDsn: sentryDsn ? "SET" : "NOT SET",
             sentryRelease,
             sentryTracingSampleRate,
@@ -23,8 +21,7 @@ export const SentryProvider: Provider = {
 
         // Only initialize Sentry if explicitly enabled and in production environment
         // This prevents noise from development, staging, CI, and other non-production environments
-        //if (enableSentry && environment === "production") {
-        if (enableSentry && sentryDsn) {
+        if (sentryDsn && environment === "production") {
             console.log("Initializing Sentry...");
             Sentry.init({
                 dsn: sentryDsn,
@@ -34,12 +31,7 @@ export const SentryProvider: Provider = {
                 normalizeDepth: 16,
             });
             console.log("Sentry initialized successfully");
-        } else {
-            console.log("Sentry not initialized:", {
-                reason: !enableSentry ? "Sentry disabled" : "DSN not provided",
-            });
         }
-//        }
 
         return Sentry;
     },
