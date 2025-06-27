@@ -49,6 +49,7 @@ import {
 } from "../application/applicationNotificationService";
 import { UserRequest } from "../controllers/request";
 import patches from "../controllers/patches";
+import { logger } from "../logger";
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -589,7 +590,11 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
       params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat` };
     } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
-      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      emailTo = [
+        { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail },
+        { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+        { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+      ].filter((destinataire) => destinataire.email);
       params = { ...params, cta: `${config.APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
@@ -601,7 +606,11 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
     } else if (template === SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION) {
       emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
     } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
-      emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
+      emailTo = [
+        { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail },
+        { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+        { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+      ].filter((destinataire) => destinataire.email);
       params = { ...params, message, cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater` };
     } else if (template === SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION) {
       // when it is a new application, there are 2 possibilities
@@ -712,6 +721,7 @@ router.post("/:id/notify/:template", passport.authenticate(["referent", "young"]
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     let cc = isYoung(req.user) ? getCcOfYoung({ template, young }) : [];
+    logger.info(`Sending email to ${emailTo?.map((destinataire) => destinataire.email).join(", ")} with template ${template}`);
     const mail = await sendTemplate(template, {
       emailTo,
       params,

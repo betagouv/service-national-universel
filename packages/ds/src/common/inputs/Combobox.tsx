@@ -24,7 +24,15 @@ export default function Combobox({
   onChange,
 }: proptype) {
   return (
-    <HeadlessCombobox as="div" value={value} onChange={onChange}>
+    <HeadlessCombobox
+      as="div"
+      value={value}
+      onChange={(value) => {
+        if (value) {
+          onChange(value);
+        }
+      }}
+    >
       <HeadlessCombobox.Label className="block text-sm font-medium leading-6 text-gray-800">
         {label}
       </HeadlessCombobox.Label>
