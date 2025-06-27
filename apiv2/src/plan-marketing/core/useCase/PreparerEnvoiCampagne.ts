@@ -43,7 +43,7 @@ export class PreparerEnvoiCampagne implements UseCase<void> {
             throw new FunctionalException(FunctionalExceptionCode.CAMPAIGN_NOT_FOUND);
         }
         // Créer la liste de diffusion et importer les contacts sur le fournisseur
-        const contacts = await this.creerListeDiffusion.execute(campagneId);
+        const contacts = await this.creerListeDiffusion.execute(campagneId, campagne.cohortId);
         await this.importerContacts.execute(campagneId, campagneFournisseur.id!, contacts, programmationId);
     }
 }

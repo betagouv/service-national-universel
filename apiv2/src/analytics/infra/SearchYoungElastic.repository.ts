@@ -73,10 +73,21 @@ export class SearchYoungElasticRepository implements SearchYoungGateway {
     }
 
     async countYoung(params: Pick<SearchParams, "filters" | "searchTerm" | "existingFields">): Promise<number> {
+        // Replace "N/A" value by undefined
+        const filters = params.filters;
+        if (filters) {
+            Object.entries(filters).forEach(([key, value]) => {
+                if (Array.isArray(value) && value.includes("N/A")) {
+                    filters[key] = value.map((v) => (v === "N/A" ? undefined : v));
+                }
+            });
+        }
+
         const queryBuilder = new ElasticsearchQueryBuilder<YoungType>("young")
             .setFilters(params.filters)
             .setExistingFields(params.existingFields)
             .setSearchTerm(params.searchTerm);
+
         const response = await this.elasticsearchService.count(queryBuilder.buildCountQuery());
         return response.body.count;
     }
