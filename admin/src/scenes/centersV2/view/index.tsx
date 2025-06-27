@@ -13,7 +13,7 @@ import SessionList from "../components/sessions/SessionList";
 import { capture } from "@/sentry";
 import { AuthState } from "@/redux/auth/reducer";
 import { Session } from "@/types";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 export default function Index() {
   const { id } = useParams<{ id: string }>();

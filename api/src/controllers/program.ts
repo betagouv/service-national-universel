@@ -1,15 +1,22 @@
-const express = require("express");
+import express, { Request, Response } from "express";
+import Joi from "joi";
+import passport from "passport";
+
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, canCreateOrUpdateProgram } from "snu-lib";
+
+import { capture } from "../sentry";
+import { logger } from "../logger";
+import { ProgramModel } from "../models";
+import { ERRORS, isYoung } from "../utils";
+import { validateId, validateString, validateArray, validateProgram, idSchema } from "../utils/validator";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+
 const router = express.Router();
-const passport = require("passport");
-const { capture } = require("../sentry");
-const { logger } = require("../logger");
 
-const { ProgramModel } = require("../models");
-const { ERRORS, isYoung } = require("../utils");
-const { validateId, validateString, validateArray, validateProgram } = require("../utils/validator");
-const { ROLES, canCreateOrUpdateProgram } = require("snu-lib");
-
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedProgram } = validateProgram(req.body);
     if (error) {
@@ -25,7 +32,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: errorProgram, value: checkedProgram } = validateProgram(req.body);
     const { error: errorId, value: checkedId } = validateId(req.params.id);
@@ -43,23 +50,28 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error, value: checkedId } = validateId(req.params.id);
-    if (error) {
+router.get(
+  "/:id",
+  authMiddleware(["referent", "young"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.PROGRAM, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const data = await ProgramModel.findById(req.validatedParams.id);
+      if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    const data = await ProgramModel.findById(checkedId);
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
-router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     let data = [];
     if (req.user.role === ROLES.ADMIN) data = await ProgramModel.find({});
@@ -82,7 +94,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
   }
 });
 
-router.get("/public/engagements", async (req, res) => {
+router.get("/public/engagements", async (req: Request, res: Response) => {
   try {
     const data = await ProgramModel.aggregate([
       {
@@ -104,7 +116,7 @@ router.get("/public/engagements", async (req, res) => {
   }
 });
 
-router.get("/public/engagement/:id", async (req, res) => {
+router.get("/public/engagement/:id", async (req: Request, res: Response) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -120,7 +132,7 @@ router.get("/public/engagement/:id", async (req, res) => {
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: checkedId } = validateId(req.params.id);
     if (error) {
@@ -128,6 +140,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     const program = await ProgramModel.findById(checkedId);
+    if (!program) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canCreateOrUpdateProgram(req.user, program)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await program.deleteOne();
     logger.debug(`Program ${req.params.id} has been deleted`);
@@ -138,4 +151,4 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
   }
 });
 
-module.exports = router;
+export default router;

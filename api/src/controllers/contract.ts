@@ -1,28 +1,41 @@
-const express = require("express");
-const router = express.Router();
-const passport = require("passport");
-const crypto = require("crypto");
-const { SENDINBLUE_TEMPLATES, getAge, canCreateOrUpdateContract, canViewContract, ROLES } = require("snu-lib");
-const { capture } = require("../sentry");
-const { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } = require("../models");
-const { ERRORS, isYoung, isReferent } = require("../utils");
-const { sendTemplate } = require("../brevo");
-const { config } = require("../config");
-const { logger } = require("../logger");
-const { validateId, validateContract, validateOptionalId, idSchema } = require("../utils/validator");
-const { serializeContract } = require("../utils/serializer");
-const { updateYoungPhase2StatusAndHours, updateYoungStatusPhase2Contract, checkStatusContract } = require("../utils");
-const Joi = require("joi");
-const patches = require("./patches");
-const { generatePdfIntoStream } = require("../utils/pdf-renderer");
-const { requestValidatorMiddleware } = require("../middlewares/requestValidatorMiddleware");
-const { accessControlMiddleware } = require("../middlewares/accessControlMiddleware");
-const { authMiddleware } = require("../middlewares/authMiddleware");
+import express, { Response } from "express";
+import passport from "passport";
+import crypto from "crypto";
+import {
+  SENDINBLUE_TEMPLATES,
+  getAge,
+  canCreateOrUpdateContract,
+  canViewContract,
+  ROLES,
+  UserDto,
+  ContractType,
+  isAuthorized,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
+} from "snu-lib";
+import { capture } from "../sentry";
+import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
+import { ERRORS, isYoung, isReferent } from "../utils";
+import { sendTemplate } from "../brevo";
+import { config } from "../config";
+import { logger } from "../logger";
+import { validateId, validateContract, validateOptionalId, idSchema } from "../utils/validator";
+import { serializeContract } from "../utils/serializer";
+import { updateYoungPhase2StatusAndHours, updateYoungStatusPhase2Contract, checkStatusContract } from "../utils";
+import Joi from "joi";
+import patches from "./patches";
+import { generatePdfIntoStream } from "../utils/pdf-renderer";
+import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
+import { accessControlMiddleware } from "../middlewares/accessControlMiddleware";
+import { authMiddleware } from "../middlewares/authMiddleware";
+import { RouteRequest, RouteResponse, UserRequest } from "./request";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
-async function createContract(data, fromUser) {
+async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
   const contract = await ContractModel.create(data);
-  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+  const age = getAge(contract.youngBirthdate);
+  const isYoungAdult = age !== "?" && age >= 18;
 
   contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
   contract.projectManagerStatus = "WAITING_VALIDATION";
@@ -58,16 +71,17 @@ async function createContract(data, fromUser) {
   return contract;
 }
 
-async function updateContract(id, data, fromUser) {
+async function updateContract(id: string, data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
-  const previous = await ContractModel.findById(id);
   const contract = await ContractModel.findById(id);
+  if (!contract) throw new Error(ERRORS.NOT_FOUND);
+  const previous = JSON.parse(JSON.stringify(contract));
   contract.set(data);
   await contract.save({ fromUser });
 
-  const isYoungAdult = getAge(contract.youngBirthdate) >= 18;
+  const age = getAge(contract.youngBirthdate);
+  const isYoungAdult = age !== "?" && age >= 18;
 
-  // When we update, we have to send mail again to validated.
   if (previous.invitationSent !== "true" || previous.projectManagerStatus === "VALIDATED" || previous.projectManagerEmail !== contract.projectManagerEmail) {
     contract.projectManagerStatus = "WAITING_VALIDATION";
     contract.projectManagerToken = crypto.randomBytes(40).toString("hex");
@@ -99,7 +113,7 @@ async function updateContract(id, data, fromUser) {
   return contract;
 }
 
-async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
+async function sendProjectManagerContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
   const departmentReferentPhase2 = await ReferentModel.find({
     department: contract.youngDepartment,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
@@ -117,12 +131,13 @@ async function sendProjectManagerContractEmail(contract, isValidateAgainMail) {
   });
 }
 
-async function sendStructureManagerContractEmail(contract, isValidateAgainMail) {
+async function sendStructureManagerContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
   try {
     if (contract.tutorEmail) {
       await sendContractEmail(contract, {
         email: contract.tutorEmail,
         name: `${contract.tutorFirstName} ${contract.tutorLastName}`,
+        // @ts-ignore TODO: check if tutorToken is needed
         token: contract.tutorToken,
         isValidateAgainMail,
       });
@@ -140,7 +155,7 @@ async function sendStructureManagerContractEmail(contract, isValidateAgainMail) 
   }
 }
 
-async function sendParent1ContractEmail(contract, isValidateAgainMail) {
+async function sendParent1ContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
   return await sendContractEmail(contract, {
     email: contract.parent1Email,
     name: `${contract.parent1FirstName} ${contract.parent1LastName}`,
@@ -149,7 +164,7 @@ async function sendParent1ContractEmail(contract, isValidateAgainMail) {
   });
 }
 
-async function sendParent2ContractEmail(contract, isValidateAgainMail) {
+async function sendParent2ContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
   return await sendContractEmail(contract, {
     email: contract.parent2Email,
     name: `${contract.parent2FirstName} ${contract.parent2LastName}`,
@@ -158,7 +173,7 @@ async function sendParent2ContractEmail(contract, isValidateAgainMail) {
   });
 }
 
-async function sendYoungContractEmail(contract, isValidateAgainMail) {
+async function sendYoungContractEmail(contract: ContractType, isValidateAgainMail?: boolean): Promise<void> {
   return await sendContractEmail(contract, {
     email: contract.youngEmail,
     name: `${contract.youngFirstName} ${contract.youngLastName}`,
@@ -167,7 +182,16 @@ async function sendYoungContractEmail(contract, isValidateAgainMail) {
   });
 }
 
-async function sendContractEmail(contract, options) {
+async function sendContractEmail(
+  contract: ContractType,
+  options: {
+    email?: string;
+    name: string;
+    token?: string;
+    cc?: Array<{ name: string; email: string }>;
+    isValidateAgainMail?: boolean;
+  },
+): Promise<void> {
   try {
     let template, cc;
     if (options.isValidateAgainMail) {
@@ -183,7 +207,7 @@ async function sendContractEmail(contract, options) {
       missionName: contract.missionName,
       cta: `${config.APP_URL}/validate-contract?token=${options.token}&contract=${contract._id}`,
     };
-    const emailTo = [{ name: options.name, email: options.email }];
+    const emailTo = [{ name: options.name, email: options.email! }];
     if (options?.cc?.length) {
       cc = options.cc;
     }
@@ -197,8 +221,10 @@ async function sendContractEmail(contract, options) {
   }
 }
 
+const router = express.Router();
+
 // Create or update contract.
-router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: idError, value: id } = validateOptionalId(req.body._id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -208,8 +234,6 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    // - admin and referent can send contract to everybody
-    // - responsible and supervisor can send contract in their structures
     if (!canCreateOrUpdateContract(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
@@ -237,17 +261,13 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
       }
     }
 
-    // Create or update contract.
     const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
-    // Update the application.
     const application = await ApplicationModel.findById(contract.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     application.contractId = contract._id;
-    // We have to update the application's mission duration.
     application.missionDuration = contract.missionDuration;
     await application.save({ fromUser: req.user });
 
-    // Update young status.
     const young = await YoungModel.findById(contract.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     await updateYoungStatusPhase2Contract(young, req.user);
@@ -261,7 +281,7 @@ router.post("/", passport.authenticate(["referent"], { session: false, failWithE
 });
 
 // Send contract email
-router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error, value: id } = validateId(req.params.id);
     if (error) {
@@ -275,21 +295,19 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
     const contract = await ContractModel.findById(id);
     if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // - admin and referent can send contract to everybody
-    // - responsible and supervisor can send contract in their structures
-    if (!canCreateOrUpdateContract(req.user, contract)) {
+    if (!canCreateOrUpdateContract(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     if (req.user.role === ROLES.RESPONSIBLE) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (contract.structureId.toString() !== req.user.structureId.toString()) {
+      if (contract.structureId?.toString() !== req.user.structureId.toString()) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
     if (req.user.role === ROLES.SUPERVISOR) {
       if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-      if (!structures.map((e) => e._id.toString()).includes(contract.structureId.toString())) {
+      if (!structures.map((e) => e._id.toString()).includes(contract.structureId?.toString())) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
     }
@@ -307,7 +325,7 @@ router.post("/:id/send-email/:type", passport.authenticate(["referent"], { sessi
   }
 });
 
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
+router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { error: idError, value: id } = validateId(req.params.id);
     if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -315,11 +333,11 @@ router.get("/:id", passport.authenticate(["referent", "young"], { session: false
     const data = await ContractModel.findById(id);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoung(req.user) && data.youngId.toString() !== req.user._id.toString()) {
+    if (isYoung(req.user) && data.youngId?.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    if (isReferent(req.user) && !canViewContract(req.user, data)) {
+    if (isReferent(req.user) && !canViewContract(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
@@ -339,7 +357,7 @@ router.get(
     }),
     accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN]),
   ],
-  async (req, res) => {
+  async (req: UserRequest, res: Response) => {
     try {
       const { id } = req.params;
 
@@ -358,7 +376,7 @@ router.get(
 );
 
 // Get a contract by its token.
-router.get("/token/:token", async (req, res) => {
+router.get("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -375,7 +393,7 @@ router.get("/token/:token", async (req, res) => {
 });
 
 // Validate token.
-router.post("/token/:token", async (req, res) => {
+router.post("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -405,19 +423,21 @@ router.post("/token/:token", async (req, res) => {
       data.youngContractValidationDate = new Date();
     }
 
-    await data.save({ fromUser: req.user });
+    const application = await ApplicationModel.findById(data.applicationId);
+    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const young = await YoungModel.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    await data.save({ fromUser: req.user });
+
     await updateYoungStatusPhase2Contract(young, req.user);
 
     const contractStatus = checkStatusContract(data);
-    const application = await ApplicationModel.findById(data.applicationId);
+
     application.set({ contractStatus });
     await application.save({ fromUser: req.user });
 
-    // notify the young and parents when the contract has been validated by everyone.
     if (contractStatus === "VALIDATED") {
       let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
 
@@ -444,28 +464,37 @@ router.post("/token/:token", async (req, res) => {
   }
 });
 
-router.post("/:id/download", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { error: idError, value: id } = validateId(req.params.id);
-    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.post(
+  "/:id/download",
+  authMiddleware(["young", "referent"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.CONTRACT, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const contract = await ContractModel.findById(req.validatedParams.id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const contract = await ContractModel.findById(id);
-    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (
+        !isAuthorized({
+          resource: PERMISSION_RESOURCES.CONTRACT,
+          action: PERMISSION_ACTIONS.READ,
+          user: req.user,
+          context: { contract: contract.toJSON() },
+        })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
-    // A young can only download their own documents.
-    if (isYoung(req.user) && contract.youngId.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
+    } catch (e) {
+      capture(e);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    if (isReferent(req.user) && !canCreateOrUpdateContract(req.user, contract)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    await generatePdfIntoStream(res, { type: "contract", template: "2", contract });
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-module.exports = router;
+export default router;

@@ -9,7 +9,7 @@ import VioletButton from "../../components/buttons/VioletButton";
 import Loader from "../../components/Loader";
 import { translate, ROLES } from "../../utils";
 import Breadcrumbs from "../../components/Breadcrumbs";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 // todo - les virer de /assets et utiliser des url d'image normales
 const images = import.meta.glob("../../assets/programmes-engagement/*", { eager: true });

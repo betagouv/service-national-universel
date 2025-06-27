@@ -1,6 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import API from "@/services/api";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 export function useCohortHasPDT(cohortName: string) {
   return useQuery({

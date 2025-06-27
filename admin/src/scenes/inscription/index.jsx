@@ -8,7 +8,7 @@ import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, FeatureFlagName } from "snu-lib";
+import { canInviteYoung, getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, FeatureFlagName, PERMISSION_RESOURCES, isCreateAuthorized } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import { ExportComponent, Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
@@ -220,7 +220,7 @@ export default function Inscription() {
   if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
     baseInscriptionPath = `/classes/${selectedClassId}/inscription-manuelle`;
   }
-  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : true;
+  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.YOUNG, ignorePolicy: true });
 
   if (isLabelsPending) return <Loader />;
 

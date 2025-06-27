@@ -1,11 +1,18 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
+import { getAppHelperWithAcl } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { createReferentHelper, deleteReferentByIdHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { TableDeRepartitionModel } from "../models";
+import { PermissionModel } from "../models/permissions/permission";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
+import { addPermissionHelper } from "./helpers/permissions";
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT] } });
+  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.TABLE_DE_REPARTITION, PERMISSION_ACTIONS.READ);
+});
 afterAll(dbClose);
 describe("Table de répartition", () => {
   let referent;
@@ -21,26 +28,34 @@ describe("Table de répartition", () => {
   });
   describe("POST /region", () => {
     it("should return 400 when request body is invalid", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/region").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris",
-        toRegion: "",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris",
+          toRegion: "",
+        });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ ok: false, code: "INVALID_PARAMS" });
     });
 
     it("should return 409 when tableDeRepartition already exists", async () => {
-      const res1 = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
+      const res1 = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
       expect(res1.status).toBe(200);
 
-      const res2 = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
+      const res2 = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
       expect(res2.status).toBe(409);
       expect(res2.body).toEqual({ ok: false, code: "ALREADY_EXISTS" });
     });
 
     it("should return 200 when tableDeRepartition is created successfully", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris14621", toRegion: "HOH2136" });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Paris14621", toRegion: "HOH2136" });
       expect(res.status).toBe(200);
       expect(res.body).toEqual({ ok: true });
       await TableDeRepartitionModel.deleteMany();
@@ -48,7 +63,9 @@ describe("Table de répartition", () => {
 
     it("should return 500 when an error occurs", async () => {
       jest.spyOn(TableDeRepartitionModel, "findOne").mockRejectedValue(new Error("Mock server error"));
-      const res = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Pari6s115", toRegion: "QHUQIHD" });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Pari6s115", toRegion: "QHUQIHD" });
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ ok: false, code: "SERVER_ERROR" });
 
@@ -58,27 +75,35 @@ describe("Table de répartition", () => {
   });
   describe("POST /delete/region", () => {
     it("should return 400 when request body is invalid", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/delete/region").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris",
-        toRegion: "",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/region")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris",
+          toRegion: "",
+        });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ ok: false, code: "INVALID_PARAMS" });
     });
 
     it("should return 200 when tableDeRepartition is deleted successfully", async () => {
-      const res1 = await request(getAppHelper()).post("/table-de-repartition/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
+      const res1 = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
       expect(res1.status).toBe(200);
 
-      const res2 = await request(getAppHelper()).post("/table-de-repartition/delete/region").send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
+      const res2 = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Paris441112", toRegion: "HOHOs1321" });
       expect(res2.status).toBe(200);
       expect(res2.body).toEqual({ ok: true });
     });
 
     it("should return 500 when an error occurs", async () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockRejectedValue(new Error("Mock server error"));
-      const res = await request(getAppHelper()).post("/table-de-repartition/delete/region").send({ cohort: "Février 2023 - C", fromRegion: "Pari6s115", toRegion: "QHUQIHD" });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/region")
+        .send({ cohort: "Février 2023 - C", fromRegion: "Pari6s115", toRegion: "QHUQIHD" });
       expect(res.status).toBe(500);
       expect(res.body).toEqual({ ok: false, code: "SERVER_ERROR" });
       jest.restoreAllMocks();
@@ -100,13 +125,15 @@ describe("Table de répartition", () => {
       });
 
       // Send a POST request to the route with the valid parameters and authorization token
-      const res = await request(getAppHelper()).post("/table-de-repartition/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris14621",
-        toRegion: "HOH2136",
-        fromDepartment: "Department1",
-        toDepartment: "Department2",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris14621",
+          toRegion: "HOH2136",
+          fromDepartment: "Department1",
+          toDepartment: "Department2",
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -116,24 +143,28 @@ describe("Table de répartition", () => {
       await tableDeRepartition.deleteOne();
     });
     it("should return 400 when request body is invalid", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris14621",
-        toRegion: "HOH2136",
-        fromDepartment: "",
-        toDepartment: "",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris14621",
+          toRegion: "HOH2136",
+          fromDepartment: "",
+          toDepartment: "",
+        });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ ok: false, code: "INVALID_PARAMS" });
     });
     it("should return 400 when fromDepartment and toDepartment are empty", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris1416211",
-        toRegion: "HOH123136",
-        fromDepartment: "Department112",
-        toDepartment: "Department122",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris1416211",
+          toRegion: "HOH123136",
+          fromDepartment: "Department112",
+          toDepartment: "Department122",
+        });
       expect(res.status).toEqual(400);
       expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
     });
@@ -147,7 +178,9 @@ describe("Table de répartition", () => {
       // await referent.save();
 
       // Send a GET request to the route with the valid cohort parameter and authorization token
-      const res = await request(getAppHelper()).get(`/table-de-repartition/national/Février 2023 - C`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/table-de-repartition/national/Février 2023 - C`)
+        .send();
 
       // Expect a 200 response
       expect(res.status).toBe(200);
@@ -164,7 +197,7 @@ describe("Table de répartition", () => {
       // await referent.save();
 
       // Send a GET request to the route without the cohort parameter and authorization token
-      const res = await request(getAppHelper()).get(`/table-de-repartition/national`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/national`);
 
       // Expect a 404 response
       expect(res.status).toBe(404);
@@ -182,7 +215,7 @@ describe("Table de répartition", () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockRejectedValue(new Error("Mock server error"));
 
       // Send a GET request to the route with a valid cohort parameter and authorization token
-      const res = await request(getAppHelper()).get(`/table-de-repartition/national/Février 2023 - C`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/national/Février 2023 - C`);
 
       // Expect a 500 response with an error message
       expect(res.status).toBe(500);
@@ -224,7 +257,7 @@ describe("Table de répartition", () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockResolvedValueOnce([mockTableDeRepartition]);
 
       // Send a GET request to the /table-de-repartition/toRegion/:cohort/:region endpoint with the mock request parameters and user object
-      const res = await request(getAppHelper()).get(`/table-de-repartition/toRegion/${requestParams.cohort}/${requestParams.region}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/toRegion/${requestParams.cohort}/${requestParams.region}`);
 
       // Assert that the response status code is 200 and the response body contains the expected data
       expect(res.status).toBe(200);
@@ -254,7 +287,7 @@ describe("Table de répartition", () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockRejectedValueOnce(new Error("Mock server error"));
 
       // Send a GET request to the /table-de-repartition/toRegion/:cohort/:region endpoint with the mock request parameters and user object
-      const res = await request(getAppHelper()).get(`/table-de-repartition/toRegion/${requestParams.cohort}/${requestParams.region}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/toRegion/${requestParams.cohort}/${requestParams.region}`);
 
       // Assert that the response status code is 500 and the response body contains the expected error code
       expect(res.status).toBe(500);
@@ -298,7 +331,7 @@ describe("Table de répartition", () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockResolvedValueOnce([mockTableDeRepartition]);
 
       // Send a GET request to the /table-de-repartition/toRegion/:cohort/:region endpoint with the mock request parameters and user object
-      const res = await request(getAppHelper()).get(`/table-de-repartition/fromRegion/${requestParams.cohort}/${requestParams.region}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/fromRegion/${requestParams.cohort}/${requestParams.region}`);
 
       // Assert that the response status code is 200 and the response body contains the expected data
       expect(res.status).toBe(200);
@@ -328,7 +361,7 @@ describe("Table de répartition", () => {
       jest.spyOn(TableDeRepartitionModel, "find").mockRejectedValueOnce(new Error("Mock server error"));
 
       // Send a GET request to the /table-de-repartition/toRegion/:cohort/:region endpoint with the mock request parameters and user object
-      const res = await request(getAppHelper()).get(`/table-de-repartition/fromRegion/${requestParams.cohort}/${requestParams.region}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/table-de-repartition/fromRegion/${requestParams.cohort}/${requestParams.region}`);
 
       // Assert that the response status code is 500 and the response body contains the expected error code
       expect(res.status).toBe(500);
@@ -359,13 +392,15 @@ describe("Table de répartition", () => {
       });
 
       // Send a POST request to the route with the valid parameters and authorization token
-      const res = await request(getAppHelper()).post("/table-de-repartition/delete/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris14621",
-        toRegion: "HOH2136",
-        fromDepartment: "Department1",
-        toDepartment: "Department2",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris14621",
+          toRegion: "HOH2136",
+          fromDepartment: "Department1",
+          toDepartment: "Department2",
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.ok).toBe(true);
@@ -376,25 +411,29 @@ describe("Table de répartition", () => {
     });
 
     it("should return 400 when request body is invalid", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/delete/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris14621",
-        toRegion: "HOH2136",
-        fromDepartment: "",
-        toDepartment: "",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris14621",
+          toRegion: "HOH2136",
+          fromDepartment: "",
+          toDepartment: "",
+        });
       expect(res.status).toBe(400);
       expect(res.body).toEqual({ ok: false, code: "INVALID_PARAMS" });
     });
 
     it("should return 400 when fromDepartment and toDepartment are empty", async () => {
-      const res = await request(getAppHelper()).post("/table-de-repartition/delete/department").send({
-        cohort: "Février 2023 - C",
-        fromRegion: "Paris1416211",
-        toRegion: "HOH123136",
-        fromDepartment: "Department112",
-        toDepartment: "Department122",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/table-de-repartition/delete/department")
+        .send({
+          cohort: "Février 2023 - C",
+          fromRegion: "Paris1416211",
+          toRegion: "HOH123136",
+          fromDepartment: "Department112",
+          toDepartment: "Department122",
+        });
       expect(res.status).toEqual(400);
       expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
     });

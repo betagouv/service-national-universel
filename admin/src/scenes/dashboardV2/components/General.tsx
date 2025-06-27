@@ -14,7 +14,7 @@ import KeyNumbers from "./KeyNumbers";
 import InfoMessage from "./ui/InfoMessage";
 import Todos from "./Todos";
 import Objective from "../moderator-ref/subscenes/general/components/Objective";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 export default function Index() {
   const user = useSelector((state: AuthState) => state.Auth.user);

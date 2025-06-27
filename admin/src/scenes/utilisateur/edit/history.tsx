@@ -1,16 +1,24 @@
 import React, { useEffect, useState } from "react";
 
+import { PatchType, ReferentType, UserDto } from "snu-lib";
+
 import HistoricComponent from "../../../components/views/Historic2";
-import UserHeader from "../composants/UserHeader";
 import { formatHistory } from "../../../utils";
 import API from "../../../services/api";
 import Loader from "../../../components/Loader";
+import UserHeader from "../composants/UserHeader";
 
-export default function Edit({ user, currentUser }) {
-  const [data, setData] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+interface EditProps {
+  user: ReferentType;
+  currentUser: UserDto;
+}
+
+export default function Edit({ user, currentUser }: EditProps): JSX.Element {
+  const [data, setData] = useState<PatchType[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(true);
   const formattedData = formatHistory(data, user.role);
-  const getPatches = async () => {
+
+  const getPatches = async (): Promise<void> => {
     try {
       const { ok, data } = await API.get(`/referent/${user._id}/patches`);
       if (!ok) return;
@@ -32,6 +40,7 @@ export default function Edit({ user, currentUser }) {
     <>
       <UserHeader user={user} currentUser={currentUser} tab="historique" />
       <div className="p-[30px]">
+        {/* @ts-expect-error legacy js component */}
         <HistoricComponent model="referent" data={formattedData} />
       </div>
     </>
