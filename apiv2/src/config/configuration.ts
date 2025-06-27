@@ -21,7 +21,6 @@ export default () => ({
     environment,
     release: _env(envStr, "RELEASE", "development"),
     sentry: {
-        enabled: _env(envBool, "ENABLE_SENTRY", false),
         dsn: _env(envStr, "SENTRY_DSN", ""),
         tracingSampleRate: _env(envFloat, "SENTRY_TRACING_SAMPLE_RATE", 0.01),
     },
