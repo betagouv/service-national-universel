@@ -110,6 +110,8 @@ else # Create application
     clever domain add api.$env_name.$domain/v2/
     clever domain add admin.$env_name.$domain/
     clever domain add moncompte.$env_name.$domain/
+    clever domain add tasks.$env_name.$domain/
+    clever domain add tasksv2.$env_name.$domain/
 fi
 
 deployment_started=$(clever curl -s "$cc_endpoint/v2/organisations/$org_id/applications/$app_id/deployments?action=DEPLOY&limit=1" \
