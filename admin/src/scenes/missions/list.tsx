@@ -187,9 +187,15 @@ export default function List() {
                         key: "exportMission",
                         // @ts-ignore
                         action: () => {
-                          setIsExportOpen(true);
+                          if (paramData?.count) {
+                            setIsExportOpen(true);
+                          }
                         },
-                        render: <div className="cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50">Informations de missions</div>,
+                        render: (
+                          <div className={cx("cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50", !paramData?.count ? "opacity-50" : "")}>
+                            Informations de missions
+                          </div>
+                        ),
                       },
                       {
                         key: "exportCandidature",
@@ -203,8 +209,8 @@ export default function List() {
                           <Tooltip
                             title={`Vous ne pouvez pas exporter les candidatures pour plus de 5000 missions à la fois.
                           Modifiez les filtres pour réduire le nombre de missions à exporter.`}
-                            disabled={!!paramData?.count && paramData?.count <= 5000}>
-                            <div className={cx("cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50", paramData?.count && paramData?.count > 5000 ? "opacity-50" : "")}>
+                            disabled={!paramData?.count || paramData?.count <= 5000}>
+                            <div className={cx("cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50", !paramData?.count || paramData?.count > 5000 ? "opacity-50" : "")}>
                               Informations de candidatures
                             </div>
                           </Tooltip>
