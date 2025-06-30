@@ -118,6 +118,12 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         filters: Record<string, string | string[]>,
         auteur: ExportMissionCandidaturesTaskParameters["auteur"],
     ) {
+        if (missions.length === 0) {
+            return {
+                columnsName: [],
+                values: [],
+            };
+        }
         let updatedMissions = missions;
 
         const youngCategorie = [
@@ -241,6 +247,10 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         );
         const nbJeunes = Object.keys(youngsById).length;
         this.logger.log(`jeunes count: ${nbJeunes}`, ExporterMissionCanditatures.name);
+
+        if (nbJeunes === 0) {
+            return {};
+        }
 
         // search youngs data
         const youngs = await this.searchYoungGateway.searchYoung({

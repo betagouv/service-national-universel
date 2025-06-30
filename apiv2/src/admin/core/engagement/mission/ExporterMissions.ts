@@ -105,6 +105,12 @@ export class ExporterMissions implements UseCase<ExporterMissionsResult> {
         selectedFields: string[],
         auteur: ExportMissionsTaskParameters["auteur"],
     ) {
+        if (missions.length === 0) {
+            return {
+                columnsName: [],
+                values: [],
+            };
+        }
         let updatedMissions = missions;
         let tutorsById: Record<string, Partial<ReferentType>> = {};
         let structuresById: Record<string, Partial<StructureType>> = {};
