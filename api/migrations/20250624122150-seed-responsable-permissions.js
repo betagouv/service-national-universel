@@ -191,6 +191,14 @@ module.exports = {
         ],
       },
     });
+    // inscription
+    await PermissionModel.create({
+      code: PERMISSION_CODES.INSCRIPTION_READ,
+      titre: "Accès en lecture sur les inscriptions",
+      resource: PERMISSION_RESOURCES.INSCRIPTION,
+      action: PERMISSION_ACTIONS.READ,
+      roles: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE],
+    });
     // user
     await PermissionModel.create({
       code: PERMISSION_CODES.USER_FULL,

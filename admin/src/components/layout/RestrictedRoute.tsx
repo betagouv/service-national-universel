@@ -85,7 +85,7 @@ const PERMISSIONS_BY_ROUTE = {
   },
   "/inscription": {
     ignorePolicy: true, // should have read permission but not specific to a young
-    permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.READ }],
+    permissions: [{ resource: PERMISSION_RESOURCES.INSCRIPTION, action: PERMISSION_ACTIONS.READ }],
   },
   "/alerte": {
     permissions: [{ resource: PERMISSION_RESOURCES.ALERTE_MESSAGE, action: PERMISSION_ACTIONS.WRITE }],
