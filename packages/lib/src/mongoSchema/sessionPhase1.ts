@@ -167,6 +167,22 @@ export const SessionPhase1Schema = {
     },
   },
 
+  deplacementAutonomousMeetingHour: {
+    type: String,
+    optional: true,
+    documentation: {
+      description: "Heure d'arrivée au centre de cohésion pour les jeunes qui viennent par leurs propre moyens",
+    },
+  },
+
+  deplacementAutonomousReturnHour: {
+    type: String,
+    optional: true,
+    documentation: {
+      description: "Heure de retour au centre de cohésion",
+    },
+  },
+
   // TODO: remove this field
   status: {
     type: String,

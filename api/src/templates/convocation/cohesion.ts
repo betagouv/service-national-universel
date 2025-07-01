@@ -4,15 +4,48 @@ import dayjs from "dayjs";
 import "dayjs/locale/fr";
 import { withPipeStream } from "../utils";
 import { getDepartureDateSession, getReturnDateSession } from "../../utils/cohort";
-import { formatStringDate, formatStringDateTimezoneUTC, transportDatesToString } from "snu-lib";
-import { getMeetingAddress, getCertificateTemplate, isLocalTransport, fetchDataForYoungCertificate } from "../../young/youngCertificateService";
+import {
+  CohesionCenterType,
+  CohortType,
+  DepartmentServiceType,
+  formatStringDate,
+  formatStringDateTimezoneUTC,
+  LigneBusType,
+  LigneToPointType,
+  PointDeRassemblementType,
+  SessionPhase1Type,
+  transportDatesToString,
+  YoungDto,
+} from "snu-lib";
+import { getMeetingAddress, getCertificateTemplate, isLocalTransport, fetchDataForYoungCertificate, getMeetingHour, getReturnHour } from "../../young/youngCertificateService";
 import { FONT, FONT_BOLD, FONT_ITALIC, LIST_INDENT, initDocument } from "../templateService";
 import { logger } from "../../logger";
 
 const FILL_COLOR = "#444";
 const MARGIN = 50;
 
-function render(doc, { young, session, cohort, center, service, meetingPoint, ligneBus, ligneToPoint }) {
+function render(
+  doc,
+  {
+    young,
+    session,
+    cohort,
+    center,
+    service,
+    meetingPoint,
+    ligneBus,
+    ligneToPoint,
+  }: {
+    young: YoungDto;
+    session: SessionPhase1Type;
+    cohort: CohortType;
+    center: CohesionCenterType;
+    service: DepartmentServiceType;
+    meetingPoint: PointDeRassemblementType;
+    ligneBus: LigneBusType;
+    ligneToPoint: LigneToPointType;
+  },
+) {
   let _y;
   const page = doc.page;
 
@@ -79,7 +112,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
     doc.font(FONT).text("Le ", MARGIN + 100, undefined, { continued: true });
     doc.font(FONT_BOLD).text(dayjs(departureDate).locale("fr-FR").format("dddd DD MMMM YYYY"));
     doc.font(FONT).text("A ", { continued: true });
-    doc.font(FONT_BOLD).text(meetingPoint && ligneToPoint?.meetingHour ? ligneToPoint.meetingHour : "16:00");
+    doc.font(FONT_BOLD).text(getMeetingHour(young, session, meetingPoint, ligneToPoint));
     doc.font(FONT).text("Au ", { continued: true });
     doc.font(FONT_BOLD).text(getMeetingAddress(young, meetingPoint, center));
     if (ligneBus) {
@@ -136,7 +169,7 @@ function render(doc, { young, session, cohort, center, service, meetingPoint, li
   doc.font(FONT).text(` est prévu`, { continued: true });
   if (!isLocalTransport(young)) {
     doc.font(FONT_BOLD).text(` le ${dayjs(returnDate).locale("fr").format("dddd DD MMMM YYYY")}`, { continued: true });
-    doc.font(FONT_BOLD).text(` à ${meetingPoint && ligneToPoint ? ligneToPoint.returnHour : "11:00"}`, { continued: true });
+    doc.font(FONT_BOLD).text(` à ${getReturnHour(young, session, meetingPoint, ligneToPoint)}`, { continued: true });
   }
   doc.font(FONT).text(` au même endroit que le jour du départ en centre.`);
 
@@ -166,6 +199,7 @@ async function generateCohesion(outStream, young) {
   const data = await fetchDataForYoungCertificate(young);
   const doc = initDocument(75, 30, MARGIN, MARGIN, {});
   withPipeStream(doc, outStream, () => {
+    // @ts-ignore
     render(doc, { young, ...data });
   });
   timer.done({ message: "RENDERING", level: "debug" });
@@ -178,6 +212,7 @@ async function generateBatchCohesion(outStream, youngs) {
   withPipeStream(doc, outStream, () => {
     for (const young of youngs) {
       doc.addPage();
+      // @ts-ignore
       render(doc, { young, ...commonYoungData });
     }
   });

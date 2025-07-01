@@ -1,11 +1,31 @@
 import { CohesionCenterModel, SessionPhase1Model, CohortModel, LigneBusModel, LigneToPointModel, PointDeRassemblementModel, DepartmentServiceModel } from "../models";
-import { YoungDto, PointDeRassemblementType, CohesionCenterType, getParticularitesAcces } from "snu-lib";
+import { YoungDto, PointDeRassemblementType, CohesionCenterType, getParticularitesAcces, SessionPhase1Type, LigneToPointType } from "snu-lib";
 
 export const getMeetingAddress = (young: YoungDto, pdr: PointDeRassemblementType, centre: CohesionCenterType) => {
   if (young.deplacementPhase1Autonomous === "true" || !pdr) return `${centre.address} ${centre.zip} ${centre.city}`;
   const complement = getParticularitesAcces(pdr, young.cohort);
   const complementText = complement ? ", " + complement : "";
   return `${pdr.name}, ${pdr.address} ${pdr.zip} ${pdr.city}${complementText}`;
+};
+
+export const getMeetingHour = (young: YoungDto, session?: SessionPhase1Type, meetingPoint?: PointDeRassemblementType, ligneToPoint?: LigneToPointType) => {
+  if (meetingPoint && ligneToPoint?.meetingHour) {
+    return ligneToPoint.meetingHour;
+  }
+  if (young?.deplacementPhase1Autonomous === "true" && session?.deplacementAutonomousMeetingHour) {
+    return session?.deplacementAutonomousMeetingHour;
+  }
+  return "16:00";
+};
+
+export const getReturnHour = (young: YoungDto, session?: SessionPhase1Type, meetingPoint?: PointDeRassemblementType, ligneToPoint?: LigneToPointType) => {
+  if (meetingPoint && ligneToPoint?.returnHour) {
+    return ligneToPoint.returnHour;
+  }
+  if (young?.deplacementPhase1Autonomous === "true" && session?.deplacementAutonomousReturnHour) {
+    return session?.deplacementAutonomousReturnHour;
+  }
+  return "11:00";
 };
 
 export const getCertificateTemplate = (young: YoungDto) => {
