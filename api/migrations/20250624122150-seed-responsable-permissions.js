@@ -400,7 +400,7 @@ module.exports = {
       titre: "Accès complet aux import SI SNU",
       resource: PERMISSION_RESOURCES.IMPORT_SI_SNU,
       action: PERMISSION_ACTIONS.FULL,
-      roles: [ROLES.SUB_ROLE_GOD],
+      roles: [SUB_ROLE_GOD],
     });
     // table de repartition
     await PermissionModel.create({
