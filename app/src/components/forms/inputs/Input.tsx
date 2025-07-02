@@ -1,15 +1,14 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, InputHTMLAttributes } from "react";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 
-type Props = {
+type InputProps = InputHTMLAttributes<HTMLInputElement> & {
   label?: string;
   className?: string;
   error?: string;
-  [key: string]: any;
 };
 
-const Input = forwardRef<HTMLInputElement, Props>(function Input(props, ref) {
+const Input = forwardRef<HTMLInputElement, InputProps>(function Input(props, ref) {
   const { label, className, error, ...rest } = props;
   return (
     <div className={`mb-[1rem] ${className}`}>

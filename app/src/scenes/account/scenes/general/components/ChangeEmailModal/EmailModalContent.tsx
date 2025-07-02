@@ -6,16 +6,23 @@ import Input from "@/components/forms/inputs/Input";
 import api from "@/services/api";
 import { capture } from "@/sentry";
 
-const PasswordModalContent = ({ onSuccess, onCancel, password, enteredEmail = "" }) => {
+interface PasswordModalContentProps {
+  onSuccess: (email: string) => void;
+  onCancel: () => void;
+  password: string;
+  enteredEmail?: string;
+}
+
+const PasswordModalContent = ({ onSuccess, onCancel, password, enteredEmail = "" }: PasswordModalContentProps) => {
   const [email, setEmail] = useState(enteredEmail);
   const [emailConfirmation, setEmailConfirmation] = useState(enteredEmail);
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<any>({});
   const [isLoading, setLoading] = useState(false);
 
   const trimmedEmail = email?.trim();
   const trimmedEmailConfirmation = emailConfirmation?.trim();
 
-  const requestEmailUpdate = async (newEmail, password) => {
+  const requestEmailUpdate = async (newEmail: string, password: string) => {
     try {
       setLoading(true);
       const { ok, code } = await api.post(`/young/email`, { email: newEmail, password });
@@ -33,7 +40,7 @@ const PasswordModalContent = ({ onSuccess, onCancel, password, enteredEmail = ""
   };
 
   const onSubmit = async () => {
-    let errors = {};
+    const errors: any = {};
 
     if (email === undefined || email === "") {
       errors["email"] = "Ce champ est obligatoire";
@@ -60,8 +67,14 @@ const PasswordModalContent = ({ onSuccess, onCancel, password, enteredEmail = ""
   return (
     <>
       <Modal.Title>Quelle est votre nouvelle adresse email ?</Modal.Title>
-      <Input label="Nouvelle adresse email" name="email" onChange={setEmail} error={errors.email} value={email} />
-      <Input label="Confirmer la nouvelle adresse email" name="emailConfirmation" onChange={setEmailConfirmation} error={errors.emailConfirmation} value={emailConfirmation} />
+      <Input label="Nouvelle adresse email" name="email" onChange={(e) => setEmail(e.target.value)} error={errors.email} value={email} />
+      <Input
+        label="Confirmer la nouvelle adresse email"
+        name="emailConfirmation"
+        onChange={(e) => setEmailConfirmation(e.target.value)}
+        error={errors.emailConfirmation}
+        value={emailConfirmation}
+      />
       <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={onSubmit} confirmText="Recevoir le code d'activation" disabled={isLoading} />
     </>
   );
