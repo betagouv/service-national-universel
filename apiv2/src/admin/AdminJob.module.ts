@@ -91,6 +91,10 @@ import { StructureGateway } from "./core/engagement/structure/Structure.gateway"
 import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
 import { ExportMissionService } from "./core/engagement/mission/ExportMission.service";
 import { SharedModule } from "@shared/Shared.module";
+import { ExporterInscriptions } from "./core/sejours/phase1/inscription/ExporterInscriptions";
+import { CandidatureGateway } from "./core/engagement/candidature/Candidature.gateway";
+import { CandidatureRepository } from "./infra/engagement/candidature/repository/mongo/CandidatureMongo.repository";
+import { candidatureMongoProviders } from "./infra/engagement/candidature/provider/CandidatureMongo.provider";
 
 @Module({
     imports: [
@@ -131,6 +135,7 @@ import { SharedModule } from "@shared/Shared.module";
         ...taskMongoProviders,
         ...historyProvider,
         ...structureMongoProviders,
+        ...candidatureMongoProviders,
         // ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
@@ -143,6 +148,7 @@ import { SharedModule } from "@shared/Shared.module";
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: ClockGateway, useClass: ClockProvider },
         { provide: StructureGateway, useClass: StructureRepository },
+        { provide: CandidatureGateway, useClass: CandidatureRepository },
         { provide: SearchYoungGateway, useClass: SearchYoungElasticRepository },
         { provide: SearchMissionGateway, useClass: SearchMissionElasticRepository },
         { provide: SearchApplicationGateway, useClass: SearchApplicationElasticRepository },
@@ -173,6 +179,7 @@ import { SharedModule } from "@shared/Shared.module";
         ValiderBasculeJeunesService,
         ValiderBasculeJeunesValides,
         ValiderBasculeJeunesNonValides,
+        ExporterInscriptions,
         ExporterMissionCanditatures,
         ExporterMissions,
         ...referentielServiceProvider,

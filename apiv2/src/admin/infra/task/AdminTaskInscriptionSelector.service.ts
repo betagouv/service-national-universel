@@ -1,5 +1,6 @@
 import { Job } from "bullmq";
 import {
+    ExportInscriptionsTaskResult,
     SimulationBasculeJeunesValidesTaskResult,
     TaskName,
     ValiderBasculeJeunesNonValidesTaskResult,
@@ -17,6 +18,7 @@ import { SimulationBasculeJeunes } from "@admin/core/sejours/phase1/inscription/
 import { SimulationBasculeJeunesTaskModel } from "@admin/core/sejours/phase1/inscription/SimulationBasculeJeunesTask.model";
 import { ValiderBasculeJeunesNonValidesTaskModel } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides.model";
 import { ValiderBasculeJeunesNonValides } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunesNonValides";
+import { ExporterInscriptions } from "@admin/core/sejours/phase1/inscription/ExporterInscriptions";
 
 @Injectable()
 export class AdminTaskInscriptionSelectorService {
@@ -24,6 +26,7 @@ export class AdminTaskInscriptionSelectorService {
         private readonly simulationBasculeJeunes: SimulationBasculeJeunes,
         private readonly validerBasculeJeunesValides: ValiderBasculeJeunesValides,
         private readonly validerBasculeJeunesNonValides: ValiderBasculeJeunesNonValides,
+        private readonly exportInscriptions: ExporterInscriptions,
     ) {}
     async handleInscription(job: Job<TaskQueue, any, TaskName>, task: TaskModel): Promise<Record<string, any>> {
         let results = {} as Record<string, any>;
@@ -71,6 +74,13 @@ export class AdminTaskInscriptionSelectorService {
                     rapportKey: validationBasculeNonValidesSimulation.rapportFile.Key,
                     ...validationBasculeNonValidesSimulation.analytics,
                 } as ValiderBasculeJeunesNonValidesTaskResult;
+                break;
+            case TaskName.INSCRIPTION_EXPORT:
+                const exportInscription = await this.exportInscriptions.execute(task.metadata!.parameters!);
+                results = {
+                    rapportKey: exportInscription.rapportFile.Key,
+                    ...exportInscription.analytics,
+                };
                 break;
             default:
                 throw new Error(`Task of type ${job.name} not handle yet for inscription`);

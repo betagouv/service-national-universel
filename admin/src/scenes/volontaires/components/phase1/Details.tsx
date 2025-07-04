@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Button } from "@snu/ds/admin";
-import { ROLES, COHORT_TYPE, CohesionCenterType, CohortType, YoungType, LigneBusType, LigneToPointType, PointDeRassemblementType } from "snu-lib";
+import { ROLES, COHORT_TYPE, CohesionCenterType, CohortDto, YoungType, LigneBusType, LigneToPointType, PointDeRassemblementType } from "snu-lib";
 import { isCohortOpenForAffectation } from "../../utils";
 import { User } from "@/types";
 import Loader from "@/components/Loader";
@@ -28,7 +28,7 @@ interface Props {
   cohesionCenter: CohesionCenterType;
   meetingPoint: meetingPointType;
   pointDeRassemblement: PointDeRassemblementType;
-  cohort: CohortType;
+  cohort: CohortDto;
   young: YoungType;
   setYoung: () => void;
   user: User;

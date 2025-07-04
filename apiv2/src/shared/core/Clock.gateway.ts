@@ -13,6 +13,7 @@ export interface ClockGateway {
     computeAge(dateNaissance: Date);
     addHours(date: Date, hours: number): Date;
     addDays(date: Date, days: number): Date;
+    addMonths(date: Date, months: number): Date;
     parseDate(date: string, format: string): Date;
     parseDateNaissance(date: string): Date;
     isValidFrenchDate(date: string): boolean;
