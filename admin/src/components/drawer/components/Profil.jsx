@@ -130,11 +130,14 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                       <div className="bg-[#EEEFF5] h-[1px] mx-auto w-[247px] 1mb-1" />
                       {/* Body */}
                       <div className="flex flex-col !py-1 px-[3px]">
-                        {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-                          <NavItemAction Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
-                        )}
                         {isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) && (
-                          <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
+                          <>
+                            {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) ? (
+                              <NavItemAction Icon={AddUser} title="Inviter un nouvel utilisateur" onClick={() => setOpenInvite(true)} />
+                            ) : (
+                              <NavItem Icon={AddUser} title="Inviter un nouveau responsable" link={`/structure/${user.structureId}?prompt=team`} />
+                            )}
+                          </>
                         )}
                         {(isWriteAuthorized({ user, resource: PERMISSION_RESOURCES.COHORT }) || isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.COHORT })) && (
                           <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />
