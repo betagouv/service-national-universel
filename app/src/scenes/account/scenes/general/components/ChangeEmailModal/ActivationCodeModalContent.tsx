@@ -10,7 +10,15 @@ import InlineButton from "@/components/dsfr/ui/buttons/InlineButton";
 import { setYoung } from "@/redux/auth/actions";
 import plausibleEvent from "@/services/plausible";
 
-const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotReceiveCodeModal, validationToken = "" }) => {
+interface ActivationCodeModalContentProps {
+  onSuccess: () => void;
+  onCancel: () => void;
+  newEmail: string;
+  openDidNotReceiveCodeModal: () => void;
+  validationToken?: string;
+}
+
+const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotReceiveCodeModal, validationToken = "" }: ActivationCodeModalContentProps) => {
   const dispatch = useDispatch();
 
   const [error, setError] = useState("");
@@ -64,7 +72,7 @@ const ActivationCodeModalContent = ({ onSuccess, onCancel, newEmail, openDidNotR
           Vous venez de recevoir un code d’activation sur la boîte mail de <strong className="text-gray-900">{newEmail}</strong>
         </div>
       </Modal.Subtitle>
-      <Input label="Code d'activation reçu par email" name="email" onChange={setEmailValidationToken} error={error} value={emailValidationToken} />
+      <Input label="Code d'activation reçu par email" name="email" onChange={(e) => setEmailValidationToken(e.target.value)} error={error} value={emailValidationToken} />
       <InlineButton
         className={`text-sm font-medium ${error ? "text-red-500 hover:text-red-700" : "text-gray-500 hover:text-gray-700"}`}
         onClick={error ? requestNewToken : openDidNotReceiveCodeModal}>

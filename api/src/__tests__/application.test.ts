@@ -262,6 +262,54 @@ describe("Application", () => {
         expect(res.status).toBe(200);
       }
     });
+
+    it("should contain parent1 and parent2 in emailTo", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+
+      const sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
+      for (const template of [SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION, SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION]) {
+        await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
+        expect(sendTemplateSpy).toHaveBeenCalledWith(
+          template,
+          expect.objectContaining({
+            emailTo: [
+              { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail },
+              { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+              { name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email },
+            ],
+          }),
+        );
+        const lastCall = sendTemplateSpy.mock.calls[sendTemplateSpy.mock.calls.length - 1];
+        expect((lastCall[1] as any).emailTo).toHaveLength(3);
+      }
+    });
+
+    it("should not send email to parent2 if parent2 is not defined", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ parent2FirstName: "", parent2LastName: "", parent2Email: "" }));
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+      const sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
+      await request(getAppHelper()).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION}`).send({});
+      expect(sendTemplateSpy).toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+        expect.not.objectContaining({ emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }] }),
+      );
+      expect(sendTemplateSpy).toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+        expect.objectContaining({
+          emailTo: expect.arrayContaining([
+            { name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail },
+            { name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email },
+          ]),
+        }),
+      );
+      const lastCall = sendTemplateSpy.mock.calls[sendTemplateSpy.mock.calls.length - 1];
+      expect((lastCall[1] as any).emailTo).toHaveLength(2);
+    });
   });
 });
 

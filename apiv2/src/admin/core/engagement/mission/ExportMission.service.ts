@@ -97,6 +97,10 @@ export class ExportMissionService {
         const nbTutors = Object.keys(tutorsById).length;
         this.logger.log(`tutors count: ${nbTutors}`);
 
+        if (nbTutors === 0) {
+            return {};
+        }
+
         // search tutors data
         const tutors = await this.searchReferentGateway.searchReferent({
             musts: { ids: Object.keys(tutorsById) },

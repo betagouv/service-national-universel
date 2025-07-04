@@ -134,7 +134,7 @@ export const DropDown = ({ isShowing, filter, selectedFilters, setSelectedFilter
         ? data.filter((f) => (filter?.translate ? normalizeString(filter.translate(f.key)).includes(normalizedSearch) : normalizeString(f.key).includes(normalizedSearch)))
         : data;
     if (filter?.filter) {
-      newData = newData.filter(filter.filter);
+      newData = newData?.filter(filter.filter);
     }
     setOptionsVisible(newData);
   }, [search]);

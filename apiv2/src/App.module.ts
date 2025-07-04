@@ -1,4 +1,4 @@
-import { Logger, MiddlewareConsumer, Module, ParseEnumPipe } from "@nestjs/common";
+import { Logger, MiddlewareConsumer, Module, ParseEnumPipe, DynamicModule } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import configuration from "./config/configuration";
 
@@ -33,7 +33,7 @@ import { SentryProvider as Sentry} from "@infra/shared/Sentry.provider";
 })
 export class AppModule {
     configure(consumer: MiddlewareConsumer) {
-        consumer.apply(LoggerRequestMiddleware).forRoutes("*");
-        consumer.apply(CorrelationIdMiddleware).forRoutes("*");
+        consumer.apply(LoggerRequestMiddleware).forRoutes("{*all}");
+        consumer.apply(CorrelationIdMiddleware).forRoutes("{*all}");
     }
 }

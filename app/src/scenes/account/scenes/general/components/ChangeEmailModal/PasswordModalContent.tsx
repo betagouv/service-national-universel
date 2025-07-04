@@ -6,12 +6,17 @@ import api from "@/services/api";
 import Modal from "@/components/ui/modals/Modal";
 import InputPassword from "@/components/forms/inputs/InputPassword";
 
-const PasswordModalContent = ({ onSuccess, onCancel }) => {
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setLoading] = useState(false);
+interface PasswordModalContentProps {
+  onSuccess: (password: string) => void;
+  onCancel: () => void;
+}
 
-  const checkPassword = async (password) => {
+const PasswordModalContent: React.FC<PasswordModalContentProps> = ({ onSuccess, onCancel }) => {
+  const [password, setPassword] = useState<string>("");
+  const [error, setError] = useState<string>("");
+  const [isLoading, setLoading] = useState<boolean>(false);
+
+  const checkPassword = async (password: string): Promise<void> => {
     if (!password) {
       return setError("Merci d'entrer le mot de passe ");
     }
@@ -24,11 +29,11 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
       setPassword("");
 
       return onSuccess(password);
-    } catch (e) {
+    } catch (e: any) {
       setPassword("");
       setError(translate(e.code));
       if (e.code === "TOO_MANY_REQUESTS") {
-        let date = formatToActualTime(e?.data?.nextLoginAttemptIn);
+        const date = formatToActualTime(e?.data?.nextLoginAttemptIn);
         setError(
           `Vous avez atteint le maximum de tentatives de connexion autorisées. Votre accès est bloqué jusqu'à ${
             date !== "-" ? `à ${date}` : "demain"
@@ -46,7 +51,7 @@ const PasswordModalContent = ({ onSuccess, onCancel }) => {
       <Modal.Subtitle>
         <div className="md:text-center mb-3">Pour sécuriser votre demande de changement d'adresse email, veuillez saisir votre mot de passe.</div>
       </Modal.Subtitle>
-      <InputPassword label="Mot de passe" name="password" onChange={setPassword} error={error} value={password} />
+      <InputPassword label="Mot de passe" name="password" onChange={(e) => setPassword(e.target.value)} error={error} value={password} />
       <Modal.Buttons onCancel={onCancel} cancelText="Annuler" onConfirm={() => checkPassword(password)} confirmText="Continuer" disabled={isLoading} />
     </>
   );

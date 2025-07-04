@@ -1,17 +1,15 @@
-import React, { forwardRef, useState } from "react";
+import React, { forwardRef, InputHTMLAttributes, useState } from "react";
 import Label from "../layout/Label";
 import ErrorMessage from "../ErrorMessage";
 import { HiOutlineEye, HiOutlineEyeOff } from "react-icons/hi";
 
-type Props = {
+type InputPasswordProps = Omit<InputHTMLAttributes<HTMLInputElement>, "type"> & {
   label?: string;
   className?: string;
   error?: string;
-  [key: string]: any; // To allow additional props like `rest`
 };
 
-const InputPassword = forwardRef<HTMLInputElement, Props>(function InputPassword(props, ref) {
-  const { label, className, error, ...rest } = props;
+const InputPassword = forwardRef<HTMLInputElement, InputPasswordProps>(function InputPassword({ label, className, error, ...rest }, ref) {
   const [inputType, setInputType] = useState("password");
 
   if ("type" in rest) {
