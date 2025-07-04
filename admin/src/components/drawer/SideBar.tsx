@@ -42,7 +42,7 @@ import SNUpportBox from "./components/SNUpportBox";
 import SwitchSession from "./components/SwitchSession";
 import Profil from "./components/Profil";
 import InviteHeader from "./components/invite";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 //Css !important becuse of bootstrap override
 

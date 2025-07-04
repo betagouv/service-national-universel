@@ -5,8 +5,9 @@ import { useHistory } from "react-router-dom";
 import {
   canManageMig,
   canValidateYoungToLP,
-  canViewEmailHistory,
   canViewNotes,
+  isReadAuthorized,
+  PERMISSION_RESOURCES,
   ROLES,
   translate,
   translateInscriptionStatus,
@@ -46,7 +47,7 @@ import { capture } from "@/sentry";
 import { signinAs } from "@/utils/signinAs";
 import { useMutation } from "@tanstack/react-query";
 import { notifyYoungStatusChanged, updateYoung } from "../utils/service";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 const blueBadge = { color: "#66A7F4", backgroundColor: "#F9FCFF" };
 const greyBadge = { color: "#9A9A9A", backgroundColor: "#F6F6F6" };
@@ -299,7 +300,7 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                   </div>
                 </Tab>
               )}
-              {canViewEmailHistory(user) ? (
+              {isReadAuthorized({ user, resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS }) ? (
                 <Tab isActive={tab === "notifications"} onClick={() => history.push(`/volontaire/${young._id}/notifications`)}>
                   Notifications
                 </Tab>

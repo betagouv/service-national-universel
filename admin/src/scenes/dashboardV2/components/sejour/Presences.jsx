@@ -4,7 +4,7 @@ import OccupationBarVertical from "./OccupationBarVertical";
 import { getNewLink } from "../../../../utils";
 import queryString from "query-string";
 import { COHORTS_WITH_JDM_COUNT } from "snu-lib";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import { useSelector } from "react-redux";
 
 export default function Presences({ presence, JDM, depart, departTotal, departMotif, filter, role, sessionId, centerId, cohortHeadCenter = null }) {

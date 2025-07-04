@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { Switch } from "react-router-dom";
+import { toastr } from "react-redux-toastr";
+import { useSelector } from "react-redux";
+
 import useDocumentTitle from "../../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../../sentry";
-
 import api from "../../../services/api";
 import Breadcrumbs from "../../../components/Breadcrumbs";
-import { toastr } from "react-redux-toastr";
-import { ROLES } from "../../../utils";
-import { useSelector } from "react-redux";
+import Loader from "../../../components/Loader";
+
 import Details from "./details";
 import Notifications from "./notifications";
 import History from "./history";
-import Loader from "../../../components/Loader";
 
 export default function Index({ ...props }) {
   const [user, setUser] = useState();
@@ -43,7 +43,7 @@ export default function Index({ ...props }) {
     <>
       <Breadcrumbs items={[{ label: "Utilisateurs", to: "/user" }, { label: "Fiche de l'utilisateur" }]} />{" "}
       <Switch>
-        {currentUser.role === ROLES.ADMIN && <SentryRoute path="/user/:id/historique" render={() => <History user={user} currentUser={currentUser} />} />}
+        <SentryRoute path="/user/:id/historique" render={() => <History user={user} currentUser={currentUser} />} />
         <SentryRoute path="/user/:id/notifications" render={() => <Notifications user={user} currentUser={currentUser} />} />
         <SentryRoute path="/user/:id" render={() => <Details user={user} setUser={setUser} currentUser={currentUser} />} />
       </Switch>

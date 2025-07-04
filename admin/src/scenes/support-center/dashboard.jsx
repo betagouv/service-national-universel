@@ -14,7 +14,7 @@ import SuccessIcon from "../../components/SuccessIcon";
 import { referentArticles, adminArticles, structureArticles, visitorArticles, headCenterArticles, administrator_cleArticles, referent_classeArticles } from "./articles";
 import plausibleEvent from "../../services/plausible";
 import { ROLES } from "snu-lib";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 const Dashboard = (props) => {
   const [userTickets, setUserTickets] = useState(null);
