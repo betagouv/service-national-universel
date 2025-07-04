@@ -90,6 +90,9 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
 import { StructureGateway } from "./core/engagement/structure/Structure.gateway";
 import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
 import { ExportMissionService } from "./core/engagement/mission/ExportMission.service";
+import { SharedModule } from "@shared/Shared.module";
+import { APP_FILTER } from "@nestjs/core";
+import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
 
 @Module({
     imports: [
@@ -109,6 +112,7 @@ import { ExportMissionService } from "./core/engagement/mission/ExportMission.se
         ReferentielModule,
         AuthModule,
         AnalyticsModule,
+        SharedModule,
     ],
     providers: [
         Logger,
@@ -181,6 +185,10 @@ import { ExportMissionService } from "./core/engagement/mission/ExportMission.se
         ClasseService,
         JeuneService,
         ExportMissionService,
+        {
+            provide: APP_FILTER,
+            useClass: AllExceptionsFilter,
+        },
     ],
 })
 export class AdminJobModule {

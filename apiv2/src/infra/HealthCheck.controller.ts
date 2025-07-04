@@ -5,7 +5,10 @@ import { SENTRY_PROVIDER } from "./shared/Sentry.provider";
 
 @Controller("")
 export class HealthCheckController {
-    constructor(private readonly configService: ConfigService, @Inject(SENTRY_PROVIDER) private readonly sentry: typeof Sentry) {}
+    constructor(
+        private readonly configService: ConfigService,
+        @Inject(SENTRY_PROVIDER) private readonly sentry: typeof Sentry,
+    ) {}
 
     @Get()
     check() {
@@ -14,11 +17,6 @@ export class HealthCheckController {
 
     @Get("testsentry")
     testSentry(): string {
-        try {
-            throw new Error("Test Sentry - Erreur intentionnelle pour tester l'intégration");
-        } catch (error) {
-            this.sentry.captureException(error);
-            return "Erreur envoyée à Sentry !";
-        }
+        throw new Error("Test Sentry - Erreur intentionnelle pour tester l'intégration");
     }
 }

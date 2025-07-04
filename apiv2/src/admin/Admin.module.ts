@@ -77,6 +77,9 @@ import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/Cla
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
+import { SharedModule } from "@shared/Shared.module";
+import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
+import { APP_FILTER } from "@nestjs/core";
 
 @Module({
     imports: [
@@ -98,6 +101,7 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
         TaskModule,
         ReferentielModule,
         AuthModule,
+        SharedModule,
     ],
     controllers: [
         ClasseController,
@@ -158,6 +162,10 @@ import { MissionController } from "./infra/engagement/mission/api/Mission.contro
         ClasseImportService,
         JeuneService,
         InscrireEleveManuellement,
+        {
+            provide: APP_FILTER,
+            useClass: AllExceptionsFilter,
+        },
     ],
     exports: [
         ClsModule,
@@ -177,6 +185,7 @@ export class AdminModule {
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })
+            .exclude({ path: "/testsentry", method: RequestMethod.GET })
             .exclude({ path: "/queues(.*)", method: RequestMethod.GET })
             .exclude({ path: "/queues(.*)retry/(.*)", method: RequestMethod.PUT })
             .exclude({ path: "/queues(.*)clean", method: RequestMethod.PUT })
