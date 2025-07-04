@@ -105,6 +105,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
                 signOptions: { expiresIn: "1h" },
             }),
             QueueModule,
+            SharedModule,
         ],
         controllers: [
             ClasseController,

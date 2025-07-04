@@ -22,6 +22,7 @@ import { ClockProvider } from "@shared/infra/Clock.provider";
 import { QueueName } from "@shared/infra/Queue";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { testDatabaseProviders } from "../testDatabaseProvider";
+import { SharedModule } from "@shared/Shared.module";
 export interface SetupOptions {
     newContainer: boolean;
 }
@@ -59,6 +60,7 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
                 load: [configuration],
             }),
             QueueModule,
+            SharedModule,
         ],
         providers: [
             Logger,
