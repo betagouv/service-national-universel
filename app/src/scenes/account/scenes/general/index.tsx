@@ -31,6 +31,8 @@ type FormValues = {
 
 const AccountGeneralPage = () => {
   const { young } = useAuth();
+  console.log("young", young.psc1Info);
+  console.log("psc1",young.psc1Info === "true")
   const { canUpdatePSC1 } = usePermissions();
   const searchParams = new URLSearchParams(window.location.search);
   const newEmailValidationToken = searchParams.get("newEmailValidationToken");
@@ -128,8 +130,8 @@ const AccountGeneralPage = () => {
                 <h2 className="m-0 text-base font-normal leading-6 align-left">Avez-vous validé le PSC1 (Prévention et Secours Civiques de niveau 1) ?</h2>
               </div>
               <div className="flex flex-col gap-1">
-                <RadioButton label="Oui" value="true" defaultChecked={young.psc1Info === "true"} disabled={!canUpdatePSC1} {...register("psc1Info")} />
-                <RadioButton label="Non" value="false" defaultChecked={young.psc1Info === "false"} disabled={!canUpdatePSC1} {...register("psc1Info")} />
+                <RadioButton label="Oui" value="true" disabled={!canUpdatePSC1} {...register("psc1Info")} />
+                <RadioButton label="Non" value="false" disabled={!canUpdatePSC1} {...register("psc1Info")} />
               </div>
             </section>
           </div>
