@@ -31,8 +31,6 @@ type FormValues = {
 
 const AccountGeneralPage = () => {
   const { young } = useAuth();
-  console.log("young", young.psc1Info);
-  console.log("psc1",young.psc1Info === "true")
   const { canUpdatePSC1 } = usePermissions();
   const searchParams = new URLSearchParams(window.location.search);
   const newEmailValidationToken = searchParams.get("newEmailValidationToken");
