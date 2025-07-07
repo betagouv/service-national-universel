@@ -30,7 +30,7 @@ import ModalConfirmDeleteYoung from "../../components/modals/young/ModalConfirmD
 import PanelV2 from "../../components/PanelV2";
 import { toastr } from "react-redux-toastr";
 import { signinAs } from "@/utils/signinAs";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 export default function VolontairePanel({ onChange, value }) {
   const [referentManagerPhase2, setReferentManagerPhase2] = useState();

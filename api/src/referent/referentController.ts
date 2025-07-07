@@ -80,7 +80,6 @@ import {
   canRefuseMilitaryPreparation,
   canChangeYoungCohort,
   canSendTutorTemplate,
-  canModifyStructure,
   canSearchSessionPhase1,
   canCreateOrUpdateSessionPhase1,
   SENDINBLUE_TEMPLATES,
@@ -112,6 +111,9 @@ import {
   ReferentType,
   PermissionDto,
   ROLE_JEUNE,
+  PERMISSION_RESOURCES,
+  isWriteAuthorized,
+  PERMISSION_ACTIONS,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -128,6 +130,7 @@ import { CohortDocumentWithPlaces } from "../utils/cohort";
 import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
+import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -343,97 +346,102 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
   }
 });
 
-router.post("/signup_invite/:template", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      template: Joi.string().required(),
-      email: Joi.string().lowercase().trim().email().required(),
-      firstName: Joi.string().required(),
-      lastName: Joi.string().required(),
-      role: Joi.string()
-        .valid(...ROLES_LIST)
-        .required(),
-      subRole: Joi.string().allow(null, ""),
-      region: Joi.string().allow(null, ""),
-      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
-      structureId: Joi.string().allow(null, ""),
-      structureName: Joi.string().allow(null, ""),
-      cohesionCenterName: Joi.string().allow(null, ""),
-      cohesionCenterId: Joi.string().allow(null, ""),
-      phone: Joi.string().allow(null, ""),
-      cohorts: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+router.post(
+  "/signup_invite/:template",
+  authMiddleware(["referent"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.CREATE, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = Joi.object({
+        template: Joi.string().required(),
+        email: Joi.string().lowercase().trim().email().required(),
+        firstName: Joi.string().required(),
+        lastName: Joi.string().required(),
+        role: Joi.string()
+          .valid(...ROLES_LIST)
+          .required(),
+        subRole: Joi.string().allow(null, ""),
+        region: Joi.string().allow(null, ""),
+        department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+        structureId: Joi.string().allow(null, ""),
+        structureName: Joi.string().allow(null, ""),
+        cohesionCenterName: Joi.string().allow(null, ""),
+        cohesionCenterId: Joi.string().allow(null, ""),
+        phone: Joi.string().allow(null, ""),
+        cohorts: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      })
+        .unknown()
+        .validate({ ...req.params, ...req.body }, { stripUnknown: true });
 
-    if (error) {
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
+      const referentProperties: Partial<ReferentType> = { roles: [] };
+      if (email) referentProperties.email = email.trim().toLowerCase();
+      if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
+      if (lastName) referentProperties.lastName = lastName.toUpperCase();
+      if (role) {
+        referentProperties.role = role;
+        referentProperties.roles = [role];
+      }
+      if (subRole) {
+        referentProperties.subRole = subRole;
+        referentProperties.roles = [...referentProperties.roles!, subRole];
+      }
+      if (region) referentProperties.region = region;
+      if (department) referentProperties.department = department;
+      if (structureId) referentProperties.structureId = structureId;
+      if (cohesionCenterName) referentProperties.cohesionCenterName = cohesionCenterName;
+      if (cohesionCenterId) referentProperties.cohesionCenterId = cohesionCenterId;
+      if (phone) {
+        referentProperties.phone = phone;
+        referentProperties.mobile = phone;
+      }
+      if (cohorts) {
+        referentProperties.cohorts = cohorts;
+        referentProperties.cohortIds = await getCohortIdsFromCohortName(cohorts);
+      }
+
+      const invitation_token = crypto.randomBytes(20).toString("hex");
+      referentProperties.invitationToken = invitation_token;
+      // @ts-ignore
+      referentProperties.invitationExpires = inSevenDays();
+
+      if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
+        referentProperties.subRole = SUB_ROLES.referent_etablissement;
+        referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
+      }
+
+      const referent = await ReferentModel.create(referentProperties);
+      if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
+      await updateTutorNameInMissionsAndApplications(referent, req.user);
+
+      let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
+        // fixme: update url
+        cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
+      }
+      const fromName = `${req.user.firstName} ${req.user.lastName}`;
+      const toName = `${referent.firstName} ${referent.lastName}`;
+
+      await sendTemplate(template, {
+        emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+        params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+      });
+
+      return res.status(200).send({ data: serializeReferent(referent), ok: true });
+    } catch (error) {
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
-    const referentProperties: Partial<ReferentType> = { roles: [] };
-    if (email) referentProperties.email = email.trim().toLowerCase();
-    if (firstName) referentProperties.firstName = firstName.charAt(0).toUpperCase() + (firstName || "").toLowerCase().slice(1);
-    if (lastName) referentProperties.lastName = lastName.toUpperCase();
-    if (role) {
-      referentProperties.role = role;
-      referentProperties.roles = [role];
-    }
-    if (subRole) {
-      referentProperties.subRole = subRole;
-      referentProperties.roles = [...referentProperties.roles!, subRole];
-    }
-    if (region) referentProperties.region = region;
-    if (department) referentProperties.department = department;
-    if (structureId) referentProperties.structureId = structureId;
-    if (cohesionCenterName) referentProperties.cohesionCenterName = cohesionCenterName;
-    if (cohesionCenterId) referentProperties.cohesionCenterId = cohesionCenterId;
-    if (phone) {
-      referentProperties.phone = phone;
-      referentProperties.mobile = phone;
-    }
-    if (cohorts) {
-      referentProperties.cohorts = cohorts;
-      referentProperties.cohortIds = await getCohortIdsFromCohortName(cohorts);
-    }
-
-    const invitation_token = crypto.randomBytes(20).toString("hex");
-    referentProperties.invitationToken = invitation_token;
-    // @ts-ignore
-    referentProperties.invitationExpires = inSevenDays();
-
-    if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
-      referentProperties.subRole = SUB_ROLES.referent_etablissement;
-      referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
-    }
-
-    const referent = await ReferentModel.create(referentProperties);
-    if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    await updateTutorNameInMissionsAndApplications(referent, req.user);
-
-    let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
-      // fixme: update url
-      cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
-    }
-    const fromName = `${req.user.firstName} ${req.user.lastName}`;
-    const toName = `${referent.firstName} ${referent.lastName}`;
-
-    await sendTemplate(template, {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
-    });
-
-    return res.status(200).send({ data: serializeReferent(referent), ok: true });
-  } catch (error) {
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.post("/signup_retry", async (req: UserRequest, res: Response) => {
   try {
@@ -1614,36 +1622,41 @@ router.get("/manager_phase2/:department", passport.authenticate(["young", "refer
   }
 });
 
-router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = validateReferent(req.body);
-    if (error) {
+router.put(
+  "/:id",
+  authMiddleware(["referent"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value } = validateReferent(req.body);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const referent = await ReferentModel.findById(req.params.id);
+      if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      const structure = await StructureModel.findById(value.structureId);
+
+      if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      referent.set(value);
+      referent.set(cleanReferentData(referent));
+      referent.set({ roles: [referent.role, referent.subRole].filter(Boolean) }); // filter removes null, undefined or ""
+
+      await referent.save({ fromUser: req.user });
+      await updateTutorNameInMissionsAndApplications(referent, req.user);
+      res.status(200).send({ ok: true, data: referent });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    const referent = await ReferentModel.findById(req.params.id);
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const structure = await StructureModel.findById(value.structureId);
-
-    if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    referent.set(value);
-    referent.set(cleanReferentData(referent));
-    referent.set({ roles: [referent.role, referent.subRole].filter(Boolean) }); // filter removes null, undefined or ""
-
-    await referent.save({ fromUser: req.user });
-    await updateTutorNameInMissionsAndApplications(referent, req.user);
-    res.status(200).send({ ok: true, data: referent });
-  } catch (error) {
-    capture(error);
-    if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.put("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
@@ -1684,7 +1697,14 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     const structure = await StructureModel.findById(checkedStructureId);
     const referent = await ReferentModel.findById(checkedId);
     if (!referent || !structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    if (!canModifyStructure(req.user, structure) || !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })) {
+    if (
+      !isWriteAuthorized({
+        user: req.user,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        context: { structure: structure.toJSON() },
+      }) ||
+      !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })
+    ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

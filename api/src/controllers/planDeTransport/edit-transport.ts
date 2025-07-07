@@ -1,22 +1,20 @@
-const express = require("express");
+import express, { Response } from "express";
+import passport from "passport";
+import { capture } from "../../sentry";
+import Joi from "joi";
+import { PointDeRassemblementModel } from "../../models";
+import { LigneBusModel } from "../../models";
+import { CohesionCenterModel } from "../../models";
+import { YoungModel } from "../../models";
+import { ERRORS, updateSeatsTakenInBusLine } from "../../utils";
+import { UserRequest } from "../request";
+import { YoungDto } from "snu-lib";
+
 const router = express.Router();
-const passport = require("passport");
-const { capture } = require("../../sentry");
-const Joi = require("joi");
-const { canViewLigneBus } = require("snu-lib");
-//const { PlanTransportModel } = require("../../models");
-const { PointDeRassemblementModel } = require("../../models");
-const { LigneBusModel } = require("../../models");
-const { CohesionCenterModel } = require("../../models");
 
-const { YoungModel } = require("../../models");
-
-const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
-const { validateYoung } = require("../../utils/validator");
-
-router.post("/youngs/", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/youngs/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { ligneIds, cohort } = req.body;
     const youngs = await YoungModel.find({ ligneId: { $in: [...ligneIds] } }, "_id firstName lastName ligneId meetingPointId cohort status sessionPhase1Id cohensioncenterId");
     if (!youngs || !youngs.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -32,10 +30,9 @@ router.post("/youngs/", passport.authenticate("referent", { session: false, fail
   }
 });
 
-// todo : put it in the correct controller
-router.post("/meetingPoints", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/meetingPoints", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: [...req.body] }, deletedAt: { $exists: false } });
     if (!meetingPoints || !meetingPoints.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     res.status(200).send({ ok: true, data: meetingPoints });
@@ -45,9 +42,9 @@ router.post("/meetingPoints", passport.authenticate("referent", { session: false
   }
 });
 
-router.post("/saveYoungs", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.post("/saveYoungs", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const schema = Joi.object({
       busFrom: Joi.string().required(),
@@ -58,12 +55,12 @@ router.post("/saveYoungs", passport.authenticate("referent", { session: false, f
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
     const youngs = req.body.data;
-    const ids = youngs.map((e) => e._id);
+    const ids = youngs.map((e: YoungDto) => e._id);
     const busFrom = await LigneBusModel.findById(req.body.busFrom);
     const busTo = await LigneBusModel.findById(req.body.busTo);
     const youngsDb = await YoungModel.find({ _id: { $in: [...ids] } });
     if (!youngsDb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const promise = youngs.map(async (e) => {
+    const promise = youngs.map(async (e: YoungDto) => {
       const index = youngsDb.findIndex((y) => y._id.toString() === e._id);
       if (index >= 0) {
         Object.keys(e).forEach((key) => (youngsDb[index][key] = e[key]));
@@ -80,14 +77,15 @@ router.post("/saveYoungs", passport.authenticate("referent", { session: false, f
   }
 });
 
-router.get("/allLines/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
+router.get("/allLines/:cohort", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.UNAUTHORIZED });
+    if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const { cohort } = req.params;
     let lines = await LigneBusModel.find({ cohort: cohort }, "_id busId centerId youngCapacity meetingPointsIds sessionId").lean();
     if (!lines) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const data = lines.map(async (e) => {
       const center = await CohesionCenterModel.findById(e.centerId);
+      if (!center) return { ...e, region: "", cohensioncenterId: "" };
       return { ...e, region: center.region, cohensioncenterId: center._id };
     });
     const response = await Promise.all(data);
@@ -98,4 +96,4 @@ router.get("/allLines/:cohort", passport.authenticate("referent", { session: fal
   }
 });
 
-module.exports = router;
+export default router;

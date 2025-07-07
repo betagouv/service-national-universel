@@ -7,7 +7,7 @@ import api from "../../../../services/api";
 import { getNewLink } from "../../../../utils";
 import { FilterComponent } from "../FilterDashBoard";
 import { BarChart, FullDoughnut, Legend, graphColors } from "../graphs";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import { useSelector } from "react-redux";
 
 export default function Details({ selectedFilters, role, sessionId, centerId }) {

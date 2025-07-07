@@ -1,7 +1,7 @@
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
 
-export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context }: HasPermissionParams): boolean {
+export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
     console.warn(`user is not defined`);
     return false;
@@ -12,8 +12,12 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
   }
   const permissions = user.acl.filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
   if (permissions?.length) {
+    if (ignorePolicy) {
+      return true;
+    }
     const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
-    if (!permissionWithpolicies.length) {
+    if (permissions.length > permissionWithpolicies.length) {
+      // au moins une permission sans policy
       return true;
     }
     const contextUpdated = { referent: user, ...context };
@@ -23,9 +27,9 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         if (policy.where?.length) {
           for (const where of policy.where) {
             if (where.source) {
-              authorized.push(contextUpdated[resource]?.[where.field] === user[where.source]);
+              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(user[where.source]));
             } else if (where.value) {
-              authorized.push(contextUpdated[resource]?.[where.field] === where.value);
+              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(where.value));
             } else {
               authorized.push(false);
             }
@@ -35,27 +39,32 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         }
       }
     }
-    return authorized.every((isAuthorized) => isAuthorized);
+    // au moins une condition des policy doit être vérifiée
+    return authorized.some((isAuthorized) => isAuthorized);
   }
   return false;
 }
 
-export function isCreateAuthorized({ user, resource, context }: HasPermissionParams): boolean {
-  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.CREATE, context });
+export function isCreateAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.CREATE, context, ignorePolicy });
 }
 
-export function isReadAuthorized({ user, resource, context }: HasPermissionParams): boolean {
-  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.READ, context });
+export function isReadAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.READ, context, ignorePolicy });
 }
 
-export function isWriteAuthorized({ user, resource, context }: HasPermissionParams): boolean {
-  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.WRITE, context });
+export function isWriteAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.WRITE, context, ignorePolicy });
 }
 
-export function isDeleteAuthorized({ user, resource, context }: HasPermissionParams): boolean {
-  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.DELETE, context });
+export function isDeleteAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.DELETE, context, ignorePolicy });
 }
 
-export function isExecuteAuthorized({ user, resource, context }: HasPermissionParams): boolean {
-  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.EXECUTE, context });
+export function isExecuteAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.EXECUTE, context, ignorePolicy });
+}
+
+export function isFullAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
+  return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.FULL, context, ignorePolicy });
 }

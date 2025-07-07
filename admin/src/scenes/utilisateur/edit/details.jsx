@@ -36,7 +36,7 @@ import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRo
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import RenewInvitation from "./partials/RenewInvitation";
 
 export default function Details({ user, setUser, currentUser }) {

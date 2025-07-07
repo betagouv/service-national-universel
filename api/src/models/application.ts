@@ -3,6 +3,9 @@ import patchHistory from "mongoose-patch-history";
 import anonymize from "../anonymization/application";
 
 import { ApplicationSchema, InterfaceExtended, MONGO_COLLECTION, getVirtualUser, buildPatchUser, DocumentExtended, CustomSaveParams, UserExtension, UserSaved } from "snu-lib";
+import { MissionDocument } from "./mission";
+import { ContractDocument } from "./contract";
+import { ReferentDocument } from "./referent";
 
 const MODELNAME = MONGO_COLLECTION.APPLICATION;
 
@@ -60,7 +63,13 @@ schema.plugin(patchHistory, {
 });
 
 type ApplicationType = InterfaceExtended<InferSchemaType<typeof schema>>;
-export type ApplicationDocument<T = {}> = DocumentExtended<ApplicationType & T>;
+export type ApplicationDocument<T = {}> = DocumentExtended<
+  ApplicationType & {
+    mission?: MissionDocument;
+    tutor?: ReferentDocument;
+    contract?: ContractDocument;
+  } & T
+>;
 type SchemaExtended = ApplicationDocument & UserExtension;
 
 export const ApplicationModel = mongoose.model<ApplicationDocument>(MODELNAME, schema);
