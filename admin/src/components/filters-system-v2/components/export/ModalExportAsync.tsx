@@ -42,7 +42,7 @@ export default function ModalExportAsync({ isOpen, onClose, onExport, exportFiel
             <p className="text-center text-sm text-gray-600">
               {Object.keys(selectedFilters)
                 .filter((e) => selectedFilters?.[e]?.filter?.length && selectedFilters?.[e]?.filter?.[0] !== "")
-                .map((e) => `${translateField(e)} : ${translate(selectedFilters?.[e]?.filter)}`)
+                .map((e) => `${translateField(e)} : ${translate(selectedFilters?.[e]?.filter as any)}`)
                 .join(" • ")}
             </p>
           </div>
