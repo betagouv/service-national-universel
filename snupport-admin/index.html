@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no" />
+  <title>SNUpport</title>
+  <script defer data-domain="admin-support.snu.gouv.fr"
+    src="https://plausible.io/js/script.manual.outbound-links.file-downloads.js"></script>
+  <script>
+    window.plausible =
+      window.plausible ||
+      function () {
+        (window.plausible.q = window.plausible.q || []).push(arguments);
+      };
+  </script>
+  <script>
+    var url = window.location.href;
+    // Replace every all-numeric sequences located between two slashes by "_ID_"
+    var redactedUrl = url.replace(/[0-9a-fA-F]{24}/g, ":id");
+    // Send the pageview event to Plausible
+    plausible("pageview", { u: redactedUrl });
+  </script>
+</head>
+
+<body>
+  <noscript> You need to enable JavaScript to run this app. </noscript>
+  <div id="root"></div>
+  <script type="module" src="/src/index.tsx"></script>
+</body>
+
+</html>

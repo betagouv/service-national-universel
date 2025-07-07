@@ -1,0 +1,14 @@
+{
+  "extends": "./tsconfig.front.json",
+  "compilerOptions": {
+    "baseUrl": "src",
+    "outDir": "build",
+    "paths": {
+      "@/*": ["./*"]
+    },
+    "types": ["vite/client", "node"]
+  },
+  "include": ["src", "./globals.d.ts"],
+  "exclude": ["**/dist/**/*", "**/build/**/*", "node_modules", "**/node_modules/*"],
+  "references": []
+}

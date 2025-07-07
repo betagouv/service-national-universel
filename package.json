@@ -36,7 +36,9 @@
     "admin",
     "api",
     "apiv2",
-    "devops/analytics"
+    "devops/analytics",
+    "snupport-api",
+    "snupport-admin"
   ],
   "engines": {
     "node": "^20.17",
