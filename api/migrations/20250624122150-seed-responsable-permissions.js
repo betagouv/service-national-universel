@@ -142,7 +142,7 @@ module.exports = {
         titre: "Accès complet sur sa structure",
         resource: PERMISSION_RESOURCES.STRUCTURE,
         action,
-        roles: [ROLES.RESPONSIBLE],
+        roles: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR],
         policy: {
           where: [
             {
