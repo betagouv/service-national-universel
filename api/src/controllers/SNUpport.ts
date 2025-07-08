@@ -263,7 +263,7 @@ router.post(
       });
       if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
       else if (isYoung(req.user) && subject.includes("J'ai une question")) {
-        const isNotified = await notifyReferent(response.data, req.body.message);
+        const isNotified = await notifyReferent(response.data.ticket, req.body.message);
         if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
       }
       if (!response.ok) return res.status(400).send({ ok: false, code: response });
