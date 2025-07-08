@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 
-import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1 } from "snu-lib";
+import { YOUNG_STATUS_PHASE3, getPhaseStatusOptions, translate, translatePhase1, translatePhase2, translateStatusPhase } from "snu-lib";
 
 import { AuthState } from "@/redux/auth/reducer";
 import ChevronDown from "@/assets/icons/ChevronDown";
@@ -16,7 +16,7 @@ import ConfirmationModal from "./ConfirmationModal";
 export default function PhaseStatusSelector({ young, onChange }) {
   const [phaseChoiceOpened, setPhaseChoiceOpened] = useState(false);
   const [statusOpened, setStatusOpened] = useState(0);
-  const [confirmChangeModal, setConfirmChangeModal] = useState<{ phase: number; status: number; message: string | ReactElement } | null>(null);
+  const [confirmChangeModal, setConfirmChangeModal] = useState<{ phase: number; status: string; message: string | ReactElement } | null>(null);
   const { user } = useSelector((state: AuthState) => state.Auth);
 
   const statusOptions = getPhaseStatusOptions(user, statusOpened);
@@ -44,15 +44,15 @@ export default function PhaseStatusSelector({ young, onChange }) {
     };
   }, []);
 
-  function confirmChangePhaseStatus(phase, status) {
+  function confirmChangePhaseStatus(phase: number, newStatus: string) {
     setConfirmChangeModal({
       phase,
-      status,
+      status: newStatus,
       message: (
         <div>
           Voulez-vous vraiment modifier le statut de la phase {phase}
           <br />
-          du statut <b>{translate(young[`statusPhase${phase}`])}</b> au statut <b>{translate(status)}</b>.
+          du statut <b>{translateStatusPhase(phase, young[`statusPhase${phase}`])}</b> au statut <b>{translateStatusPhase(phase, newStatus)}</b>.
         </div>
       ),
     });
@@ -100,7 +100,7 @@ export default function PhaseStatusSelector({ young, onChange }) {
               className={`w-full flex items-center whitespace-nowrap px-[16px] py-[8px] ${statusOpened === 2 ? "bg-[#F3F4F6]" : "cursor-pointer bg-[#FFFFFF] hover:bg-[#F3F4F6]"}`}
               onClick={() => setStatusOpened(2)}>
               <div className="mr-[9px] text-[14px] text-[#111827]">Phase 2</div>
-              <div className="grow text-[12px] text-[#6B7280]">{translate(young.statusPhase2)}</div>
+              <div className="grow text-[12px] text-[#6B7280]">{translatePhase2(young.statusPhase2)}</div>
               <ChevronRight className="ml-[9px] text-[#1F2937]" />
             </button>
             {[YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED].includes(young.statusPhase3) && (
@@ -147,7 +147,7 @@ function statusButton(young, option, phaseNumber, onSelect) {
       }`}
       onClick={() => onSelect(phaseNumber, option)}>
       {isChecked && <Check />}
-      <div className="ml-[6px]">{phaseNumber === 1 ? translatePhase1(option) : translate(option)}</div>
+      <div className="ml-[6px]">{translateStatusPhase(phaseNumber, option)}</div>
     </button>
   );
 }

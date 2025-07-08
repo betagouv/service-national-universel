@@ -39,6 +39,9 @@ import {
   getPhaseStatusOptions,
   FUNCTIONAL_ERRORS,
   YOUNG_SOURCE,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE3,
 } from "snu-lib";
 import { getDensity, getQPV } from "../../geo";
 import { sendTemplate } from "../../brevo";
@@ -285,9 +288,17 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
 
     // --- validate data
     const bodySchema = Joi.object().keys({
-      statusPhase1: Joi.string().valid("AFFECTED", "WAITING_AFFECTATION", "WAITING_ACCEPTATION", "CANCEL", "EXEMPTED", "DONE", "NOT_DONE"), // "WAITING_LIST"
-      statusPhase2: Joi.string().valid("WAITING_REALISATION", "IN_PROGRESS", "VALIDATED"),
-      statusPhase3: Joi.string().valid("WAITING_REALISATION", "WAITING_VALIDATION", "VALIDATED"),
+      statusPhase1: Joi.string().valid(
+        YOUNG_STATUS_PHASE1.AFFECTED,
+        YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        "WAITING_ACCEPTATION", // old status
+        "CANCEL", // old status
+        YOUNG_STATUS_PHASE1.EXEMPTED,
+        YOUNG_STATUS_PHASE1.DONE,
+        YOUNG_STATUS_PHASE1.NOT_DONE,
+      ), // "WAITING_LIST"
+      statusPhase2: Joi.string().valid(YOUNG_STATUS_PHASE2.WAITING_REALISATION, YOUNG_STATUS_PHASE2.IN_PROGRESS, YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.DESENGAGED),
+      statusPhase3: Joi.string().valid(YOUNG_STATUS_PHASE3.WAITING_REALISATION, YOUNG_STATUS_PHASE3.WAITING_VALIDATION, YOUNG_STATUS_PHASE3.VALIDATED),
     });
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
@@ -320,7 +331,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     // reset cohesion/bus/meetingPoint center when new status is WAITING_AFFECTATION
     let oldSession;
     let oldBus;
-    if (value.statusPhase1 === "WAITING_AFFECTATION") {
+    if (value.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION) {
       if (young?.meetingPointId) oldBus = await LigneBusModel.findById(young.ligneId);
       if (young?.sessionPhase1Id) {
         oldSession = await SessionPhase1Model.findById(young.sessionPhase1Id);
@@ -341,7 +352,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
           hasMeetingInformation: undefined,
         });
       }
-    } else if (value.statusPhase1 === "AFFECTED" && young.statusPhase1 !== "AFFECTED") {
+    } else if (value.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED && young.statusPhase1 !== YOUNG_STATUS_PHASE1.AFFECTED) {
       if (young.hasMeetingInformation !== "true" || !young.cohesionCenterId || !young.meetingPointId || (young.source === YOUNG_SOURCE.VOLONTAIRE && !young.ligneId)) {
         return res.status(400).send({
           ok: false,
@@ -350,20 +361,20 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       }
     }
 
-    if (value.statusPhase1 === "DONE" && young.statusPhase1 !== "DONE") {
+    if (value.statusPhase1 === YOUNG_STATUS_PHASE1.DONE && young.statusPhase1 !== YOUNG_STATUS_PHASE1.DONE) {
       value.statusPhase2OpenedAt = now;
     }
 
     if (value.statusPhase2) {
       value.statusPhase2UpdatedAt = now;
-      if (value.statusPhase2 === "VALIDATED") {
+      if (value.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED) {
         value.statusPhase2ValidatedAt = now;
       }
     }
 
     if (value.statusPhase3) {
       value.statusPhase3UpdatedAt = now;
-      if (value.statusPhase3 === "VALIDATED") {
+      if (value.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) {
         value.statusPhase3ValidatedAt = now;
       }
     }

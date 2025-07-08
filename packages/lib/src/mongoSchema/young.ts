@@ -1,6 +1,6 @@
 import mongoose, { Schema, InferSchemaType } from "mongoose";
 
-import { YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_ACCOUNT_STATUS } from "../constants/constants";
+import { YOUNG_SOURCE_LIST, YOUNG_SOURCE, YOUNG_ACCOUNT_STATUS, YOUNG_STATUS_PHASE2 } from "../constants/constants";
 import { PHONE_ZONES_NAMES_ARR } from "../phone-number";
 import { ROLES_LIST } from "../roles";
 
@@ -313,7 +313,7 @@ export const YoungSchema = {
     type: String,
     default: "WAITING_REALISATION",
     //WITHDRAWN is legacy
-    enum: ["WAITING_REALISATION", "IN_PROGRESS", "VALIDATED", "WITHDRAWN"],
+    enum: Object.values(YOUNG_STATUS_PHASE2),
     documentation: {
       description: "Statut du volontaire lié à la seconde phase",
     },

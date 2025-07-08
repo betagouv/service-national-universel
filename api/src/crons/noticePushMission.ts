@@ -1,17 +1,31 @@
-const esClient = require("../es");
-const path = require("path");
+import path from "path";
 
-const { capture } = require("../sentry");
-const { YoungModel, CohortModel } = require("../models");
+import { SENDINBLUE_TEMPLATES, translate, formatStringDate, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE1, YOUNG_STATUS, APPLICATION_STATUS, MISSION_STATUS } from "snu-lib";
 
-const { sendTemplate } = require("../brevo");
-const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
-const { config } = require("../config");
-const { getCcOfYoung } = require("../utils");
-const fileName = path.basename(__filename, ".js");
+import { capture } from "../sentry";
+import { YoungModel, CohortModel, YoungDocument } from "../models";
+import { sendTemplate } from "../brevo";
+import slack from "../slack";
+import { config } from "../config";
+import { getCcOfYoung } from "../utils";
+import esClient from "../es";
 
-exports.handler = async () => {
+const fileName = path.basename(__filename, ".ts");
+
+interface EsMission {
+  _id: string;
+  _source: {
+    structureName?: string;
+    name: string;
+    startAt: string;
+    endAt: string;
+    city: string;
+    zip: string;
+    domains?: string[];
+  };
+}
+
+export const handler = async (): Promise<void> => {
   try {
     let countTotal = 0;
     let countHit = 0;
@@ -26,13 +40,15 @@ exports.handler = async () => {
 
     const cursor = YoungModel.find({
       cohort: { $in: cohortsName },
-      status: "VALIDATED",
-      statusPhase1: "DONE",
-      statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
+      status: YOUNG_STATUS.VALIDATED,
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: { $nin: [YOUNG_STATUS_PHASE2.VALIDATED, YOUNG_STATUS_PHASE2.WITHDRAWN, YOUNG_STATUS_PHASE2.DESENGAGED] },
     }).cursor();
-    await cursor.eachAsync(async function (young) {
+    await cursor.eachAsync(async function (young: YoungDocument) {
       countTotal++;
-      const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(obj)).length;
+      const applicationsCount = young?.phase2ApplicationStatus.filter((appStatus: string) =>
+        [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION].includes(appStatus as any),
+      ).length;
       if (applicationsCount < 15) {
         const esMissions = await getMissions({ young });
         const missions = esMissions?.map((mission) => ({
@@ -44,10 +60,10 @@ exports.handler = async () => {
           domains: mission._source.domains?.map(translate)?.join(", "),
           cta: `${config.APP_URL}/mission/${mission._id}`,
         }));
-        countMissionSent[missions?.length] = (countMissionSent[missions?.length] || 0) + 1;
-        if (!missions) return;
-        countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
-        if (missions?.length > 0) {
+        if (!missions || !young || !esMissions) return;
+        countMissionSent[missions.length] = (countMissionSent[missions.length] || 0) + 1;
+        countMissionSentCohort[young.cohort!] = (countMissionSentCohort[young.cohort!] || 0) + 1;
+        if (missions.length > 0) {
           countHit++;
           // send a mail to the young
           let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
@@ -55,15 +71,17 @@ exports.handler = async () => {
           await sendTemplate(template, {
             emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
             params: {
+              // @ts-ignore
               missions,
               cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+nouvelles+mig+publiees&utm_source=notifauto&utm_medium=mail+237+acceder`,
             },
             cc,
           });
           // stock the list in young
-          const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
+          const missionsInMail = (young.missionsInMail || []).concat(esMissions.map((mission) => ({ missionId: mission._id, date: Date.now() })) as any);
           // This is used in order to minimize risk of version conflict.
           const youngForUpdate = await YoungModel.findById(young._id);
+          if (!youngForUpdate) throw new Error(`Young not found ${young._id}`);
           youngForUpdate.set({ missionsInMail });
           await youngForUpdate.save({ fromUser: { firstName: `Cron ${fileName}` } });
         }
@@ -91,7 +109,7 @@ exports.handler = async () => {
   }
 };
 
-const getMissions = async ({ young }) => {
+const getMissions = async ({ young }: { young: YoungDocument }): Promise<EsMission[] | undefined> => {
   if (!young || !young.location || !young.location.lat || !young.location.lon) return;
   try {
     const excludedMissionIds = young?.missionsInMail?.map((m) => m.missionId);
@@ -108,7 +126,7 @@ const getMissions = async ({ young }) => {
         ],
         filter: [
           // only validated missions...
-          { term: { "status.keyword": "VALIDATED" } },
+          { term: { "status.keyword": MISSION_STATUS.VALIDATED } },
           //... that didn't reach their deadline...
           {
             range: {
