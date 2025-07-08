@@ -13,10 +13,10 @@ export default ({ mode }) => {
       sentryVitePlugin({
         include: ".",
         ignore: ["node_modules", "vite.config.ts"],
-        org: "sentry",
+        org: "betagouv",
         project: "snupport-app",
         authToken: process.env.SENTRY_AUTH_TOKEN,
-        url: "https://sentry.selego.co/",
+        url: "https://sentry.incubateur.net",
         environment: mode,
         release: {
           name: process.env.VITE_RELEASE,
