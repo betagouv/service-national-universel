@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-const { config } = require("./config.js");
+const { config } = require("./config");
 
 //Set up default mongoose connection
 

@@ -15,7 +15,7 @@ require("./imap");
 require("./utils/ventilation");
 require("./crons");
 
-const { config } = require("./config.js");
+const { config } = require("./config");
 
 const app = express();
 const registerSentryErrorHandler = initSentry(app);
