@@ -1,12 +1,15 @@
-const Joi = require("joi");
-const { capture } = require("../sentry");
-const { ERRORS } = require("../utils");
-const { canViewPatchesHistory, canDeletePatchesHistory } = require("snu-lib");
-const { validateId } = require("../utils/validator");
-const mongoose = require("mongoose");
-const { ClasseModel } = require("../models");
+import Joi from "joi";
+import mongoose, { Model } from "mongoose";
 
-const get = async (req, model) => {
+import { canViewPatchesHistory, RouteResponseBody, UserDto } from "snu-lib";
+
+import { capture } from "../sentry";
+import { ERRORS } from "../utils";
+import { validateId } from "../utils/validator";
+import { ClasseModel } from "../models";
+import { RouteRequest, UserRequest } from "./request";
+
+export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: Model<any>): Promise<any[]> => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
@@ -37,7 +40,12 @@ const get = async (req, model) => {
   }
 };
 
-const getOldStudentPatches = async ({ classeId, user }) => {
+interface GetOldStudentPatchesParams {
+  classeId: string;
+  user: UserDto;
+}
+
+export const getOldStudentPatches = async ({ classeId, user }: GetOldStudentPatchesParams): Promise<any[]> => {
   try {
     const { error, value: id } = validateId(classeId);
     if (error) {
@@ -78,7 +86,12 @@ const getOldStudentPatches = async ({ classeId, user }) => {
   }
 };
 
-const deletePatches = async ({ id, model }) => {
+interface DeletePatchesParams {
+  id: string;
+  model: Model<any>;
+}
+
+export const deletePatches = async ({ id, model }: DeletePatchesParams): Promise<RouteResponseBody<any> & { codeError?: number }> => {
   try {
     const { error, value: validatedId } = validateId(id);
     if (error) {
@@ -140,4 +153,4 @@ const deletePatches = async ({ id, model }) => {
   }
 };
 
-module.exports = { get, getOldStudentPatches, deletePatches };
+export default { get, getOldStudentPatches, deletePatches };

@@ -1,5 +1,3 @@
-import "./instrument"; // first
-
 import { ConfigService } from "@nestjs/config";
 import { RequestMethod, ValidationPipe } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";

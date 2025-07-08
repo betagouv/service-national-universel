@@ -2,7 +2,7 @@ import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
 import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
-import { CohortType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
+import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore } from "date-fns";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
@@ -246,11 +246,6 @@ function canDeletePatchesHistory(actor, target) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
   const isOwner = actor._id.toString() === target._id.toString();
   return isAdminOrReferent || isOwner;
-}
-
-function canViewEmailHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
-  return isAdminOrReferent;
 }
 
 function canViewNotes(actor) {
@@ -503,7 +498,7 @@ function canSendImageRightsForSessionPhase1(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 }
 
-function canCreateOrModifyMission(user, mission, structure) {
+function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure?: StructureType | null) {
   if (user.role === ROLES.SUPERVISOR) {
     return user.structureId === mission.structureId || user.structureId === structure?.networkId;
   }
@@ -514,23 +509,8 @@ function canCreateOrUpdateProgram(user, program) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
   return (
     isAdminOrReferent &&
-    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
+    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
   );
-}
-function canModifyStructure(user: UserDto, structure: StructureType, modifyStructure?: StructureType) {
-  const isAdmin = user.role === ROLES.ADMIN;
-  const isResponsible = user.role === ROLES.RESPONSIBLE;
-  const isReferentRegionFromSameRegion = user.role === ROLES.REFERENT_REGION && user.region === structure.region;
-  const isReferentDepartmentFromSameDepartment = user.role === ROLES.REFERENT_DEPARTMENT && user.department.includes(structure.department!);
-  const isResponsibleModifyingOwnStructure = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && structure._id.toString() === user.structureId;
-  const isSupervisorModifyingChild = user.role === ROLES.SUPERVISOR && user.structureId === structure.networkId;
-
-  // un responsable ne peux pas passer en tête de réseau la structure
-  if (isResponsible && modifyStructure && structure.isNetwork !== "true" && modifyStructure.isNetwork === "true") {
-    return false;
-  }
-
-  return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment || isResponsibleModifyingOwnStructure || isSupervisorModifyingChild;
 }
 
 function canCreateStructure(user) {
@@ -547,20 +527,20 @@ interface UserRoles {
   roles?: ReferentType["roles"];
 }
 
-function isAdmin(user: UserRoles) {
+export function isAdmin(user: UserRoles) {
   return ROLES.ADMIN === user.role;
 }
 
-function isReferentReg(user: UserRoles) {
-  return ROLES.REFERENT_REGION === user.role;
+export function isReferentReg(user: UserRoles) {
+  return ROLES.REFERENT_REGION === user?.role;
 }
 
-function isReferentDep(user: UserRoles) {
-  return ROLES.REFERENT_DEPARTMENT === user.role;
+export function isReferentDep(user: UserRoles) {
+  return ROLES.REFERENT_DEPARTMENT === user?.role;
 }
 
-function isReferentRegDep(user: UserRoles) {
-  return [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role || "");
+export function isReferentRegDep(user: UserRoles) {
+  return isReferentReg(user) || isReferentDep(user);
 }
 
 export function isResponsible(user: UserRoles) {
@@ -575,36 +555,44 @@ export function isResponsibleOrSupervisor(user: UserRoles) {
   return isResponsible(user) || isSupervisor(user);
 }
 
-function isReferentOrAdmin(user: UserRoles) {
+export function isReferentOrAdmin(user: UserRoles) {
   return isAdmin(user) || isReferentRegDep(user);
 }
 
-function isAdminCle(user: UserRoles) {
+export function isAdminCle(user: UserRoles) {
   return user?.role === ROLES.ADMINISTRATEUR_CLE;
 }
 
-function isChefEtablissement(user: UserRoles) {
+export function isChefEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.referent_etablissement;
 }
 
-function isCoordinateurEtablissement(user: UserRoles) {
+export function isCoordinateurEtablissement(user: UserRoles) {
   return isAdminCle(user) && user?.subRole === SUB_ROLES.coordinateur_cle;
 }
 
-function isReferentClasse(user: UserRoles) {
+export function isReferentClasse(user: UserRoles) {
   return user?.role === ROLES.REFERENT_CLASSE;
 }
 
-function isHeadCenter(user: UserRoles) {
+export function isHeadCenter(user: UserRoles) {
   return user?.role === ROLES.HEAD_CENTER;
 }
 
-function isHeadCenterAdjoint(user: UserRoles) {
+export function isHeadCenterAdjoint(user: UserRoles) {
   return user?.role === ROLES.HEAD_CENTER_ADJOINT;
 }
 
-function isReferentSanitaire(user: UserRoles) {
+export function isReferentSanitaire(user: UserRoles) {
   return user?.role === ROLES.REFERENT_SANITAIRE;
+}
+
+export function isResponsableDeCentre(user: UserRoles) {
+  return isReferentSanitaire(user) || isHeadCenter(user) || isHeadCenterAdjoint(user);
+}
+
+export function isVisiteur(user: UserRoles) {
+  return user?.role === ROLES.VISITOR;
 }
 
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
@@ -649,10 +637,6 @@ const canSendFileByMailToYoung = (actor, young) => {
   const isReferentDepartmentFromSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
   return isAdmin || isReferentRegionFromSameRegion || isReferentDepartmentFromSameDepartment;
 };
-
-function canSearchAssociation(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
 
 function canViewCohesionCenter(actor: UserDto) {
   return [
@@ -765,20 +749,6 @@ function canCreateBus(actor) {
 
 function canViewMission(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canViewStructures(actor) {
-  if (actor.constructor.modelName === "young") return true;
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.RESPONSIBLE,
-    ROLES.SUPERVISOR,
-  ].includes(actor.role);
 }
 
 function canModifyMissionStructureId(actor) {
@@ -970,29 +940,6 @@ function canShareSessionPhase1(actor) {
   );
 }
 
-function canCreateAlerteMessage(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
-}
-
-function canReadAlerteMessage(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.RESPONSIBLE,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.SUPERVISOR,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
-}
-
-function canViewTableDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
 function canEditTableDeRepartitionDepartment(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
 }
@@ -1017,19 +964,6 @@ function canDeleteSchemaDeRepartition(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
-function canViewLigneBus(actor) {
-  return [
-    ROLES.ADMIN,
-    ROLES.REFERENT_REGION,
-    ROLES.REFERENT_DEPARTMENT,
-    ROLES.TRANSPORTER,
-    ROLES.HEAD_CENTER,
-    ROLES.HEAD_CENTER_ADJOINT,
-    ROLES.REFERENT_SANITAIRE,
-    ROLES.REFERENT_CLASSE,
-    ROLES.ADMINISTRATEUR_CLE,
-  ].includes(actor.role);
-}
 function canUpdateLigneBus(actor) {
   return [
     ROLES.ADMIN,
@@ -1113,7 +1047,7 @@ function canCreateTags(actor) {
   return [ROLES.ADMIN].includes(actor.role);
 }
 
-function isSuperAdmin(actor) {
+export function isSuperAdmin(actor) {
   if (!actor) return false;
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
@@ -1303,7 +1237,6 @@ export {
   canDeleteReferent,
   canViewPatchesHistory,
   canDeletePatchesHistory,
-  canViewEmailHistory,
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
@@ -1316,18 +1249,15 @@ export {
   canCreateOrModifyMission,
   canCreateOrUpdateProgram,
   canInviteYoung,
-  isReferentOrAdmin,
   isTemporaryAffected,
   FORCE_DISABLED_ASSIGN_COHESION_CENTER,
   FORCE_DISABLED_ASSIGN_MEETING_POINT,
   canAssignCohesionCenter,
   canAssignMeetingPoint,
-  canModifyStructure,
   canDeleteStructure,
   canSigninAs,
   canSendFileByMailToYoung,
   canCreateEvent,
-  canSearchAssociation,
   canCreateStructure,
   canViewCohesionCenter,
   canSearchSessionPhase1,
@@ -1350,7 +1280,6 @@ export {
   canUpdateBus,
   canCreateBus,
   canViewMission,
-  canViewStructures,
   canModifyMissionStructureId,
   canViewStructureChildren,
   canSendTemplateToYoung,
@@ -1367,9 +1296,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canCreateAlerteMessage,
-  canReadAlerteMessage,
-  canViewTableDeRepartition,
   canEditTableDeRepartitionDepartment,
   canEditTableDeRepartitionRegion,
   canViewSchemaDeRepartition,
@@ -1377,7 +1303,6 @@ export {
   canEditSchemaDeRepartition,
   canDeleteSchemaDeRepartition,
   canViewNotes,
-  canViewLigneBus,
   canUpdateLigneBus,
   canCreateLigneBus,
   canDeleteLigneBus,
@@ -1395,17 +1320,6 @@ export {
   ligneBusCanEditOpinionDemandeDeModification,
   ligneBusCanEditTagsDemandeDeModification,
   canCreateTags,
-  isSuperAdmin,
-  isAdmin,
-  isReferentReg,
-  isReferentDep,
-  isAdminCle,
-  isChefEtablissement,
-  isCoordinateurEtablissement,
-  isReferentClasse,
-  isHeadCenter,
-  isHeadCenterAdjoint,
-  isReferentSanitaire,
   canSendTimeScheduleReminderForSessionPhase1,
   canSendPlanDeTransport,
   canSendImageRightsForSessionPhase1,
@@ -1439,6 +1353,5 @@ export {
   canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
-  isReferentRegDep,
   canModifyDirectionCenterTeam,
 };

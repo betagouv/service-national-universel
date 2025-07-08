@@ -5,6 +5,7 @@ import { CronJobSelectorService } from "./CronJobSelector.service";
 import { ConsumerResponse } from "@shared/infra/ConsumerResponse";
 import { QueueName } from "@shared/infra/Queue";
 import { Processor, WorkerHost } from "@nestjs/bullmq";
+import { SentryExceptionCaptured } from "@sentry/nestjs";
 
 @Processor(QueueName.CRON)
 export class CronJobConsumer extends WorkerHost {
@@ -13,6 +14,7 @@ export class CronJobConsumer extends WorkerHost {
         super();
     }
 
+    @SentryExceptionCaptured()
     async process(job: Job<CronJob, any, CronJobName>): Promise<ConsumerResponse> {
         this.logger.log(`Processing cron job ${job.name}`);
         try {

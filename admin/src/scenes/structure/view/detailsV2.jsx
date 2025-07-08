@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
-import { useAddress, translate, canModifyStructure } from "snu-lib";
+import { useAddress, translate, PERMISSION_RESOURCES, isWriteAuthorized } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
 import { useDebounce } from "@uidotdev/usehooks";
 import API from "../../../services/api";
@@ -109,7 +109,11 @@ function StructureForm({ structure, setStructure }) {
     <main className="rounded-xl bg-white p-8 shadow-sm">
       <div className="flex w-full items-center justify-between">
         <h2 className="my-0 text-lg font-medium leading-6 text-gray-900">Informations générales</h2>
-        {canModifyStructure(user, structure) && (
+        {isWriteAuthorized({
+          user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure },
+        }) && (
           <EditButton isEditing={isEditing} setIsEditing={setIsEditing} isLoading={isLoading} onSubmit={onSubmit} defaultData={structure} setData={setData} setErrors={setErrors} />
         )}
       </div>

@@ -6,6 +6,7 @@ import { Job } from "bullmq";
 import { ContactType } from "../Notification";
 import { ReferentSyncDto } from "./Contact";
 import { ContactProvider } from "./Contact.provider";
+import { SentryExceptionCaptured } from "@sentry/nestjs";
 
 @Processor(QueueName.CONTACT)
 export class ContactConsumer extends WorkerHost {
@@ -15,6 +16,8 @@ export class ContactConsumer extends WorkerHost {
     ) {
         super();
     }
+
+    @SentryExceptionCaptured()
     async process(job: Job<ReferentSyncDto[], any, ContactType>): Promise<ConsumerResponse> {
         try {
             switch (job.name) {

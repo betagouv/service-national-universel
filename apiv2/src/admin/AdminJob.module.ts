@@ -90,6 +90,7 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
 import { StructureGateway } from "./core/engagement/structure/Structure.gateway";
 import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
 import { ExportMissionService } from "./core/engagement/mission/ExportMission.service";
+import { SharedModule } from "@shared/Shared.module";
 
 @Module({
     imports: [
@@ -109,6 +110,7 @@ import { ExportMissionService } from "./core/engagement/mission/ExportMission.se
         ReferentielModule,
         AuthModule,
         AnalyticsModule,
+        SharedModule,
     ],
     providers: [
         Logger,
