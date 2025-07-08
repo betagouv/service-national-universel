@@ -98,7 +98,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         await this.notificationGateway.sendEmail<ExportMissionsParams>(
             {
                 to: [{ email: referent.email, name: `${referent.prenom} ${referent.nom}` }],
-                url: `https://${rapportFile.Location}`,
+                url: rapportFile.Location,
             },
             EmailTemplate.EXPORT_MISSION_CANDIDATURES,
         );
