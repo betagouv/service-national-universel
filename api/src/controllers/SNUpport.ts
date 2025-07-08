@@ -31,6 +31,16 @@ interface File {
   path: string;
 }
 
+interface ResponsePostTicket {
+  ok: boolean;
+  code?: string | object;
+  data?: ResponsePostTicketData;
+}
+interface ResponsePostTicketData {
+  ticket: Ticket;
+  message: Message;
+}
+
 interface Ticket {
   id?: string;
   status?: string;
@@ -243,7 +253,7 @@ router.post(
       }
       const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
       const userAttributes = await getUserAttributes(req.user);
-      const response = await SNUpport.api("/v0/message", {
+      const response: ResponsePostTicket = await SNUpport.api("/v0/message", {
         method: "POST",
         credentials: "include",
         body: JSON.stringify({
@@ -261,7 +271,7 @@ router.post(
           files,
         }),
       });
-      if (!response.ok) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
+      if (!response.ok || !response.data?.ticket) slack.error({ title: "Create ticket via message Zammod", text: JSON.stringify(response.code) });
       else if (isYoung(req.user) && subject.includes("J'ai une question")) {
         const isNotified = await notifyReferent(response.data.ticket, req.body.message);
         if (!isNotified) slack.error({ title: "Notify referent new message to SNUpport", text: JSON.stringify(response.code) });
