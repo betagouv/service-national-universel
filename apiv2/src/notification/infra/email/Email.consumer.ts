@@ -5,6 +5,7 @@ import { Job } from "bullmq";
 import { EmailParams, EmailTemplate } from "../../core/Notification";
 import { QueueName } from "@shared/infra/Queue";
 import { EmailProvider } from "./Email.provider";
+import { SentryExceptionCaptured } from "@sentry/nestjs";
 
 @Processor(QueueName.EMAIL)
 export class EmailConsumer extends WorkerHost {
@@ -14,6 +15,8 @@ export class EmailConsumer extends WorkerHost {
     ) {
         super();
     }
+
+    @SentryExceptionCaptured()
     async process(job: Job<EmailParams, any, EmailTemplate>): Promise<ConsumerResponse> {
         this.logger.log(`Sending email template "${job.name}" to ${JSON.stringify(job.data?.to)}`, EmailConsumer.name);
         return this.emailProvider

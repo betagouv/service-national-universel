@@ -15,6 +15,7 @@ import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelec
 import { ImportClasseEnMasseTaskModel } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.model";
 import { ImporterClasseEnMasse } from "@admin/core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
 import { AdminTaskEngagementSelectorService } from "./AdminTaskEngagementSelector";
+import { SentryExceptionCaptured } from "@sentry/nestjs";
 
 @Processor(QueueName.ADMIN_TASK)
 export class AdminTaskConsumer extends WorkerHost {
@@ -30,6 +31,8 @@ export class AdminTaskConsumer extends WorkerHost {
     ) {
         super();
     }
+
+    @SentryExceptionCaptured()
     async process(job: Job<TaskQueue, any, TaskName>): Promise<ConsumerResponse> {
         // TODO : benchmark sur les perf de la création d'un contexte cls
         return this.cls.run(async () => {

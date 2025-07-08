@@ -2,7 +2,7 @@ import React from "react";
 import { Link } from "react-router-dom";
 import { getNewLink } from "@/utils";
 import queryString from "query-string";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import { useSelector } from "react-redux";
 
 export default function StatusPhase1({ statusPhase1, total, filter, role, sessionId, centerId }) {

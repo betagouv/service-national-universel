@@ -12,7 +12,7 @@ import getNoteData from "./todos.constants";
 import Engagement from "./ui/icons/Engagement";
 import Inscription from "./ui/icons/Inscription";
 import Sejour from "./ui/icons/Sejour";
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 
 // Adding Todos to a user role dashboard
 // 1. Import <Todos /> in the dashboard/general component

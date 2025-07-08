@@ -1,21 +1,36 @@
 import React, { useState } from "react";
 import { useSelector } from "react-redux";
-import { ROLES, TEMPLATE_DESCRIPTIONS, canViewEmailHistory, formatLongDateFR } from "snu-lib";
+import { ROLES, TEMPLATE_DESCRIPTIONS, formatLongDateFR, UserDto, PERMISSION_RESOURCES, isReadAuthorized } from "snu-lib";
 import { translateEmails } from "../../utils";
 import { Filters, ResultTable, Save, SelectedFilters } from "../filters-system-v2";
 import EmailPanel from "../panels/EmailPanel";
+import { AuthState } from "@/redux/auth/reducer";
 
-export default function Emails({ email, userType }) {
-  const { user } = useSelector((state) => state.Auth);
+interface EmailData {
+  subject: string;
+  templateId: string;
+  event?: string;
+  date: string;
+}
+
+interface EmailsProps {
+  email: string;
+  userType: string;
+}
+
+export default function Emails({ email, userType }: EmailsProps): JSX.Element | null {
+  const { user } = useSelector((state: AuthState) => state.Auth);
 
   //List state
-  const [data, setData] = useState([]);
+  const [data, setData] = useState<EmailData[]>([]);
   const pageId = `emails-${userType}-list`;
-  const [selectedFilters, setSelectedFilters] = useState({});
-  const [paramData, setParamData] = useState({
+  const [selectedFilters, setSelectedFilters] = useState<Record<string, any>>({});
+  const [paramData, setParamData] = useState<{
+    page: number;
+  }>({
     page: 0,
   });
-  const [size, setSize] = useState(10);
+  const [size, setSize] = useState<number>(10);
 
   //Filters
   const filterArray = [
@@ -25,10 +40,10 @@ export default function Emails({ email, userType }) {
       missingLabel: "Non renseigné",
       showCount: false,
     },
-    user.role === ROLES.ADMIN ? { title: "Dernier statut", name: "event", translate: (e) => translateEmails(e), showCount: false } : null,
-  ].filter(Boolean);
+    user.role === ROLES.ADMIN ? { title: "Dernier statut", name: "event", translate: (e: string) => translateEmails(e), showCount: false } : null,
+  ].filter((filter): filter is NonNullable<typeof filter> => filter !== null);
 
-  if (!canViewEmailHistory(user)) return null;
+  if (!isReadAuthorized({ user, resource: PERMISSION_RESOURCES.USER_NOTIFICATIONS })) return null;
 
   return (
     <div className="rounded-xl bg-white text-gray-900 shadow-md">
@@ -37,7 +52,7 @@ export default function Emails({ email, userType }) {
           <Filters
             pageId={pageId}
             route={`/elasticsearch/email/${email}/search`}
-            setData={(value) => setData(value)}
+            setData={(value: EmailData[]) => setData(value)}
             filters={filterArray}
             searchPlaceholder="Rechercher un email"
             selectedFilters={selectedFilters}
@@ -68,11 +83,7 @@ export default function Emails({ email, userType }) {
                   <th className="w-1/6 px-4 py-3 text-xs font-normal text-gray-500">Date{user.role === ROLES.ADMIN && " du dernier statut"}</th>
                 </tr>
               </thead>
-              <tbody>
-                {data?.map((email, index) => (
-                  <Email key={index} email={email} user={user} />
-                ))}
-              </tbody>
+              <tbody>{data?.map((email, index) => <Email key={index} email={email} user={user} />)}</tbody>
             </table>
           }
         />
@@ -81,8 +92,12 @@ export default function Emails({ email, userType }) {
   );
 }
 
-function Email({ email, user }) {
-  const [open, setOpen] = React.useState(false);
+interface EmailProps {
+  email: EmailData;
+  user: UserDto;
+}
+function Email({ email, user }: EmailProps): JSX.Element {
+  const [open, setOpen] = React.useState<boolean>(false);
 
   return (
     <>

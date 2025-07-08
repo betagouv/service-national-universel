@@ -8,7 +8,7 @@ import api from "@/services/api";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
 
-import { isResponsableDeCentre } from "@/utils";
+import { isResponsableDeCentre } from "snu-lib";
 import { REJECTION_REASONS, REJECTION_REASONS_KEY } from "./commons";
 import YoungHeader from "./components/YoungHeader";
 import SectionConsentements from "./components/sections/consentements/SectionConsentements";

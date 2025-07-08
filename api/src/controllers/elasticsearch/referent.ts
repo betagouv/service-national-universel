@@ -1,18 +1,33 @@
-const passport = require("passport");
-const express = require("express");
-const router = express.Router();
-const { ROLES, canSearchInElasticSearch, department2region, departmentList, ES_NO_LIMIT } = require("snu-lib");
-const { capture } = require("../../sentry");
-const esClient = require("../../es");
-const { ERRORS } = require("../../utils");
-const { allRecords } = require("../../es/utils");
-const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
-const { StructureModel, EtablissementModel, ClasseModel } = require("../../models");
-const Joi = require("joi");
-const { serializeReferents } = require("../../utils/es-serializer");
+import passport from "passport";
+import express, { Response } from "express";
+import Joi from "joi";
 
-async function buildReferentContext(user) {
-  const contextFilters = [];
+import { ROLES, canSearchInElasticSearch, department2region, departmentList, ES_NO_LIMIT, UserDto, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+
+import { capture } from "../../sentry";
+import esClient from "../../es";
+import { ERRORS } from "../../utils";
+import { allRecords } from "../../es/utils";
+import { buildNdJson, buildRequestBody, joiElasticSearch } from "./utils";
+import { StructureModel, EtablissementModel, ClasseModel } from "../../models";
+import { serializeReferents } from "../../utils/es-serializer";
+import { UserRequest } from "../request";
+import { authMiddleware } from "../../middlewares/authMiddleware";
+import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+
+interface ReferentContext {
+  referentContextFilters?: any[];
+  referentContextError?: {
+    status: number;
+    body: {
+      ok: boolean;
+      code: string;
+    };
+  };
+}
+
+async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
+  const contextFilters: any[] = [];
 
   // A responsible cans only see their structure's referent (responsible and supervisor).
   if (user.role === ROLES.RESPONSIBLE) {
@@ -62,6 +77,7 @@ async function buildReferentContext(user) {
       },
     });
   }
+
   if (user.role === ROLES.REFERENT_REGION) {
     contextFilters.push({
       bool: {
@@ -86,6 +102,7 @@ async function buildReferentContext(user) {
       },
     });
   }
+
   if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
     contextFilters.push({
       bool: {
@@ -101,7 +118,7 @@ async function buildReferentContext(user) {
       - all ref ADMIN CLE of his etablissement
       - all ref Classe of his etablissement
     */
-    const refIds = [];
+    const refIds: string[] = [];
     const etablissement = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
     if (!etablissement) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const classes = await ClasseModel.find({ etablissementId: etablissement._id });
@@ -126,11 +143,11 @@ async function buildReferentContext(user) {
     const classes = await ClasseModel.findOne({ referentClasseIds: user._id });
     if (!classes) return { referentContextError: { status: 404, body: { ok: false, code: ERRORS.NOT_FOUND } } };
     const etablissement = await EtablissementModel.findOne({ _id: classes.etablissementId });
-    const refIds = [...etablissement.referentEtablissementIds, ...etablissement.coordinateurIds];
+    const refIds = [...(etablissement?.referentEtablissementIds || []), ...(etablissement?.coordinateurIds || [])];
     contextFilters.push({
       bool: {
         should: [
-          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement.department } }] } },
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_CLASSE] } }, { term: { "department.keyword": etablissement?.department } }] } },
           { bool: { must: { ids: { values: refIds } } } },
         ],
       },
@@ -139,60 +156,67 @@ async function buildReferentContext(user) {
   return { referentContextFilters: contextFilters };
 }
 
-router.post("/team/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const { user, body } = req;
-    // Configuration
-    const searchFields = ["email", "firstName", "lastName"];
-    const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword"];
-    const sortFields = [];
-    const size = body.syze;
-    // Authorization
-    if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+const router = express.Router();
 
-    // Body params validation
-    const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
-    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.post(
+  "/team/:action(search|export)",
+  authMiddleware(["referent"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { user, body } = req;
+      // Configuration
+      const searchFields = ["email", "firstName", "lastName"];
+      const filterFields = ["role.keyword", "subRole.keyword", "region.keyword", "department.keyword"];
+      const sortFields: string[] = [];
+      const size = body.syze;
+      // Authorization
+      if (!canSearchInElasticSearch(user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    //Query params validation
-    const { error: errorQuery, value: query } = Joi.object({
-      tab: Joi.string()
-        .trim()
-        .allow(null)
-        .valid("region", "department", ...departmentList),
-    }).validate(req.query, { stripUnknown: true });
-    if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      // Body params validation
+      const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body });
+      if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    // Context filters
-    const contextFilters = [
-      user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "region.keyword": user.department.map((depart) => department2region[depart]) } } : null,
-      user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
-    ].filter(Boolean);
+      //Query params validation
+      const { error: errorQuery, value: query } = Joi.object({
+        tab: Joi.string()
+          .trim()
+          .allow(null)
+          .valid("region", "department", ...departmentList),
+      }).validate(req.query, { stripUnknown: true });
+      if (errorQuery) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    if (query.tab) {
-      if (query.tab === "region") {
-        contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.VISITOR] } });
-      } else {
-        contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } });
+      // Context filters
+      const contextFilters: any[] = [
+        user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "region.keyword": (user.department as string[]).map((depart) => department2region[depart]) } } : null,
+        user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
+      ].filter(Boolean);
+
+      if (query.tab) {
+        if (query.tab === "region") {
+          contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.VISITOR] } });
+        } else {
+          contextFilters.push({ terms: { "role.keyword": [ROLES.REFERENT_DEPARTMENT] } });
+        }
       }
+
+      const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
+
+      if (req.params.action === "export") {
+        const response = await allRecords("referent", hitsRequestBody.query);
+        return res.status(200).send({ ok: true, data: response });
+      } else {
+        const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
+        return res.status(200).send(response.body);
+      }
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });
-
-    if (req.params.action === "export") {
-      const response = await allRecords("referent", hitsRequestBody.query);
-      return res.status(200).send({ ok: true, data: response });
-    } else {
-      const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     const { user, body } = req;
     // Configuration
@@ -220,7 +244,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Context filters
     const contextFilters = [
-      ...referentContextFilters,
+      ...(referentContextFilters || []),
       { bool: { must_not: { exists: { field: "deletedAt" } } } },
       query.cohort
         ? {
@@ -256,7 +280,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   }
 });
 
-router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
+router.post("/structure/:structure", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
     if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
@@ -277,4 +301,4 @@ router.post("/structure/:structure", passport.authenticate(["referent"], { sessi
   }
 });
 
-module.exports = router;
+export default router;

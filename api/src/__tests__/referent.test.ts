@@ -15,12 +15,14 @@ import {
   YOUNG_SOURCE,
   INSCRIPTION_GOAL_LEVELS,
   ROLES_LIST,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
 } from "snu-lib";
 
 import { CohortModel, InscriptionGoalModel, YoungModel } from "../models";
 import { getCompletionObjectifs } from "../services/inscription-goal";
 
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
@@ -42,6 +44,8 @@ import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 import { createInscriptionGoal } from "./helpers/inscriptionGoal";
 import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -55,7 +59,12 @@ jest.mock("../cryptoUtils", () => ({
   encrypt: () => Buffer.from("test"),
 }));
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper([ROLES.RESPONSIBLE, ROLES.SUPERVISOR], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.CREATE);
+});
 afterAll(dbClose);
 beforeEach(async () => {
   await YoungModel.deleteMany();
@@ -69,7 +78,9 @@ describe("Referent", () => {
     it("should invite and add referent (admin)", async () => {
       const referentFixture = getNewReferentFixture();
       const referentsBefore = await getReferentsHelper();
-      const res = await request(getAppHelper()).post("/referent/signup_invite/001").send(referentFixture);
+      const res = await request(await getAppHelperWithAcl())
+        .post("/referent/signup_invite/001")
+        .send(referentFixture);
       expect(res.statusCode).toEqual(200);
       const referentsAfter = await getReferentsHelper();
       expect(referentsAfter.length).toEqual(referentsBefore.length + 1);
@@ -77,14 +88,14 @@ describe("Referent", () => {
     });
     it("should invite and add referent (responsible)", async () => {
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE };
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .post("/referent/signup_invite/001")
         .send(referentFixture);
       expect(res.statusCode).toEqual(200);
     });
     it("should return 400 if no templates given", async () => {
       const referentFixture = getNewReferentFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/signup_invite/001")
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
@@ -93,7 +104,7 @@ describe("Referent", () => {
       const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
       for (const role of ROLES_LIST) {
         if (role !== ROLES.RESPONSIBLE) {
-          const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+          const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
             .post("/referent/signup_invite/001")
             .send({ ...referentFixture, role });
           expect(res.statusCode).toEqual(403);
@@ -104,7 +115,9 @@ describe("Referent", () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email?.toLowerCase();
       await createReferentHelper({ ...fixture, email });
-      let res = await request(getAppHelper()).post("/referent/signup_invite/001").send(fixture);
+      let res = await request(await getAppHelperWithAcl())
+        .post("/referent/signup_invite/001")
+        .send(fixture);
       expect(res.status).toBe(409);
     });
   });
@@ -119,7 +132,7 @@ describe("Referent", () => {
       const youngFixture = getNewYoungFixture();
       const originalYoung = await createYoungHelper({ ...youngFixture, ...newYoungFields });
       const modifiedYoung = { ...youngFixture, ...newYoungFields, ...updateYoungFields };
-      const response = await request(getAppHelper(user))
+      const response = await request(await getAppHelperWithAcl(user))
         .put(`/referent/young/${originalYoung._id}${queryParam || ""}`)
         .send(modifiedYoung);
       const young = await getYoungByIdHelper(originalYoung._id);
@@ -141,7 +154,7 @@ describe("Referent", () => {
         },
         { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort.id },
         { keepYoung: true },
-        { role: ROLES.ADMIN },
+        { role: ROLES.ADMIN, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );
       expect(response.statusCode).not.toEqual(200);
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_NOT_DEFINED);
@@ -168,7 +181,7 @@ describe("Referent", () => {
         },
         { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         { keepYoung: true },
-        { role: ROLES.HEAD_CENTER },
+        { role: ROLES.HEAD_CENTER, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
 
@@ -243,7 +256,9 @@ describe("Referent", () => {
       expect(response.body.code).toBe(FUNCTIONAL_ERRORS.INSCRIPTION_GOAL_REGION_REACHED);
     });
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put(`/referent/young/${notExistingYoungId}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/young/${notExistingYoungId}`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should update young name", async () => {
@@ -330,19 +345,19 @@ describe("Referent", () => {
     it("should return 400 if body is not valid", async () => {
       const young = await createYoungHelper(getNewYoungFixture({ status: YOUNG_STATUS.VALIDATED as any }));
       const youngIds = [young._id];
-      let res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      let res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: "NOT_VALID" });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.WITHDRAWN });
       expect(res.statusCode).toEqual(400);
-      res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds: [], status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(400);
@@ -350,7 +365,7 @@ describe("Referent", () => {
 
     it("should return 404 if young not found", async () => {
       const youngIds = [notExistingYoungId];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(404);
@@ -358,14 +373,14 @@ describe("Referent", () => {
 
     it("should return 403 if user cannot validate youngs", async () => {
       const youngIds = [new ObjectId().toString()];
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
     });
     it("should return 403 if payload is VALIDATED and if classe is not found", async () => {
       const youngIds = [new ObjectId().toString()];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(404);
@@ -384,7 +399,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -412,7 +427,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -440,7 +455,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(200);
@@ -472,7 +487,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(getAppHelper({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.REFUSED });
       expect(res.statusCode).toEqual(200);
@@ -486,26 +501,30 @@ describe("Referent", () => {
 
   describe("POST /referent/:tutorId/email/:template", () => {
     it("should return 404 if tutor not found", async () => {
-      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .post(`/referent/${notExistingReferentId}/email/test`)
         .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if tutor found", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post(`/referent/${tutor._id}/email/${SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_CORRECTION}`)
         .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(200);
     });
     it("should return 400 if wrong template", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/001`).send({ message: "hello", subject: "hi" });
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/${tutor._id}/email/001`)
+        .send({ message: "hello", subject: "hi" });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 400 if wrong template params", async () => {
       const tutor = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).post(`/referent/${tutor._id}/email/001`).send({ app: "is a string but must be object" });
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/referent/${tutor._id}/email/001`)
+        .send({ app: "is a string but must be object" });
       expect(res.statusCode).toEqual(400);
     });
   });
@@ -513,7 +532,7 @@ describe("Referent", () => {
   describe("GET /referent/youngFile/:youngId/:key/:fileName", () => {
     it("should return 200 if file is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .get("/referent/youngFile/" + young._id + "/key/test.pdf")
         .send();
       expect(res.statusCode).toEqual(200);
@@ -524,7 +543,7 @@ describe("Referent", () => {
 
   describe("POST /referent/file/:key", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .get("/referent/file/cniFiles")
         .send({ body: JSON.stringify({ youngId: notExistingYoungId, names: ["e"] }) });
       expect(res.statusCode).toEqual(404);
@@ -532,7 +551,7 @@ describe("Referent", () => {
     it("should send file for the young", async () => {
       // This test should be improved to check the file is sent (currently no file is sent)
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/file/cniFiles")
         .send({ body: JSON.stringify({ youngId: young._id, names: ["e"] }) });
       expect(res.body).toEqual({ data: ["e"], ok: true });
@@ -541,14 +560,14 @@ describe("Referent", () => {
 
   describe("GET /referent/young/:youngId", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .get("/referent/young/" + notExistingYoungId)
         .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .get("/referent/young/" + young._id)
         .send();
       expect(res.statusCode).toEqual(200);
@@ -558,7 +577,7 @@ describe("Referent", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const structure: any = await createStructureHelper({ ...getNewStructureFixture() });
       const application: any = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .get("/referent/young/" + young._id)
         .send();
       expect(res.statusCode).toEqual(200);
@@ -581,7 +600,9 @@ describe("Referent", () => {
 
   describe("GET /referent/:id/patches", () => {
     it("should return 404 if referent not found", async () => {
-      const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}/patches`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/${notExistingReferentId}/patches`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 403 if not admin", async () => {
@@ -589,7 +610,7 @@ describe("Referent", () => {
       referent.firstName = "MY NEW NAME";
       await referent.save();
 
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .get(`/referent/${referent._id}/patches`)
         .send();
       expect(res.status).toBe(403);
@@ -598,7 +619,9 @@ describe("Referent", () => {
       const referent: any = await createReferentHelper(getNewReferentFixture());
       referent.firstName = "MY NEW NAME";
       await referent.save();
-      const res = await request(getAppHelper()).get(`/referent/${referent._id}/patches`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/${referent._id}/patches`)
+        .send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(
         expect.arrayContaining([
@@ -612,18 +635,22 @@ describe("Referent", () => {
 
   describe("GET /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
-      const res = await request(getAppHelper()).get(`/referent/${notExistingReferentId}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/${notExistingReferentId}`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).get(`/referent/${referent._id}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/referent/${referent._id}`)
+        .send();
       expect(res.statusCode).toEqual(200);
       expectReferentToEqual(referent, res.body.data);
     });
     it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .get(`/referent/${referent._id}`)
         .send();
       expect(res.statusCode).toEqual(403);
@@ -633,13 +660,17 @@ describe("Referent", () => {
   describe("PUT /referent", () => {
     it("should return 200 when valid params are given", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
-      const res = await request(getAppHelper(referent)).put(`/referent`).send({ firstName: "MY NEW NAME" });
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/referent`)
+        .send({ firstName: "MY NEW NAME" });
       expect(res.statusCode).toEqual(200);
     });
     it("should not update structureId if referent is responsible", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
       const structure = await createStructureHelper(getNewStructureFixture());
-      const res = await request(getAppHelper(referent)).put(`/referent`).send({ structureId: structure._id });
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/referent`)
+        .send({ structureId: structure._id });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.structureId).toEqual(referent.structureId);
     });
@@ -648,22 +679,30 @@ describe("Referent", () => {
   describe("PUT /referent/:id", () => {
     it("should return 400 when a role is given", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ role: "referent" });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ role: "referent" });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 200 when firstName is given", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME" });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ firstName: "MY NEW NAME" });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data?.firstName).toEqual("My New Name");
     });
     it("should return 404 if referent not found", async () => {
-      const res = await request(getAppHelper()).put(`/referent/${notExistingReferentId}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${notExistingReferentId}`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName: "MY NEW NAME", lastName: "my neW last Name" });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ firstName: "MY NEW NAME", lastName: "my neW last Name" });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(
         expect.objectContaining({
@@ -676,7 +715,9 @@ describe("Referent", () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.SUPERVISOR }));
       for (const role of ROLES_LIST) {
         if (role !== ROLES.ADMIN) {
-          const res = await request(getAppHelper({ role })).put(`/referent/${referent._id}`).send({ role: ROLES.ADMIN });
+          const res = await request(await getAppHelperWithAcl({ role }))
+            .put(`/referent/${referent._id}`)
+            .send({ role: ROLES.ADMIN });
           expect(res.statusCode).toEqual(403);
         }
       }
@@ -685,7 +726,7 @@ describe("Referent", () => {
     it("should return 403 if responsible try to change structure", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: "123" }));
       const structure = await createStructureHelper(getNewStructureFixture());
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .put(`/referent/${referent._id}`)
         .send({ structureId: structure._id });
       expect(res.statusCode).toEqual(403);
@@ -703,7 +744,9 @@ describe("Referent", () => {
       application.missionId = mission._id;
       await mission.save();
       await application.save();
-      const res = await request(getAppHelper()).put(`/referent/${referent._id}`).send({ firstName, lastName });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/${referent._id}`)
+        .send({ firstName, lastName });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(expect.objectContaining({ lastName: lastName }));
       const missions = await getMissionsHelper({ tutorId: referent._id.toString() });
@@ -717,18 +760,22 @@ describe("Referent", () => {
 
   describe("DELETE /referent/:id", () => {
     it("should return 404 if referent not found", async () => {
-      const res = await request(getAppHelper()).delete(`/referent/${notExistingReferentId}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .delete(`/referent/${notExistingReferentId}`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper()).delete(`/referent/${referent._id}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .delete(`/referent/${referent._id}`)
+        .send();
       expect(res.statusCode).toEqual(200);
       expect(await getReferentByIdHelper(referent._id)).toBeNull();
     });
     it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .delete(`/referent/${referent._id}`)
         .send();
       expect(res.statusCode).toEqual(403);
@@ -739,32 +786,34 @@ describe("Referent", () => {
     it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
 
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(403);
     });
     it("should return 404 if referent not found", async () => {
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/signin_as/referent/" + notExistingReferentId)
         .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 400 if type param is not found", async () => {
-      const res = await request(getAppHelper()).post("/referent/signin_as/foo/bar").send();
+      const res = await request(await getAppHelperWithAcl())
+        .post("/referent/signin_as/foo/bar")
+        .send();
       expect(res.statusCode).toEqual(400);
     });
     it("should return 403 when impersonate user has subrole god", async () => {
       const referent = await createReferentHelper(getNewReferentFixture({ subRole: SUB_ROLE_GOD }));
 
-      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(403);
     });
     it("should return 200 if referent found", async () => {
       const referent: any = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(200);
@@ -778,14 +827,14 @@ describe("Referent", () => {
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/signin_as/young/" + young._id)
         .send();
       expect(res.statusCode).toEqual(200);
     });
     it("should return a jwt token", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/referent/signin_as/referent/" + referent._id)
         .send();
       expect(res.statusCode).toEqual(200);
@@ -801,12 +850,14 @@ describe("Referent", () => {
       expect(young.cohortId).toEqual(cohort1._id.toString());
 
       const newCohortName = "à venir";
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
-        source: "VOLONTAIRE",
-        cohort: newCohortName,
-        message: "Changing cohort for testing purposes",
-        cohortChangeReason: "Testing",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: "VOLONTAIRE",
+          cohort: newCohortName,
+          message: "Changing cohort for testing purposes",
+          cohortChangeReason: "Testing",
+        });
 
       expect(res.status).toEqual(200);
       expect(res.body.data.cohort).toEqual(newCohortName);
@@ -820,12 +871,14 @@ describe("Referent", () => {
       const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
 
       const notPersistedCohortName = "à venir";
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
-        source: "VOLONTAIRE",
-        cohort: notPersistedCohortName,
-        message: "Changing cohort for testing",
-        cohortChangeReason: "Testing",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: "VOLONTAIRE",
+          cohort: notPersistedCohortName,
+          message: "Changing cohort for testing",
+          cohortChangeReason: "Testing",
+        });
 
       expect(res.status).toEqual(200);
       expect(res.body.data.cohort).toEqual(notPersistedCohortName);
@@ -835,7 +888,7 @@ describe("Referent", () => {
     it("should return 403 if the referent is not authorized to change the cohort", async () => {
       const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
       const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      const res = await request(getAppHelper({ role: ROLES.VISITOR }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.VISITOR }))
         .put(`/referent/young/${young._id}/change-cohort`)
         .send({
           source: "VOLONTAIRE",
@@ -850,12 +903,14 @@ describe("Referent", () => {
     it("should return 409 if the cohort is not valid", async () => {
       const cohort1 = await CohortModel.create({ ...getNewCohortFixture(), name: "CLE mars 2024 1" });
       const young = await YoungModel.create({ ...getNewYoungFixture(), cohort: cohort1.name, cohortId: cohort1._id });
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
-        source: "VOLONTAIRE",
-        cohort: "invalid cohort",
-        message: "Changing cohort for testing purposes",
-        cohortChangeReason: "Testing",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: "VOLONTAIRE",
+          cohort: "invalid cohort",
+          message: "Changing cohort for testing purposes",
+          cohortChangeReason: "Testing",
+        });
 
       expect(res.status).toEqual(409);
     });
@@ -883,12 +938,14 @@ describe("Referent", () => {
         schoolCountry: school.country,
       });
 
-      const res = await request(getAppHelper()).put(`/referent/young/${young._id}/change-cohort`).send({
-        source: YOUNG_SOURCE.VOLONTAIRE,
-        cohort: cohort2.name,
-        message: "Changing cohort for testing purposes",
-        cohortChangeReason: "Testing HTS to HTS",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/referent/young/${young._id}/change-cohort`)
+        .send({
+          source: YOUNG_SOURCE.VOLONTAIRE,
+          cohort: cohort2.name,
+          message: "Changing cohort for testing purposes",
+          cohortChangeReason: "Testing HTS to HTS",
+        });
 
       expect(res.status).toBe(200);
       expect(res.body.data.cohort).toBe(cohort2.name);
