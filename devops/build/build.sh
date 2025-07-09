@@ -16,8 +16,8 @@ destination=$2
 front=0
 back=0
 case $application in
-    (app | admin) front=1 ;;
-    (api | apiv2) back=1 ;;
+    (app | admin | snupport-app) front=1 ;;
+    (api | apiv2 | snupport-api) back=1 ;;
     (*)
         echo "You must specify a valid application"
         exit 1
@@ -37,10 +37,12 @@ npm install --global "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune $application
+# NOT NEEDED BY SNUPPORT
 if (( $front )); then
     cp tsconfig.front.json out
 fi
 cp -r patches out
+# END
 cd out
 npm ci --no-audit --no-fund
 turbo run build
@@ -59,8 +61,10 @@ if (( $front )); then
 fi
 
 if (( $back )); then
+    # NOT NEEDED BY SNUPPORT
     mkdir -p $destination/packages/lib/
     mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
+    # END
     mv out/node_modules $destination/
 fi
 
@@ -74,6 +78,12 @@ if [[ $application == "apiv2" ]]; then
     mkdir -p $destination/apiv2/
     mv out/apiv2/{dist/*,node_modules} $destination/apiv2/
     cp devops/build/apiv2/package.json $destination
+fi
+
+if [[ $application == "snupport-api" ]]; then
+    mkdir -p $destination/snupport-api/
+    mv out/snupport-api/{dist/*,node_modules} $destination/snupport-api/
+    cp devops/build/snupport-api/package.json $destination
 fi
 
 rm -Rf out
