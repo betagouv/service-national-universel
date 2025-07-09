@@ -4,7 +4,7 @@ import { Redirect, useLocation } from "react-router-dom";
 import { BsLock } from "react-icons/bs";
 import { toastr } from "react-redux-toastr";
 
-import { ROLES, ROLES_LIST, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized } from "snu-lib";
+import { ROLES, ROLES_LIST, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized, hasPolicyForAttribute } from "snu-lib";
 
 import { AuthState } from "../../redux/auth/reducer";
 import { SentryRoute } from "../../sentry";
@@ -142,14 +142,18 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
 
   const route = Object.keys(PERMISSIONS_BY_ROUTE).find((route) => pathname.startsWith(route));
   if (!matchRoute && route && PERMISSIONS_BY_ROUTE[route]?.permissions) {
+    let ignorePolicy = PERMISSIONS_BY_ROUTE[route].ignorePolicy;
     const id = pathname.match(/[0-9a-fA-F]{24}/)?.[0];
     const context = {};
     if (id && PERMISSIONS_BY_ROUTE[route].params?.id) {
       setAttributeFromPath(PERMISSIONS_BY_ROUTE[route].params.id, context, id);
+      if (!hasPolicyForAttribute({ user, permissions: PERMISSIONS_BY_ROUTE[route].permissions, field: "_id" })) {
+        ignorePolicy = true;
+      }
     }
-    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].permissions.some((permission) =>
-      isAuthorized({ user, resource: permission.resource, action: permission.action, context, ignorePolicy: PERMISSIONS_BY_ROUTE[route].ignorePolicy }),
-    );
+    const routeAuthorized = PERMISSIONS_BY_ROUTE[route].permissions.some((permission) => {
+      return isAuthorized({ user, resource: permission.resource, action: permission.action, context, ignorePolicy });
+    });
     if (!routeAuthorized) {
       console.log(`user does not have permission for ${pathname}`);
       if (pathname === defaultRoute) {

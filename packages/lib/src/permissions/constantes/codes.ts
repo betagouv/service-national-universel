@@ -31,6 +31,7 @@ export enum PERMISSION_CODES {
   STRUCTURE_DEPARTEMENT = "StructureDepartement",
   STRUCTURE_DEPARTEMENT_FULL = "StructureDepartementFull",
   STRUCTURE_FULL = "StructureFull",
+  STRUCTURE_READ = "StructureRead",
   STRUCTURE_REGION = "StructureRegion",
   STRUCTURE_SAME_STRUCTURE = "StructureSameStructure",
   STRUCTURE_TETERESEAU = "StructureTetereseau",
