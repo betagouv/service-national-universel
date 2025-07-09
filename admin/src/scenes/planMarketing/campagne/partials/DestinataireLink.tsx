@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { HiOutlineExternalLink } from "react-icons/hi";
 
-import { buildRequestQueryString, COHORT_TYPE, DestinataireListeDiffusion } from "snu-lib";
+import { buildRequestQueryString, DestinataireListeDiffusion, ListeDiffusionEnum } from "snu-lib";
 
 import { AnalyticsService } from "@/services/analyticsService";
 import useCohort from "@/hooks/useCohort";
@@ -31,7 +31,7 @@ export default function DestinataireLink({ cohortId, listeDiffusion }: Destinata
     return null;
   }
 
-  const subQueryPath = cohort.type === COHORT_TYPE.VOLONTAIRE ? "volontaire" : "inscription";
+  const subQueryPath = listeDiffusion.type === ListeDiffusionEnum.VOLONTAIRES ? "volontaire" : "inscription";
   const queryPath = `/${subQueryPath}${buildRequestQueryString({ ...listeDiffusion.filters, cohort: cohort.name, page: 1 })}`;
 
   return (
