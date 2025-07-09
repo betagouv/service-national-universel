@@ -1,5 +1,7 @@
+import { PermissionType } from "src/mongoSchema";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
+import { UserDto } from "src/dto";
 
 export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
@@ -72,4 +74,12 @@ export function isExecuteAuthorized({ user, resource, context, ignorePolicy }: H
 
 export function isFullAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
   return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.FULL, context, ignorePolicy });
+}
+
+export function hasPolicyForAttribute({ user, permissions, field }: { user: UserDto; permissions: PermissionType[]; field: string }): boolean {
+  return (
+    user.acl?.some(
+      (acl) => permissions.some((permission) => permission.resource === acl.resource) && acl.policy?.some((policy) => policy.where?.some((where) => where.field === field)),
+    ) || false
+  );
 }
