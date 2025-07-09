@@ -341,7 +341,13 @@ export default function Phase2({ young, onChange }) {
                   <span>Le volontaire a bien bénéficié du remboursement</span>
                 </div>
                 <div className="text-xs text-gray-400">
-                  Renseigné par <b>{young.roadCodeRefundOrganization}</b>, le {new Date(young.roadCodeRefundDate).toLocaleDateString("fr-FR")}
+                  Renseigné
+                  {young.roadCodeRefundOrganization && (
+                    <span>
+                      par <b>{young.roadCodeRefundOrganization}</b>,
+                    </span>
+                  )}{" "}
+                  le {new Date(young.roadCodeRefundDate).toLocaleDateString("fr-FR")}
                 </div>
               </>
             ) : (
