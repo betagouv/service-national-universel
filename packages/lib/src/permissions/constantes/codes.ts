@@ -28,6 +28,7 @@ export enum PERMISSION_CODES {
   PROGRAM_READ = "ProgramRead",
   SETTINGS_FULL = "SettingsFull",
   SETTINGS_READ = "SettingsRead",
+  STRUCTURE_DEPARTEMENT = "StructureDepartement",
   STRUCTURE_DEPARTEMENT_FULL = "StructureDepartementFull",
   STRUCTURE_FULL = "StructureFull",
   STRUCTURE_REGION = "StructureRegion",

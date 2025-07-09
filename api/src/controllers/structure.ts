@@ -288,11 +288,17 @@ router.get(
 
       const data = await StructureModel.findById(checkedId);
       if (!data) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, context: { structure: { _id: data._id.toString() } } })) {
+      let structure = serializeStructure(data, req.user);
+      if (
+        !isReadAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: { ...structure, _id: data._id.toString() } },
+        })
+      ) {
         return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      let structure = serializeStructure(data, req.user);
       if (req.query.withMissions || req.query.withReferents || req.query.withTeam) {
         let promises: Promise<any[]>[] = [];
 
