@@ -139,9 +139,7 @@ export default function Profil({ sideBarOpen, user, setOpenInvite }) {
                             )}
                           </>
                         )}
-                        {(isWriteAuthorized({ user, resource: PERMISSION_RESOURCES.COHORT }) || isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.COHORT })) && (
-                          <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />
-                        )}
+                        {isReadAuthorized({ user, resource: PERMISSION_RESOURCES.SETTINGS }) && <NavItem Icon={Settings} title="Paramétrages dynamiques" link="/settings" />}
                         {[ROLES.ADMIN].includes(user.role) && <NavItem Icon={() => <HiOutlinePaperClip size={22} />} title="Import SI-SNU" link={"/import-si-snu"} />}
                         {[ROLES.ADMIN].includes(user.role) && SUB_ROLE_GOD === user.subRole && (
                           <NavItem Icon={() => <HiOutlineMail size={22} />} title="Marketing" link={"/plan-marketing/campagnes-generiques"} />
