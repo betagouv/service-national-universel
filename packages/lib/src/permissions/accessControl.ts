@@ -1,7 +1,7 @@
-import { PermissionType } from "src/mongoSchema";
+import { PermissionType } from "../mongoSchema";
+import { UserDto } from "../dto";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
-import { UserDto } from "src/dto";
 
 export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
