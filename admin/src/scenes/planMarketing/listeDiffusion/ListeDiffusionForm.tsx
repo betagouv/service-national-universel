@@ -52,24 +52,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
     },
   });
 
-  useEffect(() => {
-    const filtersToUse = listeDiffusionData.filters || {};
-    reset(
-      {
-        type: ListeDiffusionEnum.VOLONTAIRES,
-        filters: filtersToUse,
-        ...listeDiffusionData,
-      },
-      {
-        keepDirty: false,
-        keepErrors: false,
-      },
-    );
-
-    setSelectedFilters(filtersToUse);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [listeDiffusionData, reset, forceOpen]);
-
   watch((currentState, { name }) => {
     if (name === "type") {
       handleSelectedFiltersChange({});
@@ -133,7 +115,6 @@ export const ListeDiffusionForm = ({ listeDiffusionData, filter, onSave, onCance
                 name="type"
                 control={control}
                 rules={{ required: !isEditing && "Ce champ est requis" }}
-                disabled={isEditing}
                 render={({ field }) => (
                   <RadioButton
                     options={[
