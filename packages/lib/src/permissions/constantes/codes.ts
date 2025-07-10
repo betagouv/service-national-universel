@@ -39,6 +39,7 @@ export enum PERMISSION_CODES {
   SUPPORT_WRITE = "SupportWrite",
   TABLE_DE_REPARTITION_READ = "TableDeRepartitionRead",
   USER_FULL = "UserFull",
+  USER_READ = "UserRead",
   USER_HISTORY_READ = "UserHistoryRead",
   USER_NOTIFICATIONS_READ = "UserNotificationsRead",
   USER_SAME_STRUCTURE_CREATE = "UserSameStructureCreate",
