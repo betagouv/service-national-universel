@@ -46,6 +46,7 @@ export default function ExportMissionsModal({ user, selectedFilters, onClose, is
     },
     onSuccess: () => {
       toastr.success("Exportation des candidatures", "L'exportation des candidatures a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
+      setExportParams(null);
       onClose();
     },
     onError: (error) => {
