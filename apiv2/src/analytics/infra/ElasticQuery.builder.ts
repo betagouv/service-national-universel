@@ -103,15 +103,14 @@ export class ElasticsearchQueryBuilder<T> {
                                 },
                                 {
                                     terms: {
-                                        [key]: value.filter((e) => e !== undefined && e !== null && e !== "N/A")
+                                        [key]: value.filter((v) => v !== undefined && v !== null && v !== "N/A"),
                                     },
                                 },
                             ],
                         },
                     });
                 }
-            }
-            else {
+            } else if (value !== "") {
                 this.query.body.query.bool.filter!.push({
                     terms: {
                         [`${key}.keyword`]: [value],
