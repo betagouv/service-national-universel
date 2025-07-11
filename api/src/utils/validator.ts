@@ -580,6 +580,7 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     missionsInMail: Joi.array().items(Joi.any().allow(null, "")),
     classeId: Joi.string().allow(null, ""),
     psc1Info: Joi.string().allow(null, ""),
+    roadCodeRefund: Joi.string().valid("true", "false").allow(null, ""),
   };
 
   if (!isYoung(user)) {
