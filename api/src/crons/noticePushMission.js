@@ -6,7 +6,7 @@ const { YoungModel, CohortModel } = require("../models");
 
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge } = require("snu-lib");
 const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
@@ -93,6 +93,40 @@ exports.handler = async () => {
 
 const getMissions = async ({ young }) => {
   if (!young || !young.location || !young.location.lat || !young.location.lon) return;
+  // only validated missions...
+  let filter = [{ term: { "status.keyword": "VALIDATED" } }, { term: { "visibility.keyword": "VISIBLE" } }];
+
+  const today = new Date();
+  const age = calculateAge(young.birthdateAt, today);
+
+  if (young.statusMilitaryPreparationFiles === "REFUSED" || age < 16) {
+    filter.push({ term: { "isMilitaryPreparation.keyword": "false" } });
+  }
+  filter.push(
+    //... that didn't reach their deadline...
+    {
+      range: {
+        endAt: {
+          gte: "now",
+        },
+      },
+    },
+    //... that have places left...
+    {
+      range: {
+        placesLeft: {
+          gt: 0,
+        },
+      },
+    },
+    //... that is in 20 km radius...
+    {
+      geo_distance: {
+        distance: "20km",
+        location: young.location,
+      },
+    },
+  );
   try {
     const excludedMissionIds = young?.missionsInMail?.map((m) => m.missionId);
 
@@ -106,33 +140,7 @@ const getMissions = async ({ young }) => {
             },
           },
         ],
-        filter: [
-          // only validated missions...
-          { term: { "status.keyword": "VALIDATED" } },
-          //... that didn't reach their deadline...
-          {
-            range: {
-              endAt: {
-                gte: "now",
-              },
-            },
-          },
-          //... that have places left...
-          {
-            range: {
-              placesLeft: {
-                gt: 0,
-              },
-            },
-          },
-          //... that is in 20 km radius...
-          {
-            geo_distance: {
-              distance: "20km",
-              location: young.location,
-            },
-          },
-        ],
+        filter: filter,
       },
     };
 
