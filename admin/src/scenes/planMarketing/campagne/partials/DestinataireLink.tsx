@@ -27,7 +27,7 @@ export default function DestinataireLink({ cohortId, listeDiffusion }: Destinata
     enabled: !!listeDiffusion,
   });
 
-  if (!cohort || Object.entries(listeDiffusion?.filters).length === 0) {
+  if (!cohort) {
     return null;
   }
 
