@@ -1,31 +1,43 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
-import { EtablissementDto } from "./dto";
+import { CohortDto, EtablissementDto, YoungDto } from "./dto";
 import { format, isPast } from "date-fns";
 import { fr } from "date-fns/locale";
 import { shouldDisplayDateByCohortName } from "./utils/cohortUtils";
 import { CohortType } from "./mongoSchema/cohort";
 import { YoungType } from "./mongoSchema/young";
 
-const COHORTS_WITH_JDM_COUNT = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022", "Février 2023 - C", "Avril 2023 - B", "Avril 2023 - A", "Juin 2023"];
+export const COHORTS_WITH_JDM_COUNT = [
+  "2019",
+  "2020",
+  "2021",
+  "2022",
+  "Février 2022",
+  "Juin 2022",
+  "Juillet 2022",
+  "Février 2023 - C",
+  "Avril 2023 - B",
+  "Avril 2023 - A",
+  "Juin 2023",
+];
 
-const getCohortStartDate = (cohort: CohortType) => {
+export const getCohortStartDate = (cohort: CohortType) => {
   return getZonedDate(cohort.dateStart);
 };
 
-const getCohortEndDate = (cohort: CohortType) => {
+export const getCohortEndDate = (cohort: CohortType) => {
   return getZonedDate(cohort.dateEnd);
 };
 
-const getSchoolYear = (etablissement?: EtablissementDto) => {
+export const getSchoolYear = (etablissement?: EtablissementDto) => {
   const schoolYears = etablissement?.schoolYears || [];
   return schoolYears[schoolYears.length - 1];
 };
 
-const getCohortYear = (cohort?: Pick<CohortType, "dateStart">) => cohort?.dateStart?.toString().slice(0, 4);
+export const getCohortYear = (cohort?: Pick<CohortType, "dateStart">) => cohort?.dateStart?.toString().slice(0, 4);
 
-const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
+export const getCohortPeriod = (cohort?: Pick<CohortType, "name" | "dateStart" | "dateEnd">, withBold = false) => {
   if (!cohort?.dateStart || !cohort?.dateEnd) return cohort?.name || cohort;
 
   if (!shouldDisplayDateByCohortName(cohort.name)) {
@@ -86,7 +98,7 @@ const formatShortCohortPeriod = (cohort) => {
   return formattedStart + " > " + formattedEnd;
 };
 
-const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
+export const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
   if (format === "short") {
     return formatShortCohortPeriod(cohort);
   }
@@ -94,7 +106,7 @@ const formatCohortPeriod = (cohort, format = "short", withBold = false) => {
 };
 
 // includes old cohorts and 2023 july with specific dates for DROMS
-const getCohortPeriodTemp = (young) => {
+export const getCohortPeriodTemp = (young) => {
   const { cohort, region } = young;
   const cohortName = cohort.name || cohort;
   if (cohortName === "Juillet 2023" && [...regionsListDROMS, "Polynésie française"].includes(region)) {
@@ -121,16 +133,16 @@ const getCohortPeriodTemp = (young) => {
   return getCohortPeriod(cohort);
 };
 
-function inscriptionCreationOpenForYoungs(cohort) {
+export function inscriptionCreationOpenForYoungs(cohort) {
   if (!cohort?.inscriptionEndDate) return false;
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-const isCohortTooOld = (cohort?: CohortType) => {
+export const isCohortTooOld = (cohort?: CohortType | CohortDto) => {
   return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
-function hasAccessToReinscription(young: YoungType) {
+export function hasAccessToReinscription(young: YoungType) {
   if (young.departSejourMotif === "Exclusion") {
     return false;
   }
@@ -140,39 +152,22 @@ function hasAccessToReinscription(young: YoungType) {
   return young.cohort === "à venir";
 }
 
-const hasValidatedPhase1 = (young: YoungType) =>
+const hasValidatedPhase1 = (young: YoungType | YoungDto) =>
   (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) || [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
 
 const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
 
 // Les volontaires peuvent voir les missions dès qu'ils sont pointés et tant que leur cohorte n'est pas archivée
-function canViewMissions(young: YoungType, cohort?: CohortType) {
+export function canViewMissions(young: YoungType, cohort?: CohortType) {
   return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
 }
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
-function canCreateApplications(young: YoungType, cohort?: CohortType) {
-  return hasValidatedPhase1(young) && !isCohortTooOld(cohort);
+export function canCreateApplications(young: YoungType | YoungDto, cohort?: CohortType | CohortDto) {
+  return hasValidatedPhase1(young) && !isCohortTooOld(cohort) && young.statusPhase2 !== YOUNG_STATUS_PHASE2.DESENGAGED;
 }
 
 // Ils peuvent demander des reconnaissances d'équivalences même si leur cohorte est archivée.
-function canCreateEquivalences(young: YoungType) {
+export function canCreateEquivalences(young: YoungType) {
   return hasValidatedPhase1(young);
 }
-
-export {
-  getSchoolYear,
-  getCohortYear,
-  getCohortPeriod,
-  formatCohortPeriod,
-  getCohortPeriodTemp,
-  inscriptionCreationOpenForYoungs,
-  hasAccessToReinscription,
-  isCohortTooOld,
-  canViewMissions,
-  canCreateApplications,
-  canCreateEquivalences,
-  getCohortStartDate,
-  getCohortEndDate,
-  COHORTS_WITH_JDM_COUNT,
-};

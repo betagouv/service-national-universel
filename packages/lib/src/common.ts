@@ -1,7 +1,21 @@
 import sanitizeHtml from "sanitize-html";
 
 import { WITHRAWN_REASONS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ACADEMIQUE_DOMAINS, YOUNG_SOURCE } from "./constants/constants";
-import translation from "./translation";
+import {
+  translate,
+  translateApplication,
+  translateApplicationFileType,
+  translateEngagement,
+  translateEquivalenceStatus,
+  translateFileStatusPhase1,
+  translateInscriptionStatus,
+  translateMission,
+  translatePhase1,
+  translatePhase2,
+  translateSource,
+  translateStatusMilitaryPreparationFiles,
+  translateVisibilty,
+} from "./translation";
 import { ROLES } from "./roles";
 
 const isInRuralArea = (v) => {
@@ -19,29 +33,29 @@ const getFilterLabel = (selected, placeholder = "Choisissez un filtre", prelabel
   if (Object.keys(selected).length === 0) return placeholder;
   const translator = (item) => {
     if (prelabel === "Statut phase 2") {
-      return translation.translatePhase2(item);
+      return translatePhase2(item);
     } else if (prelabel === "Statut phase 1") {
-      return translation.translatePhase1(item);
+      return translatePhase1(item);
     } else if (prelabel === "Statut mission (candidature)") {
-      return translation.translateApplication(item);
+      return translateApplication(item);
     } else if (prelabel === "Equivalence de MIG") {
-      return translation.translateEquivalenceStatus(item);
+      return translateEquivalenceStatus(item);
     } else if (prelabel === "Statut contrats") {
-      return translation.translateEngagement(item);
+      return translateEngagement(item);
     } else if (prelabel === "Statut fichier phase 1") {
-      return translation.translateFileStatusPhase1(item);
+      return translateFileStatusPhase1(item);
     } else if (prelabel === "Visibilité") {
-      return translation.translateVisibilty(item);
+      return translateVisibilty(item);
     } else if (prelabel === "Pièces jointes") {
-      return translation.translateApplicationFileType(item);
+      return translateApplicationFileType(item);
     } else if (prelabel === "Dossier d’éligibilité aux Préparations Militaires") {
-      return translation.translateStatusMilitaryPreparationFiles(item);
+      return translateStatusMilitaryPreparationFiles(item);
     } else if (prelabel === "Place occupées") {
-      return translation.translateMission(item);
+      return translateMission(item);
     } else if (prelabel === "Statut") {
-      return translation.translateInscriptionStatus(item);
+      return translateInscriptionStatus(item);
     } else {
-      return translation.translate(item);
+      return translate(item);
     }
   };
   const translated = Object.keys(selected).map((item) => {
@@ -62,27 +76,27 @@ const getSelectedFilterLabel = (selected, prelabel) => {
   }
   const translator = (item) => {
     if (prelabel === "Statut phase 2") {
-      return translation.translatePhase2(item);
+      return translatePhase2(item);
     } else if (prelabel === "Statut phase 1") {
-      return translation.translatePhase1(item);
+      return translatePhase1(item);
     } else if (prelabel === "Statut mission (candidature)") {
-      return translation.translateApplication(item);
+      return translateApplication(item);
     } else if (prelabel === "Equivalence de MIG") {
-      return translation.translateEquivalenceStatus(item);
+      return translateEquivalenceStatus(item);
     } else if (prelabel === "Statut contrats") {
-      return translation.translateEngagement(item);
+      return translateEngagement(item);
     } else if (prelabel === "Statut fichier phase 1") {
-      return translation.translateFileStatusPhase1(item);
+      return translateFileStatusPhase1(item);
     } else if (prelabel === "Visibilité") {
-      return translation.translateVisibilty(item);
+      return translateVisibilty(item);
     } else if (prelabel === "Dossier d’éligibilité aux Préparations Militaires") {
-      return translation.translateStatusMilitaryPreparationFiles(item);
+      return translateStatusMilitaryPreparationFiles(item);
     } else if (prelabel === "Source") {
-      return translation.translateSource(item);
+      return translateSource(item);
     } else if (prelabel === "Place occupées") {
-      return translation.translateMission(item);
+      return translateMission(item);
     } else {
-      return translation.translate(item);
+      return translate(item);
     }
   };
   let value = "";

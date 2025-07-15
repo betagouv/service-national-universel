@@ -2,7 +2,7 @@ import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS } from "./constants/cle/classeImportEnMasse";
 
-const translate = (value) => {
+export const translate = (value?: string | null) => {
   switch (value) {
     case "WAITING_REALISATION":
       return "En attente de réalisation";
@@ -339,7 +339,7 @@ const translate = (value) => {
   }
 };
 
-const translateRoles = (role) => {
+export const translateRoles = (role) => {
   switch (role) {
     case "admin":
       return "Modérateur";
@@ -408,7 +408,7 @@ const translateRoles = (role) => {
   }
 };
 
-const translateInscriptionStatus = (value) => {
+export const translateInscriptionStatus = (value) => {
   switch (value) {
     case "WAITING_VALIDATION":
       return "En attente de validation";
@@ -439,7 +439,7 @@ const translateInscriptionStatus = (value) => {
   }
 };
 
-const translateVisibilty = (v) => {
+export const translateVisibilty = (v) => {
   switch (v) {
     case "VISIBLE":
       return "Ouverte";
@@ -450,7 +450,7 @@ const translateVisibilty = (v) => {
   }
 };
 
-const translateState = (state) => {
+export const translateState = (state) => {
   switch (state) {
     case "open":
     case "OPEN":
@@ -475,7 +475,7 @@ const translateState = (state) => {
   }
 };
 
-const translateSessionStatus = (statut) => {
+export const translateSessionStatus = (statut) => {
   switch (statut) {
     case "VALIDATED":
       return "Validé";
@@ -486,7 +486,18 @@ const translateSessionStatus = (statut) => {
   }
 };
 
-const translatePhase1 = (phase1) => {
+export const translateStatusPhase = (phase: number, status: string) => {
+  switch (phase) {
+    case 1:
+      return translatePhase1(status);
+    case 2:
+      return translatePhase2(status);
+    default:
+      return translate(status);
+  }
+};
+
+export const translatePhase1 = (phase1) => {
   switch (phase1) {
     case "WAITING_AFFECTATION":
       return "En attente d'affectation";
@@ -511,7 +522,7 @@ const translatePhase1 = (phase1) => {
   }
 };
 
-const translatePhase2 = (phase2) => {
+export const translatePhase2 = (phase2) => {
   switch (phase2) {
     case "WAITING_REALISATION":
       return "Inactif";
@@ -523,11 +534,13 @@ const translatePhase2 = (phase2) => {
       return "Désistée";
     case "IN_COMING":
       return "À venir";
+    case "DESENGAGED":
+      return "Désengagée";
     default:
       return phase2;
   }
 };
-const translateContractStatus = (contract) => {
+export const translateContractStatus = (contract) => {
   switch (contract) {
     case "DRAFT":
       return "Brouillon";
@@ -539,7 +552,7 @@ const translateContractStatus = (contract) => {
       return contract;
   }
 };
-const translateApplication = (candidature) => {
+export const translateApplication = (candidature) => {
   switch (candidature) {
     case "WAITING_VALIDATION":
       return "Candidature en attente";
@@ -566,7 +579,7 @@ const translateApplication = (candidature) => {
   }
 };
 
-const translateApplicationForYoungs = (candidature) => {
+export const translateApplicationForYoungs = (candidature) => {
   switch (candidature) {
     case "WAITING_VALIDATION":
       return "Candidature en attente";
@@ -591,7 +604,7 @@ const translateApplicationForYoungs = (candidature) => {
   }
 };
 
-const translateEngagement = (engagement) => {
+export const translateEngagement = (engagement) => {
   switch (engagement) {
     case "DRAFT":
       return "Brouillon";
@@ -604,7 +617,7 @@ const translateEngagement = (engagement) => {
   }
 };
 
-const translateFileStatusPhase1 = (status) => {
+export const translateFileStatusPhase1 = (status) => {
   switch (status) {
     case "TO_UPLOAD":
       return "À renseigner";
@@ -626,7 +639,7 @@ const translateFileStatusPhase1 = (status) => {
       return status;
   }
 };
-const translateStatusMilitaryPreparationFiles = (status) => {
+export const translateStatusMilitaryPreparationFiles = (status) => {
   switch (status) {
     case "WAITING_VERIFICATION":
       return "En attente de vérification";
@@ -641,7 +654,7 @@ const translateStatusMilitaryPreparationFiles = (status) => {
   }
 };
 
-const translateEquivalenceStatus = (status) => {
+export const translateEquivalenceStatus = (status) => {
   switch (status) {
     case "WAITING_VERIFICATION":
       return "En attente de vérification";
@@ -656,7 +669,7 @@ const translateEquivalenceStatus = (status) => {
   }
 };
 
-const translateAddFilePhase2WithoutPreposition = (status) => {
+export const translateAddFilePhase2WithoutPreposition = (status) => {
   switch (status) {
     case "contractAvenantFiles":
       return "Avenant au contrat d’engagement";
@@ -671,7 +684,7 @@ const translateAddFilePhase2WithoutPreposition = (status) => {
   }
 };
 
-const translateAddFilePhase2 = (status) => {
+export const translateAddFilePhase2 = (status) => {
   switch (status) {
     case "contractAvenantFiles":
       return "un avenant au contrat d’engagement";
@@ -686,7 +699,7 @@ const translateAddFilePhase2 = (status) => {
   }
 };
 
-const translateAddFilesPhase2 = (status) => {
+export const translateAddFilesPhase2 = (status) => {
   switch (status) {
     case "contractAvenantFiles":
       return "plusieurs avenants au contrat d’engagement";
@@ -701,12 +714,12 @@ const translateAddFilesPhase2 = (status) => {
   }
 };
 
-const translateSource = (bool) => {
+export const translateSource = (bool) => {
   if (bool === "true") return "JVA";
   else return "SNU";
 };
 
-const translateFilter = (label) => {
+export const translateFilter = (label) => {
   switch (label) {
     // Volontaires
     case "SEARCH":
@@ -823,7 +836,7 @@ const translateFilter = (label) => {
   }
 };
 
-const translateGrade = (grade) => {
+export const translateGrade = (grade) => {
   switch (grade) {
     case "NOT_SCOLARISE":
       return "Non scolarisé(e)";
@@ -864,7 +877,7 @@ const translateGrade = (grade) => {
   }
 };
 
-const translateField = (field) => {
+export const translateField = (field) => {
   switch (field) {
     case "firstName":
       return "Prénom";
@@ -1027,7 +1040,7 @@ const translateField = (field) => {
   }
 };
 
-const translateCorrectionReason = (reason) => {
+export const translateCorrectionReason = (reason) => {
   switch (reason) {
     case "UNREADABLE":
       return "Pièce illisible";
@@ -1044,7 +1057,7 @@ const translateCorrectionReason = (reason) => {
   }
 };
 
-const translateApplicationFileType = (type) => {
+export const translateApplicationFileType = (type) => {
   switch (type) {
     case "contractAvenantFiles":
       return "Avenant au contrat d'engagement";
@@ -1059,7 +1072,7 @@ const translateApplicationFileType = (type) => {
   }
 };
 
-const translateAction = (action: string): string => {
+export const translateAction = (action: string): string => {
   switch (action) {
     case "add":
       return "Ajout";
@@ -1076,7 +1089,7 @@ const translateAction = (action: string): string => {
   }
 };
 
-const translateTypologieCenter = (typology) => {
+export const translateTypologieCenter = (typology) => {
   switch (typology) {
     case "PUBLIC_ETAT":
       return "Public / État";
@@ -1091,7 +1104,7 @@ const translateTypologieCenter = (typology) => {
   }
 };
 
-const translateDomainCenter = (domain) => {
+export const translateDomainCenter = (domain) => {
   switch (domain) {
     case "ETABLISSEMENT":
       return "Etablissement d’enseignement";
@@ -1106,7 +1119,7 @@ const translateDomainCenter = (domain) => {
   }
 };
 
-const translateMission = (mission) => {
+export const translateMission = (mission) => {
   switch (mission) {
     case "FULL":
       return "Toutes les places occupées";
@@ -1119,7 +1132,7 @@ const translateMission = (mission) => {
   }
 };
 
-const translateCniExpired = (cniExpired) => {
+export const translateCniExpired = (cniExpired) => {
   switch (cniExpired) {
     case "true":
       return "En attente";
@@ -1128,7 +1141,7 @@ const translateCniExpired = (cniExpired) => {
   }
 };
 
-const translateEtablissementSector = (sector) => {
+export const translateEtablissementSector = (sector) => {
   switch (sector) {
     case "pro":
       return "Professionnel";
@@ -1139,7 +1152,7 @@ const translateEtablissementSector = (sector) => {
   }
 };
 
-const translateColoration = (coloration) => {
+export const translateColoration = (coloration) => {
   switch (coloration) {
     case "SPORT":
       return "Sport";
@@ -1154,7 +1167,7 @@ const translateColoration = (coloration) => {
   }
 };
 
-const translateYoungSource = (source) => {
+export const translateYoungSource = (source) => {
   switch (source) {
     case "CLE":
       return "CLE";
@@ -1166,7 +1179,7 @@ const translateYoungSource = (source) => {
   }
 };
 
-const translateStatusClasse = (status) => {
+export const translateStatusClasse = (status) => {
   switch (status) {
     case "WITHDRAWN":
       return "Classe Désistée";
@@ -1275,7 +1288,7 @@ export const translateMarketing = (name: string) => {
 // --------------------------------------------------------------
 // Utilisé formater les noms et adresses des centres du SI
 
-const formatNameAndAddress = (address: string): string => {
+export const formatNameAndAddress = (address: string): string => {
   const addressExceptions = ["de", "du", "des", "le", "la", "les", "à", "au", "aux", "l'", "sur", "sous", "et"];
 
   return address
@@ -1362,7 +1375,7 @@ const busModificationFields = {
 
 const allBusPatchesFields = { ...globalFields, ...busPatchFields, ...lineToPointFields, ...busModificationFields };
 
-function translateBusPatchesField(path) {
+export function translateBusPatchesField(path) {
   // const translationKey = Object.keys(allBusPatchesFields).find((key) => path.includes(key));
   // return translationKey ? allBusPatchesFields[translationKey] : path;
   return allBusPatchesFields[path] ? allBusPatchesFields[path] : path;
@@ -1413,79 +1426,4 @@ export const translateInscriptionManuelle = (name: string) => {
     default:
       return name;
   }
-};
-
-export {
-  translate,
-  translateState,
-  translateSessionStatus,
-  translatePhase1,
-  translateContractStatus,
-  translatePhase2,
-  translateApplication,
-  translateApplicationForYoungs,
-  translateEngagement,
-  translateFileStatusPhase1,
-  translateStatusMilitaryPreparationFiles,
-  translateEquivalenceStatus,
-  translateAddFilePhase2,
-  translateAddFilesPhase2,
-  translateAddFilePhase2WithoutPreposition,
-  translateVisibilty,
-  translateFilter,
-  translateSource,
-  translateGrade,
-  translateField,
-  translateCorrectionReason,
-  translateApplicationFileType,
-  translateAction,
-  translateTypologieCenter,
-  translateDomainCenter,
-  translateMission,
-  translateBusPatchesField,
-  translateInscriptionStatus,
-  translateCniExpired,
-  translateEtablissementSector,
-  translateColoration,
-  translateYoungSource,
-  translateStatusClasse,
-  translateRoles,
-  formatNameAndAddress,
-};
-export default {
-  translate,
-  translateState,
-  translateSessionStatus,
-  translatePhase1,
-  translateContractStatus,
-  translatePhase2,
-  translateApplication,
-  translateApplicationForYoungs,
-  translateEngagement,
-  translateFileStatusPhase1,
-  translateStatusMilitaryPreparationFiles,
-  translateEquivalenceStatus,
-  translateAddFilePhase2,
-  translateAddFilesPhase2,
-  translateAddFilePhase2WithoutPreposition,
-  translateVisibilty,
-  translateFilter,
-  translateSource,
-  translateGrade,
-  translateField,
-  translateCorrectionReason,
-  translateApplicationFileType,
-  translateAction,
-  translateTypologieCenter,
-  translateDomainCenter,
-  translateMission,
-  translateBusPatchesField,
-  translateInscriptionStatus,
-  translateCniExpired,
-  translateEtablissementSector,
-  translateColoration,
-  translateYoungSource,
-  translateStatusClasse,
-  translateRoles,
-  formatNameAndAddress,
 };
