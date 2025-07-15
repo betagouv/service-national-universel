@@ -750,6 +750,12 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     const { sessionPhase1Id, ligneId } = young;
 
+    if (value.roadCodeRefund === "true") {
+      newYoung.roadCodeRefundDate = new Date();
+    } else if (value.roadCodeRefund === "false") {
+      newYoung.roadCodeRefundDate = undefined;
+    }
+
     young.set(newYoung);
     await young.save({ fromUser: req.user });
 
