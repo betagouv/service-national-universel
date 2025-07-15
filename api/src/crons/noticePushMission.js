@@ -97,9 +97,9 @@ const getMissions = async ({ young }) => {
   let filter = [{ term: { "status.keyword": "VALIDATED" } }, { term: { "visibility.keyword": "VISIBLE" } }];
 
   const today = new Date();
-  const ageAtStart = calculateAge(young.birthdateAt, today);
+  const age = calculateAge(young.birthdateAt, today);
 
-  if (young.statusMilitaryPreparationFiles === "REFUSED" || ageAtStart < 16) {
+  if (young.statusMilitaryPreparationFiles === "REFUSED" || age < 16) {
     filter.push({ term: { "isMilitaryPreparation.keyword": "false" } });
   }
   filter.push(
