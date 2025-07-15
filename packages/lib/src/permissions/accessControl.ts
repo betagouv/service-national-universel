@@ -1,3 +1,5 @@
+import { PermissionType } from "../mongoSchema";
+import { UserDto } from "../dto";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
 
@@ -27,7 +29,12 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         if (policy.where?.length) {
           for (const where of policy.where) {
             if (where.source) {
-              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(user[where.source]));
+              const userValue = user[where.source];
+              if (Array.isArray(userValue)) {
+                authorized.push(userValue.includes(String(contextUpdated[resource]?.[where.field])));
+              } else {
+                authorized.push(String(contextUpdated[resource]?.[where.field]) === String(userValue));
+              }
             } else if (where.value) {
               authorized.push(String(contextUpdated[resource]?.[where.field]) === String(where.value));
             } else {
@@ -67,4 +74,12 @@ export function isExecuteAuthorized({ user, resource, context, ignorePolicy }: H
 
 export function isFullAuthorized({ user, resource, context, ignorePolicy }: HasPermissionParams): boolean {
   return isAuthorized({ user, resource, action: PERMISSION_ACTIONS.FULL, context, ignorePolicy });
+}
+
+export function hasPolicyForAttribute({ user, permissions, field }: { user: UserDto; permissions: PermissionType[]; field: string }): boolean {
+  return (
+    user.acl?.some(
+      (acl) => permissions.some((permission) => permission.resource === acl.resource) && acl.policy?.some((policy) => policy.where?.some((where) => where.field === field)),
+    ) || false
+  );
 }

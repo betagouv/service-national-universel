@@ -161,4 +161,10 @@ export class FileProvider implements FileGateway {
     baseName(path: string): string {
         return path.replace(/^.*[\\/]/, "");
     }
+
+    getFileUrlFromKey(key: string): string {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        return `https://${bucket}.${endpoint}/${key}`;
+    }
 }
