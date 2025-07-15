@@ -109,6 +109,7 @@ const getMissions = async ({ young }) => {
         filter: [
           // only validated missions...
           { term: { "status.keyword": "VALIDATED" } },
+          { term: { "visibility.keyword": "VISIBLE" } },
           //... that didn't reach their deadline...
           {
             range: {
