@@ -24,6 +24,13 @@ export const PermissionPolicyWhereSchema = {
       description: "Dynamic field of referent to filter on (ex: '_id')",
     },
   },
+  resource: {
+    type: String,
+    optional: true,
+    documentation: {
+      description: "Custom resource to filter on (when context has a another resource than the permission resource)",
+    },
+  },
 };
 
 export const PermissionPolicySchema = {

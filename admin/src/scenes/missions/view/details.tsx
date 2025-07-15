@@ -6,8 +6,9 @@ import CreatableSelect from "react-select/creatable";
 import { useSelector } from "react-redux";
 import validator from "validator";
 
-import { useAddress, MISSION_STATUS } from "snu-lib";
+import { useAddress, MISSION_STATUS, MissionType } from "snu-lib";
 import { AddressForm } from "@snu/ds/common";
+// @ts-ignore
 import { useDebounce } from "@uidotdev/usehooks";
 import InfoMessage from "../../dashboardV2/components/ui/InfoMessage";
 
@@ -28,21 +29,27 @@ import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { HiExternalLink } from "react-icons/hi";
 
-export default function DetailsView({ mission, setMission, getMission }) {
-  const [values, setValues] = useState(mission);
+interface DetailsViewProps {
+  mission: MissionType;
+  setMission: (mission: MissionType) => void;
+  getMission: () => void;
+}
+
+export default function DetailsView({ mission, setMission, getMission }: DetailsViewProps) {
+  const [values, setValues] = useState<MissionType>(mission);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState({});
-  const [referents, setReferents] = useState([]);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [referents, setReferents] = useState<Array<any>>([]);
   const [creationTutor, setCreationTutor] = useState(false);
-  const { user } = useSelector((state) => state.Auth);
-  const [structure, setStructure] = useState(null);
+  const user = useSelector((state: any) => state.Auth.user);
+  const [structure, setStructure] = useState<any>(null);
 
   const [editingBottom, setEdittingBottom] = useState(false);
   const [loadingBottom, setLoadingBottom] = useState(false);
   const [errorsBottom, setErrorsBottom] = useState({});
 
-  const [newTutor, setNewTutor] = useState({ firstName: "", lastName: "", email: "", phone: "" });
+  const [newTutor, setNewTutor] = useState<any>({ firstName: "", lastName: "", email: "", phone: "" });
 
   const [modalConfirmation, setModalConfirmation] = useState(false);
   const [query, setQuery] = useState("");
@@ -74,9 +81,9 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
   const history = useHistory();
 
-  const referentSelectRef = useRef();
+  const referentSelectRef = useRef<any>(null);
 
-  async function initContext({ structureId }) {
+  async function initContext({ structureId }: { structureId?: string }) {
     if (!structureId) return history.push("/mission");
 
     //init structure
@@ -100,7 +107,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     initContext({ structureId: values.structureId });
   }, [values.structureId]);
 
-  const fetchStructures = async (inputValue) => {
+  const fetchStructures = async (inputValue: string) => {
     const { responses } = await api.post("/elasticsearch/structure/search", { filters: { searchbar: [inputValue] } });
     return responses[0].hits.hits.map((hit) => {
       return { value: hit._source, _id: hit._id, label: hit._source.name, structure: hit._source };
@@ -111,8 +118,8 @@ export default function DetailsView({ mission, setMission, getMission }) {
     // Réinitialiser les états de chargement et d'erreur
     setLoading(true);
     setLoadingBottom(true);
-    const error = {};
-    const errorBottom = {};
+    const error: Record<string, string> = {};
+    const errorBottom: Record<string, string> = {};
 
     setLoading(true);
     const baseError = "Ce champ est obligatoire";
@@ -121,25 +128,27 @@ export default function DetailsView({ mission, setMission, getMission }) {
     });
     if (mission?.isJvaMission === "false" && !values.addressVerified) error.addressVerified = "L'adresse doit être vérifiée";
     //check duration only if specified
+    // @ts-ignore
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet");
+      toastr.error("Oups, le formulaire est incomplet", "");
       return setLoading(false);
     }
 
     setLoadingBottom(true);
-    if (values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
-    if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrect";
+    if (values.startAt && new Date(values.startAt) < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date est incorrect";
+    if (values.startAt && values.endAt && new Date(values.startAt) > new Date(values.endAt)) error.endAt = "La date de fin est incorrect";
+    // @ts-ignore
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)
       error.placesTotal = "Il y a plus de candidatures que de places";
 
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet");
+      toastr.error("Oups, le formulaire est incomplet", "");
       return setLoadingBottom(false);
     }
 
@@ -148,7 +157,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
 
     // Si des erreurs sont trouvées, afficher un message d'erreur
     if (Object.keys(combinedError).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet");
+      toastr.error("Oups, le formulaire est incomplet", "");
       setLoading(false);
       setLoadingBottom(false);
       return;
@@ -172,10 +181,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     }
   }, [values.period]);
 
-  const updateMission = async (valuesToUpdate) => {
+  const updateMission = async (valuesToUpdate: string[]) => {
     try {
       // build object from array of keys
-      const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {});
+      const valuesToSend = valuesToUpdate.reduce((o, key) => ({ ...o, [key]: values[key] }), {} as any);
       if (valuesToSend.addressVerified) valuesToSend.addressVerified = valuesToSend.addressVerified.toString();
       if (structure.isMilitaryPreparation !== "true") valuesToSend.isMilitaryPreparation = "false";
       const { ok, code, data: missionReturned } = await api.put(`/mission/${values._id}`, valuesToSend);
@@ -184,7 +193,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
         setLoadingBottom(false);
         return setLoading(false);
       }
-      toastr.success("Mission enregistrée");
+      toastr.success("Mission enregistrée", "");
       setLoading(false);
       setLoadingBottom(false);
       setEdittingBottom(false);
@@ -194,7 +203,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
     } catch (e) {
       setLoading(false);
       setLoadingBottom(false);
-      return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission");
+      return toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", "");
     }
   };
 
@@ -202,9 +211,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
     return { value: d, label: translate(d) };
   });
 
-  const onVerifyAddress = (isConfirmed) => (suggestion) => {
+  const onVerifyAddress = (isConfirmed?: boolean) => (suggestion: any) => {
     setValues({
       ...values,
+      // @ts-ignore
       addressVerified: true,
       region: suggestion.region,
       department: suggestion.department,
@@ -221,14 +231,14 @@ export default function DetailsView({ mission, setMission, getMission }) {
   ];
   const sendInvitation = async () => {
     try {
-      let error = {};
-      if (!newTutor.firstName) error.firstName = "Ce champ est obligatoire";
-      if (!newTutor.lastName) error.lastName = "Ce champ est obligatoire";
-      if (!validator.isEmail(newTutor.email)) error.email = "L'email est incorrect";
-      if (!newTutor.phone) error.phone = "Ce champ est obligatoire";
-      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) error.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
-      setErrors(error);
-      if (Object.keys(error).length > 0) return setLoading(false);
+      const errorInvite: Record<string, string> = {};
+      if (!newTutor.firstName) errorInvite.firstName = "Ce champ est obligatoire";
+      if (!newTutor.lastName) errorInvite.lastName = "Ce champ est obligatoire";
+      if (!validator.isEmail(newTutor.email)) errorInvite.email = "L'email est incorrect";
+      if (!newTutor.phone) errorInvite.phone = "Ce champ est obligatoire";
+      if (!isPossiblePhoneNumber(newTutor.phone, "FR")) errorInvite.phone = "Le numéro de téléphone est au mauvais format. Format attendu : 06XXXXXXXX ou +33XXXXXXXX";
+      setErrors(errorInvite);
+      if (Object.keys(errorInvite).length > 0) return setLoading(false);
 
       newTutor.structureId = values.structureId;
       newTutor.structureName = values.structureName;
@@ -242,7 +252,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
       setNewTutor({ firstName: "", lastName: "", email: "", phone: "" });
       setCreationTutor(false);
       initContext({ structureId: values.structureId });
-      return toastr.success("Invitation envoyée");
+      return toastr.success("Invitation envoyée", "");
     } catch (e) {
       if (e.code === "USER_ALREADY_REGISTERED")
         return toastr.error("Cette adresse email est déjà utilisée.", `${newTutor.email} a déjà un compte sur cette plateforme.`, { timeOut: 10000 });
@@ -290,8 +300,6 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 {mission.status === "VALIDATED" && (
                   <div className="flex flex-row items-center justify-center gap-2">
                     <Toggle
-                      id="visibility"
-                      name="visibility"
                       disabled={!editing}
                       value={!thresholdPendingReached && values.visibility === "VISIBLE"}
                       onChange={(e) => {
@@ -374,6 +382,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 <div className="mt-4">
                   <div className="mb-2 text-xs font-medium">Structure rattachée</div>
                   <AsyncSelect
+                    // @ts-ignore
                     label="Structure"
                     value={{ label: values.structureName }}
                     loadOptions={fetchStructures}
@@ -389,10 +398,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     }}
                     defaultOptions
                     onChange={(e) => {
-                      setValues({ ...values, structureName: e.label, structureId: e._id });
+                      // @ts-ignore
+                      setValues({ ...values, structureName: e?.label, structureId: e?._id });
                     }}
                     placeholder="Rechercher une structure"
-                    error={errors.structureName}
+                    // @ts-ignore
+                    error={errors?.structureName}
                   />
                   {values.structureName && <ViewStructureLink structureId={values.structureId} />}
                 </div>
@@ -405,8 +416,10 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     options={mainDomainsOption}
                     placeholder={"Sélectionnez un domaine principal"}
                     onChange={(e) => {
+                      // @ts-ignore
                       setValues({ ...values, mainDomain: e.value, domains: values.domains.filter((d) => d !== e.value) });
                     }}
+                    // @ts-ignore
                     value={values.mainDomain}
                   />
                   <div className="my-2 flex flex-row text-xs font-medium">
@@ -420,6 +433,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     noOptionsMessage={"Aucun domaine ne correspond à cette recherche"}
                     placeholder={"Sélectionnez un ou plusieurs domaines"}
                     onChange={(e) => {
+                      // @ts-ignore
                       setValues({ ...values, domains: e });
                     }}
                     value={[...values.domains]}
@@ -431,6 +445,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <AddressForm
                     readOnly={!editing}
                     data={{ address: values.address, zip: values.zip, city: values.city }}
+                    // @ts-ignore
                     updateData={(address) => setValues({ ...values, ...address, addressVerified: false })}
                     query={query}
                     setQuery={setQuery}
@@ -444,6 +459,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         city={values.city}
                         onSuccess={onVerifyAddress(true)}
                         onFail={onVerifyAddress()}
+                        // @ts-ignore
                         isVerified={values.addressVerified === true}
                         buttonClassName="border-[#1D4ED8] text-[#1D4ED8]"
                         verifyText="Pour vérifier  l'adresse vous devez remplir les champs adresse, code postal et ville."
@@ -478,6 +494,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
                         indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                       }}
+                      // @ts-ignore
                       noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
                       placeholder={"Sélectionnez un tuteur"}
                       onChange={(e) => {
@@ -553,10 +570,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                 <div>
                   <div className="mb-2 text-xs font-medium">Type de mission</div>
                   <CustomSelect
+                    // @ts-ignore
                     errors={errors}
                     readOnly={!editing}
                     options={formatOptions}
                     placeholder={"Mission regroupée sur des journées"}
+                    // @ts-ignore
                     onChange={(e) => setValues({ ...values, format: e.value })}
                     value={values.format}
                   />
@@ -639,6 +658,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="flex flex-row items-center justify-between">
                     <div className="font-medium text-gray-800">Préparation Militaire : {values?.isMilitaryPreparation === "true" ? "oui" : "non"}</div>
                     <Toggle
+                      // @ts-ignore
                       id="hebergement"
                       name="hebergement"
                       disabled={!editing}
@@ -654,6 +674,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="flex flex-row items-center justify-between">
                     <div className="font-medium text-gray-800">Hébergement proposé : {values?.hebergement === "true" ? "oui" : "non"}</div>
                     <Toggle
+                      // @ts-ignore
                       id="hebergement"
                       name="hebergement"
                       disabled={!editing}
@@ -737,17 +758,20 @@ export default function DetailsView({ mission, setMission, getMission }) {
                       type="date"
                       className="w-[50%]"
                       onChange={(startAt) => setValues({ ...values, startAt })}
+                      // @ts-ignore
                       value={values.startAt}
                       error={errors?.startAt}
                     />
                     <Field
                       readOnly={!editing}
+                      // @ts-ignore
                       bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                       label="Date de fin"
                       name="endAt"
                       className="w-[50%]"
                       type="date"
                       onChange={(endAt) => setValues({ ...values, endAt })}
+                      // @ts-ignore
                       value={values.endAt}
                       error={errors?.endAt}
                     />
@@ -760,14 +784,17 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     </div>
                   </div>
                   <Field
+                    // @ts-ignore
                     error={errorsBottom?.frequence}
                     readOnly={!editing}
+                    // @ts-ignore
                     bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
                     row={4}
                     onChange={(frequence) => setValues({ ...values, frequence })}
                     label="Fréquence estimée de la mission"
+                    // @ts-ignore
                     value={values.frequence}
                   />
                 </div>
@@ -787,9 +814,11 @@ export default function DetailsView({ mission, setMission, getMission }) {
                     isMulti
                     options={Object.values(PERIOD).map((el) => ({ value: el, label: translate(el) }))}
                     placeholder={"Sélectionnez une ou plusieurs périodes"}
+                    // @ts-ignore
                     onChange={(e) => setValues({ ...values, period: e })}
                     value={values.period}
                   />
+                  {/* @ts-ignore */}
                   {(editing || values.subPeriod.length > 0) && values.period.length !== 0 && values.period !== "" && values.period !== "WHENEVER" && (
                     <div className="mt-4">
                       <CustomSelect
@@ -797,12 +826,15 @@ export default function DetailsView({ mission, setMission, getMission }) {
                         isMulti
                         options={(() => {
                           const valuesToCheck = values.period;
-                          let options = [];
+                          const options = [];
+                          // @ts-ignore
                           if (valuesToCheck?.indexOf(PERIOD.DURING_HOLIDAYS) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_HOLIDAYS));
+                          // @ts-ignore
                           if (valuesToCheck?.indexOf(PERIOD.DURING_SCHOOL) !== -1) options.push(...Object.keys(MISSION_PERIOD_DURING_SCHOOL));
                           return options.map((el) => ({ value: el, label: translate(el) }));
                         })()}
                         placeholder={"Sélectionnez une ou plusieurs périodes"}
+                        // @ts-ignore
                         onChange={(e) => setValues({ ...values, subPeriod: e })}
                         value={values.subPeriod}
                       />
@@ -815,10 +847,12 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   </div>
                   <Field
                     name="placesTotal"
+                    // @ts-ignore
                     error={errorsBottom?.placesTotal}
                     readOnly={!editing}
                     isJvaMission={mission?.isJvaMission === "true"}
                     onChange={(placesTotal) => setValues({ ...values, placesTotal })}
+                    // @ts-ignore
                     value={values.placesTotal}
                   />
                 </div>
@@ -831,7 +865,29 @@ export default function DetailsView({ mission, setMission, getMission }) {
   );
 }
 
-const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti = false, placeholder, noOptionsMessage = "Aucune option", error, isJvaMission = false }) => {
+const CustomSelect = ({
+  ref = null,
+  onChange,
+  readOnly,
+  options,
+  value,
+  isMulti = false,
+  placeholder,
+  noOptionsMessage = "Aucune option",
+  error,
+  isJvaMission = false,
+}: {
+  ref?: any;
+  onChange: (value: string | string[]) => void;
+  readOnly: boolean;
+  options: Array<any>;
+  value: string | string[];
+  isMulti?: boolean;
+  placeholder: string;
+  noOptionsMessage?: string;
+  error?: string;
+  isJvaMission?: boolean;
+}) => {
   return (
     <ReactSelect
       isDisabled={readOnly || isJvaMission}
@@ -854,7 +910,7 @@ const CustomSelect = ({ ref = null, onChange, readOnly, options, value, isMulti 
   );
 };
 
-const CheckBox = ({ value }) => {
+const CheckBox = ({ value }: { value: boolean }) => {
   return (
     <>
       {value ? (

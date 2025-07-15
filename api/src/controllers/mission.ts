@@ -8,17 +8,7 @@ import { ERRORS, isYoung } from "../utils/index";
 import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } from "../application/applicationService";
 import { getTutorName } from "../services/mission";
 import { validateId, validateMission, idSchema } from "../utils/validator";
-import {
-  SENDINBLUE_TEMPLATES,
-  MISSION_STATUS,
-  ROLES,
-  canViewMission,
-  canModifyMissionStructureId,
-  YoungType,
-  PERMISSION_RESOURCES,
-  PERMISSION_ACTIONS,
-  isAuthorized,
-} from "snu-lib";
+import { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, YoungType, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized, isAdmin } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
@@ -413,8 +403,6 @@ router.get(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
       const where: any = { missionId: id };
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         where.status = { $ne: "WAITING_ACCEPTATION " };
@@ -443,7 +431,7 @@ router.put(
       const { error: errorStructureId, value: checkedStructureId } = validateId(req.params.structureId);
       if (errorId || errorStructureId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      if (!canModifyMissionStructureId(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!isAdmin(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const structure = await StructureModel.findById(checkedStructureId);
       const mission = await MissionModel.findById(checkedId);

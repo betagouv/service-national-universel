@@ -1,21 +1,21 @@
 import express, { Response } from "express";
-import passport from "passport";
 import crypto from "crypto";
 import {
   SENDINBLUE_TEMPLATES,
   getAge,
-  canCreateOrUpdateContract,
-  canViewContract,
   ROLES,
   UserDto,
   ContractType,
   isAuthorized,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
+  isReadAuthorized,
+  isWriteAuthorized,
+  isCreateAuthorized,
 } from "snu-lib";
 import { capture } from "../sentry";
 import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
-import { ERRORS, isYoung, isReferent } from "../utils";
+import { ERRORS } from "../utils";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
 import { logger } from "../logger";
@@ -224,129 +224,151 @@ async function sendContractEmail(
 const router = express.Router();
 
 // Create or update contract.
-router.post("/", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: idError, value: id } = validateOptionalId(req.body._id);
-    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { error, value: data } = validateContract(req.body);
-    if (error) {
+router.post(
+  "/",
+  authMiddleware(["referent"]),
+  permissionAccessControlMiddleware([
+    { resource: PERMISSION_RESOURCES.CONTRACT, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true },
+    { resource: PERMISSION_RESOURCES.CONTRACT, action: PERMISSION_ACTIONS.CREATE, ignorePolicy: true },
+  ]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error: idError, value: id } = validateOptionalId(req.body._id);
+      if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      const { error, value: data } = validateContract(req.body);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      let previousStructureId, currentStructureId;
+      if (id) {
+        if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        const contract = await ContractModel.findById(id);
+        if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        previousStructureId = contract.structureId;
+        currentStructureId = data.structureId || contract.structureId;
+      } else {
+        if (!isCreateAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user })) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+        previousStructureId = data.structureId;
+        currentStructureId = data.structureId;
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+
+      const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
+      const application = await ApplicationModel.findById(contract.applicationId);
+      if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      application.contractId = contract._id;
+      application.missionDuration = contract.missionDuration;
+      await application.save({ fromUser: req.user });
+
+      const young = await YoungModel.findById(contract.youngId);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      await updateYoungStatusPhase2Contract(young, req.user);
+      await updateYoungPhase2StatusAndHours(young, req.user);
+
+      return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (!canCreateOrUpdateContract(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-    let previousStructureId, currentStructureId;
-    if (id) {
-      const contract = await ContractModel.findById(id);
-      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      previousStructureId = contract.structureId;
-      currentStructureId = data.structureId || contract.structureId;
-    } else {
-      previousStructureId = data.structureId;
-      currentStructureId = data.structureId;
-    }
-    if (req.user.role === ROLES.RESPONSIBLE) {
-      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (previousStructureId.toString() !== req.user.structureId.toString() || currentStructureId.toString() !== req.user.structureId.toString()) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-    }
-    if (req.user.role === ROLES.SUPERVISOR) {
-      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-      if (!structures.map((e) => e._id.toString()).includes(previousStructureId.toString()) || !structures.map((e) => e._id.toString()).includes(currentStructureId.toString())) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-    }
-
-    const contract = id ? await updateContract(id, data, req.user) : await createContract(data, req.user);
-    const application = await ApplicationModel.findById(contract.applicationId);
-    if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    application.contractId = contract._id;
-    application.missionDuration = contract.missionDuration;
-    await application.save({ fromUser: req.user });
-
-    const young = await YoungModel.findById(contract.youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    await updateYoungStatusPhase2Contract(young, req.user);
-    await updateYoungPhase2StatusAndHours(young, req.user);
-
-    return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 // Send contract email
-router.post("/:id/send-email/:type", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
+router.post(
+  "/:id/send-email/:type",
+  authMiddleware(["referent"]),
+  [permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.CONTRACT, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }])],
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value: id } = validateId(req.params.id);
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const { error: typeError, value: type } = Joi.string().valid("projectManager", "structureManager", "parent1", "parent2", "young").required().validate(req.params.type);
+      if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+      const contract = await ContractModel.findById(id);
+      if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user, context: { contract: contract.toJSON() } })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      if (req.user.role === ROLES.RESPONSIBLE) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        if (contract.structureId?.toString() !== req.user.structureId.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+      if (req.user.role === ROLES.SUPERVISOR) {
+        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
+        if (!structures.map((e) => e._id.toString()).includes(contract.structureId?.toString())) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
+
+      if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
+      if (type === "structureManager") await sendStructureManagerContractEmail(contract, false);
+      if (type === "parent1") await sendParent1ContractEmail(contract, false);
+      if (type === "parent2") await sendParent2ContractEmail(contract, false);
+      if (type === "young") await sendYoungContractEmail(contract, false);
+
+      return res.status(200).send({ ok: true });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+  },
+);
 
-    const { error: typeError, value: type } = Joi.string().valid("projectManager", "structureManager", "parent1", "parent2", "young").required().validate(req.params.type);
-    if (typeError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+router.get(
+  "/:id",
+  authMiddleware(["referent", "young"]),
+  [
+    requestValidatorMiddleware({
+      params: Joi.object({ id: idSchema().required() }),
+    }),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.CONTRACT, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  ],
+  async (req: RouteRequest<any>, res: RouteResponse<any>) => {
+    try {
+      const { error: idError, value: id } = validateId(req.params.id);
+      if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const contract = await ContractModel.findById(id);
-    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const data = await ContractModel.findById(id);
+      if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrUpdateContract(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-    if (req.user.role === ROLES.RESPONSIBLE) {
-      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (contract.structureId?.toString() !== req.user.structureId.toString()) {
+      if (!isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.CONTRACT, context: { contract: data.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
+
+      return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    if (req.user.role === ROLES.SUPERVISOR) {
-      if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-      if (!structures.map((e) => e._id.toString()).includes(contract.structureId?.toString())) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-      }
-    }
-
-    if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
-    if (type === "structureManager") await sendStructureManagerContractEmail(contract, false);
-    if (type === "parent1") await sendParent1ContractEmail(contract, false);
-    if (type === "parent2") await sendParent2ContractEmail(contract, false);
-    if (type === "young") await sendYoungContractEmail(contract, false);
-
-    return res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.get("/:id", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: idError, value: id } = validateId(req.params.id);
-    if (idError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const data = await ContractModel.findById(id);
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (isYoung(req.user) && data.youngId?.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    if (isReferent(req.user) && !canViewContract(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get(
   "/:id/patches",

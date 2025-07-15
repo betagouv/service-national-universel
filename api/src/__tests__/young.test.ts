@@ -2,12 +2,12 @@ import fetch from "node-fetch";
 
 import request from "supertest";
 import jwt from "jsonwebtoken";
-import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE } from "snu-lib";
+import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
-import { initRedisClient, closeRedisClient } from "../redis";
+import { closeRedisClient } from "../redis";
 import { getNewApplicationFixture } from "./fixtures/application";
 import { createApplication } from "./helpers/application";
 import getNewMissionFixture from "./fixtures/mission";
@@ -21,6 +21,8 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
 import { ClasseModel } from "../models";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
 
 jest.mock("../redis", () => {
   const redis = require("redis");
@@ -66,8 +68,20 @@ jest.mock("node-fetch");
 
 const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
-beforeAll(() => {
-  return Promise.all([dbConnect(), initRedisClient()]);
+beforeAll(async () => {
+  await dbConnect();
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL, [
+    {
+      where: [
+        { source: "_id", field: "youngId" },
+        { source: "_id", resource: "young", field: "_id" },
+      ],
+      blacklist: [],
+      whitelist: [],
+    },
+  ]);
 });
 
 afterAll(() => {
@@ -80,7 +94,7 @@ describe("Young", () => {
     it("should soft-delete the young", async () => {
       const youngFixture = getNewYoungFixture();
       const young = await createYoungHelper(youngFixture);
-      const res = await request(getAppHelper()).put(`/young/${young._id}/soft-delete`);
+      const res = await request(await getAppHelperWithAcl()).put(`/young/${young._id}/soft-delete`);
       expect(res.statusCode).toEqual(200);
       const updatedYoung = res.body.data;
 
@@ -140,20 +154,22 @@ describe("Young", () => {
     });
 
     it("should return 404 with wrong id", async () => {
-      const res = await request(getAppHelper()).delete("/young/" + notExistingYoungId);
+      const res = await request(await getAppHelperWithAcl()).delete("/young/" + notExistingYoungId);
       expect(res.statusCode).toEqual(404);
     });
 
     it("should be accessible by referents only", async () => {
       const passport = require("passport");
-      await request(getAppHelper()).delete("/young/" + notExistingYoungId);
+      await request(await getAppHelperWithAcl()).delete("/young/" + notExistingYoungId);
       expect(passport.lastTypeCalledOnAuthenticate).toEqual(["referent"]);
     });
   });
 
   describe("GET /young/:id/patches", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/young/${notExistingYoungId}/patches`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 403 if not admin", async () => {
@@ -161,7 +177,7 @@ describe("Young", () => {
       young.firstName = "MY NEW NAME";
       await young.save();
 
-      const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
         .get(`/young/${young._id}/patches`)
         .send();
       expect(res.status).toBe(403);
@@ -170,7 +186,9 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       young.firstName = "MY NEW NAME";
       await young.save();
-      const res = await request(getAppHelper()).get(`/young/${young._id}/patches`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/young/${young._id}/patches`)
+        .send();
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).toEqual(
         expect.arrayContaining([
@@ -182,26 +200,34 @@ describe("Young", () => {
     });
     it("should be only accessible by referents", async () => {
       const passport = require("passport");
-      await request(getAppHelper()).get(`/young/${notExistingYoungId}/patches`).send();
+      await request(await getAppHelperWithAcl())
+        .get(`/young/${notExistingYoungId}/patches`)
+        .send();
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
     });
   });
 
   describe("PUT /young/:id/validate-mission-phase3", () => {
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).put(`/young/${notExistingYoungId}/validate-mission-phase3`).send({});
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/young/${notExistingYoungId}/validate-mission-phase3`)
+        .send({});
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young)).put(`/young/${young._id}/validate-mission-phase3`).send({});
+      const res = await request(await getAppHelperWithAcl(young))
+        .put(`/young/${young._id}/validate-mission-phase3`)
+        .send({});
       expect(res.statusCode).toEqual(200);
     });
     it("should be only accessible by young", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const passport = require("passport");
-      const res = await request(getAppHelper()).put(`/young/${young._id}/validate-mission-phase3`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/young/${young._id}/validate-mission-phase3`)
+        .send();
       expect(res.statusCode).toEqual(200);
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
     });
@@ -209,7 +235,9 @@ describe("Young", () => {
       const me = await createYoungHelper(getNewYoungFixture());
       const they = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(me)).put(`/young/${they._id}/validate-mission-phase3`).send();
+      const res = await request(await getAppHelperWithAcl(me))
+        .put(`/young/${they._id}/validate-mission-phase3`)
+        .send();
       expect(res.statusCode).toEqual(403);
     });
   });
@@ -219,9 +247,11 @@ describe("Young", () => {
 
   describe("POST /young/france-connect/authorization-url", () => {
     it("should return 200", async () => {
-      const res = await request(getAppHelper()).post("/young/france-connect/authorization-url").send({
-        callback: "foo",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/france-connect/authorization-url")
+        .send({
+          callback: "foo",
+        });
       const url = res.body.data.url;
       storedState = url.split("state=")[1].split("&")[0];
       storedNonce = url.split("nonce=")[1].split("&")[0];
@@ -256,11 +286,13 @@ describe("Young", () => {
           json: jsonResponse,
         }),
       );
-      const res = await request(getAppHelper()).post("/young/france-connect/user-info").send({
-        code: "foo",
-        callback: "bar",
-        state: storedState,
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/france-connect/user-info")
+        .send({
+          code: "foo",
+          callback: "bar",
+          state: storedState,
+        });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -269,11 +301,13 @@ describe("Young", () => {
     it("should return 200 if young is updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young)).put("/young/account/profile").send({
-        gender: "male",
-        phone: "0600000000",
-        phoneZone: "FRANCE",
-      });
+      const res = await request(await getAppHelperWithAcl(young))
+        .put("/young/account/profile")
+        .send({
+          gender: "male",
+          phone: "0600000000",
+          phoneZone: "FRANCE",
+        });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.gender).toEqual("male");
       expect(res.body.data.phone).toEqual("0600000000");
@@ -281,10 +315,12 @@ describe("Young", () => {
     });
     it("should return 400 if parameters are wrong", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper(young)).put("/young/account/profile").send({
-        firstName: "foo",
-        lastName: "bar",
-      });
+      const res = await request(await getAppHelperWithAcl(young))
+        .put("/young/account/profile")
+        .send({
+          firstName: "foo",
+          lastName: "bar",
+        });
       expect(res.statusCode).toEqual(400);
     });
 
@@ -295,7 +331,9 @@ describe("Young", () => {
         statusPhase2: "WAITING_REALISATION",
         statusPhase3: "WAITING_REALISATION",
       });
-      const response = await request(getAppHelper(young)).put("/young").send({ status: "WITHDRAWN" });
+      const response = await request(await getAppHelperWithAcl(young))
+        .put("/young")
+        .send({ status: "WITHDRAWN" });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
@@ -306,7 +344,9 @@ describe("Young", () => {
 
     it.skip("should not cascade status to WITHDRAWN if validated", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), statusPhase1: "DONE", statusPhase2: "VALIDATED", statusPhase3: "VALIDATED" });
-      const response = await request(getAppHelper(young)).put("/young").send({ status: "WITHDRAWN" });
+      const response = await request(await getAppHelperWithAcl(young))
+        .put("/young")
+        .send({ status: "WITHDRAWN" });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.status).toEqual("WITHDRAWN");
@@ -317,7 +357,9 @@ describe("Young", () => {
 
     it("should be only accessible by young", async () => {
       const passport = require("passport");
-      await request(getAppHelper()).put("/young").send();
+      await request(await getAppHelperWithAcl())
+        .put("/young")
+        .send();
       expect(passport.lastTypeCalledOnAuthenticate).toEqual("young");
     });
   });
@@ -326,21 +368,23 @@ describe("Young", () => {
     it("should return 200 if parents are updated", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const response = await request(getAppHelper(young)).put("/young/account/parents").send({
-        parent1Status: "mother",
-        parent1FirstName: "foo",
-        parent1LastName: "bar",
-        parent1Email: "foo@bar.com",
-        parent1Phone: "0600000000",
-        parent1PhoneZone: "FRANCE",
-        parent2: true,
-        parent2Status: "father",
-        parent2FirstName: "foo",
-        parent2LastName: "bar",
-        parent2Email: "foo@bar.com",
-        parent2Phone: "0600000000",
-        parent2PhoneZone: "FRANCE",
-      });
+      const response = await request(await getAppHelperWithAcl(young))
+        .put("/young/account/parents")
+        .send({
+          parent1Status: "mother",
+          parent1FirstName: "foo",
+          parent1LastName: "bar",
+          parent1Email: "foo@bar.com",
+          parent1Phone: "0600000000",
+          parent1PhoneZone: "FRANCE",
+          parent2: true,
+          parent2Status: "father",
+          parent2FirstName: "foo",
+          parent2LastName: "bar",
+          parent2Email: "foo@bar.com",
+          parent2Phone: "0600000000",
+          parent2PhoneZone: "FRANCE",
+        });
       const updatedYoung = response.body.data;
       expect(response.statusCode).toEqual(200);
       expect(updatedYoung.parent1Status).toEqual("mother");
@@ -360,7 +404,9 @@ describe("Young", () => {
     it("should return 400 if parent 1 status is not given", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const response = await request(getAppHelper(young)).put("/young/account/parents").send({ parent1Status: "" });
+      const response = await request(await getAppHelperWithAcl(young))
+        .put("/young/account/parents")
+        .send({ parent1Status: "" });
       expect(response.statusCode).toEqual(400);
     });
   });
@@ -369,7 +415,7 @@ describe("Young", () => {
     it("should return 200 if mission preferences are updated", async () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), domains: ["foo"] });
 
-      const response = await request(getAppHelper(young))
+      const response = await request(await getAppHelperWithAcl(young))
         .put("/young/account/mission-preferences")
         .send({
           domains: ["bar"],
@@ -418,10 +464,12 @@ describe("Young", () => {
     it("should return 400 when invitation token is not provided", async () => {
       await deleteYoungByEmailHelper("foo@example.org");
       const young = await createYoungHelper({ ...getNewYoungFixture(), email: "foo@example.org" });
-      const res = await request(getAppHelper()).post("/young/signup_invite").send({
-        email: young.email,
-        password: "%%minMAJ1235",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_invite")
+        .send({
+          email: young.email,
+          password: "Test1234567!",
+        });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 404 when invitation is expired", async () => {
@@ -433,11 +481,13 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(getAppHelper()).post("/young/signup_invite").send({
-        email: young.email,
-        invitationToken,
-        password: "aabb",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_invite")
+        .send({
+          email: young.email,
+          invitationToken,
+          password: "Test1234567!",
+        });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 400 when password is not valid", async () => {
@@ -449,11 +499,13 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(getAppHelper()).post("/young/signup_invite").send({
-        email: young.email,
-        invitationToken,
-        password: "aabb",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_invite")
+        .send({
+          email: young.email,
+          invitationToken,
+          password: "Test1234567",
+        });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 200 when young found", async () => {
@@ -465,11 +517,13 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(getAppHelper()).post("/young/signup_invite").send({
-        email: young.email,
-        password: "%%minMAJ1235",
-        invitationToken,
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_invite")
+        .send({
+          email: young.email,
+          password: "Test1234567!",
+          invitationToken,
+        });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -480,10 +534,9 @@ describe("Young", () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: false }));
       const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
-      const passport = require("passport");
-      passport.user = referent;
-
-      const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/young/invite")
+        .send(youngFixture);
 
       expect(res.statusCode).toBe(403);
       expect(res.body.code).toBe(ERRORS.OPERATION_NOT_ALLOWED);
@@ -494,10 +547,9 @@ describe("Young", () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentDepartment: true }));
       const youngFixture = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
-      const passport = require("passport");
-      passport.user = referent;
-
-      const res = await request(getAppHelper()).post("/young/invite").send(youngFixture);
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/young/invite")
+        .send(youngFixture);
 
       expect(res.statusCode).toBe(200);
       expect(res.body.young).toBeDefined();
@@ -509,10 +561,9 @@ describe("Young", () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ inscriptionOpenForReferentClasse: true, type: COHORT_TYPE.CLE }));
       const young = getNewYoungFixture({ cohortId: cohort._id.toString() });
 
-      const passport = require("passport");
-      passport.user = referent;
-
-      const res = await request(getAppHelper()).post("/young/invite").send(young);
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/young/invite")
+        .send(young);
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty("young");
@@ -526,7 +577,9 @@ describe("Young", () => {
 
   describe("POST /young/signup_verify", () => {
     it("should return 400 when missing invitationToken", async () => {
-      const res = await request(getAppHelper()).post("/young/signup_verify").send({});
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_verify")
+        .send({});
       expect(res.statusCode).toEqual(400);
     });
     it("should return 404 when invitation is expired", async () => {
@@ -538,7 +591,9 @@ describe("Young", () => {
         invitationExpires: new Date(Date.now() - 1000 * 60 * 60 * 24 * 70),
       });
       // expect(new Date(Date.now() - 1000 * 60 * 60 * 24 * 7)).toEqual([]);
-      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_verify")
+        .send({ invitationToken });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 404 when invitation token is wrong", async () => {
@@ -549,7 +604,9 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken: "bar" });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_verify")
+        .send({ invitationToken: "bar" });
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 when invitation token is wrong", async () => {
@@ -560,7 +617,9 @@ describe("Young", () => {
         invitationToken,
         invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
       });
-      const res = await request(getAppHelper()).post("/young/signup_verify").send({ invitationToken });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/young/signup_verify")
+        .send({ invitationToken });
       expect(res.statusCode).toEqual(200);
     });
   });
@@ -575,7 +634,7 @@ describe("Young", () => {
       const young = await createYoungHelper({ ...getNewYoungFixture(), cohort: cohort.name, cohortId: cohort._id });
 
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      let res = await request(getAppHelper(young))
+      let res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -584,7 +643,7 @@ describe("Young", () => {
 
       // With military file.
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      res = await request(getAppHelper(young))
+      res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
         .field("body", JSON.stringify({ names: ["image.jpeg"] }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -596,7 +655,7 @@ describe("Young", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: COHORTS.AVENIR }));
 
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      let res = await request(getAppHelper(young))
+      let res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["image.jpeg"], category: "cniNew", expirationDate: "2024-06-25T09:33:21.470Z" }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -605,7 +664,7 @@ describe("Young", () => {
 
       // With military file.
       getMimeFromFileSpy.mockResolvedValueOnce("image/jpeg");
-      res = await request(getAppHelper())
+      res = await request(await getAppHelperWithAcl())
         .post(`/young/${young._id}/documents/militaryPreparationFilesIdentity`)
         .field("body", JSON.stringify({ names: ["image.jpeg"] }))
         .attach("file", Buffer.from("contenu"), { filename: "image.jpeg" });
@@ -616,7 +675,7 @@ describe("Young", () => {
     it("should not accept invalid body", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .send({ body: JSON.stringify({ expirationDate: null }) });
       expect(res.status).toEqual(400);
@@ -625,7 +684,7 @@ describe("Young", () => {
     it("should not accept invalid param key", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/thisPropertyDoesNotExists`)
         .send({ body: JSON.stringify({ names: ["e"] }) });
       expect(res.status).toEqual(400);
@@ -634,7 +693,7 @@ describe("Young", () => {
     it("should not accept invalid file mime", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post(`/young/${young._id}/documents/cniFiles`)
         .field("body", JSON.stringify({ names: ["test.csv"] }))
         .attach("file", Buffer.from("contenu"), { filename: "test.csv", contentType: "text/csv" });
@@ -644,28 +703,30 @@ describe("Young", () => {
 
   describe("GET /young/validate_phase3/:young/:token", () => {
     it("should return 404 when token or young is wrong", async () => {
-      const res = await request(getAppHelper()).get(`/young/validate_phase3/${notExistingYoungId}/token`);
+      const res = await request(await getAppHelperWithAcl()).get(`/young/validate_phase3/${notExistingYoungId}/token`);
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 when token is right", async () => {
       const token = Date.now().toString();
       const young = await createYoungHelper({ ...getNewYoungFixture(), phase3Token: token });
-      const res = await request(getAppHelper()).get(`/young/validate_phase3/${young._id}/${token}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/young/validate_phase3/${young._id}/${token}`);
       expect(res.statusCode).toEqual(200);
     });
   });
 
   describe("PUT /young/validate_phase3/:young/:token", () => {
     it("should return 404 when token or young is wrong", async () => {
-      const res = await request(getAppHelper()).put(`/young/validate_phase3/${notExistingYoungId}/token`);
+      const res = await request(await getAppHelperWithAcl()).put(`/young/validate_phase3/${notExistingYoungId}/token`);
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 when token is right with tutor note", async () => {
       const token = Date.now().toString();
       const young = await createYoungHelper({ ...getNewYoungFixture(), phase3Token: token });
-      const res = await request(getAppHelper()).put(`/young/validate_phase3/${young._id}/${token}`).send({
-        phase3TutorNote: "hello",
-      });
+      const res = await request(await getAppHelperWithAcl())
+        .put(`/young/validate_phase3/${young._id}/${token}`)
+        .send({
+          phase3TutorNote: "hello",
+        });
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.phase3TutorNote).toEqual("hello");
     });
@@ -675,17 +736,21 @@ describe("Young", () => {
     const validTemplate = "1229";
     it("should return 400 if template not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper()).post(`/young/${young._id}/email/test/`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/young/${young._id}/email/test/`)
+        .send();
       expect(res.statusCode).toEqual(400);
     });
     it("should return 404 if young not found", async () => {
-      const res = await request(getAppHelper()).post(`/young/${notExistingYoungId}/email/${validTemplate}/`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/young/${notExistingYoungId}/email/${validTemplate}/`)
+        .send();
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post("/young/" + young._id + "/email/" + validTemplate)
         .send({ message: "hello" });
       expect(res.statusCode).toEqual(200);
@@ -695,7 +760,9 @@ describe("Young", () => {
       sendTemplate.mockClear();
       const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
       const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
-      const res = await request(getAppHelper(tutor)).post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`).send({ status: "VALIDATED" });
+      const res = await request(await getAppHelperWithAcl(tutor))
+        .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`)
+        .send({ status: "VALIDATED" });
       expect(res.statusCode).toEqual(200);
       expect(sendTemplate).toHaveBeenCalledTimes(1);
       expect(sendTemplate).toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE, {
@@ -723,13 +790,13 @@ describe("Young", () => {
     it("should return 404 when young does not exist", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
 
-      const res = await request(getAppHelper(referent)).get("/young/" + notExistingYoungId + "/application");
+      const res = await request(await getAppHelperWithAcl(referent)).get("/young/" + notExistingYoungId + "/application");
       expect(res.status).toBe(404);
     });
     it("should return empty array when young has no application", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 
-      const res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
+      const res = await request(await getAppHelperWithAcl(young)).get("/young/" + young._id + "/application");
       expect(res.body.data).toStrictEqual([]);
       expect(res.status).toBe(200);
     });
@@ -738,7 +805,7 @@ describe("Young", () => {
 
       const mission = await createMissionHelper(getNewMissionFixture());
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
+      const res = await request(await getAppHelperWithAcl(young)).get("/young/" + young._id + "/application");
       expect(res.status).toBe(200);
       expect(res.body.data.length).toBe(1);
       expect(res.body.data[0].status).toBe("WAITING_VALIDATION");
@@ -750,11 +817,11 @@ describe("Young", () => {
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
 
       // Successful request
-      let res = await request(getAppHelper(young)).get("/young/" + young._id + "/application");
+      let res = await request(await getAppHelperWithAcl(young)).get("/young/" + young._id + "/application");
       expect(res.status).toBe(200);
 
       // Failed request (not allowed)
-      res = await request(getAppHelper(young)).get("/young/" + secondYoung._id + "/application");
+      res = await request(await getAppHelperWithAcl(young)).get("/young/" + secondYoung._id + "/application");
       expect(res.status).toBe(403);
     });
   });
@@ -772,7 +839,7 @@ describe("Young", () => {
       const updatedYoung = { ...young.toObject(), status: "VALIDATED" };
       await young.set(updatedYoung).save();
 
-      const res = await request(getAppHelper({ role: ROLES.ADMIN }))
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .put(`/referent/young/${young._id}`)
         .send({
           status: "VALIDATED",
