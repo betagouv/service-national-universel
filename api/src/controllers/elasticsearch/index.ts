@@ -14,7 +14,7 @@ router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission").default);
 router.use("/missionapi", require("./missionapi"));
 router.use("/email", require("./email"));
-router.use("/application", require("./application"));
+router.use("/application", require("./application").default);
 router.use("/referent", require("./referent").default);
 router.use("/dashboard", require("./dashboard/index"));
 router.use("/association", require("./association").default);

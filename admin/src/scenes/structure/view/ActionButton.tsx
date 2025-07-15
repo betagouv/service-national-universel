@@ -1,5 +1,5 @@
 import React from "react";
-import { canCreateMission } from "snu-lib";
+import { isCreateAuthorized, PERMISSION_RESOURCES } from "snu-lib";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
@@ -8,7 +8,7 @@ export function ActionButton({ structureRattacheeId }: { structureRattacheeId?: 
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  if (!canCreateMission(user)) {
+  if (!isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { mission: { structureId: structureRattacheeId! } } })) {
     return null;
   }
   let structureRattacheeParam = "";

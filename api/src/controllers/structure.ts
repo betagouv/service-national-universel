@@ -8,7 +8,6 @@ import { ERRORS } from "../utils";
 import {
   ROLES,
   canDeleteStructure,
-  canViewMission,
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
@@ -235,12 +234,10 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      if (!canViewMission(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const missions = await MissionModel.find({ structureId: req.validatedParams.id });
+      if (!missions) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const data = await MissionModel.find({ structureId: req.validatedParams.id });
-      if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      return res.status(200).send({ ok: true, data: data.map(serializeMission) });
+      return res.status(200).send({ ok: true, data: missions.map(serializeMission) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
