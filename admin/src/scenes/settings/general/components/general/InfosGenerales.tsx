@@ -152,7 +152,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                           <MdInfoOutline size={20} className="text-gray-400" />
                         </Tooltip>
                       </div>
-                      <SimpleToggle label="Cohorte spécifique DROM-COM" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                      <SimpleToggle label="Cohorte spécifique DROM-COM" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                     </div>
                   )}
                 />

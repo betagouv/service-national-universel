@@ -27,8 +27,6 @@ const limitedAccess = {
     authorised: ["/dashboard", "/profil", "/volontaire", "/ligne-de-bus", "/besoin-d-aide", "/centre", "/point-de-rassemblement", "/contenu", "/user"],
     default: "/dashboard",
   },
-  // [ROLES.RESPONSIBLE]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
-  [ROLES.SUPERVISOR]: { authorised: ["/dashboard", "/profil", "/volontaire", "/structure", "/mission", "/besoin-d-aide", "/user"], default: "/dashboard" },
 };
 
 const PERMISSIONS_BY_ROUTE = {
@@ -50,6 +48,10 @@ const PERMISSIONS_BY_ROUTE = {
   "/mission": {
     ignorePolicy: true, // should have read permission but not specific to a mission
     permissions: [{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ }],
+  },
+  "/structure": {
+    ignorePolicy: true, // should have read permission but not specific to a structure
+    permissions: [{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ }],
   },
   "/structure/": {
     params: { id: "structure._id" },
@@ -173,18 +175,18 @@ export const RestrictedRoute = ({ component: Component, roles = ROLES_LIST, ...r
         // toastr.error("Accès non autorisé", `Vous n'avez pas les permissions nécessaires pour accéder à cette page, vous avez été redirigé vers l'accueil.`);
       }
       return <Redirect to={defaultRoute} />;
-    } else {
-      console.debug(`user has permission for ${pathname}`);
     }
   }
 
   // TODO: remove this hack when all routes are protected with permissions
-  if (!matchRoute && (!route || !PERMISSIONS_BY_ROUTE[route]) && [ROLES.INJEP, ROLES.DSNJ].includes(user.role)) {
+  if (!matchRoute && (!route || !PERMISSIONS_BY_ROUTE[route]) && [ROLES.INJEP, ROLES.DSNJ, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
     console.log(`user does not have permission for ${pathname}.`);
     if (pathname !== defaultRoute) {
       toastr.error("Accès non autorisé", `Vous n'avez pas les permissions nécessaires pour accéder à cette page, vous avez été redirigé vers l'accueil.`);
     }
     return <Redirect to={defaultRoute} />;
+  } else {
+    console.debug(`user has permission for ${pathname}`);
   }
 
   return <SentryRoute {...rest} render={(props) => <Component {...props} />} />;
