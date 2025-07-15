@@ -37,7 +37,7 @@ import { StructureGateway } from "@admin/core/engagement/structure/Structure.gat
 import { CandidatureGateway } from "@admin/core/engagement/candidature/Candidature.gateway";
 import { SejourGateway } from "../sejour/Sejour.gateway";
 import { SessionGateway } from "../session/Session.gateway";
-import { EXPORT_JEUNE_FOLDER } from "./ExporterJeune.service";
+import { EXPORT_JEUNE_FOLDER, ExporterJeuneService } from "./ExporterJeune.service";
 
 export type ExporterJeunesResult = {
     rapportFile: {
@@ -57,6 +57,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
     private readonly logger: Logger = new Logger(ExporterJeunes.name);
 
     constructor(
+        @Inject(ExporterJeuneService) private readonly exporterJeuneService: ExporterJeuneService,
         @Inject(ReferentGateway) private readonly referentGateway: ReferentGateway,
         @Inject(StructureGateway) private readonly structureGateway: StructureGateway,
         @Inject(SejourGateway) private readonly sejourGateway: SejourGateway,
@@ -71,7 +72,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
 
     async execute({
         format,
-        filters,
+        filters: filtersRaw,
         fields,
         searchTerm,
         auteur,
@@ -87,6 +88,8 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         }
 
         const musts: Record<string, string | string[]> = {};
+
+        const filters = this.exporterJeuneService.getAllowedFilters(filtersRaw, referent);
 
         if (!filters.status?.length && auteur.role !== ROLES.ADMIN) {
             // volontaires
@@ -242,7 +245,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         this.logger.log(`result ${result.length}`);
 
         return {
-            columnsName: Object.keys(result[0]),
+            columnsName: result.length ? Object.keys(result[0]) : [],
             values: result.map((item) => Object.values(item)),
         };
     }
