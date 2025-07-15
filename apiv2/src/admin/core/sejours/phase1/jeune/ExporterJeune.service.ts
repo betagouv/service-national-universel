@@ -24,4 +24,68 @@ export class ExporterJeuneService {
         }
         return true;
     }
+
+    getAllowedFilters(filtersRaw, user: Partial<ReferentModel>) {
+        const allowedFilters = [
+            "cohort",
+            "originalCohort",
+            "status",
+            "country",
+            "academy",
+            "region",
+            "department",
+            "hasNotes",
+            "grade",
+            "gender",
+            "situation",
+            "ppsBeneficiary",
+            "paiBeneficiary",
+            "isRegionRural",
+            "qpv",
+            "handicap",
+            "allergies",
+            "specificAmenagment",
+            "reducedMobilityAccess",
+            "imageRight",
+            "CNIFileNotValidOnStart",
+            "statusPhase1",
+            "hasMeetingInformation",
+            "handicapInSameDepartment",
+            "youngPhase1Agreement",
+            "cohesionStayPresence",
+            "presenceJDM",
+            "departInform",
+            "departSejourMotif",
+            "cohesionStayMedicalFileReceived",
+            "ligneId",
+            "isTravelingByPlane",
+            "statusPhase2",
+            "phase2ApplicationStatus",
+            "statusPhase2Contract",
+            "statusMilitaryPreparationFiles",
+            "phase2ApplicationFilesType",
+            "status_equivalence",
+            "statusPhase3",
+            "schoolDepartment",
+            "parentAllowSNU",
+            "sessionPhase1Id",
+            "source",
+            "classeId",
+            "etablissementId",
+            "psc1Info",
+            "roadCodeRefund",
+            "frenchNationality",
+            ...(user.role === ROLES.REFERENT_DEPARTMENT ? ["schoolName"] : []),
+        ];
+        const filters = Object.keys(filtersRaw).reduce(
+            (acc, filterKey) => {
+                if (allowedFilters.includes(filterKey)) {
+                    acc[filterKey] = filtersRaw[filterKey];
+                }
+                return acc;
+            },
+            {} as Record<string, string | string[]>,
+        );
+        return filters;
+    }
 }

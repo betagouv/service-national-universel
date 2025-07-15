@@ -97,6 +97,7 @@ import { CandidatureRepository } from "./infra/engagement/candidature/repository
 import { candidatureMongoProviders } from "./infra/engagement/candidature/provider/CandidatureMongo.provider";
 import { NettoyageExportMissions } from "./core/engagement/mission/cron/NettoyageExportMissions";
 import { NettoyageExportJeune } from "./core/sejours/phase1/jeune/cron/NettoyageExportJeune";
+import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
 
 @Module({
     imports: [
@@ -194,6 +195,7 @@ import { NettoyageExportJeune } from "./core/sejours/phase1/jeune/cron/Nettoyage
         ClasseService,
         JeuneService,
         ExportMissionService,
+        ExporterJeuneService,
     ],
     exports: [NettoyageExportMissions, NettoyageExportJeune],
 })
