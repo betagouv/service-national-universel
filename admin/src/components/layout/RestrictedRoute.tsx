@@ -94,8 +94,11 @@ const PERMISSIONS_BY_ROUTE = {
     permissions: [{ resource: PERMISSION_RESOURCES.SETTINGS, action: PERMISSION_ACTIONS.READ }],
   },
   "/user": {
-    ignorePolicy: true, // should have write permission but not specific to a referent
-    permissions: [{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE }],
+    ignorePolicy: true, // should have permission but not specific to a referent
+    permissions: [
+      { resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.WRITE },
+      { resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ },
+    ],
   },
   "/user/": {
     params: { id: "referent._id" },
