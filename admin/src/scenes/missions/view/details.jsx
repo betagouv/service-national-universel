@@ -430,6 +430,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <div className="mb-2 text-xs font-medium">Adresse</div>
                   <AddressForm
                     readOnly={!editing}
+                    disabled={mission?.isJvaMission === "true"}
                     data={{ address: values.address, zip: values.zip, city: values.city }}
                     updateData={(address) => setValues({ ...values, ...address, addressVerified: false })}
                     query={query}
@@ -762,6 +763,7 @@ export default function DetailsView({ mission, setMission, getMission }) {
                   <Field
                     error={errorsBottom?.frequence}
                     readOnly={!editing}
+                    disabled={mission?.isJvaMission === "true"}
                     bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
