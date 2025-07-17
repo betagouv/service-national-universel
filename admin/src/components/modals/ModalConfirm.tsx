@@ -6,6 +6,23 @@ import ModalButton from "../buttons/ModalButton";
 import CloseSvg from "../../assets/Close";
 import RoundWarning from "../../assets/RoundWarning";
 
+interface ModalConfirmProps {
+  isOpen: boolean;
+  showHeaderText?: boolean;
+  headerText?: string;
+  showHeaderIcon?: boolean;
+  title: string;
+  message: string;
+  onChange?: () => void;
+  onCancel?: () => void;
+  onConfirm: () => Promise<void> | void;
+  size?: "sm" | "md" | "lg" | "xl";
+  disableConfirm?: boolean;
+  confirmText?: string;
+  cancelText?: string;
+  children?: React.ReactNode;
+}
+
 export default function ModalConfirm({
   isOpen,
   showHeaderText = true,
@@ -21,8 +38,8 @@ export default function ModalConfirm({
   confirmText = "Confirmer",
   cancelText = "Annuler",
   children = <></>,
-}) {
-  const [sending, setSending] = useState(false);
+}: ModalConfirmProps) {
+  const [sending, setSending] = useState<boolean>(false);
 
   const submit = async () => {
     setSending(true);
@@ -42,10 +59,10 @@ export default function ModalConfirm({
           {children}
         </Content>
         <Footer>
-          <ModalButton loading={sending} disabled={sending || disableConfirm} onClick={submit} primary>
+          <ModalButton loading={sending} disabled={sending || disableConfirm} onClick={submit} primary={true} newPrimary={false} secondary={false}>
             {confirmText}
           </ModalButton>
-          <ModalButton disabled={sending} onClick={onCancel || onChange}>
+          <ModalButton disabled={sending} onClick={onCancel || onChange} primary={false} newPrimary={false} secondary={true} loading={false}>
             {cancelText}
           </ModalButton>
         </Footer>

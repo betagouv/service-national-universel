@@ -1,4 +1,4 @@
-import express from "express";
+import express, { Response } from "express";
 import passport from "passport";
 import fetch from "node-fetch";
 import queryString from "querystring";
@@ -40,7 +40,6 @@ import {
   canGetYoungByEmail,
   canInviteYoung,
   canEditYoung,
-  canViewYoungApplications,
   canEditPresenceYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
@@ -62,6 +61,10 @@ import {
   ReferentType,
   getCohortPeriod,
   WITHRAWN_REASONS,
+  PERMISSION_RESOURCES,
+  isReadAuthorized,
+  PERMISSION_CODES,
+  PERMISSION_ACTIONS,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -77,6 +80,7 @@ import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
 import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
+import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
@@ -694,52 +698,57 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
   }
 });
 
-router.get("/:id/application", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
-    if (error) {
+router.get(
+  "/:id/application",
+  authMiddleware(["referent", "young"]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const { error, value: id } = Joi.string().required().validate(req.params.id, { stripUnknown: true });
+      if (error) {
+        capture(error);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      if (isYoung(req.user) && req.user._id.toString() !== id) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const young = await YoungModel.findById(id);
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+
+      if (isReferent(req.user) && !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const { error: queryError, value: isMilitaryPreparation } = Joi.boolean().validate(req.query.isMilitaryPreparation);
+      if (queryError) {
+        capture(queryError);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
+
+      const query: any = { youngId: id };
+
+      type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
+      let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
+
+      if (isMilitaryPreparation) {
+        data = data.filter((a) => a.mission?.isMilitaryPreparation);
+      }
+
+      for (let application of data) {
+        if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
+        if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
+        application = { ...serializeApplication(application), mission: application.mission, tutor: application.tutor, contract: application.contract };
+      }
+
+      return res.status(200).send({ ok: true, data });
+    } catch (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    if (isYoung(req.user) && req.user._id.toString() !== id) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    if (isReferent(req.user) && !canViewYoungApplications(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    const { error: queryError, value: isMilitaryPreparation } = Joi.boolean().validate(req.query.isMilitaryPreparation);
-    if (queryError) {
-      capture(queryError);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const query: any = { youngId: id };
-
-    type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
-    let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
-
-    if (isMilitaryPreparation) {
-      data = data.filter((a) => a.mission?.isMilitaryPreparation);
-    }
-
-    for (let application of data) {
-      if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
-      if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
-      application = { ...serializeApplication(application), mission: application.mission, tutor: application.tutor, contract: application.contract };
-    }
-
-    return res.status(200).send({ ok: true, data });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 // Get authorization from France Connect.
 router.post("/france-connect/authorization-url", async (req: UserRequest, res) => {

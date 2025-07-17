@@ -1725,62 +1725,67 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
   }
 });
 
-router.delete("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const referent = await ReferentModel.findById(req.params.id);
-    if (!referent) return res.status(404).send({ ok: false });
-    const structure = await StructureModel.findById(referent.structureId);
+router.delete(
+  "/:id",
+  authMiddleware("referent"),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.DELETE, ignorePolicy: true }]),
+  async (req: UserRequest, res: Response) => {
+    try {
+      const referent = await ReferentModel.findById(req.params.id);
+      if (!referent) return res.status(404).send({ ok: false });
+      const structure = await StructureModel.findById(referent.structureId);
 
-    if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
-      const referents = await ReferentModel.find({ structureId: referent.structureId });
-      const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
-      if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
-      if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
-    }
-    if (referent.role === ROLES.ADMINISTRATEUR_CLE || referent.role === ROLES.REFERENT_CLASSE) {
-      const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] }, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
-      if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
-
-      if (referent.subRole === SUB_ROLES.referent_etablissement) {
-        const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
-        if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+      if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
+        const referents = await ReferentModel.find({ structureId: referent.structureId });
+        const missionsLinkedToReferent = await MissionModel.find({ tutorId: referent._id }).countDocuments();
+        if (referents.length === 1) return res.status(409).send({ ok: false, code: ERRORS.LINKED_STRUCTURE });
+        if (missionsLinkedToReferent) return res.status(409).send({ ok: false, code: ERRORS.LINKED_MISSIONS });
       }
+      if (referent.role === ROLES.ADMINISTRATEUR_CLE || referent.role === ROLES.REFERENT_CLASSE) {
+        const classes = await ClasseModel.find({ referentClasseIds: { $in: [referent._id] }, schoolYear: ClasseSchoolYear.YEAR_2024_2025 });
+        if (classes.length > 0) return res.status(409).send({ ok: false, code: ERRORS.LINKED_CLASSES });
 
-      if (referent.subRole === SUB_ROLES.coordinateur_cle) {
-        const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
-        if (etablissement) {
-          const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
-          etablissement.set({ coordinateurIds: coordinateur });
-          await etablissement.save({ fromUser: req.user });
+        if (referent.subRole === SUB_ROLES.referent_etablissement) {
+          const etablissement = await EtablissementModel.findOne({ referentEtablissementIds: { $in: [referent._id] } });
+          if (etablissement) return res.status(409).send({ ok: false, code: ERRORS.LINKED_ETABLISSEMENT });
+        }
+
+        if (referent.subRole === SUB_ROLES.coordinateur_cle) {
+          const etablissement = await EtablissementModel.findOne({ coordinateurIds: { $in: [referent._id] } });
+          if (etablissement) {
+            const coordinateur = etablissement.coordinateurIds.filter((c) => c.toString() !== referent._id.toString());
+            etablissement.set({ coordinateurIds: coordinateur });
+            await etablissement.save({ fromUser: req.user });
+          }
         }
       }
-    }
 
-    await referent.deleteOne();
-    logger.debug(`Referent ${req.params.id} has been deleted`);
+      await referent.deleteOne();
+      logger.debug(`Referent ${req.params.id} has been deleted`);
 
-    if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
-      const response = await SNUpport.api(`/v0/referent`, {
-        method: "DELETE",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include",
-        body: JSON.stringify({ email: referent.email }),
-      });
+      if (referent.role === ROLES.REFERENT_DEPARTMENT || referent.role === ROLES.REFERENT_REGION) {
+        const response = await SNUpport.api(`/v0/referent`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          credentials: "include",
+          body: JSON.stringify({ email: referent.email }),
+        });
 
-      if (!response.ok) {
-        logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+        if (!response.ok) {
+          logger.error(`Failed to delete referent from SNUPPORT: ${response.statusText}`);
+        }
       }
+      res.status(200).send({ ok: true });
+    } catch (error) {
+      capture(error);
+      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get(
   "/:id/session-phase1",

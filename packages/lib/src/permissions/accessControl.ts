@@ -28,15 +28,16 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
       for (const policy of permission.policy) {
         if (policy.where?.length) {
           for (const where of policy.where) {
+            const contextResource = where.resource || resource;
             if (where.source) {
               const userValue = user[where.source];
               if (Array.isArray(userValue)) {
-                authorized.push(userValue.includes(String(contextUpdated[resource]?.[where.field])));
+                authorized.push(userValue.includes(String(contextUpdated[contextResource]?.[where.field])));
               } else {
-                authorized.push(String(contextUpdated[resource]?.[where.field]) === String(userValue));
+                authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(userValue));
               }
             } else if (where.value) {
-              authorized.push(String(contextUpdated[resource]?.[where.field]) === String(where.value));
+              authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(where.value));
             } else {
               authorized.push(false);
             }

@@ -111,8 +111,8 @@ export default function ExportComponent({
       )}
       <ModalConfirm
         isOpen={modal.isOpen}
-        title={modal.title}
-        message={modal.message}
+        title={modal.title!}
+        message={modal.message!}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal.onConfirm?.();

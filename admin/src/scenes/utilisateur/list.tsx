@@ -383,11 +383,10 @@ const Action = ({ hit, structure }: ActionProps) => {
         ]}
       />
 
-      {/* @ts-expect-error jsx component */}
       <ModalConfirm
         isOpen={modal?.isOpen}
-        title={modal?.title}
-        message={modal?.message}
+        title={modal?.title as string}
+        message={modal?.message as string}
         onCancel={() => setModal({ isOpen: false, onConfirm: null })}
         onConfirm={() => {
           modal?.onConfirm?.();

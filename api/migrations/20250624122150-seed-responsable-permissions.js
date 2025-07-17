@@ -102,7 +102,7 @@ module.exports = {
           where: [
             {
               field: "region",
-              value: "region",
+              source: "region",
             },
           ],
         },
@@ -117,7 +117,7 @@ module.exports = {
           where: [
             {
               field: "department",
-              value: "department",
+              source: "department",
             },
           ],
         },
@@ -132,7 +132,7 @@ module.exports = {
           where: [
             {
               field: "networkId", // structure
-              value: "structureId", // referent
+              source: "structureId", // referent
             },
           ],
         },
