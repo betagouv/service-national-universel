@@ -26,6 +26,7 @@ interface proptype {
   query: string;
   setQuery: React.Dispatch<React.SetStateAction<string>>;
   options: Address[];
+  disabled?: boolean;
 }
 
 export default function AddressForm({
@@ -36,6 +37,7 @@ export default function AddressForm({
   query,
   setQuery,
   options,
+  disabled = false,
 }: proptype) {
   function resetData() {
     updateData({
@@ -58,23 +60,25 @@ export default function AddressForm({
           value={data.address}
           onChange={(value: string) => updateData({ ...data, address: value })}
           disabled={
-            readOnly || data?.coordinatesAccuracyLevel === "housenumber"
+            readOnly ||
+            data?.coordinatesAccuracyLevel === "housenumber" ||
+            disabled
           }
           className="col-span-2"
         />
         <Input
           label="Ville"
           value={data.city}
-          disabled={readOnly}
+          disabled={readOnly || disabled}
           className="col-span-2 md:col-span-1"
         />
         <Input
           label="Code postal"
           value={data.zip}
-          disabled={readOnly}
+          disabled={readOnly || disabled}
           className="col-span-2 md:col-span-1"
         />
-        {!readOnly && (
+        {!readOnly && !disabled && (
           <button
             onClick={resetData}
             className="col-span-2 text-blue-600 hover:text-blue-800 ml-auto py-1 flex gap-2 items-center"
