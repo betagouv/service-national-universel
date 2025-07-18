@@ -87,6 +87,7 @@ export const articleSummaries = [
 
 // TODO: Move to DB
 export const questions = [
+  // 1. CODE DE LA ROUTE
   {
     category: "QUESTION",
     value: "PHASE_2_LICENSE",
@@ -96,6 +97,43 @@ export const questions = [
     parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
     displayForm: true,
   },
+  // 2. QUESTIONS D'ENGAGEMENT (Phase 2)
+  {
+    category: "QUESTION",
+    value: "PHASE_2",
+    label: "Phase Engagement - Comment trouver une Mission d'intérêt général ?",
+    articles: ["comment-trouver-une-mig"],
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
+  },
+  {
+    category: "QUESTION",
+    value: "PHASE_2_MISSION",
+    label: "Phase Engagement - J'ai trouvé une Mission d'intérêt général mais elle n'est pas sur la plateforme, comment faire ?",
+    articles: ["je-ne-trouve-pas-de-mission-qui-minteresse"],
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
+  },
+  {
+    category: "QUESTION",
+    value: "PHASE_2_CANDIDATURE",
+    label: "Phase Engagement - Je n'ai pas de nouvelle de ma candidature",
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
+  },
+  {
+    category: "QUESTION",
+    value: "PHASE_2_JDC",
+    label: "Phase Engagement - Ma JDC / Mon CIP",
+    articles: ["journee-defense-et-citoyennete"],
+    roles: ["public", "young"],
+    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
+    displayForm: true,
+  },
+  // 3. QUESTIONS DE SÉJOUR (Phase 1)
   {
     category: "QUESTION",
     label: "Séjour -  Eligibilité aux séjours",
@@ -148,7 +186,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_AFFECTATION",
-    label: "Séjour - Mon lieu d’affectation",
+    label: "Séjour - Mon lieu d'affectation",
     articles: ["mon-lieu-daffectation"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.VOLONTAIRE],
@@ -157,7 +195,7 @@ export const questions = [
   {
     category: "QUESTION",
     value: "PHASE_1_AFFECTATION_CLE",
-    label: "Séjour - Mon lieu d’affectation",
+    label: "Séjour - Mon lieu d'affectation",
     articles: ["quand-vais-je-connaitre-mon-lieu-daffectation-copie"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE],
@@ -192,45 +230,11 @@ export const questions = [
     parcours: [YOUNG_SOURCE.CLE],
     displayForm: true,
   },
-  {
-    category: "QUESTION",
-    value: "PHASE_2",
-    label: "Phase Engagement - Comment trouver une Mission d'intérêt général ?",
-    articles: ["comment-trouver-une-mig"],
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
-    displayForm: true,
-  },
-  {
-    category: "QUESTION",
-    value: "PHASE_2_MISSION",
-    label: "Phase Engagement - J'ai trouvé une Mission d'intérêt général mais elle n'est pas sur la plateforme, comment faire ?",
-    articles: ["je-ne-trouve-pas-de-mission-qui-minteresse"],
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
-    displayForm: true,
-  },
-  {
-    category: "QUESTION",
-    value: "PHASE_2_CANDIDATURE",
-    label: "Phase Engagement - Je n'ai pas de nouvelle de ma candidature",
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
-    displayForm: true,
-  },
-  {
-    category: "QUESTION",
-    value: "PHASE_2_JDC",
-    label: "Phase Engagement - Ma JDC / Mon CIP",
-    articles: ["journee-defense-et-citoyennete"],
-    roles: ["public", "young"],
-    parcours: [YOUNG_SOURCE.VOLONTAIRE, YOUNG_SOURCE.CLE],
-    displayForm: true,
-  },
+  // 4. QUESTIONS TECHNIQUES
   {
     category: "TECHNICAL",
     value: "HTS_TO_CLE",
-    label: "Inscription classe engagée : j’ai déjà un compte volontaire",
+    label: "Inscription classe engagée : j'ai déjà un compte volontaire",
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
     displayForm: true,
@@ -255,7 +259,7 @@ export const questions = [
   {
     category: "TECHNICAL",
     value: "SIBLINGS",
-    label: "J’ai un frère ou une soeur qui possède déjà un compte ",
+    label: "J'ai un frère ou une soeur qui possède déjà un compte ",
     articles: ["je-souhaite-inscrire-des-freressoeurs"],
     roles: ["public", "young"],
     parcours: [YOUNG_SOURCE.CLE, YOUNG_SOURCE.VOLONTAIRE],
