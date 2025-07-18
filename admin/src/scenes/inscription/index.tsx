@@ -49,6 +49,7 @@ import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import ExportInscriptionsButton from "./ExportInscriptionsButton";
 import ExportInscriptionsScolariseButton from "./ExportInscriptionsScolariseButton";
+import { MAX_EXPORT_VOLONTAIRES } from "../volontaires/list";
 
 interface ParamData {
   page: number;
@@ -290,8 +291,10 @@ export default function Inscription(): JSX.Element {
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
-            <ExportInscriptionsButton user={user} selectedFilters={selectedFilters} />
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && <ExportInscriptionsScolariseButton user={user} selectedFilters={selectedFilters} />}
+            <ExportInscriptionsButton selectedFilters={selectedFilters} disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
+            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+              <ExportInscriptionsScolariseButton user={user} selectedFilters={selectedFilters} disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
+            )}
           </div>
         </div>
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">

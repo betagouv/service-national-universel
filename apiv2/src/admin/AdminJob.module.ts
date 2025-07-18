@@ -98,6 +98,22 @@ import { candidatureMongoProviders } from "./infra/engagement/candidature/provid
 import { NettoyageExportMissions } from "./core/engagement/mission/cron/NettoyageExportMissions";
 import { NettoyageExportJeune } from "./core/sejours/phase1/jeune/cron/NettoyageExportJeune";
 import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
+import { SearchLigneDeBusGateway } from "@analytics/core/SearchLigneDeBus.gateway";
+import { SearchSegmentDeLigneGateway } from "@analytics/core/SearchSegmentDeLigne.gateway";
+import { SearchEtablissementGateway } from "@analytics/core/SearchEtablissement.gateway";
+import { SearchClasseGateway } from "@analytics/core/SearchClasse.gateway";
+import { SearchCentreGateway } from "@analytics/core/SearchCentre.gateway";
+import { SearchSejourGateway } from "@analytics/core/SearchSejour.gateway";
+import { SearchPointDeRassemblementGateway } from "@analytics/core/SearchPointDeRassemblement.gateway";
+import { SearchSchoolGateway } from "@analytics/core/SearchSchool.gateway";
+import { SearchCentreElasticRepository } from "@analytics/infra/SearchCentreElastic.repository";
+import { SearchClasseElasticRepository } from "@analytics/infra/SearchClasseElastic.repository";
+import { SearchEtablissementElasticRepository } from "@analytics/infra/SearchEtablissementElastic.repository";
+import { SearchLigneDeBusElasticRepository } from "@analytics/infra/SearchLigneDeBusElastic.repository";
+import { SearchPointDeRassemblementElasticRepository } from "@analytics/infra/SearchPointDeRassemblementElastic.repository";
+import { SearchSchoolElasticRepository } from "@analytics/infra/SearchSchoolElastic.repository";
+import { SearchSegmentDeLigneElasticRepository } from "@analytics/infra/SearchSegmentDeLigneElastic.repository";
+import { SearchSejourElasticRepository } from "@analytics/infra/SearchSejourElastic.repository";
 
 @Module({
     imports: [
@@ -157,6 +173,14 @@ import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.
         { provide: SearchApplicationGateway, useClass: SearchApplicationElasticRepository },
         { provide: SearchReferentGateway, useClass: SearchReferentElasticRepository },
         { provide: SearchStructureGateway, useClass: SearchStructureElasticRepository },
+        { provide: SearchCentreGateway, useClass: SearchCentreElasticRepository },
+        { provide: SearchClasseGateway, useClass: SearchClasseElasticRepository },
+        { provide: SearchEtablissementGateway, useClass: SearchEtablissementElasticRepository },
+        { provide: SearchLigneDeBusGateway, useClass: SearchLigneDeBusElasticRepository },
+        { provide: SearchPointDeRassemblementGateway, useClass: SearchPointDeRassemblementElasticRepository },
+        { provide: SearchSchoolGateway, useClass: SearchSchoolElasticRepository },
+        { provide: SearchSegmentDeLigneGateway, useClass: SearchSegmentDeLigneElasticRepository },
+        { provide: SearchSejourGateway, useClass: SearchSejourElasticRepository },
         // add use case here
         AffectationService,
         InscriptionService,

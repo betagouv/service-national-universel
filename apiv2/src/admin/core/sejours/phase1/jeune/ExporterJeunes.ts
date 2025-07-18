@@ -12,13 +12,22 @@ import {
     formatLongDateFR,
     formatPhoneE164,
     getLabelWithdrawnReason,
+    isAdmin,
     isInRuralArea,
+    isReferentDep,
+    isReferentReg,
+    isReferentRegDep,
+    isResponsableDeCentre,
+    isResponsible,
+    isSupervisor,
+    isVisiteur,
     LigneBusType,
     LigneToPointType,
     MeetingPointType,
     MIME_TYPES,
     ROLES,
     SchoolType,
+    SessionPhase1Type,
     translate,
     translateFileStatusPhase1,
     translatePhase1,
@@ -38,6 +47,14 @@ import { CandidatureGateway } from "@admin/core/engagement/candidature/Candidatu
 import { SejourGateway } from "../sejour/Sejour.gateway";
 import { SessionGateway } from "../session/Session.gateway";
 import { EXPORT_JEUNE_FOLDER, ExporterJeuneService } from "./ExporterJeune.service";
+import { SearchCentreGateway } from "@analytics/core/SearchCentre.gateway";
+import { SearchSchoolGateway } from "@analytics/core/SearchSchool.gateway";
+import { SearchSejourGateway } from "@analytics/core/SearchSejour.gateway";
+import { SearchLigneDeBusGateway } from "@analytics/core/SearchLigneDeBus.gateway";
+import { SearchPointDeRassemblementGateway } from "@analytics/core/SearchPointDeRassemblement.gateway";
+import { SearchSegmentDeLigneGateway } from "@analytics/core/SearchSegmentDeLigne.gateway";
+import { SearchClasseGateway } from "@analytics/core/SearchClasse.gateway";
+import { SearchEtablissementGateway } from "@analytics/core/SearchEtablissement.gateway";
 
 export type ExporterJeunesResult = {
     rapportFile: {
@@ -64,6 +81,15 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         @Inject(SessionGateway) private readonly sessionGateway: SessionGateway,
         @Inject(CandidatureGateway) private readonly candidatureGateway: CandidatureGateway,
         @Inject(SearchYoungGateway) private readonly searchYoungGateway: SearchYoungGateway,
+        @Inject(SearchSchoolGateway) private readonly searchSchoolGateway: SearchSchoolGateway,
+        @Inject(SearchCentreGateway) private readonly searchCentreGateway: SearchCentreGateway,
+        @Inject(SearchSejourGateway) private readonly searchSejourGateway: SearchSejourGateway,
+        @Inject(SearchLigneDeBusGateway) private readonly searchLigneDeBusGateway: SearchLigneDeBusGateway,
+        @Inject(SearchPointDeRassemblementGateway)
+        private readonly searchPointDeRassemblementGateway: SearchPointDeRassemblementGateway,
+        @Inject(SearchSegmentDeLigneGateway) private readonly searchSegmentDeLigneGateway: SearchSegmentDeLigneGateway,
+        @Inject(SearchClasseGateway) private readonly searchClasseGateway: SearchClasseGateway,
+        @Inject(SearchEtablissementGateway) private readonly searchEtablissementGateway: SearchEtablissementGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
@@ -91,9 +117,8 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
 
         const filters = this.exporterJeuneService.getAllowedFilters(filtersRaw, referent);
 
-        if (!filters.status?.length && auteur.role !== ROLES.ADMIN) {
-            // volontaires
-            filters.status = [
+        if (!isAdmin(auteur)) {
+            const defaultStatus = [
                 YOUNG_STATUS.WAITING_VALIDATION,
                 YOUNG_STATUS.WAITING_CORRECTION,
                 YOUNG_STATUS.REFUSED,
@@ -102,18 +127,14 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
                 YOUNG_STATUS.WAITING_LIST,
                 YOUNG_STATUS.ABANDONED,
                 YOUNG_STATUS.REINSCRIPTION,
+                ...(isReferentRegDep(auteur) ? [YOUNG_STATUS.IN_PROGRESS] : []),
             ];
+            filters.status = filters.status?.length
+                ? defaultStatus.filter((status) => filters.status.includes(status))
+                : defaultStatus;
         }
 
-        if (
-            (!filters.status?.length && auteur.role === ROLES.REFERENT_DEPARTMENT) ||
-            auteur.role === ROLES.REFERENT_REGION
-        ) {
-            // inscription en cours
-            filters.status = YOUNG_STATUS.IN_PROGRESS;
-        }
-
-        if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(auteur.role!)) {
+        if (isResponsableDeCentre(auteur)) {
             const sejours =
                 auteur.role === ROLES.HEAD_CENTER
                     ? await this.sejourGateway.findByHeadCenterId(auteur.id)
@@ -133,7 +154,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             filters.cohort = visibleCohorts.map((session) => session.nom);
         }
 
-        if (auteur.role === ROLES.RESPONSIBLE) {
+        if (isResponsible(auteur)) {
             if (!referent.structureId) {
                 throw new FunctionalException(
                     FunctionalExceptionCode.NOT_ENOUGH_DATA,
@@ -144,7 +165,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             musts._id = candidatures.map((candidature) => candidature.jeuneId!);
         }
 
-        if (auteur.role === ROLES.SUPERVISOR) {
+        if (isSupervisor(auteur)) {
             if (!referent.structureId) {
                 throw new FunctionalException(
                     FunctionalExceptionCode.NOT_ENOUGH_DATA,
@@ -158,14 +179,14 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             musts._id = candidatures.map((candidature) => candidature.jeuneId!);
         }
 
-        if (auteur.role === ROLES.REFERENT_REGION && filters.schoolRegion !== referent.region) {
+        if (isReferentReg(auteur) && filters.schoolRegion !== referent.region) {
             filters.region = referent.region;
         }
-        if (auteur.role === ROLES.REFERENT_DEPARTMENT && filters.schoolDepartment?.[0] !== referent.departement?.[0]) {
+        if (isReferentDep(auteur) && filters.schoolDepartment?.[0] !== referent.departement?.[0]) {
             filters.department = referent.departement!;
         }
 
-        if (auteur.role === ROLES.VISITOR) {
+        if (isVisiteur(auteur)) {
             filters.region = referent.region;
         }
 
@@ -230,11 +251,80 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
     ) {
         let updatedJeunes = jeunes;
 
+        let schoolsById: Record<string, Partial<SchoolType>> = {};
+        let centersById: Record<string, Partial<CohesionCenterType>> = {};
+        let sessionPhase1sById: Record<string, Partial<SessionPhase1Type>> = {};
+        let lignesBusById: Record<string, Partial<LigneBusType>> = {};
+        let meetingPointsById: Record<string, Partial<MeetingPointType>> = {};
+        let lignesToPointById: Record<string, Partial<LigneToPointType>> = {};
+        let classesById: Record<string, Partial<ClasseType>> = {};
+        let etablissementsById: Record<string, Partial<EtablissementType>> = {};
+
+        //School
+        if (selectedFields.includes("schoolSituation")) {
+            schoolsById = await this.retrieveSchools(jeunes);
+        }
+
+        //center
+        if (selectedFields.includes("phase1Affectation")) {
+            centersById = await this.retrieveCenters(jeunes);
+        }
+
+        // sessionPhase1
+        if (selectedFields.includes("sessionPhase1Id")) {
+            sessionPhase1sById = await this.retrieveSessionPhase1s(jeunes);
+        }
+
+        //full info bus
+        if (selectedFields.includes("phase1Transport")) {
+            const ligneInfos = await this.retrieveLignesBus(jeunes);
+            lignesBusById = ligneInfos.lignesBusById;
+            meetingPointsById = ligneInfos.meetingPointsById;
+            lignesToPointById = ligneInfos.lignesToPointById;
+        }
+
+        if (selectedFields.includes("cle")) {
+            classesById = await this.retrieveClasses(jeunes);
+            etablissementsById = await this.retrieveEtablissements(jeunes);
+        }
+
         const result: any[] = [];
         updatedJeunes.forEach((jeune, index) => {
             if (index % 1000 === 0) {
                 this.logger.log(`mapping ${format} ${index}/${updatedJeunes.length}`);
             }
+
+            if (jeune.schoolId) {
+                // @ts-ignore
+                jeune.school = schoolsById[jeune.schoolId];
+            }
+            if (jeune.classeId) {
+                // @ts-ignore
+                jeune.classe = classesById[jeune.classeId];
+            }
+            if (jeune.etablissementId) {
+                // @ts-ignore
+                jeune.etablissement = etablissementsById[jeune.etablissementId];
+            }
+            if (jeune.sessionPhase1Id) {
+                // @ts-ignore
+                jeune.sessionPhase1 = sessionPhase1sById[jeune.sessionPhase1Id];
+            }
+            if (jeune.cohesionCenterId) {
+                // @ts-ignore
+                jeune.center = centersById[jeune.cohesionCenterId];
+            }
+            if (jeune.ligneId) {
+                // @ts-ignore
+                jeune.bus = lignesBusById[jeune.ligneId];
+                // @ts-ignore
+                jeune.meetingPoint = meetingPointsById[jeune.meetingPointId];
+                // @ts-ignore
+                jeune.ligneToPoint = lignesToPointById[`${jeune.meetingPointId}_${jeune.ligneId}`];
+            }
+            // @ts-ignore
+            jeune.emailDeConnexion = jeune.email;
+
             const mappedJeune =
                 format === "volontaire"
                     ? this.mapVolontaire(jeune, selectedFields, auteur)
@@ -248,6 +338,257 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             columnsName: result.length ? Object.keys(result[0]) : [],
             values: result.map((item) => Object.values(item)),
         };
+    }
+
+    async retrieveSchools(jeunes: YoungType[]) {
+        const schoolsById: Record<string, Partial<SchoolType>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.schoolId) {
+                    acc[jeune.schoolId] = { _id: jeune.schoolId };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<SchoolType>>,
+        );
+        const nbSchools = Object.keys(schoolsById).length;
+        this.logger.log(`school count: ${nbSchools}`);
+        if (nbSchools === 0) {
+            return {};
+        }
+
+        // search schools data
+        const schools = await this.searchSchoolGateway.searchSchool({
+            musts: { ids: Object.keys(schoolsById) },
+            full: true,
+        });
+        this.logger.log(`schools search count: ${schools.hits.length}`);
+        if (schools.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbSchools: ${nbSchools} !== searchCount: ${schools.hits.length}`,
+            );
+        }
+        schools.hits.forEach((school) => {
+            schoolsById[school._id] = school;
+        });
+
+        return schoolsById;
+    }
+
+    async retrieveCenters(jeunes: YoungType[]) {
+        const centersById: Record<string, Partial<CohesionCenterType>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.cohesionCenterId) {
+                    acc[jeune.cohesionCenterId] = { _id: jeune.cohesionCenterId };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<CohesionCenterType>>,
+        );
+        const nbCenters = Object.keys(centersById).length;
+        this.logger.log(`center count: ${nbCenters}`);
+        if (nbCenters === 0) {
+            return {};
+        }
+
+        // search centers data
+        const centers = await this.searchCentreGateway.searchCentre({
+            musts: { ids: Object.keys(centersById) },
+            full: true,
+        });
+        this.logger.log(`centers search count: ${centers.hits.length}`);
+        if (centers.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbCenters: ${nbCenters} !== searchCount: ${centers.hits.length}`,
+            );
+        }
+        centers.hits.forEach((center) => {
+            centersById[center._id] = center;
+        });
+
+        return centersById;
+    }
+
+    async retrieveSessionPhase1s(jeunes: YoungType[]) {
+        const sessionPhase1sById: Record<string, Partial<SessionPhase1Type>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.sessionPhase1Id) {
+                    acc[jeune.sessionPhase1Id] = { _id: jeune.sessionPhase1Id };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<SessionPhase1Type>>,
+        );
+        const nbSessionPhase1s = Object.keys(sessionPhase1sById).length;
+        this.logger.log(`sessionPhase1 count: ${nbSessionPhase1s}`);
+        if (nbSessionPhase1s === 0) {
+            return {};
+        }
+        // search sessionPhase1s data
+        const sessionPhase1s = await this.searchSejourGateway.searchSejour({
+            filters: { cohesionCenterId: Object.keys(sessionPhase1sById) },
+            full: true,
+        });
+        this.logger.log(`sessionPhase1s search count: ${sessionPhase1s.hits.length}`);
+        if (sessionPhase1s.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbSessionPhase1s: ${nbSessionPhase1s} !== searchCount: ${sessionPhase1s.hits.length}`,
+            );
+        }
+        sessionPhase1s.hits.forEach((sessionPhase1) => {
+            sessionPhase1sById[sessionPhase1._id] = sessionPhase1;
+        });
+
+        return sessionPhase1sById;
+    }
+
+    async retrieveLignesBus(jeunes: YoungType[]) {
+        // search lignesBus data
+        const lignesBusById: Record<string, Partial<LigneBusType>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.ligneId) {
+                    acc[jeune.ligneId] = { _id: jeune.ligneId };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<LigneBusType>>,
+        );
+        const nbLignesBus = Object.keys(lignesBusById).length;
+        this.logger.log(`lignesBus count: ${nbLignesBus}`);
+        if (nbLignesBus === 0) {
+            return { lignesBusById: {}, meetingPointsById: {}, lignesToPointById: {} };
+        }
+        const lignesBus = await this.searchLigneDeBusGateway.searchLigneDeBus({
+            musts: { ids: Object.keys(lignesBusById) },
+            full: true,
+        });
+        this.logger.log(`lignesBus search count: ${lignesBus.hits.length}`);
+        if (lignesBus.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbLignesBus: ${nbLignesBus} !== searchCount: ${lignesBus.hits.length}`,
+            );
+        }
+        lignesBus.hits.forEach((ligneBus) => {
+            lignesBusById[ligneBus._id] = ligneBus;
+        });
+
+        // get meetingPoints
+        const meetingPointsById: Record<string, Partial<MeetingPointType>> = lignesBus.hits.reduce(
+            (acc, ligneBus) => {
+                if (ligneBus.meetingPointsIds) {
+                    for (const meetingPointId of ligneBus.meetingPointsIds) {
+                        if (meetingPointId) {
+                            acc[meetingPointId] = { _id: meetingPointId };
+                        }
+                    }
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<MeetingPointType>>,
+        );
+        const lignesToPointById: Record<string, Partial<LigneToPointType>> = {};
+
+        const nbMeetingPoints = Object.keys(meetingPointsById).length;
+        this.logger.log(`meetingPoints count: ${nbMeetingPoints}`);
+        if (nbMeetingPoints !== 0) {
+            const meetingPoints = await this.searchPointDeRassemblementGateway.searchPointDeRassemblement({
+                musts: { ids: Object.keys(meetingPointsById) },
+                existingFields: ["matricule"],
+                full: true,
+            });
+            this.logger.log(`meetingPoints search count: ${meetingPoints.hits.length}`);
+            if (meetingPoints.hits.length === 0) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    `nbMeetingPoints: ${nbMeetingPoints} !== searchCount: ${meetingPoints.hits.length}`,
+                );
+            }
+            meetingPoints.hits.forEach((meetingPoint) => {
+                meetingPointsById[meetingPoint._id] = meetingPoint;
+            });
+            // get lignesToPoint
+            const lignesToPoint = await this.searchSegmentDeLigneGateway.searchSegmentDeLigne({
+                filters: { meetingPointId: Object.keys(meetingPointsById) },
+                full: true,
+            });
+            this.logger.log(`lignesToPoint search count: ${lignesToPoint.hits.length}`);
+            lignesToPoint.hits.forEach((ligneToPoint) => {
+                lignesToPointById[`${ligneToPoint.meetingPointId}_${ligneToPoint.lineId}`] = ligneToPoint;
+            });
+        }
+
+        return { lignesBusById, meetingPointsById, lignesToPointById };
+    }
+
+    async retrieveClasses(jeunes: YoungType[]) {
+        const classesById: Record<string, Partial<ClasseType>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.classeId) {
+                    acc[jeune.classeId] = { _id: jeune.classeId };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<ClasseType>>,
+        );
+        const nbClasses = Object.keys(classesById).length;
+        this.logger.log(`class count: ${nbClasses}`);
+        if (nbClasses === 0) {
+            return {};
+        }
+        // search classes data
+        const classes = await this.searchClasseGateway.searchClasse({
+            musts: { ids: Object.keys(classesById) },
+            full: true,
+        });
+        this.logger.log(`classes search count: ${classes.hits.length}`);
+        if (classes.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbClasses: ${nbClasses} !== searchCount: ${classes.hits.length}`,
+            );
+        }
+        classes.hits.forEach((classe) => {
+            classesById[classe._id] = classe;
+        });
+
+        return classesById;
+    }
+
+    async retrieveEtablissements(jeunes: YoungType[]) {
+        const etablissementsById: Record<string, Partial<EtablissementType>> = jeunes.reduce(
+            (acc, jeune) => {
+                if (jeune.etablissementId) {
+                    acc[jeune.etablissementId] = { _id: jeune.etablissementId };
+                }
+                return acc;
+            },
+            {} as Record<string, Partial<EtablissementType>>,
+        );
+        const nbEtablissements = Object.keys(etablissementsById).length;
+        this.logger.log(`etablissements count: ${nbEtablissements}`);
+        if (nbEtablissements === 0) {
+            return {};
+        }
+        // search etablissements data
+        const etablissements = await this.searchEtablissementGateway.searchEtablissement({
+            musts: { ids: Object.keys(etablissementsById) },
+            full: true,
+        });
+        this.logger.log(`etablissements search count: ${etablissements.hits.length}`);
+        if (etablissements.hits.length === 0) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                `nbEtablissements: ${nbEtablissements} !== searchCount: ${etablissements.hits.length}`,
+            );
+        }
+        etablissements.hits.forEach((etablissement) => {
+            etablissementsById[etablissement._id] = etablissement;
+        });
+
+        return etablissementsById;
     }
 
     mapInscription(jeune: YoungType, selectedFields: string[], auteur: ExportJeunesTaskParameters["auteur"]) {

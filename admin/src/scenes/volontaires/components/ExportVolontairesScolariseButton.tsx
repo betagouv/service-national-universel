@@ -24,14 +24,11 @@ export default function ExportVolontairesScolariseButton({ user, selectedFilters
   const { mutate: exportJeunesScolarise, isPending } = useMutation({
     mutationFn: async () => await JeuneService.postJeunesScolariseExport(buildApiv2Query(selectedFilters, ["*"])),
     onSuccess: () => {
-      toastr.success(
-        "Exportation des volontaires scolarisés",
-        "L'exportation des volontaires scolarisés a en cours de traitement, vous recevrez un email lorsque cela sera terminé.",
-      );
+      toastr.success("Export des volontaires scolarisés", "L'export des volontaires scolarisés a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setShowModal(false);
     },
     onError: (error) => {
-      toastr.error("Une erreur est survenue lors de l'exportation des volontaires scolarisés", translate(error.message));
+      toastr.error("Une erreur est survenue lors de l'export des volontaires scolarisés", translate(error.message));
     },
   });
 
@@ -48,7 +45,7 @@ export default function ExportVolontairesScolariseButton({ user, selectedFilters
       <ModalConfirm
         isOpen={showModal}
         title="Téléchargement"
-        message={`\nL'exportation du fichier volumineux peut prendre du temps. Vous recevrez une notification par e-mail une fois prête.\n
+        message={`\nL'export du fichier volumineux peut prendre du temps. Vous recevrez une notification par e-mail une fois prête.\n
           En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)`}
         onCancel={() => setShowModal(false)}
         onConfirm={() => {
