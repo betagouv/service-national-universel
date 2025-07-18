@@ -13,6 +13,8 @@ export interface SejourGateway {
         sejourIds: string[],
     ): Promise<Array<Pick<SejourModel, "id"> & { placesOccupeesJeunes: number }>>;
     findByCohesionCenterIdsAndCohortId(cohesionCenterIds: string[], cohortId: string): Promise<SejourModel[]>;
+    findByHeadCenterId(headCenterId: string): Promise<SejourModel[]>;
+    findByAdjointsId(adjointsId: string): Promise<SejourModel[]>;
 }
 
 export const SejourGateway = Symbol("SejourGateway");
