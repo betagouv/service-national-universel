@@ -38,7 +38,7 @@ export function buildRequestQueryString(query: BasicRoute["query"] = {}): string
   if (!query || Object.keys(query).length === 0) {
     return "";
   }
-  return `?${qs.stringify(query)}`;
+  return `?${qs.stringify(query, {arrayFormat: 'separator', arrayFormatSeparator: '~'})}`;
 }
 
 export const hashToFormData = <T extends Record<string, unknown>>(hash: T, path: string): FormData => {
