@@ -119,36 +119,6 @@ const Signin: React.FC = () => {
           </Button>
         </div>
       </form>
-      <hr className="mt-3 border-b-1 text-[#E5E5E5]" />
-      <div className="mt-3 text-[#E5E5E5] space-y-3">
-        <div className="mt-3 mb-2 text-center text-xl font-bold text-[#161616]">Vous n&apos;êtes pas encore inscrit(e) ?</div>
-        {isInscriptionOpen ? (
-          <div className="flex w-full justify-center">
-            <Button
-              priority="secondary"
-              onClick={() => {
-                plausibleEvent("Connexion/Lien vers preinscription");
-                return history.push("/preinscription");
-              }}>
-              Commencer mon inscription
-            </Button>
-          </div>
-        ) : (
-          <>
-            <p className="text-center text-base text-[#161616] m-3">Soyez informé(e) lors de l'ouverture des prochaines inscriptions.</p>
-            <div className="flex w-full justify-center">
-              <a
-                href="https://www.snu.gouv.fr/inscriptions-cloturees/"
-                target="_blank"
-                rel="noreferrer"
-                className="text-[#161616]"
-                onClick={() => plausibleEvent("Connexion/Lien vers preinscription")}>
-                Recevoir une alerte par email
-              </a>
-            </div>
-          </>
-        )}
-      </div>
     </DSFRContainer>
   );
 };
