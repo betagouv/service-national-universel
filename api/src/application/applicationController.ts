@@ -359,7 +359,7 @@ router.put(
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // A young can only update his own application.
-      if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
+      if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON(), application: application.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
