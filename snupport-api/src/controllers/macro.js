@@ -10,7 +10,7 @@ const TagModel = require("../models/tag");
 const ShortcutModel = require("../models/shortcut");
 const MessageModel = require("../models/message");
 const { sendEmailWithConditions, getHoursDifference } = require("../utils");
-const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_TICKET_STATUS } = require("../schemas");
@@ -21,68 +21,64 @@ const SCHEMA_MACRO = Joi.object({
   isActive: Joi.boolean(),
   stayOnCurrentPage: Joi.boolean().optional().default(false),
   sendCurrentMessage: Joi.boolean().optional().default(false),
-  macroAction: Joi.array().items(Joi.object({
-    action: Joi.string().valid("SET", "DELETE", "ADDMESSAGE"),
-    field: Joi.string().when('action', {
-      switch: [
+  macroAction: Joi.array().items(
+    Joi.object({
+      action: Joi.string().valid("SET", "DELETE", "ADDMESSAGE"),
+      field: Joi.string().when("action", {
+        switch: [
           { is: "DELETE", then: Joi.valid("tagsId") },
           { is: "ADDMESSAGE", then: Joi.valid("message") },
-      ],
-      otherwise: Joi.valid("notes.content", "subject", "status", "tagsId", "folder", "agentId")
-    }),
-    value: Joi.string().when('field', {
-      switch: [
+        ],
+        otherwise: Joi.valid("notes.content", "subject", "status", "tagsId", "folder", "agentId"),
+      }),
+      value: Joi.string().when("field", {
+        switch: [
           { is: "status", then: SCHEMA_TICKET_STATUS },
           { is: "notes.content", then: Joi.string().trim() },
           { is: "subject", then: Joi.string().trim() },
-      ],
-      otherwise: SCHEMA_ID,
-    }),
-  }))
+        ],
+        otherwise: SCHEMA_ID,
+      }),
+    })
+  ),
 });
 
 router.use(agentGuard);
 
-router.post("/",
-  validateBody(SCHEMA_MACRO.prefs({ presence: 'required' })),
-  async (req, res) => {
-    const { firstName, lastName, role, _id } = req.user;
-    await MacroModel.create({ ...req.cleanBody, updatedBy: { firstName, lastName, role, _id } });
-    return res.status(200).send({ ok: true });
+router.post("/", validateBody(SCHEMA_MACRO.prefs({ presence: "required" })), async (req, res) => {
+  const { firstName, lastName, role, _id } = req.user;
+  await MacroModel.create({ ...req.cleanBody, updatedBy: { firstName, lastName, role, _id } });
+  return res.status(200).send({ ok: true });
+});
+
+router.patch("/:id", validateParams(idSchema), validateBody(SCHEMA_MACRO.min(1)), async (req, res) => {
+  const { firstName, lastName, role, _id } = req.user;
+  const macro = await MacroModel.findById(req.cleanParams.id);
+  if (!macro) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   }
-);
 
-router.patch("/:id",
+  macro.set({ ...req.cleanBody, updatedAt: new Date(), updatedBy: { firstName, lastName, role, _id } });
+  await macro.save();
+
+  return res.status(200).send({ ok: true });
+});
+
+router.delete("/:id", validateParams(idSchema), async (req, res) => {
+  await MacroModel.deleteOne({ _id: req.cleanParams.id });
+  return res.status(200).send({ ok: true });
+});
+
+router.post(
+  "/:id",
   validateParams(idSchema),
-  validateBody(SCHEMA_MACRO.min(1)),
-  async (req, res) => {
-    const { firstName, lastName, role, _id } = req.user;
-    const macro = await MacroModel.findById(req.cleanParams.id);
-    if (!macro) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-
-    macro.set({ ...req.cleanBody, updatedAt: new Date(), updatedBy: { firstName, lastName, role, _id } });
-    await macro.save();
-
-    return res.status(200).send({ ok: true });
-  }
-);
-
-router.delete("/:id",
-  validateParams(idSchema),
-  async (req, res) => {
-    await MacroModel.deleteOne({ _id: req.cleanParams.id });
-    return res.status(200).send({ ok: true });
-  }
-);
-
-router.post("/:id",
-  validateParams(idSchema),
-  validateBody(Joi.object({
-    ticketsId: Joi.array().items(SCHEMA_ID),
-    agentId: SCHEMA_ID,
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      ticketsId: Joi.array().items(SCHEMA_ID),
+      agentId: SCHEMA_ID,
+      needSpecificMessage: Joi.boolean().optional().default(false),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const agent = await AgentModel.findById(req.cleanBody.agentId);
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -99,7 +95,7 @@ router.post("/:id",
         const macroAction = macros.macroAction[j];
         if (macroAction.action === "SET") ticket = await setField(ticket, macroAction);
         if (macroAction.action === "DELETE") ticket = await deleteField(ticket, macroAction);
-        if (macroAction.action === "ADDMESSAGE") ticket = await addShortcutMessage(ticket, macroAction, agent);
+        if (macroAction.action === "ADDMESSAGE" && !req.cleanBody.needSpecificMessage) ticket = await addShortcutMessage(ticket, macroAction, agent);
       }
       ticket.updatedAt = new Date();
       if (ticket.status === "CLOSED") {
@@ -113,15 +109,56 @@ router.post("/:id",
   }
 );
 
-router.get("/",
-  validateQuery(Joi.object({
-    isActive: Joi.boolean(),
-  })),
+router.get(
+  "/",
+  validateQuery(
+    Joi.object({
+      isActive: Joi.boolean(),
+    })
+  ),
   async (req, res) => {
     const macro = await MacroModel.find(req.cleanQuery);
     return res.status(200).send({ ok: true, data: macro });
   }
 );
+
+router.get("/:id", validateParams(idSchema), async (req, res) => {
+  const macro = await MacroModel.findById(req.cleanParams.id).lean();
+  if (!macro) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  }
+  const hasMacroShortcut = macro.macroAction.some((action) => action.action === "ADDMESSAGE");
+  if (hasMacroShortcut) {
+    const shortcutsIds = macro.macroAction.filter((action) => action.action === "ADDMESSAGE").map((action) => action.value);
+    const shortcuts = await ShortcutModel.find({ _id: { $in: shortcutsIds } });
+    macro.macroAction = macro.macroAction.map((action) => {
+      if (action.action === "ADDMESSAGE") {
+        const shortcut = shortcuts.find((s) => s._id.toString() === action.value);
+
+        if (!shortcut) {
+          console.log(`Shortcut ${action.value} not found for macro ${macro._id}`);
+          return {
+            ...action,
+            value: null,
+            error: "Shortcut not found",
+          };
+        }
+
+        return {
+          ...action,
+          message: {
+            _id: shortcut._id,
+            text: shortcut.text,
+            content: shortcut.content,
+            name: shortcut.name,
+          },
+        };
+      }
+      return action;
+    });
+  }
+  return res.status(200).send({ ok: true, data: macro });
+});
 
 const setField = async (ticket, macroAction) => {
   try {

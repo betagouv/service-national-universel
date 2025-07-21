@@ -59,8 +59,12 @@ export default ({ ticket, setTicket, tags, setTags, agents }) => {
     <div className="flex w-[378px] flex-none flex-col border-r border-light-grey bg-gray-50 p-8 pt-5">
       <div className="">
         <div className="flex" onClick={() => (contactProfile.length !== 0 ? window.open(`${contactProfile[0].value}`, "_blank") : 0)}>
-          <h6 className="mb-2 cursor-pointer text-lg font-bold text-gray-900">{`${contact.firstName ? contact.firstName + " " + contact.lastName : contact.email}`}</h6>
-          <HiChevronRight className="mt-1 text-xl text-gray-900" />
+          {contact && (
+            <>
+              <h6 className="mb-2 cursor-pointer text-lg font-bold text-gray-900">{`${contact.firstName ? contact.firstName + " " + contact.lastName : contact.email}`}</h6>
+              <HiChevronRight className="mt-1 text-xl text-gray-900" />
+            </>
+          )}
         </div>
         <select
           onChange={(e) => handleChangeRole(e.target.value)}

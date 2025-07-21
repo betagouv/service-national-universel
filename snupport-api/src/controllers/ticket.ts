@@ -18,7 +18,26 @@ const router = express.Router();
 
 router.use(agentGuard);
 
-const SCHEMA_CONTACT_GROUP = Joi.string().valid("unknown", "admin exterior", "young exterior", "responsible", "supervisor", "head_center", "referent_region", "referent_department", "visitor", "young", "parent", "admin", "administrateur_cle", "referent_classe", "transporter", "dsnj", "injep", "moderator");
+const SCHEMA_CONTACT_GROUP = Joi.string().valid(
+  "unknown",
+  "admin exterior",
+  "young exterior",
+  "responsible",
+  "supervisor",
+  "head_center",
+  "referent_region",
+  "referent_department",
+  "visitor",
+  "young",
+  "parent",
+  "admin",
+  "administrateur_cle",
+  "referent_classe",
+  "transporter",
+  "dsnj",
+  "injep",
+  "moderator"
+);
 const SCHEMA_PERIOD = Joi.object({
   period: Joi.number().integer().positive().default(7),
   startDate: Joi.date(),
@@ -29,17 +48,20 @@ const SCHEMA_DATERANGE = Joi.object({
   to: Joi.date(),
 });
 
-router.post("/",
-  validateBody(Joi.object({
-    subject: Joi.string().trim(),
-    contactEmail: SCHEMA_EMAIL,
-    canal: Joi.string().valid("MAIL", "PLATFORM"),
-    message: Joi.string().trim(),
-    tags: Joi.array().items(SCHEMA_ID).optional(),
-    copyRecipients: Joi.array().items(SCHEMA_EMAIL).optional(),
-    files: Joi.array().items(Joi.object()).optional(),
-    agentId: SCHEMA_ID.optional(),
-  }).prefs({ presence: 'required' })),
+router.post(
+  "/",
+  validateBody(
+    Joi.object({
+      subject: Joi.string().trim(),
+      contactEmail: SCHEMA_EMAIL,
+      canal: Joi.string().valid("MAIL", "PLATFORM"),
+      message: Joi.string().trim(),
+      tags: Joi.array().items(SCHEMA_ID).optional(),
+      copyRecipients: Joi.array().items(SCHEMA_EMAIL).optional(),
+      files: Joi.array().items(Joi.object()).optional(),
+      agentId: SCHEMA_ID.optional(),
+    }).prefs({ presence: "required" })
+  ),
   async (req: UserRequest, res: Response) => {
     const { subject, contactEmail, canal, tags, message, copyRecipients, files, agentId } = req.cleanBody;
 
@@ -72,7 +94,7 @@ router.post("/",
       createdDayAt: weekday[new Date().getDay()],
       createdBy: req.user.role,
     };
-    
+
     if (user.role === "AGENT") {
       const agent = agentId ? await AgentModel.findById(agentId) : null;
       ticket.agentLastName = agent ? agent.lastName : user.lastName;
@@ -124,9 +146,9 @@ router.post("/",
           lastMessageId: newMessage._id,
           attachment: null,
           messageHistory: null,
-      });
+        });
       } else {
-        await sendNotif({ ticket: newTicket, templateId: SENDINBLUE_TEMPLATES.NEW_TICKET, message: undefined });
+        await sendNotif({ ticket: newTicket, templateId: SENDINBLUE_TEMPLATES.NEW_TICKET, message: undefined, attachment: [] });
       }
       if (!newMessage) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
     }
@@ -134,7 +156,6 @@ router.post("/",
     return res.status(200).send({ ok: true, data: { ticket: newTicket } });
   }
 );
-
 
 export interface DateRange {
   from?: string;
@@ -163,11 +184,11 @@ export interface PostSearchRequestBody {
 
 function buildSorting(req): any {
   if (req.cleanBody.sorting === "AGENT") {
-    return { agentLastName: 'asc', agentFirstName: 'asc' };
+    return { agentLastName: "asc", agentFirstName: "asc" };
   } else if (req.cleanBody.sorting === "CREATIONDATE") {
-    return { createdAt: 'desc' };
+    return { createdAt: "desc" };
   } else {
-    return { updatedAt: 'desc' };
+    return { updatedAt: "desc" };
   }
 }
 
@@ -206,15 +227,10 @@ function buildContextFilter(req) {
   // Ajout de la recherche avancée si présente
   if (req.cleanBody.advancedSearch) {
     const regex = {
-      $regex: autocomplete_regex(req.cleanQuery.advancedSearch),
-      $options: 'i',
-    }
-    filter.$or = [
-      { number: regex },
-      { subject: regex },
-      { contactEmail: regex },
-      { contactLastName: regex },
-    ];
+      $regex: autocomplete_regex(req.cleanBody.advancedSearch),
+      $options: "i",
+    };
+    filter.$or = [{ number: regex }, { subject: regex }, { contactEmail: regex }, { contactLastName: regex }];
   }
 
   // Filtrage par contact
@@ -291,38 +307,41 @@ function buildContextFilter(req) {
 }
 
 function formatAggregation(aggregation) {
-  const index = {}
+  const index = {};
   for (let item of aggregation) {
     const { key, status } = item._id;
     if (!index[key]) {
-      index[key] = { key, status: { buckets: []}}
+      index[key] = { key, status: { buckets: [] } };
     }
     index[key].status.buckets.push({ key: status, doc_count: item.doc_count });
   }
-  return Object.values(index)
+  return Object.values(index);
 }
 
-router.post("/search",
-  validateBody(Joi.object({
-    size: Joi.number().default(10).integer().positive(),
-    page: Joi.number().default(1).integer().positive(),
-    folderId: SCHEMA_ID,
-    tag: Joi.alternatives().try(Joi.string().valid("null"), Joi.array().items(SCHEMA_ID)),
-    status: Joi.string().valid("TOTREAT", "NEW", "OPEN", "PENDING", "CLOSED", "DRAFT", "all"),
-    contactId: SCHEMA_ID,
-    agentId: SCHEMA_ID,
-    ticketId: SCHEMA_ID,
-    sorting: Joi.string().valid("AGENT", "CREATIONDATE", "UPDATEDATE"),
-    sources: Joi.array().items(Joi.string().valid("MAIL", "FORM", "PLATFORM", "CHAT")),
-    contactGroup: Joi.array().items(SCHEMA_CONTACT_GROUP),
-    contactDepartment: Joi.array().items(Joi.string().trim()),
-    contactCohort: Joi.array().items(Joi.string().trim()),
-    parcours: Joi.array().items(SCHEMA_PARCOURS),
-    advancedSearch: Joi.string().trim(),
-    agent: Joi.array().items(Joi.alternatives().try(SCHEMA_ID, Joi.string().valid("undefined"))),
-    creationDate: SCHEMA_DATERANGE,
-    lastActivityDate: SCHEMA_DATERANGE,
-  })),
+router.post(
+  "/search",
+  validateBody(
+    Joi.object({
+      size: Joi.number().default(10).integer().positive(),
+      page: Joi.number().default(1).integer().positive(),
+      folderId: SCHEMA_ID,
+      tag: Joi.alternatives().try(Joi.string().valid("null"), Joi.array().items(SCHEMA_ID)),
+      status: Joi.string().valid("TOTREAT", "NEW", "OPEN", "PENDING", "CLOSED", "DRAFT", "all"),
+      contactId: SCHEMA_ID,
+      agentId: SCHEMA_ID,
+      ticketId: SCHEMA_ID,
+      sorting: Joi.string().valid("AGENT", "CREATIONDATE", "UPDATEDATE"),
+      sources: Joi.array().items(Joi.string().valid("MAIL", "FORM", "PLATFORM", "CHAT")),
+      contactGroup: Joi.array().items(SCHEMA_CONTACT_GROUP),
+      contactDepartment: Joi.array().items(Joi.string().trim()),
+      contactCohort: Joi.array().items(Joi.string().trim()),
+      parcours: Joi.array().items(SCHEMA_PARCOURS),
+      advancedSearch: Joi.string().trim(),
+      agent: Joi.array().items(Joi.alternatives().try(SCHEMA_ID, Joi.string().valid("undefined"))),
+      creationDate: SCHEMA_DATERANGE,
+      lastActivityDate: SCHEMA_DATERANGE,
+    })
+  ),
   async (req: UserRequest, res: Response) => {
     const filter = buildContextFilter(req);
     const total = await TicketModel.countDocuments(filter);
@@ -330,7 +349,7 @@ router.post("/search",
       .skip((req.cleanBody.page - 1) * req.cleanBody.size)
       .limit(req.cleanBody.size)
       .sort(buildSorting(req));
-    
+
     // Filtrage des conditions pour les agrégations (exclusion des filtres status et folder)
     delete filter.status;
     delete filter.foldersId;
@@ -338,21 +357,21 @@ router.post("/search",
     const statusAggregation = await TicketModel.aggregate([
       { $match: filter },
       { $group: { _id: "$status", doc_count: { $sum: 1 } } },
-      { $project: { _id: 0, 'key': '$_id', 'doc_count': 1 }},
+      { $project: { _id: 0, key: "$_id", doc_count: 1 } },
     ]);
 
     const tagAggregation = await TicketModel.aggregate([
       { $match: filter },
       { $project: { _id: 0, tagsId: 1, status: 1 } },
       { $unwind: { path: "$tagsId", preserveNullAndEmptyArrays: false } },
-      { $group: { _id: {key: "$tagsId", status: "$status"}, doc_count: {$sum: 1}} }
+      { $group: { _id: { key: "$tagsId", status: "$status" }, doc_count: { $sum: 1 } } },
     ]);
 
     const contactDepartmentAggregation = await TicketModel.aggregate([
       { $match: filter },
       { $project: { _id: 0, contactDepartment: 1, status: 1 } },
       { $unwind: { path: "$contactDepartment", preserveNullAndEmptyArrays: false } },
-      { $group: { _id: {key: "$contactDepartment", status: "$status"}, doc_count: {$sum: 1}} }
+      { $group: { _id: { key: "$contactDepartment", status: "$status" }, doc_count: { $sum: 1 } } },
     ]);
 
     res.status(200).send({
@@ -368,30 +387,28 @@ router.post("/search",
   }
 );
 
-router.get("/searchAll",
-  validateQuery(Joi.object({
-    q: Joi.string().trim().default(""),
-    limit: Joi.number().integer().positive().optional().default(10),
-  }).prefs({ presence: 'required' })),
+router.get(
+  "/searchAll",
+  validateQuery(
+    Joi.object({
+      q: Joi.string().trim().default(""),
+      limit: Joi.number().integer().positive().optional().default(10),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     if (req.cleanQuery.q.length < 3) {
       res.status(200).send({
         ok: true,
         data: [],
       });
-      return
+      return;
     }
     const regex = {
       $regex: autocomplete_regex(req.cleanQuery.q),
-      $options: 'i',
-    }
+      $options: "i",
+    };
     const filter: any = {
-      $or:  [
-        { number: regex },
-        { subject: regex },
-        { contactEmail: regex },
-        { contactLastName: regex },
-      ]
+      $or: [{ number: regex }, { subject: regex }, { contactEmail: regex }, { contactLastName: regex }],
     };
     if (req.user.role === "REFERENT_REGION") {
       filter.contactRegion = req.user.region;
@@ -401,9 +418,7 @@ router.get("/searchAll",
       filter.contactDepartment = { $in: req.user.departments };
       filter.formSubjectStep1 = "QUESTION";
     }
-    const tickets = await TicketModel.find(filter)
-      .limit(req.cleanQuery.limit)
-      .sort({ updatedAt: -1 });
+    const tickets = await TicketModel.find(filter).limit(req.cleanQuery.limit).sort({ updatedAt: -1 });
     res.status(200).send({
       ok: true,
       data: tickets,
@@ -417,93 +432,98 @@ function getDate(date, days) {
   return d;
 }
 
-router.post("/stats/date",
-  validateBody(SCHEMA_PERIOD),
-  async (req: UserRequest, res: Response) => {
-    const tag = await TagModel.findOne({ name: "Spam" });
-    if (!tag) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Spam tag not found" });
-    }
-    const period = req.cleanBody.period;
-    let startDate;
-    if (req.cleanBody.startDate) {
-      startDate = new Date(req.cleanBody.startDate);
-    } else {
-      startDate = getDate(new Date(), -period);
-    }
+router.post("/stats/date", validateBody(SCHEMA_PERIOD), async (req: UserRequest, res: Response) => {
+  const tag = await TagModel.findOne({ name: "Spam" });
+  if (!tag) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Spam tag not found" });
+  }
+  const period = req.cleanBody.period;
+  let startDate;
+  if (req.cleanBody.startDate) {
+    startDate = new Date(req.cleanBody.startDate);
+  } else {
+    startDate = getDate(new Date(), -period);
+  }
 
-    const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
-    
-    const filter: any = {
-      $or: [
-        { createdAt: { $gte: startDate, $lte: endDate }, },
-        { closedAt: { $gte: startDate, $lte: endDate } }
-      ]
+  const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
+
+  const filter: any = {
+    $or: [{ createdAt: { $gte: startDate, $lte: endDate } }, { closedAt: { $gte: startDate, $lte: endDate } }],
+  };
+  if (req.user.role === "REFERENT_REGION") {
+    filter.contactRegion = req.user.region;
+    filter.formSubjectStep1 = "QUESTION";
+  }
+  if (req.user.role === "REFERENT_DEPARTMENT") {
+    filter.contactDepartment = { $in: req.user.departments };
+    filter.formSubjectStep1 = "QUESTION";
+  }
+  const aggregate = await TicketModel.aggregate([
+    {
+      $match: filter,
+    },
+    {
+      $project: {
+        _id: 0,
+        ticketsCreated: {
+          $cond: [
+            {
+              $and: [{ $gte: ["$createdAt", startDate] }, { $lte: ["$createdAt", endDate] }],
+            },
+            1,
+            0,
+          ],
+        },
+        ticketsClosed: {
+          $cond: [
+            {
+              $and: [{ $gte: ["$closedAt", startDate] }, { $lte: ["$closedAt", endDate] }],
+            },
+            1,
+            0,
+          ],
+        },
+        spam: { $cond: [{ $in: [tag._id.toString(), "$tagsId"] }, 1, 0] },
+      },
+    },
+    {
+      $project: {
+        ticketsCreated: 1,
+        ticketsClosed: 1,
+        ticketsCreatedSpam: { $cond: [{ $and: ["$ticketsCreated", "$spam"] }, 1, 0] },
+        ticketsClosedSpam: { $cond: [{ $and: ["$ticketsClosed", "$spam"] }, 1, 0] },
+      },
+    },
+    {
+      $group: {
+        _id: null,
+        ticketsCreated: { $sum: "$ticketsCreated" },
+        ticketsClosed: { $sum: "$ticketsClosed" },
+        ticketsCreatedSpam: { $sum: "$ticketsCreatedSpam" },
+        ticketsClosedSpam: { $sum: "$ticketsClosedSpam" },
+      },
+    },
+  ]);
+  if (aggregate.length === 0) {
+    const data = {
+      ticketsCreated: 0,
+      ticketsClosed: 0,
+      ticketsCreatedSpam: 0,
+      ticketsClosedSpam: 0,
     };
-    if (req.user.role === "REFERENT_REGION") {
-      filter.contactRegion = req.user.region;
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    if (req.user.role === "REFERENT_DEPARTMENT") {
-      filter.contactDepartment = { $in: req.user.departments };
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    const aggregate = await TicketModel.aggregate([
-      {
-        $match: filter,
-      },
-      {
-        $project:
-          {
-            _id: 0,
-            ticketsCreated: {
-              $cond: [ {
-                  $and: [
-                    { $gte: [ "$createdAt", startDate ] },
-                    { $lte: [ "$createdAt", endDate ] }
-                  ]
-              }, 1, 0 ]
-            },
-            ticketsClosed: {
-              $cond: [ {
-                  $and: [
-                    { $gte: [ "$closedAt", startDate ] },
-                    { $lte: [ "$closedAt", endDate ] }
-                  ]
-              }, 1, 0 ]
-            },
-            spam: { $cond: [ { $in: [ tag._id.toString(), "$tagsId" ] }, 1, 0 ] }
-          }
-      },
-      {
-        $project:
-          {
-            ticketsCreated: 1,
-            ticketsClosed: 1,
-            ticketsCreatedSpam: { $cond: [ { $and: ["$ticketsCreated", "$spam"] }, 1, 0 ] },
-            ticketsClosedSpam: { $cond: [ { $and: ["$ticketsClosed", "$spam"] }, 1, 0 ] }
-          }
-      },
-      {
-        $group:
-          {
-            _id: null,
-            ticketsCreated: { $sum: "$ticketsCreated" },
-            ticketsClosed: { $sum: "$ticketsClosed" },
-            ticketsCreatedSpam: { $sum: "$ticketsCreatedSpam" },
-            ticketsClosedSpam: { $sum: "$ticketsClosedSpam" }
-          }
-      }
-    ]);
-    const { _id, ...data } = aggregate[0]
     return res.status(200).send({ ok: true, data });
   }
-);
+  const { _id, ...data } = aggregate[0];
+  return res.status(200).send({ ok: true, data });
+});
 
-router.post("/stats/tags",
-  validateQuery(Joi.object({
-    source: Joi.string().valid('dashboard'),
-  })),
+router.post(
+  "/stats/tags",
+  validateQuery(
+    Joi.object({
+      source: Joi.string().valid("dashboard"),
+    })
+  ),
   validateBody(SCHEMA_PERIOD),
   async (req: UserRequest, res: Response) => {
     const period = req.cleanBody.period;
@@ -543,10 +563,10 @@ router.post("/stats/tags",
         $match: filter,
       },
       {
-        $project: { _id: 0, tagsId: 1, createdAt: 1 }
+        $project: { _id: 0, tagsId: 1, createdAt: 1 },
       },
       {
-        $unwind: { path: "$tagsId", preserveNullAndEmptyArrays: false }
+        $unwind: { path: "$tagsId", preserveNullAndEmptyArrays: false },
       },
     ]);
 
@@ -561,7 +581,7 @@ router.post("/stats/tags",
           _id: key,
           count: 0,
           countAll: 0,
-        } 
+        };
       }
       filteredTags[key].countAll += 1;
       if (item.createdAt >= startDate) {
@@ -573,15 +593,14 @@ router.post("/stats/tags",
       _id: { $in: Object.keys(filteredTags) },
       name: { $ne: null },
     }).select(["_id", "name"]);
-    
+
     for (const tag of tags) {
       const key = tag._id.toString();
       filteredTags[key].name = tag.name;
     }
 
-
     for (const key in filteredTags) {
-      const tag = filteredTags[key]
+      const tag = filteredTags[key];
       tag.percentage = tag.countAll - tag.count !== 0 ? (tag.count / (tag.countAll - tag.count) - 1) * 100 : 0;
     }
 
@@ -594,161 +613,156 @@ router.post("/stats/tags",
         name: i.name,
       }))
       .sort((a, b) => b.doc_count - a.doc_count)
-      .slice(0, req.cleanQuery.source === "dashboard" ? 12 : 20)
-
+      .slice(0, req.cleanQuery.source === "dashboard" ? 12 : 20);
 
     return res.status(200).send({ ok: true, data });
+  }
+);
+
+router.post("/stats/source", validateBody(SCHEMA_PERIOD), async (req: UserRequest, res: Response) => {
+  const tag = await TagModel.findOne({ name: "Spam" });
+  if (!tag) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Spam tag not found" });
+  }
+  const period = req.cleanBody.period;
+  let startDate;
+  if (req.cleanBody.startDate) {
+    startDate = new Date(req.cleanBody.startDate);
+  } else {
+    startDate = getDate(new Date(), -period);
+  }
+  const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
+
+  const filter: any = { createdAt: { $gte: startDate, $lte: endDate } };
+  if (req.user.role === "REFERENT_REGION") {
+    filter.contactRegion = req.user.region;
+    filter.formSubjectStep1 = "QUESTION";
+  }
+  if (req.user.role === "REFERENT_DEPARTMENT") {
+    filter.contactDepartment = { $in: req.user.departments };
+    filter.formSubjectStep1 = "QUESTION";
+  }
+  const sourceAggregate = await TicketModel.aggregate([
+    {
+      $match: filter,
+    },
+    {
+      $group: { _id: "$source", count: { $sum: 1 } },
+    },
+  ]);
+  const spamAggregate = await TicketModel.aggregate([
+    {
+      $match: {
+        ...filter,
+        tagsId: tag._id.toString(),
+        source: "MAIL",
+      },
+    },
+    {
+      $count: "mailSpam",
+    },
+  ]);
+  return res.status(200).send({ ok: true, data: { mailSpam: spamAggregate.length ? spamAggregate[0].mailSpam : 0, sources: sourceAggregate } });
 });
 
-router.post("/stats/source",
-  validateBody(SCHEMA_PERIOD),
-  async (req: UserRequest, res: Response) => {
-    const tag = await TagModel.findOne({ name: "Spam" });
-    if (!tag) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND, message: "Spam tag not found" });
-    }
-    const period = req.cleanBody.period;
-    let startDate;
-    if (req.cleanBody.startDate) {
-      startDate = new Date(req.cleanBody.startDate);
-    } else {
-      startDate = getDate(new Date(), -period);
-    }
-    const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
-
-    const filter: any = { createdAt: { $gte: startDate, $lte: endDate } };
-    if (req.user.role === "REFERENT_REGION") {
-      filter.contactRegion = req.user.region;
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    if (req.user.role === "REFERENT_DEPARTMENT") {
-      filter.contactDepartment = { $in: req.user.departments };
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    const sourceAggregate = await TicketModel.aggregate([
-      {
-        $match: filter,
-      },
-      {
-        $group: { _id: "$source", count: { $sum: 1 } }
-      }
-    ]);
-    const spamAggregate = await TicketModel.aggregate([
-      {
-        $match:  {
-          ...filter,
-          tagsId: tag._id.toString(),
-          source: "MAIL",
-        },
-      },
-      {
-        $count: "mailSpam"
-      }
-    ]);
-    return res.status(200).send({ ok: true, data: { mailSpam: spamAggregate.length ? spamAggregate[0].mailSpam : 0, sources: sourceAggregate} });
+router.post("/stats/feedback", validateBody(SCHEMA_PERIOD), async (req: UserRequest, res: Response) => {
+  const period = req.cleanBody.period || 7;
+  let startDate;
+  if (req.cleanBody.startDate) {
+    startDate = new Date(req.cleanBody.startDate);
+  } else {
+    startDate = getDate(new Date(), -period);
   }
-);
+  const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
 
-router.post("/stats/feedback",
-  validateBody(SCHEMA_PERIOD),
-  async (req: UserRequest, res: Response) => {
-    const period = req.cleanBody.period || 7;
-    let startDate;
-    if (req.cleanBody.startDate) {
-      startDate = new Date(req.cleanBody.startDate);
-    } else {
-      startDate = getDate(new Date(), -period);
-    }
-    const endDate = req.cleanBody.endDate ? new Date(req.cleanBody.endDate) : new Date();
-
-    const filter: any = { createdAt: { $gte: startDate, $lte: endDate } };
-    if (req.user.role === "REFERENT_REGION") {
-      filter.contactRegion = req.user.region;
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    if (req.user.role === "REFERENT_DEPARTMENT") {
-      filter.contactDepartment = { $in: req.user.departments };
-      filter.formSubjectStep1 = "QUESTION";
-    }
-    const aggregate = await TicketModel.aggregate([
-      {
-        $match: filter,
-      },
-      {
-        $group: { _id: "$feedback", count: { $sum: 1 } }
-      }
-    ]);
-    return res.status(200).send({ ok: true, data: aggregate });
+  const filter: any = { createdAt: { $gte: startDate, $lte: endDate } };
+  if (req.user.role === "REFERENT_REGION") {
+    filter.contactRegion = req.user.region;
+    filter.formSubjectStep1 = "QUESTION";
   }
-);
+  if (req.user.role === "REFERENT_DEPARTMENT") {
+    filter.contactDepartment = { $in: req.user.departments };
+    filter.formSubjectStep1 = "QUESTION";
+  }
+  const aggregate = await TicketModel.aggregate([
+    {
+      $match: filter,
+    },
+    {
+      $group: { _id: "$feedback", count: { $sum: 1 } },
+    },
+  ]);
+  return res.status(200).send({ ok: true, data: aggregate });
+});
 
-router.get("/:id",
+router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+  const ticket = await TicketModel.findById(req.cleanParams.id);
+  if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  const tags = await TagModel.find({ _id: { $in: ticket.tagsId }, deletedAt: null });
+  return res.status(200).send({ ok: true, data: { ticket, tags } });
+});
+
+router.get("/linkTicket/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+  let query: any = { contactId: req.cleanParams.id };
+  if (req.user.role === "REFERENT_DEPARTMENT" || req.user.role === "REFERENT_REGION") {
+    query.formSubjectStep1 = "QUESTION";
+  }
+  const ticket = await TicketModel.find(query);
+  return res.status(200).send({ ok: true, data: ticket });
+});
+
+router.patch(
+  "/:id",
   validateParams(idSchema),
-  async (req: UserRequest, res: Response) => {
-    const ticket = await TicketModel.findById(req.cleanParams.id);
-    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const tags = await TagModel.find({ _id: { $in: ticket.tagsId }, deletedAt: null });
-    return res.status(200).send({ ok: true, data: { ticket, tags } });
-  }
-);
-
-router.get("/linkTicket/:id",
-  validateParams(idSchema),
-  async (req: UserRequest, res: Response) => {
-    let query: any = { contactId: req.cleanParams.id };
-    if (req.user.role === "REFERENT_DEPARTMENT" || req.user.role === "REFERENT_REGION") {
-      query.formSubjectStep1 = "QUESTION";
-    }
-    const ticket = await TicketModel.find(query);
-    return res.status(200).send({ ok: true, data: ticket });
-  }
-);
-
-router.patch("/:id",
-  validateParams(idSchema),
-  validateBody(Joi.object({
-    subject: Joi.string().trim(),
-    contactEmail: SCHEMA_EMAIL,
-    canal: Joi.string().valid("MAIL", "PLATFORM"),
-    tagsId: Joi.array().items(SCHEMA_ID),
-    copyRecipients: Joi.array().items(SCHEMA_EMAIL),
-    files: Joi.array().items(Joi.object()),
-    status: SCHEMA_TICKET_STATUS,
-    messageDraft: Joi.string().allow(""),
-    feedback: Joi.string().trim(),
-    contactGroup: SCHEMA_CONTACT_GROUP,
-    contactDepartment: Joi.string().trim(),
-    contactAttributes: Joi.array().items(Joi.object({
-      name: Joi.string(),
-      value: Joi.string().allow(null),
-      format: Joi.string().valid("string", "date", "link"),
-    })),
-    notes: Joi.array().items(Joi.object({
-      authorName: Joi.string().trim(),
-      createdAt: Joi.date(),
-      content: Joi.string(),
-    })),
-    agentId: SCHEMA_ID.allow(""),
-    agentFirstName: Joi.string().allow("").trim(),
-    agentLastName: Joi.string().allow("").trim(),
-    agentEmail: Joi.string().allow("").trim(),
-    referentDepartmentId: SCHEMA_ID,
-    referentDepartmentFirstName: Joi.string().trim(),
-    referentDepartmentLastName: Joi.string().trim(),
-    referentDepartmentEmail: Joi.string().trim(),
-    referentRegionId: SCHEMA_ID,
-    referentRegionFirstName: Joi.string().trim(),
-    referentRegionLastName: Joi.string().trim(),
-    referentRegionEmail: Joi.string().trim(),
-    formSubjectStep1: Joi.string().valid("TECHNICAL", "QUESTION"),
-  }).min(1)),
+  validateBody(
+    Joi.object({
+      subject: Joi.string().trim(),
+      contactEmail: SCHEMA_EMAIL,
+      canal: Joi.string().valid("MAIL", "PLATFORM"),
+      tagsId: Joi.array().items(SCHEMA_ID),
+      copyRecipients: Joi.array().items(SCHEMA_EMAIL),
+      files: Joi.array().items(Joi.object()),
+      status: SCHEMA_TICKET_STATUS,
+      messageDraft: Joi.string().allow(""),
+      feedback: Joi.string().trim(),
+      contactGroup: SCHEMA_CONTACT_GROUP,
+      contactDepartment: Joi.string().trim(),
+      contactAttributes: Joi.array().items(
+        Joi.object({
+          name: Joi.string(),
+          value: Joi.string().allow(null),
+          format: Joi.string().valid("string", "date", "link"),
+        })
+      ),
+      notes: Joi.array().items(
+        Joi.object({
+          authorName: Joi.string().trim(),
+          createdAt: Joi.date(),
+          content: Joi.string(),
+        })
+      ),
+      agentId: SCHEMA_ID.allow(""),
+      agentFirstName: Joi.string().allow("").trim(),
+      agentLastName: Joi.string().allow("").trim(),
+      agentEmail: Joi.string().allow("").trim(),
+      referentDepartmentId: SCHEMA_ID,
+      referentDepartmentFirstName: Joi.string().trim(),
+      referentDepartmentLastName: Joi.string().trim(),
+      referentDepartmentEmail: Joi.string().trim(),
+      referentRegionId: SCHEMA_ID,
+      referentRegionFirstName: Joi.string().trim(),
+      referentRegionLastName: Joi.string().trim(),
+      referentRegionEmail: Joi.string().trim(),
+      formSubjectStep1: Joi.string().valid("TECHNICAL", "QUESTION"),
+    }).min(1)
+  ),
   async (req: UserRequest, res: Response) => {
     const id = req.cleanParams.id;
 
     let ticket = await TicketModel.findOne({ _id: id });
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    ticket.set(req.cleanBody)
+    ticket.set(req.cleanBody);
 
     if (req.cleanBody.status === "CLOSED") {
       ticket.closedAt = new Date();
@@ -765,7 +779,6 @@ router.patch("/:id",
     //   ticket.foldersId.push(req.cleanBody.folderId);
     // }
 
-
     if (req.cleanBody.messageDraft) {
       ticket.status = "DRAFT";
     }
@@ -780,7 +793,7 @@ router.patch("/:id",
 
     ["agentId", "agentFirstName", "agentLastName", "agentEmail"].forEach((field) => {
       if (req.cleanBody[field] === "") {
-        ticket[field] = undefined;
+        ticket![field] = undefined;
       }
     });
 
@@ -794,20 +807,20 @@ router.patch("/:id",
   }
 );
 
-router.delete("/:id",
-  validateParams(idSchema),
-  async (req: UserRequest, res: Response) => {
-    const id = req.cleanParams.id;
-    await TicketModel.findOneAndDelete({ _id: id });
-    return res.status(200).send({ ok: true });
-  }
-);
+router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+  const id = req.cleanParams.id;
+  await TicketModel.findOneAndDelete({ _id: id });
+  return res.status(200).send({ ok: true });
+});
 
-router.put("/transfer/:id",
+router.put(
+  "/transfer/:id",
   validateParams(idSchema),
-  validateBody(Joi.object({
-    contactEmail: SCHEMA_EMAIL,
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      contactEmail: SCHEMA_EMAIL,
+    }).prefs({ presence: "required" })
+  ),
   async (req: UserRequest, res: Response) => {
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
@@ -825,11 +838,14 @@ router.put("/transfer/:id",
   }
 );
 
-router.put("/viewing/:id",
+router.put(
+  "/viewing/:id",
   validateParams(idSchema),
-  validateBody(Joi.object({
-    isViewing: Joi.boolean(),
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      isViewing: Joi.boolean(),
+    }).prefs({ presence: "required" })
+  ),
   async (req: UserRequest, res: Response) => {
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
@@ -842,15 +858,12 @@ router.put("/viewing/:id",
   }
 );
 
-router.get("/viewing/:id",
-  validateParams(idSchema),
-  async (req: UserRequest, res: Response) => {
-    const id = req.cleanParams.id;
-    let ticket = await TicketModel.findById(id);
-    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    return res.status(200).send({ ok: true, data: ticket.viewingAgent });
-  }
-);
+router.get("/viewing/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+  const id = req.cleanParams.id;
+  let ticket = await TicketModel.findById(id);
+  if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  return res.status(200).send({ ok: true, data: ticket.viewingAgent });
+});
 
 /*
 Routes deleted as not used :

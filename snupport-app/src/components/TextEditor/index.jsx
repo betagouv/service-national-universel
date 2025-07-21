@@ -50,7 +50,18 @@ const useKeyPress = (targetKey) => {
   return keyPressed;
 };
 
-const TextEditor = ({ readOnly, setHtmlText, draftMessageHtml, setSlateContent, signature, forcedHtml, hasError, resetCount, className }) => {
+const TextEditor = ({
+  readOnly = false,
+  setHtmlText,
+  draftMessageHtml,
+  setSlateContent,
+  signature,
+  forcedHtml = "",
+  hasError = false,
+  resetCount,
+  className = "",
+  macroSlateContent,
+}) => {
   const draftMessageSlate = new DOMParser().parseFromString(draftMessageHtml, "text/html");
   const deserialized = deserialize(draftMessageSlate.body).filter((a) => a.type);
   const [value, setValue] = useState(draftMessageHtml ? (signature ? deserialized.concat(signature) : deserialized) : signature ? signature : empty);
@@ -66,6 +77,15 @@ const TextEditor = ({ readOnly, setHtmlText, draftMessageHtml, setSlateContent, 
   const [selected, setSelected] = useState(0);
   if (!editorRef.current) editorRef.current = withPlugins(withHistory(withReact(createEditor())));
   const editor = editorRef.current;
+
+  useEffect(() => {
+    if (macroSlateContent && macroSlateContent.length > 0) {
+      setValue(macroSlateContent);
+      editor.children = macroSlateContent;
+      setForceUpdateKey((prev) => prev + 1);
+      onChange(macroSlateContent);
+    }
+  }, [macroSlateContent]);
 
   useEffect(() => {
     if (Editor.nodes(editor, { at: [], match: (n) => Text.isText(n) || n.type }).length > 0) {

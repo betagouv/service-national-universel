@@ -39,6 +39,30 @@ function validatePassword(password) {
   return schema.validate(password);
 }
 
+const sendResponseTicket = async ({ ticket, copyRecipient, dest, attachment, messageHistory, lastMessageId }) => {
+  try {
+    if (ticket.canal === "PLATFORM") {
+      if (dest === ticket.contactEmail && copyRecipient.length === 0) {
+        const lastMessage = ticket.textMessage[ticket.textMessage.length - 1].replace(/\\n/g, "<br>");
+        await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.ANSWER_RECEIVED, message: lastMessage, attachment });
+      } else {
+        await sendEmailWithConditions({
+          ticket,
+          copyRecipient,
+          dest,
+          attachment,
+          messageHistory,
+          lastMessageId,
+        });
+      }
+    } else if (ticket.canal === "MAIL") {
+      await sendEmailWithConditions({ ticket, copyRecipient, dest, attachment, messageHistory, lastMessageId });
+    }
+  } catch (error) {
+    capture(error);
+  }
+};
+
 const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment, messageHistory, lastMessageId }) => {
   try {
     let mailTicket;
@@ -67,8 +91,12 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
       return message;
     };
 
+    const copyDest = copyRecipient?.map((recipient) => {
+      return { email: recipient };
+    });
+
     await sendEmail([{ email: dest }], ticket.subject + " [#" + ticket.number + "]", formatMessageForReading(mailTicket), {
-      cc: copyRecipient ?? [],
+      cc: copyDest ?? [],
       attachment: attachmentsEmail.length > 0 ? attachmentsEmail : undefined,
     });
   } catch (error) {
@@ -76,7 +104,7 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
   }
 };
 
-const sendNotif = async ({ ticket, templateId, message }) => {
+const sendNotif = async ({ ticket, templateId, message, attachment }) => {
   try {
     const youngRoles = ["young", "young exterior", "parent"];
 
@@ -94,6 +122,7 @@ const sendNotif = async ({ ticket, templateId, message }) => {
     await sendTemplate(templateId, {
       emailTo: [{ email: ticket.contactEmail }],
       params,
+      attachment: attachment?.length > 0 ? attachment : undefined,
     });
   } catch (error) {
     capture(error);
@@ -344,4 +373,5 @@ module.exports = {
   sendNotif,
   diacriticSensitiveRegex,
   sendReferentReport,
+  sendResponseTicket,
 };

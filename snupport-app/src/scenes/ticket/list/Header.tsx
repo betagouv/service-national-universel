@@ -1,9 +1,8 @@
 import React from "react";
+import ReactTooltip from "react-tooltip";
 import { toast } from "react-hot-toast";
-import { HiOutlineClipboardList } from "react-icons/hi";
 import { SORTING } from "@/constants";
-import MacroDropdown from "../components/MacroDropdown";
-import FilterDropdown from "@/components/FilterDropdown";
+import HeaderMacroDropdown from "../components/macros/HeaderDropDown";
 import SortDropdown from "@/components/SortDropdown";
 import { SNU_URL_API } from "@/config";
 import useUpdateTicket from "../hooks/useUpdateTicket";
@@ -71,30 +70,42 @@ export default function Header({ filter, update, aggregations, selectedTicket, s
         <div className="flex">
           {user.role === "AGENT" && (
             <>
-              <button
-                className="flex h-[40px] w-full cursor-pointer items-center rounded-md border border-gray-300 bg-white px-4 mr-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50"
-                onClick={() => handleDesassigner(selectedTicket)}
-              >
-                <p className="w-full">Désassigner</p>
-              </button>
+              <ReactTooltip
+                id="desassigner-tooltip"
+                disable={selectedTicket.length > 0}
+                type="dark"
+                place="top"
+                effect="solid"
+                className="custom-tooltip-radius !shadow-sm !text-white !text-xs !font-medium"
+              />
+              <div data-tip="Sélectionnez au moins un ticket" data-for="desassigner-tooltip" className="inline-block">
+                <button
+                  className="flex h-[40px] cursor-pointer items-center rounded-md border border-gray-300 bg-white px-4 mr-2 text-center text-sm font-medium text-gray-700 transition-colors hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-white"
+                  disabled={selectedTicket.length === 0}
+                  onClick={() => handleDesassigner(selectedTicket)}
+                >
+                  <p className="w-full">Désassigner</p>
+                </button>
+              </div>
 
-              <FilterDropdown name="Action" icon={<HiOutlineClipboardList />} buttonClass="rounded-l-md">
-                <MacroDropdown
-                  selectedTicket={selectedTicket}
-                  onClose={() => {
-                    update(filter);
-                    setSelectedTicket([]);
-                  }}
-                  onRefresh={() => update(filter)}
-                />
-              </FilterDropdown>
+              <HeaderMacroDropdown
+                selectedTicket={selectedTicket}
+                onClose={() => {
+                  update(filter);
+                  setSelectedTicket([]);
+                }}
+                onRefresh={() => update(filter)}
+                className="w-[250px] max-w-[250px]"
+              />
             </>
           )}
-          <SortDropdown items={sortActions} buttonClass={`${user.role === "AGENT" ? "rounded-r-md" : "rounded-md"}`} />
         </div>
       </div>
       <Tab filter={filter} setFilter={(f) => update(f)} statusArr={aggregations.status} toTreatTicket={toTreatTicket} />
-      {(user.role === "AGENT" || user.role === "DG") && <Filter filter={filter} setFilter={(f) => update(f)} agents={agents} cohortList={cohortList} />}
+      <div className={`flex ${user.role === "AGENT" || user.role === "DG" ? "justify-between" : "justify-end"}`}>
+        {(user.role === "AGENT" || user.role === "DG") && <Filter filter={filter} setFilter={(f) => update(f)} agents={agents} cohortList={cohortList} />}
+        <SortDropdown className="h-[40px] mr-3" items={sortActions} buttonClass={"rounded-md"} />
+      </div>
     </>
   );
 }

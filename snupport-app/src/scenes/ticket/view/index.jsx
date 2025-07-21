@@ -41,6 +41,11 @@ export default () => {
     }
   }, [ticket]);
 
+  const areAgentsEqual = (agents1, agents2) => {
+    if (agents1.length !== agents2.length) return false;
+    return agents1.every((agent1) => agents2.some((agent2) => agent2._id === agent1._id));
+  };
+
   async function getViewingAgents(id) {
     if (!id) return;
 
@@ -65,7 +70,9 @@ export default () => {
             const isFirstOccurrence = array.findIndex((a) => a.email === agent.email) === index;
             return isNotDuplicate && isFirstOccurrence;
           });
-          setViewingAgents(filteredAgents);
+
+          // Only update if actually different
+          setViewingAgents((prevAgents) => (areAgentsEqual(prevAgents, filteredAgents) ? prevAgents : filteredAgents));
         }
       }
     }, 5000);

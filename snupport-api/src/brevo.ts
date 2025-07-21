@@ -57,7 +57,7 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
     }
 
     const body: any = {};
-    body.to = [to];
+    body.to = to;
     if (cc?.length) body.cc = cc;
     if (bcc?.length) body.bcc = bcc;
     body.htmlContent = htmlContent;

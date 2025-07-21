@@ -1,7 +1,7 @@
 import { Menu, Transition } from "@headlessui/react";
 import { formatDistance } from "date-fns";
 import { fr } from "date-fns/locale";
-import React, { Fragment, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import ReactTooltip from "react-tooltip";
 import { toast } from "react-hot-toast";
 import { BsArrowReturnLeft } from "react-icons/bs";
@@ -9,15 +9,19 @@ import { HiChevronDown, HiPlus, HiSave, HiX, HiXCircle } from "react-icons/hi";
 import Avatar from "../../../components/Avatar";
 import TextEditor from "../../../components/TextEditor";
 
-import MacroDropdown from "./MacroDropdown";
+import ThreadMacroDropdown from "./macros/ThreadDropdown";
 import SendFileEmailModal from "./SenfFileEmailModal";
 import ChatBox from "./ChatBox";
+import { getMacroById } from "../../../services/macro";
 
 import API from "../../../services/api";
-import { isMessageValid, removeLineBreakFromStartAndEnd, getMessageWithoutSignature } from "../../../components/TextEditor/importHtml";
+import { removeLineBreakFromStartAndEnd, getMessageWithoutSignature } from "../../../components/TextEditor/importHtml";
 import { fillShortcut } from "../utils";
 import { TRANSLATE_ROLE } from "../../../utils";
 import { serializeTicketUpdate } from "../service";
+import PreviewMacroDropdown from "./macros/PreviewDropDown";
+import { useMacroSelection } from "./macros/useMacro";
+import CopyRecipientEditor from "./CopyRecipientEditor";
 
 const Thread = ({
   messages,
@@ -47,6 +51,8 @@ const Thread = ({
   const [messageHistory, setMessageHistory] = useState(null);
   const [dest, setDest] = useState(ticket.contactEmail);
   const [editorResetCount, setEditorResetCount] = useState(0);
+  const [macroSlateContent, setMacroSlateContent] = useState(null);
+  const [selectedMacro, setSelectedMacro] = useState(null);
 
   // is needed to make message available in cleanup function
   const messageRef = useRef("");
@@ -80,7 +86,10 @@ const Thread = ({
     const { ok, data } = await API.get({ path: "/message", query: { ticketId: ticket._id } });
     if (!ok) return toast.error("Une erreur est survenue");
     setMessages(data);
-    scrollDiv.current.scrollIntoView({ behavior: "smooth" });
+    if (scrollDiv.current) {
+      scrollDiv.current.scrollIntoView({ behavior: "smooth" });
+    }
+    return;
   }
 
   const onUploadImage = async (formatedMessage) => {
@@ -92,7 +101,7 @@ const Thread = ({
       updateMessages();
       return ok;
     } catch (e) {
-      toast.error(e, "Erreur");
+      toast.error("Erreur", e);
     }
   };
   const formatMessageForSending = (message) => {
@@ -105,27 +114,54 @@ const Thread = ({
     return formattedMessage;
   };
 
+  const handleSending = async () => {
+    if (selectedMacro) {
+      try {
+        await handleSelectMacro(selectedMacro, true);
+      } catch (error) {
+        console.error("Error applying macro:", error);
+        toast.error("Erreur lors de l'application de la macro");
+      } finally {
+        setSelectedMacro(null);
+        setMacroSlateContent(null);
+        setMessage("");
+        await updateTicket();
+        setEditorResetCount(editorResetCount + 1);
+        await updateMessages();
+        setFiles([]);
+        setSelectedImage(null);
+      }
+    } else {
+      handleAddMessage();
+    }
+  };
+
   const handleAddMessage = async () => {
-    const messageWithoutSigniture = getMessageWithoutSignature(message, signature);
-    const messageWithoutHTMLTags = getMessageTextWithoutHTMLTags(messageWithoutSigniture);
-    console.log("messageWithoutSigniture", messageWithoutSigniture);
-    console.log("messageWithoutHTMLTags", messageWithoutHTMLTags);
-    console.log(isMessageValid(message), "isMessageValid(message)");
     try {
-      if (!messageWithoutHTMLTags || !isMessageValid(message)) return toast.error("Veuillez renseigner un message");
+      const messageWithoutSigniture = getMessageWithoutSignature(message, signature);
+      const messageWithoutHTMLTags = getMessageTextWithoutHTMLTags(messageWithoutSigniture);
+      if (!messageWithoutHTMLTags && !selectedImage) {
+        return true;
+      }
       let formatedMessage = fillShortcut(message, user, { firstName: ticket.contactFirstName, lastName: ticket.contactLastName });
       formatedMessage = formatMessageForSending(formatedMessage); // Convertir les caractères spéciaux
       let ok;
       if (selectedImage) {
         ok = await onUploadImage(formatedMessage);
-        if (!ok) return toast.error("Une erreur est survenue");
+        if (!ok) {
+          toast.error("Une erreur est survenue");
+          return false;
+        }
         toast.success("Message avec pièce jointe envoyé");
       } else {
         ok = await API.post({
           path: "/message",
           body: { message: formatedMessage, ticketId: ticket._id, slateContent, copyRecipient: copyRecipient, dest, messageHistory },
         });
-        if (!ok) return toast.error("Une erreur est survenue");
+        if (!ok) {
+          toast.error("Une erreur est survenue");
+          return false;
+        }
         toast.success("Message envoyé");
       }
       setMessage("");
@@ -134,8 +170,10 @@ const Thread = ({
       await updateMessages();
       setFiles([]);
       setSelectedImage(null);
+      return true;
     } catch (error) {
       toast.error("Erreur lors de l'envoi du message");
+      return false;
     }
   };
 
@@ -159,6 +197,29 @@ const Thread = ({
     }
   };
 
+  const onPreviewMacro = async (id) => {
+    if (!ticket._id) {
+      toast.error("Aucun ticket sélectionné pour la prévisualisation de la macro");
+      return;
+    }
+    try {
+      const response = await getMacroById(id);
+      if (!response) {
+        toast.error("Erreur lors de la récupération de la macro");
+        return;
+      }
+      console.log(response);
+      setSelectedMacro(id);
+      const macroContent = response.macroAction
+        .filter((action) => action.action === "ADDMESSAGE")
+        .map((action) => action.message.content)
+        .flat();
+      setMacroSlateContent(macroContent);
+    } catch (error) {
+      toast.error("Erreur lors de la récupération de la macro");
+    }
+  };
+
   const Button = ({ text, icon, handleClick }) => (
     <button
       className="flex h-[inherit] grow items-center justify-center gap-2 rounded-md border border-gray-300 bg-white px-2.5 transition-colors hover:bg-gray-50"
@@ -169,6 +230,15 @@ const Thread = ({
       {!isPreview && <span className="text-sm font-medium text-grey-text">{text}</span>}
     </button>
   );
+
+  const { handleSelectMacro } = useMacroSelection({
+    selectedTicket: [ticket._id],
+    handleAddMessage,
+    onClose: onMacroApply,
+    onRefresh: async () => {
+      await updateTicket();
+    },
+  });
 
   return (
     <div className={`flex w-full flex-1 flex-col overflow-y-auto bg-white py-5 ${isPreview ? "px-3" : "pl-7 pr-[30px]"} ${className}`}>
@@ -219,12 +289,12 @@ const Thread = ({
         <TextEditor
           resetCount={editorResetCount}
           key={ticket._id}
-          htmlText={message}
           setHtmlText={setMessage}
           draftMessageHtml={ticket.messageDraft}
           setSlateContent={setSlateContent}
           reloadKey={reloadKey}
           signature={signature}
+          macroSlateContent={macroSlateContent}
         />
         <div>
           {files.length > 0 && (
@@ -258,7 +328,9 @@ const Thread = ({
           setSelectedImage={setSelectedImage}
           iconButton={isPreview}
         />
-        {user.role === "AGENT" && !isPreview && <Button text="Ajouter destinataires" icon={<BsArrowReturnLeft />} handleClick={() => setIsCopyRecipientVisible(true)} />}
+        {["AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION"].includes(user.role) && !isPreview && (
+          <Button text="Ajouter destinataires" icon={<BsArrowReturnLeft />} handleClick={() => setIsCopyRecipientVisible(true)} />
+        )}
         {user.role === "AGENT" ? (
           <Button icon={<HiSave />} text="Enregistrer" handleClick={() => handleAddDraftMessage()} />
         ) : (
@@ -269,17 +341,16 @@ const Thread = ({
           <button
             type="button"
             className={`relative flex flex-1 items-center justify-center ${
-              user.role === "AGENT" ? "rounded-l-md" : "rounded-md"
+              user.role === "AGENT" && !selectedMacro ? "rounded-l-md" : "rounded-md"
             } bg-accent-color px-[18px] text-sm font-medium text-white transition-colors hover:bg-indigo-500 focus:z-10`}
-            onClick={handleAddMessage}
+            onClick={handleSending}
             disabled={user.role === "DG"}
           >
-            Envoyer
+            <p>Envoyer {selectedMacro && "et appliquer la macro"}</p>
           </button>
-          {user.role === "AGENT" && (
+          {user.role === "AGENT" && !selectedMacro && (
             <Menu as="span" className="relative block">
               <Menu.Button className="relative flex h-full w-[42px] items-center justify-center rounded-r-md border-l border-[#726BEA] bg-accent-color text-xl text-white transition-colors hover:bg-indigo-500 focus:z-10">
-                <span className="sr-only">Open options</span>
                 <HiChevronDown />
               </Menu.Button>
               <Transition
@@ -290,8 +361,8 @@ const Thread = ({
                 leaveFrom="transform opacity-100 scale-100"
                 leaveTo="transform opacity-0 scale-95"
               >
-                <Menu.Items className="absolute bottom-12 right-0 flex w-56 origin-bottom-right flex-col rounded-md bg-white py-1 shadow-lg">
-                  <MacroDropdown
+                <Menu.Items className="absolute bottom-12 right-0 flex w-56 origin-bottom-right flex-col rounded-md bg-white shadow-lg">
+                  <ThreadMacroDropdown
                     selectedTicket={[ticket._id]}
                     handleAddMessage={handleAddMessage}
                     onClose={onMacroApply}
@@ -305,140 +376,20 @@ const Thread = ({
           )}
         </div>
       </div>
-    </div>
-  );
-};
-
-const CopyRecipientEditor = ({ copyRecipient, isVisible, setCopyRecipient, dest, setDest }) => {
-  const [defaultCopyRecipients, setDefaultCopyRecipients] = useState([]);
-  const [defaultDest, setDefaultDest] = useState([]);
-  const [inputDest, setInputDest] = useState("");
-  const [inputCc, setInputCc] = useState("");
-
-  useEffect(() => {
-    updateCc();
-  }, [inputCc]);
-
-  useEffect(() => {
-    updateDest();
-  }, [inputDest]);
-
-  async function updateCc() {
-    if (!inputCc) return setDefaultCopyRecipients([]);
-    const { ok, data } = await API.get({ path: `/contact/search`, query: { q: inputCc } });
-    if (ok) setDefaultCopyRecipients(data);
-  }
-
-  async function updateDest() {
-    if (!inputDest) return setDefaultDest([]);
-    const { ok, data } = await API.get({ path: `/contact/search`, query: { q: inputDest } });
-    if (ok) setDefaultDest(data);
-  }
-
-  const addCopyRecipient = async (value) => {
-    try {
-      setCopyRecipient([...copyRecipient, value]);
-      setInputCc("");
-    } catch (e) {
-      toast.error(e, "Erreur lors de l'ajout du destinataire");
-    }
-  };
-
-  const removeCopyRecipient = async (value) => {
-    try {
-      setCopyRecipient(copyRecipient.filter((recipient) => recipient !== value));
-    } catch (e) {
-      toast.error(e, "Erreur lors de la suppression du destinataire");
-    }
-  };
-
-  return (
-    <div className={` ${isVisible ? "" : "hidden"} mb-4 `}>
-      <label className="text-xs text-gray-500">{"A"}</label>
-
-      <div className="mt-2 mb-4 flex divide-x divide-gray-300 overflow-hidden rounded-md border border-gray-300">
-        <input
-          onClick={() => setInputDest("")}
-          onChange={(e) => setInputDest(e.target.value)}
-          value={inputDest}
-          type="text"
-          className="w-[200px] flex-1 border-0 text-sm text-gray-600 placeholder:text-[#979797] focus:border-transparent"
-          placeholder={"A"}
-        />
-        <button
-          className="flex h-10 w-11 flex-none items-center justify-center bg-white text-2xl text-gray-500 transition-colors hover:bg-gray-50"
-          onClick={() => {
-            setDest(inputDest);
-            setInputDest("");
-          }}
-        >
-          <HiPlus />
-        </button>
-      </div>
-      <div className="relative ">
-        <ul className="absolute z-10 mb-4 w-full  bg-white text-sm text-gray-600">
-          {defaultDest.map((defaultD) => (
-            <li
-              className="z-10  cursor-pointer bg-white hover:bg-gray-50"
-              key={defaultD._id}
-              onClick={() => {
-                setDest(defaultD.email);
-                setInputDest("");
-              }}
-            >
-              {defaultD.email}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      {dest && (
-        <div className="relative flex flex-wrap gap-2.5">
-          <span className=" flex items-center gap-0.5 rounded-full bg-purple-100 py-0.5 pl-2.5 pr-1">
-            <span className="text-sm font-medium text-purple-800">{dest}</span>
-            <HiX onClick={() => setDest(null)} className="cursor-pointer text-base text-indigo-400" />
-          </span>
+      {user.role === "AGENT" && (
+        <div className="mt-3 flex w-full justify-end">
+          <PreviewMacroDropdown
+            selectedTicket={[ticket._id]}
+            handleAddMessage={handleAddMessage}
+            onClose={onPreviewMacro}
+            onRefresh={async () => {
+              await updateTicket();
+            }}
+            className="w-[250px]"
+            filtered={true}
+          />
         </div>
       )}
-      <label className="text-xs text-gray-500">{"COPIE"}</label>
-
-      <div className="mt-2 mb-4 flex divide-x divide-gray-300 overflow-hidden rounded-md border border-gray-300">
-        <input
-          onClick={() => setInputCc("")}
-          onChange={(e) => setInputCc(e.target.value)}
-          value={inputCc}
-          type="text"
-          className="w-[200px] flex-1 border-0 text-sm text-gray-600 placeholder:text-[#979797] focus:border-transparent"
-          placeholder={"COPIE"}
-        />
-        <button
-          className="flex h-10 w-11 flex-none items-center justify-center bg-white text-2xl text-gray-500 transition-colors hover:bg-gray-50"
-          onClick={() => {
-            setCopyRecipient([...copyRecipient, inputCc]);
-            setInputCc("");
-          }}
-        >
-          <HiPlus />
-        </button>
-      </div>
-      <div className="relative ">
-        <ul className="absolute z-10 mb-4 w-full  bg-white text-sm text-gray-600">
-          {defaultCopyRecipients.map((defaultCopyRecipient) => (
-            <li className="z-10  cursor-pointer bg-white hover:bg-gray-50" key={defaultCopyRecipient._id} onClick={() => addCopyRecipient(defaultCopyRecipient.email)}>
-              {defaultCopyRecipient.email}
-            </li>
-          ))}
-        </ul>
-      </div>
-
-      <div className="relative flex flex-wrap gap-2.5">
-        {copyRecipient.map((email, i) => (
-          <span className=" flex items-center gap-0.5 rounded-full bg-purple-100 py-0.5 pl-2.5 pr-1" key={i}>
-            <span className="text-sm font-medium text-purple-800">{email}</span>
-            <HiX onClick={() => removeCopyRecipient(email)} className="cursor-pointer text-base text-indigo-400" />
-          </span>
-        ))}
-      </div>
     </div>
   );
 };

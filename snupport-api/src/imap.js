@@ -84,7 +84,7 @@ async function addMessage(mail) {
       if (mail.copyRecipient) obj.copyRecipient = mail.copyRecipient;
       ticket = await TicketModel.create(obj);
       ticket = await matchVentilationRule(ticket);
-      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text });
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text, attachment: [] });
     }
 
     // create message

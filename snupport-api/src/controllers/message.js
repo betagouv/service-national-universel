@@ -7,7 +7,7 @@ const TicketModel = require("../models/ticket");
 const AgentModel = require("../models/agent");
 const { matchVentilationRule } = require("../utils/ventilation");
 
-const { sendEmailWithConditions, getFile, deleteFile, uploadAttachment, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, getSignedUrl } = require("../utils");
+const { getFile, deleteFile, uploadAttachment, getHoursDifference, getSignedUrl, sendResponseTicket } = require("../utils");
 const { decrypt, encrypt } = require("../utils/crypto");
 const { getS3Path } = require("../utils/file");
 const { agentGuard } = require("../middlewares/authenticationGuards");
@@ -91,14 +91,7 @@ router.post(
     });
     ticket.textMessage.push(message);
 
-    const lastMessage = ticket.textMessage[ticket.textMessage.length - 1].replace(/\\n/g, "<br>");
-
-    if (ticket.canal === "MAIL" || ticket.contactGroup === "unknown") {
-      console.log("Sending email for ticket", ticket._id);
-      await sendEmailWithConditions({ ticket, copyRecipient: dataMessage.copyRecipient, dest, messageHistory, lastMessageId: dataMessage._id });
-    } else {
-      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.ANSWER_RECEIVED, message: lastMessage });
-    }
+    await sendResponseTicket({ ticket, copyRecipient: dataMessage.copyRecipient, dest, messageHistory, lastMessageId: dataMessage._id, attachment: [] });
 
     return res.status(200).send({ ok: true, dataMessage });
   }
@@ -217,9 +210,7 @@ router.post(
       text: `${messageHtml}`,
       copyRecipient,
     });
-    if (ticket.canal === "MAIL") {
-      await sendEmailWithConditions({ ticket, copyRecipient, dest, attachment: mailFormatFiles, messageHistory, lastMessageId: message._id });
-    }
+    await sendResponseTicket({ ticket, copyRecipient, dest, attachment: mailFormatFiles, messageHistory, lastMessageId: message._id });
     for (let file of files) {
       const { name, data, mimetype } = file;
       const path = getS3Path(name);
