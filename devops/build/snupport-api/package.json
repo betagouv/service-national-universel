@@ -5,7 +5,7 @@
     "node": "^20.17"
   },
   "scripts": {
-    "start": "node api/src/index.js"
+    "start": "node snupport-api/src/index.js"
   },
   "author": "SNU",
   "license": "ISC",
