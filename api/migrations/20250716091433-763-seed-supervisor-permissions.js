@@ -101,6 +101,30 @@ module.exports = {
         roles: [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE],
       });
     }
+    // add resource to permission mission
+    const permission = await PermissionModel.findOne({
+      code: PERMISSION_CODES.MISSION_SAME_STRUCTURE_FULL_NETWORK,
+      resource: PERMISSION_RESOURCES.MISSION,
+      action: PERMISSION_ACTIONS.FULL,
+    });
+    permission.set({
+      policy: {
+        where: [
+          // mission de sa structure
+          {
+            field: "structureId", // mission
+            source: "structureId", // referent
+          },
+          // mission de la structure de son réseau
+          {
+            resource: "structure",
+            field: "networkId", // structure
+            source: "structureId", // referent
+          },
+        ],
+      },
+    });
+    permission.save();
   },
 
   async down(db, client) {
