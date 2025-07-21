@@ -8,7 +8,18 @@ import { ERRORS, isYoung } from "../utils/index";
 import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToApply } from "../application/applicationService";
 import { getTutorName } from "../services/mission";
 import { validateId, validateMission, idSchema } from "../utils/validator";
-import { SENDINBLUE_TEMPLATES, MISSION_STATUS, ROLES, YoungType, PERMISSION_RESOURCES, PERMISSION_ACTIONS, isAuthorized, isAdmin } from "snu-lib";
+import {
+  SENDINBLUE_TEMPLATES,
+  MISSION_STATUS,
+  ROLES,
+  YoungType,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
+  isAdmin,
+  isCreateAuthorized,
+  isWriteAuthorized,
+  isDeleteAuthorized,
+} from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
@@ -50,12 +61,11 @@ router.post(
         responsible = await ReferentModel.findById(checkedMission.tutorId);
       }
 
-      if (req.user.role === ROLES.SUPERVISOR) structure = await StructureModel.findById(checkedMission.structureId);
+      if (checkedMission.structureId) structure = await StructureModel.findById(checkedMission.structureId);
 
       if (
-        !isAuthorized({
+        !isCreateAuthorized({
           resource: PERMISSION_RESOURCES.MISSION,
-          action: PERMISSION_ACTIONS.CREATE,
           user: req.user,
           context: { mission: checkedMission, structure: structure ? structure.toJSON() : null },
         })
@@ -136,15 +146,14 @@ router.put(
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       let structure: StructureDocument | null = null;
-      if (req.user.role === ROLES.SUPERVISOR) structure = await StructureModel.findById(mission.structureId);
+      if (mission.structureId) structure = await StructureModel.findById(mission.structureId);
 
       const { error: errorMission, value: checkedMission } = validateMission(req.body);
       if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
       if (
-        !isAuthorized({
+        !isWriteAuthorized({
           resource: PERMISSION_RESOURCES.MISSION,
-          action: PERMISSION_ACTIONS.WRITE,
           user: req.user,
           context: { mission: checkedMission, structure: structure ? structure.toJSON() : null },
         })
@@ -291,17 +300,22 @@ router.post(
       const missions = await MissionModel.find({ _id: { $in: ids } });
       if (missions?.length !== ids.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (
-        missions.some(
-          (mission) =>
-            !isAuthorized({
-              resource: PERMISSION_RESOURCES.MISSION,
-              action: PERMISSION_ACTIONS.WRITE,
-              user: req.user,
-              context: { mission: mission.toJSON() },
-            }),
-        )
-      ) {
+      let isAuthorized = false;
+      for (const mission of missions) {
+        let structure: StructureDocument | null = null;
+        if (mission.structureId) structure = await StructureModel.findById(mission.structureId);
+        if (
+          isWriteAuthorized({
+            resource: PERMISSION_RESOURCES.MISSION,
+            user: req.user,
+            context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
+          })
+        ) {
+          isAuthorized = true;
+          break;
+        }
+      }
+      if (!isAuthorized) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -480,12 +494,14 @@ router.delete(
       const mission = await MissionModel.findById(checkedId);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      let structure: StructureDocument | null = null;
+      if (mission.structureId) structure = await StructureModel.findById(mission.structureId);
+
       if (
-        !isAuthorized({
+        !isDeleteAuthorized({
           resource: PERMISSION_RESOURCES.MISSION,
-          action: PERMISSION_ACTIONS.DELETE,
           user: req.user,
-          context: { mission: mission.toJSON() },
+          context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
         })
       ) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

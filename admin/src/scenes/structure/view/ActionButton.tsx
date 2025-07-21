@@ -3,12 +3,12 @@ import { isCreateAuthorized, PERMISSION_RESOURCES } from "snu-lib";
 import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 
-export function ActionButton({ structureRattacheeId }: { structureRattacheeId?: string }) {
+export function ActionButton({ structureRattacheeId, networkId }: { structureRattacheeId?: string; networkId?: string }) {
   //@ts-expect-error Auth does not exist
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  if (!isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { mission: { structureId: structureRattacheeId! } } })) {
+  if (!isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { structureId: structureRattacheeId!, networkId: networkId! } } })) {
     return null;
   }
   let structureRattacheeParam = "";
