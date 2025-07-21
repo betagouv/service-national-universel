@@ -1,4 +1,4 @@
-const { PERMISSION_CODES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ROLES, PERMISSION_ACTIONS_READ_WRITE, ROLE_JEUNE } = require("snu-lib");
+const { PERMISSION_CODES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, ROLES, ROLE_JEUNE, PERMISSION_ACTIONS_READ_WRITE_CREATE } = require("snu-lib");
 const { PermissionModel } = require("../src/models/permissions/permission");
 
 module.exports = {
@@ -41,7 +41,7 @@ module.exports = {
       code: PERMISSION_CODES.CANDIDATURE_WRITE,
       titre: "Modification de candidatures",
       resource: PERMISSION_RESOURCES.APPLICATION,
-      action: PERMISSION_ACTIONS.CREATE,
+      action: PERMISSION_ACTIONS.WRITE,
       roles: [ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE],
     });
     await PermissionModel.create({
@@ -51,7 +51,7 @@ module.exports = {
       action: PERMISSION_ACTIONS.CREATE,
       roles: [ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE],
     });
-    for (const action of PERMISSION_ACTIONS_READ_WRITE) {
+    for (const action of PERMISSION_ACTIONS_READ_WRITE_CREATE) {
       await PermissionModel.create({
         code: PERMISSION_CODES.CANDIDATURE_REGION + action,
         titre: "Création de candidatures",
@@ -60,6 +60,7 @@ module.exports = {
         policy: {
           where: [
             {
+              resource: "young",
               field: "region",
               source: "region",
             },
@@ -75,6 +76,7 @@ module.exports = {
         policy: {
           where: [
             {
+              resource: "young",
               field: "department",
               source: "department",
             },
@@ -107,7 +109,7 @@ module.exports = {
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_YOUNG_FULL });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_WRITE });
     await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_CREATE });
-    for (const action of PERMISSION_ACTIONS_READ_WRITE) {
+    for (const action of PERMISSION_ACTIONS_READ_WRITE_CREATE) {
       await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_REGION + action });
       await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_DEPARTMENT + action });
       await PermissionModel.deleteOne({ code: PERMISSION_CODES.CANDIDATURE_CLE + action });

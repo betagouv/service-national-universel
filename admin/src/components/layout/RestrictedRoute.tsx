@@ -49,6 +49,9 @@ const PERMISSIONS_BY_ROUTE = {
     ignorePolicy: true, // should have read permission but not specific to a mission
     permissions: [{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ }],
   },
+  "/structure/create": {
+    permissions: [{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.CREATE }],
+  },
   "/structure": {
     ignorePolicy: true, // should have read permission but not specific to a structure
     permissions: [{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ }],
@@ -61,6 +64,7 @@ const PERMISSIONS_BY_ROUTE = {
     permissions: [{ resource: PERMISSION_RESOURCES.ASSOCIATION, action: PERMISSION_ACTIONS.READ }],
   },
   "/contenu": {
+    ignorePolicy: true, // should have read permission but not specific to a program
     permissions: [{ resource: PERMISSION_RESOURCES.PROGRAM, action: PERMISSION_ACTIONS.READ }],
   },
   "/school": {
