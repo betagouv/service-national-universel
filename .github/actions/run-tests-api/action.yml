@@ -57,11 +57,17 @@ runs:
       shell: bash
       run: npm run lint
 
-    - name: Test and Send coverage
-      uses: paambaati/codeclimate-action@v9.0.0
-      env:
-        CC_TEST_REPORTER_ID: ${{ inputs.CC_TEST_REPORTER_ID }}
-        CI: true
-      with:
-        workingDirectory: api
-        coverageCommand: npm run coverage
+    - name: Run tests
+      working-directory: api
+      shell: bash
+      run: npm run test
+
+    # TODO: Uncomment this when we can use Code Climate again
+    # - name: Test and Send coverage
+    #   uses: paambaati/codeclimate-action@v9.0.0
+    #   env:
+    #     CC_TEST_REPORTER_ID: ${{ inputs.CC_TEST_REPORTER_ID }}
+    #     CI: true
+    #   with:
+    #     workingDirectory: api
+    #     coverageCommand: npm run coverage
