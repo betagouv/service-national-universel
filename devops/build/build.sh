@@ -29,11 +29,13 @@ fi
 front=0
 back=0
 use_packages=0
+use_patches=0
 copy_tsconfig=0
 
 if [[ $application == "api" || $application == "apiv2" ]]; then
     back=1;
     use_packages=1;
+    use_patches=1;
 fi
 if [[ $application == "app" || $application == "admin" ]]; then
     front=1;
@@ -56,7 +58,9 @@ turbo prune $application
 if (( $copy_tsconfig )); then
     cp tsconfig.front.json out
 fi
-cp -r patches out
+if (( $use_patches )); then
+    cp -r patches out
+fi
 cd out
 npm ci --no-audit --no-fund
 turbo run build
