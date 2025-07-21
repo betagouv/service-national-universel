@@ -29,6 +29,7 @@ export class InscriptionController {
         @Body() payload: PostInscriptionsExportPayloadDto,
     ): Promise<InscriptionRoutes["PostInscriptionsExport"]["response"]> {
         const parameters: ExportJeunesTaskParameters = {
+            name: "inscription",
             format: "inscription",
             filters: payload.filters,
             fields: payload.fields,
@@ -73,6 +74,7 @@ export class InscriptionController {
         }
 
         const parameters: ExportJeunesTaskParameters = {
+            name: "inscription",
             format: "inscription",
             filters,
             fields: payload.fields,

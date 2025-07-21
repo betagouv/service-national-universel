@@ -51,6 +51,7 @@ export class JeuneController {
         }
 
         const parameters: ExportJeunesTaskParameters = {
+            name: "volontaire",
             format: "volontaire",
             filters: payload.filters,
             fields: payload.fields,
@@ -106,6 +107,7 @@ export class JeuneController {
         }
 
         const parameters: ExportJeunesTaskParameters = {
+            name: "volontaire",
             format: "inscription",
             filters,
             fields: payload.fields,

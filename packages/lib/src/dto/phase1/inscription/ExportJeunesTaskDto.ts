@@ -6,6 +6,7 @@ type Analytics = {
 };
 
 export interface ExportJeunesTaskParameters extends Omit<Phase1TaskParameters, "sessionId"> {
+  name: string;
   format: "volontaire" | "inscription";
   filters: Record<string, string | string[]>;
   fields: string[];

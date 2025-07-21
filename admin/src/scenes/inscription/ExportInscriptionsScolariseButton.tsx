@@ -10,6 +10,7 @@ import ModalConfirm from "@/components/modals/ModalConfirm";
 import { BsDownload } from "react-icons/bs";
 import { InscriptionService } from "@/services/inscriptionService";
 import { MAX_EXPORT_VOLONTAIRES } from "../volontaires/list";
+import { buildApiv2Query } from "@/components/filters-system-v2/components/filters/utils";
 
 interface Props {
   user: UserDto;
@@ -23,19 +24,7 @@ export default function ExportInscriptionsScolariseButton({ user, selectedFilter
   const { mutate: exportInscriptions, isPending } = useMutation({
     mutationFn: async () => {
       return await InscriptionService.postInscriptionsScolariseExport({
-        filters: Object.entries(selectedFilters).reduce(
-          (acc, [key, value]) => {
-            if (key === "searchbar") {
-              return acc;
-            }
-            // @ts-ignore
-            acc[key] = value.filter;
-            return acc;
-          },
-          {} as Record<string, string | string[]>,
-        ),
-        fields: ["*"],
-        searchTerm: selectedFilters?.searchbar?.filter?.[0],
+        ...buildApiv2Query(selectedFilters, ["*"]),
         departement: user.role === ROLES.REFERENT_DEPARTMENT ? (user.department as string[]) : undefined,
         region: user.role === ROLES.REFERENT_REGION ? user.region : undefined,
       });

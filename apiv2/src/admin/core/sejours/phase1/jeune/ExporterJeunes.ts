@@ -97,6 +97,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
     ) {}
 
     async execute({
+        name,
         format,
         filters: filtersRaw,
         fields,
@@ -215,7 +216,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         this.logger.log(`Upload excel`);
         // upload du rapport du s3
         const timestamp = this.clockGateway.formatSafeDateTime(new Date());
-        const fileName = `${format}s_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
+        const fileName = `${name}s_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
             `${EXPORT_JEUNE_FOLDER}/${fileName}`,
             {

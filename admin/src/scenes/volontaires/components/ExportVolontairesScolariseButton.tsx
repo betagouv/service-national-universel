@@ -22,7 +22,12 @@ export default function ExportVolontairesScolariseButton({ user, selectedFilters
   const [showModal, setShowModal] = useState(false);
 
   const { mutate: exportJeunesScolarise, isPending } = useMutation({
-    mutationFn: async () => await JeuneService.postJeunesScolariseExport(buildApiv2Query(selectedFilters, ["*"])),
+    mutationFn: async () =>
+      await JeuneService.postJeunesScolariseExport({
+        ...buildApiv2Query(selectedFilters, ["*"]),
+        departement: user.role === ROLES.REFERENT_DEPARTMENT ? (user.department as string[]) : undefined,
+        region: user.role === ROLES.REFERENT_REGION ? user.region : undefined,
+      }),
     onSuccess: () => {
       toastr.success("Export des volontaires scolarisés", "L'export des volontaires scolarisés a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setShowModal(false);
