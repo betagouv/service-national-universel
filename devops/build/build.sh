@@ -5,7 +5,7 @@ set -e
 if [ "$#" -lt 2 ]; then
     echo "Build application to destination directory"
     echo "Usage $0 <application> <destination>"
-    echo "  application: Application name (app, admin, api, apiv2)"
+    echo "  application: Application name (app, admin, api, apiv2, snupport-app, snupport-api)"
     echo "  destination: Build output directory"
     exit 1
 fi
@@ -13,21 +13,37 @@ fi
 application=$1
 destination=$2
 
-front=0
-back=0
 case $application in
-    (app | admin | snupport-app) front=1 ;;
-    (api | apiv2 | snupport-api) back=1 ;;
+    (app | admin | api | apiv2 | snupport-app | snupport-api) ;;
     (*)
         echo "You must specify a valid application"
         exit 1
     ;;
 esac
 
-
 if [[ $destination == "" ]]; then
     echo "You must specify the destination directory"
     exit 1
+fi
+
+front=0
+back=0
+use_packages=0
+copy_tsconfig=0
+
+if [[ $application == "api" || $application == "apiv2" ]]; then
+    back=1;
+    use_packages=1;
+fi
+if [[ $application == "app" || $application == "admin" ]]; then
+    front=1;
+    copy_tsconfig=1;
+fi
+if [[ $application == "snupport-api" ]]; then
+    back=1;
+fi
+if [[ $application == "snupport-app" ]]; then
+    front=1;
 fi
 
 cd "$(dirname $0)/../.."
@@ -37,12 +53,10 @@ npm install --global "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune $application
-# NOT NEEDED BY SNUPPORT
-if (( $front )); then
+if (( $copy_tsconfig )); then
     cp tsconfig.front.json out
 fi
 cp -r patches out
-# END
 cd out
 npm ci --no-audit --no-fund
 turbo run build
@@ -61,10 +75,10 @@ if (( $front )); then
 fi
 
 if (( $back )); then
-    # NOT NEEDED BY SNUPPORT
-    mkdir -p $destination/packages/lib/
-    mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
-    # END
+    if (( $use_packages )); then
+        mkdir -p $destination/packages/lib/
+        mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
+    fi
     mv out/node_modules $destination/
 fi
 
