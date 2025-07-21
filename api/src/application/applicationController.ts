@@ -18,6 +18,8 @@ import {
   PERMISSION_ACTIONS,
   isCreateAuthorized,
   isWriteAuthorized,
+  isSupervisor,
+  isResponsible,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../sentry";
@@ -740,7 +742,7 @@ router.post(
             });
 
             return sendYoungRPMail();
-          } else if (req.user.role === ROLES.RESPONSIBLE) {
+          } else if (isResponsible(req.user) || isSupervisor(req.user)) {
             // prevenir referent departement pahse 2
             const referentManagerPhase2 = await getReferentManagerPhase2(application.youngDepartment);
             emailTo = referentManagerPhase2.map((referent) => ({
@@ -763,6 +765,8 @@ router.post(
               params,
             });
             return sendYoungRPMail();
+          } else {
+            emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
           }
         }
       } else {
