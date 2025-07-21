@@ -100,7 +100,7 @@ fi
 
 if [[ $application == "snupport-api" ]]; then
     mkdir -p $destination/snupport-api/
-    mv out/snupport-api/{dist/*,node_modules} $destination/snupport-api/
+    mv out/snupport-api/{src,node_modules} $destination/snupport-api/
     cp devops/build/snupport-api/package.json $destination
 fi
 
