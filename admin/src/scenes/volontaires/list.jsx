@@ -4,14 +4,13 @@ import { Link, useHistory } from "react-router-dom";
 
 import { Listbox, Transition } from "@headlessui/react";
 import { Fragment } from "react";
-import { BsDownload } from "react-icons/bs";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
-import { isSuperAdmin, youngExportFields } from "snu-lib";
+import { isSuperAdmin } from "snu-lib";
 import Badge from "../../components/Badge";
 import Breadcrumbs from "../../components/Breadcrumbs";
 import Loader from "../../components/Loader";
-import { ExportComponent, Filters, ModalExport, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
+import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { appURL } from "../../config";
 import useFilterLabels from "./useFilterLabels";
 import plausibleEvent from "../../services/plausible";
@@ -19,13 +18,17 @@ import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translateP
 import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
 import Panel from "./panel";
-import { getFilterArray, transformInscription, transformVolontaires } from "./utils";
+import { getFilterArray } from "./utils";
 import { signinAs } from "@/utils/signinAs";
 import { getCohortGroups } from "@/services/cohort.service";
 import { Button } from "@snu/ds/admin";
 import { useToggle } from "react-use";
 import { ModalCreationListeBrevo } from "@/components/modals/ModalCreationListeBrevo";
 import { useBrevoExport } from "@/hooks/useBrevoExport";
+import ExportVolontairesButton from "./components/ExportVolontairesButton";
+import ExportVolontairesScolariseButton from "./components/ExportVolontairesScolariseButton";
+
+export const MAX_EXPORT_VOLONTAIRES = 50000;
 
 export default function VolontaireList() {
   const pageId = "young-list";
@@ -34,7 +37,6 @@ export default function VolontaireList() {
   const { data: labels, isPending, isError } = useFilterLabels(pageId);
 
   const [volontaire, setVolontaire] = useState(null);
-  const [isExportOpen, setIsExportOpen] = useState(false);
   const [size, setSize] = useState(10);
 
   //List state
@@ -70,39 +72,9 @@ export default function VolontaireList() {
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            <button
-              className="group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out"
-              onClick={() => setIsExportOpen(true)}>
-              <BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />
-              <p>Exporter</p>
-            </button>
-            <ModalExport
-              isOpen={isExportOpen}
-              setIsOpen={setIsExportOpen}
-              route="/elasticsearch/young/export?tab=volontaire"
-              transform={(data, values) => transformVolontaires(data, values)}
-              exportFields={youngExportFields}
-              exportTitle="volontaires"
-              showTotalHits={true}
-              selectedFilters={selectedFilters}
-            />
-
+            <ExportVolontairesButton selectedFilters={selectedFilters} disabled={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
             {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <ExportComponent
-                title={user.role === ROLES.REFERENT_DEPARTMENT ? "Exporter les volontaires scolarisés dans le département" : "Exporter les volontaires scolarisés dans la région"}
-                exportTitle="Volontaires"
-                route="/elasticsearch/young/young-having-school-in-dep-or-region/export?tab=volontaire"
-                filters={filterArray}
-                selectedFilters={selectedFilters}
-                setIsOpen={() => true}
-                icon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
-                customCss={{
-                  override: true,
-                  button: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-                  loadingButton: `group ml-auto flex items-center gap-3 rounded-lg border-[1px] text-white border-blue-600 bg-blue-600 px-3 py-2 text-sm hover:bg-white hover:!text-blue-600 transition ease-in-out`,
-                }}
-                transform={async (data) => transformInscription(data)}
-              />
+              <ExportVolontairesScolariseButton user={user} selectedFilters={selectedFilters} disabled={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
             )}
           </div>
         </div>

@@ -1,20 +1,37 @@
 import React from "react";
 import styled from "styled-components";
 
-export default function DownloadButton({ text, tooltipText, minTooltipText, icon, minify = false, ...rest }) {
+interface BadgeProps {
+  text: string;
+  tooltipText?: string;
+  minTooltipText?: string;
+  icon?: React.ReactNode;
+  minify?: boolean;
+  color?: string;
+  backgroundColor?: string;
+  [key: string]: any;
+}
+
+export default function Badge({ text, tooltipText, minTooltipText, icon, minify = false, ...rest }: BadgeProps) {
   return (
-    <Badge minify={minify} {...rest}>
+    <StyledBadge minify={minify} {...rest}>
       <div className="flex items-center gap-1">
         {icon}
         <span>{text}</span>
       </div>
       <div className="tooltiptext">{tooltipText}</div>
       <div className="minTooltipText">{minTooltipText || tooltipText}</div>
-    </Badge>
+    </StyledBadge>
   );
 }
 
-const Badge = styled.div`
+interface StyledBadgeProps {
+  minify?: boolean;
+  color?: string;
+  backgroundColor?: string;
+}
+
+const StyledBadge = styled.div<StyledBadgeProps>`
   position: relative;
   display: inline-block;
   padding: 0.25rem 1rem;

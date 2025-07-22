@@ -125,7 +125,7 @@ export default function Index() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const filters = [
+    const filters: Filter[] = [
       {
         id: "status",
         name: "Statut d’inscription",
@@ -136,27 +136,32 @@ export default function Index() {
         id: "statusPhase1",
         name: "Statut de phase 1",
         fullValue: "Tous",
+        // @ts-expect-error fixme
         fixed: [YOUNG_STATUS_PHASE1.AFFECTED],
         options: Object.keys(YOUNG_STATUS_PHASE1)
           .filter((s) => !([YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION] as string[]).includes(s))
           .map((status) => ({ key: status, label: translatePhase1(status) })),
       },
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
-        : null,
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
-          }
-        : null,
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "region",
+              name: "Région",
+              fullValue: "Toutes",
+              options: regionOptions,
+            },
+          ]
+        : []),
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "academy",
+              name: "Académie",
+              fullValue: "Toutes",
+              options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
+            },
+          ]
+        : []),
       {
         id: "department",
         name: "Département",
@@ -169,9 +174,9 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e) => orderCohort(e),
+        sort: (e: any) => orderCohort(e) as any,
       },
-    ].filter((e) => e);
+    ];
     setFilterArray(filters);
   }, [departmentOptions]);
 

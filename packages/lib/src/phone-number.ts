@@ -1,4 +1,6 @@
-const PHONE_ZONES_NAMES = {
+import parsePhoneNumberFromString from "libphonenumber-js";
+
+export const PHONE_ZONES_NAMES = {
   FRANCE: "FRANCE",
   GUADELOUPE: "GUADELOUPE",
   GUYANE: "GUYANE",
@@ -14,7 +16,7 @@ const PHONE_ZONES_NAMES = {
   AUTRE: "AUTRE",
 };
 
-const PHONE_ZONES = {
+export const PHONE_ZONES = {
   FRANCE: {
     shortcut: "FR",
     name: "France métropolitaine",
@@ -121,9 +123,9 @@ const PHONE_ZONES = {
   },
 };
 
-const PHONE_ZONES_NAMES_ARR = Object.values(PHONE_ZONES_NAMES);
+export const PHONE_ZONES_NAMES_ARR = Object.values(PHONE_ZONES_NAMES);
 
-const formatPhoneNumberFromPhoneZone = (phoneNumber, phoneZoneKey) => {
+export const formatPhoneNumberFromPhoneZone = (phoneNumber, phoneZoneKey) => {
   const phoneZone = PHONE_ZONES[phoneZoneKey];
 
   if (!phoneNumber || !phoneZone || !phoneZone.numberLength) {
@@ -140,7 +142,7 @@ const formatPhoneNumberFromPhoneZone = (phoneNumber, phoneZoneKey) => {
   return phoneNumber;
 };
 
-const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
+export const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
   const isPhoneZoneIncluded = Object.keys(PHONE_ZONES).includes(zoneKey);
   if (!isPhoneZoneIncluded && throwError) {
     throw new Error(`Phone zone '${zoneKey}' unkown. Please check if this phone zone exists in PHONE_ZONES in 'snu-lib/phone-number.js'.`);
@@ -148,7 +150,7 @@ const isPhoneZoneKnown = ({ zoneKey, throwError = true }) => {
   return isPhoneZoneIncluded;
 };
 
-const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
+export const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
   const phoneZone = PHONE_ZONES[zoneKey];
 
   if (!phoneZone?.numberLength) {
@@ -169,7 +171,7 @@ const isPhoneNumberWellFormated = (phoneNumberValue, zoneKey) => {
   return false;
 };
 
-const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
+export const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
   const verifiedZoneKey = zoneKey || "AUTRE";
   if (verifiedZoneKey === "AUTRE") {
     return phoneNumber;
@@ -178,4 +180,21 @@ const concatPhoneNumberWithZone = (phoneNumber, zoneKey) => {
   return `(${phoneZone.code}) ${phoneNumber}`;
 };
 
-export { PHONE_ZONES, PHONE_ZONES_NAMES, PHONE_ZONES_NAMES_ARR, formatPhoneNumberFromPhoneZone, isPhoneZoneKnown, isPhoneNumberWellFormated, concatPhoneNumberWithZone };
+export const formatPhoneE164 = (phone, phoneZone) => {
+  if (!phone) {
+    return;
+  }
+  if (typeof phone !== "string") {
+    console.log("Pb with phone format" + JSON.stringify(phone));
+    return;
+  }
+
+  if (!phoneZone || phoneZone === "AUTRE") return phone;
+
+  const zone = PHONE_ZONES[phoneZone].shortcut;
+
+  const phoneNumber = parsePhoneNumberFromString(phone, zone);
+  if (!phoneNumber) console.log("Failed to parse phoneNumber : " + JSON.stringify(phone));
+
+  return phoneNumber ? phoneNumber.format("E.164") : concatPhoneNumberWithZone(phone, phoneZone);
+};
