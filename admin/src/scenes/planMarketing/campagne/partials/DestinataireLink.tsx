@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { HiOutlineExternalLink } from "react-icons/hi";
 
-import { buildRequestQueryString, DestinataireListeDiffusion } from "snu-lib";
+import { buildRequestQueryString, DestinataireListeDiffusion, ListeDiffusionEnum } from "snu-lib";
 
 import { AnalyticsService } from "@/services/analyticsService";
 import useCohort from "@/hooks/useCohort";
@@ -27,15 +27,15 @@ export default function DestinataireLink({ cohortId, listeDiffusion }: Destinata
     enabled: !!listeDiffusion,
   });
 
-  if (!cohort || Object.entries(listeDiffusion?.filters).length === 0) {
+  if (!cohort) {
     return null;
   }
 
+  const subQueryPath = listeDiffusion.type === ListeDiffusionEnum.VOLONTAIRES ? "volontaire" : "inscription";
+  const queryPath = `/${subQueryPath}${buildRequestQueryString({ ...listeDiffusion.filters, cohort: cohort.name, page: 1 })}`;
+
   return (
-    <Link
-      to={`/volontaire${buildRequestQueryString({ ...listeDiffusion.filters, cohort: cohort.name, page: 1 })}${listeDiffusion.filters.status.length ? "" : "&status="}`}
-      target="_blank"
-      className="text-blue-500 flex items-center gap-1">
+    <Link to={queryPath} target="_blank" className="text-blue-500 flex items-center gap-1">
       Consulter les {analytic?.count ?? "..."} jeunes <HiOutlineExternalLink size={20} />
     </Link>
   );

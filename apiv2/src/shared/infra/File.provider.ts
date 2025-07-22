@@ -153,9 +153,46 @@ export class FileProvider implements FileGateway {
             return false;
         }
     }
+    async remoteListFiles(path: string): Promise<
+        {
+            Key: string;
+            LastModified: Date;
+            Size: number;
+        }[]
+    > {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.ListObjectsV2Request = {
+            Bucket: bucket,
+            Prefix: path,
+        };
+        const awsResponse = await s3bucket.listObjectsV2(params).promise();
+
+        return (
+            awsResponse.Contents?.map((content) => ({
+                Key: content.Key!,
+                LastModified: content.LastModified!,
+                Size: content.Size!,
+            })) || []
+        );
+    }
 
     async deleteRemoteFile(path: string): Promise<void> {
-        throw new TechnicalException(TechnicalExceptionType.NOT_IMPLEMENTED_YET);
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.DeleteObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+        };
+        await s3bucket.deleteObject(params).promise();
     }
 
     baseName(path: string): string {

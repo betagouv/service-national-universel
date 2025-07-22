@@ -22,8 +22,8 @@ import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
-import { EmailTemplate, ExportMissionsParams } from "@notification/core/Notification";
-import { ExportMissionService } from "./ExportMission.service";
+import { EmailTemplate, ExportDownloadParams } from "@notification/core/Notification";
+import { EXPORT_MISSION_FOLDER, ExportMissionService } from "./ExportMission.service";
 
 export type ExporterMissionCanditaturesResult = {
     rapportFile: {
@@ -86,7 +86,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         const timestamp = this.clockGateway.formatSafeDateTime(new Date());
         const fileName = `missions_candidatures_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
         const rapportFile = await this.fileGateway.uploadFile(
-            `file/admin/engagement/mission/${fileName}`,
+            `${EXPORT_MISSION_FOLDER}/${fileName}`,
             {
                 data: fileBuffer,
                 mimetype: MIME_TYPES.EXCEL,
@@ -95,12 +95,12 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         );
 
         // envoi de l'email à celui qui a demandé l'export
-        await this.notificationGateway.sendEmail<ExportMissionsParams>(
+        await this.notificationGateway.sendEmail<ExportDownloadParams>(
             {
                 to: [{ email: referent.email, name: `${referent.prenom} ${referent.nom}` }],
                 url: this.fileGateway.getFileUrlFromKey(rapportFile.Key),
             },
-            EmailTemplate.EXPORT_MISSION_CANDIDATURES,
+            EmailTemplate.EXPORT_DOWNLOAD,
         );
 
         return {

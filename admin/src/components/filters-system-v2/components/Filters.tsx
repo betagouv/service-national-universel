@@ -33,6 +33,8 @@ export interface Filter {
   allowEmpty?: boolean;
   disabledBaseQuery?: boolean;
   options?: any;
+  transformData?: (data: any[]) => any[];
+  customComponentQuery?: (value: any) => any;
 }
 
 interface FiltersProps {

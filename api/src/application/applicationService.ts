@@ -1,23 +1,11 @@
-import {
-  SENDINBLUE_TEMPLATES,
-  MISSION_STATUS,
-  APPLICATION_STATUS,
-  canCreateApplications,
-  calculateAge,
-  YoungType,
-  MissionType,
-  CohortType,
-  SUB_ROLES,
-  ROLES,
-  canCreateYoungApplication,
-} from "snu-lib";
+import { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, canCreateApplications, calculateAge, YoungType, MissionType, CohortType, SUB_ROLES, ROLES } from "snu-lib";
 import { deletePatches } from "../controllers/patches";
 import { ApplicationModel, MissionModel, ReferentDocument } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { getCcOfYoung, isReferent, isYoung } from "../utils";
+import { getCcOfYoung } from "../utils";
 import { getTutorName } from "../services/mission";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -219,23 +207,6 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
   }
   return [referentDepartemental];
 }
-
-export const canUpdateApplication = async (user, application, young, structures) => {
-  // - admin can update all applications
-  // - referent can update applications of their department/region
-  // - responsible and supervisor can update applications of their structures
-  if (user.role === ROLES.ADMIN) return true;
-  if (isYoung(user) && application.youngId.toString() !== user._id.toString()) return false;
-  if (isReferent(user)) {
-    if (!canCreateYoungApplication(user, young)) return false;
-    if (user.role === ROLES.RESPONSIBLE && (!user.structureId || application.structureId.toString() !== user.structureId.toString())) return false;
-    if (user.role === ROLES.SUPERVISOR) {
-      if (!user.structureId) return false;
-      if (!structures.map((e) => e._id.toString()).includes(application.structureId.toString())) return false;
-    }
-  }
-  return true;
-};
 
 export async function updateMission(app, fromUser) {
   try {
