@@ -3,7 +3,17 @@ import { HiOutlineLockClosed } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { Link, useHistory } from "react-router-dom";
 import cx from "classnames";
-import { formatDateFR, getDepartmentNumber, MissionType, StructureType, translateApplication, translateMission, translateSource } from "snu-lib";
+import {
+  formatDateFR,
+  getDepartmentNumber,
+  isCreateAuthorized,
+  MissionType,
+  PERMISSION_RESOURCES,
+  StructureType,
+  translateApplication,
+  translateMission,
+  translateSource,
+} from "snu-lib";
 import Img4 from "@/assets/JVA_round.png";
 import Img3 from "@/assets/logo-snu.png";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -31,8 +41,6 @@ export default function List() {
   const [isExportOpen, setIsExportOpen] = useState(false);
   const [isExportCandidatureOpen, setIsExportCandidatureOpen] = useState(false);
   const history = useHistory();
-
-  const canCreateMission = user.role === ROLES.RESPONSIBLE && user.structureId && structure && structure?.status !== "DRAFT";
 
   //List state
   const [data, setData] = useState<MissionDto[]>([]);
@@ -168,11 +176,13 @@ export default function List() {
           <div className="flex items-center justify-between py-8">
             <div className="text-2xl font-bold leading-7 text-[#242526]">Missions</div>
             <div className="flex flex-row items-center gap-3 text-sm">
-              {canCreateMission ? (
-                <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
-                  Nouvelle mission
-                </button>
-              ) : null}
+              {structure &&
+                structure.status !== "DRAFT" &&
+                isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { structureId: structure._id, networkId: structure.networkId! } } }) && (
+                  <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
+                    Nouvelle mission
+                  </button>
+                )}
               <SelectAction
                 title="Exporter"
                 alignItems="right"

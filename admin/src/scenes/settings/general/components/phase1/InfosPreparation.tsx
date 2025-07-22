@@ -109,20 +109,20 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
                 name="sessionEditionOpenForReferentRegion"
                 control={control}
                 render={({ field }) => (
-                  <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                  <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                 )}
               />
               <Controller
                 name="sessionEditionOpenForReferentDepartment"
                 control={control}
                 render={({ field }) => (
-                  <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                  <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                 )}
               />
               <Controller
                 name="sessionEditionOpenForTransporter"
                 control={control}
-                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />}
+                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />}
               />
             </div>
 
@@ -140,20 +140,20 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
                 name="pdrEditionOpenForReferentRegion"
                 control={control}
                 render={({ field }) => (
-                  <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                  <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                 )}
               />
               <Controller
                 name="pdrEditionOpenForReferentDepartment"
                 control={control}
                 render={({ field }) => (
-                  <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                  <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                 )}
               />
               <Controller
                 name="pdrEditionOpenForTransporter"
                 control={control}
-                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />}
+                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />}
               />
             </div>
             <InformationsConvoyage disabled={isSubmitting || readOnly} control={control} />
@@ -210,14 +210,14 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
                     name="schemaAccessForReferentRegion"
                     control={control}
                     render={({ field }) => (
-                      <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                      <SimpleToggle label="Référents régionaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                     )}
                   />
                   <Controller
                     name="schemaAccessForReferentDepartment"
                     control={control}
                     render={({ field }) => (
-                      <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />
+                      <SimpleToggle label="Référents départementaux" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />
                     )}
                   />
                 </div>
@@ -269,7 +269,7 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
               <Controller
                 name="busEditionOpenForTransporter"
                 control={control}
-                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={field.value} onChange={(value) => field.onChange(value)} />}
+                render={({ field }) => <SimpleToggle label="Transporteurs" disabled={isSubmitting || readOnly} value={!!field.value} onChange={(value) => field.onChange(value)} />}
               />
             </div>
             <div className="flex flex-col gap-3">

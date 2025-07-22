@@ -4,7 +4,7 @@ import getNewMissionFixture from "./fixtures/mission";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import getNewCohortFixture from "./fixtures/cohort";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
+import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { createApplication, notExistingApplicationId } from "./helpers/application";
 import { dbConnect, dbClose } from "./helpers/db";
 import { notExisitingMissionId, createMissionHelper, getMissionByIdHelper } from "./helpers/mission";
@@ -13,7 +13,9 @@ import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./hel
 import { createCohortHelper } from "./helpers/cohort";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES } from "snu-lib";
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { PermissionModel } from "../models/permissions/permission";
+import { addPermissionHelper } from "./helpers/permissions";
 
 jest.setTimeout(60_000);
 
@@ -22,7 +24,21 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect();
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
+  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL, [
+    {
+      where: [
+        { source: "_id", field: "youngId" },
+        { source: "_id", resource: "young", field: "_id" },
+      ],
+      blacklist: [],
+      whitelist: [],
+    },
+  ]);
+});
 afterAll(dbClose);
 afterEach(resetAppAuth);
 
@@ -31,7 +47,7 @@ describe("Application", () => {
     beforeEach(resetAppAuth);
     it("should return 404 when young is not found", async () => {
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: notExistingYoungId, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
@@ -39,7 +55,7 @@ describe("Application", () => {
     it("should return 404 when mission is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: notExisitingMissionId });
       expect(res.status).toBe(404);
@@ -52,7 +68,7 @@ describe("Application", () => {
       const application = getNewApplicationFixture();
 
       // Successful application
-      let res = await request(getAppHelper(young))
+      let res = await request(await getAppHelperWithAcl(young, "young"))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(200);
@@ -67,7 +83,7 @@ describe("Application", () => {
       const application = getNewApplicationFixture();
 
       // Failed application
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young, "young"))
         .post("/application")
         .send({ ...application, youngId: secondYoung._id, missionId: mission._id });
       expect(res.status).toBe(400);
@@ -77,7 +93,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(200);
@@ -89,7 +105,7 @@ describe("Application", () => {
       await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission1._id });
       const mission2 = await createMissionHelper(getNewMissionFixture());
       const { ...application } = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission2._id });
       expect(res.status).toBe(200);
@@ -101,7 +117,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id, status: "WAITING_VALIDATION" });
       expect(res.status).toBe(200);
@@ -115,7 +131,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
       const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 100, placesTotal: 100 });
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id, status: "DONE" });
       expect(res.status).toBe(200);
@@ -129,7 +145,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, birthdateAt: new Date(`${year - 12}-01-01T00:00:00.000Z`) }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
@@ -139,7 +155,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
@@ -149,7 +165,7 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION }));
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = getNewApplicationFixture();
-      const res = await request(getAppHelper(young))
+      const res = await request(await getAppHelperWithAcl(young))
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
@@ -161,7 +177,9 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString() });
+      const res = await request(await getAppHelperWithAcl())
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: application._id.toString() });
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("DONE");
     });
@@ -173,15 +191,21 @@ describe("Application", () => {
       const secondApplication = await createApplication({ ...getNewApplicationFixture(), youngId: secondYoung._id, missionId: mission._id });
 
       // Successful update
-      let res = await request(getAppHelper()).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString() });
+      let res = await request(await getAppHelperWithAcl())
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: application._id.toString() });
       expect(res.status).toBe(200);
 
       // Failed update (not allowed)
-      res = await request(getAppHelper(young)).put("/application").send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+      res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
       expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
-      res = await request(getAppHelper(young)).put("/application").send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+      res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
       expect(res.status).toBe(400);
     });
 
@@ -195,7 +219,9 @@ describe("Application", () => {
           missionId: mission._id,
           missionDuration: "1",
         });
-        await request(getAppHelper()).put("/application").send({ priority: "1", status, _id: application._id.toString() });
+        await request(await getAppHelperWithAcl())
+          .put("/application")
+          .send({ priority: "1", status, _id: application._id.toString() });
       }
       const updatedYoung = await getYoungByIdHelper(young._id);
       expect(updatedYoung!.phase2NumberHoursEstimated).toBe("5");
@@ -205,37 +231,45 @@ describe("Application", () => {
 
   describe("GET /application/:id", () => {
     it("should return 404 when application is not found", async () => {
-      const res = await request(getAppHelper()).get(`/application/${notExistingApplicationId}`);
+      const res = await request(await getAppHelperWithAcl()).get(`/application/${notExistingApplicationId}`);
       expect(res.status).toBe(404);
     });
     it("should return application", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const mission = await createMissionHelper(getNewMissionFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
-      const res = await request(getAppHelper()).get("/application/" + application._id);
+      const res = await request(await getAppHelperWithAcl()).get("/application/" + application._id);
       expect(res.status).toBe(200);
       expect(res.body.data.status).toBe("WAITING_VALIDATION");
     });
     it("should be only accessible by referent", async () => {
-      await request(getAppHelper()).put(`/application/${notExistingApplicationId}`).send();
+      await request(await getAppHelperWithAcl())
+        .put(`/application/${notExistingApplicationId}`)
+        .send();
       expect(require("passport").lastTypeCalledOnAuthenticate).toEqual("referent");
     });
   });
 
   describe("POST /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
-      const res = await request(getAppHelper()).post(`/application/${notExistingApplicationId}/notify/foo`).send({});
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/application/${notExistingApplicationId}/notify/foo`)
+        .send({});
       expect(res.status).toBe(404);
     });
     it("should return 404 when young is not found", async () => {
       const application = await createApplication(getNewApplicationFixture());
-      const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/application/${application._id}/notify/foo`)
+        .send({});
       expect(res.status).toBe(404);
     });
     it("should return 404 when mission is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
-      const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/application/${application._id}/notify/foo`)
+        .send({});
       expect(res.status).toBe(404);
     });
     it("should return 404 when template is not found", async () => {
@@ -244,7 +278,9 @@ describe("Application", () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
 
-      const res = await request(getAppHelper()).post(`/application/${application._id}/notify/foo`).send({});
+      const res = await request(await getAppHelperWithAcl())
+        .post(`/application/${application._id}/notify/foo`)
+        .send({});
       expect(res.status).toBe(404);
     });
     it("should return 200 when template is found", async () => {
@@ -258,7 +294,9 @@ describe("Application", () => {
         SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
         SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION,
       ]) {
-        const res = await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
+        const res = await request(await getAppHelperWithAcl())
+          .post(`/application/${application._id}/notify/${template}`)
+          .send({});
         expect(res.status).toBe(200);
       }
     });
@@ -271,7 +309,9 @@ describe("Application", () => {
 
       const sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
       for (const template of [SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION, SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION]) {
-        await request(getAppHelper()).post(`/application/${application._id}/notify/${template}`).send({});
+        await request(await getAppHelperWithAcl())
+          .post(`/application/${application._id}/notify/${template}`)
+          .send({});
         expect(sendTemplateSpy).toHaveBeenCalledWith(
           template,
           expect.objectContaining({
@@ -293,7 +333,9 @@ describe("Application", () => {
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
       const sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
-      await request(getAppHelper()).post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION}`).send({});
+      await request(await getAppHelperWithAcl())
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION}`)
+        .send({});
       expect(sendTemplateSpy).toHaveBeenCalledWith(
         SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
         expect.not.objectContaining({ emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }] }),
@@ -316,7 +358,9 @@ describe("Application", () => {
 describe("GET /application/:id/patches", () => {
   it("should return 404 if application not found", async () => {
     const applicationId = new ObjectId();
-    const res = await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    const res = await request(await getAppHelperWithAcl())
+      .get(`/application/${applicationId}/patches`)
+      .send();
     expect(res.statusCode).toEqual(404);
   });
   it("should return 403 if not admin", async () => {
@@ -324,7 +368,7 @@ describe("GET /application/:id/patches", () => {
     application.missionName = "MY NEW NAME";
     await application.save();
 
-    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+    const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
       .get(`/application/${application._id}/patches`)
       .send();
     expect(res.status).toBe(403);
@@ -333,7 +377,9 @@ describe("GET /application/:id/patches", () => {
     const application = await createApplication(getNewApplicationFixture());
     application.missionName = "MY NEW NAME";
     await application.save();
-    const res = await request(getAppHelper()).get(`/application/${application._id}/patches`).send();
+    const res = await request(await getAppHelperWithAcl())
+      .get(`/application/${application._id}/patches`)
+      .send();
     expect(res.statusCode).toEqual(200);
     expect(res.body.data).toEqual(
       expect.arrayContaining([
@@ -346,7 +392,9 @@ describe("GET /application/:id/patches", () => {
   it("should be only accessible by referents", async () => {
     const passport = require("passport");
     const applicationId = new ObjectId();
-    await request(getAppHelper()).get(`/application/${applicationId}/patches`).send();
+    await request(await getAppHelperWithAcl())
+      .get(`/application/${applicationId}/patches`)
+      .send();
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });

@@ -747,14 +747,6 @@ function canCreateBus(actor) {
   return actor.role === ROLES.ADMIN;
 }
 
-function canViewMission(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canModifyMissionStructureId(actor) {
-  return actor.role === ROLES.ADMIN;
-}
-
 function canViewStructureChildren(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
@@ -802,22 +794,6 @@ function canInviteYoung(actor: UserDto, cohort: CohortDto | null) {
 
 function canSendTemplateToYoung(actor, young) {
   return canEditYoung(actor, young);
-}
-
-function canViewYoungApplications(actor, young) {
-  return canEditYoung(actor, young) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canCreateYoungApplication(actor, young) {
-  return canEditYoung(actor, young) || [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canCreateOrUpdateContract(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
-}
-
-function canViewContract(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(actor.role);
 }
 
 function canCreateOrUpdateDepartmentService(actor) {
@@ -1210,10 +1186,6 @@ export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "
   return true;
 }
 
-export function canCreateMission(actor: UserDto) {
-  return actor.role === ROLES.SUPERVISOR && actor.structureId && actor.structureId !== "DRAFT";
-}
-
 export {
   ROLES,
   SUB_ROLES,
@@ -1279,14 +1251,8 @@ export {
   canViewBus,
   canUpdateBus,
   canCreateBus,
-  canViewMission,
-  canModifyMissionStructureId,
   canViewStructureChildren,
   canSendTemplateToYoung,
-  canViewYoungApplications,
-  canCreateYoungApplication,
-  canCreateOrUpdateContract,
-  canViewContract,
   canCreateOrUpdateDepartmentService,
   canViewDepartmentService,
   canSearchInElasticSearch,
