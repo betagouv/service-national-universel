@@ -4,11 +4,6 @@ import api from "../../../../services/api";
 import store from "@/redux/store";
 import { Filter } from "../Filters";
 
-// interface FilterValue {
-//   filter: string[];
-//   customComponentQuery?: any;
-// }
-
 interface SelectedFilters {
   [key: string]: Filter;
 }
