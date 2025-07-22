@@ -20,12 +20,31 @@ import {
   translateYoungSource,
   translateStatusMilitaryPreparationFiles,
   canAssignManually,
+  UserDto,
+  MeetingPointType,
+  CohesionCenterType,
+  LigneToPointType,
+  ClasseType,
+  EtablissementType,
+  LigneBusType,
+  YoungType,
+  CohortDto,
 } from "snu-lib";
 import { orderCohort } from "../../../components/filters-system-v2/components/filters/utils";
 import { formatPhoneE164 } from "../../../utils/formatPhoneE164";
 import { youngCheckinField } from "@/utils";
+import { Filter } from "@/components/filters-system-v2/components/Filters";
 
-export const getFilterArray = (user, labels) => {
+interface AllFields {
+  [key: string]: { [key: string]: string | undefined };
+}
+
+export const getFilterArray = (
+  user: UserDto,
+  labels: {
+    [key: string]: string;
+  },
+): Filter[] => {
   return [
     { title: "Cohorte", name: "cohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: (e) => orderCohort(e) },
     { title: "Cohorte d'origine", name: "originalCohort", parentGroup: "Général", missingLabel: "Non renseigné", sort: orderCohort },
@@ -45,7 +64,7 @@ export const getFilterArray = (user, labels) => {
       name: "department",
       parentGroup: "Général",
       missingLabel: "Non renseigné",
-      translate: (e) => getDepartmentNumber(e) + " - " + e,
+      translate: (e: string) => getDepartmentNumber(e) + " - " + e,
     },
     {
       title: "Note interne",
@@ -180,7 +199,7 @@ export const getFilterArray = (user, labels) => {
       name: "classeId",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || "N/A - Supprimé";
       },
@@ -190,7 +209,7 @@ export const getFilterArray = (user, labels) => {
       name: "etablissementId",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || "N/A - Supprimé";
       },
@@ -200,7 +219,7 @@ export const getFilterArray = (user, labels) => {
       name: "sessionPhase1Id",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || "N/A - Supprimé";
       },
@@ -266,7 +285,7 @@ export const getFilterArray = (user, labels) => {
       name: "ligneId",
       parentGroup: "Phase 1",
       missingLabel: "Non renseigné",
-      translate: (item) => {
+      translate: (item: string) => {
         if (item === "N/A") return item;
         return labels[item] || item;
       },
@@ -334,28 +353,28 @@ export const getFilterArray = (user, labels) => {
       missingLabel: "Non renseigné",
       translate: translate,
     },
-  ].filter(Boolean);
+  ].filter(Boolean) as Filter[];
 };
 
-export async function transformVolontaires(data, values) {
-  let all = data;
+// legacy: déplacé dans l'api v2 (useCase ExportJeunes)
+export async function transformVolontaires(data: any[], values: string[]): Promise<{ [key: string]: string | undefined }[]> {
+  const all = data;
 
   return all.map((data) => {
-    let center = {};
+    let center = {} as CohesionCenterType;
     if (data.cohesionCenterId && data.sessionPhase1Id) {
-      center = data?.center;
-      if (!center) center = {};
+      center = data?.center || {};
     }
-    let meetingPoint = {};
-    let bus = {};
-    let ligneToPoint = {};
+    let meetingPoint = {} as MeetingPointType;
+    let bus = {} as LigneBusType;
+    let ligneToPoint = {} as LigneToPointType;
     if (data.meetingPointId && data.ligneId) {
       bus = data?.bus || {};
       ligneToPoint = data?.ligneToPoint || {};
       meetingPoint = data?.meetingPoint || {};
     }
-    let classe = {};
-    let etablissement = {};
+    let classe = {} as ClasseType;
+    let etablissement = {} as EtablissementType;
     if (data.classeId) {
       classe = data?.classe || {};
     }
@@ -365,7 +384,7 @@ export async function transformVolontaires(data, values) {
 
     if (!data.domains) data.domains = [];
     if (!data.periodRanking) data.periodRanking = [];
-    const allFields = {
+    const allFields: AllFields = {
       emailDeConnexion: {
         "Email de connexion": data.emailDeConnexion,
       },
@@ -415,7 +434,7 @@ export async function transformVolontaires(data, values) {
         "Nom de l'établissement": data.school?.fullName || data.schoolName,
         "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
         "Ville de l'établissement": data.school?.city || data.schoolCity,
-        "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
+        "Département de l'établissement": departmentLookUp[data.school?.department || ""] || data.schoolDepartment,
         "UAI de l'établissement": data.school?.uai,
       },
       situation: {
@@ -434,7 +453,7 @@ export async function transformVolontaires(data, values) {
         "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
         "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
         "Structure médico-sociale": translate(data.medicosocialStructure),
-        "Nom de la structure médico-sociale": data.medicosocialStructureName, // différence avec au-dessus ?
+        "Nom de la structure médico-sociale": data.medicosocialStructureName,
         "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
         "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
         "Ville de la structure médico-sociale": data.medicosocialStructureCity,
@@ -493,8 +512,11 @@ export async function transformVolontaires(data, values) {
         "Se rend au centre par ses propres moyens": translate(data.deplacementPhase1Autonomous),
         "Informations de transports transmises par email": translate(data.transportInfoGivenByLocal),
         "Bus n˚": bus?.busId,
+        // @ts-ignore
         "Nom du point de rassemblement": meetingPoint?.name,
+        // @ts-ignore
         "Adresse point de rassemblement": meetingPoint?.address,
+        // @ts-ignore
         "Ville du point de rassemblement": meetingPoint?.city,
         "Date aller": formatDateFR(bus?.departuredDate),
         "Heure de départ": ligneToPoint?.departureHour,
@@ -554,125 +576,19 @@ export async function transformVolontaires(data, values) {
       desistement: {
         "Raison du désistement": getLabelWithdrawnReason(data.withdrawnReason),
         "Message de désistement": data.withdrawnMessage,
-        // Date du désistement: // not found in db
       },
     };
 
-    let fields = { ID: data._id };
+    const fields: { [key: string]: string | undefined } = { ID: data._id };
     for (const element of values) {
-      let key;
+      let key: string;
       for (key in allFields[element]) fields[key] = allFields[element][key];
     }
     return fields;
   });
 }
 
-export function mapInscriptionFields(inscriptions) {
-  return transformInscription(inscriptions).map((inscription) => ({
-    ...inscription,
-    "Email de connexion": inscription["Email"],
-  }));
-}
-
-export function transformInscription(data) {
-  let all = data;
-  return all.map((data) => {
-    return {
-      _id: data._id,
-      Cohorte: data.cohort,
-      Prénom: data.firstName,
-
-      Nom: data.lastName,
-      "Date de naissance": formatDateFRTimezoneUTC(data.birthdateAt),
-      "Pays de naissance": data.birthCountry || "France",
-      "Ville de naissance": data.birthCity,
-      "Code postal de naissance": data.birthCityZip,
-      "Date de fin de validité de la pièce d'identité": formatDateFRTimezoneUTC(data?.latestCNIFileExpirationDate),
-      Sexe: translate(data.gender),
-      Email: data.email,
-      Téléphone: formatPhoneE164(data.phone, data.phoneZone),
-      "Adresse postale": data.address,
-      "Code postal": data.zip,
-      Ville: data.city,
-      Département: data.department,
-      Région: data.region,
-      Académie: data.academy,
-      Pays: data.country,
-      "Nom de l'hébergeur": data.hostLastName,
-      "Prénom de l'hébergeur": data.hostFirstName,
-      "Lien avec l'hébergeur": data.hostRelationship,
-      "Adresse - étranger": data.foreignAddress,
-      "Code postal - étranger": data.foreignZip,
-      "Ville - étranger": data.foreignCity,
-      "Pays - étranger": data.foreignCountry,
-      Situation: translate(data.situation),
-      Niveau: data.grade,
-      "Type d'établissement": translate(data.school?.type || data.schoolType),
-      "Nom de l'établissement": data.school?.fullName || data.schoolName,
-      "Code postal de l'établissement": data.school?.postcode || data.schoolZip,
-      "Ville de l'établissement": data.school?.city || data.schoolCity,
-      "Département de l'établissement": departmentLookUp[data.school?.department] || data.schoolDepartment,
-      "UAI de l'établissement": data.school?.uai,
-      "Quartier Prioritaire de la ville": translate(data.qpv),
-      "Zone Rurale": translate(isInRuralArea(data)),
-      Handicap: translate(data.handicap),
-      "Bénéficiaire d'un PPS": translate(data.ppsBeneficiary),
-      "Bénéficiaire d'un PAI": translate(data.paiBeneficiary),
-      "Structure médico-sociale": translate(data.medicosocialStructure),
-      "Nom de la structure médico-sociale": data.medicosocialStructureName,
-      "Adresse de la structure médico-sociale": data.medicosocialStructureAddress,
-      "Code postal de la structure médico-sociale": data.medicosocialStructureZip,
-      "Ville de la structure médico-sociale": data.medicosocialStructureCity,
-      "Aménagement spécifique": translate(data.specificAmenagment),
-      "Nature de l'aménagement spécifique": data.specificAmenagmentType,
-      "Aménagement pour mobilité réduite": translate(data.reducedMobilityAccess),
-      "Besoin d'être affecté(e) dans le département de résidence": translate(data.handicapInSameDepartment),
-      "Allergies ou intolérances alimentaires": translate(data.allergies),
-      "Activité de haut-niveau": translate(data.highSkilledActivity),
-      "Nature de l'activité de haut-niveau": data.highSkilledActivityType,
-      "Activités de haut niveau nécessitant d'être affecté dans le département de résidence": translate(data.highSkilledActivityInSameDepartment),
-      "Document activité de haut-niveau ": data.highSkilledActivityProofFiles,
-      "Consentement des représentants légaux": translate(data.parentConsentment),
-      "Droit à l'image": translate(data.imageRight),
-      "Autotest PCR": translate(data.autoTestPCR),
-      "Règlement intérieur": translate(data.rulesYoung),
-      "Fiche sanitaire réceptionnée": translate(data.cohesionStayMedicalFileReceived) || "Non Renseigné",
-      PSC1: translate(data.psc1Info) || "Non Renseigné",
-      "Remboursement Code de la Route": translate(data.roadCodeRefund) || "Non renseigné",
-      "Statut représentant légal 1": translate(data.parent1Status),
-      "Prénom représentant légal 1": data.parent1FirstName,
-      "Nom représentant légal 1": data.parent1LastName,
-      "Email représentant légal 1": data.parent1Email,
-      "Téléphone représentant légal 1": formatPhoneE164(data.parent1Phone, data.parent1PhoneZone),
-      "Adresse représentant légal 1": data.parent1Address,
-      "Code postal représentant légal 1": data.parent1Zip,
-      "Ville représentant légal 1": data.parent1City,
-      "Département représentant légal 1": data.parent1Department,
-      "Région représentant légal 1": data.parent1Region,
-      "Statut représentant légal 2": translate(data.parent2Status),
-      "Prénom représentant légal 2": data.parent2FirstName,
-      "Nom représentant légal 2": data.parent2LastName,
-      "Email représentant légal 2": data.parent2Email,
-      "Téléphone représentant légal 2": formatPhoneE164(data.parent2Phone, data.parent2PhoneZone),
-      "Adresse représentant légal 2": data.parent2Address,
-      "Code postal représentant légal 2": data.parent2Zip,
-      "Ville représentant légal 2": data.parent2City,
-      "Département représentant légal 2": data.parent2Department,
-      "Région représentant légal 2": data.parent2Region,
-      Motivation: data.motivations,
-      Phase: translate(data.phase),
-      "Créé lé": formatLongDateFR(data.createdAt),
-      "Mis à jour le": formatLongDateFR(data.updatedAt),
-      "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
-      "Statut général": translate(data.status),
-      "Statut Phase 1": translatePhase1(data.statusPhase1),
-      "Statut Phase 2": translatePhase2(data.statusPhase2),
-      "Dernier statut le": formatLongDateFR(data.lastStatusAt),
-    };
-  });
-}
-
-export function isCohortOpenForAffectation(user, young, cohort) {
+export function isCohortOpenForAffectation(user: UserDto, young: YoungType, cohort: CohortDto): boolean {
   if (!user || !young || !cohort) return false;
   if (young.status !== "VALIDATED" && young.status !== "WAITING_LIST") {
     return false;
@@ -683,7 +599,7 @@ export function isCohortOpenForAffectation(user, young, cohort) {
   }
 }
 
-export function isYoungCheckIsOpen(user, cohort) {
+export function isYoungCheckIsOpen(user: UserDto, cohort: CohortDto): boolean {
   if (!cohort || !user) return false;
   const field = youngCheckinField[user.role];
   return field ? !!cohort[field] : false;

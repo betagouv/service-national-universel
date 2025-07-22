@@ -29,6 +29,8 @@ import { Filter } from "@/components/filters-system-v2/components/Filters";
 import ExportMissionsModal from "./components/ExportMissionsModal";
 import { Tooltip } from "@snu/ds/admin";
 
+export const MAX_EXPORT_MISSIONS = 5000;
+
 interface MissionDto extends MissionType {
   structure: any;
 }
@@ -211,16 +213,20 @@ export default function List() {
                         key: "exportCandidature",
                         // @ts-ignore
                         action: () => {
-                          if (paramData?.count && paramData?.count <= 5000) {
+                          if (paramData?.count && paramData?.count <= MAX_EXPORT_MISSIONS) {
                             setIsExportCandidatureOpen(true);
                           }
                         },
                         render: (
                           <Tooltip
-                            title={`Vous ne pouvez pas exporter les candidatures pour plus de 5000 missions à la fois.
+                            title={`Vous ne pouvez pas exporter les candidatures pour plus de ${MAX_EXPORT_MISSIONS} missions à la fois.
                           Modifiez les filtres pour réduire le nombre de missions à exporter.`}
-                            disabled={!paramData?.count || paramData?.count <= 5000}>
-                            <div className={cx("cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50", !paramData?.count || paramData?.count > 5000 ? "opacity-50" : "")}>
+                            disabled={!paramData?.count || paramData?.count <= MAX_EXPORT_MISSIONS}>
+                            <div
+                              className={cx(
+                                "cursor-pointer p-2 px-3 text-sm text-gray-700 hover:bg-gray-50",
+                                !paramData?.count || paramData?.count > MAX_EXPORT_MISSIONS ? "opacity-50" : "",
+                              )}>
                               Informations de candidatures
                             </div>
                           </Tooltip>

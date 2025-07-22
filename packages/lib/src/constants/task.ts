@@ -32,4 +32,6 @@ export enum TaskName {
   // Missions
   MISSION_EXPORT_CANDIDATURES = "MISSION_EXPORT_CANDIDATURES",
   MISSION_EXPORT = "MISSION_EXPORT",
+  // Jeunes (volontaires et inscriptions)
+  JEUNE_EXPORT = "JEUNE_EXPORT",
 }

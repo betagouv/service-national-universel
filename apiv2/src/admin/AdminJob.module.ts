@@ -91,6 +91,29 @@ import { StructureGateway } from "./core/engagement/structure/Structure.gateway"
 import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
 import { ExportMissionService } from "./core/engagement/mission/ExportMission.service";
 import { SharedModule } from "@shared/Shared.module";
+import { ExporterJeunes } from "./core/sejours/phase1/jeune/ExporterJeunes";
+import { CandidatureGateway } from "./core/engagement/candidature/Candidature.gateway";
+import { CandidatureRepository } from "./infra/engagement/candidature/repository/mongo/CandidatureMongo.repository";
+import { candidatureMongoProviders } from "./infra/engagement/candidature/provider/CandidatureMongo.provider";
+import { NettoyageExportMissions } from "./core/engagement/mission/cron/NettoyageExportMissions";
+import { NettoyageExportJeune } from "./core/sejours/phase1/jeune/cron/NettoyageExportJeune";
+import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
+import { SearchLigneDeBusGateway } from "@analytics/core/SearchLigneDeBus.gateway";
+import { SearchSegmentDeLigneGateway } from "@analytics/core/SearchSegmentDeLigne.gateway";
+import { SearchEtablissementGateway } from "@analytics/core/SearchEtablissement.gateway";
+import { SearchClasseGateway } from "@analytics/core/SearchClasse.gateway";
+import { SearchCentreGateway } from "@analytics/core/SearchCentre.gateway";
+import { SearchSejourGateway } from "@analytics/core/SearchSejour.gateway";
+import { SearchPointDeRassemblementGateway } from "@analytics/core/SearchPointDeRassemblement.gateway";
+import { SearchSchoolGateway } from "@analytics/core/SearchSchool.gateway";
+import { SearchCentreElasticRepository } from "@analytics/infra/SearchCentreElastic.repository";
+import { SearchClasseElasticRepository } from "@analytics/infra/SearchClasseElastic.repository";
+import { SearchEtablissementElasticRepository } from "@analytics/infra/SearchEtablissementElastic.repository";
+import { SearchLigneDeBusElasticRepository } from "@analytics/infra/SearchLigneDeBusElastic.repository";
+import { SearchPointDeRassemblementElasticRepository } from "@analytics/infra/SearchPointDeRassemblementElastic.repository";
+import { SearchSchoolElasticRepository } from "@analytics/infra/SearchSchoolElastic.repository";
+import { SearchSegmentDeLigneElasticRepository } from "@analytics/infra/SearchSegmentDeLigneElastic.repository";
+import { SearchSejourElasticRepository } from "@analytics/infra/SearchSejourElastic.repository";
 
 @Module({
     imports: [
@@ -131,6 +154,7 @@ import { SharedModule } from "@shared/Shared.module";
         ...taskMongoProviders,
         ...historyProvider,
         ...structureMongoProviders,
+        ...candidatureMongoProviders,
         // ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,
@@ -143,11 +167,20 @@ import { SharedModule } from "@shared/Shared.module";
         { provide: TaskGateway, useClass: AdminTaskRepository },
         { provide: ClockGateway, useClass: ClockProvider },
         { provide: StructureGateway, useClass: StructureRepository },
+        { provide: CandidatureGateway, useClass: CandidatureRepository },
         { provide: SearchYoungGateway, useClass: SearchYoungElasticRepository },
         { provide: SearchMissionGateway, useClass: SearchMissionElasticRepository },
         { provide: SearchApplicationGateway, useClass: SearchApplicationElasticRepository },
         { provide: SearchReferentGateway, useClass: SearchReferentElasticRepository },
         { provide: SearchStructureGateway, useClass: SearchStructureElasticRepository },
+        { provide: SearchCentreGateway, useClass: SearchCentreElasticRepository },
+        { provide: SearchClasseGateway, useClass: SearchClasseElasticRepository },
+        { provide: SearchEtablissementGateway, useClass: SearchEtablissementElasticRepository },
+        { provide: SearchLigneDeBusGateway, useClass: SearchLigneDeBusElasticRepository },
+        { provide: SearchPointDeRassemblementGateway, useClass: SearchPointDeRassemblementElasticRepository },
+        { provide: SearchSchoolGateway, useClass: SearchSchoolElasticRepository },
+        { provide: SearchSegmentDeLigneGateway, useClass: SearchSegmentDeLigneElasticRepository },
+        { provide: SearchSejourGateway, useClass: SearchSejourElasticRepository },
         // add use case here
         AffectationService,
         InscriptionService,
@@ -173,8 +206,11 @@ import { SharedModule } from "@shared/Shared.module";
         ValiderBasculeJeunesService,
         ValiderBasculeJeunesValides,
         ValiderBasculeJeunesNonValides,
+        ExporterJeunes,
         ExporterMissionCanditatures,
         ExporterMissions,
+        NettoyageExportMissions,
+        NettoyageExportJeune,
         ...referentielServiceProvider,
         AdminTaskInscriptionSelectorService,
         AdminTaskImportReferentielSelectorService,
@@ -183,7 +219,9 @@ import { SharedModule } from "@shared/Shared.module";
         ClasseService,
         JeuneService,
         ExportMissionService,
+        ExporterJeuneService,
     ],
+    exports: [NettoyageExportMissions, NettoyageExportJeune],
 })
 export class AdminJobModule {
     constructor(private logger: Logger) {
