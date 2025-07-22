@@ -1,5 +1,5 @@
 import React from "react";
-import { DestinataireListeDiffusion } from "snu-lib";
+import { DestinataireListeDiffusion, ListeDiffusionEnum } from "snu-lib";
 import { ListeDiffusionDataProps } from "../../listeDiffusion/ListeDiffusionForm";
 import { useQuery } from "@tanstack/react-query";
 import { AnalyticsService } from "@/services/analyticsService";
@@ -16,7 +16,13 @@ export default function DestinataireCount({ type, cohortId, listeDiffusion }: De
     queryFn: async () => {
       let count = 0;
       if (type === DestinataireListeDiffusion.JEUNES || type === DestinataireListeDiffusion.REPRESENTANTS_LEGAUX) {
-        const response = await AnalyticsService.getYoungCount({ filters: { cohortId: [cohortId], ...listeDiffusion?.filters } });
+        // Si liste de diffusion est de type volontaires, on doit forcer les status comme pour l'api v1
+        // @see api/src/controllers/elasticsearch/young.js#472
+        const filters =
+          listeDiffusion?.type === ListeDiffusionEnum.VOLONTAIRES
+            ? { ...listeDiffusion?.filters, status: [...(listeDiffusion?.filters?.status || []), "VALIDATED", "WITHDRAWN", "WAITING_LIST", "DELETED"] }
+            : listeDiffusion?.filters;
+        const response = await AnalyticsService.getYoungCount({ filters: { cohortId: [cohortId], ...filters } });
         count = response.count;
       }
       if (type === DestinataireListeDiffusion.REPRESENTANTS_LEGAUX) {
