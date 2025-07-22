@@ -21,7 +21,7 @@ export default function useReactSelectTheme({
   const disabledColor = "#F9FAFB";
 
   const styles: CustomStyles = {
-    control: (styles, state) => ({
+    control: (styles: any, state) => ({
       ...styles,
       cursor: state.isDisabled ? "not-allowed" : "pointer",
       boxShadow: "0 0 0 0 rgb(0 0 0 / 0.05)",
@@ -48,7 +48,7 @@ export default function useReactSelectTheme({
       ...(controlCustomStyle || {}),
       ...(size === "sm" && { minHeight: 32, height: 32 }),
     }),
-    option: (styles, { isSelected, isFocused, isDisabled }) => {
+    option: (styles: any, { isSelected, isFocused, isDisabled }) => {
       return {
         ...styles,
         backgroundColor: isSelected
@@ -69,24 +69,24 @@ export default function useReactSelectTheme({
         ...(optionCustomStyle || {}),
       };
     },
-    placeholder: (styles) => {
+    placeholder: (styles: any) => {
       return {
         ...styles,
         padding: paddingStyle,
       };
     },
-    input: (styles, { isDisabled }) => ({
+    input: (styles: any, { isDisabled }) => ({
       ...styles,
       height: size === "sm" ? 24 : size === "md" ? 29 : 46,
       cursor: isDisabled ? "not-allowed" : "pointer",
       padding: paddingStyle,
     }),
-    singleValue: (styles) => ({
+    singleValue: (styles: any) => ({
       ...styles,
       padding: paddingStyle,
       color: disabled ? "#6B7280" : "black",
     }),
-    multiValue: (styles) => ({
+    multiValue: (styles: any) => ({
       ...styles,
       marginTop: label ? "16px" : "0",
       backgroundColor: "#F3F4F6",
@@ -94,13 +94,13 @@ export default function useReactSelectTheme({
       fontSize: "16px",
       fontWeight: "400",
     }),
-    indicatorSeparator: (styles) => ({
+    indicatorSeparator: (styles: any) => ({
       ...styles,
       height: "30px",
       margin: "auto",
       display: isClearable ? "block" : "none",
     }),
-    dropdownIndicator: (styles) => ({
+    dropdownIndicator: (styles: any) => ({
       ...styles,
       cursor: disabled || readOnly ? "not-allowed" : "pointer",
       padding: 0,
@@ -113,7 +113,7 @@ export default function useReactSelectTheme({
         height: size === "sm" ? "16px" : "24px",
       },
     }),
-    menu: (styles) => ({
+    menu: (styles: any) => ({
       ...styles,
       border: "none",
       boxShadow: "0px 0px 12px 0px rgba(0, 0, 0, 0.25)",
@@ -123,11 +123,11 @@ export default function useReactSelectTheme({
       zIndex: 20,
       ...(menuCustomStyle || {}),
     }),
-    menuList: (styles) => ({
+    menuList: (styles: any) => ({
       ...styles,
       borderRadius: 4,
     }),
-    clearIndicator: (styles) => ({
+    clearIndicator: (styles: any) => ({
       ...styles,
       cursor: "pointer",
       borderRadius: "10%",

@@ -389,12 +389,12 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                     isDisabled={!editing}
                     noOptionsMessage={() => "Aucune structure ne correspond à cette recherche"}
                     styles={{
-                      dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      placeholder: (styles) => ({ ...styles, color: "black" }),
-                      control: (styles, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
-                      singleValue: (styles) => ({ ...styles, color: "black" }),
-                      multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                      indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                      dropdownIndicator: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      placeholder: (styles: any) => ({ ...styles, color: "black" }),
+                      control: (styles: any, { isDisabled }) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: isDisabled ? "white" : "white" }),
+                      singleValue: (styles: any) => ({ ...styles, color: "black" }),
+                      multiValueRemove: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                      indicatorsContainer: (provided: any, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                     }}
                     defaultOptions
                     onChange={(e) => {
@@ -487,12 +487,12 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                       ref={referentSelectRef}
                       error={errors.tutorId}
                       styles={{
-                        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                        placeholder: (styles) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
-                        control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
-                        singleValue: (styles) => ({ ...styles, color: "black" }),
-                        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-                        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+                        dropdownIndicator: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                        placeholder: (styles: any) => ({ ...styles, color: errors.tutorId ? "red" : "black" }),
+                        control: (styles: any) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: editing && mission?.isJvaMission === "true" ? "#E5E7EB" : "white" }),
+                        singleValue: (styles: any) => ({ ...styles, color: "black" }),
+                        multiValueRemove: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+                        indicatorsContainer: (provided: any, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
                       }}
                       // @ts-ignore
                       noOptionsMessage={"Aucun tuteur ne correspond à cette recherche"}
@@ -894,12 +894,12 @@ const CustomSelect = ({
       ref={ref}
       noOptionsMessage={() => noOptionsMessage}
       styles={{
-        dropdownIndicator: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-        placeholder: (styles) => ({ ...styles, color: error ? "red" : "black" }),
-        control: (styles) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: !readOnly && isJvaMission ? "#E5E7EB" : "white" }),
-        singleValue: (styles) => ({ ...styles, color: "black" }),
-        multiValueRemove: (styles, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
-        indicatorsContainer: (provided, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
+        dropdownIndicator: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        placeholder: (styles: any) => ({ ...styles, color: error ? "red" : "black" }),
+        control: (styles: any) => ({ ...styles, borderColor: "#D1D5DB", backgroundColor: !readOnly && isJvaMission ? "#E5E7EB" : "white" }),
+        singleValue: (styles: any) => ({ ...styles, color: "black" }),
+        multiValueRemove: (styles: any, { isDisabled }) => ({ ...styles, display: isDisabled ? "none" : "flex" }),
+        indicatorsContainer: (provided: any, { isDisabled }) => ({ ...provided, display: isDisabled ? "none" : "flex" }),
       }}
       options={options}
       placeholder={placeholder}

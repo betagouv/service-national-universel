@@ -1,0 +1,29 @@
+{
+  "compilerOptions": {
+    "composite": true,
+    "allowJs": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "isolatedModules": true,
+    "jsx": "react",
+    "strict": false,
+    "forceConsistentCasingInFileNames": true,
+    "downlevelIteration": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUnusedParameters": false,
+    "noUnusedLocals": false,
+    "noImplicitReturns": true,
+    "strictNullChecks": true,
+    "allowSyntheticDefaultImports": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2021",
+    "skipLibCheck": true,
+    "noEmitOnError": true,
+    "noEmit": false
+  },
+  "include": [],
+  "files": [],
+  "extends": "@tsconfig/vite-react/tsconfig.json"
+}

@@ -1,0 +1,23 @@
+{
+  "compilerOptions": {
+    "strictNullChecks": true,
+    "skipLibCheck": true,
+    "removeComments": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "esModuleInterop": true,
+    "preserveWatchOutput": true,
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "target": "ES2022",
+    "outDir": "./src",
+    "rootDir": "./src"
+  },
+  "references": [],
+  "include": ["src/**/*.ts"],
+  "exclude": ["**/node_modules/*", "src/__tests__/*"],
+  "typeRoots": [
+    "./@types",
+    "./node_modules/@types",
+  ]
+}

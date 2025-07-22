@@ -1,0 +1,13 @@
+{
+  "name": "snupport-api",
+  "version": "1.0.0",
+  "engines": {
+    "node": "^20.17"
+  },
+  "scripts": {
+    "start": "node snupport-api/src/index.js"
+  },
+  "author": "SNU",
+  "license": "ISC",
+  "description": ""
+}
