@@ -211,6 +211,24 @@
       }
     },
     {
+      "label": "Start snupport-api",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app @snu/support-api",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
+      "label": "Start snupport-app",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app @snu/support-app",
+      "type": "shell",
+      "problemMatcher": [],
+      "options": {
+        "cwd": "./"
+      }
+    },
+    {
       "label": "Start Analytics",
       "command": "npm run dev:app analytics",
       "type": "shell",
@@ -220,7 +238,7 @@
       }
     },
     {
-      "label": "Start Support",
+      "label": "Start BDC",
       "command": "npm install && npm run dev",
       "type": "shell",
       "problemMatcher": [],
