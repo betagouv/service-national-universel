@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  button.loading {
+    color: transparent;
+  }
+  button:disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    cursor: default;
+  }
+
+  .wrapper {
+    @apply mx-auto max-w-6xl p-4;
+  }
+  a {
+    @apply cursor-pointer;
+  }
+}
+
+.content {
+  max-width: calc(100vw - 3.5rem);
+}
+
+.dir-rtl {
+  direction: rtl;
+}
+
+.dir-ltr {
+  direction: ltr;
+}
+
+.show-button-on-hover:hover .button-container {
+  opacity: 1;
+  pointer-events: initial;
+}
+
+.show-button-on-hover .button-container {
+  opacity: 0;
+  pointer-events: none;
+}

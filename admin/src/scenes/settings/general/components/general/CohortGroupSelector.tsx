@@ -41,7 +41,7 @@ export default function CohortGroupSelector({ group, cohort, onChange, readOnly 
       onCreateOption={handleCreate}
       placeholder="Sélectionnez un groupe de cohorte"
       styles={{
-        control: (base) => ({
+        control: (base: any) => ({
           ...base,
           padding: "10px",
           minHeight: "40px",
