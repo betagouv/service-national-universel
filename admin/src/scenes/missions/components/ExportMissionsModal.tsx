@@ -45,7 +45,7 @@ export default function ExportMissionsModal({ user, selectedFilters, onClose, is
       });
     },
     onSuccess: () => {
-      toastr.success("Export des candidatures", "L'export des candidatures est en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
+      toastr.success("Export des missions", "L'export des missions est en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setExportParams(null);
       onClose();
     },
