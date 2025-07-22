@@ -142,6 +142,8 @@ const DashboardVisitorV2 = lazy(() => import("./scenes/dashboardV2/visitor"));
 const Team = lazy(() => import("./scenes/team"));
 // @ts-ignore
 const Accueil = lazy(() => import("./scenes/dashboardV2/ref-cle/Accueil"));
+// @ts-ignore
+const ExportPage = lazy(() => import("./scenes/export"));
 
 initApi();
 
@@ -354,6 +356,7 @@ const Home = () => {
                   {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, user?.role, environment) ? <RestrictedRoute path="/design-system" component={DesignSystemPage} /> : null}
                   {/* DASHBOARD */}
                   <RestrictedRoute path="/dashboard" component={renderDashboardV2} />
+                  <RestrictedRoute path="/export/:id" component={ExportPage} />
                   {/* Default route (redirection de la home et 404) */}
                   <RestrictedRoute path="/" component={(props) => <NotFound {...props} homePath="/dashboard" />} />
                 </Switch>
