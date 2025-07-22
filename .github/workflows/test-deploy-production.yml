@@ -126,6 +126,8 @@ jobs:
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_ADMIN }}
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKS }}
           ${{ vars.CC_APP_ID_PRODUCTION_SNU_TASKSV2 }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNUPPORT_API }}
+          ${{ vars.CC_APP_ID_PRODUCTION_SNUPPORT_APP }}
           EOF
 
           wait
