@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 import Refresh from "@/assets/icons/Refresh";
 import { Label, Button } from "@snu/ds/admin";
-import { COHORT_TYPE, CohesionCenterType, CohortType, formatNameAndAddress } from "snu-lib";
+import { COHORT_TYPE, CohesionCenterType, CohortDto, formatNameAndAddress } from "snu-lib";
 
 type ModalAffectationsType = {
   isOpen: boolean;
@@ -13,7 +13,7 @@ type ModalAffectationsType = {
 
 interface Props {
   cohesionCenter: CohesionCenterType;
-  cohort: CohortType;
+  cohort: CohortDto;
   setModalAffectation: (modalAffectations: ModalAffectationsType) => void;
   modalAffectations: ModalAffectationsType;
   isOpenForAffectation: boolean;

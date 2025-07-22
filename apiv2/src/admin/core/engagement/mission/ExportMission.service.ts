@@ -7,6 +7,8 @@ import { MissionType, ReferentType, ROLES, StructureType } from "snu-lib";
 import { StructureGateway } from "../structure/Structure.gateway";
 import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
 
+export const EXPORT_MISSION_FOLDER = "file/admin/engagement/mission";
+
 @Injectable()
 export class ExportMissionService {
     private readonly logger: Logger = new Logger(ExportMissionService.name);

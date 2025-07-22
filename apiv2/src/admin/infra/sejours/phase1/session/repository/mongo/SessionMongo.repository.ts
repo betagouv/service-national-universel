@@ -65,6 +65,12 @@ export class SessionRepository implements SessionGateway {
         });
         return SessionMapper.toModels(sessions);
     }
+
+    async findByDateEndAfter(date: Date): Promise<SessionModel[]> {
+        const sessions = await this.sesssionMongooseEntity.find({ dateEnd: { $gte: date } });
+        return SessionMapper.toModels(sessions);
+    }
+
     async update(session: SessionModel): Promise<SessionModel> {
         const sessionEntity = SessionMapper.toEntity(session);
         const retrievedSession = await this.sesssionMongooseEntity.findById(session.id);

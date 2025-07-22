@@ -61,29 +61,33 @@ export default function Index() {
   const [departmentOptions, setDepartmentOptions] = useState<FilterOption[]>([]);
 
   useEffect(() => {
-    const filters = [
+    const filters: Filter[] = [
       {
         id: "status",
         name: "Statut d’inscription",
         fullValue: "Tous",
         options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
       },
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "region",
-            name: "Région",
-            fullValue: "Toutes",
-            options: regionOptions,
-          }
-        : null,
-      ![ROLES.REFERENT_DEPARTMENT].includes(user.role)
-        ? {
-            id: "academy",
-            name: "Académie",
-            fullValue: "Toutes",
-            options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
-          }
-        : null,
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "region",
+              name: "Région",
+              fullValue: "Toutes",
+              options: regionOptions,
+            },
+          ]
+        : []),
+      ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
+        ? [
+            {
+              id: "academy",
+              name: "Académie",
+              fullValue: "Toutes",
+              options: academyOptions.sort((a, b) => a.label.localeCompare(b.label)),
+            },
+          ]
+        : []),
       {
         id: "department",
         name: "Département",
@@ -96,9 +100,9 @@ export default function Index() {
         name: "Cohorte",
         fullValue: "Toutes",
         options: getCohortNameList(cohorts).map((cohort) => ({ key: cohort, label: cohort })),
-        sort: (e) => orderCohort(e),
+        sort: (e: any) => orderCohort(e) as any,
       },
-    ].filter((e) => e);
+    ];
     setFilterArray(filters);
   }, [departmentOptions]);
 
