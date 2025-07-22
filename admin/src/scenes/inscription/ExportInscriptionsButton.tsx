@@ -38,7 +38,7 @@ export default function ExportInscriptionsButton({ selectedFilters, disabled }: 
       });
     },
     onSuccess: () => {
-      toastr.success("Export des inscriptions", "L'export des inscriptions a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
+      toastr.success("Export des inscriptions", "L'export des inscriptions est en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setShowModal(false);
     },
     onError: (error) => {

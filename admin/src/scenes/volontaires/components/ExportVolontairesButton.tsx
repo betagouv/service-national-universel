@@ -26,7 +26,7 @@ export default function ExportVolontairesButton({ selectedFilters, disabled }: P
     mutationFn: async ({ selectedFilters, selectedFields }: { selectedFilters: { [key: string]: Filter }; selectedFields: string[] }) =>
       await JeuneService.postJeunesExport(buildApiv2Query(selectedFilters, selectedFields)),
     onSuccess: () => {
-      toastr.success("Export des volontaires", "L'export des volontaires a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
+      toastr.success("Export des volontaires", "L'export des volontaires est en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setExportParams(null);
       setShowModal(null);
     },

@@ -29,7 +29,7 @@ export default function ExportVolontairesScolariseButton({ user, selectedFilters
         region: user.role === ROLES.REFERENT_REGION ? user.region : undefined,
       }),
     onSuccess: () => {
-      toastr.success("Export des volontaires scolarisés", "L'export des volontaires scolarisés a en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
+      toastr.success("Export des volontaires scolarisés", "L'export des volontaires scolarisés est en cours de traitement, vous recevrez un email lorsque cela sera terminé.");
       setShowModal(false);
     },
     onError: (error) => {
