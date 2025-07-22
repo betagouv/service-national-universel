@@ -239,8 +239,7 @@ export default function Team({ focusedSession: focusedSessionfromProps }) {
         <ModalConfirm
           isOpen={modal?.isOpen}
           title={modal?.title}
-          message={modal?.message}
-          onChange={null}
+          message={modal?.message as string}
           onCancel={() => setModal({ isOpen: false, onConfirm: () => {}, title: "", message: "" })}
           onConfirm={async () => {
             await modal?.onConfirm();

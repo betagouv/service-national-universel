@@ -35,7 +35,7 @@ export default function DetailsView({ ...props }) {
   if (!structure) return <Loader />;
 
   return (
-    <StructureView tab="details" structure={structure} actionButton={<ActionButton structureRattacheeId={structure._id} />}>
+    <StructureView tab="details" structure={structure} actionButton={<ActionButton structureRattacheeId={structure._id} networkId={structure.networkId} />}>
       <div className="my-4 flex gap-6">
         <CardRepresentant structure={structure} setStructure={setStructure} />
         <TeamCard structure={structure} />

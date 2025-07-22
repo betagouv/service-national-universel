@@ -2,7 +2,7 @@ import React from "react";
 import { Switch } from "@headlessui/react";
 import cx from "classnames";
 
-export default function Toggle({ onChange, value, disabled = false }) {
+export default function Toggle({ onChange, value, disabled = false }: { onChange: (e: boolean) => void; value: boolean; disabled?: boolean }) {
   return (
     <Switch
       checked={value}

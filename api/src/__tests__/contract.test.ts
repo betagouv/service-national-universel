@@ -55,19 +55,21 @@ afterEach(resetAppAuth);
 describe("Contract", () => {
   describe("POST /contract", () => {
     it("should return 400 when contract ID is not a valid ID", async () => {
-      const res = await request(getAppHelper()).post("/contract").send({ _id: "not-an-id" });
+      const res = await request(await getAppHelperWithAcl())
+        .post("/contract")
+        .send({ _id: "not-an-id" });
       expect(res.status).toBe(400);
     });
     it("should return 404 when application is not found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/contract")
         .send({ ...getNewContractFixture(), youngId: young._id });
       expect(res.status).toBe(404);
     });
     it("should return 404 when young is not found", async () => {
       const application = await createApplication(getNewApplicationFixture());
-      const res = await request(getAppHelper())
+      const res = await request(await getAppHelperWithAcl())
         .post("/contract")
         .send({ ...getNewContractFixture(), applicationId: application._id });
       expect(res.status).toBe(404);
@@ -79,7 +81,7 @@ describe("Contract", () => {
         const contractFixture = getNewContractFixture();
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;
-        const res = await request(getAppHelper())
+        const res = await request(await getAppHelperWithAcl())
           .post("/contract")
           .send({ ...contractFixture, ...options });
         return { res, young, application, contractFixture };
@@ -104,7 +106,7 @@ describe("Contract", () => {
         const { res, young, contractFixture } = await createContract({ sendMessage: false });
         expect(res.status).toBe(200);
         expect(res.body.data.invitationSent).not.toBe("true");
-        const resAfter = await request(getAppHelper())
+        const resAfter = await request(await getAppHelperWithAcl())
           .post("/contract")
           .send({ ...res.body.data, sendMessage: true });
         expect(resAfter.status).toBe(200);
@@ -146,7 +148,9 @@ describe("Contract", () => {
         contractFixture.youngId = young._id;
         contractFixture.applicationId = application._id;
         contractFixture.missionDuration = "65";
-        const res = await request(getAppHelper()).post("/contract").send(contractFixture);
+        const res = await request(await getAppHelperWithAcl())
+          .post("/contract")
+          .send(contractFixture);
         expect(res.status).toBe(200);
 
         const updatedYoung = await getYoungByIdHelper(young._id);
@@ -160,18 +164,24 @@ describe("Contract", () => {
   });
   describe("GET /contract/:id", () => {
     it("should return 404 not found", async () => {
-      const res = await request(getAppHelper()).get(`/contract/${new ObjectId()}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/contract/${new ObjectId()}`)
+        .send();
       expect(res.status).toBe(404);
     });
     it("should return 400 not an ID", async () => {
-      const res = await request(getAppHelper()).get(`/contract/1`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/contract/1`)
+        .send();
       expect(res.status).toBe(400);
     });
     it("should return 200 when it works", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
-      const res = await request(getAppHelper()).get(`/contract/${contract._id}`).send();
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/contract/${contract._id}`)
+        .send();
       expect(res.status).toBe(200);
     });
     it("should not return tokens for young", async () => {
@@ -187,7 +197,9 @@ describe("Contract", () => {
         structureManagerToken: "qux",
       });
 
-      const res = await request(getAppHelper(young)).get(`/contract/${contract._id}`).send();
+      const res = await request(await getAppHelperWithAcl(young))
+        .get(`/contract/${contract._id}`)
+        .send();
       expect(res.status).toBe(200);
       expect(res.body.data.projectManagerToken).toBeUndefined();
       expect(res.body.structureManagerToken).toBeUndefined();
@@ -201,14 +213,18 @@ describe("Contract", () => {
       const contract = await createContractHelper({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id });
 
       const secondYoung = await createYoungHelper(getNewYoungFixture());
-      const res = await request(getAppHelper(secondYoung)).get(`/contract/${contract._id}`).send();
+      const res = await request(await getAppHelperWithAcl(secondYoung))
+        .get(`/contract/${contract._id}`)
+        .send();
       expect(res.status).toBe(403);
     });
   });
 
   describe("GET /contract/token/:token", () => {
     it("should return 404 not found", async () => {
-      const resGet = await request(getAppHelper()).get(`/contract/token/${new ObjectId()}`).send();
+      const resGet = await request(await getAppHelperWithAcl())
+        .get(`/contract/token/${new ObjectId()}`)
+        .send();
       expect(resGet.status).toBe(404);
     });
     it("should return 200 for each token", async () => {
@@ -228,7 +244,9 @@ describe("Contract", () => {
         ...tokens,
       });
       for (const token of Object.values(tokens)) {
-        const res = await request(getAppHelper()).get(`/contract/token/${token}`).send();
+        const res = await request(await getAppHelperWithAcl())
+          .get(`/contract/token/${token}`)
+          .send();
         expect(res.status).toBe(200);
         expect(res.body.data._id).toBe(contract._id.toString());
         expect(res.body.data.projectManagerToken).toBeUndefined();
@@ -242,7 +260,9 @@ describe("Contract", () => {
 
   describe("POST /contract/token/:token", () => {
     it("should return 404 not found", async () => {
-      const resGet = await request(getAppHelper()).post(`/contract/token/${new ObjectId()}`).send();
+      const resGet = await request(await getAppHelperWithAcl())
+        .post(`/contract/token/${new ObjectId()}`)
+        .send();
       expect(resGet.status).toBe(404);
     });
     it("should return 200 for each token and validate status", async () => {
@@ -262,7 +282,9 @@ describe("Contract", () => {
         ...tokens,
       });
       for (const [key, token] of Object.entries(tokens)) {
-        const res = await request(getAppHelper()).post(`/contract/token/${token}`).send();
+        const res = await request(await getAppHelperWithAcl())
+          .post(`/contract/token/${token}`)
+          .send();
         expect(res.status).toBe(200);
 
         const updatedContract = await getContractByIdHelper(contract._id);
@@ -302,7 +324,9 @@ describe("Contract", () => {
 
       const secondYoung = await createYoungHelper(getNewYoungFixture());
 
-      const resDownload = await request(getAppHelper(secondYoung)).post(`/contract/${contract._id}/download`).send();
+      const resDownload = await request(await getAppHelperWithAcl(secondYoung))
+        .post(`/contract/${contract._id}/download`)
+        .send();
       expect(resDownload.status).toBe(403);
     });
 
@@ -322,7 +346,9 @@ describe("Contract", () => {
 describe("GET /contract/:id/patches", () => {
   it("should return 404 if contract not found", async () => {
     const contractId = new ObjectId();
-    const res = await request(getAppHelper()).get(`/contract/${contractId}/patches`).send();
+    const res = await request(await getAppHelperWithAcl())
+      .get(`/contract/${contractId}/patches`)
+      .send();
     expect(res.statusCode).toEqual(404);
   });
   it("should return 403 if not admin", async () => {
@@ -330,7 +356,7 @@ describe("GET /contract/:id/patches", () => {
     contract.youngFirstName = "MY NEW NAME";
     await contract.save();
 
-    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
+    const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
       .get(`/contract/${contract._id}/patches`)
       .send();
     expect(res.status).toBe(403);
@@ -339,7 +365,9 @@ describe("GET /contract/:id/patches", () => {
     const contract = await createContractHelper(getNewContractFixture());
     contract.youngFirstName = "MY NEW NAME";
     await contract.save();
-    const res = await request(getAppHelper()).get(`/contract/${contract._id}/patches`).send();
+    const res = await request(await getAppHelperWithAcl())
+      .get(`/contract/${contract._id}/patches`)
+      .send();
     expect(res.statusCode).toEqual(200);
     expect(res.body.data).toEqual(
       expect.arrayContaining([
@@ -352,7 +380,9 @@ describe("GET /contract/:id/patches", () => {
   it("should be only accessible by referents", async () => {
     const passport = require("passport");
     const contractId = new ObjectId();
-    await request(getAppHelper()).get(`/contract/${contractId}/patches`).send();
+    await request(await getAppHelperWithAcl())
+      .get(`/contract/${contractId}/patches`)
+      .send();
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
   });
 });

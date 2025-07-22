@@ -6,9 +6,10 @@ export function permissionAccessControlMiddleware(permissions: HasPermissionsPar
   return (req: UserRequest, res: Response, next: NextFunction) => {
     const user = req.user;
 
-    if (!permissions.some(({ resource, action, ignorePolicy }) => isAuthorized({ user, resource, action, ignorePolicy }))) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // au moins une permission doit être autorisée
+    if (permissions.some(({ resource, action, ignorePolicy }) => isAuthorized({ user, resource, action, ignorePolicy }))) {
+      return next();
     }
-    return next();
+    return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   };
 }
