@@ -19,9 +19,7 @@ export async function sendEmailToYoung(template: string, young, params: EmailPar
   if (template === SENDINBLUE_TEMPLATES.young.MILITARY_PREPARATION_DOCS_CORRECTION) buttonCta = `${config.APP_URL}/ma-preparation-militaire`;
   if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED)
     buttonCta = `${config.APP_URL}/inscription/coordonnees?utm_campaign=transactionnel+compte+cree&utm_source=notifauto&utm_medium=mail+219+acceder`;
-  if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION)
-    buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
-  if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_PM)
+  if (template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION || template === SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_PM)
     buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+170+acceder`;
   if (template === SENDINBLUE_TEMPLATES.young.INSCRIPTION_REACTIVATED)
     buttonCta = `${config.APP_URL}?utm_campaign=transactionnel+compte+reactive&utm_source=notifauto&utm_medium=mail+168+seconnecter`;
