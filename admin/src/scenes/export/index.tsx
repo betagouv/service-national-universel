@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useTimeoutFn } from "react-use";
 import cx from "classnames";
 
-import { downloadSecuredFile } from "@/services/file.service";
+import { downloadSignedFile } from "@/services/file.service";
 import useEnvironment from "@/hooks/useEnvironment";
 import Loader from "@/components/Loader";
 
@@ -20,7 +20,7 @@ export default function ExportPage() {
 
   const handleDownloadFile = async () => {
     try {
-      await downloadSecuredFile(decodeURIComponent(id));
+      await downloadSignedFile(decodeURIComponent(id));
       setIsLoading(false);
     } catch (error) {
       toastr.error("Erreur lors du téléchargement du fichier", error.message);
@@ -47,7 +47,7 @@ export default function ExportPage() {
       <div className="text-center">Si le téléchargement ne démarre pas, veuillez cliquer sur le bouton ci-dessous.</div>
 
       <Button title="Télécharcher mon export" onClick={handleDownloadFile} className="mb-10" />
-      <i className="text-xs">(le fichier n'est disponible que quelques heures après la réception de de l'email de confirmation)</i>
+      <i className="text-xs">(le fichier n'est disponible que quelques heures après la réception de l'email de confirmation)</i>
       <div className={cx("text-center mt-20", { hidden: !isDevelopment })}>
         <b>Debug key:</b> {decodeURIComponent(id)}
       </div>

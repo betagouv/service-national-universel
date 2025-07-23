@@ -204,4 +204,18 @@ export class FileProvider implements FileGateway {
         const endpoint = this.config.getOrThrow("bucket.endpoint");
         return `https://${bucket}.${endpoint}/${key}`;
     }
+
+    async getFileSignedUrlFromKey(path: string): Promise<string> {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        const params: AWS.S3.Types.GetObjectRequest = {
+            Bucket: bucket,
+            Key: path,
+        };
+        return s3bucket.getSignedUrl("getObject", params);
+    }
 }

@@ -1,4 +1,4 @@
-import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
+import { CanActivate, ExecutionContext, Injectable, Scope } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 
 import { HasPermissionParams, HasPermissionsParams, isAuthorized } from "snu-lib";
@@ -7,7 +7,10 @@ import { CustomRequest } from "@shared/infra/CustomRequest";
 import { ReferentMapper } from "@admin/infra/iam/repository/mongo/Referent.mapper";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { Logger } from "@nestjs/common";
-@Injectable()
+
+export const PermissionAccessControl = Reflector.createDecorator<HasPermissionsParams["permissions"]>();
+
+@Injectable({ scope: Scope.REQUEST })
 export class PermissionGuard implements CanActivate {
     constructor(
         private readonly reflector: Reflector,
@@ -20,10 +23,7 @@ export class PermissionGuard implements CanActivate {
             this.logger.debug("User not found");
             return false;
         }
-        const permissions = this.reflector.get<HasPermissionsParams["permissions"]>(
-            "permissions",
-            context.getHandler(),
-        );
+        const permissions = this.reflector.get(PermissionAccessControl, context.getHandler());
         if (!permissions || permissions.length === 0) {
             this.logger.debug("No permissions found");
             return false;
@@ -34,6 +34,8 @@ export class PermissionGuard implements CanActivate {
             acl: request.user.acl,
         } as HasPermissionParams["user"];
 
-        return !permissions.some(({ resource, action }) => isAuthorized({ user, resource, action }));
+        return permissions.some(({ resource, action, ignorePolicy }) =>
+            isAuthorized({ user, resource, action, ignorePolicy }),
+        );
     }
 }

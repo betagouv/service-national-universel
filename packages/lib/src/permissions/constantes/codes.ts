@@ -20,6 +20,7 @@ export enum PERMISSION_CODES {
   ETABLISSEMENT_READ = "EtablissementRead",
   EXPORT_DSNJ = "ExportDsnj",
   EXPORT_INJEP = "ExportInjep",
+  EXPORT_READ = "ExportRead",
   IMPORT_SI_SNU_FULL = "ImportSiSnuFull",
   INSCRIPTION_READ = "InscriptionRead",
   LIGNE_BUS_FULL = "LigneBusFull",
