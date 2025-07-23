@@ -65,6 +65,7 @@ export interface FileGateway {
     deleteRemoteFile(path: string): Promise<void>;
     baseName(path: string): string;
     getFileUrlFromKey(key: string): string;
+    getFileSignedUrlFromKey(key: string): Promise<string>;
 }
 
 export const FileGateway = Symbol("FileGateway");

@@ -125,6 +125,9 @@ const PERMISSIONS_BY_ROUTE = {
   "/classes": {
     permissions: [{ resource: PERMISSION_RESOURCES.CLASSE, action: PERMISSION_ACTIONS.READ }],
   },
+  "/export": {
+    permissions: [{ resource: PERMISSION_RESOURCES.EXPORT, action: PERMISSION_ACTIONS.READ }],
+  },
 };
 
 const DEFAULT_ROUTE_BY_ROLE = {

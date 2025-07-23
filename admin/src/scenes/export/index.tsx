@@ -5,7 +5,7 @@ import { useParams } from "react-router-dom";
 import { useTimeoutFn } from "react-use";
 import cx from "classnames";
 
-import { downloadSecuredFile } from "@/services/file.service";
+import { downloadSignedFile } from "@/services/file.service";
 import useEnvironment from "@/hooks/useEnvironment";
 import Loader from "@/components/Loader";
 
@@ -20,7 +20,7 @@ export default function ExportPage() {
 
   const handleDownloadFile = async () => {
     try {
-      await downloadSecuredFile(decodeURIComponent(id));
+      await downloadSignedFile(decodeURIComponent(id));
       setIsLoading(false);
     } catch (error) {
       toastr.error("Erreur lors du téléchargement du fichier", error.message);

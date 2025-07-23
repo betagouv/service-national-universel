@@ -30,6 +30,12 @@ export async function resizeImage(file, config = {}) {
   return image;
 }
 
+export const downloadSignedFile = async (key: string) => {
+  const link = `${apiv2URL}/file/signed-url?key=${encodeURIComponent(key)}`;
+  const result = await apiv2.get<{ url: string }>(link);
+  window.open(result.url, "_blank");
+};
+
 export const downloadSecuredFile = async (url: string, { fileName, isPublic }: { fileName?: string; isPublic?: boolean } = {}) => {
   const link = getSecuredFileUrl(url, isPublic);
   const downloadFileName = fileName || url.replace(/^.*[\\/]/, "");

@@ -79,10 +79,11 @@ import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
 import { SharedModule } from "@shared/Shared.module";
 import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
-import { APP_FILTER } from "@nestjs/core";
+import { APP_FILTER, APP_GUARD } from "@nestjs/core";
 import { InscriptionController } from "./infra/sejours/phase1/inscription/api/Inscription.controller";
 import { JeuneController } from "./infra/sejours/phase1/api/Jeune.controller";
 import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
+import { PermissionGuard } from "@auth/infra/guard/Permissions.guard";
 
 @Module({
     imports: [
