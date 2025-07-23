@@ -55,6 +55,7 @@ import { SearchPointDeRassemblementGateway } from "@analytics/core/SearchPointDe
 import { SearchSegmentDeLigneGateway } from "@analytics/core/SearchSegmentDeLigne.gateway";
 import { SearchClasseGateway } from "@analytics/core/SearchClasse.gateway";
 import { SearchEtablissementGateway } from "@analytics/core/SearchEtablissement.gateway";
+import { ConfigService } from "@nestjs/config";
 
 export type ExporterJeunesResult = {
     rapportFile: {
@@ -94,6 +95,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         @Inject(ClockGateway) private readonly clockGateway: ClockGateway,
         @Inject(CryptoGateway) private readonly cryptoGateway: CryptoGateway,
         @Inject(NotificationGateway) private readonly notificationGateway: NotificationGateway,
+        private readonly configService: ConfigService,
     ) {}
 
     async execute({
@@ -217,20 +219,16 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
         // upload du rapport du s3
         const timestamp = this.clockGateway.formatSafeDateTime(new Date());
         const fileName = `${name}s_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
-        const rapportFile = await this.fileGateway.uploadFile(
-            `${EXPORT_JEUNE_FOLDER}/${fileName}`,
-            {
-                data: fileBuffer,
-                mimetype: MIME_TYPES.EXCEL,
-            },
-            { ACL: "public-read" },
-        );
+        const rapportFile = await this.fileGateway.uploadFile(`${EXPORT_JEUNE_FOLDER}/${fileName}`, {
+            data: fileBuffer,
+            mimetype: MIME_TYPES.EXCEL,
+        });
 
         // envoi de l'email à celui qui a demandé l'export
         await this.notificationGateway.sendEmail<ExportDownloadParams>(
             {
                 to: [{ email: referent.email, name: `${referent.prenom} ${referent.nom}` }],
-                url: this.fileGateway.getFileUrlFromKey(rapportFile.Key),
+                url: `${this.configService.get("urls.admin")}/export/${encodeURIComponent(rapportFile.Key)}`,
             },
             EmailTemplate.EXPORT_DOWNLOAD,
         );
