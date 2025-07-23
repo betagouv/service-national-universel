@@ -180,7 +180,7 @@ export default function List() {
             <div className="flex flex-row items-center gap-3 text-sm">
               {structure &&
                 structure.status !== "DRAFT" &&
-                isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { structureId: structure._id, networkId: structure.networkId! } } }) && (
+                isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { _id: structure._id, networkId: structure.networkId! } } }) && (
                   <button className="cursor-pointer rounded-lg bg-blue-600 px-3 py-2 text-white" onClick={() => history.push(`/mission/create/${user.structureId}`)}>
                     Nouvelle mission
                   </button>

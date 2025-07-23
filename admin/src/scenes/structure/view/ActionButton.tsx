@@ -8,7 +8,7 @@ export function ActionButton({ structureRattacheeId, networkId }: { structureRat
   const user = useSelector((state) => state.Auth.user);
   const history = useHistory();
 
-  if (!isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { structureId: structureRattacheeId!, networkId: networkId! } } })) {
+  if (!isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.MISSION, context: { structure: { _id: structureRattacheeId!, networkId: networkId! } } })) {
     return null;
   }
   let structureRattacheeParam = "";
