@@ -350,25 +350,32 @@ router.post(
       .limit(req.cleanBody.size)
       .sort(buildSorting(req));
 
+    const statusAggregationFilter = { ...filter };
+    const tagAggregationFilter = { ...filter };
+    const contactAggregationFilter = { ...filter };
+
     // Filtrage des conditions pour les agrégations (exclusion des filtres status et folder)
-    delete filter.status;
-    delete filter.foldersId;
+    delete statusAggregationFilter.status;
+    delete statusAggregationFilter.foldersId;
+    delete tagAggregationFilter.foldersId;
+    delete contactAggregationFilter.status;
+    delete contactAggregationFilter.foldersId;
 
     const statusAggregation = await TicketModel.aggregate([
-      { $match: filter },
+      { $match: statusAggregationFilter },
       { $group: { _id: "$status", doc_count: { $sum: 1 } } },
       { $project: { _id: 0, key: "$_id", doc_count: 1 } },
     ]);
 
     const tagAggregation = await TicketModel.aggregate([
-      { $match: filter },
+      { $match: tagAggregationFilter },
       { $project: { _id: 0, tagsId: 1, status: 1 } },
       { $unwind: { path: "$tagsId", preserveNullAndEmptyArrays: false } },
       { $group: { _id: { key: "$tagsId", status: "$status" }, doc_count: { $sum: 1 } } },
     ]);
 
     const contactDepartmentAggregation = await TicketModel.aggregate([
-      { $match: filter },
+      { $match: contactAggregationFilter },
       { $project: { _id: 0, contactDepartment: 1, status: 1 } },
       { $unwind: { path: "$contactDepartment", preserveNullAndEmptyArrays: false } },
       { $group: { _id: { key: "$contactDepartment", status: "$status" }, doc_count: { $sum: 1 } } },
