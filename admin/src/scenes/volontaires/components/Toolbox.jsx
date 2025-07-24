@@ -47,7 +47,7 @@ export default function Toolbox({ young }) {
           </button>
           {!canYoungApplyToPhase2 ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
-              <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
+              <div className="text-[black]">Le jeune n&apos;est pas éligible à la phase 2</div>
             </ReactTooltip>
           ) : null}
         </div>
@@ -99,7 +99,7 @@ export default function Toolbox({ young }) {
           </button>
           {!canYoungApplyToPhase2 ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
-              <div className="text-[black]">Le jeune n&apos;est pas élibigle à la phase 2</div>
+              <div className="text-[black]">Le jeune n&apos;est pas éligible à la phase 2</div>
             </ReactTooltip>
           ) : null}
         </div>
