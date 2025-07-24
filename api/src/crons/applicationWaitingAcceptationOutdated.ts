@@ -1,12 +1,10 @@
-const { capture } = require("../sentry");
-const slack = require("../slack");
-const { ApplicationModel } = require("../models");
-const { StructureModel } = require("../models");
-const { YoungModel } = require("../models");
-const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
-const { config } = require("../config");
-const { sendTemplate } = require("../brevo");
-const { getCcOfYoung } = require("../utils");
+import { capture } from "../sentry";
+import slack from "../slack";
+import { ApplicationModel, StructureModel, YoungModel } from "../models";
+import { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } from "snu-lib";
+import { config } from "../config";
+import { sendTemplate } from "../brevo";
+import { getCcOfYoung } from "../utils";
 
 const clean = async () => {
   let countAutoCancel = 0;
@@ -39,13 +37,21 @@ const notify1Week = async () => {
     total++;
     if (diffDays(application.createdAt, now) === 7) {
       notice1week++;
+      const structure = await StructureModel.findById(application.structureId);
       const young = await YoungModel.findById(application.youngId);
-      const emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE;
+      if (!young || !structure) throw new Error("Young or structure not found for application");
+      let emailTemplate = "";
+      if (structure.isMilitaryPreparation === "true") {
+        emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE_PM;
+      } else {
+        emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE;
+      }
       let cc = getCcOfYoung({ template: emailTemplate, young });
       await sendTemplate(emailTemplate, {
-        emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           missionName: application?.missionName,
+          structureName: structure?.name,
           cta: `${config.APP_URL}/mission/${application?.missionId}`,
         },
         cc,
@@ -64,12 +70,20 @@ const notify13Days = async () => {
     total++;
     if (diffDays(application.createdAt, now) === 13) {
       notice13Days++;
-      const structure = await StructureModel.findById(application?.structureId);
+      const structure = await StructureModel.findById(application.structureId);
       const young = await YoungModel.findById(application.youngId);
-      const emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE;
+      if (!young || !structure) {
+        throw new Error("Young or structure not found for application");
+      }
+      let emailTemplate = "";
+      if (structure.isMilitaryPreparation === "true") {
+        emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE_PM;
+      } else {
+        emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE;
+      }
       let cc = getCcOfYoung({ template: emailTemplate, young });
       await sendTemplate(emailTemplate, {
-        emailTo: [{ name: `${application?.youngFirstName} ${application?.youngLastName}`, email: application?.youngEmail }],
+        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
           missionName: application?.missionName,
           structureName: structure?.name,

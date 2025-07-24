@@ -32,8 +32,14 @@ export async function createApplication({ mission, young }: { mission: MissionTy
   return data;
 }
 
-export async function sendNotificationApplicationWasCreated({ mission, young }) {
-  const { ok: ok, code: code } = await API.post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION}`, {
+export async function sendNotificationApplicationWasCreated({ mission, young }: { mission: MissionType; young: YoungType }) {
+  let template = "";
+  if (mission.isMilitaryPreparation === "true") {
+    template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_PM;
+  } else {
+    template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION;
+  }
+  const { ok: ok, code: code } = await API.post(`/young/${young._id}/email/${template}`, {
     missionName: mission.name,
     structureName: mission.structureName,
   });
