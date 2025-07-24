@@ -195,7 +195,7 @@ export const BREVO_ERROR_TEMPLATE_NOT_FOUND = "document_not_found";
 function replaceTemplateParams(content: string, params: SendMailParameters["params"] = {}) {
   let hydratedContent = content;
   for (const paramKey of Object.keys(params)) {
-    hydratedContent = hydratedContent.replace(new RegExp(`{{ *params.${paramKey} *}}`, "g"), String(params[paramKey]));
+    hydratedContent = hydratedContent?.replace(new RegExp(`{{ *params.${paramKey} *}}`, "g"), String(params[paramKey]));
   }
   return hydratedContent;
 }
@@ -224,7 +224,7 @@ async function simulateTemplate(id: string, { params, emailTo, cc, bcc, attachme
  * @returns
  */
 export async function getPreviewTemplate(id: string) {
-  if (!config.SENDINBLUEKEY){
+  if (!config.SENDINBLUEKEY) {
     captureMessage("NO SENDINBLUE KEY");
   }
   const template: BrevoEmailTemplate | BrevoApiError = await api(`/smtp/templates/${id}`, undefined, true);
