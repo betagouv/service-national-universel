@@ -205,7 +205,7 @@ router.post(
       if (hasSubmittedMilitaryPreparationFiles) {
         young.set({ statusMilitaryPreparationFiles: MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION });
         await young.save({ fromUser: req.user });
-        if (data.status === APPLICATION_STATUS.WAITING_VALIDATION) {
+        if (data.status !== APPLICATION_STATUS.WAITING_ACCEPTATION) {
           await notifyReferentMilitaryPreparationFilesSubmitted(young);
         }
       }
