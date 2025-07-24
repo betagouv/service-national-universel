@@ -32,6 +32,26 @@ export type JeVeuxAiderMission = {
   publisherId: string;
   activity: string;
   address: string;
+  addresses: {
+    street: string;
+    city: string;
+    postalCode: string;
+    departmentName: string;
+    departmentCode: string;
+    region: string;
+    country: string;
+    location: {
+      lat: number;
+      lon: number;
+    };
+    geoPoint: {
+      type: string;
+      coordinates: [number, number];
+      _id: string;
+    };
+    geolocStatus: string;
+    _id: string;
+  }[];
   applicationUrl: string;
   associationAddress: string;
   associationCity: string;
