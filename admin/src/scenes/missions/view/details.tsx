@@ -444,6 +444,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                   <div className="mb-2 text-xs font-medium">Adresse</div>
                   <AddressForm
                     readOnly={!editing}
+                    disabled={mission?.isJvaMission === "true"}
                     data={{ address: values.address, zip: values.zip, city: values.city }}
                     // @ts-ignore
                     updateData={(address) => setValues({ ...values, ...address, addressVerified: false })}
@@ -787,6 +788,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                     // @ts-ignore
                     error={errorsBottom?.frequence}
                     readOnly={!editing}
+                    disabled={mission?.isJvaMission === "true"}
                     // @ts-ignore
                     bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"

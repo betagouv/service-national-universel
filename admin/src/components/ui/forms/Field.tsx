@@ -24,6 +24,7 @@ interface FieldProps {
   transformer?: (item: any) => any;
   options?: Array<any>;
   filterOnType?: boolean;
+  disabled?: boolean;
 }
 
 export default function Field({
@@ -48,6 +49,7 @@ export default function Field({
   transformer,
   options,
   filterOnType,
+  disabled = false,
 }: FieldProps) {
   const [copied, setCopied] = useState(false);
 
@@ -110,6 +112,7 @@ export default function Field({
               onChange={(e) => onChange?.(e.target.value, name, e)}
               className={`w-full text-start ${bgColor} ` + className}
               maxLength={maxLength}
+              disabled={disabled}
             />
           ))}
 
