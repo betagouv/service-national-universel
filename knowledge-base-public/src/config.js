@@ -1,7 +1,7 @@
 const environment = process.env.NEXT_PUBLIC_ENVIRONMENT;
 
 let snuApiUrl = "http://localhost:8080";
-let supportApiUrl = "http://localhost:3000";
+let supportApiUrl = "http://localhost:8090";
 let adminURL = "http://localhost:8082";
 let appURL = "http://localhost:8081";
 

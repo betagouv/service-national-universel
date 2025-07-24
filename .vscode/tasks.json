@@ -212,7 +212,7 @@
     },
     {
       "label": "Start snupport-api",
-      "command": "source ~/.zshrc && nvm use && npm run dev:app @snu/support-api",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app snupport-api",
       "type": "shell",
       "problemMatcher": [],
       "options": {
@@ -221,7 +221,7 @@
     },
     {
       "label": "Start snupport-app",
-      "command": "source ~/.zshrc && nvm use && npm run dev:app @snu/support-app",
+      "command": "source ~/.zshrc && nvm use && npm run dev:app snupport-app",
       "type": "shell",
       "problemMatcher": [],
       "options": {
