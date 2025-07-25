@@ -67,7 +67,7 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
     tutorId: referentMission.id,
     tutorName: getTutorName({ firstName: referentMission.firstName, lastName: referentMission.lastName }),
     zip: mission.postalCode,
-    address: mission.address,
+    address: mission.address || "_",
     city: mission.city,
     department: mission.departmentName,
     region: mission.region,
