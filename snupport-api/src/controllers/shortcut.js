@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const ShortcutModel = require("../models/shortcut");
-const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
 
@@ -24,10 +24,13 @@ const updateChildrenRecursive = async (content, user) => {
   return content;
 };
 
-router.get("/",
-  validateQuery(Joi.object({
-    signatureDest: Joi.string().pattern(/^[0-9a-z_ ]+$/),
-  })),
+router.get(
+  "/",
+  validateQuery(
+    Joi.object({
+      signatureDest: Joi.string().pattern(/^[0-9a-z_ ]+$/),
+    })
+  ),
   async (req, res) => {
     const query = {};
     if (req.cleanQuery.signatureDest) {
@@ -42,10 +45,13 @@ router.get("/",
   }
 );
 
-router.get("/search",
-  validateQuery(Joi.object({
-    q: Joi.string().trim(),
-  })),
+router.get(
+  "/search",
+  validateQuery(
+    Joi.object({
+      q: Joi.string().trim(),
+    })
+  ),
   async (req, res) => {
     let query = {};
     const q = req.cleanQuery.q || "";
@@ -86,12 +92,15 @@ router.get("/search",
   }
 );
 
-router.post("/search",
-  validateBody(Joi.object({
-    q: Joi.string().trim(),
-    isSignature: Joi.boolean(),
-    contactGroup: Joi.array().items(Joi.string().trim()),
-  })),
+router.post(
+  "/search",
+  validateBody(
+    Joi.object({
+      q: Joi.string().trim(),
+      isSignature: Joi.boolean(),
+      contactGroup: Joi.array().items(Joi.string().trim()),
+    })
+  ),
   async (req, res) => {
     let query = {};
     const q = req.cleanBody.q || "";
@@ -149,14 +158,17 @@ router.post("/search",
   }
 );
 
-router.post("/",
-  validateBody(Joi.object({
-    content: Joi.array(),
-    dest: Joi.array().items(Joi.string().trim()),
-    keyword: Joi.array().items(Joi.string().trim()),
-    name: Joi.string().trim(),
-    text: Joi.string().trim()
-  }).prefs({ presence: 'required' })),
+router.post(
+  "/",
+  validateBody(
+    Joi.object({
+      content: Joi.array(),
+      dest: Joi.array().items(Joi.string().trim()),
+      keyword: Joi.array().items(Joi.string().trim()),
+      name: Joi.string().trim(),
+      text: Joi.string().trim(),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     let shortcut = req.cleanBody;
     shortcut.userRole = req.user.role;
@@ -166,29 +178,29 @@ router.post("/",
   }
 );
 
-router.patch("/:id",
+router.patch(
+  "/:id",
   validateParams(idSchema),
-  validateBody(Joi.object({
-    content: Joi.array(),
-    dest: Joi.array().items(Joi.string().trim()),
-    keyword: Joi.array().items(Joi.string().trim()),
-    name: Joi.string().trim(),
-    text: Joi.string().trim(),
-    status: Joi.boolean(),
-    userVisibility: Joi.string().valid("ALL", "AGENT"),
-  }).min(1)),
+  validateBody(
+    Joi.object({
+      content: Joi.array(),
+      dest: Joi.array().items(Joi.string().trim()),
+      keyword: Joi.array().items(Joi.string().trim()),
+      name: Joi.string().trim(),
+      text: Joi.string().trim(),
+      status: Joi.boolean(),
+      userVisibility: Joi.string().valid("ALL", "AGENT"),
+    }).min(1)
+  ),
   async (req, res) => {
     await ShortcutModel.findOneAndUpdate({ _id: req.cleanParams.id }, req.cleanBody);
     return res.status(200).send({ ok: true });
   }
 );
 
-router.delete("/:id",
-  validateParams(idSchema),
-  async (req, res) => {
-    await ShortcutModel.findByIdAndDelete(req.cleanParams.id);
+router.delete("/:id", validateParams(idSchema), async (req, res) => {
+  await ShortcutModel.findByIdAndDelete(req.cleanParams.id);
 
-    return res.status(200).send({ ok: true });
-  }
-);
+  return res.status(200).send({ ok: true });
+});
 module.exports = router;
