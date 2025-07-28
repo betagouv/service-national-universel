@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     libcap2-bin \
     socat \
+    gettext-base \
     && rm -rf /var/lib/apt/lists/*
 
 # Installation de Heartbeat (x86_64 pour CleverCloud)
@@ -18,8 +19,5 @@ RUN curl -L -O https://artifacts.elastic.co/downloads/beats/heartbeat/heartbeat-
 # Ajout du fichier de configuration
 COPY heartbeat.yml.template /etc/heartbeat/heartbeat.yml.template
 COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
 ENTRYPOINT ["/entrypoint.sh"]
-
-# Chargement du pattern Kibana + lancement Heartbeat
-CMD socat TCP-LISTEN:${PORT:-8080},fork,reuseaddr SYSTEM:'echo HTTP/1.1 200 OK; echo; echo OK' & \
-    heartbeat -e 
