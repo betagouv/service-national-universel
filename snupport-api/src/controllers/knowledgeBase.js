@@ -9,18 +9,34 @@ const KbSearchModel = require("../models/kbSearch");
 const { uploadPublicPicture, diacriticSensitiveRegex } = require("../utils/index.js");
 const { ERRORS } = require("../errors");
 const { revalidateSiteMap, formatSectionsIntoSitemap } = require("../utils/sitemap.utils");
-const  { agentGuard } = require("../middlewares/authenticationGuards");
+const { agentGuard } = require("../middlewares/authenticationGuards");
 const { requireRole } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
 
-
 function search_regex(query) {
   return diacriticSensitiveRegex(escapeStringRegexp(query));
 }
 
-const SCHEMA_ROLE = Joi.string().valid("public", "young", "young_cle", "structure", "referent", "referent_sanitaire", "head_center", "head_center_adjoint", "visitor", "transporter", "referent_classe", "admin", "administrateur_cle", "administrateur_cle_coordinateur_cle", "administrateur_cle_referent_etablissement", "responsible");
+const SCHEMA_ROLE = Joi.string().valid(
+  "public",
+  "young",
+  "young_cle",
+  "structure",
+  "referent",
+  "referent_sanitaire",
+  "head_center",
+  "head_center_adjoint",
+  "visitor",
+  "transporter",
+  "referent_classe",
+  "admin",
+  "administrateur_cle",
+  "administrateur_cle_coordinateur_cle",
+  "administrateur_cle_referent_etablissement",
+  "responsible"
+);
 
 const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
@@ -163,13 +179,18 @@ const getContentAsText = (content) => {
     .join(" ");
 };
 
-router.post("/:allowedRole/siblings",
-  validateParams(Joi.object({
-    allowedRole: SCHEMA_ROLE,
-  }).prefs({ presence: 'required' })),
-  validateBody(Joi.object({
-    parentId: SCHEMA_ID,
-  }).prefs({ presence: 'required' })),
+router.post(
+  "/:allowedRole/siblings",
+  validateParams(
+    Joi.object({
+      allowedRole: SCHEMA_ROLE,
+    }).prefs({ presence: "required" })
+  ),
+  validateBody(
+    Joi.object({
+      parentId: SCHEMA_ID,
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const siblings = await KnowledgeBaseModel.find({ ...req.cleanParams, ...req.cleanBody }).lean();
 
@@ -200,23 +221,26 @@ router.post("/picture", agentGuard, async (req, res) => {
   return res.status(200).send({ data: result.Location, ok: true });
 });
 
-router.post("/",
+router.post(
+  "/",
   agentGuard,
-  validateBody(Joi.object({
-    title: Joi.string().trim(),
-    status: Joi.string().valid("DRAFT", "PUBLISHED", "ARCHIVED").default("DRAFT"),
-    type: Joi.string().valid("section", "article"),
-    position: Joi.number().integer().positive(),
-    allowedRoles: Joi.array().items(SCHEMA_ROLE),
-    parentId: SCHEMA_ID.optional(),
-    description: Joi.string().optional(),
-    keywords: Joi.string().optional(),
-    content: Joi.string().optional(),
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      title: Joi.string().trim(),
+      status: Joi.string().valid("DRAFT", "PUBLISHED", "ARCHIVED").default("DRAFT").optional(),
+      type: Joi.string().valid("section", "article"),
+      position: Joi.number().integer().positive(),
+      allowedRoles: Joi.array().items(SCHEMA_ROLE),
+      parentId: SCHEMA_ID.allow(null).optional(),
+      description: Joi.string().allow(""),
+      keywords: Joi.string().optional(),
+      content: Joi.string().optional(),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const slug = await getSlug(req.cleanBody.title);
     const kb = {
-      ...req.cleanBody, 
+      ...req.cleanBody,
       author: req.user._id,
       slug,
     };
@@ -240,45 +264,49 @@ router.post("/",
   }
 );
 
-router.post("/duplicate/:id",
-  agentGuard,
-  validateParams(idSchema),
-  async (req, res) => {
-    const oldKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
-    if (!oldKb) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    //duplicate old kb
-    const newKb = await KnowledgeBaseModel.create({
-      type: oldKb.type,
-      parentId: oldKb.parentId,
-      position: oldKb.position + 1,
-      title: oldKb.title + " - (Copie)",
-      slug: oldKb.slug + "-copie",
-      allowedRoles: oldKb.allowedRoles,
-      status: "DRAFT",
-      author: req.user._id,
-      icon: oldKb.icon,
-      content: oldKb.content,
-      contentAsText: oldKb.contentAsText,
-      group: oldKb.group,
-      keywords: oldKb.keywords,
-    });
-    await revalidateSiteMap();
-    const data = await KnowledgeBaseModel.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean();
-    return res.status(200).send({ ok: true, data });
+router.post("/duplicate/:id", agentGuard, validateParams(idSchema), async (req, res) => {
+  const oldKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
+  if (!oldKb) {
+    return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   }
-);
+  //duplicate old kb
+  const newKb = await KnowledgeBaseModel.create({
+    type: oldKb.type,
+    parentId: oldKb.parentId,
+    position: oldKb.position + 1,
+    title: oldKb.title + " - (Copie)",
+    slug: oldKb.slug + "-copie",
+    allowedRoles: oldKb.allowedRoles,
+    status: "DRAFT",
+    author: req.user._id,
+    icon: oldKb.icon,
+    content: oldKb.content,
+    contentAsText: oldKb.contentAsText,
+    group: oldKb.group,
+    keywords: oldKb.keywords,
+  });
+  await revalidateSiteMap();
+  const data = await KnowledgeBaseModel.findById(newKb._id).populate({ path: "author", select: "_id firstName lastName role" }).lean();
+  return res.status(200).send({ ok: true, data });
+});
 
 // this is when reordering by drag and drop, in the tree or in a section
-router.put("/reorder",
+router.put(
+  "/reorder",
   agentGuard,
-  validateBody(Joi.array().items(Joi.object({
-    _id: SCHEMA_ID,
-    position: Joi.number().integer().positive(),
-    parentId: SCHEMA_ID.optional(),
-    allowedRoles: Joi.array().items(SCHEMA_ROLE),
-  })).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.array()
+      .items(
+        Joi.object({
+          _id: SCHEMA_ID,
+          position: Joi.number().integer().positive(),
+          parentId: SCHEMA_ID.allow(null).optional(),
+          allowedRoles: Joi.array().items(SCHEMA_ROLE).optional(),
+          initShowOpen: Joi.any().optional(),
+        })
+      )
+      .prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const itemsToReorder = req.cleanBody;
     const session = await KnowledgeBaseModel.startSession();
@@ -295,27 +323,30 @@ router.put("/reorder",
   }
 );
 
-router.patch("/:id",
+router.patch(
+  "/:id",
   agentGuard,
   validateParams(idSchema),
-  validateBody(Joi.object({
-    title: Joi.string().trim(),
-    status: Joi.string().valid("DRAFT", "PUBLISHED", "ARCHIVED").default("DRAFT"),
-    type: Joi.string().valid("section", "article"),
-    position: Joi.number().integer().positive(),
-    allowedRoles: Joi.array().items(SCHEMA_ROLE),
-    parentId: SCHEMA_ID,
-    description: Joi.string(),
-    keywords: Joi.string(),
-    content: Joi.string(),
-    group: Joi.string().token(),
-    icon: Joi.string().token(),
-    author: SCHEMA_ID,
-    read: Joi.number().integer().min(0),
-    imageSrc: Joi.string().uri(),
-    imageAlt: Joi.string().token(),
-    slug: Joi.string().pattern(/^[0-9a-z-]+$/),
-  }).min(1)),
+  validateBody(
+    Joi.object({
+      title: Joi.string().trim(), // required
+      status: Joi.string().valid("DRAFT", "PUBLISHED", "ARCHIVED").default("DRAFT").optional(),
+      type: Joi.string().valid("section", "article"), // required
+      position: Joi.number().integer().positive(), // required
+      allowedRoles: Joi.array().items(SCHEMA_ROLE), // required
+      parentId: SCHEMA_ID.allow(null).optional(),
+      description: Joi.string().allow(""),
+      keywords: Joi.string().allow(""),
+      content: Joi.string(),
+      group: Joi.string().token(), // required
+      icon: Joi.string().token(),
+      author: SCHEMA_ID, // required
+      read: Joi.number().integer().min(0), // required
+      imageSrc: Joi.string().uri(),
+      imageAlt: Joi.string().token(),
+      slug: Joi.string().pattern(/^[0-9a-z-]+$/), // required
+    }).min(1)
+  ),
   async (req, res) => {
     const existingKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -368,12 +399,15 @@ router.patch("/:id",
   }
 );
 
-router.put("/:id/content",
+router.put(
+  "/:id/content",
   agentGuard,
   validateParams(idSchema),
-  validateBody(Joi.object({
-    content: Joi.array(),
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      content: Joi.array(),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const existingKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -401,19 +435,19 @@ router.get("/sitemap", async (req, res) => {
   const sections = await KnowledgeBaseModel.aggregate(pipeline);
   // Filter out null group (sections and orphaned items) and map the rest into an array of IDs.
   const sectionIds = sections.filter((e) => e._id).map((e) => e._id.toString());
-  const data = await KnowledgeBaseModel.find(
-    { type: "section", status: "PUBLISHED", _id: { $in: sectionIds } },
-    { title: 1, slug: 1, parentId: 1, position: 1, allowedRoles: 1 }
-  );
+  const data = await KnowledgeBaseModel.find({ type: "section", status: "PUBLISHED", _id: { $in: sectionIds } }, { title: 1, slug: 1, parentId: 1, position: 1, allowedRoles: 1 });
   if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   return res.status(200).send({ ok: true, data: formatSectionsIntoSitemap(data) });
 });
 
-router.post("/all",
+router.post(
+  "/all",
   agentGuard,
-  validateBody(Joi.object({
-    allowedRoles: Joi.array().items(SCHEMA_ROLE),
-  }).prefs({ presence: 'required' })),
+  validateBody(
+    Joi.object({
+      allowedRoles: Joi.array().items(SCHEMA_ROLE),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const data = await KnowledgeBaseModel.find({}).populate({ path: "author", select: "_id firstName lastName role" });
     const filteredData = data.filter((item) =>
@@ -424,30 +458,32 @@ router.post("/all",
   }
 );
 
-router.get("/:allowedRole/search",
-  validateParams(Joi.object({
-    allowedRole: SCHEMA_ROLE,
-  }).prefs({ presence: 'required' })),
-  validateQuery(Joi.object({
-    search: Joi.string(),
-  }).prefs({ presence: 'required', stripUnknown: true })),
+router.get(
+  "/:allowedRole/search",
+  validateParams(
+    Joi.object({
+      allowedRole: SCHEMA_ROLE,
+    }).prefs({ presence: "required" })
+  ),
+  validateQuery(
+    Joi.object({
+      search: Joi.string(),
+    }).prefs({ presence: "required", stripUnknown: true })
+  ),
   async (req, res) => {
     if (req.cleanQuery.search.length < 3) {
       res.status(200).send({
         ok: true,
         data: [],
       });
-      return
+      return;
     }
     const regex = {
       $regex: search_regex(req.cleanQuery.search),
-      $options: 'i',
-    }
+      $options: "i",
+    };
     const query = {
-      $or:  [
-        { title: regex },
-        { keywords: regex },
-      ]
+      $or: [{ title: regex }, { keywords: regex }],
     };
     if (req.cleanParams.allowedRole !== "admin") {
       query.allowedRoles = req.cleanParams.allowedRole;
@@ -468,13 +504,15 @@ router.get("/:allowedRole/search",
   }
 );
 
-
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:allowedRole/:slug",
-  validateParams(Joi.object({
-    allowedRole: SCHEMA_ROLE,
-    slug: Joi.string(),
-  }).prefs({ presence: 'required' })),
+router.get(
+  "/:allowedRole/:slug",
+  validateParams(
+    Joi.object({
+      allowedRole: SCHEMA_ROLE,
+      slug: Joi.string(),
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const existingKb = await KnowledgeBaseModel.findOne({ slug: req.cleanParams.slug, allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" })
       .populate({
@@ -527,10 +565,13 @@ router.get("/:allowedRole/:slug",
 );
 
 // this is for the public-access part of the knowledge base (not the admin part)
-router.get("/:allowedRole",
-  validateParams(Joi.object({
-    allowedRole: SCHEMA_ROLE,
-  }).prefs({ presence: 'required' })),
+router.get(
+  "/:allowedRole",
+  validateParams(
+    Joi.object({
+      allowedRole: SCHEMA_ROLE,
+    }).prefs({ presence: "required" })
+  ),
   async (req, res) => {
     const children = await KnowledgeBaseModel.find({ allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" })
       .sort({ parentId: 1, type: -1, position: 1 })
@@ -553,45 +594,42 @@ router.get("/:allowedRole",
   }
 );
 
-router.delete("/:id",
-  validateParams(idSchema),
-  agentGuard, async (req, res) => {
-    const kb = await KnowledgeBaseModel.findById(req.cleanParams.id);
-    if (!kb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+router.delete("/:id", validateParams(idSchema), agentGuard, async (req, res) => {
+  const kb = await KnowledgeBaseModel.findById(req.cleanParams.id);
+  if (!kb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const childrenToDelete = await findChildren(kb, true);
-    // check if there is no reference of existing article/section in links
-    const slugs = [kb, ...childrenToDelete].map((item) => item.slug);
-    const articlesReferingItemsToDelete = [];
-    const articlesNotToDelete = await KnowledgeBaseModel.find({ type: "article", _id: { $nin: [kb, ...childrenToDelete].map((item) => item._id) } });
-    for (const slug of slugs) {
-      for (const article of articlesNotToDelete) {
-        const hasSlug = findArticlesWithSlug(slug, article.content);
-        if (hasSlug) articlesReferingItemsToDelete.push(article);
-      }
+  const childrenToDelete = await findChildren(kb, true);
+  // check if there is no reference of existing article/section in links
+  const slugs = [kb, ...childrenToDelete].map((item) => item.slug);
+  const articlesReferingItemsToDelete = [];
+  const articlesNotToDelete = await KnowledgeBaseModel.find({ type: "article", _id: { $nin: [kb, ...childrenToDelete].map((item) => item._id) } });
+  for (const slug of slugs) {
+    for (const article of articlesNotToDelete) {
+      const hasSlug = findArticlesWithSlug(slug, article.content);
+      if (hasSlug) articlesReferingItemsToDelete.push(article);
     }
-
-    if (articlesReferingItemsToDelete.length) {
-      return res.status(400).send({
-        ok: true,
-        data: articlesReferingItemsToDelete,
-        code: "ARTICLES_REFERING_TO_ITEMS",
-        // error: `Il y a une référence de l'élément que vous souhaitez supprimer dans d'autres articles, veuillez les mettre à jour: ${articlesReferingItemsToDelete.map(
-        //   (article) => `\n${article.title}`,
-        // )}`,
-      });
-    }
-
-    // delete items
-    for (const child of [kb, ...childrenToDelete]) {
-      await KnowledgeBaseModel.findByIdAndDelete(child._id);
-    }
-
-    if (kb.type === "section") await revalidateSiteMap();
-
-    res.status(200).send({ ok: true });
   }
-);
+
+  if (articlesReferingItemsToDelete.length) {
+    return res.status(400).send({
+      ok: true,
+      data: articlesReferingItemsToDelete,
+      code: "ARTICLES_REFERING_TO_ITEMS",
+      // error: `Il y a une référence de l'élément que vous souhaitez supprimer dans d'autres articles, veuillez les mettre à jour: ${articlesReferingItemsToDelete.map(
+      //   (article) => `\n${article.title}`,
+      // )}`,
+    });
+  }
+
+  // delete items
+  for (const child of [kb, ...childrenToDelete]) {
+    await KnowledgeBaseModel.findByIdAndDelete(child._id);
+  }
+
+  if (kb.type === "section") await revalidateSiteMap();
+
+  res.status(200).send({ ok: true });
+});
 
 /*
 Routes deleted as not used :

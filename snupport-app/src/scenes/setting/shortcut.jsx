@@ -33,11 +33,12 @@ export default function Shortcut() {
 
   const createShortcut = async (shortcut) => {
     try {
-      const { ok } = await API.post({ path: "/shortcut", body: { ...shortcut } });
+      const { ok, code } = await API.post({ path: "/shortcut", body: { ...shortcut } });
       if (ok) {
         await update();
         toast.success("Le shortcut a été créé");
       }
+      if (code) return toast.error(code);
     } catch (e) {
       toast.error(e.message);
     }
@@ -46,11 +47,12 @@ export default function Shortcut() {
   const updateShortcut = async (shortcut) => {
     try {
       const body = filterObjectByKeys(shortcut, ["content", "dest", "keyword", "name", "text", "status", "userVisibility"]);
-      const { ok } = await API.patch({ path: `/shortcut/${shortcut._id}`, body });
+      const { ok, code } = await API.patch({ path: `/shortcut/${shortcut._id}`, body });
       if (ok) {
         await update();
         toast.success("Le shortcut a été modifié");
       }
+      if (code) return toast.error(code);
     } catch (e) {
       toast.error(e.message);
     }
