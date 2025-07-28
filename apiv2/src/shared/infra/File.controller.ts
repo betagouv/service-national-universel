@@ -38,6 +38,10 @@ export class FileController {
     @UseGuards(PermissionGuard)
     @PermissionAccessControl([{ resource: PERMISSION_RESOURCES.EXPORT, action: PERMISSION_ACTIONS.READ }])
     async getFileSignedUrlFromKey(@Query("key") key: string): Promise<{ url: string }> {
+        if (!(await this.fileGateway.remoteFileExists(key))) {
+            throw new FunctionalException(FunctionalExceptionCode.FILE_NOT_AVAILABLE_FOR_DOWNLOAD, key);
+        }
+
         return { url: await this.fileGateway.getFileSignedUrlFromKey(key) };
     }
 
