@@ -324,6 +324,8 @@ const translate = (value) => {
       return "Aucun objectif d'inscription défini pour le département !";
     case FUNCTIONAL_ERRORS.MISSING_AFFECTATION_INFORMATIONS:
       return "Les informations nécessaires à l'affectation ne sont pas disponibles ! (confirmation PDR, centre, PDR, ligne de bus)";
+    case FUNCTIONAL_ERRORS.FILE_NOT_AVAILABLE_FOR_DOWNLOAD:
+      return "Le fichier n'est plus disponible au téléchargement";
     case "NOT_ENOUGH_DATA":
       return "Données insuffisantes";
     case "AFFECTATION_NOT_ENOUGH_DATA":
