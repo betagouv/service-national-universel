@@ -193,6 +193,7 @@ export class AdminModule {
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })
             .exclude({ path: "/testsentry", method: RequestMethod.GET })
+            .exclude({ path: "/health", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues/retry/*retry", method: RequestMethod.PUT })
             .exclude({ path: "/queues/*queues/clean", method: RequestMethod.PUT })
