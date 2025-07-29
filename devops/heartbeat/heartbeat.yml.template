@@ -32,7 +32,7 @@ heartbeat.monitors:
 
 - type: http
   name: "API v2 - api.snu.gouv.fr/v2"
-  urls: ["https://api.snu.gouv.fr/v2"]
+  urls: ["https://api.snu.gouv.fr/v2/health"]
   schedule: "@every 60s"
 
 - type: http
