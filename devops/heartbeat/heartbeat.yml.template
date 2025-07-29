@@ -1,0 +1,91 @@
+output.elasticsearch:
+  hosts: ["${ES_HOST}"]
+  username: "${ES_USERNAME}"
+  password: "${ES_PASSWORD}"
+  ssl.verification_mode: "none"
+
+setup.kibana:
+  host: "${KIBANA_HOST}"
+  username: "${KIBANA_USERNAME}"
+  password: "${KIBANA_PASSWORD}"
+
+heartbeat.monitors:
+- type: http
+  name: "Site Vitrine - www.snu.gouv.fr"
+  urls: ["https://www.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Mon Compte - moncompte.snu.gouv.fr"
+  urls: ["https://moncompte.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Admin - admin.snu.gouv.fr"
+  urls: ["https://admin.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "API - api.snu.gouv.fr"
+  urls: ["https://api.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "API v2 - api.snu.gouv.fr/v2"
+  urls: ["https://api.snu.gouv.fr/v2/health"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Support - admin-support.snu.gouv.fr"
+  urls: ["https://admin-support.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Base de connaissance - support.snu.gouv.fr"
+  urls: ["https://support.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "API Support - api-support.snu.gouv.fr"
+  urls: ["https://api-support.snu.gouv.fr/"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "AirFlow - app-2ab63355-275d-406e-9ee9-5cfd80a3b5f5.cleverapps.io/health"
+  urls: ["https://app-2ab63355-275d-406e-9ee9-5cfd80a3b5f5.cleverapps.io/health"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Mail Exchange - exchange.snu.gouv.fr"
+  urls: ["https://exchange.snu.gouv.fr"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Admin CI - admin.ci.beta-snu.dev"
+  urls: ["https://admin.ci.beta-snu.dev"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Admin API CI - api.ci.beta-snu.dev"
+  urls: ["https://api.ci.beta-snu.dev"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "MonCompte CI - moncompte.ci.beta-snu.dev"
+  urls: ["https://moncompte.ci.beta-snu.dev"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "Admin Staging - admin.beta-snu.dev"
+  urls: ["https://admin.beta-snu.dev"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "API Staging - api.beta-snu.dev"
+  urls: ["https://api.beta-snu.dev"]
+  schedule: "@every 60s"
+
+- type: http
+  name: "MonCompte Staging - moncompte.beta-snu.dev"
+  urls: ["https://moncompte.beta-snu.dev"]
+  schedule: "@every 60s"

@@ -15,6 +15,14 @@ export class HealthCheckController {
         return this.configService.getOrThrow("release");
     }
 
+    @Get("health")
+    health() {
+        return {
+            status: "healthy",
+            timestamp: new Date().toISOString(),
+        };
+    }
+
     @Get("testsentry")
     testSentry(): string {
         throw new Error("Test Sentry - Erreur intentionnelle pour tester l'intégration");
