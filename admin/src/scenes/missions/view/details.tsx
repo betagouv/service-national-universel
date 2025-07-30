@@ -134,7 +134,12 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error(
+        "Oups, le formulaire est incomplet",
+        Object.keys(error)
+          .map((key) => `${key}: ${error[key]}`)
+          .join(", "),
+      );
       return setLoading(false);
     }
 
@@ -148,7 +153,12 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error(
+        "Oups, le formulaire est incomplet",
+        Object.keys(error)
+          .map((key) => `${key}: ${error[key]}`)
+          .join(", "),
+      );
       return setLoadingBottom(false);
     }
 
@@ -157,7 +167,12 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     // Si des erreurs sont trouvées, afficher un message d'erreur
     if (Object.keys(combinedError).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error(
+        "Oups, le formulaire est incomplet",
+        Object.keys(error)
+          .map((key) => `${key}: ${error[key]}`)
+          .join(", "),
+      );
       setLoading(false);
       setLoadingBottom(false);
       return;
