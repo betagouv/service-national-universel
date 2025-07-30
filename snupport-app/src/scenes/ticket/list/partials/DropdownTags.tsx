@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import API from "../../../../services/api";
 import { capture } from "../../../../sentry";
 import Checkbox from "./Checkbox";
+import { on } from "process";
 
 type Tag = {
   _id: string;
@@ -13,7 +14,13 @@ type Tag = {
   userVisibility: string;
 };
 
-const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
+interface DropdownTagsProps {
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+  filter: Record<string, any>;
+}
+
+const DropdownTags = ({ selectedTags, onChange, filter }: DropdownTagsProps) => {
   const [ticketCounts, setTicketCounts] = useState({});
   const [tags, setTags] = useState<Tag[]>([]);
   const [terms, setTerms] = useState("");
@@ -49,8 +56,8 @@ const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
       const query: {
         tag: string[];
         status?: string;
-      } = { tag: selectedTags };
-      if (filterStatusTicket) query.status = filterStatusTicket;
+      } = { ...filter, tag: selectedTags };
+      // if (filter.status) query.status = filter.status;
 
       const response = await API.post({ path: "/ticket/search", body: query });
       if (response.ok) {
@@ -81,7 +88,7 @@ const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
     if (tags.length > 0) {
       fetchTicketCounts();
     }
-  }, [filterStatusTicket, selectedTags]);
+  }, [filter, selectedTags]);
 
   return (
     <div>
@@ -111,7 +118,13 @@ const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
                 placeholder="Rechercher etiquette"
                 onChange={(e) => setTerms(e.target.value)}
               />
-              <button className="p-2 text-m text-red-500 hover:text-red-300 hover:bg-gray-100 rounded-md mr-1" onClick={() => setTerms("")}>
+              <button
+                className="p-2 text-m text-red-500 hover:text-red-300 hover:bg-gray-100 rounded-md mr-1"
+                onClick={() => {
+                  setTerms("");
+                  onChange([]);
+                }}
+              >
                 <HiTrash />
               </button>
             </div>

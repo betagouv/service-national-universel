@@ -44,8 +44,8 @@ const SCHEMA_PERIOD = Joi.object({
   endDate: Joi.date(),
 });
 const SCHEMA_DATERANGE = Joi.object({
-  from: Joi.date(),
-  to: Joi.date(),
+  from: Joi.date().allow(""),
+  to: Joi.date().allow(""),
 });
 
 router.post(
@@ -324,19 +324,19 @@ router.post(
     Joi.object({
       size: Joi.number().default(10).integer().positive(),
       page: Joi.number().default(1).integer().positive(),
-      folderId: SCHEMA_ID,
+      folderId: SCHEMA_ID.allow(""),
       tag: Joi.alternatives().try(Joi.string().valid("null"), Joi.array().items(SCHEMA_ID)),
       status: Joi.string().valid("TOTREAT", "NEW", "OPEN", "PENDING", "CLOSED", "DRAFT", "all"),
-      contactId: SCHEMA_ID,
-      agentId: SCHEMA_ID,
-      ticketId: SCHEMA_ID,
-      sorting: Joi.string().valid("AGENT", "CREATIONDATE", "UPDATEDATE"),
+      contactId: SCHEMA_ID.allow(""),
+      agentId: SCHEMA_ID.allow(""),
+      ticketId: SCHEMA_ID.allow(""),
+      sorting: Joi.string().valid("AGENT", "CREATIONDATE", "UPDATEDATE").allow(""),
       sources: Joi.array().items(Joi.string().valid("MAIL", "FORM", "PLATFORM", "CHAT")),
       contactGroup: Joi.array().items(SCHEMA_CONTACT_GROUP),
       contactDepartment: Joi.array().items(Joi.string().trim()),
       contactCohort: Joi.array().items(Joi.string().trim()),
       parcours: Joi.array().items(SCHEMA_PARCOURS),
-      advancedSearch: Joi.string().trim(),
+      advancedSearch: Joi.string().trim().allow(""),
       agent: Joi.array().items(Joi.alternatives().try(SCHEMA_ID, Joi.string().valid("undefined"))),
       creationDate: SCHEMA_DATERANGE,
       lastActivityDate: SCHEMA_DATERANGE,
