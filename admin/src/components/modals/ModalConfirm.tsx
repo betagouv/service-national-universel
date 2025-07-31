@@ -11,6 +11,7 @@ interface ModalConfirmProps {
   showHeaderText?: boolean;
   headerText?: string;
   showHeaderIcon?: boolean;
+  icon?: React.ReactNode;
   title: string;
   message: string;
   onChange?: () => void;
@@ -28,6 +29,7 @@ export default function ModalConfirm({
   showHeaderText = true,
   headerText = "alerte",
   showHeaderIcon = false,
+  icon = null,
   title,
   message,
   onChange,
@@ -41,6 +43,13 @@ export default function ModalConfirm({
 }: ModalConfirmProps) {
   const [sending, setSending] = useState<boolean>(false);
 
+  const renderIcon = () => {
+    if (icon) {
+      return <span style={{ marginBottom: "1.5rem" }}>{icon}</span>;
+    }
+    return <RoundWarning style={{ marginBottom: "1.5rem" }} />;
+  };
+
   const submit = async () => {
     setSending(true);
     await onConfirm();
@@ -52,7 +61,7 @@ export default function ModalConfirm({
       <ModalContainer className="pb-0">
         <CloseSvg className="close-icon" height={10} width={10} onClick={onCancel || onChange} />
         {showHeaderText ? <Header>{headerText}</Header> : null}
-        {showHeaderIcon ? <RoundWarning style={{ marginBottom: "1.5rem" }} /> : null}
+        {showHeaderIcon ? renderIcon() : null}
         <Content>
           <h1>{title}</h1>
           <p className="whitespace-pre-wrap">{message}</p>
