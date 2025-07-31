@@ -11,6 +11,7 @@ import { BsDownload } from "react-icons/bs";
 import { InscriptionService } from "@/services/inscriptionService";
 import { MAX_EXPORT_VOLONTAIRES } from "../volontaires/list";
 import { buildApiv2Query } from "@/components/filters-system-v2/components/filters/utils";
+import { HiDownload } from "react-icons/hi";
 
 interface Props {
   user: UserDto;
@@ -51,17 +52,18 @@ export default function ExportInscriptionsScolariseButton({ user, selectedFilter
       />
       <ModalConfirm
         isOpen={showModal}
-        title="Téléchargement"
-        message={`\nL'export du fichier volumineux peut prendre du temps. Vous recevrez une notification par e-mail une fois prête.\n
-          En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL)`}
+        title="Exporter les données"
+        message={`\nVous allez recevoir un mail pour télécharger votre export. Pensez à regarder dans vos courriers indésirables.\n
+          En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL).`}
         onCancel={() => setShowModal(false)}
         onConfirm={() => {
           exportInscriptions();
           setShowModal(false);
         }}
         onChange={() => {}}
-        showHeaderText={true}
-        showHeaderIcon={true}
+        showHeaderText
+        showHeaderIcon
+        icon={<HiDownload size={48} className="text-blue-600 bg-blue-100 rounded-full p-2" />}
         headerText=""
         confirmText="Confirmer"
         cancelText="Annuler"
