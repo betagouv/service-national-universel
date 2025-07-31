@@ -1,10 +1,12 @@
 import React, { useEffect, useMemo, useState } from "react";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { Popover, Transition } from "@headlessui/react";
 import { HiChevronDown, HiTrash } from "react-icons/hi";
 import { toast } from "react-hot-toast";
 import API from "../../../../services/api";
 import { capture } from "../../../../sentry";
 import Checkbox from "./Checkbox";
+import { on } from "process";
 
 type Tag = {
   _id: string;
@@ -12,55 +14,58 @@ type Tag = {
   userVisibility: string;
 };
 
-const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
+interface DropdownTagsProps {
+  selectedTags: string[];
+  onChange: (tags: string[]) => void;
+  filter: Record<string, any>;
+}
+
+const DropdownTags = ({ selectedTags, onChange, filter }: DropdownTagsProps) => {
   const [ticketCounts, setTicketCounts] = useState({});
   const [tags, setTags] = useState<Tag[]>([]);
   const [terms, setTerms] = useState("");
+  const queryClient = useQueryClient();
 
   const handleChangeState = (contactDepartment, value) => {
     if (value) return onChange([...new Set([...selectedTags, contactDepartment])]);
     return onChange(selectedTags?.filter((item) => item !== contactDepartment));
   };
 
-  const fetchTags = async (q?: string) => {
-    try {
-      const { ok, data: tagsAll, code } = await API.get({ path: "/tag/search", query: { q: q || undefined } });
-      if (!ok) {
-        toast.error(code);
-        return;
-      }
-      const tagsVisible = tagsAll.filter((tag) => tag.userVisibility !== "OLD");
-      setTags(tagsVisible);
-    } catch (e) {
-      capture(e);
-    }
-    return;
-  };
+  const { mutate: fetchTags, isPending: isLoadingTags } = useMutation({
+    mutationFn: async () => {
+      const res = await API.get({
+        path: "/tag/search",
+        query: { q: undefined },
+      });
+      if (!res.ok) throw new Error(res.code);
+      const tagsVisible = res.data.filter((tag) => tag.userVisibility !== "OLD");
+      return tagsVisible;
+    },
+    onError: (error) => {
+      toast.error(error.message);
+      capture(error);
+    },
+    onSuccess: (data) => {
+      setTags(data);
+      queryClient.setQueryData(["tags"], data);
+    },
+  });
 
   const fetchTicketCounts = async () => {
     try {
-      if (!tags.length || !selectedTags.length) return;
       const query: {
         tag: string[];
         status?: string;
-      } = { tag: selectedTags };
-      if (filterStatusTicket) query.status = filterStatusTicket;
+      } = { ...filter, tag: selectedTags };
+      // if (filter.status) query.status = filter.status;
+
       const response = await API.post({ path: "/ticket/search", body: query });
       if (response.ok) {
         const { aggregations } = response;
         if (aggregations?.tag && Array.isArray(aggregations.tag)) {
           const counts = aggregations.tag.reduce((acc, item) => {
             const buckets = item.status?.buckets || [];
-            if (!filterStatusTicket) {
-              acc[item.key] = buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
-            } else if (filterStatusTicket === "TOTREAT") {
-              acc[item.key] = buckets.reduce((sum, bucket) => {
-                return bucket.key !== "CLOSED" && bucket.key !== "DRAFT" ? sum + bucket.doc_count : sum;
-              }, 0);
-            } else {
-              const statusBucket = buckets.find((bucket) => bucket.key === filterStatusTicket);
-              acc[item.key] = statusBucket ? statusBucket.doc_count : 0;
-            }
+            acc[item.key] = buckets.reduce((sum, bucket) => sum + bucket.doc_count, 0);
             return acc;
           }, {});
           setTicketCounts(counts);
@@ -80,8 +85,10 @@ const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
   }, []);
 
   useEffect(() => {
-    fetchTicketCounts();
-  }, [filterStatusTicket, tags, selectedTags]);
+    if (tags.length > 0) {
+      fetchTicketCounts();
+    }
+  }, [filter, selectedTags]);
 
   return (
     <div>
@@ -106,11 +113,18 @@ const DropdownTags = ({ selectedTags, onChange, filterStatusTicket }) => {
             <div className="flex justify-end">
               <input
                 type="text"
+                value={terms}
                 className="w-full border-0 text-sm text-gray-600 placeholder:text-[#979797] focus:border-transparent"
                 placeholder="Rechercher etiquette"
                 onChange={(e) => setTerms(e.target.value)}
               />
-              <button className="p-2 text-m text-red-500 hover:text-red-300 hover:bg-gray-100 rounded-md mr-1" onClick={() => onChange([])}>
+              <button
+                className="p-2 text-m text-red-500 hover:text-red-300 hover:bg-gray-100 rounded-md mr-1"
+                onClick={() => {
+                  setTerms("");
+                  onChange([]);
+                }}
+              >
                 <HiTrash />
               </button>
             </div>

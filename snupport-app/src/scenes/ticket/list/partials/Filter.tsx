@@ -63,7 +63,7 @@ export default function Filter({ filter, setFilter, agents, cohortList = [] }: F
         />
         <DropdownParcours name="Parcours" selectedParcours={filter.parcours} setSelectedParcours={(parcours) => setFilter({ ...filter, parcours })} />
         <AutoCompleteContact value={filter.contactId} onChange={(contactId) => setFilter({ ...filter, contactId })} />
-        <DropdownTags selectedTags={filter.tag || []} filterStatusTicket={filter.status} onChange={(tag) => setFilter({ ...filter, tag })} />
+        <DropdownTags selectedTags={filter.tag || []} filter={filter} onChange={(tag) => setFilter({ ...filter, tag })} />
         <div className="flex">
           <HiXCircle className="mt-[9px] cursor-pointer text-xl text-red-700" onClick={onReset} />
         </div>
