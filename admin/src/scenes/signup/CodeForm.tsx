@@ -80,7 +80,7 @@ export default function CodeForm({ referent, reinscription, invitationToken, onR
             <p className="text-lg font-bold">Si vous ne recevez pas de mail, veuillez vérifier que :</p>
             <ul>
               <li>L'adresse email que vous utilisez est bien celle indiquée ci-dessus</li>
-              <li>Le mail ne se trouve pas dans vos spams</li>
+              <li>Le mail ne se trouve pas dans vos courriers indésirables</li>
               <li>
                 L'adresse email <i>no_reply-mailauto@snu.gouv.fr</i> ne fait pas partie des adresses indésirables de votre boite mail
               </li>
