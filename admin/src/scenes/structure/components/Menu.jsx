@@ -1,7 +1,7 @@
 import React from "react";
 import { useSelector } from "react-redux";
 import { Link } from "react-router-dom";
-import { canViewPatchesHistory, ROLES } from "snu-lib";
+import { isReadAuthorized, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 import Clock from "../../../assets/Clock";
 
 export default function Menu({ tab, structure }) {
@@ -11,7 +11,7 @@ export default function Menu({ tab, structure }) {
   if ([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
     tabs.push({ label: "Missions", id: "missions", src: `/structure/${structure._id}/missions` });
   }
-  if (canViewPatchesHistory(user)) {
+  if (isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user, ignorePolicy: true })) {
     tabs.push({ label: "Historique", id: "historique", src: `/structure/${structure._id}/historique`, icon: Clock });
   }
 

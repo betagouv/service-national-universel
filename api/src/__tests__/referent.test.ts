@@ -64,6 +64,8 @@ beforeAll(async () => {
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.RESPONSIBLE, ROLES.SUPERVISOR], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.CREATE);
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.USER_HISTORY, PERMISSION_ACTIONS.READ);
 });
 afterAll(dbClose);
 beforeEach(async () => {
@@ -600,7 +602,7 @@ describe("Referent", () => {
 
   describe("GET /referent/:id/patches", () => {
     it("should return 404 if referent not found", async () => {
-      const res = await request(await getAppHelperWithAcl())
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .get(`/referent/${notExistingReferentId}/patches`)
         .send();
       expect(res.statusCode).toEqual(404);
