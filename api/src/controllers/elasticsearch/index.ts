@@ -13,7 +13,7 @@ router.use("/lignebus", require("./lignebus"));
 router.use("/schoolramses", require("./schoolramses"));
 router.use("/mission", require("./mission").default);
 router.use("/missionapi", require("./missionapi"));
-router.use("/email", require("./email"));
+router.use("/email", require("./email").default);
 router.use("/application", require("./application").default);
 router.use("/referent", require("./referent").default);
 router.use("/dashboard", require("./dashboard/index"));

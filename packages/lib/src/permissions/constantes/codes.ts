@@ -30,6 +30,7 @@ export enum PERMISSION_CODES {
   MISSION_SAME_STRUCTURE_FULL = "MissionSameStructureFull",
   MISSION_SAME_STRUCTURE_FULL_NETWORK = "MissionSameStructureFullNetwork",
   POINT_DE_RASSEMBLEMENT_READ = "PointDeRassemblementRead",
+  PATCHES_READ = "PatchesRead",
   PROFILE = "Profile",
   PROGRAM_FULL = "ProgramFull",
   PROGRAM_FULL_DEPARTMENT = "ProgramFullDepartment",

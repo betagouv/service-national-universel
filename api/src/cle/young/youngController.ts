@@ -2,7 +2,7 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { canSearchStudent, ROLES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
+import { canSearchStudent, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
 
 import { validateId, idSchema } from "../../utils/validator";
 import { ERRORS } from "../../utils";
@@ -13,7 +13,7 @@ import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllo
 import patches from "../../controllers/patches";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
-import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
+import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -78,7 +78,7 @@ router.get(
     requestValidatorMiddleware({
       params: Joi.object({ idClasse: idSchema().required() }),
     }),
-    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   ],
   async (req: UserRequest, res) => {
     try {
@@ -137,7 +137,7 @@ router.get(
     requestValidatorMiddleware({
       params: Joi.object({ idClasse: idSchema().required() }),
     }),
-    accessControlMiddleware([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE]),
+    permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   ],
   async (req: UserRequest, res) => {
     try {
