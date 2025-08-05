@@ -32,6 +32,8 @@ import {
   YOUNG_STATUS,
   ROLE_JEUNE,
   ROLES,
+  ReferentStatus,
+  ERRORS as SNU_ERRORS,
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
@@ -393,12 +395,11 @@ class Auth {
     try {
       const now = new Date();
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
       if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
 
-      const match = config.ENVIRONMENT === "development" || (await user.comparePassword(password));
+      const match = await user.comparePassword(password);
 
       if (!match) {
         const loginAttempts = (user.loginAttempts || 0) + 1;
@@ -412,6 +413,10 @@ class Auth {
         await user.save();
         if (date > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      }
+
+      if (user?.status === ReferentStatus.INACTIVE) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
 
       if (user.invitationToken && (isAdminCle(user) || isReferentClasse(user))) {
@@ -514,6 +519,7 @@ class Auth {
         attempts2FA: { $lt: 3 },
         token2FAExpires: { $gt: Date.now() },
       });
+
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.token2FA !== token_2fa) {
         user.set({ attempts2FA: (user.attempts2FA || 0) + 1 });
@@ -823,6 +829,9 @@ class Auth {
         captureMessage("PB with signin_token", { extra: { data: data, token: token } });
         return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
+      if (user?.status === ReferentStatus.INACTIVE) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
+      }
       if (isYoung(user)) {
         data.acl = await getAcl({ ...user, roles: [ROLE_JEUNE] });
       } else if (isReferent(user)) {
@@ -840,6 +849,9 @@ class Auth {
     if (error) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     try {
       const { user } = req;
+      if (user?.status === ReferentStatus.INACTIVE) {
+        return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
+      }
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -964,7 +976,7 @@ class Auth {
 
     try {
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
-      if (!user) return res.status(200).send({ ok: true });
+      if (!user || user?.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
       const token = await crypto.randomBytes(20).toString("hex");
       user.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + COOKIE_SIGNIN_MAX_AGE_MS });

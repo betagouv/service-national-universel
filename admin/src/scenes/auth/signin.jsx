@@ -12,7 +12,7 @@ import api, { setJwtToken } from "../../services/api";
 import Header from "./components/header";
 import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
-import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl } from "snu-lib";
+import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl, ERRORS } from "snu-lib";
 import { captureMessage } from "../../sentry";
 
 export default function Signin() {
@@ -21,6 +21,7 @@ export default function Signin() {
 
   const user = useSelector((state) => state.Auth.user);
   const [userIsValid, setUserIsValid] = useState(true);
+  const [isReferentInactive, setIsReferentInactive] = useState(false);
 
   const [tooManyRequests, setTooManyRequests] = useState({ status: false, date: null });
 
@@ -58,6 +59,7 @@ export default function Signin() {
                 initialValues={{ email: "", password: "" }}
                 onSubmit={async ({ email, password }, actions) => {
                   try {
+                    setIsReferentInactive(false);
                     const { user, token, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
                       plausibleEvent("2FA demandée");
@@ -84,6 +86,9 @@ export default function Signin() {
                     if (e && ["EMAIL_OR_PASSWORD_INVALID", "USER_NOT_EXISTS", "EMAIL_AND_PASSWORD_REQUIRED"].includes(e.code)) {
                       return setUserIsValid(false);
                     }
+                    if (e.code === ERRORS.REFERENT_INACTIVE) {
+                      setIsReferentInactive(true);
+                    }
                     if (e.code === "TOO_MANY_REQUESTS") {
                       setTooManyRequests({ status: true, date: formatToActualTime(e?.data?.nextLoginAttemptIn) });
                     }
@@ -97,6 +102,9 @@ export default function Signin() {
                     <Form className="mb-6 flex flex-col items-start gap-4">
                       {!userIsValid && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">E-mail et/ou mot de passe incorrect(s)</div>
+                      )}
+                      {isReferentInactive && (
+                        <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">Votre compte a été désactivé</div>
                       )}
                       {tooManyRequests?.status && (
                         <div className="block w-full rounded border border-red-400 bg-red-50 py-2.5 px-4 text-sm text-red-500">
