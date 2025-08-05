@@ -508,7 +508,10 @@ export default function Create(props) {
                       label="Date de début"
                       type="date"
                       className="w-[50%]"
-                      onChange={(startAt) => setValues({ ...values, startAt })}
+                      onChange={(startAt) => {
+                        errors.startAt = "";
+                        setValues({ ...values, startAt });
+                      }}
                       value={values.startAt}
                       error={errors?.startAt}
                     />
@@ -517,7 +520,10 @@ export default function Create(props) {
                       name="endAt"
                       className="w-[50%]"
                       type="date"
-                      onChange={(endAt) => setValues({ ...values, endAt })}
+                      onChange={(endAt) => {
+                        errors.endAt = "";
+                        setValues({ ...values, endAt });
+                      }}
                       value={values.endAt}
                       error={errors?.endAt}
                     />

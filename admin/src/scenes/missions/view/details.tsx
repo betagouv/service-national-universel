@@ -29,6 +29,39 @@ import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { HiExternalLink } from "react-icons/hi";
 
+const FIELDS_NAMES = {
+  address: "Adresse",
+  addressVerified: "Adresse vérifiée",
+  zip: "Code postal",
+  city: "Ville",
+  name: "Nom",
+  description: "Description",
+  actions: "Actions",
+  format: "Format",
+  region: "Région",
+  department: "Département",
+  status: "Statut",
+  isJvaMission: "Source",
+  visibility: "Visibilité",
+  mainDomain: "Domaine d'action principal",
+  placesLeft: "Places restantes",
+  tutorName: "Tuteur",
+  isMilitaryPreparation: "Préparation Militaire",
+  hebergement: "Hébergement",
+  hebergementPayant: "Hébergement Payant",
+  placesStatus: "Place occupées",
+  applicationStatus: "Statut de candidature",
+  fromDate: "Date de début",
+  toDate: "Date de fin",
+  structureName: "Structure",
+};
+
+const formatErrorMessages = (error: Record<string, string>): string => {
+  return Object.keys(error)
+    .map((key) => `\n${FIELDS_NAMES[key] || key}: ${error[key]}`)
+    .join(", ");
+};
+
 interface DetailsViewProps {
   mission: MissionType;
   setMission: (mission: MissionType) => void;
@@ -134,7 +167,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     setErrors(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error("Oups, le formulaire est incomplet", formatErrorMessages(error));
       return setLoading(false);
     }
 
@@ -148,7 +181,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     setErrorsBottom(error);
     if (Object.keys(error).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error("Oups, le formulaire est incomplet", formatErrorMessages(error));
       return setLoadingBottom(false);
     }
 
@@ -157,7 +190,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
 
     // Si des erreurs sont trouvées, afficher un message d'erreur
     if (Object.keys(combinedError).length > 0) {
-      toastr.error("Oups, le formulaire est incomplet", "");
+      toastr.error("Oups, le formulaire est incomplet", formatErrorMessages(combinedError));
       setLoading(false);
       setLoadingBottom(false);
       return;
