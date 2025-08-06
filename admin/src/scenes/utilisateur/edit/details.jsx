@@ -25,6 +25,7 @@ import {
   VISITOR_SUBROLES,
   isDeleteAuthorized,
   PERMISSION_RESOURCES,
+  ReferentStatus,
 } from "snu-lib";
 
 import dayjs from "@/utils/dayjs.utils";
@@ -37,7 +38,7 @@ import CustomSelect from "../composants/CustomSelect";
 import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
-import { Container, Button, Badge, Label, InputText } from "@snu/ds/admin";
+import { Container, Button, Badge, Label, InputText, Tooltip } from "@snu/ds/admin";
 import { isResponsableDeCentre } from "snu-lib";
 import RenewInvitation from "./partials/RenewInvitation";
 
@@ -182,6 +183,12 @@ export default function Details({ user, setUser, currentUser }) {
   const startEdit = () => {
     setMode(MODE_EDITION);
   };
+
+  useEffect(() => {
+    if (user.status === ReferentStatus.INACTIVE) {
+      stopEdit();
+    }
+  }, [user.status]);
 
   const stopEdit = () => {
     setMode(MODE_DEFAULT);
@@ -360,7 +367,7 @@ export default function Details({ user, setUser, currentUser }) {
         onCancel={closeCohortChangeConfirmModal}
         onConfirm={changeCohort}
       />
-      <UserHeader user={user} tab="profile" currentUser={currentUser} />
+      <UserHeader user={user} tab="profile" currentUser={currentUser} onUserUpdate={setUser} />
       <div className="p-8">
         <Box className="p-6">
           <div className="mb-6 flex justify-between">
@@ -378,10 +385,14 @@ export default function Details({ user, setUser, currentUser }) {
                     </RoundButton>
                   </div>
                 ) : (
-                  <RoundButton className="" onClick={startEdit}>
-                    <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                    Modifier
-                  </RoundButton>
+                  <>
+                    <Tooltip title="Vous ne pouvez pas modifier le profil d'un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
+                      <RoundButton className="" onClick={startEdit} disabled={user.status === ReferentStatus.INACTIVE}>
+                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
+                        Modifier
+                      </RoundButton>
+                    </Tooltip>
+                  </>
                 )}
               </>
             )}
@@ -583,10 +594,12 @@ export default function Details({ user, setUser, currentUser }) {
         {isDeleteAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) &&
           canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
             <div className="flex items-center justify-center">
-              {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} />}
-              <BorderButton mode="red" className="mt-3" onClick={onClickDelete}>
-                Supprimer le compte
-              </BorderButton>
+              {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} user={user} />}
+              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
+                <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={user.status === ReferentStatus.INACTIVE} href={null}>
+                  Supprimer le compte
+                </BorderButton>
+              </Tooltip>
               <ConfirmationModal
                 isOpen={modal?.isOpen}
                 title={modal?.title}

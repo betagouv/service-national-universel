@@ -4,9 +4,10 @@ import { useDispatch } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
 
-import { canSigninAs, isReadAuthorized, PERMISSION_RESOURCES, translate, UserDto, ReferentType } from "snu-lib";
-import { Badge } from "@snu/ds/admin";
+import { canSigninAs, isReadAuthorized, PERMISSION_RESOURCES, translate, UserDto, ReferentType, ReferentStatus, translateReferentStatus, ROLES } from "snu-lib";
+import { Badge, Select, Tooltip } from "@snu/ds/admin";
 import { signinAs } from "@/utils/signinAs";
+import api from "@/services/api";
 
 import History from "../../../assets/icons/History";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
@@ -19,6 +20,7 @@ interface UserHeaderProps {
   user: ReferentType;
   tab: string;
   currentUser: UserDto;
+  onUserUpdate?: (updatedUser: ReferentType) => void;
 }
 
 const getSubtitle = (user: ReferentType): string => {
@@ -27,11 +29,11 @@ const getSubtitle = (user: ReferentType): string => {
   return `Inscrit(e) ${diff} - ${createdAt.toLocaleDateString()}`;
 };
 
-export default function UserHeader({ user, tab, currentUser }: UserHeaderProps): JSX.Element {
+export default function UserHeader({ user, tab, currentUser, onUserUpdate }: UserHeaderProps): JSX.Element {
   const history = useHistory();
   const dispatch = useDispatch();
   const [handleImpersonateLoading, setHandleImpersonateLoading] = useState<boolean>(false);
-
+  const [statusUpdateLoading, setStatusUpdateLoading] = useState<boolean>(false);
   const handleImpersonate = async (): Promise<void> => {
     try {
       if (handleImpersonateLoading) return;
@@ -44,6 +46,30 @@ export default function UserHeader({ user, tab, currentUser }: UserHeaderProps):
     } catch (e) {
       console.log(e);
       toastr.error("Oops, une erreur est survenu lors de la masquarade !", translate(e.code));
+    }
+  };
+
+  const handleStatusChange = async (selectedOption: { value: ReferentStatus; label: string }): Promise<void> => {
+    try {
+      toastr.clean();
+      if (statusUpdateLoading || selectedOption.value === user.status) return;
+      setStatusUpdateLoading(true);
+      plausibleEvent("Utilisateurs/CTA - Changer statut");
+
+      const { ok, code, data } = await api.put(`/referent/${user._id}`, { status: selectedOption.value });
+      if (!ok) {
+        toastr.error("Erreur lors de la mise à jour du statut", translate(code));
+        return;
+      }
+
+      toastr.success("Statut mis à jour", `Statut mis à jour vers "${selectedOption.label}"`);
+      if (onUserUpdate) {
+        onUserUpdate({ ...user, status: data.status });
+      }
+    } catch (e) {
+      toastr.error("Erreur lors de la mise à jour du statut", translate(e.code));
+    } finally {
+      setStatusUpdateLoading(false);
     }
   };
 
@@ -63,8 +89,40 @@ export default function UserHeader({ user, tab, currentUser }: UserHeaderProps):
                   <PanelActionButton icon="eye" title="Voir la structure" className="m-0 mr-2" />
                 </Link>
               )}
+              {currentUser.role === ROLES.ADMIN && (
+                <div className="mr-2">
+                  <Select
+                    value={{
+                      value: user.status,
+                      label: translateReferentStatus(user.status as ReferentStatus),
+                    }}
+                    options={[
+                      { value: ReferentStatus.ACTIVE, label: translateReferentStatus(ReferentStatus.ACTIVE) },
+                      { value: ReferentStatus.INACTIVE, label: translateReferentStatus(ReferentStatus.INACTIVE) },
+                    ]}
+                    onChange={handleStatusChange}
+                    disabled={statusUpdateLoading}
+                    placeholder="Statut"
+                    className="min-w-[120px]"
+                    size="sm"
+                    isSearchable={false}
+                  />
+                </div>
+              )}
               {canSigninAs(currentUser, user, "referent") && (
-                <PanelActionButton className="m-0" onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />
+                <Tooltip title="Vous ne pouvez pas prendre la place d'un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
+                  <PanelActionButton
+                    className={"m-0"}
+                    onClick={handleImpersonate}
+                    icon="impersonate"
+                    title="Prendre&nbsp;sa&nbsp;place"
+                    disabled={user.status === ReferentStatus.INACTIVE}
+                    style={{
+                      backgroundColor: user.status === ReferentStatus.INACTIVE ? "gray" : "white",
+                      cursor: user.status === ReferentStatus.INACTIVE ? "not-allowed" : "pointer",
+                    }}
+                  />
+                </Tooltip>
               )}
             </div>
           </div>

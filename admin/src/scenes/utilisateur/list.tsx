@@ -5,7 +5,18 @@ import { Link, useHistory } from "react-router-dom";
 import { BsDownload } from "react-icons/bs";
 import { IoFlashOutline } from "react-icons/io5";
 
-import { canViewReferent, formatLongDateFR, getDepartmentNumber, canSigninAs, ERRORS, SUB_ROLE_GOD, StructureType, DepartmentServiceType, ReferentType } from "snu-lib";
+import {
+  canViewReferent,
+  formatLongDateFR,
+  getDepartmentNumber,
+  canSigninAs,
+  ERRORS,
+  SUB_ROLE_GOD,
+  StructureType,
+  DepartmentServiceType,
+  ReferentType,
+  translateReferentStatus,
+} from "snu-lib";
 import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
 
 import dayjs from "@/utils/dayjs.utils";
@@ -49,6 +60,7 @@ export default function List() {
       translate: translate,
       missingLabel: "Non renseigné",
     },
+
     {
       title: "Région",
       name: "region",
@@ -78,6 +90,12 @@ export default function List() {
           },
         ]
       : []),
+    {
+      title: "Statut",
+      name: "status",
+      translate: translateReferentStatus,
+      missingLabel: "Non renseigné",
+    },
   ];
 
   useEffect(() => {
@@ -145,6 +163,7 @@ export default function List() {
                   "Créé lé": formatLongDateFR(data.createdAt),
                   "Mis à jour le": formatLongDateFR(data.updatedAt),
                   "Dernière connexion le": formatLongDateFR(data.lastLoginAt),
+                  Statut: translateReferentStatus(data.status),
                 };
               });
             }}
