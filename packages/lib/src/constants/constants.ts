@@ -423,9 +423,14 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2024_2.png",
   },
   {
-    date_end: "03-13-2050", // ! Changer ici à l'ajout d'un nouveau
+    date_end: "08-22-2025",
     ministres: ["Corinne Orzechowski"],
     template: "certificates/certificateTemplate2024_3.png",
+  },
+  {
+    date_end: "03-13-2050", 
+    ministres: ["Franck Thénard-Duvivier"],
+    template: "certificates/attestationPhase2Template_FTD.png",
   },
 ];
 
