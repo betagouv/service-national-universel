@@ -16,8 +16,10 @@ import {
   DepartmentServiceType,
   ReferentType,
   translateReferentStatus,
+  ReferentStatus,
+  isSuperAdmin,
 } from "snu-lib";
-import { Badge, Container, DropdownButton, Header, Page } from "@snu/ds/admin";
+import { Badge, Container, DropdownButton, Header, Page, Tooltip } from "@snu/ds/admin";
 
 import dayjs from "@/utils/dayjs.utils";
 import { signinAs } from "@/utils/signinAs";
@@ -373,13 +375,16 @@ const Action = ({ hit, structure }: ActionProps) => {
     }
   };
 
+  const isSigninAsEnabled = canSigninAs(user, hit, "referent") && hit.status !== ReferentStatus.INACTIVE;
+  const isDeleteEnabled = (canDeleteReferent({ actor: user, originalTarget: hit, structure }) && hit.status !== ReferentStatus.INACTIVE) || isSuperAdmin(user);
+
   return (
     <>
       <DropdownButton
         title={<IoFlashOutline size={20} />}
         mode={"badge"}
         rightIcon={false}
-        buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600"}
+        buttonClassName={"rounded-[50%] !p-0 !w-10 !h-10 border-none hover:bg-white hover:text-blue-600 disabled:opacity-50 disabled:cursor-not-allowed"}
         position="right"
         optionsGroup={[
           {
@@ -390,13 +395,13 @@ const Action = ({ hit, structure }: ActionProps) => {
               {
                 key: "view",
                 render: (
-                  <Link to={`/user/${hit._id}`} className="appearance-none w-full">
+                  <Link to={`/user/${hit._id}`} className="appearance-none w-full text-left">
                     <p>Consulter le profil</p>
                   </Link>
                 ),
               },
-              canSigninAs(user, hit, "referent") ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
-              canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? { key: "delete", render: <p>Supprimer le profil</p>, action: handleClickDelete } : null,
+              isSigninAsEnabled ? { key: "takePlace", render: <p>Prendre sa place</p>, action: handleImpersonate } : null,
+              isDeleteEnabled ? { key: "delete", render: <p>Supprimer le profil</p>, action: handleClickDelete } : null,
             ].filter(Boolean),
           },
         ]}

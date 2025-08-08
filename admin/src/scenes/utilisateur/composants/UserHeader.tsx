@@ -89,26 +89,24 @@ export default function UserHeader({ user, tab, currentUser, onUserUpdate }: Use
                   <PanelActionButton icon="eye" title="Voir la structure" className="m-0 mr-2" />
                 </Link>
               )}
-              {currentUser.role === ROLES.ADMIN && (
-                <div className="mr-2">
-                  <Select
-                    value={{
-                      value: user.status,
-                      label: translateReferentStatus(user.status as ReferentStatus),
-                    }}
-                    options={[
-                      { value: ReferentStatus.ACTIVE, label: translateReferentStatus(ReferentStatus.ACTIVE) },
-                      { value: ReferentStatus.INACTIVE, label: translateReferentStatus(ReferentStatus.INACTIVE) },
-                    ]}
-                    onChange={handleStatusChange}
-                    disabled={statusUpdateLoading}
-                    placeholder="Statut"
-                    className="min-w-[120px]"
-                    size="sm"
-                    isSearchable={false}
-                  />
-                </div>
-              )}
+              <div className="mr-2">
+                <Select
+                  value={{
+                    value: user.status,
+                    label: translateReferentStatus(user.status as ReferentStatus),
+                  }}
+                  options={[
+                    { value: ReferentStatus.ACTIVE, label: translateReferentStatus(ReferentStatus.ACTIVE) },
+                    { value: ReferentStatus.INACTIVE, label: translateReferentStatus(ReferentStatus.INACTIVE) },
+                  ]}
+                  onChange={handleStatusChange}
+                  disabled={statusUpdateLoading || currentUser.role !== ROLES.ADMIN}
+                  placeholder="Statut"
+                  className="min-w-[120px]"
+                  size="sm"
+                  isSearchable={false}
+                />
+              </div>
               {canSigninAs(currentUser, user, "referent") && (
                 <Tooltip title="Vous ne pouvez pas prendre la place d'un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
                   <PanelActionButton

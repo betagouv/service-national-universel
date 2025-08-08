@@ -35,7 +35,7 @@ import Field from "../../phase0/components/Field";
 import { RoundButton, PlainButton, BorderButton } from "../../phase0/components/Buttons";
 import ConfirmationModal from "../../phase0/components/ConfirmationModal";
 import CustomSelect from "../composants/CustomSelect";
-import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions } from "../utils";
+import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions, MODE_READONLY } from "../utils";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText, Tooltip } from "@snu/ds/admin";
@@ -345,13 +345,19 @@ export default function Details({ user, setUser, currentUser }) {
 
   const structure = data.structureId ? structures.find((struct) => struct._id === data.structureId) : undefined;
 
-  const roleMode = canUpdateReferent({
+  let roleMode = canUpdateReferent({
     actor: currentUser,
     originalTarget: user,
     structure,
   })
     ? MODE_EDITION
     : MODE_DEFAULT;
+
+  if (user.status === ReferentStatus.INACTIVE) {
+    roleMode = MODE_READONLY;
+  }
+
+  const isDeleteEnabled = isSuperAdmin(currentUser) || user.status !== ReferentStatus.INACTIVE;
 
   return (
     <>
@@ -424,6 +430,7 @@ export default function Details({ user, setUser, currentUser }) {
                   regionOrDep={data.department || []}
                   onRegionOrDepChange={onDepartmentChange}
                   subRoleOptions={getSubRoleOptions(REFERENT_DEPARTMENT_SUBROLE)}
+                  disabled={user.status === ReferentStatus.INACTIVE}
                   regionOrDepOptions={departmentList.map((e) => ({ value: e, label: e }))}
                 />
               )}
@@ -436,6 +443,7 @@ export default function Details({ user, setUser, currentUser }) {
                   regionOrDep={data.region}
                   onRegionOrDepChange={onChange("region")}
                   subRoleOptions={getSubRoleOptions(data.role === ROLES.REFERENT_REGION ? REFERENT_REGION_SUBROLE : VISITOR_SUBROLES)}
+                  disabled={user.status === ReferentStatus.INACTIVE}
                   regionOrDepOptions={regionList.map((r) => ({ value: r, label: r }))}
                 />
               )}
@@ -494,9 +502,14 @@ export default function Details({ user, setUser, currentUser }) {
                         </div>
                       )}
                       {roleMode === MODE_EDITION && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && !newCenter && (
-                        <AddButton onClick={addNewCenter} className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}>
-                          Ajouter un centre
-                        </AddButton>
+                        <Tooltip title="Vous ne pouvez pas ajouter un centre à un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE} className="justify-end">
+                          <AddButton
+                            onClick={addNewCenter}
+                            className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}
+                            disabled={user.status === ReferentStatus.INACTIVE}>
+                            Ajouter un centre
+                          </AddButton>
+                        </Tooltip>
                       )}
                       {roleMode === MODE_EDITION && newCenter && (
                         <div className="mt-4 flex justify-end">
@@ -595,8 +608,8 @@ export default function Details({ user, setUser, currentUser }) {
           canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
             <div className="flex items-center justify-center">
               {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} user={user} />}
-              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
-                <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={user.status === ReferentStatus.INACTIVE} href={null}>
+              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={isDeleteEnabled}>
+                <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={!isDeleteEnabled} href={null}>
                   Supprimer le compte
                 </BorderButton>
               </Tooltip>
