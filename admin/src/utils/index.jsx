@@ -1,7 +1,17 @@
 import PasswordValidator from "password-validator";
 import React from "react";
 import slugify from "slugify";
-import { formatStringLongDate, ROLES, translate, translateApplication, translateEngagement, translatePhase1, translatePhase2, translateStatusClasse } from "snu-lib";
+import {
+  formatStringLongDate,
+  ROLES,
+  translate,
+  translateApplication,
+  translateEngagement,
+  translatePhase1,
+  translatePhase2,
+  translateReferentStatus,
+  translateStatusClasse,
+} from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
 import { environment } from "../config";
@@ -277,7 +287,11 @@ function formatValue(path, value) {
     if (path.includes("location")) return `Latitude: ${value.lat}, Longitude: ${value.lon}`;
     if (path.includes("notes")) return value.note?.substring(0, 100);
     if (path.includes("structureManager")) return `${value.firstName} ${value.lastName}`;
+
     return JSON.stringify(value);
+  }
+  if (path.includes("status")) {
+    return translateReferentStatus(value);
   }
   return value;
 }

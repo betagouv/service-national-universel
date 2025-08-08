@@ -20,6 +20,7 @@ export const roleOptions = [
 
 export const MODE_DEFAULT = "default";
 export const MODE_EDITION = "edition";
+export const MODE_READONLY = "readonly";
 
 export const formatSessionOptions = (phase1Sessions, sessionsWhereUserIsHeadCenter) => {
   const cohortsWhereUserIsHeadCenter = sessionsWhereUserIsHeadCenter.map((session) => session.cohort);

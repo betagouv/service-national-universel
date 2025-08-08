@@ -82,11 +82,14 @@ export const CohortBadge = ({ children, className }) => {
   );
 };
 
-export const AddButton = ({ children, className, onClick }) => {
+export const AddButton = ({ children, className, onClick, disabled }) => {
   return (
     <button
       onClick={onClick}
-      className={`flex items-center justify-end rounded-md border border-gray-300 py-2  px-7 font-medium text-gray-700 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)] ${className}`}>
+      className={`flex items-center justify-end rounded-md border border-gray-300 py-2  px-7 font-medium text-gray-700 hover:shadow-[0_1px_5px_rgba(0,0,0,0.16)] ${className} ${
+        disabled ? "opacity-50 cursor-not-allowed" : ""
+      }`}
+      disabled={disabled}>
       <Plus className="mr-2 text-blue-600" />
       {children}
     </button>
