@@ -50,6 +50,7 @@ const PERMISSIONS_BY_ROUTE = {
     permissions: [{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ }],
   },
   "/structure/create": {
+    ignorePolicy: true, // should have read permission but not specific to a structure
     permissions: [{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.CREATE }],
   },
   "/structure": {

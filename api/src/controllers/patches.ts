@@ -1,7 +1,7 @@
 import Joi from "joi";
 import mongoose, { Model } from "mongoose";
 
-import { canViewPatchesHistory, RouteResponseBody, UserDto } from "snu-lib";
+import { isReadAuthorized, PERMISSION_ACTIONS, PERMISSION_RESOURCES, RouteResponseBody, UserDto } from "snu-lib";
 
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
@@ -18,7 +18,13 @@ export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: 
       capture(error);
       throw new Error(ERRORS.INVALID_PARAMS);
     }
-    if (!canViewPatchesHistory(req.user)) throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+
+    if (
+      !isReadAuthorized({ resource: PERMISSION_RESOURCES.USER_HISTORY, action: PERMISSION_ACTIONS.READ, user: req.user!, ignorePolicy: true }) &&
+      !isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user!, ignorePolicy: true })
+    ) {
+      throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    }
 
     const elem = await model.findById(value.id);
     if (!elem) throw new Error(ERRORS.NOT_FOUND);
@@ -52,7 +58,12 @@ export const getOldStudentPatches = async ({ classeId, user }: GetOldStudentPatc
       capture(error);
       throw new Error(ERRORS.INVALID_PARAMS);
     }
-    if (!canViewPatchesHistory(user)) throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    if (
+      !isReadAuthorized({ resource: PERMISSION_RESOURCES.USER_HISTORY, action: PERMISSION_ACTIONS.READ, user, ignorePolicy: true }) &&
+      !isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user, ignorePolicy: true })
+    ) {
+      throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    }
 
     const elem = await ClasseModel.findById(id);
     if (!elem) throw new Error(ERRORS.NOT_FOUND);
