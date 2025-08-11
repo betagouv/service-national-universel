@@ -1,11 +1,11 @@
 import { Menu, Transition } from "@headlessui/react";
-import { formatDistance } from "date-fns";
+import { formatDistance, format } from "date-fns";
 import { fr } from "date-fns/locale";
 import React, { useEffect, useRef, useState } from "react";
 import ReactTooltip from "react-tooltip";
 import { toast } from "react-hot-toast";
 import { BsArrowReturnLeft } from "react-icons/bs";
-import { HiChevronDown, HiPlus, HiSave, HiX, HiXCircle } from "react-icons/hi";
+import { HiChevronDown, HiRefresh, HiSave, HiXCircle } from "react-icons/hi";
 import Avatar from "../../../components/Avatar";
 import TextEditor from "../../../components/TextEditor";
 
@@ -22,6 +22,7 @@ import { serializeTicketUpdate } from "../service";
 import PreviewMacroDropdown from "./macros/PreviewDropDown";
 import { useMacroSelection } from "./macros/useMacro";
 import CopyRecipientEditor from "./CopyRecipientEditor";
+import useAutoSave from "../hooks/useAutoSave";
 
 const Thread = ({
   messages,
@@ -53,6 +54,8 @@ const Thread = ({
   const [editorResetCount, setEditorResetCount] = useState(0);
   const [macroSlateContent, setMacroSlateContent] = useState(null);
   const [selectedMacro, setSelectedMacro] = useState(null);
+  const [lastSavedAt, setLastSavedAt] = useState(null);
+  const [isMessageFullyLoaded, setIsMessageFullyLoaded] = useState(false);
 
   // is needed to make message available in cleanup function
   const messageRef = useRef("");
@@ -91,6 +94,11 @@ const Thread = ({
     }
     return;
   }
+
+  const isSaving = useAutoSave(message, () => handleAddDraftMessage(false), {
+    delayMs: 500,
+    isEnabled: !isPreview && user.role !== "DG" && isMessageFullyLoaded, //message is considered fully loaded after it is updated by the TextEditor component
+  });
 
   const onUploadImage = async (formatedMessage) => {
     try {
@@ -177,7 +185,7 @@ const Thread = ({
     }
   };
 
-  const handleAddDraftMessage = async () => {
+  const handleAddDraftMessage = async (displayToast = true) => {
     const messageWithoutSigniture = getMessageWithoutSignature(message, signature);
     const messageWithoutHTMLTags = getMessageTextWithoutHTMLTags(messageWithoutSigniture);
 
@@ -188,7 +196,10 @@ const Thread = ({
         body,
       });
       if (!ok) return toast.error(`Une erreur est survenue : ${code}`);
-      toast.success("Message enregistré");
+      if (displayToast) {
+        toast.success("Message enregistré");
+      }
+      setLastSavedAt(new Date());
       await updateMessages();
       await updateTicket();
     } catch (error) {
@@ -289,7 +300,10 @@ const Thread = ({
         <TextEditor
           resetCount={editorResetCount}
           key={ticket._id}
-          setHtmlText={setMessage}
+          setHtmlText={(text) => {
+            setMessage(text);
+            setIsMessageFullyLoaded(true);
+          }}
           draftMessageHtml={ticket.messageDraft}
           setSlateContent={setSlateContent}
           reloadKey={reloadKey}
@@ -331,12 +345,21 @@ const Thread = ({
         {["AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION"].includes(user.role) && !isPreview && (
           <Button text="Ajouter destinataires" icon={<BsArrowReturnLeft />} handleClick={() => setIsCopyRecipientVisible(true)} />
         )}
-        {user.role === "AGENT" ? (
-          <Button icon={<HiSave />} text="Enregistrer" handleClick={() => handleAddDraftMessage()} />
-        ) : (
-          <Button icon={<HiSave />} text="Enregistrer comme brouillon" handleClick={() => handleAddDraftMessage()} />
-        )}
-
+        <div className="relative z-0 flex h-[42px] grow rounded-md">
+          {lastSavedAt && (
+            <span className="absolute -top-4 text-xs text-gray-500 truncate">
+              <div className="flex items-center">
+                {`Enregistré le ${format(lastSavedAt, "dd/MM/yyyy HH:mm:ss", { locale: fr })}`}
+                {isSaving && <HiRefresh className="ml-2 animate-spin" />}
+              </div>
+            </span>
+          )}
+          {user.role === "AGENT" ? (
+            <Button icon={<HiSave />} text="Enregistrer" handleClick={() => handleAddDraftMessage()} />
+          ) : (
+            <Button icon={<HiSave />} text="Enregistrer comme brouillon" handleClick={() => handleAddDraftMessage()} />
+          )}
+        </div>
         <div className="relative z-0 flex h-[42px] grow rounded-md">
           <button
             type="button"
