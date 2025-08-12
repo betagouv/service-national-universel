@@ -8,3 +8,8 @@ export enum InvitationType {
   INSCRIPTION = "INSCRIPTION",
   CONFIRMATION = "CONFIRMATION",
 }
+
+export enum ReferentStatus {
+  ACTIVE = "ACTIVE",
+  INACTIVE = "INACTIVE",
+}

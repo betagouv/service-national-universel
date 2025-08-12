@@ -1,7 +1,7 @@
 import { Schema, InferSchemaType } from "mongoose";
 
 import { SUB_ROLES_LIST, ROLES_LIST, VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD } from "../roles";
-import { ReferentCreatedBy, InvitationType } from "../constants/referentConstants";
+import { ReferentCreatedBy, InvitationType, ReferentStatus } from "../constants/referentConstants";
 
 import { InterfaceExtended } from ".";
 
@@ -284,6 +284,15 @@ export const ReferentSchema = {
     default: {},
     documentation: {
       description: "Métadonnées d'un référent",
+    },
+  },
+
+  status: {
+    type: String,
+    enum: ReferentStatus,
+    default: ReferentStatus.ACTIVE,
+    documentation: {
+      description: "Statut du référent",
     },
   },
 
