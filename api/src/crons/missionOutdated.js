@@ -3,7 +3,7 @@ const { capture } = require("../sentry");
 const { MissionModel, ReferentModel, ApplicationModel, YoungModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, MISSION_STATUS } = require("snu-lib");
 const { config } = require("../config");
 const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
@@ -11,7 +11,10 @@ const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
-  const cursor = await MissionModel.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
+  const cursor = await MissionModel.find({
+    endAt: { $lt: Date.now() },
+    status: { $in: [MISSION_STATUS.VALIDATED, MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.WAITING_CORRECTION] },
+  })
     .cursor()
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
