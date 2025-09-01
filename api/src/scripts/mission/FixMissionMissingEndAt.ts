@@ -3,6 +3,7 @@ import { logger } from "../../logger";
 import { MissionDocument, MissionModel } from "../../models";
 import { fetchMissions, JeVeuxAiderMission } from "../../crons/missionsJVA/JVARepository";
 import { MISSION_STATUS } from "snu-lib";
+import { endOfYear } from "date-fns";
 
 const scriptUser = { firstName: "983 Fix JVAMissions endAt" };
 
@@ -43,7 +44,7 @@ async function getPreviousStatusBeforeArchive(mission: MissionDocument): Promise
 }
 
 function getTargetEndAt(): Date {
-  return new Date(Date.UTC(2026, 11, 31, 23, 59, 59, 999));
+  return endOfYear(new Date(2026, 1, 1));
 }
 
 async function processJvaMission(jva: JeVeuxAiderMission): Promise<void> {
