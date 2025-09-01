@@ -7,6 +7,7 @@ const { logger } = require("./logger");
 function initSentry() {
   if (config.ENABLE_SENTRY) {
     init({
+      debug: config.SENTRY_DEBUG_MODE,
       dsn: "https://f6de4fc0bffdc6392b2700fd0c2d16a3@sentry.incubateur.net/243",
       environment: config.ENVIRONMENT,
       release: config.RELEASE,
