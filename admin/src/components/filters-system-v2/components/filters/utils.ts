@@ -51,7 +51,7 @@ export const buildQuery = async (
     });
 
     const aggs = resAlternative.responses[1].aggregations;
-    const data = resAlternative.responses[0].hits.hits.map((h: any) => ({ ...h._source, _id: h._id, sort: h?.sort }));
+    const data = resAlternative.responses[0].hits?.hits?.map((h: any) => ({ ...h._source, _id: h._id, sort: h?.sort }));
     const count = resAlternative.responses[1].aggregations?.count?.total?.value || resAlternative.responses[0].hits?.total?.value || 0;
     const newFilters: Record<string, any[]> = {};
 
@@ -59,7 +59,9 @@ export const buildQuery = async (
     filterArray.forEach((f) => {
       if (f.customComponent) return;
       if (f.disabledBaseQuery) return;
-      newFilters[f.name!] = aggs[f.name!].names.buckets.filter((b: AggregationBucket) => b.doc_count > 0).map((b: AggregationBucket) => ({ key: b.key, doc_count: b.doc_count }));
+      newFilters[f.name!] = aggs?.[f.name!]?.names?.buckets
+        ?.filter((b: AggregationBucket) => b.doc_count > 0)
+        .map((b: AggregationBucket) => ({ key: b.key, doc_count: b.doc_count }));
 
       // check for any transformData function
       if (f.transformData) {
