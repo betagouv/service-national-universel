@@ -22,6 +22,7 @@ const maintenance = _env(envBool, "VITE_MAINTENANCE", false);
 const SENTRY_TRACING_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_TRACING_SAMPLE_RATE", 0.1);
 const SENTRY_SESSION_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_SESSION_SAMPLE_RATE", 0.1);
 const SENTRY_ON_ERROR_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
+const SENTRY_DEBUG_MODE = _env(envBool, "VITE_SENTRY_DEBUG_MODE", false);
 const franceConnectUrl = _env(envStr, "VITE_FRANCE_CONNECT_URL", "https://fcp.integ01.dev-franceconnect.fr/api/v1");
 const API_ENGAGEMENT_URL = _env(envStr, "VITE_API_ENGAGEMENT_URL", "https://api.api-engagement.beta.gouv.fr");
 const API_ENGAGEMENT_SNU_ID = _env(envStr, "VITE_API_ENGAGEMENT_SNU_ID");
@@ -30,6 +31,7 @@ export {
   apiURL,
   apiv2URL,
   RELEASE,
+  SENTRY_DEBUG_MODE,
   SENTRY_TRACING_SAMPLE_RATE,
   SENTRY_SESSION_SAMPLE_RATE,
   SENTRY_ON_ERROR_SAMPLE_RATE,
