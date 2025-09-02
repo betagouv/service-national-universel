@@ -9,9 +9,10 @@ interface BorderButtonProps {
   target?: string;
   rel?: string;
   mode?: string;
+  disabled?: boolean;
 }
 
-export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "" }: BorderButtonProps) {
+export function BorderButton({ children, className = "", onClick = () => {}, href, target, rel, mode = "", disabled = false }: BorderButtonProps) {
   let color;
   switch (mode) {
     case "blue":
@@ -19,6 +20,9 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
       break;
     case "red":
       color = "bg-white text-[#EF4444] border-[#EF4444] hover:!bg-[#EF4444] hover:text-white";
+      if (disabled) {
+        color = "bg-white text-[#EF4444] border-[#EF4444] opacity-50";
+      }
       break;
     case "grey":
       color = "bg-white text-[#374151] border-gray-300 hover:!bg-gray-300 hover:text-white";
@@ -41,8 +45,11 @@ export function BorderButton({ children, className = "", onClick = () => {}, hre
   } else {
     return (
       <button
-        className={`flex cursor-pointer items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] px-3 py-2 hover:border-[transparent] ${color} ${className}`}
-        onClick={onClick}>
+        className={`flex items-center justify-center whitespace-nowrap rounded-[6px] border-[1px] px-3 py-2 ${
+          disabled ? "cursor-not-allowed" : "cursor-pointer hover:border-[transparent]"
+        } ${color} ${className}`}
+        onClick={onClick}
+        disabled={disabled}>
         {children}
       </button>
     );

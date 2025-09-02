@@ -1,6 +1,7 @@
 import { TaskType } from "./mongoSchema/task";
 import { FUNCTIONAL_ERRORS } from "./constants/functionalErrors";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, CLASSE_IMPORT_EN_MASSE_ERRORS } from "./constants/cle/classeImportEnMasse";
+import { ReferentStatus } from "./constants/referentConstants";
 
 const translate = (value) => {
   switch (value) {
@@ -1414,6 +1415,17 @@ export const translateInscriptionManuelle = (name: string) => {
       return "L'effectif ajusté de la classe est atteint.";
     default:
       return name;
+  }
+};
+
+export const translateReferentStatus = (status: ReferentStatus) => {
+  switch (status) {
+    case "ACTIVE":
+      return "Activé";
+    case "INACTIVE":
+      return "Désactivé";
+    default:
+      return status;
   }
 };
 
