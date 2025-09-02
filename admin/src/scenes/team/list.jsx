@@ -3,7 +3,7 @@ import { HiLogin, HiUserAdd } from "react-icons/hi";
 import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { Link, useHistory } from "react-router-dom";
-import { formatLongDateFR } from "snu-lib";
+import { ReferentStatus, formatLongDateFR } from "snu-lib";
 import Eye from "@/assets/icons/Eye";
 import Pencil from "@/assets/icons/Pencil";
 import Trash from "@/assets/icons/Trash";
@@ -307,6 +307,8 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
+
+  const isDeleteEnabled = canDeleteReferent({ actor: user, originalTarget: hit, structure }) && hit.status !== ReferentStatus.INACTIVE;
   return (
     <>
       <div className="flex flex-row flex-wrap items-center justify-between">
@@ -320,7 +322,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
                 <Pencil width={16} height={16} />
               </div>
             </Link>
-            {canDeleteReferent({ actor: user, originalTarget: hit, structure }) ? (
+            {isDeleteEnabled ? (
               <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gray-100 text-gray-600 hover:scale-105 group-hover:bg-white" onClick={onClickDelete}>
                 <Trash width={16} height={16} />
               </div>

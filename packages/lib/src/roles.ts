@@ -235,13 +235,6 @@ function canDeleteReferent({ actor, originalTarget, structure }) {
   return authorized;
 }
 
-function canViewPatchesHistory(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(
-    actor.role,
-  );
-  return isAdminOrReferent;
-}
-
 function canDeletePatchesHistory(actor, target) {
   const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
   const isOwner = actor._id.toString() === target._id.toString();
@@ -1207,7 +1200,6 @@ export {
   canEditYoung,
   canDownloadYoungDocuments,
   canDeleteReferent,
-  canViewPatchesHistory,
   canDeletePatchesHistory,
   canViewReferent,
   canUpdateReferent,

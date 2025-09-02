@@ -7,7 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES, copyToClipboard, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
-import { canSigninAs } from "snu-lib";
+import { ReferentStatus, canSigninAs } from "snu-lib";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -20,6 +20,7 @@ import ModalReferentDeleted from "../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import PanelV2 from "../../components/PanelV2";
 import { signinAs } from "@/utils/signinAs";
+import { Tooltip } from "@snu/ds/admin";
 
 export default function UserPanel({ onChange, value }) {
   const [structure, setStructure] = useState();
@@ -104,7 +105,6 @@ export default function UserPanel({ onChange, value }) {
       return toastr.error("Oups, une erreur est survenue pendant la supression du profil :", translate(e.code));
     }
   };
-
   if (!value) return <div />;
   return (
     <PanelV2 open={value ? true : false} onClose={onChange} title={`${value.firstName} ${value.lastName}`}>
@@ -114,8 +114,36 @@ export default function UserPanel({ onChange, value }) {
             <Link to={`/user/${value._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
-            {canSigninAs(user, value, "referent") ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
+            {canSigninAs(user, value, "referent") ? (
+              <Tooltip title="Vous ne pouvez pas prendre la place d'un utilisateur désactivé" disabled={value.status !== ReferentStatus.INACTIVE}>
+                <PanelActionButton
+                  onClick={handleImpersonate}
+                  icon="impersonate"
+                  title="Prendre&nbsp;sa&nbsp;place"
+                  disabled={value.status === ReferentStatus.INACTIVE}
+                  style={{
+                    backgroundColor: value.status === ReferentStatus.INACTIVE ? "gray" : "white",
+                    cursor: value.status === ReferentStatus.INACTIVE ? "not-allowed" : "pointer",
+                  }}
+                />
+              </Tooltip>
+            ) : null}
+
+            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? (
+              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={value.status !== ReferentStatus.INACTIVE}>
+                <PanelActionButton
+                  onClick={onClickDelete}
+                  icon="bin"
+                  title="Supprimer"
+                  disabled={value.status === ReferentStatus.INACTIVE}
+                  style={{
+                    backgroundColor: value.status === ReferentStatus.INACTIVE ? "gray" : "white",
+                    cursor: value.status === ReferentStatus.INACTIVE ? "not-allowed" : "pointer",
+                  }}
+                />
+              </Tooltip>
+            ) : null}
+
             {structure ? (
               <Link to={`/structure/${structure._id}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
                 <PanelActionButton icon="eye" title="Voir la structure" />

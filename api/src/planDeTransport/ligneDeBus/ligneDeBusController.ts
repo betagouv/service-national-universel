@@ -9,7 +9,6 @@ import {
   canEditLigneBusPointDeRassemblement,
   isBusEditionOpen,
   ROLES,
-  canViewPatchesHistory,
   formatStringLongDate,
   isIsoDate,
   translateBusPatchesField,
@@ -21,6 +20,7 @@ import {
   ACTIONS,
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
+  isReadAuthorized,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -899,7 +899,9 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     }
 
     // --- security
-    if (!canViewPatchesHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user!, ignorePolicy: true })) {
+      throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    }
 
     // --- query
     // ------ find all patches ids

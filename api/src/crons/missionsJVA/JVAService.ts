@@ -1,5 +1,5 @@
 import { config } from "../../config";
-import { addHours, addYears } from "date-fns";
+import { addHours } from "date-fns";
 import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
 import { getTutorName } from "../../services/mission";
 import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
@@ -59,7 +59,7 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
     actions,
     mainDomain: jva2SnuDomaines[mission.domain],
     startAt: addHours(startAt, 2),
-    endAt: mission.endAt ? addHours(endAt, 2) : addYears(startAt, 1),
+    endAt: mission.endAt ? addHours(endAt, 2) : new Date(Date.UTC(2026, 11, 31, 23, 59, 59, 999)),
     placesTotal: mission.snuPlaces,
     frequence: mission.schedule,
     structureId: structure.id,
@@ -122,7 +122,7 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
     ...updatedMission,
     placesLeft,
   });
-  if ([MISSION_STATUS.CANCEL, MISSION_STATUS.ARCHIVED].includes(mission.status as any)) {
+  if (mission.status === MISSION_STATUS.CANCEL) {
     mission.set({ status: MISSION_STATUS.WAITING_VALIDATION });
   }
   await mission.save({ fromUser });

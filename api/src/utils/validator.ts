@@ -643,6 +643,7 @@ export function validateReferent(referent) {
       structureId: Joi.string().allow(null, ""),
       acceptCGU: Joi.string().allow(null, ""),
       cohorts: Joi.array().items(Joi.string().allow(null, "")),
+      status: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
 }

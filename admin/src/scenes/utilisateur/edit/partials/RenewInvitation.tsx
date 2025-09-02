@@ -1,11 +1,11 @@
 import api from "@/services/api";
-import { Button } from "@snu/ds/admin";
+import { Button, Tooltip } from "@snu/ds/admin";
 import { useMutation } from "@tanstack/react-query";
 import React from "react";
 import { toastr } from "react-redux-toastr";
-import { formatLongDateFR, translate } from "snu-lib";
+import { ReferentStatus, ReferentType, formatLongDateFR, translate } from "snu-lib";
 
-export default function RenewInvitation({ userId }: { userId: string }) {
+export default function RenewInvitation({ userId, user }: { userId: string; user: ReferentType }) {
   const { mutate } = useMutation({
     mutationFn: async () => {
       const { ok, code, data } = await api.post(`/referent/${userId}/renew-invitation`);
@@ -22,5 +22,15 @@ export default function RenewInvitation({ userId }: { userId: string }) {
     },
   });
 
-  return <Button title="Renouveler invitation" type="cancel" className="mt-3 mr-3" onClick={() => mutate()} />;
+  return (
+    <Tooltip title="Vous ne pouvez pas renouveler l'invitation d'un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE}>
+      <Button
+        title="Renouveler invitation"
+        type="cancel"
+        className={`mt-3 mr-3 ${user.status === ReferentStatus.INACTIVE ? "cursor-not-allowed" : "cursor-pointer"}`}
+        onClick={() => mutate()}
+        disabled={user.status === ReferentStatus.INACTIVE}
+      />
+    </Tooltip>
+  );
 }
