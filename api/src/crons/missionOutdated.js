@@ -3,7 +3,7 @@ const { capture } = require("../sentry");
 const { MissionModel, ReferentModel, ApplicationModel, YoungModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, MISSION_STATUS } = require("snu-lib");
 const { config } = require("../config");
 const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
@@ -11,7 +11,10 @@ const fileName = path.basename(__filename, ".js");
 
 const clean = async () => {
   let countAutoArchived = 0;
-  const cursor = await MissionModel.find({ endAt: { $lt: Date.now() }, status: "VALIDATED" })
+  const cursor = await MissionModel.find({
+    endAt: { $lt: Date.now() },
+    status: { $in: [MISSION_STATUS.VALIDATED, MISSION_STATUS.WAITING_VALIDATION, MISSION_STATUS.WAITING_CORRECTION] },
+  })
     .cursor()
     .addCursorFlag("noCursorTimeout", true);
   await cursor.eachAsync(async function (mission) {
@@ -111,7 +114,7 @@ const cancelApplications = async (mission) => {
 exports.handler = async () => {
   // slack.info({ title: "outdated mission", text: "I'm checking if there is any outdated mission in our database !" });
   try {
-    clean();
+    await clean();
   } catch (e) {
     capture(`ERROR`, JSON.stringify(e));
     capture(e);
@@ -123,7 +126,7 @@ exports.handler = async () => {
 exports.handlerNotice1Week = async () => {
   // slack.info({ title: "1 week notice outdated mission", text: "I'm checking if there is any mission in our database that will be expired in 1 week !" });
   try {
-    notify1Week();
+    await notify1Week();
   } catch (e) {
     capture(e);
     slack.error({ title: "1 week notice outdated mission", text: JSON.stringify(e) });

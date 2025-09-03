@@ -47,6 +47,9 @@ import { initDB } from "../mongo";
     case "check-classe-coherence":
       await require("./checkClasseCoherence").handler();
       break;
+    case "missionOutdated":
+      await require("./missionOutdated").handler();
+      break;
     default:
       console.log("No cron found for " + process.argv[2]);
   }
