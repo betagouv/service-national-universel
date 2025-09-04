@@ -12,7 +12,7 @@ import {
   makeFetchTransport,
   replayIntegration,
 } from "@sentry/react";
-import { RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, environment } from "./config";
+import { RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_DEBUG_MODE, environment } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -25,6 +25,7 @@ function initSentry() {
   if (environment !== "development") {
     // Evite le spam sentry en local
     init({
+      debug: SENTRY_DEBUG_MODE,
       dsn: "https://c817c8150fe3dc49bb989119fe2871b8@sentry.incubateur.net/241",
       environment,
       release: RELEASE,
