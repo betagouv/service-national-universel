@@ -52,6 +52,7 @@ const YOUNG_STATUS_COLORS = {
   WAITING_VALIDATION: colors.orange,
   WAITING_CORRECTION: colors.yellow,
   VALIDATED: colors.green,
+  "Validé sur liste rouge": colors.green,
   REFUSED: colors.pink,
   IN_PROGRESS: colors.darkPurple,
   WITHDRAWN: colors.lightGrey,

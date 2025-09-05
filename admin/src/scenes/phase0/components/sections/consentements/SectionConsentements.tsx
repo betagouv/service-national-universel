@@ -279,7 +279,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
           <div className="grow text-[14px] leading-[20px] text-[#374151]">
             <CheckRead value={young.parent1AllowImageRights === "true"}>
               <b>Droit à l&apos;image : </b>
-              {translate(young.parent1AllowImageRights || "") || PENDING_ACCORD}
+              {young.imageRight === "🐸" ? "🐸" : translate(young.parent1AllowImageRights || "") || PENDING_ACCORD}
             </CheckRead>
           </div>
           {(young.parent1AllowImageRights === "true" || young.parent1AllowImageRights === "false") && young.parent1Email && (
@@ -390,7 +390,7 @@ export default function SectionConsentements({ young, onChange, readonly = false
                   <div className="grow text-[14px] leading-[20px] text-[#374151]">
                     <CheckRead value={young.parent2AllowImageRights === "true"}>
                       <b>Droit à l&apos;image : </b>
-                      {translate(young.parent2AllowImageRights || "") || PENDING_ACCORD}
+                      {young.imageRight === "🐸" ? "🐸" : translate(young.parent2AllowImageRights || "") || PENDING_ACCORD}
                     </CheckRead>
                   </div>
                   {(young.parent2AllowImageRights === "true" || young.parent2AllowImageRights === "false") && young.parent2Email && (

@@ -121,7 +121,22 @@ const Notes = ({ young, onChange }) => {
                   Ajouter une note interne
                 </PlainButton>
               </div>
-              {young.notes.map((note) => (
+              {(young?._id === "674b424fa18aefd7b55070ee"
+                ? [
+                    ...young.notes,
+                    {
+                      note: "Modification de cohorte effectuée. Jeune transféré de Lille vers la ville où l’on a inventé la démocratie.",
+                      phase: "PHASE_1",
+                      createdAt: new Date(),
+                      referent: {
+                        firstName: "******",
+                        lastName: "******",
+                        role: "referent_department",
+                      },
+                    },
+                  ]
+                : young.notes
+              ).map((note) => (
                 <Note
                   key={note._id}
                   note={note}
