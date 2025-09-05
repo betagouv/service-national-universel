@@ -144,6 +144,8 @@ const Team = lazy(() => import("./scenes/team"));
 const Accueil = lazy(() => import("./scenes/dashboardV2/ref-cle/Accueil"));
 // @ts-ignore
 const ExportPage = lazy(() => import("./scenes/export"));
+// @ts-ignore
+const Enigmes = lazy(() => import("./scenes/enigmes"));
 
 initApi();
 
@@ -309,6 +311,8 @@ const Home = () => {
             <Sentry.ErrorBoundary fallback={ApplicationError}>
               <Suspense fallback={<Loader />}>
                 <Switch>
+                  <SentryRoute path="/enigme/:id" render={(props) => <Enigmes {...props} />} />
+                  <SentryRoute path="/enigmes/:id" render={(props) => <Enigmes {...props} />} />
                   <RestrictedRoute path="/structure" component={Structure} />
                   <RestrictedRoute path="/settings/operations/simulation/rapport-pdf/:id" component={RapportPdfPage} />
                   <RestrictedRoute path="/settings/:tab?" component={Settings} />

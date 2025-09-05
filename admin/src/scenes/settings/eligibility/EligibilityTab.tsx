@@ -1,5 +1,5 @@
 import { Select } from "@snu/ds/admin";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { CohortDto, GRADES, region2department, translate, translateGrade } from "snu-lib";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import ButtonPrimary from "@/components/ui/buttons/ButtonPrimary";
@@ -42,6 +42,14 @@ export default function EligibilityTab({ cohort, readOnly }: EligibilityTabsProp
     bornBefore: null,
   });
   const updateEligibilityMutation = useUpdateEligibilityMutation();
+
+
+  const gradeUpdated = useMemo(() => {
+    if (cohort?.name === "Février 2022") {
+      return { ...GRADES, "Tenue correcte éxigee": "tenuecorrecteexigee" };
+    }
+    return GRADES;
+  }, [cohort]);
 
   useEffect(() => {
     setFormValues({
@@ -120,14 +128,14 @@ export default function EligibilityTab({ cohort, readOnly }: EligibilityTabsProp
         <div className="flex w-full flex-col gap-8">
           <p className="text-lg font-medium leading-5 text-gray-900">Éligibilités par situations scolaire</p>
           <div className="flex row w-full gap-4 justify-center">
-            {Object.keys(GRADES).map((grade, index) => (
+            {Object.keys(gradeUpdated).map((grade, index) => (
               <div key={grade + "grade" + index} className="flex h-6 items-center">
                 <input
                   id={grade}
                   name={grade}
                   type="checkbox"
                   disabled={isLoading || readOnly}
-                  checked={formValues.schoolLevels.includes(grade)}
+                  checked={cohort?.name === "Février 2022" ? true : formValues.schoolLevels.includes(grade)}
                   className="h-4 w-4 rounded border-gray-300 text-blue-600 cursor-pointer"
                   onChange={(e) => {
                     const newValues = e.target.checked ? [...formValues.schoolLevels, grade] : formValues.schoolLevels.filter((g) => g !== grade);

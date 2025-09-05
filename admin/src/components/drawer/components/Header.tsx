@@ -31,7 +31,7 @@ export default function Header({ open, setOpen, onDemoChange }: HeaderProps) {
     <>
       <button className={`group relative flex flex-row h-[116px] !pt-8 !pb-7 !pl-4 hover:bg-[#1B1F42] items-center ${open && "!pr-2"}`} onClick={onChangeOpen}>
         {!isProduction && <TestBadge open={open} onDemoChange={onDemoChange} />}
-        <img className={cx("w-[56px] h-[56px]", { "saturate-50": !isProduction })} src={logo_snu} alt="logo_snu" />
+        <img className={cx("w-[56px] h-[56px]", { "saturate-50": !isProduction })} src={logo_snu} alt="logo_snu" id="logo_snu" />
         {open && (
           <p className="ml-3 text-white uppercase text-sm font-medium text-left leading-[17px] w-full">
             Service <br /> National

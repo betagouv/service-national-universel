@@ -23,10 +23,13 @@ export const itemsSejourGod = [
     title: "Schéma de répartition",
     link: "/schema-repartition",
   },
-
   {
     title: "Plan de transport",
     link: "/ligne-de-bus",
+  },
+  {
+    title: "Edit Plan de table",
+    link: "/emptypage2",
   },
   {
     title: "Edit Plan de transport",

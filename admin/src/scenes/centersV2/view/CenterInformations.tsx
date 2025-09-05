@@ -46,7 +46,7 @@ export default function Details({ center }: { center: CohesionCenterType }) {
                 </p>
                 <p>
                   <span className="text-gray-500 mr-2">Matricule : </span>
-                  {center.matricule}
+                  {center._id === "66da08d8502c4f7fc1dfa921" ? "YMCA089-00" : center.matricule}
                 </p>
                 <p>
                   <span className="text-gray-500 mr-2">Désignation : </span>

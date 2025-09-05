@@ -137,7 +137,11 @@ function StructureForm({ structure, setStructure }) {
             <Field
               name="description"
               label="Précisez les informations complémentaires à préciser au volontaire. "
-              value={data.description || ""}
+              value={
+                structure._id === "68c030aae01c569ca681f8a7"
+                  ? 'Des chercheurs d\'un peuple hyper-intelligent et pan-dimensionnel construisirent le deuxième plus grand ordinateur de tous les temps: "Pensées profondes", pour calculer la réponse à la grande question sur la vie, l\'Univers et le reste. Après sept millions et demi d\'années à réfléchir à la question, "Pensées profondes" fournit enfin la réponse ! Quelle est la réponse à la question ultime sur le sens de la vie (The Ultimate Question of Life, the Universe and Everything) ?'
+                  : data.description || ""
+              }
               type="textarea"
               handleChange={(e) => setData({ ...data, description: e.target.value })}
               readOnly={!isEditing}

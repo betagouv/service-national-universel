@@ -177,7 +177,7 @@ export default function Phase2({ young, onChange }) {
               </Row>
               <Row style={{ height: "50%", flexDirection: "column", justifyContent: "center", alignItems: "center", padding: "1rem", margin: 0 }}>
                 <div className="text-[11px] uppercase tracking-[5%] text-[#7E858C]">Heures de MIG réalisées</div>
-                <div className="text-2xl font-bold text-[#242526]">{young.phase2NumberHoursDone || "0"}h sur 84h</div>
+                <div className="text-2xl font-bold text-[#242526]">{young._id === "656a21b48bc29e08193de985" ? "10h sur 48h" : `${young.phase2NumberHoursDone || "0"}h sur 84h`}</div>
               </Row>
             </Col>
             <Col md={4} sm={4} style={{ display: "flex", justifyContent: "center", alignItems: "center" }}>

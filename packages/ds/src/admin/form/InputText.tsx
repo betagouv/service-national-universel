@@ -18,6 +18,7 @@ type OwnProps = {
   max?: number;
   high?: number;
   icon?: React.ReactNode;
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
 };
 
 export default function InputText({
@@ -35,6 +36,7 @@ export default function InputText({
   max,
   high = 54,
   icon,
+  onKeyDown,
 }: OwnProps) {
   const {
     baseClass,
@@ -85,6 +87,7 @@ export default function InputText({
               readOnly={readOnly}
               onChange={(e) => onChange?.(e)}
               maxLength={max}
+              onKeyDown={onKeyDown}
             />
           </div>
         </div>
