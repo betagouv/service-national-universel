@@ -304,6 +304,7 @@ const SideBar = ({ sessionsList }) => {
 
   return (
     <div
+      id="sideBar"
       className={cx(
         "sticky flex flex-col inset-y-0  z-40 print:hidden",
         { "w-[250px]": open },
