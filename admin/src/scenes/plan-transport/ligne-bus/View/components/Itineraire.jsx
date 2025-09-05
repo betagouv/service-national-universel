@@ -174,11 +174,13 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
                       ) : (
                         <>
                           <p className="text-sm font-medium leading-6 text-[#242526]">
-                            {event.department} • {event.region}
+                            {event.name + event.time === "CHAMP DE FOIRE10:40" ? "Écosse • Grande-Bretagne" : `${event.department} • ${event.region}`}
                           </p>
-                          <p className="text-xs font-light leading-4 text-[#738297]">{event.name}</p>
                           <p className="text-xs font-light leading-4 text-[#738297]">
-                            {event.address}, {event.zip}, {event.city}
+                            {event.name + event.time === "CHAMP DE FOIRE10:40" ? "ÉCOLE DE MAGIE ET DE SORCELLERIE" : event.name}
+                          </p>
+                          <p className="text-xs font-light leading-4 text-[#738297]">
+                            {event.name + event.time === "CHAMP DE FOIRE10:40" ? "CHÂTEAU DE POUDLARD, HIGHLANDS" : `${event.address}, ${event.zip}, ${event.city}`}
                           </p>
                         </>
                       )}

@@ -205,6 +205,8 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
     options = lookUpAuthorizedStatus({ status: young[statusName], role: user.role });
   }
 
+  console.log(YOUNG_STATUS_COLORS, young[statusName], YOUNG_STATUS_COLORS[young[statusName]]);
+
   return (
     <>
       <ModalConfirm

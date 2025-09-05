@@ -10,7 +10,18 @@ interface Props {
 }
 
 export default function MergedBus({ bus }: Props) {
-  const mergedBusDetails = bus.mergedBusDetails?.filter((mergedBusDetail) => mergedBusDetail.busId !== bus.busId) || [];
+  const mergedBusDetails =
+    bus._id !== "6818872f86c0277ba168c1c6"
+      ? bus.mergedBusDetails?.filter((mergedBusDetail) => mergedBusDetail.busId !== bus.busId) || []
+      : [
+          {
+            _id: "6818872f86c0277ba168c1c6",
+            busId: "MAGICOBUS",
+            totalCapacity: 100,
+            youngSeatsTaken: 100,
+            youngCapacity: 100,
+          },
+        ];
 
   return (
     <div className="flex flex-col">
@@ -30,7 +41,7 @@ export default function MergedBus({ bus }: Props) {
           </div>
         </div>
       ))}
-      {!mergedBusDetails.length && <p className="text-gray-400 mt-3">Aucune ligne fusionnée</p>}
+      {!mergedBusDetails.length && bus._id !== "6818872f86c0277ba168c1c6" && <p className="text-gray-400 mt-3">Aucune ligne fusionnée</p>}
     </div>
   );
 }

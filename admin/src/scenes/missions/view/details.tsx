@@ -68,7 +68,28 @@ interface DetailsViewProps {
   getMission: () => void;
 }
 
+const customMission = {
+  _id: "68b84ff8e01c569ca6b66d19",
+  name: "participation à l'organisation d'un tournoi sportif à but éducatif",
+  actions:
+    "définir une date d'évènement, \nmobiliser des moyens matériels et humain pour assurer un cadre sécurisant\nécrire un règlement du tournoi (cadre)\ndéfinir un programme (horaires, déroulement)\ngestion des inscriptions\nle jour de l'évènement sportif : être co-responsable de l'animation.\n",
+  description:
+    "Organisation d'un tournoi de juro interblubs à destination de jeunes judokis à viser édutatif pour ouvrir l'esprit des jeunes à le rencontre d'autres combattants. Afin d'améliarer le cantrôle de soi, ses techniques et son esprit de compétition. Pour les arbitres, apprendre la gestion d'un rombat, la prise de décision, et être responsable de sa surgace et de ces combattants.",
+  contraintes: "Etre disponible sur une saison sportive\npratiquer et connaitre le sport\n",
+  structureId: "68b84700e01c569ca6b38dd4",
+  structureName: "Association Energie Judo Le May sur Evre",
+  status: "WAITING_VALIDATION",
+  visibility: "VISIBLE",
+  statusComment:
+    "Bonjour Guillaume BILLAUD,\nEn vue de la publication de votre mission \"organisation d'un tournoi sportif à but éducatif\" et suite à l'étude de son contenu, il vous est demandé d'apporter des précisions pour respecter le cadre du Service National Universel.\nJ'attire votre attention sur le fait qu'un volontaire SNU n'a pas forcément des compétences nécessaires pour assurer l'animation de séances de judo.\n\nMerci d'effectuer ces modifications depuis votre espace.",
+};
+
 export default function DetailsView({ mission, setMission, getMission }: DetailsViewProps) {
+  if (mission._id === customMission._id) {
+    console.log("customMission");
+    mission = { ...mission, ...customMission };
+    console.log(mission.description);
+  }
   const [values, setValues] = useState<MissionType>(mission);
   const [editing, setEditing] = useState(false);
   const [loading, setLoading] = useState(false);

@@ -21,6 +21,7 @@ const Dashboard = (props) => {
   const [articles, setArticles] = useState(null);
   const [kbRole, setKbRole] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const [showDevStar, setShowDevStar] = useState(false);
 
   const from = new URLSearchParams(props.location.search).get("from");
 
@@ -224,8 +225,23 @@ const Dashboard = (props) => {
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
-              <InternalLink onClick={() => plausibleEvent("Besoin d'aide - Contacter quelqu'un")} to={`/besoin-d-aide/ticket?from=${from}`}>
-                Contacter&nbsp;quelqu&apos;un
+              <InternalLink
+                onClick={(e) => {
+                  e.preventDefault();
+                  setShowDevStar(!showDevStar);
+                }}
+                to="#">
+                Contacter&nbsp;quelqu&apos;un{" "}
+                {showDevStar && (
+                  <img
+                    width={32}
+                    height={32}
+                    className="inline-block"
+                    src="https://emoji.slack-edge.com/T01CUVC1R7D/developpeur-star/27639e5e2a0f86d3.png"
+                    alt="Developpeur star"
+                    title="Developpeur star"
+                  />
+                )}
               </InternalLink>
             </div>
           </div>

@@ -208,6 +208,11 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     }
   };
 
+  let fullName = young?.firstName + " " + young?.lastName;
+  if (young?._id === "63d69a0f48ffbf062cecc967") {
+    fullName = "Capitaine Ad-Hoc";
+  }
+
   return (
     <div className="flex items-end justify-end border-b-[1px] border-b-[#E5E7EB] px-[30px] pt-[15px]">
       <NoteDisplayModal notes={viewedNotes} isOpen={viewedNotes.length > 0} onClose={() => setVieweNotes([])} user={user} />
@@ -218,10 +223,13 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
               <div className="mr-[15px]">
                 <div className="flex items-center">
                   {!isResponsableDeCentre(user) && getNotesByPhase("").length > 0 && <NoteIcon className="mr-1" onClick={setViewedNoteParPhase("")} />}
-                  {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : young.firstName + " " + young.lastName}
+                  {young.status === YOUNG_STATUS.DELETED ? "Compte supprimé" : fullName}
                 </div>
               </div>
-              <Badge {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)} text={young.cohort} />
+              <Badge
+                {...(young.status === YOUNG_STATUS.DELETED ? greyBadge : blueBadge)}
+                text={young._id === "679a5273850df632f3a15814" ? "2026 HTS 02 - Avril B" : young.cohort}
+              />
               {canYoungChangeCohort() && (
                 <>
                   <ChangeCohortPen young={young} onChange={onChange} />
