@@ -89,9 +89,11 @@ export const getURLParam = (urlParams: URLSearchParams, setParamData: (paramData
       // on check si c'est un custom component
       const customComponent = filters.find((f) => f.name === key);
       if (customComponent?.getQuery) {
-        localFilters[key] = { filter: value.split("~"), customComponentQuery: customComponent.getQuery(value.split("+")[0]) };
+        const decodedValues = value.split("~").map((val) => decodeURIComponent(val));
+        localFilters[key] = { filter: decodedValues, customComponentQuery: customComponent.getQuery(decodedValues[0]) };
       } else {
-        localFilters[key] = { filter: value.split("~") };
+        const decodedValues = value.split("~").map((val) => decodeURIComponent(val));
+        localFilters[key] = { filter: decodedValues };
       }
     }
   });
@@ -109,12 +111,14 @@ export const currentFilterAsUrl = (filters: SelectedFilters, page: number, filte
   let url = Object.keys(selectedFilters)?.reduce((acc, curr) => {
     if (curr === "searchbar" && selectedFilters[curr]?.filter?.length && selectedFilters[curr]?.filter?.[0]?.trim() === "") return acc;
     if (selectedFilters[curr]?.filter?.length) {
-      acc += `${curr}=${selectedFilters[curr]?.filter?.join("~")}${index < length - 1 ? "&" : ""}`;
+      const encodedValues = selectedFilters[curr]?.filter?.map((value) => encodeURIComponent(value)).join("~");
+      acc += `${curr}=${encodedValues}${index < length - 1 ? "&" : ""}`;
       // check if custom component
       // @ts-ignore
     } else if (selectedFilters[curr]?.filter?.value?.length && selectedFilters[curr]?.filter?.value[0]?.trim() !== "") {
       // @ts-ignore
-      acc += `${curr}=${selectedFilters[curr]?.filter?.value?.join("~")}${index < length - 1 ? "&" : ""}`;
+      const encodedValues = selectedFilters[curr]?.filter?.value?.map((value) => encodeURIComponent(value)).join("~");
+      acc += `${curr}=${encodedValues}${index < length - 1 ? "&" : ""}`;
     } else return acc;
 
     index++;
