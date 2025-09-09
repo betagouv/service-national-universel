@@ -776,20 +776,6 @@ router.patch(
       if (!ticket.closedTimeHours) ticket.closedTimeHours = Number(Number(getHoursDifference(new Date(), ticket.createdAt)).toFixed(2));
     }
 
-    // TODO : updated logic & schema
-
-    // if (req.cleanBody.folder) {
-    //   ticket.folder = req.cleanBody.folder;
-    //   ticket.folders = [req.cleanBody.folder];
-    // }
-    // if (Object.prototype.hasOwnProperty.call(req.cleanBody, "folderId")) {
-    //   ticket.foldersId.push(req.cleanBody.folderId);
-    // }
-
-    if (req.cleanBody.messageDraft) {
-      ticket.status = "DRAFT";
-    }
-
     if (req.cleanBody.subject) {
       if (req.cleanBody.subject.includes("question")) ticket.formSubjectStep1 = "QUESTION";
       if (req.cleanBody.subject.includes("problème")) ticket.formSubjectStep1 = "TECHNICAL";
