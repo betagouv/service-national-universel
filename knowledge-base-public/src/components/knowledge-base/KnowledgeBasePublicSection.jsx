@@ -82,7 +82,7 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
       <>
         <div className="border border-gray-200 bg-white p-4 flex items-center justify-center">
           <div className="text-sm text-blue-800 font-bold px-32">
-            <p>Aucun séjour SNU à titre individuel (hors temps scolaire) n'est à ce jour programmé pour l'année scolaire 2025-2026</p>
+            <p>Aucun séjour SNU n'est à ce jour programmé pour l'année scolaire 2025-2026</p>
           </div>
         </div>
         <div className="w-full flex flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">
