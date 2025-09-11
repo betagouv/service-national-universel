@@ -13,13 +13,16 @@ import { buildApiv2Query } from "@/components/filters-system-v2/components/filte
 import ModalExportAsync from "@/components/filters-system-v2/components/export/ModalExportAsync";
 import { MAX_EXPORT_VOLONTAIRES } from "../list";
 import { HiDownload } from "react-icons/hi";
+import { ModalExport } from "@/components/filters-system-v2";
+import { transformVolontaires } from "../utils";
 
 interface Props {
   selectedFilters: { [key: string]: Filter };
+  isAsync?: boolean;
   disabled?: boolean;
 }
 
-export default function ExportVolontairesButton({ selectedFilters, disabled }: Props) {
+export default function ExportVolontairesButton({ selectedFilters, isAsync, disabled }: Props) {
   const [showModal, setShowModal] = useState<"field" | "confirm" | null>(null);
   const [exportParams, setExportParams] = useState<{ selectedFilters: { [key: string]: Filter }; selectedFields: string[] } | null>(null);
 
@@ -46,18 +49,32 @@ export default function ExportVolontairesButton({ selectedFilters, disabled }: P
         loading={isPending}
         onClick={() => setShowModal("field")}
       />
-      <ModalExportAsync
-        isOpen={showModal === "field"}
-        onClose={() => setShowModal(null)}
-        exportFields={youngExportFields}
-        exportTitle="volontaires"
-        selectedFilters={selectedFilters}
-        isLoading={isPending}
-        onExport={(filters, fields) => {
-          setExportParams({ selectedFilters: filters, selectedFields: fields });
-          setShowModal("confirm");
-        }}
-      />
+      {isAsync && (
+        <ModalExportAsync
+          isOpen={showModal === "field"}
+          onClose={() => setShowModal(null)}
+          exportFields={youngExportFields}
+          exportTitle="volontaires"
+          selectedFilters={selectedFilters}
+          isLoading={isPending}
+          onExport={(filters, fields) => {
+            setExportParams({ selectedFilters: filters, selectedFields: fields });
+            setShowModal("confirm");
+          }}
+        />
+      )}
+      {!isAsync && (
+        <ModalExport
+          isOpen={!!showModal}
+          setIsOpen={() => setShowModal(null)}
+          route="/elasticsearch/young/export?tab=volontaire"
+          transform={(data, values) => transformVolontaires(data, values)}
+          exportFields={youngExportFields}
+          exportTitle="volontaires"
+          totalHits
+          selectedFilters={selectedFilters}
+        />
+      )}
       <ModalConfirm
         isOpen={showModal === "confirm"}
         title="Exporter les données"

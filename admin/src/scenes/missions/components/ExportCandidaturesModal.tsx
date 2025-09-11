@@ -9,7 +9,7 @@ import { MissionService } from "@/services/missionService";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { HiDownload } from "react-icons/hi";
 
-const getExportsFields = (user: UserDto) => {
+export const getExportsFields = (user: UserDto) => {
   let filtered = missionCandidatureExportFields;
   if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
     const filterAdress = missionCandidatureExportFields.find((e) => e.id === "address");
