@@ -16,7 +16,7 @@ import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import MyClass from "@/scenes/cle/MyClass";
 import useClass from "@/scenes/cle/useClass";
 
-export default function PublicContactForm({ category, question, parcours }) {
+export default function PublicContactForm({ category, question }) {
   const history = useHistory();
   const { files, addFiles, deleteFile, error } = useFileUpload();
 
@@ -67,7 +67,6 @@ export default function PublicContactForm({ category, question, parcours }) {
         email,
         department,
         role,
-        parcours,
         subjectStep1: category,
         subjectStep2: question.value,
         region: department2region[department],
