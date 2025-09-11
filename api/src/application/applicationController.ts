@@ -304,7 +304,7 @@ router.post(
         // A young can only update his own application.
         // - admin can update all applications
         // - referent can update applications of their department/region
-        if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON(), application: application.toJSON() } })) {
+        if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young, application: application } })) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
         }
         // - responsible and supervisor can update applications of their structures
