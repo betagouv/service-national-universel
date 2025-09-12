@@ -253,7 +253,6 @@ export default function List() {
 
 const Hit = ({ hit, onClick, user, structure }) => {
   const displayActionButton = canViewReferent(user, hit);
-
   return (
     <tr className="flex items-center py-3 px-4 hover:bg-gray-50" onClick={onClick}>
       <td className="w-[30%] table-cell truncate cursor-pointer">
@@ -275,8 +274,14 @@ const Hit = ({ hit, onClick, user, structure }) => {
         <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.createdAt).format("hh:mm")}</p>
       </td>
       <td className="w-[18%]">
-        <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
-        <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
+        {hit.lastLoginAt ? (
+          <>
+            <p className="text-sm leading-none text-gray-900">{dayjs(hit.lastLoginAt).format("DD/MM/YYYY")}</p>
+            <p className="text-sm leading-none text-gray-500 mt-2">{dayjs(hit.lastLoginAt).format("hh:mm")}</p>
+          </>
+        ) : (
+          <p className="text-sm leading-none text-gray-500 mt-2"></p>
+        )}
       </td>
       {displayActionButton ? (
         <td className="flex w-[5%] flex-col gap-2">
