@@ -22,7 +22,7 @@ interface Props {
   disabled?: boolean;
 }
 
-export default function ExportVolontairesButton({ selectedFilters, isAsync, disabled }: Props) {
+export default function ExportVolontairesButton({ selectedFilters, isAsync = false, disabled = false }: Props) {
   const [showModal, setShowModal] = useState<"field" | "confirm" | null>(null);
   const [exportParams, setExportParams] = useState<{ selectedFilters: { [key: string]: Filter }; selectedFields: string[] } | null>(null);
 

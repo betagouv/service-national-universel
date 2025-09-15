@@ -73,18 +73,22 @@ export default function VolontaireList() {
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            <ExportVolontairesButton
-              selectedFilters={selectedFilters}
-              isAsync={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-              disabled={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES}
-            />
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <ExportVolontairesScolariseButton
-                user={user}
-                selectedFilters={selectedFilters}
-                isAsync={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-                disabled={paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES}
-              />
+            {!!paramData?.count && (
+              <>
+                <ExportVolontairesButton
+                  selectedFilters={selectedFilters}
+                  isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                  disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                />
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+                  <ExportVolontairesScolariseButton
+                    user={user}
+                    selectedFilters={selectedFilters}
+                    isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                    disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>

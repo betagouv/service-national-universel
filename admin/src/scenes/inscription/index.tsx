@@ -291,18 +291,23 @@ export default function Inscription(): JSX.Element {
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
-            <ExportInscriptionsButton
-              selectedFilters={selectedFilters}
-              isAsync={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-              disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES}
-            />
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <ExportInscriptionsScolariseButton
-                user={user}
-                selectedFilters={selectedFilters}
-                isAsync={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-                disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES}
-              />
+
+            {!!paramData?.count && (
+              <>
+                <ExportInscriptionsButton
+                  selectedFilters={selectedFilters}
+                  isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                  disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                />
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+                  <ExportInscriptionsScolariseButton
+                    user={user}
+                    selectedFilters={selectedFilters}
+                    isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                    disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>

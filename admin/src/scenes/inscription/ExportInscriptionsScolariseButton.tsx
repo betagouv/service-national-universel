@@ -44,34 +44,36 @@ export default function ExportInscriptionsScolariseButton({ user, selectedFilter
 
   return (
     <>
-      <Button
-        disabled={disabled}
-        tooltip={disabled ? `Vous ne pouvez pas exporter plus de ${MAX_EXPORT_VOLONTAIRES} inscriptions à la fois.` : undefined}
-        title={user.role === ROLES.REFERENT_DEPARTMENT ? "Exporter les volontaires scolarisés dans le département" : "Exporter les volontaires scolarisés dans la région"}
-        leftIcon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
-        loading={isPending}
-        className="w-full"
-        onClick={() => setShowModal(true)}
-      />
       {isAsync && (
-        <ModalConfirm
-          isOpen={showModal}
-          title="Exporter les données"
-          message={`\nVous allez recevoir un mail pour télécharger votre export. Pensez à regarder dans vos courriers indésirables.\n
+        <>
+          <Button
+            disabled={disabled}
+            tooltip={disabled ? `Vous ne pouvez pas exporter plus de ${MAX_EXPORT_VOLONTAIRES} inscriptions à la fois.` : undefined}
+            title={user.role === ROLES.REFERENT_DEPARTMENT ? "Exporter les volontaires scolarisés dans le département" : "Exporter les volontaires scolarisés dans la région"}
+            leftIcon={<BsDownload className="text-white h-4 w-4 group-hover:!text-blue-600" />}
+            loading={isPending}
+            className="w-full"
+            onClick={() => setShowModal(true)}
+          />
+          <ModalConfirm
+            isOpen={showModal}
+            title="Exporter les données"
+            message={`\nVous allez recevoir un mail pour télécharger votre export. Pensez à regarder dans vos courriers indésirables.\n
           En téléchargeant ces informations, vous vous engagez à les supprimer après consultation en application des dispositions légales sur la protection des données personnelles (RGPD, CNIL).`}
-          onCancel={() => setShowModal(false)}
-          onConfirm={() => {
-            exportInscriptions();
-            setShowModal(false);
-          }}
-          onChange={() => {}}
-          showHeaderText
-          showHeaderIcon
-          icon={<HiDownload size={48} className="text-blue-600 bg-blue-100 rounded-full p-2" />}
-          headerText=""
-          confirmText="Confirmer"
-          cancelText="Annuler"
-        />
+            onCancel={() => setShowModal(false)}
+            onConfirm={() => {
+              exportInscriptions();
+              setShowModal(false);
+            }}
+            onChange={() => {}}
+            showHeaderText
+            showHeaderIcon
+            icon={<HiDownload size={48} className="text-blue-600 bg-blue-100 rounded-full p-2" />}
+            headerText=""
+            confirmText="Confirmer"
+            cancelText="Annuler"
+          />
+        </>
       )}
       {!isAsync && (
         <ExportComponent

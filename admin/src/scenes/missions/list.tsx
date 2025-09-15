@@ -36,7 +36,7 @@ import ExportMissionsModal from "./components/ExportMissionsModal";
 import { Tooltip } from "@snu/ds/admin";
 
 export const MAX_EXPORT_MISSIONS_SYNC = 5000;
-export const MAX_EXPORT_CANDIDATURES_SYNC = 700;
+export const MAX_EXPORT_CANDIDATURES_SYNC = 150;
 export const MAX_EXPORT_CANDIDATURES = 5000;
 
 interface MissionDto extends MissionType {
