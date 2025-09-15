@@ -49,7 +49,7 @@ import DeletedInscriptionPanel from "./deletedPanel";
 import Panel from "./panel";
 import ExportInscriptionsButton from "./ExportInscriptionsButton";
 import ExportInscriptionsScolariseButton from "./ExportInscriptionsScolariseButton";
-import { MAX_EXPORT_VOLONTAIRES } from "../volontaires/list";
+import { MAX_EXPORT_VOLONTAIRES, MAX_EXPORT_VOLONTAIRES_SYNC } from "../volontaires/list";
 
 interface ParamData {
   page: number;
@@ -291,9 +291,23 @@ export default function Inscription(): JSX.Element {
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
-            <ExportInscriptionsButton selectedFilters={selectedFilters} disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
-            {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-              <ExportInscriptionsScolariseButton user={user} selectedFilters={selectedFilters} disabled={!!paramData?.count && paramData?.count > MAX_EXPORT_VOLONTAIRES} />
+
+            {!!paramData?.count && (
+              <>
+                <ExportInscriptionsButton
+                  selectedFilters={selectedFilters}
+                  isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                  disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                />
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+                  <ExportInscriptionsScolariseButton
+                    user={user}
+                    selectedFilters={selectedFilters}
+                    isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                    disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                  />
+                )}
+              </>
             )}
           </div>
         </div>
