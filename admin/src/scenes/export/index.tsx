@@ -62,7 +62,7 @@ export default function ExportPage() {
       {!isError && (
         <>
           <div className="text-center">Si le téléchargement ne démarre pas, veuillez cliquer sur le bouton ci-dessous.</div>
-          <Button title="Télécharcher mon export" onClick={handleDownloadFile} className="mb-10" />
+          <Button title="Télécharger mon export" onClick={handleDownloadFile} className="mb-10" />
           <i className="text-xs">(le fichier n'est disponible que quelques heures après la réception de l'email de confirmation)</i>
         </>
       )}
