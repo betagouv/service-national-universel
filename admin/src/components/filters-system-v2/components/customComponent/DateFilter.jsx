@@ -29,7 +29,7 @@ export default function DateFilter(props) {
 
   return (
     <>
-      <DatePicker value={date} onChange={(e) => (e ? props.setValue([dayjs(e).format("YYYY/MM/DD")]) : [])} fromYear={2019} toYear={2025} />
+      <DatePicker value={date} onChange={(e) => (e ? props.setValue([dayjs(e).format("YYYY/MM/DD")]) : [])} fromYear={2019} toYear={2028} />
     </>
   );
 }
