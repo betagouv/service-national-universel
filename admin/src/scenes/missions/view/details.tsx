@@ -172,7 +172,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
     }
 
     setLoadingBottom(true);
-    if (values.startAt && new Date(values.startAt) < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date de début est incorrecte";
+    if (!values.startAt) error.startAt = "La date de début est incorrecte";
     if (values.startAt && values.endAt && new Date(values.startAt) > new Date(values.endAt)) error.endAt = "La date de fin est incorrecte";
     // @ts-ignore
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
