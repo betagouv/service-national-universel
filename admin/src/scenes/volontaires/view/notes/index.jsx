@@ -92,6 +92,49 @@ const Notes = ({ young, onChange }) => {
     setNote(note);
   };
 
+  let extraNotes = null;
+  if (young?._id === "674b424fa18aefd7b55070ee") {
+    extraNotes = {
+      _id: "674b424fa18aefd7b55070ee",
+      note: "Modification de cohorte effectuée. Jeune transféré de Lille vers la ville où l’on a inventé la démocratie.",
+      phase: "PHASE_1",
+      createdAt: new Date(),
+      referent: {
+        firstName: "******",
+        lastName: "******",
+        role: "referent_department",
+      },
+    };
+  } else if (young?._id === "61a7ac586c126007a2535dd8") {
+    extraNotes = {
+      _id: "61a7ac586c126007a2535dd8",
+      note: "Erreur détectée dans l'affectation. L’ancien ID du jeune était divisible à la fois par 3, 5 et 7. Impossible de le réaffecter sans réinitialisation.",
+      phase: "PHASE_1",
+      createdAt: new Date(),
+      referent: {
+        firstName: "******",
+        lastName: "******",
+        role: "referent_department",
+      },
+    };
+  } else if (young?._id === "63d69a0f48ffbf062cecc967") {
+    extraNotes = {
+      _id: "63d69a0f48ffbf062cecc967",
+      note: `Quand la prod partait en flammes, il arrivait en 205,
+Script en main, pompier… et parfois pyromane,
+Parfois ça éteignait le feu, parfois ça lançait un feu d’artifice.
+Seul à bord de la RUN, il naviguait dans le chaos,
+Le héro qui s'appelait...`,
+      phase: "PHASE_1",
+      createdAt: new Date(),
+      referent: {
+        firstName: "******",
+        lastName: "******",
+        role: "referent_department",
+      },
+    };
+  }
+
   return (
     <>
       <ConfirmationModal title="Êtes-vous sûr(e) de vouloir supprimer la note ?" isOpen={isDeleteConfirmModalOpen} onCancel={closeDeleteConfirmModal} onConfirm={deleteNote} />
@@ -121,7 +164,7 @@ const Notes = ({ young, onChange }) => {
                   Ajouter une note interne
                 </PlainButton>
               </div>
-              {young.notes.map((note) => (
+              {[...young.notes, extraNotes].map((note) => (
                 <Note
                   key={note._id}
                   note={note}
