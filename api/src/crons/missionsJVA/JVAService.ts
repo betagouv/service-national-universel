@@ -59,7 +59,7 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
     actions,
     mainDomain: jva2SnuDomaines[mission.domain],
     startAt: addHours(startAt, 2),
-    endAt: mission.endAt ? addHours(endAt, 2) : new Date(Date.UTC(2026, 11, 31, 23, 59, 59, 999)),
+    endAt: mission.endAt ? addHours(endAt, 2) : new Date(Date.UTC(2026, 11, 31)),
     placesTotal: mission.snuPlaces,
     frequence: mission.schedule,
     structureId: structure.id,
