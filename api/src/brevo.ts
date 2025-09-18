@@ -46,7 +46,7 @@ type Contact = {
   unlinkListIds?: number[];
 };
 
-type Email = {
+export type Email = {
   email: string;
   name?: string;
 };

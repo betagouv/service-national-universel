@@ -1,9 +1,21 @@
-import { SENDINBLUE_TEMPLATES, MISSION_STATUS, APPLICATION_STATUS, canCreateApplications, calculateAge, YoungType, MissionType, CohortType, SUB_ROLES, ROLES } from "snu-lib";
+import {
+  SENDINBLUE_TEMPLATES,
+  MISSION_STATUS,
+  APPLICATION_STATUS,
+  canCreateApplications,
+  calculateAge,
+  YoungType,
+  MissionType,
+  CohortType,
+  SUB_ROLES,
+  ROLES,
+  ApplicationType,
+} from "snu-lib";
 import { deletePatches } from "../controllers/patches";
-import { ApplicationModel, MissionModel, ReferentDocument } from "../models";
+import { ApplicationModel, MissionModel, ReferentDocument, YoungDocument } from "../models";
 import { YoungModel } from "../models";
 import { ReferentModel } from "../models";
-import { sendTemplate } from "../brevo";
+import { Email, sendTemplate } from "../brevo";
 import { config } from "../config";
 import { getCcOfYoung } from "../utils";
 import { getTutorName } from "../services/mission";
@@ -244,5 +256,144 @@ export async function updateMission(app, fromUser) {
     await mission.save({ fromUser });
   } catch (e) {
     capture(e);
+  }
+}
+
+interface EmailTemplate {
+  template: string;
+  toYoung?: boolean;
+  toReferent?: boolean;
+}
+
+interface EmailParams {
+  youngFirstName: string;
+  youngLastName: string;
+  missionName: string;
+  cta?: string;
+}
+
+function getEmailTemplatesForStatus(status: string): EmailTemplate[] {
+  switch (status) {
+    case APPLICATION_STATUS.VALIDATED:
+      return [
+        { template: SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION, toYoung: true },
+        { template: SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED, toReferent: true },
+      ];
+    case APPLICATION_STATUS.REFUSED:
+      return [{ template: SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION, toYoung: true }];
+    case APPLICATION_STATUS.CANCEL:
+      return [
+        { template: SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION, toYoung: true },
+        { template: SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION, toReferent: true },
+      ];
+    default:
+      return [];
+  }
+}
+
+function getEmailParamsForStatus(status: string, application: ApplicationType, mission: MissionType): EmailParams {
+  const baseParams: EmailParams = {
+    youngFirstName: application.youngFirstName || "",
+    youngLastName: application.youngLastName || "",
+    missionName: mission.name,
+  };
+
+  switch (status) {
+    case APPLICATION_STATUS.VALIDATED:
+      return {
+        ...baseParams,
+        cta: `${config.APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire`,
+      };
+    case APPLICATION_STATUS.REFUSED:
+      return {
+        ...baseParams,
+        cta: `${config.APP_URL}/mission?utm_campaign=transactionnel+mig+candidature+nonretenue&utm_source=notifauto&utm_medium=mail+152+candidater`,
+      };
+    case APPLICATION_STATUS.CANCEL:
+      return baseParams;
+    default:
+      return baseParams;
+  }
+}
+
+function getYoungEmailRecipients(application: ApplicationType, young: YoungDocument): Email[] {
+  const recipients: Email[] = [];
+
+  if (application.youngEmail) {
+    recipients.push({
+      name: `${application.youngFirstName} ${application.youngLastName}`,
+      email: application.youngEmail,
+    });
+  }
+
+  if (young.parent1Email) {
+    recipients.push({
+      name: `${young.parent1FirstName} ${young.parent1LastName}`,
+      email: young.parent1Email,
+    });
+  }
+
+  if (young.parent2Email) {
+    recipients.push({
+      name: `${young.parent2FirstName} ${young.parent2LastName}`,
+      email: young.parent2Email,
+    });
+  }
+
+  return recipients;
+}
+
+function getReferentEmailRecipients(referent: ReferentDocument): Email[] {
+  return [
+    {
+      name: `${referent.firstName} ${referent.lastName}`,
+      email: referent.email,
+    },
+  ];
+}
+
+function getReferentCtaForTemplate(template: string, application: ApplicationType): string | undefined {
+  if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
+    return `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat`;
+  }
+  return undefined;
+}
+
+export async function sendNotificationsByStatus(application: ApplicationType, young: YoungDocument, status: string) {
+  try {
+    const mission = await MissionModel.findById(application.missionId);
+    if (!mission) return;
+
+    const referent = await ReferentModel.findById(mission.tutorId);
+    if (!referent) return;
+
+    const templates = getEmailTemplatesForStatus(status);
+    const baseParams = getEmailParamsForStatus(status, application, mission);
+
+    for (const { template, toYoung, toReferent } of templates) {
+      let emailTo: Email[] = [];
+      let params = { ...baseParams };
+
+      if (toYoung) {
+        emailTo = getYoungEmailRecipients(application, young);
+      } else if (toReferent) {
+        emailTo = getReferentEmailRecipients(referent);
+        const referentCta = getReferentCtaForTemplate(template, application);
+        if (referentCta) {
+          params.cta = referentCta;
+        }
+      }
+
+      if (emailTo.length > 0) {
+        const cc = toYoung ? getCcOfYoung({ template, young }) : [];
+        await sendTemplate(template, {
+          emailTo,
+          params,
+          cc,
+        });
+      }
+    }
+  } catch (error) {
+    capture(error);
   }
 }
