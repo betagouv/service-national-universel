@@ -13,9 +13,10 @@ export interface UseMacroSelectionProps {
   onRefresh?: () => Promise<void>;
   handleAddMessage?: () => Promise<boolean>;
   filtered?: boolean;
+  disabled?: boolean;
 }
 
-export function useMacroSelection({ selectedTicket, onClose, onRefresh, handleAddMessage, filtered }: UseMacroSelectionProps) {
+export function useMacroSelection({ selectedTicket, onClose, onRefresh, handleAddMessage, filtered, disabled }: UseMacroSelectionProps) {
   const user = useSelector((state: { Auth: { user: any } }) => state.Auth.user);
   const queryClient = useQueryClient();
 
@@ -87,8 +88,8 @@ export function useMacroSelection({ selectedTicket, onClose, onRefresh, handleAd
   }, [macros, filtered]);
 
   const canSelectMacro = useMemo(() => {
-    return selectedTicket.length > 0;
-  }, [selectedTicket.length]);
+    return selectedTicket.length > 0 && !disabled;
+  }, [selectedTicket.length, disabled]);
 
   return {
     macros,
