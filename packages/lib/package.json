@@ -4,6 +4,10 @@
   "description": "",
   "main": "dist/index",
   "types": "dist/index",
+  "exports": {
+    ".": "./src/index.ts",
+    "./parseEnv": "./src/utils/parseEnv.ts"
+  },
   "files": [
     "dist"
   ],
