@@ -28,6 +28,7 @@ addGlobalEventProcessor((event) => {
 function initSentry(app) {
   if (config.ENABLE_SENTRY) {
     init({
+      debug: config.SENTRY_DEBUG_MODE,
       dsn: SENTRY_DSN,
       environment: config.ENVIRONMENT,
       release: config.RELEASE,
