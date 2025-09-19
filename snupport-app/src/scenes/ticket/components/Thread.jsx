@@ -85,11 +85,11 @@ const Thread = ({
     }
   }, [selectedImage]);
 
-  async function updateMessages() {
+  async function updateMessages(shouldScroll = true) {
     const { ok, data } = await API.get({ path: "/message", query: { ticketId: ticket._id } });
     if (!ok) return toast.error("Une erreur est survenue");
     setMessages(data);
-    if (scrollDiv.current) {
+    if (shouldScroll && scrollDiv.current) {
       scrollDiv.current.scrollIntoView({ behavior: "smooth" });
     }
     return;
@@ -200,7 +200,7 @@ const Thread = ({
         toast.success("Message enregistré");
       }
       setLastSavedAt(new Date());
-      await updateMessages();
+      await updateMessages(false);
       await updateTicket();
     } catch (error) {
       console.error(error);
