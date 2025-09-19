@@ -410,6 +410,7 @@ const Thread = ({
             }}
             className="w-[250px]"
             filtered={true}
+            disabled={isSaving}
           />
         </div>
       )}
