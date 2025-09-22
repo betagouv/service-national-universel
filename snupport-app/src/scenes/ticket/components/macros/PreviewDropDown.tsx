@@ -11,6 +11,7 @@ interface MacroDropdownProps {
   handleAddMessage?: () => Promise<boolean>;
   className?: string;
   filtered?: boolean;
+  disabled?: boolean;
 }
 
 export default function PreviewMacroDropdown(props: MacroDropdownProps) {
