@@ -129,7 +129,10 @@ router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) 
 
 router.get("/knowledgeBase/search", async (req: UserRequest, res) => {
   try {
-    const { ok, data } = await SNUpport.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}`, { method: "GET", credentials: "include" });
+    const { ok, data } = await SNUpport.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}&status=PUBLISHED`, {
+      method: "GET",
+      credentials: "include",
+    });
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     return res.status(200).send({ ok: true, data });
   } catch (error) {

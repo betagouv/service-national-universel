@@ -468,6 +468,7 @@ router.get(
   validateQuery(
     Joi.object({
       search: Joi.string(),
+      status: Joi.string().valid("PUBLISHED", "DRAFT", "ARCHIVED").optional(),
     }).prefs({ presence: "required", stripUnknown: true })
   ),
   async (req, res) => {
@@ -487,7 +488,9 @@ router.get(
     };
     if (req.cleanParams.allowedRole !== "admin") {
       query.allowedRoles = req.cleanParams.allowedRole;
-      query.status = "PUBLISHED";
+    }
+    if (req.cleanQuery.status) {
+      query.status = req.cleanQuery.status;
     }
     const results = await KnowledgeBaseModel.find(query).limit(20);
 
