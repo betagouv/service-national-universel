@@ -42,7 +42,7 @@ import {
   updateYoungApplicationFilesType,
 } from "../utils";
 import { scanFile } from "../utils/virusScanner";
-import { getAuthorizationToApply, updateMission } from "../application/applicationService";
+import { getAuthorizationToApply, updateMission, sendNotificationsByStatus } from "../application/applicationService";
 import { apiEngagement } from "../services/gouv.fr/api-engagement";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
@@ -334,6 +334,10 @@ router.post(
         await updateYoungPhase2StatusAndHours(young, req.user);
         await updateYoungStatusPhase2Contract(young, req.user);
         await updateMission(application, req.user);
+
+        if (young) {
+          await sendNotificationsByStatus(application, young, valueKey.key);
+        }
       });
       res.status(200).send({ ok: true });
     } catch (error) {
