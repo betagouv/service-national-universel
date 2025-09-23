@@ -25,7 +25,9 @@ console.log("ENVIRONMENT:", config.ENVIRONMENT);
 app.use(logger("dev"));
 
 const origin = [config.SNU_URL_APP, config.SNU_URL_ADMIN, config.SNUPPORT_URL_KB, config.SNUPPORT_URL_ADMIN];
-console.log("origin", origin);
+if (config.ENVIRONMENT === "development") {
+  origin.push(config.KNOWLEDGE_BASE_PUBLIC_URL);
+}
 app.use(express.json({ limit: "10mb" }));
 app.use(
   cors({

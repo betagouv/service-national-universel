@@ -74,6 +74,7 @@ export const config = {
   SNU_URL_ADMIN: _env(envStr, "SNU_URL_ADMIN", "http://localhost:8082"),
   SNUPPORT_URL_ADMIN: _env(envStr, "SNUPPORT_URL_ADMIN", "http://localhost:8092"),
   SNUPPORT_URL_KB: _env(envStr, "SNUPPORT_URL_KB", "http://localhost:8091"),
+  KNOWLEDGE_BASE_PUBLIC_URL: _env(envStr, "KNOWLEDGE_BASE_PUBLIC_URL", "http://localhost:8084"),
   CELLAR_ENDPOINT: _env(envStr, "CELLAR_ENDPOINT"),
   CELLAR_KEYID: _env(envStr, "CELLAR_KEYID"),
   CELLAR_KEYSECRET: _env(envStr, "CELLAR_KEYSECRET"),
