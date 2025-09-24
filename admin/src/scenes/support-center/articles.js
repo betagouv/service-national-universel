@@ -2,7 +2,7 @@ import { knowledgebaseURL } from "../../config";
 
 export const structureArticles = [
   {
-    title: "Livret d'accueil structure",
+    title: "AAAAAALivret d'accueil structure",
     emoji: "🏠",
     body: `Découvrez en quelques minutes les éléments de prise en main...`,
     url: `${knowledgebaseURL}/base-de-connaissance/livret-daccueil-structure`,
