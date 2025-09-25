@@ -63,47 +63,9 @@ export const adminArticles = [
   },
 ];
 
-export const visitorArticles = [
-  {
-    title: "Les phases du SNU",
-    emoji: "🏷️",
-    body: "Phase 0 : Les inscriptions. Les jeunes de 15 à 17 ans qui souhaitent...",
-    url: `${knowledgebaseURL}/base-de-connaissance/les-phases-du-snu-1`,
-  },
-  {
-    title: "Mon tableau de bord",
-    emoji: "📊",
-    body: "Découvrez comment utiliser votre tableau de bord...",
-    url: `${knowledgebaseURL}/base-de-connaissance/mon-tableau-de-bord`,
-  },
-  {
-    title: "Les statuts Phase 2 des volontaires",
-    emoji: "🚩",
-    body: "En attente de validation : La candidature...",
-    url: `${knowledgebaseURL}/base-de-connaissance/les-statuts-phase-2-des-volontaires-1-1`,
-  },
-];
+export const visitorArticles = [];
 
-export const headCenterArticles = [
-  {
-    title: "Livret d'accueil chef de centre",
-    emoji: "🏕️",
-    body: "Bonjour et bienvenue au sein du projet Service National Universel...",
-    url: `${knowledgebaseURL}/base-de-connaissance/livret-daccueil-chef-de-centre`,
-  },
-  {
-    title: "Les phases du SNU",
-    emoji: "🏷️",
-    body: "Phase 0 : Les inscriptions. Les jeunes de 15 à 17 ans qui souhaitent...",
-    url: `${knowledgebaseURL}/base-de-connaissance/les-phases-du-snu-1`,
-  },
-  {
-    title: "Chef de centre - Gestion de mon centre",
-    emoji: "📊",
-    body: `Tutoriel pour apprendre à gérer votre centre...`,
-    url: `${knowledgebaseURL}/base-de-connaissance/chef-de-centre-mon-tableau-de-bord`,
-  },
-];
+export const headCenterArticles = [];
 
 export const administrator_cleArticles = [];
 

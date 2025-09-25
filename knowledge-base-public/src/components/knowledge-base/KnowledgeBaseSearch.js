@@ -28,7 +28,7 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
     clearTimeout(searchTimeout.current);
     searchTimeout.current = setTimeout(async () => {
       setIsSearching(true);
-      const response = await API.get({ path: `/knowledge-base/${restriction}/search`, query: { search } });
+      const response = await API.get({ path: `/knowledge-base/${restriction}/search`, query: { search, status: "PUBLISHED" } });
       setIsSearching(false);
       if (response.ok) setItems(response.data);
     }, 1000);
@@ -80,7 +80,7 @@ export default function KnowledgeBaseSearch({ open = false, setOpen }) {
                       className="w-full rounded-md border-0 bg-white p-3 px-10 text-gray-800 shadow-sm sm:text-sm sm:leading-6"
                       onChange={computeSearch}
                       onKeyDown={(e) => {
-                        if (e.key === 'Enter') {
+                        if (e.key === "Enter") {
                           e.preventDefault();
                         }
                       }}

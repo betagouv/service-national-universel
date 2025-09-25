@@ -33,28 +33,10 @@ const articles = [
     url: `${knowledgebaseURL}/base-de-connaissance/je-cree-une-nouvelle-mission-1`,
   },
   {
-    title: "Phase 0 : le parcours des inscriptions",
-    emoji: "📄",
-    body: "Rédaction du dossier d'inscription : Le jeune...",
-    url: `${knowledgebaseURL}/base-de-connaissance/phase-0-le-parcours-des-inscriptions`,
-  },
-  {
-    title: "Phase 1 : l'organisation du séjour de cohésion",
-    emoji: "🌲",
-    body: "Lorsque l'inscription du volontaire est validée...",
-    url: `${knowledgebaseURL}/base-de-connaissance/phase-1-lorganisation-du-sejour-de-cohesion`,
-  },
-  {
     title: "Phase 2 : le parcours d'une MIG",
     emoji: "🤝",
     body: "La publication d'une MIG : La structure...",
     url: `${knowledgebaseURL}/base-de-connaissance/phase-2-le-parcours-dune-mig`,
-  },
-  {
-    title: "Phase 3 : le parcours de l'engagement",
-    emoji: "🌟",
-    body: "Optionnelle, la phase 3 vous permet de poursuivre...",
-    url: `${knowledgebaseURL}/base-de-connaissance/phase-3-le-parcours-de-lengagement-1`,
   },
   {
     title: "J'invite un nouvel utilisateur",
