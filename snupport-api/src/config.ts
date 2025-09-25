@@ -1,48 +1,7 @@
 import dotenv from "dotenv";
+import { envStr, envInt, envBool } from "snu-lib/parseEnv";
 
-// TODO : replace with snu-lib functions
-function envStr(value: any, fallback?: string) {
-  if (value === undefined) {
-    if (fallback === undefined) {
-      throw new Error("undefined value");
-    } else {
-      return fallback;
-    }
-  }
-  return value;
-}
-
-function envInt(value: any, fallback?: number) {
-  if (value === undefined) {
-    if (fallback === undefined) {
-      throw new Error("undefined value");
-    } else {
-      return fallback;
-    }
-  }
-  const intValue = parseInt(value);
-  if (isNaN(intValue)) {
-    throw new Error("invalid integer value");
-  }
-  return intValue;
-}
-
-function envBool(value: any, fallback?: boolean) {
-  if (value === undefined) {
-    if (fallback === undefined) {
-      throw new Error("undefined value");
-    } else {
-      return fallback;
-    }
-  }
-  if (value === "true") {
-    return true;
-  } else if (value === "false") {
-    return false;
-  }
-  throw new Error("invalid boolean value");
-}
-// END
+// // TODO : replace with snu-lib functions
 
 function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallback?: T) {
   try {
