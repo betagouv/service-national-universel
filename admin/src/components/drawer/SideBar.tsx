@@ -1,4 +1,4 @@
-import React, { ReactElement, useEffect } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import cx from "classnames";
@@ -43,6 +43,7 @@ import SwitchSession from "./components/SwitchSession";
 import Profil from "./components/Profil";
 import InviteHeader from "./components/invite";
 import { isResponsableDeCentre } from "snu-lib";
+import { InputText } from "@snu/ds/admin";
 
 //Css !important becuse of bootstrap override
 
@@ -304,6 +305,7 @@ const SideBar = ({ sessionsList }) => {
 
   return (
     <div
+      id="sideBar"
       className={cx(
         "sticky flex flex-col inset-y-0  z-40 print:hidden",
         { "w-[250px]": open },
@@ -329,11 +331,43 @@ const SideBar = ({ sessionsList }) => {
             </div>
           </div>
         </div>
+        <EnigmeInput />
         <Profil sideBarOpen={open} user={user} setOpenInvite={setOpenInvite} />
       </div>
       {[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
         <InviteHeader label="Inviter un nouvel utilisateur" open={openInvite} setOpen={() => setOpenInvite(false)} />
       )}
+    </div>
+  );
+};
+
+const EnigmeInput = () => {
+  // on enter press redirect to /enigme/code
+  const handleEnter = (e) => {
+    if (e.key === "Enter") {
+      window.location.href = `/enigme/${code}`;
+    }
+  };
+  const [code, setCode] = useState("");
+  return (
+    <div className="flex flex-col gap-2 px-2">
+      <p className="text-sm text-[#EEEFF5]/80 group-hover:text-[#EEEFF5]">Entrez le code pour accéder à la prochaine enigme</p>
+      <InputText
+        name="code"
+        type="text"
+        placeholder="response"
+        value={code}
+        onChange={(e) =>
+          setCode(
+            e.target.value
+              .replaceAll(" ", "")
+              .toLocaleLowerCase()
+              .normalize("NFD")
+              .replace(/[\u0300-\u036f]/g, ""),
+          )
+        }
+        onKeyDown={handleEnter}
+      />
     </div>
   );
 };

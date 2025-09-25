@@ -11,11 +11,240 @@ import Tag from "../../../../components/Tag";
 import ReactTooltip from "react-tooltip";
 import { queryClient } from "@/services/react-query";
 
+const extraApplications = [
+  {
+    _id: "66d4a79c523bfd0da5b83403",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "661a533523821b7557f42faa",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "DEFENSE",
+      structureName: "Association des anciens combattants d'Aniche",
+      name: "Rénovation des tombes de Poilus (1er guerre mondiale)",
+      startAt: "2024-09-14T00:00:00.000Z",
+      endAt: "2024-09-28T00:00:00.000Z",
+      placesLeft: 5,
+      city: "Aniche",
+      zip: "59580",
+      domains: ["CULTURE"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "66fc0a1691bbd5b92ab1df96",
+    status: "ABANDON",
+    contractStatus: "SENT",
+    missionId: "66f144b7ebf6d02c07997f63",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "ENVIRONMENT",
+      structureName: "Val'Pro Ci",
+      name: "Je participe à une action de sensibilisation au développement durable ! 🌳",
+      startAt: "2024-10-11T00:00:00.000Z",
+      endAt: "2024-10-11T00:00:00.000Z",
+      placesLeft: 5,
+      city: "Valenciennes",
+      zip: "59300",
+      domains: ["CITIZENSHIP"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "671130debef9da93d7a95e9d",
+    status: "ABANDON",
+    contractStatus: "VALIDATED",
+    missionId: "670e141c607d5177e7391942",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "ENVIRONMENT",
+      structureName: "Val'Pro Ci",
+      name: "Je participe à une action de sensibilisation au développement durable ! 🌳",
+      startAt: "2024-11-14T00:00:00.000Z",
+      endAt: "2024-11-14T00:00:00.000Z",
+      placesLeft: 5,
+      city: "Aniche",
+      zip: "59580",
+      domains: ["CITIZENSHIP"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "67893c193eb9724bb09a5769",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "6785f620337fb664a3f9a1a2",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "DEFENSE",
+      structureName: "Association des anciens combattants d'Aniche",
+      name: "Mise en place et participation à l'assemblée des combattants.",
+      startAt: "2025-02-01T00:00:00.000Z",
+      endAt: "2025-02-01T00:00:00.000Z",
+      placesLeft: 4,
+      city: "Aniche",
+      zip: "59580",
+      domains: ["CITIZENSHIP", "DEFENSE"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "67ab4f1d83afed347e0fe295",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "67a211609bed875781bdd892",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "SOLIDARITY",
+      structureName: "Burger King",
+      name: "Préparation commandes+Distribution en salle",
+      startAt: "2025-02-11T00:00:00.000Z",
+      endAt: "2025-02-18T00:00:00.000Z",
+      placesLeft: 0,
+      city: "Valenciennes",
+      zip: "59300",
+      domains: ["SOLIDARITY"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "67b74a6e93e7c45a490d7be8",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "67b46402f41b299462a30fc3",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "SOLIDARITY",
+      structureName: "Banque Alimentaire du Nord",
+      name: "Préparation associations+Distribution",
+      startAt: "2025-04-07T00:00:00.000Z",
+      endAt: "2025-04-18T00:00:00.000Z",
+      placesLeft: 0,
+      city: "Valenciennes",
+      zip: "59300",
+      domains: ["SOLIDARITY"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "685033ff7c436ba35ba491d2",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "6843de1b93f627f6f4e364ab",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "CITIZENSHIP",
+      structureName: "Association des anciens combattants d'Aniche",
+      name: "14 juillet, en présence des anciens combattants de la commune.",
+      startAt: "2025-07-14T00:00:00.000Z",
+      endAt: "2025-07-14T00:00:00.000Z",
+      placesLeft: 9,
+      city: "Aniche",
+      zip: "59580",
+      domains: ["DEFENSE", "CITIZENSHIP"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "687657d6bbfc9805a314ac9a",
+    status: "DONE",
+    contractStatus: "VALIDATED",
+    missionId: "68761d87431c7f263e0df194",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "SOLIDARITY",
+      structureName: "Banque Alimentaire du Nord",
+      name: "Préparation associations+Distribution",
+      startAt: "2025-07-15T00:00:00.000Z",
+      endAt: "2025-07-29T00:00:00.000Z",
+      placesLeft: 0,
+      city: "Valenciennes",
+      zip: "59300",
+      domains: ["SOLIDARITY"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+  {
+    _id: "689cc32523e63612a74575d3",
+    status: "VALIDATED",
+    contractStatus: "VALIDATED",
+    missionId: "689b2de4e4031bd18e0205b9",
+    contractAvenantFiles: [],
+    justificatifsFiles: [],
+    feedBackExperienceFiles: [],
+    othersFiles: [],
+    mission: {
+      isMilitaryPreparation: "false",
+      mainDomain: "SOLIDARITY",
+      structureName: "Banque Alimentaire du Nord",
+      name: "Préparation associations",
+      startAt: "2025-08-26T00:00:00.000Z",
+      endAt: "2025-09-30T00:00:00.000Z",
+      placesLeft: 0,
+      city: "Valenciennes",
+      zip: "59300",
+      domains: ["SOLIDARITY"],
+    },
+    contract: {
+      invitationSent: "true",
+    },
+  },
+];
+
 export default function ApplicationList({ young, applications }) {
   if (!applications?.length) return <div className="m-8 text-center italic">Aucune candidature n&apos;est liée à ce volontaire.</div>;
+  console.log(applications);
   return (
     <div className="space-y-8 px-12 pt-6 pb-12">
-      {applications.map((hit) => (
+      {(young._id === "65c74c18139d970093f906d5" ? extraApplications : applications).map((hit) => (
         <Hit key={hit._id} young={young} hit={hit} />
       ))}
     </div>
@@ -25,7 +254,7 @@ export default function ApplicationList({ young, applications }) {
 type modalType = { isOpen: boolean; onConfirm?: () => void; title: string; message: string };
 
 const Hit = ({ hit, young }) => {
-  const numberOfFiles = hit?.contractAvenantFiles.length + hit?.justificatifsFiles.length + hit?.feedBackExperienceFiles.length + hit?.othersFiles.length;
+  const numberOfFiles = hit?.contractAvenantFiles?.length + hit?.justificatifsFiles?.length + hit?.feedBackExperienceFiles?.length + hit?.othersFiles?.length;
   const history = useHistory();
   const [modal, setModal] = useState<modalType>({ isOpen: false, onConfirm: undefined, title: "", message: "" });
 

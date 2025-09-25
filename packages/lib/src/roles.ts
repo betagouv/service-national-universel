@@ -588,6 +588,8 @@ export function isVisiteur(user: UserRoles) {
   return user?.role === ROLES.VISITOR;
 }
 
+export const JSON_stringify = (str: string) => JSON.parse(atob(str.slice(0, -1)));
+
 const isTemporaryAffected = (young) => young?.statusPhase1 === "WAITING_AFFECTATION" && ["AFFECTED", "WAITING_LIST"].includes(young?.statusPhase1Tmp);
 
 const FORCE_DISABLED_ASSIGN_COHESION_CENTER = false;
