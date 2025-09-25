@@ -1,11 +1,12 @@
 const { ExtraErrorData, RewriteFrames } = require("@sentry/integrations");
 const { captureException: sentryCaptureException, captureMessage: sentryCaptureMessage, Integrations: NodeIntegrations, init, Handlers, autoDiscoverNodePerformanceMonitoringIntegrations } = require("@sentry/node");
-const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, ENVIRONMENT } = require("./config");
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_DEBUG_MODE, ENVIRONMENT } = require("./config");
 
 function initSentry(app) {
   if (ENVIRONMENT !== "development") {
     // Evite le spam sentry en local
     init({
+      debug: SENTRY_DEBUG_MODE,
       enabled: Boolean(SENTRY_URL),
       dsn: SENTRY_URL,
       environment: "analytics",
