@@ -1,7 +1,7 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
 import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
-import { RELEASE, ENVIRONMENT, SNUPPORT_URL_API } from "./config";
+import { RELEASE, ENVIRONMENT, SNUPPORT_URL_API, SENTRY_DEBUG_MODE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -14,6 +14,7 @@ const history = createBrowserHistory();
 function initSentry() {
   if (ENVIRONMENT !== "development") {
     init({
+      debug: SENTRY_DEBUG_MODE,
       dsn: SENTRY_DSN,
       environment: ENVIRONMENT,
       release: RELEASE,

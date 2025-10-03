@@ -9,10 +9,12 @@ export const SentryProvider: Provider = {
     useFactory: (configService: ConfigService) => {
         const environment =  configService.get<string>("environment");
         const sentryDsn = configService.get<string>("sentry.dsn");
+        const sentryDebugMode = configService.get<boolean>("sentry.debugMode");
         const sentryRelease = configService.get<string>("release");
         const sentryTracingSampleRate = configService.get<number>("sentry.tracingSampleRate");
 
         console.info("Sentry configuration:", {
+            sentryDebugMode,
             environment,
             sentryDsn: sentryDsn ? "SET" : "NOT SET",
             sentryRelease,
@@ -24,6 +26,7 @@ export const SentryProvider: Provider = {
         if (sentryDsn && environment === "production") {
             console.log("Initializing Sentry...");
             Sentry.init({
+                debug: sentryDebugMode,
                 dsn: sentryDsn,
                 environment,
                 release: sentryRelease,

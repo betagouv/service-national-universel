@@ -7,10 +7,11 @@ const {
   Handlers,
   autoDiscoverNodePerformanceMonitoringIntegrations,
 } = require("@sentry/node");
-const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE } = require("./config");
+const { SENTRY_URL, SENTRY_TRACING_SAMPLE_RATE, SENTRY_DEBUG_MODE } = require("./config");
 
 function initSentry(app) {
   init({
+    debug: SENTRY_DEBUG_MODE,
     enabled: Boolean(SENTRY_URL),
     dsn: SENTRY_URL,
     environment: "email",
