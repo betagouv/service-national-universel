@@ -1,6 +1,5 @@
 const apiEngagement = require("./syncApiEngagement");
 const missionOutdated = require("./missionOutdated");
-const computeGoalsInscription = require("./computeGoalsInscription");
 const noticePushMission = require("./noticePushMission");
 const contratRelance = require("./contratRelance");
 const applicationPending = require("./applicationPending");
@@ -15,21 +14,13 @@ const missionEquivalencePatches = require("./patch/missionEquivalence");
 const missionPatches = require("./patch/mission");
 const structurePatches = require("./patch/structure");
 const youngPatches = require("./patch/young");
-const classePatches = require("./patch/classe");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
-const parentConsentementReminder = require("./parentConsentementReminder");
 const reminderInscription = require("./reminderInscription");
-const reminderImageRightsParent2 = require("./reminderImageRightsParent2");
 const reminderWaitingCorrection = require("./reminderWaitingCorrection");
-const dsnjExport = require("./dsnjExport");
 const injepExport = require("./injepExport");
-const clotureMissionReminder = require("./clotureInscriptionReminder");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
-const classesStatusUpdate = require("./classesStatusUpdate");
 const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
-const checkClasseCoherence = require("./checkClasseCoherence");
-const autoValidatePhase1 = require("./autoValidatePhase1");
 const checkMissingInProgressWhenValidated = require("./checkMissingInProgress");
 const referentDepartmentOnBoarding = require("./ReferentDepartmentOnBoarding");
 
@@ -57,8 +48,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // missionPatches.handler() : tous les jours à 2h00
 // applicationPatches.handler() : tous les jours à 2h30
 // youngPatches.handler() : tous les jours à 3h00
-// classePatches.handler() : tous les jours à 3h20
-// dsnjExport.handler() : tous les jours à 3h30
 // injepExport.handler() : tous les jours à 3h40
 // refreshMaterializedViews.handler() : tous les jours à 5h00
 
@@ -70,12 +59,8 @@ const everyHours = (x) => `0 */${x} * * *`;
 // contratRelance.handler() : tous les jours à 6h00
 // missionOutdated.handler() : tous les jours à 8h00
 // applicationOutaded.handler() : tous les jours à 7h00
-// computeGoalsInscription.handler() : toutes les heures à la 5ème minute
 // loginAttempts.handler() : tous les jours à 1h00
-// parentConsentementReminder.handler() : tous les jours à 8h27
-// reminderImageRightsParent2.handler() : tous les jours à 10h00
 // clotureMissionReminder.handler() : tous les jours à 14h02
-// classesStatusUpdate.handler() : toutes les heures à la 2ème minute
 // monitorCertificats.handler() : 1er jour de chaque mois à 3h00
 
 function cron(name, crontab, handlers) {
@@ -88,15 +73,10 @@ const CRONS = [
   cron("youngPatches", "0 3 * * *", youngPatches.handler),
   cron("structurePatches", "30 1 * * *", structurePatches.handler),
   cron("missionEquivalencePatches", "45 1 * * *", missionEquivalencePatches.handler),
-  cron("classePatches", "20 3 * * *", classePatches.handler),
-  cron("dsnjExport", "15 04 * * *", dsnjExport.handler),
   cron("injepExport", "40 04 * * *", injepExport.handler),
-  cron("parentConsentementReminder", "27 8 * * *", parentConsentementReminder.handler),
   cron("reminderInscription", "0 11 * * *", reminderInscription.handler),
   cron("reminderWaitingCorrection", "2 11 * * *", reminderWaitingCorrection.handler),
-  cron("reminderImageRightsParent2", "0 10 * * *", reminderImageRightsParent2.handler),
   cron("refreshMaterializedViews", "0 5 * * *", refreshMaterializedViews.handler),
-  cron("clotureMissionReminder", "2 14 * * *", clotureMissionReminder.handler),
   cron("applicationPending", "0 9 * * 1", applicationPending.handler),
   cron("deleteCNIAdnSpecificAmenagementType", "0 15 * * *", deleteCNIAdnSpecificAmenagementType.handler),
   cron("noticePushMission", "2 9 1,16 * *", noticePushMission.handler),
@@ -106,16 +86,12 @@ const CRONS = [
   cron("contratRelance", "0 6 * * *", contratRelance.handler),
   cron("missionOutdated", "0 8 * * *", [missionOutdated.handler, missionOutdated.handlerNotice1Week]),
   cron("applicationOutaded", "0 7 * * *", [applicationOutaded.handler, applicationOutaded.handlerNotice1Week, applicationOutaded.handlerNotice13Days]),
-  cron("computeGoalsInscription", "5 */1 * * *", computeGoalsInscription.handler),
   cron("loginAttempts", "0 1 * * *", loginAttempts.handler),
   cron("syncReferentSupport", "45 2 * * *", syncReferentSupport.handler),
   cron("syncContactSupport", "15 1 * * *", syncContactSupport.handler),
-  cron("classesStatusUpdate", "2 */1 * * *", classesStatusUpdate.handler),
   cron("monitorCertificats", "0 3 1 * *", monitorCertificats.handler),
   cron("checkCoherence", "30 7,12,16 * * *", checkCoherence.handler),
-  cron("checkClasseCoherence", "35 7,12,16 * * *", checkClasseCoherence.handler),
   cron("checkMissingInProgressWhenValidated", "42 1 * * *", checkMissingInProgressWhenValidated.handler),
-  cron("autoValidatePhase1", "20 1 * * *", autoValidatePhase1.handler),
   cron("referentDepartmentOnBoarding", "0 10 * * *", referentDepartmentOnBoarding.handler),
 ];
 
