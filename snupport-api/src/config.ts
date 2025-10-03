@@ -93,4 +93,5 @@ export const config = {
   ENABLE_SENDINBLUE: _env(envBool, "ENABLE_SENDINBLUE", false),
   LOG_LEVEL: _env(envStr, "LOG_LEVEL", "debug"), // error, warn, info, http, debug
   SENDINBLUEKEY: _env(envStr, "SENDINBLUEKEY"),
+  SENTRY_DEBUG_MODE: _env(envBool, "SENTRY_DEBUG_MODE", false),
 };
