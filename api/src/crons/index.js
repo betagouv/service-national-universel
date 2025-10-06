@@ -17,7 +17,6 @@ const youngPatches = require("./patch/young");
 const refreshMaterializedViews = require("./patch/refresh-materialized-views");
 const reminderInscription = require("./reminderInscription");
 const reminderWaitingCorrection = require("./reminderWaitingCorrection");
-const injepExport = require("./injepExport");
 const deleteCNIAdnSpecificAmenagementType = require("./deleteCNIAndSpecificAmenagementType");
 const monitorCertificats = require("./monitorCertificats");
 const checkCoherence = require("./checkCoherence");
@@ -48,7 +47,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 // missionPatches.handler() : tous les jours à 2h00
 // applicationPatches.handler() : tous les jours à 2h30
 // youngPatches.handler() : tous les jours à 3h00
-// injepExport.handler() : tous les jours à 3h40
 // refreshMaterializedViews.handler() : tous les jours à 5h00
 
 // Crons qui peuvent être de  jour :
@@ -73,7 +71,6 @@ const CRONS = [
   cron("youngPatches", "0 3 * * *", youngPatches.handler),
   cron("structurePatches", "30 1 * * *", structurePatches.handler),
   cron("missionEquivalencePatches", "45 1 * * *", missionEquivalencePatches.handler),
-  cron("injepExport", "40 04 * * *", injepExport.handler),
   cron("reminderInscription", "0 11 * * *", reminderInscription.handler),
   cron("reminderWaitingCorrection", "2 11 * * *", reminderWaitingCorrection.handler),
   cron("refreshMaterializedViews", "0 5 * * *", refreshMaterializedViews.handler),
