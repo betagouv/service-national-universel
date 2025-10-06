@@ -98,8 +98,9 @@ export default function Todos({ user }) {
   const totalEngagement = total(stats.engagement);
 
   // Multi column pattern
-  const columnInscription = { icon: <Inscription />, title: "Inscriptions", total: totalInscription, data: stats.inscription };
-  const columnSejour = { icon: <Sejour />, title: "Séjours", total: totalSejour, data: stats.sejour };
+  // DÉCOMMISSIONNEMENT: Vues séjour et inscription désactivées
+  // const columnInscription = { icon: <Inscription />, title: "Inscriptions", total: totalInscription, data: stats.inscription };
+  // const columnSejour = { icon: <Sejour />, title: "Séjours", total: totalSejour, data: stats.sejour };
   const columnEngagement = { icon: <Engagement />, title: "Engagement", total: totalEngagement, data: stats.engagement };
 
   // Single column pattern
@@ -115,13 +116,14 @@ export default function Todos({ user }) {
     case ROLES.HEAD_CENTER:
     case ROLES.HEAD_CENTER_ADJOINT:
     case ROLES.REFERENT_SANITAIRE:
-      Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
-        if (index % 3 === 0) columnTodo1.data[key] = value;
-        if (index % 3 === 1) columnTodo2.data[key] = value;
-        if (index % 3 === 2) columnTodo3.data[key] = value;
-      });
-      columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
-      shouldShowMore = totalInscription + totalSejour + totalEngagement > 9;
+      // DÉCOMMISSIONNEMENT: Vues séjour et inscription désactivées
+      // Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
+      //   if (index % 3 === 0) columnTodo1.data[key] = value;
+      //   if (index % 3 === 1) columnTodo2.data[key] = value;
+      //   if (index % 3 === 2) columnTodo3.data[key] = value;
+      // });
+      // columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
+      // shouldShowMore = totalInscription + totalSejour + totalEngagement > 9;
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
@@ -133,7 +135,7 @@ export default function Todos({ user }) {
       columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
       break;
     default:
-      columns.push(columnInscription, columnSejour, columnEngagement);
+      columns.push(columnEngagement);
       shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
       break;
   }
@@ -142,7 +144,7 @@ export default function Todos({ user }) {
 
   return (
     <div
-      className={`flex ${!isResponsableDeCentre(user) ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
+      className={`flex ${!isResponsableDeCentre(user) ? "w-[50%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
         !fullNote ? "h-[584px]" : "h-fit"
       }`}>
       <div className="grid grid-cols-3 gap-4">

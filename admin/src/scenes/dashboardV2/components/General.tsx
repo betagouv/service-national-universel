@@ -36,12 +36,14 @@ export default function Index() {
       case ROLES.HEAD_CENTER:
       case ROLES.HEAD_CENTER_ADJOINT:
       case ROLES.REFERENT_SANITAIRE:
-        return ["general", "sejour"];
+        // DÉCOMMISSIONNEMENT: Vue séjour désactivée
+        return ["general"];
       case ROLES.RESPONSIBLE:
       case ROLES.SUPERVISOR:
         return ["general", "engagement"];
       default:
-        return ["general", "engagement", "sejour", "inscription"];
+        // DÉCOMMISSIONNEMENT: Vues séjour et inscription désactivées
+        return ["general", "engagement"];
     }
   })();
 
