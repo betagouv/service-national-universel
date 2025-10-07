@@ -9,9 +9,6 @@ import { BadgeNotif } from "@snu/ds/admin";
 import api from "@/services/api";
 
 import getNoteData from "./todos.constants";
-import Engagement from "./ui/icons/Engagement";
-import Inscription from "./ui/icons/Inscription";
-import Sejour from "./ui/icons/Sejour";
 import { isResponsableDeCentre } from "snu-lib";
 
 // Adding Todos to a user role dashboard
@@ -93,18 +90,12 @@ export default function Todos({ user }) {
       </div>
     );
 
-  const totalInscription = total(stats.inscription);
-  const totalSejour = total(stats.sejour);
   const totalEngagement = total(stats.engagement);
 
-  // Multi column pattern
-  // DÉCOMMISSIONNEMENT: Vues séjour et inscription désactivées
-  // const columnInscription = { icon: <Inscription />, title: "Inscriptions", total: totalInscription, data: stats.inscription };
-  // const columnSejour = { icon: <Sejour />, title: "Séjours", total: totalSejour, data: stats.sejour };
-  const columnEngagement = { icon: <Engagement />, title: "Engagement", total: totalEngagement, data: stats.engagement };
+  const columnEngagement = { total: totalEngagement, data: stats.engagement };
 
   // Single column pattern
-  const columnTodo1 = { title: "À faire", total: totalInscription + totalSejour + totalEngagement, data: {} };
+  const columnTodo1 = { title: "À faire", total: totalEngagement, data: {} };
   const columnTodo2 = { data: {} };
   const columnTodo3 = { data: {} };
 
@@ -116,14 +107,6 @@ export default function Todos({ user }) {
     case ROLES.HEAD_CENTER:
     case ROLES.HEAD_CENTER_ADJOINT:
     case ROLES.REFERENT_SANITAIRE:
-      // DÉCOMMISSIONNEMENT: Vues séjour et inscription désactivées
-      // Object.entries({ ...columnInscription.data, ...columnSejour.data }).forEach(([key, value], index) => {
-      //   if (index % 3 === 0) columnTodo1.data[key] = value;
-      //   if (index % 3 === 1) columnTodo2.data[key] = value;
-      //   if (index % 3 === 2) columnTodo3.data[key] = value;
-      // });
-      // columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
-      // shouldShowMore = totalInscription + totalSejour + totalEngagement > 9;
       break;
     case ROLES.SUPERVISOR:
     case ROLES.RESPONSIBLE:
@@ -132,11 +115,17 @@ export default function Todos({ user }) {
         if (index % 3 === 1) columnTodo2.data[key] = value;
         if (index % 3 === 2) columnTodo3.data[key] = value;
       });
-      columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo1.data) }, { ...columnTodo3, total: total(columnTodo1.data) });
+      columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo2.data) }, { ...columnTodo3, total: total(columnTodo3.data) });
+      shouldShowMore = totalEngagement > 9;
       break;
     default:
-      columns.push(columnEngagement);
-      shouldShowMore = totalInscription > 3 || totalSejour > 3 || totalEngagement > 3;
+      Object.entries({ ...columnEngagement.data }).forEach(([key, value], index) => {
+        if (index % 3 === 0) columnTodo1.data[key] = value;
+        if (index % 3 === 1) columnTodo2.data[key] = value;
+        if (index % 3 === 2) columnTodo3.data[key] = value;
+      });
+      columns.push(columnTodo1, { ...columnTodo2, total: total(columnTodo2.data) }, { ...columnTodo3, total: total(columnTodo3.data) });
+      shouldShowMore = totalEngagement > 9;
       break;
   }
 
@@ -144,7 +133,7 @@ export default function Todos({ user }) {
 
   return (
     <div
-      className={`flex ${!isResponsableDeCentre(user) ? "w-[50%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
+      className={`flex ${!isResponsableDeCentre(user) ? "w-[70%]" : "w-full"} flex-col gap-4 rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${
         !fullNote ? "h-[584px]" : "h-fit"
       }`}>
       <div className="grid grid-cols-3 gap-4">

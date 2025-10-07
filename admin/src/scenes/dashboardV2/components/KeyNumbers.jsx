@@ -41,7 +41,7 @@ export default function KeyNumbers({ role }) {
   }, [startDate, endDate, phase]);
 
   return (
-    <div className={`flex w-[50%] flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!open ? "h-[584px]" : "h-fit"}`}>
+    <div className={`flex w-[30%] flex-col rounded-lg bg-white px-4 py-6 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)] ${!open ? "h-[584px]" : "h-fit"}`}>
       <div className="flex items-center justify-between pb-4">
         <div className="flex items-center gap-3">
           <div className="text-sm font-bold leading-5 text-gray-900">Chiffres clés</div>
