@@ -53,7 +53,7 @@ export default function Index() {
       <Header title="Tableau de bord" breadcrumb={[{ title: "Tableau de bord" }]} classNameDivTitle="h-[38px]" />
       <DashboardContainer active="general" availableTab={availableTab}>
         <div className="flex flex-col gap-8 mb-4">
-          <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment</h1>
+          <h1 className="text-[28px] font-bold leading-8 text-gray-900">En ce moment dans la phase Engagement</h1>
           <div className="flex w-full gap-4">
             <Todos user={user} />
             {!isResponsableDeCentre(user) && <KeyNumbers role={user.role} />}

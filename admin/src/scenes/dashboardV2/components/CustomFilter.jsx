@@ -34,42 +34,6 @@ export default function CustomFilter({ setFromDate, setToDate, notesPhase, setNo
               {[ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(role) ? null : (
                 <>
                   <span className="mb-1 px-4 text-sm text-gray-500">Phase</span>
-                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("all")}>
-                    <input
-                      id="phase-all"
-                      aria-describedby="Toutes les phases"
-                      name="phase-all"
-                      type="radio"
-                      className="h-4 w-4 cursor-pointer"
-                      readOnly
-                      checked={notesPhase === "all"}
-                    />
-                    <span className="text-sm font-normal leading-5 text-gray-700">Tous</span>
-                  </div>
-                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("inscription")}>
-                    <input
-                      id="phase-inscription"
-                      aria-describedby="Phase inscription"
-                      name="phase-inscription"
-                      type="radio"
-                      className="h-4 w-4 cursor-pointer"
-                      readOnly
-                      checked={notesPhase === "inscription"}
-                    />
-                    <span className="text-sm font-normal leading-5 text-gray-700">Inscription</span>
-                  </div>
-                  <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("sejour")}>
-                    <input
-                      id="phase-sejour"
-                      aria-describedby="Phase séjour"
-                      name="phase-sejour"
-                      type="radio"
-                      className="h-4 w-4 cursor-pointer"
-                      readOnly
-                      checked={notesPhase === "sejour"}
-                    />
-                    <span className="text-sm font-normal leading-5 text-gray-700">Séjour</span>
-                  </div>
                   <div className="flex cursor-pointer items-center gap-3 px-4 py-1.5 hover:bg-gray-50" onClick={() => setNotesPhase("engagement")}>
                     <input
                       id="phase-engagement"
