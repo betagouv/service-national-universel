@@ -6,9 +6,11 @@ import CheckCircle from "../../assets/icons/CheckCircle";
 import plausibleEvent from "../../services/plausible";
 import usePermissions from "@/hooks/usePermissions";
 import DocumentsPM from "./components/DocumentsPM";
+import { RiInformationLine } from "react-icons/ri";
+import ReactTooltip from "react-tooltip";
 
 export default function HomeDesktop() {
-  const { canViewPhase2 } = usePermissions();
+  const { canViewPhase2, canViewMissions } = usePermissions();
   const history = useHistory();
   const [readMore, setReadMore] = React.useState(false);
 
@@ -82,14 +84,33 @@ export default function HomeDesktop() {
             <div className="hidden h-2/3  border-l-[1px] border-gray-200 lg:flex" />
             <div className="flex flex-col ">
               <div className="text-lg font-semibold leading-6">Vous remplissez les conditions ?</div>
-              <div className="text-lg font-semibold leading-6"> N’attendez plus !</div>
-              <Link
-                to="/mission?MILITARY_PREPARATION=true"
-                onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
-                className="group mt-4 flex items-center gap-1 rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 hover:border-blue-600 hover:bg-white">
-                <HiOutlineSearch className="mr-2 text-[#ffffff] group-hover:text-blue-600" />
-                <div className="flex-1 text-sm text-[#ffffff] group-hover:text-blue-600">Trouver une préparation militaire</div>
-              </Link>
+              <div className="text-lg font-semibold leading-6"> N'attendez plus !</div>
+              {canViewMissions ? (
+                <Link
+                  to="/mission?MILITARY_PREPARATION=true"
+                  onClick={() => plausibleEvent("Phase2/CTA - PM - TrouvezPM")}
+                  className="group mt-4 flex items-center gap-1 rounded-[10px] border-[1px] bg-blue-600 py-2.5 px-3 hover:border-blue-600 hover:bg-white">
+                  <HiOutlineSearch className="mr-2 text-[#ffffff] group-hover:text-blue-600" />
+                  <div className="flex-1 text-sm text-[#ffffff] group-hover:text-blue-600">Trouver une préparation militaire</div>
+                </Link>
+              ) : (
+                <>
+                  <button
+                    disabled
+                    data-tip
+                    data-for="tooltip-delai-pm"
+                    className="mt-4 flex gap-2 justify-center items-center bg-gray-400 text-white rounded-[10px] px-3 py-2.5 cursor-not-allowed">
+                    <HiOutlineSearch className="text-xl" />
+                    <p className="flex-1 text-sm">Trouver une préparation militaire</p>
+                    <RiInformationLine className="text-white" />
+                  </button>
+                  <ReactTooltip id="tooltip-delai-pm" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <span className="text-gray-800">
+                      Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
+                    </span>
+                  </ReactTooltip>
+                </>
+              )}
             </div>
           </div>
         </div>
