@@ -99,7 +99,6 @@ jobs:
         run: ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_STAGING_SNU_ALL }} ${{ github.sha }}
   
   deploy_production:
-    environment: production
     needs: deploy_staging
     runs-on: ubuntu-latest
 
