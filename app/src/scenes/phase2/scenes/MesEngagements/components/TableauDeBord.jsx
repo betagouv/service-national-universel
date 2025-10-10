@@ -6,7 +6,7 @@ import { PHASE2_TOTAL_HOURS, APPLICATION_STATUS } from "snu-lib";
 import { useQuery } from "@tanstack/react-query";
 import useAuth from "@/services/useAuth";
 import { HiPlus, HiSearch } from "react-icons/hi";
-import { RiMedal2Line } from "react-icons/ri";
+import { RiMedal2Line, RiInformationLine } from "react-icons/ri";
 import InfobulleIcon from "@/assets/infobulleIcon.svg";
 import SemiCircleProgress from "./SemiCircleProgress";
 import EquivalenceCard from "./../../../components/EquivalenceCard";
@@ -15,6 +15,7 @@ import { fetchApplications, fetchEquivalences } from "../../../engagement.reposi
 import Loader from "@/components/Loader";
 import MilitaryStatusBadge from "./../../../components/MilitaryStatusBadge";
 import plausibleEvent from "@/services/plausible";
+import usePermissions from "@/hooks/usePermissions";
 
 const Tooltip = ({ className }) => (
   <span className={className}>
@@ -40,6 +41,7 @@ const Tooltip = ({ className }) => (
 
 export default function View() {
   const { young } = useAuth();
+  const { canViewMissions, canCreateEquivalences } = usePermissions();
   const phase2NumberHoursDone = young.phase2NumberHoursDone || 0;
   const applications = useQuery({ queryKey: ["application"], queryFn: () => fetchApplications(young._id) });
   const equivalences = useQuery({ queryKey: ["equivalence"], queryFn: () => fetchEquivalences(young._id) });
@@ -83,18 +85,39 @@ export default function View() {
             <div className="mx-auto w-full md:w-auto">
               <p className="mt-[1rem] md:mt-14 text-2xl font-bold">C'est parti !</p>
               <p className="mt-1 text-gray-400 text-sm">Engagez vous au service de la nation.</p>
-              <Link to="/mission">
-                <p className="mt-3 bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center mx-auto w-full">
-                  <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
-                  Trouver un engagement
-                </p>
-              </Link>
-              <Link to="/phase2/equivalence">
-                <p className="mt-3 border bg-white rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center mx-auto w-full">
-                  <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
-                  Ajouter un engagement réalisé
-                </p>
-              </Link>
+              {canViewMissions ? (
+                <Link to="/mission">
+                  <p className="mt-3 bg-blue-600 text-white hover:bg-blue-800 transition-colors rounded-md px-3 py-2.5 text-center mx-auto w-full">
+                    <HiSearch className="inline-block mr-2 text-xl align-text-bottom" />
+                    Trouver un engagement
+                  </p>
+                </Link>
+              ) : (
+                <>
+                  <button
+                    disabled
+                    data-tip
+                    data-for="tooltip-delai-mesengagements"
+                    className="mt-3 flex gap-2 justify-center items-center bg-gray-400 text-white rounded-md px-3 py-2.5 cursor-not-allowed mx-auto w-full">
+                    <HiSearch className="inline-block text-xl" />
+                    <p>Trouver un engagement</p>
+                    <RiInformationLine className="text-white" />
+                  </button>
+                  <ReactTooltip id="tooltip-delai-mesengagements" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <span className="text-gray-800">
+                      Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
+                    </span>
+                  </ReactTooltip>
+                </>
+              )}
+              {canCreateEquivalences && (
+                <Link to="/phase2/equivalence">
+                  <p className="mt-3 border bg-white rounded-md px-3 py-2.5 text-gray-600 hover:text-gray-800 hover:bg-gray-50 transition-colors text-center mx-auto w-full">
+                    <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
+                    Ajouter un engagement réalisé
+                  </p>
+                </Link>
+              )}
             </div>
           </div>
         ) : null}
@@ -144,9 +167,11 @@ export default function View() {
           <div className="flex gap-2 flex-col-reverse md:flex-row justify-between md:w-full">
             <div>
               <p>Mon dossier d'éligibilité</p>
-              <Link className="text-blue-600" to="/ma-preparation-militaire">
-                {young.statusMilitaryPreparationFiles ? "Consulter" : "Compléter"}
-              </Link>
+              {young.statusMilitaryPreparationFiles || canViewMissions ? (
+                <Link className="text-blue-600" to="/ma-preparation-militaire">
+                  {young.statusMilitaryPreparationFiles ? "Consulter" : "Compléter"}
+                </Link>
+              ) : null}
             </div>
             <div>{young.statusMilitaryPreparationFiles ? <MilitaryStatusBadge status={young.statusMilitaryPreparationFiles} /> : null}</div>
           </div>

@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useHistory } from "react-router-dom";
 import { toastr } from "react-redux-toastr";
 import api from "../../../services/api";
 import { capture } from "../../../sentry";
@@ -11,12 +11,19 @@ import { RiHeartFill } from "react-icons/ri";
 import useAuth from "@/services/useAuth";
 import Container from "@/components/layout/Container";
 import plausibleEvent from "@/services/plausible";
+import usePermissions from "@/hooks/usePermissions";
 
 export default function List() {
   const { young } = useAuth();
+  const { canViewMissions } = usePermissions();
+  const history = useHistory();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
   const canDoMilitaryPreparation = young?.frenchNationality === "true";
+
+  if (!canViewMissions) {
+    history.push("/phase2");
+  }
 
   const [filters, setFilters] = useState({
     domains: [],
