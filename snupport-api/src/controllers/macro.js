@@ -14,6 +14,7 @@ const { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_TICKET_STATUS } = require("../schemas");
+const { Sentry } = require("@sentry/node");
 
 const SCHEMA_MACRO = Joi.object({
   name: Joi.string().trim(),
@@ -216,10 +217,11 @@ const deleteField = async (ticket, macroAction) => {
 
 const addShortcutMessage = async (ticket, macroAction, agent) => {
   try {
+    const span = Sentry.getActiveSpan();
     const shortcut = await ShortcutModel.findOne({ _id: macroAction.value });
-    console.time("db: countDocuments on messages");
+    span.setAttribute("db.messageModel.countDocumentsByTicketId", "start");
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
-    console.timeEnd("db: countDocuments on messages");
+    span.setAttribute("db.messageModel.countDocumentsByTicketId", "end");
     if (messageCount === 1) {
       ticket.firstResponseAgentAt = new Date();
       ticket.firstResponseAgentTime = getHoursDifference(new Date(), ticket.createdAt);
