@@ -217,7 +217,9 @@ const deleteField = async (ticket, macroAction) => {
 const addShortcutMessage = async (ticket, macroAction, agent) => {
   try {
     const shortcut = await ShortcutModel.findOne({ _id: macroAction.value });
+    console.time("db: countDocuments on messages");
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
+    console.timeEnd("db: countDocuments on messages");
     if (messageCount === 1) {
       ticket.firstResponseAgentAt = new Date();
       ticket.firstResponseAgentTime = getHoursDifference(new Date(), ticket.createdAt);
