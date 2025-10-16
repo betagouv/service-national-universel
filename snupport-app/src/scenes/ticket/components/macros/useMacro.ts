@@ -1,11 +1,9 @@
-import React from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useMemo, useCallback } from "react";
 import toast from "react-hot-toast";
 import { getMacros, Macro } from "@/services/macro";
 import API from "@/services/api";
-import { sep } from "path";
 
 export interface UseMacroSelectionProps {
   selectedTicket: string[];
