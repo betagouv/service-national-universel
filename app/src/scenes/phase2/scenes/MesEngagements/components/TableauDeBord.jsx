@@ -30,7 +30,7 @@ const Tooltip = ({ className }) => (
       arrowColor="white">
       <div className="list-outside bg-white text-left text-[15px] text-[#414458]">
         Vous disposez d’un an pour vous engager dans la phase Engagement.{" "}
-        <a className="!text-blue-600" href="https://support.snu.gouv.fr/base-de-connaissance/quel-est-le-rythme-de-realisation-de-la-mig" target="_blank" rel="noreferrer">
+        <a className="!text-blue-600" href={`${knowledgebaseURL}/base-de-connaissance/quel-est-le-rythme-de-realisation-de-la-mig`} target="_blank" rel="noreferrer">
           En savoir plus.
         </a>
       </div>
