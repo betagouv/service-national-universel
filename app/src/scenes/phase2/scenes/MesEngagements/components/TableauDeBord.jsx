@@ -30,8 +30,8 @@ const Tooltip = ({ className }) => (
       tooltipRadius="6"
       arrowColor="white">
       <div className="list-outside bg-white text-left text-[15px] text-[#414458]">
-        Vous disposez d’un an pour débuter votre phase d’engagement et de deux ans pour la terminer.{" "}
-        <a className="!text-blue-600" href={`${knowledgebaseURL}/base-de-connaissance/de-combien-de-temps-je-dispose-pour-realiser-ma-mig`} target="_blank" rel="noreferrer">
+        Vous disposez d’un an pour vous engager dans la phase Engagement.{" "}
+        <a className="!text-blue-600" href={`${knowledgebaseURL}/base-de-connaissance/quel-est-le-rythme-de-realisation-de-la-mig`} target="_blank" rel="noreferrer">
           En savoir plus.
         </a>
       </div>
