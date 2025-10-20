@@ -1,19 +1,26 @@
-jest.mock("../../../application/applicationService");
+jest.mock("../../../application/applicationService", () => ({
+  __esModule: true,
+  updateApplicationTutor: jest.fn(),
+  updateApplicationStatus: jest.fn(),
+}));
 
 import { syncMission } from "../../../crons/missionsJVA/JVAService";
 import { MissionModel, ReferentModel, StructureModel } from "../../../models";
 import { jest } from "@jest/globals";
 import { MISSION_STATUS } from "snu-lib";
 
-jest.mock("../../../models");
-jest.mock("../../../crons/missionsJVA/JVARepository");
-jest.mock("../../../brevo");
-jest.mock("../../../sentry");
-jest.mock("../../../slack");
-
-const mockedMissionModel = jest.mocked(MissionModel);
-const mockedStructureModel = jest.mocked(StructureModel);
-const mockedReferentModel = jest.mocked(ReferentModel);
+jest.mock("../../../models", () => ({
+  MissionModel: {
+    findOne: jest.fn(),
+    create: jest.fn(),
+  },
+  StructureModel: {
+    findOne: jest.fn(),
+  },
+  ReferentModel: {
+    findOne: jest.fn(),
+  },
+}));
 
 const JVA_MISSION_MOCK = {
   clientId: "123",
@@ -42,38 +49,37 @@ const JVA_MISSION_MOCK = {
 };
 
 describe("syncMission", () => {
-  afterEach(() => {
-    jest.clearAllMocks();
-  });
-
-  it("should have at least one test", () => {
-    expect(true).toBe(true);
+  beforeEach(() => {
+    jest.restoreAllMocks();
   });
 
   it("should cancel existing mission if start date is after limit", async () => {
+    const saveMock = (jest.fn() as any).mockResolvedValue(null);
     const existingMission = {
       _id: "snu-mission-id",
       status: MISSION_STATUS.VALIDATED,
-      save: jest.fn(),
+      save: saveMock,
     };
-    mockedMissionModel.findOne.mockResolvedValue(existingMission as any);
-    mockedStructureModel.findOne.mockResolvedValue({ _id: "structure-id" } as any);
-    mockedReferentModel.findOne.mockResolvedValue({ _id: "referent-id" } as any);
+    (MissionModel.findOne as any).mockResolvedValue(existingMission);
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id" });
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
       startAt: "2026-07-16T00:00:00.000Z",
     };
 
-    await syncMission(missionToSync as any);
+    const mission = await syncMission(missionToSync as any);
 
-    expect(mockedMissionModel.findOne).toHaveBeenCalledWith({ jvaMissionId: "123" });
-    expect(existingMission.save).toHaveBeenCalled();
+    expect(MissionModel.findOne).toHaveBeenCalledWith({ jvaMissionId: "123" });
+    expect(saveMock).toHaveBeenCalled();
     expect(existingMission.status).toBe(MISSION_STATUS.CANCEL);
   });
 
   it("should not create new mission if start date is after limit", async () => {
-    mockedMissionModel.findOne.mockResolvedValue(null);
+    (MissionModel.findOne as any).mockResolvedValue(null);
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id" });
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
@@ -82,26 +88,36 @@ describe("syncMission", () => {
 
     await syncMission(missionToSync as any);
 
-    expect(mockedMissionModel.findOne).toHaveBeenCalledWith({ jvaMissionId: "123" });
+    expect(MissionModel.findOne).toHaveBeenCalledWith({ jvaMissionId: "123" });
     expect(MissionModel.create).not.toHaveBeenCalled();
   });
 
   it("should update end date if it is after limit", async () => {
-    const createdMission = {};
-    mockedMissionModel.findOne.mockResolvedValue(null);
-    mockedMissionModel.create.mockResolvedValue(createdMission as any);
-    mockedStructureModel.findOne.mockResolvedValue({ _id: "structure-id" } as any);
-    mockedReferentModel.findOne.mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" } as any);
+    const setMock = jest.fn();
+    const saveMock = (jest.fn() as any).mockResolvedValue(null);
+    const existingMission = {
+      _id: "snu-mission-id",
+      status: MISSION_STATUS.VALIDATED,
+      set: setMock,
+      save: saveMock,
+      placesLeft: 10,
+      placesTotal: 10,
+    };
+
+    (MissionModel.findOne as any).mockResolvedValue(existingMission);
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
       startAt: "2026-01-01T00:00:00.000Z",
       endAt: "2026-11-10T00:00:00.000Z",
+      snuPlaces: 10,
     };
 
     await syncMission(missionToSync as any);
 
-    expect(mockedMissionModel.create).toHaveBeenCalledWith(
+    expect(setMock).toHaveBeenCalledWith(
       expect.objectContaining({
         endAt: new Date("2026-11-09T00:00:00.000Z"),
       }),
@@ -109,24 +125,50 @@ describe("syncMission", () => {
   });
 
   it("should set default end date if it is missing", async () => {
-    const createdMission = {};
-    mockedMissionModel.findOne.mockResolvedValue(null);
-    mockedMissionModel.create.mockResolvedValue(createdMission as any);
-    mockedStructureModel.findOne.mockResolvedValue({ _id: "structure-id" } as any);
-    mockedReferentModel.findOne.mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" } as any);
+    const setMock = jest.fn();
+    const saveMock = (jest.fn() as any).mockResolvedValue(null);
+    const existingMission = {
+      _id: "snu-mission-id",
+      status: MISSION_STATUS.VALIDATED,
+      set: setMock,
+      save: saveMock,
+      placesLeft: 10,
+      placesTotal: 10,
+    };
+    (MissionModel.findOne as any).mockResolvedValue(existingMission);
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
       startAt: "2026-01-01T00:00:00.000Z",
       endAt: undefined,
+      snuPlaces: 10,
     };
 
     await syncMission(missionToSync as any);
 
-    expect(mockedMissionModel.create).toHaveBeenCalledWith(
+    expect(setMock).toHaveBeenCalledWith(
       expect.objectContaining({
         endAt: new Date("2026-11-09T00:00:00.000Z"),
       }),
     );
+  });
+
+  it("should create mission if it does not exist", async () => {
+    (MissionModel.findOne as any).mockResolvedValue(null);
+    (MissionModel.create as any).mockResolvedValue({ _id: "new-mission-id" });
+    (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
+
+    const missionToSync = {
+      ...JVA_MISSION_MOCK,
+      startAt: "2026-01-01T00:00:00.000Z",
+      endAt: "2026-02-01T00:00:00.000Z",
+    };
+
+    await syncMission(missionToSync as any);
+
+    expect(MissionModel.create).toHaveBeenCalled();
   });
 });
