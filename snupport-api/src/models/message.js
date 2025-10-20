@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const MODELNAME = "message";
 
 const Schema = new mongoose.Schema({
-  ticketId: { type: String, required: true },
+  ticketId: { type: String, required: true, index: true },
 
   text: { type: String },
   slateContent: {},
