@@ -30,6 +30,8 @@ import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { HiExternalLink } from "react-icons/hi";
 
 const FIELDS_NAMES = {
+  startAt: "Date de début",
+  endAt: "Date de fin",
   address: "Adresse",
   addressVerified: "Adresse vérifiée",
   zip: "Code postal",
@@ -165,15 +167,25 @@ export default function DetailsView({ mission, setMission, getMission }: Details
     if (values.duration && isNaN(values.duration)) error.duration = "Le format est incorrect";
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
 
+    setLoadingBottom(true);
+    if (!values.startAt) error.startAt = "La date de début est incorrecte";
+    if (values.startAt && values.endAt && new Date(values.startAt) > new Date(values.endAt)) error.endAt = "La date de fin est incorrecte";
+
+    const maxStartDate = new Date("2026-07-15T00:00:00.000Z");
+    const maxEndDate = new Date("2026-11-09T00:00:00.000Z");
+    if (values.startAt && new Date(values.startAt) > maxStartDate) {
+      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 15 juillet 2026";
+    }
+    if (values.endAt && new Date(values.endAt) > maxEndDate) {
+      error.endAt = "La date de fin de la mission ne peut pas être ultérieure au 9 novembre 2026";
+    }
+
     setErrors(error);
     if (Object.keys(error).length > 0) {
       toastr.error("Oups, le formulaire est incomplet", formatErrorMessages(error));
       return setLoading(false);
     }
 
-    setLoadingBottom(true);
-    if (!values.startAt) error.startAt = "La date de début est incorrecte";
-    if (values.startAt && values.endAt && new Date(values.startAt) > new Date(values.endAt)) error.endAt = "La date de fin est incorrecte";
     // @ts-ignore
     if (values.placesTotal === "" || isNaN(values.placesTotal) || values.placesTotal < 0) error.placesTotal = "Le nombre de places est incorrect";
     if (values.placesTotal < mission.placesTotal && mission.placesLeft - (mission.placesTotal - values.placesTotal) < 0)
@@ -791,7 +803,11 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                       label="Date de début"
                       type="date"
                       className="w-[50%]"
-                      onChange={(startAt) => setValues({ ...values, startAt })}
+                      onChange={(startAt) => {
+                        setLoading(false);
+                        setErrors({ ...errors, startAt: "" });
+                        setValues({ ...values, startAt });
+                      }}
                       // @ts-ignore
                       value={values.startAt}
                       error={errors?.startAt}
@@ -804,7 +820,11 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                       name="endAt"
                       className="w-[50%]"
                       type="date"
-                      onChange={(endAt) => setValues({ ...values, endAt })}
+                      onChange={(endAt) => {
+                        setLoading(false);
+                        setErrors({ ...errors, endAt: "" });
+                        setValues({ ...values, endAt });
+                      }}
                       // @ts-ignore
                       value={values.endAt}
                       error={errors?.endAt}

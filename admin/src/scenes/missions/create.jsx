@@ -114,12 +114,22 @@ export default function Create(props) {
     if (!error.tutorId && !referents.find((ref) => ref.value === values.tutorId)) error.tutorId = "Erreur";
     if (values.startAt && values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date de début est incorrecte";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrecte";
+
+    const maxStartDate = new Date("2026-07-15T00:00:00.000Z");
+    const maxEndDate = new Date("2026-11-09T00:00:00.000Z");
+    if (values.startAt && new Date(values.startAt) > maxStartDate) {
+      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 15 juillet 2026";
+    }
+    if (values.endAt && new Date(values.endAt) > maxEndDate) {
+      error.endAt = "La date de fin de la mission ne peut pas être ultérieure au 9 novembre 2026";
+    }
     if ((values.startAt && values.endAt && values.placesTotal === "") || isNaN(values.placesTotal) || values.placesTotal < 0)
       error.placesTotal = "Le nombre de places est incorrect";
     setErrors(error);
-
     if (Object.keys(error).length > 0) {
-      if (values.name && values.tutorId && values.structureId) setModalConfirmation(true);
+      if (values.name && values.tutorId && values.structureId && !error.startAt && !error.endAt) {
+        setModalConfirmation(true);
+      }
       return setLoading(false);
     }
     createMission();
@@ -508,6 +518,7 @@ export default function Create(props) {
                       label="Date de début"
                       type="date"
                       className="w-[50%]"
+                      max="2026-11-09"
                       onChange={(startAt) => {
                         errors.startAt = "";
                         setValues({ ...values, startAt });
@@ -520,6 +531,7 @@ export default function Create(props) {
                       name="endAt"
                       className="w-[50%]"
                       type="date"
+                      max="2026-11-09"
                       onChange={(endAt) => {
                         errors.endAt = "";
                         setValues({ ...values, endAt });
