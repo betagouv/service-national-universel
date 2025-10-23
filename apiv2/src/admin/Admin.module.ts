@@ -77,6 +77,7 @@ import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/Cla
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
+import { StructureController } from "./infra/engagement/structure/api/Structure.controller";
 import { SharedModule } from "@shared/Shared.module";
 import { AllExceptionsFilter } from "@shared/infra/AllExceptions.filter";
 import { APP_FILTER, APP_GUARD } from "@nestjs/core";
@@ -84,6 +85,9 @@ import { InscriptionController } from "./infra/sejours/phase1/inscription/api/In
 import { JeuneController } from "./infra/sejours/phase1/api/Jeune.controller";
 import { ExporterJeuneService } from "./core/sejours/phase1/jeune/ExporterJeune.service";
 import { PermissionGuard } from "@auth/infra/guard/Permissions.guard";
+import { StructureGateway } from "./core/engagement/structure/Structure.gateway";
+import { StructureRepository } from "./infra/engagement/structure/repository/mongo/StructureMongo.repository";
+import { structureMongoProviders } from "./infra/engagement/structure/provider/StructureMongo.provider";
 
 @Module({
     imports: [
@@ -120,6 +124,7 @@ import { PermissionGuard } from "@auth/infra/guard/Permissions.guard";
         DesistementController,
         InscriptionController,
         MissionController,
+        StructureController,
         JeuneController,
     ],
     providers: [
@@ -150,6 +155,7 @@ import { PermissionGuard } from "@auth/infra/guard/Permissions.guard";
         ...guardProviders,
         ...taskMongoProviders,
         ...historyProvider,
+        ...structureMongoProviders,
         Logger,
         SigninReferent,
         { provide: FileGateway, useClass: FileProvider },
@@ -173,6 +179,7 @@ import { PermissionGuard } from "@auth/infra/guard/Permissions.guard";
             provide: APP_FILTER,
             useClass: AllExceptionsFilter,
         },
+        { provide: StructureGateway, useClass: StructureRepository },
     ],
     exports: [
         ClsModule,
