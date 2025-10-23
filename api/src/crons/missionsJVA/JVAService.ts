@@ -9,8 +9,12 @@ import { fetchMissions, fetchStructureById, JeVeuxAiderMission } from "./JVARepo
 import { logger } from "../../logger";
 import { capture } from "../../sentry";
 import { jva2SnuDomaines, JvaStructureException, SnuStructureException } from "./JVAUtils";
+import slack from "../../slack";
 
 const fromUser = { firstName: "Cron JeVeuxAiderService.js" };
+
+const MISSION_START_DATE_LIMIT = new Date("2026-07-15T23:59:59.999Z");
+const MISSION_END_DATE_LIMIT = new Date("2026-11-09T00:00:00.000Z");
 
 function formatStructure(jvaStructure): Partial<StructureType> {
   return {
@@ -53,13 +57,18 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
   const endAt = new Date(mission.endAt);
   const [description, actions] = mission.descriptionHtml.split("Objectifs:");
 
+  let missionEndDate = mission.endAt ? addHours(endAt, 2) : MISSION_END_DATE_LIMIT;
+  if (missionEndDate > MISSION_END_DATE_LIMIT) {
+    missionEndDate = MISSION_END_DATE_LIMIT;
+  }
+
   return {
     name: mission.title,
     description,
     actions,
     mainDomain: jva2SnuDomaines[mission.domain],
     startAt: addHours(startAt, 2),
-    endAt: mission.endAt ? addHours(endAt, 2) : new Date(Date.UTC(2026, 11, 31)),
+    endAt: missionEndDate,
     placesTotal: mission.snuPlaces,
     frequence: mission.schedule,
     structureId: structure.id,
@@ -157,8 +166,25 @@ export async function syncMissions() {
   } while (count < total);
 }
 
-async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
+export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
   logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
+
+  const startAt = new Date(mission.startAt);
+  if (startAt > MISSION_START_DATE_LIMIT) {
+    const oldMission = await MissionModel.findOne({ jvaMissionId: mission.clientId });
+    if (oldMission) {
+      oldMission.status = MISSION_STATUS.CANCEL;
+      await oldMission.save({ fromUser });
+      logger.info(`Mission ${mission.clientId} cancelled because start date is after limit.`);
+      await slack.info({
+        title: "Mission JVA annulée",
+        text: `La mission ${mission.title} (${mission.clientId}) a été annulée car sa date de début est après le 15/07/2026.`,
+      });
+    } else {
+      logger.info(`Mission ${mission.clientId} not created because start date is after limit.`);
+    }
+    return;
+  }
 
   if (JvaStructureException.includes(mission.organizationClientId.toString())) {
     logger.info(`Structure ${mission.organizationClientId} is in JVA exception list, skipping mission ${mission.clientId}`);
