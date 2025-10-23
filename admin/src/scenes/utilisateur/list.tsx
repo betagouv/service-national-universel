@@ -12,12 +12,12 @@ import {
   canSigninAs,
   ERRORS,
   SUB_ROLE_GOD,
-  StructureType,
   DepartmentServiceType,
   ReferentType,
   translateReferentStatus,
   ReferentStatus,
   isSuperAdmin,
+  StructureRoutes,
 } from "snu-lib";
 import { Badge, Container, DropdownButton, Header, Page, Tooltip } from "@snu/ds/admin";
 
@@ -38,11 +38,12 @@ import plausibleEvent from "../../services/plausible";
 import { ROLES, canDeleteReferent, translate } from "../../utils";
 import ModalUniqueResponsable from "./composants/ModalUniqueResponsable";
 import Panel from "./panel";
+import { apiv2 } from "@/services/apiv2";
 
 export default function List() {
   const [responsable, setResponsable] = useState<ReferentType | null>(null);
   const { user, sessionPhase1 } = useSelector((state: AuthState) => state.Auth);
-  const [structures, setStructures] = useState<StructureType[]>();
+  const [structures, setStructures] = useState<StructureRoutes["FindAll"]["response"]>();
   const [services, setServices] = useState<DepartmentServiceType[]>();
 
   //List params
@@ -103,9 +104,11 @@ export default function List() {
   useEffect(() => {
     (async () => {
       if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
-      const { data, ok } = await api.get("/structure");
-      if (!ok) return;
-      setStructures(data);
+      const structures = await apiv2.post<StructureRoutes["FindAll"]["response"]>("/structure", {
+        fields: ["id", "name", "region", "department", "networkId"],
+      });
+
+      setStructures(structures);
     })();
     (async () => {
       const { data, ok } = await api.get(`/department-service`);
@@ -138,9 +141,9 @@ export default function List() {
             }}
             transform={async (all) => {
               return all.map((data) => {
-                let structure: Partial<StructureType> = {};
+                let structure: StructureRoutes["FindAll"]["response"][number] = {};
                 if (data.structureId && structures) {
-                  structure = structures.find((s) => s._id === data.structureId) || {};
+                  structure = structures.find((s) => s.id === data.structureId) || {};
                 }
                 let service: Partial<DepartmentServiceType> = {};
                 if (data.role === ROLES.REFERENT_DEPARTMENT && services) {
@@ -231,7 +234,7 @@ export default function List() {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {data.map((hit) => (
-                    <Hit structure={structures?.find((s) => s._id === hit.structureId)} key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} />
+                    <Hit structure={structures?.find((s) => s.id === hit.structureId)} key={hit._id} hit={hit} user={user} onClick={() => setResponsable(hit)} />
                   ))}
                 </tbody>
                 <tr className="flex items-center py-3 px-4 text-xs font-[500] leading-5 uppercase text-gray-500 bg-gray-50 cursor-default">
@@ -296,7 +299,7 @@ const Hit = ({ hit, onClick, user, structure }) => {
 
 interface ActionProps {
   hit: ReferentType;
-  structure: StructureType;
+  structure: StructureRoutes["FindAll"]["response"][number];
 }
 
 interface ModalState {

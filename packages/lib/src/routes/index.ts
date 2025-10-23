@@ -44,6 +44,7 @@ export type { FilterLabelRoutes } from "./filterLabel";
 export type { DepartmentServiceRoutes } from "./departmentService";
 export type { PlanMarketingRoutes } from "./planMarketing";
 export type { AnalyticsRoutes } from "./analytics";
+export type { StructureRoutes } from "./structure";
 
 export * from "./phase1";
 export * from "./phase2";
