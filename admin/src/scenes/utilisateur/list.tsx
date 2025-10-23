@@ -97,6 +97,7 @@ export default function List() {
       name: "status",
       translate: translateReferentStatus,
       missingLabel: "Non renseigné",
+      defaultValue: [ReferentStatus.ACTIVE],
     },
   ];
 
