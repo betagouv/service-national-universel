@@ -10,6 +10,7 @@ import {
   SENDINBLUE_TEMPLATES,
   canCreateApplications,
   canAdminCreateApplication,
+  canReferentCreateApplication,
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
@@ -168,7 +169,17 @@ router.post(
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         }
-        const canCreate = req.user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canCreateApplications(young, cohort);
+        
+        let canCreate: boolean;
+        if (req.user.role === ROLES.ADMIN) {
+          canCreate = canAdminCreateApplication(young);
+        } else if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) {
+          const applications = await ApplicationModel.find({ youngId: young._id });
+          canCreate = canReferentCreateApplication(young, applications);
+        } else {
+          canCreate = canCreateApplications(young, cohort);
+        }
+        
         if (!canCreate) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }

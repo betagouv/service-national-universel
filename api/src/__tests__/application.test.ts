@@ -13,7 +13,7 @@ import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./hel
 import { createCohortHelper } from "./helpers/cohort";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { APPLICATION_STATUS, COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -26,8 +26,8 @@ jest.mock("../brevo", () => ({
 
 beforeAll(async () => {
   await dbConnect();
-  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
-  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLE_JEUNE] } });
+  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL, [
     {
@@ -214,7 +214,7 @@ describe("Application", () => {
         expect(res.status).toBe(200);
         expect(res.body.data.youngId).toBe(young._id.toString());
       });
-
+      
       it("should allow admin to create application even if cohort is archived", async () => {
         const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.ARCHIVED }));
         const young = await createYoungHelper(
@@ -502,5 +502,141 @@ describe("GET /application/:id/patches", () => {
       .get(`/application/${applicationId}/patches`)
       .send();
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+  });
+});
+
+describe("Referent regional/departmental creating applications", () => {
+  it("should allow REFERENT_REGION to create application for young with phase1 DONE, phase2 IN_PROGRESS and 1 application DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const existingApplication = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id,
+      missionId: mission._id,
+      status: APPLICATION_STATUS.DONE,
+    });
+
+    const newMission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: newMission._id });
+    expect(res.status).toBe(200);
+    expect(res.body.data.youngId).toBe(young._id.toString());
+  });
+
+  it("should allow REFERENT_DEPARTMENT to create application for young with phase1 EXEMPTED, phase2 WAITING_REALISATION and 1 application DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.EXEMPTED,
+        statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const existingApplication = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id,
+      missionId: mission._id,
+      status: APPLICATION_STATUS.DONE,
+    });
+
+    const newMission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: newMission._id });
+    expect(res.status).toBe(200);
+    expect(res.body.data.youngId).toBe(young._id.toString());
+  });
+
+  it("should return 403 when REFERENT_REGION tries to create application for young without application DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: mission._id });
+    expect(res.status).toBe(403);
+  });
+
+  it("should return 403 when REFERENT_DEPARTMENT tries to create application for young with phase2 VALIDATED", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const existingApplication = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id,
+      missionId: mission._id,
+      status: APPLICATION_STATUS.DONE,
+    });
+
+    const newMission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: newMission._id });
+    expect(res.status).toBe(403);
+  });
+
+  it("should return 403 when REFERENT_REGION tries to create application for young with phase1 not validated", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const existingApplication = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id,
+      missionId: mission._id,
+      status: APPLICATION_STATUS.DONE,
+    });
+
+    const newMission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: newMission._id });
+    expect(res.status).toBe(403);
   });
 });
