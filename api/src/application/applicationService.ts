@@ -10,6 +10,9 @@ import {
   SUB_ROLES,
   ROLES,
   ApplicationType,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  COHORT_STATUS,
 } from "snu-lib";
 import { deletePatches } from "../controllers/patches";
 import { ApplicationModel, MissionModel, ReferentDocument, YoungDocument } from "../models";
@@ -144,7 +147,20 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
   let refusalMessages: string[] = [];
 
   if (!canCreateApplications(young, cohort)) {
-    refusalMessages.push("Vous n'avez pas validé votre séjour de cohésion.");
+    const hasValidatedOrExemptedPhase1 = young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE || young.statusPhase1 === YOUNG_STATUS_PHASE1.EXEMPTED;
+    const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+    const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+    const cohortArchived = cohort.status === COHORT_STATUS.ARCHIVED;
+
+    if (!hasValidatedOrExemptedPhase1) {
+      refusalMessages.push("Vous devez avoir validé votre phase 1 pour candidater.");
+    } else if (!phase2NotValidated) {
+      refusalMessages.push("Votre phase 2 est déjà validée.");
+    } else if (cohortArchived && !hasCompletedMission) {
+      refusalMessages.push("Votre cohorte est archivée. Pour candidater à de nouvelles missions, vous devez d'abord avoir effectué au moins une mission.");
+    } else {
+      refusalMessages.push("Vous ne pouvez pas candidater à cette mission.");
+    }
   }
 
   if (mission.placesLeft === 0) {

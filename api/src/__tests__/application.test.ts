@@ -16,6 +16,7 @@ const { ObjectId } = Types;
 import { APPLICATION_STATUS, COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
+import { getAuthorizationToApply } from "../application/applicationService";
 
 jest.setTimeout(60_000);
 
@@ -670,5 +671,88 @@ describe("Referent regional/departmental creating applications", () => {
     const updatedYoung = await getYoungByIdHelper(young._id.toString());
     expect(updatedYoung).toBeTruthy();
     expect(updatedYoung!.phase2ApplicationStatus).toContain(APPLICATION_STATUS.DONE);
+  });
+});
+
+describe("getAuthorizationToApply", () => {
+  it("should return specific message when phase1 is not validated", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.PUBLISHED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(false);
+    expect(result.message).toContain("Vous devez avoir validé votre phase 1 pour candidater");
+  });
+
+  it("should return specific message when phase2 is already validated", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.PUBLISHED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(false);
+    expect(result.message).toContain("Votre phase 2 est déjà validée");
+  });
+
+  it("should return specific message when cohort is archived and no mission DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      phase2ApplicationStatus: [APPLICATION_STATUS.VALIDATED],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(false);
+    expect(result.message).toContain("Votre cohorte est archivée");
+    expect(result.message).toContain("vous devez d'abord avoir effectué au moins une mission");
+  });
+
+  it("should allow application when cohort is archived but has mission DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(true);
+    expect(result.message).toBe("");
+  });
+
+  it("should allow application when cohort is not archived", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.PUBLISHED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(true);
+    expect(result.message).toBe("");
   });
 });
