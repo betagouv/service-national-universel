@@ -14,7 +14,7 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { EQUIVALENCE_STATUS, isCohortTooOld, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortArchived, YOUNG_STATUS_PHASE3 } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import useReinscription from "../changeSejour/lib/useReinscription";
@@ -47,7 +47,7 @@ export default function Home() {
 
   if (hasCompletedPhase1(young)) {
     // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé
-    if (isCohortTooOld(cohort) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
+    if (isCohortArchived(cohort) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
       return <DelaiDepasse />;
     }
     if (hasWithdrawn) {

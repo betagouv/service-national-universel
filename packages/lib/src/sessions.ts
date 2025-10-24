@@ -126,7 +126,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-const isCohortTooOld = (cohort?: CohortType) => {
+const isCohortArchived = (cohort?: CohortType) => {
   return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
@@ -147,12 +147,12 @@ const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence =
 
 // Les volontaires peuvent voir les missions dès qu'ils sont pointés et tant que leur cohorte n'est pas archivée
 function canViewMissions(young: YoungType, cohort?: CohortType) {
-  return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
+  return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortArchived(cohort);
 }
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
 function canCreateApplications(young: YoungType, cohort?: CohortType) {
-  return hasValidatedPhase1(young) && !isCohortTooOld(cohort);
+  return hasValidatedPhase1(young) && !isCohortArchived(cohort);
 }
 
 // Ils peuvent demander des reconnaissances d'équivalences même si leur cohorte est archivée.
@@ -168,7 +168,7 @@ export {
   getCohortPeriodTemp,
   inscriptionCreationOpenForYoungs,
   hasAccessToReinscription,
-  isCohortTooOld,
+  isCohortArchived,
   canViewMissions,
   canCreateApplications,
   canCreateEquivalences,
