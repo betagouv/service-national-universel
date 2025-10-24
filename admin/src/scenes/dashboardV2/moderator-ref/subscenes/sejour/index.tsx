@@ -128,9 +128,10 @@ export default function Index() {
     const filters: Filter[] = [
       {
         id: "status",
-        name: "Statut d’inscription",
+        name: "Statut d'inscription",
         fullValue: "Tous",
         options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
+        translate: translateInscriptionStatus,
       },
       {
         id: "statusPhase1",
@@ -141,6 +142,7 @@ export default function Index() {
         options: Object.keys(YOUNG_STATUS_PHASE1)
           .filter((s) => !([YOUNG_STATUS_PHASE1.WAITING_LIST, YOUNG_STATUS_PHASE1.WITHDRAWN, YOUNG_STATUS_PHASE1.WAITING_AFFECTATION] as string[]).includes(s))
           .map((status) => ({ key: status, label: translatePhase1(status) })),
+        translate: translatePhase1,
       },
       ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? [
