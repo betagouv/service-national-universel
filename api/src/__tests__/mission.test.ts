@@ -7,7 +7,7 @@ import { getMissionsHelper, getMissionByIdHelper, deleteMissionByIdHelper, creat
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
 import { createStructureHelper, notExistingStructureId } from "./helpers/structure";
 import getNewReferentFixture from "./fixtures/referent";
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLE_JEUNE, ROLES } from "snu-lib";
+import { APPLICATION_STATUS, COHORT_STATUS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLE_JEUNE, ROLES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "snu-lib";
 import { createYoungHelper } from "./helpers/young";
 import getNewYoungFixture from "./fixtures/young";
 import { createApplication, getApplicationByIdHelper } from "./helpers/application";
@@ -99,6 +99,30 @@ describe("Mission", () => {
       const res = await request(await getAppHelperWithAcl(young, "young")).get(`/mission/${mission._id}`);
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.application?.youngId).toEqual(application?.youngId);
+    });
+    it("should return canApply true for proposal even with archived cohort", async () => {
+      const cohort = await createCohortHelper({ ...getNewCohortFixture(), status: COHORT_STATUS.ARCHIVED });
+      const young = await createYoungHelper({
+        ...getNewYoungFixture(),
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+        phase2ApplicationStatus: [], // Pas de mission DONE
+      });
+
+      const mission = await createMissionHelper({ ...getNewMissionFixture() });
+      const application = await createApplication({
+        ...getNewApplicationFixture(),
+        youngId: young._id,
+        missionId: mission._id,
+        status: APPLICATION_STATUS.WAITING_ACCEPTATION, // Proposition de mission
+      });
+
+      const res = await request(await getAppHelperWithAcl(young, "young")).get(`/mission/${mission._id}`);
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.application?.status).toEqual(APPLICATION_STATUS.WAITING_ACCEPTATION);
+      expect(res.body.data.canApply).toEqual(true); // Doit être true pour les propositions
     });
   });
 

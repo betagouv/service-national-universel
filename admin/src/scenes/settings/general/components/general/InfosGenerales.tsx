@@ -61,7 +61,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
 
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
-    { value: COHORT_STATUS.ARCHIVED, label: "Archivée" },
+    { value: COHORT_STATUS.ARCHIVED, label: "Archivée partiellement" },
   ];
 
   return (
