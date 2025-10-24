@@ -14,7 +14,7 @@ import Withdrawn from "./withdrawn";
 import Excluded from "./Excluded";
 import DelaiDepasse from "./DelaiDepasse";
 import useAuth from "@/services/useAuth";
-import { EQUIVALENCE_STATUS, isCohortArchived, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { EQUIVALENCE_STATUS, isCohortArchived, YOUNG_STATUS_PHASE3, APPLICATION_STATUS } from "snu-lib";
 import Loader from "@/components/Loader";
 import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import useReinscription from "../changeSejour/lib/useReinscription";
@@ -42,12 +42,13 @@ export default function Home() {
 
   // Je peux accéder à la Homepage de la Phase 2 si j'ai validé ma phase 1 et que ma cohorte me permet encore de faire la phase 2 :
   const hasMission = young.phase2ApplicationStatus.some((status) => ["VALIDATED", "IN_PROGRESS"].includes(status));
+  const hasCompletedMission = young.phase2ApplicationStatus.some((status) => status === APPLICATION_STATUS.DONE);
   const hasEquivalence = [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence as any);
   const hasWithdrawn = [YOUNG_STATUS.WITHDRAWN, YOUNG_STATUS.ABANDONED].includes(young.status as any);
 
   if (hasCompletedPhase1(young)) {
-    // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé
-    if (isCohortArchived(cohort) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence) {
+    // les volontaires des première cohortes n'ont plus le droit de faire la phase 2 SAUF si ils l'ont commencé ou ont effectué au moins une mission
+    if (isCohortArchived(cohort) && !hasCompletedPhase2(young) && !hasMission && !hasEquivalence && !hasCompletedMission) {
       return <DelaiDepasse />;
     }
     if (hasWithdrawn) {
