@@ -64,9 +64,10 @@ export default function Index() {
     const filters: Filter[] = [
       {
         id: "status",
-        name: "Statut d’inscription",
+        name: "Statut d'inscription",
         fullValue: "Tous",
         options: Object.keys(YOUNG_STATUS).map((status) => ({ key: status, label: translateInscriptionStatus(status) })),
+        translate: translateInscriptionStatus,
       },
       ...(![ROLES.REFERENT_DEPARTMENT].includes(user.role)
         ? [
