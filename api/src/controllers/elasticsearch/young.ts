@@ -596,12 +596,17 @@ router.post(
       const mission = await MissionModel.findById(req.params.id);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // Context filters
+      // Context filters - ADMIN can propose missions to young with WITHDRAWN phase2 status
+      const statusPhase2Filter =
+        user.role === ROLES.ADMIN
+          ? ["IN_PROGRESS", "WAITING_REALISATION", "WITHDRAWN"]
+          : ["IN_PROGRESS", "WAITING_REALISATION"];
+
       const contextFilters = [
         ...youngContextFilters!,
         { terms: { "status.keyword": ["VALIDATED"] } },
         { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
-        { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+        { terms: { "statusPhase2.keyword": statusPhase2Filter } },
       ];
 
       // Body params validation
