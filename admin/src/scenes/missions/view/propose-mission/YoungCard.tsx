@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { canCreateApplicationForYoung, getProjetPro, getTags } from "./utils";
-import { ApplicationType, formatDateFR, MissionType, translate, YoungType } from "snu-lib";
+import { ApplicationType, formatDateFR, MissionType, ROLES, translate, YoungType } from "snu-lib";
 import { Button } from "@snu/ds/admin";
 import ModalConfirm from "@/components/modals/ModalConfirm";
 import { useSelector } from "react-redux";
@@ -22,6 +22,7 @@ export default function YoungCard({ young, mission, application }: Props) {
   const tags = getTags(young);
   const projetPro = getProjetPro(young);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
+  const { user } = useSelector((state: any) => state.Auth);
   const cohort = cohorts.find((cohort) => cohort._id === young.cohortId);
 
   function handleClick(young: YoungType) {
@@ -66,11 +67,15 @@ export default function YoungCard({ young, mission, application }: Props) {
       ) : (
         <Button
           title="Proposer la mission"
-          disabled={!canCreateApplicationForYoung(young, cohort)}
+          disabled={!canCreateApplicationForYoung(young, cohort, user?.role)}
           onClick={() => setModal(true)}
           type="secondary"
           loading={isPending}
-          tooltip="Impossible de proposer la mission à ce volontaire (phase 1 non validée ou cohorte trop ancienne)."
+          tooltip={
+            user?.role === ROLES.ADMIN
+              ? "Impossible de proposer la mission à ce volontaire (phase 1 non validée/dispensée ou phase 2 déjà validée)."
+              : "Impossible de proposer la mission à ce volontaire (phase 1 non validée ou cohorte trop ancienne)."
+          }
           className="w-full"
         />
       )}

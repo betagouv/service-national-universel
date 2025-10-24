@@ -17,6 +17,7 @@ export default function Toolbox({ young }) {
   const cohort = cohortList.find((c) => c.name === young.cohort);
   const canYoungApplyToPhase2 = canCreateApplications(young, cohort);
   const canCreateCustomMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canYoungApplyToPhase2;
+  const canProposeExistingMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canYoungApplyToPhase2;
 
   return (
     <div className="flex flex-col">
@@ -41,15 +42,19 @@ export default function Toolbox({ young }) {
             data-tip=""
             data-for="tooltip-custom"
             className={`group flex items-center justify-center gap-1 rounded-[10px] border-[1px] border-blue-600 bg-blue-600  py-2 ${
-              canYoungApplyToPhase2 ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
+              canProposeExistingMission ? "hover:border-[#4881FF] hover:bg-[#4881FF] " : "!cursor-not-allowed"
             }`}
-            onClick={() => canYoungApplyToPhase2 && history.push(`/volontaire/${young._id}/phase2/propose-mission`)}>
+            onClick={() => canProposeExistingMission && history.push(`/volontaire/${young._id}/phase2/propose-mission`)}>
             <HiOutlineSearch className="h-5 w-5 text-blue-300" />
-            <div className={`text-sm text-blue-100 ${canYoungApplyToPhase2 && "group-hover:text-white"}`}>Trouver une mission</div>
+            <div className={`text-sm text-blue-100 ${canProposeExistingMission && "group-hover:text-white"}`}>Trouver une mission</div>
           </button>
-          {!canYoungApplyToPhase2 ? (
+          {!canProposeExistingMission ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
-              <div className="text-[black]">Le jeune n&apos;est pas éligible à la phase 2</div>
+              <div className="text-[black]">
+                {user.role === ROLES.ADMIN
+                  ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
+                  : "Le jeune n'est pas éligible à la phase 2"}
+              </div>
             </ReactTooltip>
           ) : null}
         </div>
