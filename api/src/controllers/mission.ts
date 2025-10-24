@@ -9,6 +9,7 @@ import { updateApplicationStatus, updateApplicationTutor, getAuthorizationToAppl
 import { getTutorName } from "../services/mission";
 import { validateId, validateMission, idSchema } from "../utils/validator";
 import {
+  APPLICATION_STATUS,
   SENDINBLUE_TEMPLATES,
   MISSION_STATUS,
   ROLES,
@@ -361,13 +362,20 @@ router.get(
         const application = await ApplicationModel.findOne({ missionId, youngId: req.user._id });
         const cohort = await CohortModel.findById(req.user.cohortId);
         if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+        // Si une proposition existe, toujours autoriser l'acceptation
+        const isProposal = application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION;
+        const authorization = isProposal
+          ? { canApply: true, message: "" }
+          : await getAuthorizationToApply(mission, req.user as unknown as YoungType, cohort);
+
         return res.status(200).send({
           ok: true,
           data: {
             ...serializeMission(mission),
             tutor: missionTutor,
             application: application ? serializeApplication(application) : null,
-            ...(await getAuthorizationToApply(mission, req.user as unknown as YoungType, cohort)),
+            ...authorization,
           },
         });
       }
