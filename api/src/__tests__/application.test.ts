@@ -13,7 +13,7 @@ import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./hel
 import { createCohortHelper } from "./helpers/cohort";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -170,6 +170,111 @@ describe("Application", () => {
         .post("/application")
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(403);
+    });
+
+    describe("Admin creating custom missions", () => {
+      it("should allow admin to create application for young with phase1 DONE and phase2 WAITING_REALISATION", async () => {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            cohort: cohort.name,
+            cohortId: cohort._id,
+            statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+            statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+          }),
+        );
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = getNewApplicationFixture();
+        const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        const res = await request(await getAppHelperWithAcl(admin))
+          .post("/application")
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+        expect(res.status).toBe(200);
+        expect(res.body.data.youngId).toBe(young._id.toString());
+      });
+
+      it("should allow admin to create application for young with phase1 EXEMPTED and phase2 IN_PROGRESS", async () => {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            cohort: cohort.name,
+            cohortId: cohort._id,
+            statusPhase1: YOUNG_STATUS_PHASE1.EXEMPTED,
+            statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+          }),
+        );
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = getNewApplicationFixture();
+        const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        const res = await request(await getAppHelperWithAcl(admin))
+          .post("/application")
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+        expect(res.status).toBe(200);
+        expect(res.body.data.youngId).toBe(young._id.toString());
+      });
+
+      it("should allow admin to create application even if cohort is archived", async () => {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.ARCHIVED }));
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            cohort: cohort.name,
+            cohortId: cohort._id,
+            statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+            statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+          }),
+        );
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = getNewApplicationFixture();
+        const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        const res = await request(await getAppHelperWithAcl(admin))
+          .post("/application")
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+        expect(res.status).toBe(200);
+        expect(res.body.data.youngId).toBe(young._id.toString());
+      });
+
+      it("should return 403 when admin tries to create application for young with phase2 VALIDATED", async () => {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            cohort: cohort.name,
+            cohortId: cohort._id,
+            statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+            statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+          }),
+        );
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = getNewApplicationFixture();
+        const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        const res = await request(await getAppHelperWithAcl(admin))
+          .post("/application")
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+        expect(res.status).toBe(403);
+      });
+
+      it("should return 403 when admin tries to create application for young with phase1 not validated", async () => {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+        const young = await createYoungHelper(
+          getNewYoungFixture({
+            cohort: cohort.name,
+            cohortId: cohort._id,
+            statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+            statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+          }),
+        );
+        const mission = await createMissionHelper(getNewMissionFixture());
+        const application = getNewApplicationFixture();
+        const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+        const res = await request(await getAppHelperWithAcl(admin))
+          .post("/application")
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+        expect(res.status).toBe(403);
+      });
     });
   });
 
