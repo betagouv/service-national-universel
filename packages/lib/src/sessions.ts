@@ -149,15 +149,23 @@ const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence =
 // Exception : si le jeune a au moins une mission DONE et que la phase 2 n'est pas validée, il peut voir les missions même si la cohorte est archivée
 function canViewMissions(young: YoungType, cohort?: CohortType) {
   const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
-  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
-  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
-  const cohortNotArchived = !isCohortArchived(cohort);
-
-  if (!canAccessPhase2 || !phase2NotValidated) {
+  
+  if (!canAccessPhase2) {
     return false;
   }
 
-  return cohortNotArchived || hasCompletedMission;
+  const cohortNotArchived = !isCohortArchived(cohort);
+  
+  // Si cohorte non archivée, on peut voir les missions (comportement original)
+  if (cohortNotArchived) {
+    return true;
+  }
+  
+  // Si cohorte archivée, on peut voir les missions uniquement si phase2 non validée ET au moins une mission DONE
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+  
+  return phase2NotValidated && hasCompletedMission;
 }
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
