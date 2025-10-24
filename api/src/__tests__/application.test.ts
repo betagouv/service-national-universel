@@ -639,4 +639,36 @@ describe("Referent regional/departmental creating applications", () => {
       .send({ ...application, youngId: young._id, missionId: newMission._id });
     expect(res.status).toBe(403);
   });
+
+  it("should update young.phase2ApplicationStatus when changing application status via multiaction", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.ARCHIVED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      cohort: cohort.name,
+      cohortId: cohort._id,
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      phase2ApplicationStatus: [APPLICATION_STATUS.VALIDATED],
+    });
+
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const application = await createApplication({
+      ...getNewApplicationFixture(),
+      youngId: young._id,
+      missionId: mission._id,
+      status: APPLICATION_STATUS.VALIDATED,
+    });
+
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post(`/application/multiaction/change-status/${APPLICATION_STATUS.DONE}`)
+      .send({ ids: [application._id.toString()] });
+
+    expect(res.status).toBe(200);
+
+    const updatedYoung = await getYoungByIdHelper(young._id.toString());
+    expect(updatedYoung).toBeTruthy();
+    expect(updatedYoung!.phase2ApplicationStatus).toContain(APPLICATION_STATUS.DONE);
+  });
 });
