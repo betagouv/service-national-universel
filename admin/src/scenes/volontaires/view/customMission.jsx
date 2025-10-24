@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { translateApplication, canCreateApplications, canAdminCreateApplication, ROLES } from "snu-lib";
+import { translateApplication, canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
 import validator from "validator";
 import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
@@ -23,6 +23,7 @@ export default function CustomMission({ young, onChange }) {
   const cohortList = useSelector((state) => state.Cohorts);
   const { user } = useSelector((state) => state.Auth);
   const history = useHistory();
+  const [applications, setApplications] = useState([]);
   const [values, setValues] = useState({
     status: "VALIDATED",
     structureLegalStatus: "PUBLIC",
@@ -209,7 +210,25 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  const canCreate = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canCreateApplications(young, cohort);
+  useEffect(() => {
+    const fetchApplications = async () => {
+      const { ok, data } = await api.get(`/young/${young._id}/application`);
+      if (ok) {
+        setApplications(data);
+      }
+    };
+    const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+    if (isRegionalOrDepartmental) {
+      fetchApplications();
+    }
+  }, [young._id, user.role]);
+
+  const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const canCreate = user.role === ROLES.ADMIN 
+    ? canAdminCreateApplication(young) 
+    : isRegionalOrDepartmental
+      ? canReferentCreateApplication(young, applications)
+      : canCreateApplications(young, cohort);
 
   if (!canCreate)
     return (
@@ -236,7 +255,9 @@ export default function CustomMission({ young, onChange }) {
           <div className="mt-8 text-center">
             {user.role === ROLES.ADMIN
               ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-              : "Le jeune n'est pas éligible à la phase 2"}
+              : isRegionalOrDepartmental
+                ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
+                : "Le jeune n'est pas éligible à la phase 2"}
           </div>
         </div>
       </>
