@@ -1,4 +1,4 @@
-import { canAdminCreateApplication, canReferentCreateApplication, canCreateApplications } from "../sessions";
+import { canAdminCreateApplication, canReferentCreateApplication, canCreateApplications, canViewMissions } from "../sessions";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, COHORT_STATUS } from "../constants/constants";
 
 describe("canAdminCreateApplication", () => {
@@ -138,6 +138,85 @@ describe("canReferentCreateApplication", () => {
       { status: APPLICATION_STATUS.IN_PROGRESS },
     ];
     expect(canReferentCreateApplication(young, applications)).toBe(true);
+  });
+});
+
+describe("canViewMissions", () => {
+  it("devrait retourner true si jeune pointé et cohorte non archivée", () => {
+    const young = {
+      cohesionStayPresence: "true",
+      statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [],
+    } as any;
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canViewMissions(young, cohort)).toBe(true);
+  });
+
+  it("devrait retourner true si phase1 validée et cohorte non archivée", () => {
+    const young = {
+      cohesionStayPresence: "false",
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [],
+    } as any;
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canViewMissions(young, cohort)).toBe(true);
+  });
+
+  it("devrait retourner true si phase1 validée, phase2 non validée, cohorte archivée et 1 mission DONE", () => {
+    const young = {
+      cohesionStayPresence: "false",
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+    } as any;
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canViewMissions(young, cohort)).toBe(true);
+  });
+
+  it("devrait retourner true si jeune pointé, phase2 IN_PROGRESS, cohorte archivée et 1 mission DONE", () => {
+    const young = {
+      cohesionStayPresence: "true",
+      statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      phase2ApplicationStatus: [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.DONE],
+    } as any;
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canViewMissions(young, cohort)).toBe(true);
+  });
+
+  it("devrait retourner false si phase2 validée même avec mission DONE", () => {
+    const young = {
+      cohesionStayPresence: "true",
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+    } as any;
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canViewMissions(young, cohort)).toBe(false);
+  });
+
+  it("devrait retourner false si cohorte archivée sans mission DONE", () => {
+    const young = {
+      cohesionStayPresence: "true",
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [APPLICATION_STATUS.VALIDATED],
+    } as any;
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canViewMissions(young, cohort)).toBe(false);
+  });
+
+  it("devrait retourner false si phase1 non validée et non pointé", () => {
+    const young = {
+      cohesionStayPresence: "false",
+      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [],
+    } as any;
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canViewMissions(young, cohort)).toBe(false);
   });
 });
 
