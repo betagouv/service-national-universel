@@ -152,7 +152,16 @@ function canViewMissions(young: YoungType, cohort?: CohortType) {
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
 function canCreateApplications(young: YoungType, cohort?: CohortType) {
-  return hasValidatedPhase1(young) && !isCohortArchived(cohort);
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+  const cohortNotArchived = !isCohortArchived(cohort);
+
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+
+  return cohortNotArchived || hasCompletedMission;
 }
 
 // Ils peuvent demander des reconnaissances d'équivalences même si leur cohorte est archivée.
