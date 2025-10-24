@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { translateApplication, canCreateApplications } from "snu-lib";
+import { translateApplication, canCreateApplications, canAdminCreateCustomMission, ROLES } from "snu-lib";
 import validator from "validator";
 import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
@@ -21,6 +21,7 @@ import { useSelector } from "react-redux";
 
 export default function CustomMission({ young, onChange }) {
   const cohortList = useSelector((state) => state.Cohorts);
+  const { user } = useSelector((state) => state.Auth);
   const history = useHistory();
   const [values, setValues] = useState({
     status: "VALIDATED",
@@ -208,7 +209,9 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  if (!canCreateApplications(young, cohort))
+  const canCreate = user.role === ROLES.ADMIN ? canAdminCreateCustomMission(young) : canCreateApplications(young, cohort);
+
+  if (!canCreate)
     return (
       <>
         {" "}
@@ -230,7 +233,11 @@ export default function CustomMission({ young, onChange }) {
               Créer une mission personnalisée à {young.firstName} {young.lastName}
             </div>
           </div>
-          <div className="mt-8 text-center">Le jeune n&apos;est pas éligible à la phase 2</div>
+          <div className="mt-8 text-center">
+            {user.role === ROLES.ADMIN
+              ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
+              : "Le jeune n'est pas éligible à la phase 2"}
+          </div>
         </div>
       </>
     );
