@@ -172,7 +172,7 @@ describe("Application", () => {
       expect(res.status).toBe(403);
     });
 
-    describe("Admin creating custom missions", () => {
+    describe("Admin creating applications", () => {
       it("should allow admin to create application for young with phase1 DONE and phase2 WAITING_REALISATION", async () => {
         const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
         const young = await createYoungHelper(
