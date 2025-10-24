@@ -162,7 +162,7 @@ function canCreateEquivalences(young: YoungType) {
 
 // Les admins peuvent créer des missions personnalisées pour les jeunes ayant validé leur phase 1
 // et dont la phase 2 n'est pas encore validée
-function canAdminCreateCustomMission(young: YoungType) {
+function canAdminCreateApplication(young: YoungType) {
   const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
   const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
   return hasValidatedOrExemptedPhase1 && phase2NotValidated;
@@ -180,7 +180,7 @@ export {
   canViewMissions,
   canCreateApplications,
   canCreateEquivalences,
-  canAdminCreateCustomMission,
+  canAdminCreateApplication,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

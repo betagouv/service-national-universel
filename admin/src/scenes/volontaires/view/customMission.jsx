@@ -5,7 +5,7 @@ import { useHistory } from "react-router-dom";
 import ReactSelect from "react-select";
 import AsyncSelect from "react-select/async";
 import CreatableSelect from "react-select/creatable";
-import { translateApplication, canCreateApplications, canAdminCreateCustomMission, ROLES } from "snu-lib";
+import { translateApplication, canCreateApplications, canAdminCreateApplication, ROLES } from "snu-lib";
 import validator from "validator";
 import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
@@ -209,7 +209,7 @@ export default function CustomMission({ young, onChange }) {
     }
   }, [creationTutor]);
 
-  const canCreate = user.role === ROLES.ADMIN ? canAdminCreateCustomMission(young) : canCreateApplications(young, cohort);
+  const canCreate = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canCreateApplications(young, cohort);
 
   if (!canCreate)
     return (

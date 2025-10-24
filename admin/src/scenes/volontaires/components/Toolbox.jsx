@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { HiOutlineSearch, HiOutlineAdjustments } from "react-icons/hi";
-import { canCreateApplications, canAdminCreateCustomMission, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, ROLES } from "snu-lib";
 import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
@@ -16,7 +16,7 @@ export default function Toolbox({ young }) {
 
   const cohort = cohortList.find((c) => c.name === young.cohort);
   const canYoungApplyToPhase2 = canCreateApplications(young, cohort);
-  const canCreateCustomMission = user.role === ROLES.ADMIN ? canAdminCreateCustomMission(young) : canYoungApplyToPhase2;
+  const canCreateCustomMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canYoungApplyToPhase2;
 
   return (
     <div className="flex flex-col">

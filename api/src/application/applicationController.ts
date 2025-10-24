@@ -9,7 +9,7 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   canCreateApplications,
-  canAdminCreateCustomMission,
+  canAdminCreateApplication,
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
@@ -168,7 +168,7 @@ router.post(
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         }
-        const canCreate = req.user.role === ROLES.ADMIN ? canAdminCreateCustomMission(young) : canCreateApplications(young, cohort);
+        const canCreate = req.user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canCreateApplications(young, cohort);
         if (!canCreate) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }

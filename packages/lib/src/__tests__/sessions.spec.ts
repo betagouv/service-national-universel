@@ -1,13 +1,13 @@
-import { canAdminCreateCustomMission } from "../sessions";
+import { canAdminCreateApplication } from "../sessions";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "../constants/constants";
 
-describe("canAdminCreateCustomMission", () => {
+describe("canAdminCreateApplication", () => {
   it("devrait retourner true si phase1 DONE et phase2 WAITING_REALISATION", () => {
     const young = {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(true);
+    expect(canAdminCreateApplication(young)).toBe(true);
   });
 
   it("devrait retourner true si phase1 EXEMPTED et phase2 IN_PROGRESS", () => {
@@ -15,7 +15,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.EXEMPTED,
       statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(true);
+    expect(canAdminCreateApplication(young)).toBe(true);
   });
 
   it("devrait retourner true si phase1 DONE et phase2 WITHDRAWN", () => {
@@ -23,7 +23,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.WITHDRAWN,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(true);
+    expect(canAdminCreateApplication(young)).toBe(true);
   });
 
   it("devrait retourner false si phase2 VALIDATED", () => {
@@ -31,7 +31,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(false);
+    expect(canAdminCreateApplication(young)).toBe(false);
   });
 
   it("devrait retourner false si phase1 NOT_DONE", () => {
@@ -39,7 +39,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.NOT_DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(false);
+    expect(canAdminCreateApplication(young)).toBe(false);
   });
 
   it("devrait retourner false si phase1 AFFECTED", () => {
@@ -47,7 +47,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED,
       statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(false);
+    expect(canAdminCreateApplication(young)).toBe(false);
   });
 
   it("devrait retourner false si phase1 WAITING_AFFECTATION", () => {
@@ -55,7 +55,7 @@ describe("canAdminCreateCustomMission", () => {
       statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
       statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
     } as any;
-    expect(canAdminCreateCustomMission(young)).toBe(false);
+    expect(canAdminCreateApplication(young)).toBe(false);
   });
 });
 
