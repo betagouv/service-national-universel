@@ -1,4 +1,4 @@
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 import React, { useState } from "react";
 import { canCreateApplicationForYoung, getProjetPro, getTags } from "./utils";
 import { ApplicationType, formatDateFR, MissionType, ROLES, translate, YoungType } from "snu-lib";
@@ -8,12 +8,19 @@ import { useSelector } from "react-redux";
 import { CohortState } from "@/redux/cohorts/reducer";
 import { HiOutlineMapPin } from "react-icons/hi2";
 import useCreateApplicationForYoung from "./useCreateApplicationForYoung";
+import API from "@/services/api";
 
 type Props = {
   young: YoungType & { sort: number };
   mission: MissionType;
   application?: ApplicationType;
 };
+
+async function fetchYoungApplications(youngId: string): Promise<ApplicationType[]> {
+  const { ok, data } = await API.get(`/young/${youngId}/application`);
+  if (!ok) return [];
+  return data;
+}
 
 export default function YoungCard({ young, mission, application }: Props) {
   const queryClient = useQueryClient();
@@ -24,6 +31,13 @@ export default function YoungCard({ young, mission, application }: Props) {
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const { user } = useSelector((state: any) => state.Auth);
   const cohort = cohorts.find((cohort) => cohort._id === young.cohortId);
+  
+  const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
+  const { data: youngApplications = [] } = useQuery({
+    queryKey: ["youngApplications", young._id],
+    queryFn: () => fetchYoungApplications(young._id),
+    enabled: isRegionalOrDepartmental,
+  });
 
   function handleClick(young: YoungType) {
     setModal(false);
@@ -67,14 +81,16 @@ export default function YoungCard({ young, mission, application }: Props) {
       ) : (
         <Button
           title="Proposer la mission"
-          disabled={!canCreateApplicationForYoung(young, cohort, user?.role)}
+          disabled={!canCreateApplicationForYoung(young, cohort, user?.role, youngApplications)}
           onClick={() => setModal(true)}
           type="secondary"
           loading={isPending}
           tooltip={
             user?.role === ROLES.ADMIN
               ? "Impossible de proposer la mission à ce volontaire (phase 1 non validée/dispensée ou phase 2 déjà validée)."
-              : "Impossible de proposer la mission à ce volontaire (phase 1 non validée ou cohorte trop ancienne)."
+              : isRegionalOrDepartmental
+                ? "Impossible de proposer la mission à ce volontaire (phase 1 non validée/dispensée, phase 2 déjà validée, ou aucune mission effectuée)."
+                : "Impossible de proposer la mission à ce volontaire (phase 1 non validée ou cohorte trop ancienne)."
           }
           className="w-full"
         />
