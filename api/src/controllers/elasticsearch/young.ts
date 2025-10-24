@@ -609,6 +609,16 @@ router.post(
         { terms: { "statusPhase2.keyword": statusPhase2Filter } },
       ];
 
+      // For regional/departmental referents, filter youngs with at least one DONE application
+      const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+      if (isRegionalOrDepartmental) {
+        const { ApplicationModel } = require("../../models");
+        const { APPLICATION_STATUS } = require("snu-lib");
+        const applicationsDone = await ApplicationModel.find({ status: APPLICATION_STATUS.DONE }, { youngId: 1 });
+        const youngIdsWithCompletedMission = [...new Set(applicationsDone.map((app: any) => app.youngId))];
+        contextFilters.push({ terms: { "_id.keyword": youngIdsWithCompletedMission } });
+      }
+
       // Body params validation
       const { queryFilters, page, sort, exportFields, error }: any = joiElasticSearch({ filterFields, sortFields, body: body });
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
