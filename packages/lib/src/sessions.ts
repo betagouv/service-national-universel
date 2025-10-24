@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants/constants";
+import { APPLICATION_STATUS, COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format, isPast } from "date-fns";
@@ -168,6 +168,16 @@ function canAdminCreateApplication(young: YoungType) {
   return hasValidatedOrExemptedPhase1 && phase2NotValidated;
 }
 
+// Les référents régionaux/départementaux peuvent créer des missions personnalisées pour les jeunes ayant validé leur phase 1,
+// dont la phase 2 n'est pas encore validée, et ayant au moins une candidature avec le statut DONE
+function canReferentCreateApplication(young: YoungType, applications: any[]) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = applications?.some((app) => app.status === APPLICATION_STATUS.DONE);
+  
+  return hasValidatedOrExemptedPhase1 && phase2NotValidated && hasCompletedMission;
+}
+
 export {
   getSchoolYear,
   getCohortYear,
@@ -181,6 +191,7 @@ export {
   canCreateApplications,
   canCreateEquivalences,
   canAdminCreateApplication,
+  canReferentCreateApplication,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,
