@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canCreateApplications, canAdminCreateApplication, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";
@@ -16,6 +16,7 @@ export default function ProposeMission({ young, onSend }) {
   const cohortList = useSelector((state) => state.Cohorts);
   const { user } = useSelector((state) => state.Auth);
   const [missionIds, setMissionIds] = useState([]);
+  const [applications, setApplications] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({});
   const [paramData, setParamData] = useState({ page: 0 });
   const [data, setData] = useState([]);
@@ -23,11 +24,19 @@ export default function ProposeMission({ young, onSend }) {
   const { mutate: createApplicationForYoung } = useCreateApplicationForYoung();
 
   const cohort = cohortList.find((c) => c.name === young.cohort);
-  const canProposeMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canCreateApplications(young, cohort);
+  
+  const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  
+  const canProposeMission = user.role === ROLES.ADMIN 
+    ? canAdminCreateApplication(young) 
+    : isRegionalOrDepartmental
+      ? canReferentCreateApplication(young, applications)
+      : canCreateApplications(young, cohort);
 
   useEffect(() => {
-    getApplications().then((applications) => {
-      setMissionIds(applications.map((a) => a.missionId));
+    getApplications().then((apps) => {
+      setApplications(apps || []);
+      setMissionIds(apps?.map((a) => a.missionId) || []);
     });
     updateOnParamChange(selectedFilters, paramData);
   }, []);
@@ -115,7 +124,9 @@ export default function ProposeMission({ young, onSend }) {
           <p className="text-center ">
             {user.role === ROLES.ADMIN
               ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-              : "Ce volontaire n'est pas éligible à la phase 2."}
+              : isRegionalOrDepartmental
+                ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
+                : "Ce volontaire n'est pas éligible à la phase 2."}
           </p>
         )}
       </div>

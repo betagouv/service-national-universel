@@ -3,21 +3,33 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { HiOutlineSearch, HiOutlineAdjustments } from "react-icons/hi";
-import { canCreateApplications, canAdminCreateApplication, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
 import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
 import { knowledgebaseURL } from "../../../config";
 
-export default function Toolbox({ young }) {
+export default function Toolbox({ young, applications = [] }) {
   const cohortList = useSelector((state) => state.Cohorts);
   const { user } = useSelector((state) => state.Auth);
   const history = useHistory();
 
   const cohort = cohortList.find((c) => c.name === young.cohort);
   const canYoungApplyToPhase2 = canCreateApplications(young, cohort);
-  const canCreateCustomMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canYoungApplyToPhase2;
-  const canProposeExistingMission = user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : canYoungApplyToPhase2;
+  
+  const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  
+  const canCreateCustomMission = user.role === ROLES.ADMIN 
+    ? canAdminCreateApplication(young) 
+    : isRegionalOrDepartmental
+      ? canReferentCreateApplication(young, applications)
+      : canYoungApplyToPhase2;
+  
+  const canProposeExistingMission = user.role === ROLES.ADMIN 
+    ? canAdminCreateApplication(young) 
+    : isRegionalOrDepartmental
+      ? canReferentCreateApplication(young, applications)
+      : canYoungApplyToPhase2;
 
   return (
     <div className="flex flex-col">
@@ -53,7 +65,9 @@ export default function Toolbox({ young }) {
               <div className="text-[black]">
                 {user.role === ROLES.ADMIN
                   ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-                  : "Le jeune n'est pas éligible à la phase 2"}
+                  : isRegionalOrDepartmental
+                    ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
+                    : "Le jeune n'est pas éligible à la phase 2"}
               </div>
             </ReactTooltip>
           ) : null}
@@ -109,7 +123,9 @@ export default function Toolbox({ young }) {
               <div className="text-[black]">
                 {user.role === ROLES.ADMIN
                   ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-                  : "Le jeune n'est pas éligible à la phase 2"}
+                  : isRegionalOrDepartmental
+                    ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
+                    : "Le jeune n'est pas éligible à la phase 2"}
               </div>
             </ReactTooltip>
           ) : null}
