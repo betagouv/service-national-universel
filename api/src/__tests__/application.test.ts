@@ -565,8 +565,8 @@ describe("Referent regional/departmental creating applications", () => {
     expect(res.body.data.youngId).toBe(young._id.toString());
   });
 
-  it("should return 403 when REFERENT_REGION tries to create application for young without application DONE", async () => {
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+  it("should return 403 when REFERENT_REGION tries to create application for young in archived cohort without application DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.ARCHIVED }));
     const young = await createYoungHelper(
       getNewYoungFixture({
         cohort: cohort.name,
