@@ -101,7 +101,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                               Si la cohorte est <strong>publiée</strong>, les volontaires peuvent s'inscrire si l'inscription est ouverte (voir cadre ci-dessous).
                             </li>
                             <li className="mt-2">
-                              Si elle est <strong>archivée partiellement</strong>, ils ne peuvent plus poursuivre la phase engagement.
+                              Si elle est <strong>archivée partiellement</strong>, ils peuvent poursuivre la phase engagement sous certaines conditions.
                             </li>
                             <li className="mt-2">
                               Si elle est <strong>archivée totalement</strong>, elle est complètement archivée et n'apparaît plus dans les sélections par défaut.
