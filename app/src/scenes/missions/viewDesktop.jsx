@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import useAuth from "@/services/useAuth";
+import usePermissions from "@/hooks/usePermissions";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import DoubleDayTile from "../../components/DoubleDayTile";
@@ -48,6 +49,7 @@ export default function ViewDesktop() {
   const history = useHistory();
 
   const { young } = useAuth();
+  const { canManageApplications } = usePermissions();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -194,7 +196,7 @@ export default function ViewDesktop() {
           </div>
           <div className="mt-3 flex items-center justify-center lg:!mt-0">
             {mission.application ? (
-              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} />
+              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} canManageApplications={canManageApplications} />
             ) : (
               <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
             )}
@@ -456,7 +458,7 @@ export default function ViewDesktop() {
   );
 }
 
-const ApplicationStatus = ({ mission, updateApplication, loading }) => {
+const ApplicationStatus = ({ mission, updateApplication, loading, canManageApplications }) => {
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
   const application = mission?.application;
   const tutor = mission?.tutor;
@@ -466,7 +468,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
       <>
         <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
-            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
+            {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) && canManageApplications ? (
               <button
                 className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
                 disabled={loading}
@@ -504,7 +506,7 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
       <>
         <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
-            {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
+            {["IN_PROGRESS", "VALIDATED"].includes(application.status) && canManageApplications ? (
               <button
                 className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
                 disabled={loading}
@@ -561,8 +563,8 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-2">
-          <AcceptButton mission={mission} loading={loading} updateApplication={updateApplication} />
-          <DeclineButton loading={loading} updateApplication={updateApplication} />
+          <AcceptButton mission={mission} loading={loading} updateApplication={updateApplication} disabled={!canManageApplications} />
+          <DeclineButton loading={loading} updateApplication={updateApplication} disabled={!canManageApplications} />
         </div>
         <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
       </div>

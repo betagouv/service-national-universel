@@ -9,11 +9,11 @@ import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
 export default function Index() {
-  const { canViewPhase2 } = usePermissions();
+  const { canViewMissions } = usePermissions();
   const history = useHistory();
   const device = useDevice();
 
-  if (!canViewPhase2) history.push("/");
+  if (!canViewMissions) history.push("/");
 
   const getMissionView = () => {
     if (device === "desktop") return <ViewDesktop />;
