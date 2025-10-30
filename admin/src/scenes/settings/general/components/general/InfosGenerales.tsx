@@ -104,7 +104,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                               Si elle est <strong>archivée partiellement</strong>, ils peuvent poursuivre la phase engagement sous certaines conditions.
                             </li>
                             <li className="mt-2">
-                              Si elle est <strong>archivée totalement</strong>, elle est complètement archivée et n'apparaît plus dans les sélections par défaut.
+                              Si elle est <strong>archivée totalement</strong>, les jeunes ne peuvent plus candidater, ajouter des engagements réalisés, ni gérer leurs candidatures. Les référents ne peuvent plus proposer de missions ni créer de missions personnalisées.
                             </li>
                           </ul>
                         </ReactTooltip>

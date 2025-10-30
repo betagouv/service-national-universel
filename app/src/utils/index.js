@@ -111,7 +111,7 @@ const isDoingAMission = (young) => young.phase2ApplicationStatus.some((status) =
 const isWaitingForEquivalence = (young) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
 export function canViewPhase2(young, cohort) {
-  return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young) || isDoingAMission(young) || isWaitingForEquivalence(young);
+  return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young, cohort) || isDoingAMission(young) || isWaitingForEquivalence(young);
 }
 
 export function permissionPhase3(y) {
