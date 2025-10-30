@@ -22,13 +22,13 @@ export default function Toolbox({ young, applications = [] }) {
   const canCreateCustomMission = user.role === ROLES.ADMIN 
     ? canAdminCreateApplication(young) 
     : isRegionalOrDepartmental
-      ? canReferentCreateApplication(young, applications)
+      ? canReferentCreateApplication(young, applications, cohort)
       : canYoungApplyToPhase2;
   
   const canProposeExistingMission = user.role === ROLES.ADMIN 
     ? canAdminCreateApplication(young) 
     : isRegionalOrDepartmental
-      ? canReferentCreateApplication(young, applications)
+      ? canReferentCreateApplication(young, applications, cohort)
       : canYoungApplyToPhase2;
 
   return (

@@ -19,7 +19,7 @@ export function canCreateApplicationForYoung(young: YoungType, cohort?: CohortDt
   }
   const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(userRole as string);
   if (isRegionalOrDepartmental && applications) {
-    return canReferentCreateApplication(young, applications);
+    return canReferentCreateApplication(young, applications, cohort as CohortType);
   }
   if (!cohort) return false;
   return canCreateApplications(young, cohort as CohortType);

@@ -30,7 +30,7 @@ export default function ProposeMission({ young, onSend }) {
   const canProposeMission = user.role === ROLES.ADMIN 
     ? canAdminCreateApplication(young) 
     : isRegionalOrDepartmental
-      ? canReferentCreateApplication(young, applications)
+      ? canReferentCreateApplication(young, applications, cohort)
       : canCreateApplications(young, cohort);
 
   useEffect(() => {

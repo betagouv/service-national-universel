@@ -227,7 +227,7 @@ export default function CustomMission({ young, onChange }) {
   const canCreate = user.role === ROLES.ADMIN 
     ? canAdminCreateApplication(young) 
     : isRegionalOrDepartmental
-      ? canReferentCreateApplication(young, applications)
+      ? canReferentCreateApplication(young, applications, cohort)
       : canCreateApplications(young, cohort);
 
   if (!canCreate)
