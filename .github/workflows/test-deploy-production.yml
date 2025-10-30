@@ -79,27 +79,8 @@ jobs:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
           with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
 
-  deploy_staging:
-    needs: test
-    runs-on: ubuntu-latest
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install clever-tools
-        run: npm install -g clever-tools
-
-      - name: Merge production in deploy-staging
-        run: git push --force origin HEAD:deploy-staging
-
-      - name: Watch deployment
-        env:
-          CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
-          CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_STAGING_SNU_ALL }} ${{ github.sha }}
-  
   deploy_production:
-    needs: deploy_staging
+    needs: test
     runs-on: ubuntu-latest
 
     steps:
