@@ -1,5 +1,5 @@
 import { regionsListDROMS } from "./region-and-departments";
-import { COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "./constants/constants";
+import { APPLICATION_STATUS, COHORT_STATUS, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2 } from "./constants/constants";
 import { getZonedDate } from "./utils/date";
 import { EtablissementDto } from "./dto";
 import { format, isPast } from "date-fns";
@@ -126,7 +126,7 @@ function inscriptionCreationOpenForYoungs(cohort) {
   return new Date() < new Date(cohort.inscriptionEndDate);
 }
 
-const isCohortTooOld = (cohort?: CohortType) => {
+const isCohortArchived = (cohort?: CohortType) => {
   return cohort?.status === COHORT_STATUS.ARCHIVED;
 };
 
@@ -146,18 +146,69 @@ const hasValidatedPhase1 = (young: YoungType) =>
 const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
 
 // Les volontaires peuvent voir les missions dès qu'ils sont pointés et tant que leur cohorte n'est pas archivée
+// Exception : si le jeune a au moins une mission DONE et que la phase 2 n'est pas validée, il peut voir les missions même si la cohorte est archivée
 function canViewMissions(young: YoungType, cohort?: CohortType) {
-  return (didAttendCohesionStay(young) || hasValidatedPhase1(young)) && !isCohortTooOld(cohort);
+  const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
+  
+  if (!canAccessPhase2) {
+    return false;
+  }
+
+  const cohortNotArchived = !isCohortArchived(cohort);
+  
+  // Si cohorte non archivée, on peut voir les missions (comportement original)
+  if (cohortNotArchived) {
+    return true;
+  }
+  
+  // Si cohorte archivée, on peut voir les missions uniquement si phase2 non validée ET au moins une mission DONE
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+  
+  return phase2NotValidated && hasCompletedMission;
 }
 
 // Mais ils ne peuvent candidater qu'après avoir été validés
 function canCreateApplications(young: YoungType, cohort?: CohortType) {
-  return hasValidatedPhase1(young) && !isCohortTooOld(cohort);
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+  const cohortNotArchived = !isCohortArchived(cohort);
+
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+
+  return cohortNotArchived || hasCompletedMission;
 }
 
 // Ils peuvent demander des reconnaissances d'équivalences même si leur cohorte est archivée.
 function canCreateEquivalences(young: YoungType) {
   return hasValidatedPhase1(young);
+}
+
+// Les admins peuvent créer des missions personnalisées pour les jeunes ayant validé leur phase 1
+// et dont la phase 2 n'est pas encore validée
+function canAdminCreateApplication(young: YoungType) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  return hasValidatedOrExemptedPhase1 && phase2NotValidated;
+}
+
+// Les référents régionaux/départementaux peuvent créer des missions personnalisées pour les jeunes :
+// - Cohorte non archivée : phase1 validée/dispensée + phase2 non validée
+// - Cohorte archivée : phase1 validée/dispensée + phase2 non validée + au moins 1 mission effectuée
+function canReferentCreateApplication(young: YoungType, applications: any[], cohort?: CohortType) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = applications?.some((app) => app.status === APPLICATION_STATUS.DONE);
+  const cohortNotArchived = !isCohortArchived(cohort);
+  
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+  
+  return cohortNotArchived || hasCompletedMission;
 }
 
 export {
@@ -168,10 +219,12 @@ export {
   getCohortPeriodTemp,
   inscriptionCreationOpenForYoungs,
   hasAccessToReinscription,
-  isCohortTooOld,
+  isCohortArchived,
   canViewMissions,
   canCreateApplications,
   canCreateEquivalences,
+  canAdminCreateApplication,
+  canReferentCreateApplication,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

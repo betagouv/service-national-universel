@@ -9,6 +9,8 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   canCreateApplications,
+  canAdminCreateApplication,
+  canReferentCreateApplication,
   translateAddFilePhase2,
   translateAddFilesPhase2,
   APPLICATION_STATUS,
@@ -167,7 +169,18 @@ router.post(
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         }
-        if (!canCreateApplications(young, cohort)) {
+        
+        let canCreate: boolean;
+        if (req.user.role === ROLES.ADMIN) {
+          canCreate = canAdminCreateApplication(young);
+        } else if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) {
+          const applications = await ApplicationModel.find({ youngId: young._id });
+          canCreate = canReferentCreateApplication(young, applications, cohort);
+        } else {
+          canCreate = canCreateApplications(young, cohort);
+        }
+        
+        if (!canCreate) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
       }
@@ -318,27 +331,29 @@ router.post(
         }
       }
 
-      value.ids.map(async (id: string) => {
-        const application = await ApplicationModel.findById(id);
-        if (!application) return;
+      await Promise.all(
+        value.ids.map(async (id: string) => {
+          const application = await ApplicationModel.findById(id);
+          if (!application) return;
 
-        const young = await YoungModel.findById(application.youngId);
+          const young = await YoungModel.findById(application.youngId);
 
-        application.set({ status: valueKey.key });
-        await application.save({ fromUser: req.user });
+          application.set({ status: valueKey.key });
+          await application.save({ fromUser: req.user });
 
-        if (application.apiEngagementId) {
-          await apiEngagement.update(application);
-        }
+          if (application.apiEngagementId) {
+            await apiEngagement.update(application);
+          }
 
-        await updateYoungPhase2StatusAndHours(young, req.user);
-        await updateYoungStatusPhase2Contract(young, req.user);
-        await updateMission(application, req.user);
+          await updateYoungPhase2StatusAndHours(young, req.user);
+          await updateYoungStatusPhase2Contract(young, req.user);
+          await updateMission(application, req.user);
 
-        if (young) {
-          await sendNotificationsByStatus(application, young, valueKey.key);
-        }
-      });
+          if (young) {
+            await sendNotificationsByStatus(application, young, valueKey.key);
+          }
+        }),
+      );
       res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);

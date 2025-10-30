@@ -596,13 +596,28 @@ router.post(
       const mission = await MissionModel.findById(req.params.id);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      // Context filters
+      // Context filters - ADMIN can propose missions to young with WITHDRAWN phase2 status
+      const statusPhase2Filter =
+        user.role === ROLES.ADMIN
+          ? ["IN_PROGRESS", "WAITING_REALISATION", "WITHDRAWN"]
+          : ["IN_PROGRESS", "WAITING_REALISATION"];
+
       const contextFilters = [
         ...youngContextFilters!,
         { terms: { "status.keyword": ["VALIDATED"] } },
         { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
-        { terms: { "statusPhase2.keyword": ["IN_PROGRESS", "WAITING_REALISATION"] } },
+        { terms: { "statusPhase2.keyword": statusPhase2Filter } },
       ];
+
+      // For regional/departmental referents, filter youngs with at least one DONE application
+      const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+      if (isRegionalOrDepartmental) {
+        const { ApplicationModel } = require("../../models");
+        const { APPLICATION_STATUS } = require("snu-lib");
+        const applicationsDone = await ApplicationModel.find({ status: APPLICATION_STATUS.DONE }, { youngId: 1 });
+        const youngIdsWithCompletedMission = [...new Set(applicationsDone.map((app: any) => app.youngId))];
+        contextFilters.push({ terms: { "_id.keyword": youngIdsWithCompletedMission } });
+      }
 
       // Body params validation
       const { queryFilters, page, sort, exportFields, error }: any = joiElasticSearch({ filterFields, sortFields, body: body });

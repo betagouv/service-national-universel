@@ -240,7 +240,7 @@ export default function Phase2({ young, onChange }) {
         <Phase2MilitaryPreparation young={young} applications={applicationsToMilitaryPreparation} />
         <EquivalenceList young={young} />
 
-        <Toolbox young={young} />
+        <Toolbox young={young} applications={applications} />
         <Box>
           <div className="mx-8 mb-3 flex items-center justify-between border-b-[1px] border-b-gray-200">
             <div className="flex items-center">
