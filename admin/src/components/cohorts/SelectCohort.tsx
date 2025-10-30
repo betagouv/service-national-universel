@@ -35,7 +35,7 @@ export default function SelectCohort({ cohort, withBadge, sort = "dateStart", fi
       updatedCohorts = updatedCohorts.sort((a, b) => new Date(b[sort]).getTime() - new Date(a[sort]).getTime());
     }
     if (showArchived === false) {
-      updatedCohorts = updatedCohorts.filter((cohort) => cohort.status !== COHORT_STATUS.ARCHIVED);
+      updatedCohorts = updatedCohorts.filter((cohort) => cohort.status !== COHORT_STATUS.ARCHIVED && cohort.status !== COHORT_STATUS.FULLY_ARCHIVED);
     }
 
     return updatedCohorts.map((cohort) => {
