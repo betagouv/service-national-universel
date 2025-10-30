@@ -5,6 +5,7 @@ import { HiChevronDown, HiOutlineMail, HiPlus } from "react-icons/hi";
 import { IoMdInformationCircleOutline } from "react-icons/io";
 import { MdOutlineContentCopy } from "react-icons/md";
 import useAuth from "@/services/useAuth";
+import usePermissions from "@/hooks/usePermissions";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
 import AcceptButton from "./components/AcceptButton";
@@ -48,6 +49,7 @@ export default function ViewMobile() {
   const history = useHistory();
 
   const { young } = useAuth();
+  const { canManageApplications } = usePermissions();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -161,6 +163,7 @@ export default function ViewMobile() {
                 setLoading={setLoading}
                 contract={contract}
                 contractHasAllValidation={contractHasAllValidation}
+                canManageApplications={canManageApplications}
               />
             ) : (
               <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
@@ -305,7 +308,7 @@ export default function ViewMobile() {
         {mission.application ? (
           <>
             <div className="mx-6 my-4 flex items-center justify-center">
-              {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(mission?.application.status) ? (
+              {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(mission?.application.status) && canManageApplications ? (
                 <button
                   className="group flex items-center gap-1 rounded-lg border-[1px] px-10 py-2"
                   disabled={loading}
@@ -321,7 +324,7 @@ export default function ViewMobile() {
                   <div className="text-sm font-medium leading-5 text-gray-800 group-disabled:text-gray-400">Annuler cette candidature</div>
                 </button>
               ) : null}
-              {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) ? (
+              {["IN_PROGRESS", "VALIDATED"].includes(mission?.application.status) && canManageApplications ? (
                 <button
                   className="group flex items-center gap-1 rounded-lg border-[1px] px-10 py-2"
                   disabled={loading}
@@ -465,7 +468,7 @@ const TabItem = ({ name, active, setCurrentTab, children }) => (
   </div>
 );
 
-const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation }) => {
+const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, contract, contractHasAllValidation, canManageApplications }) => {
   const { young } = useAuth();
   const tutor = mission?.tutor;
   const application = mission?.application;
@@ -571,8 +574,8 @@ const ApplicationStatus = ({ mission, updateApplication, loading, setLoading, co
           Cette mission vous a été proposée <br /> par votre référent
         </div>
         <div className="flex items-center gap-2">
-          <AcceptButton mission={mission} updateApplication={updateApplication} loading={loading} />
-          <DeclineButton updateApplication={updateApplication} loading={loading} />
+          <AcceptButton mission={mission} updateApplication={updateApplication} loading={loading} disabled={!canManageApplications} />
+          <DeclineButton updateApplication={updateApplication} loading={loading} disabled={!canManageApplications} />
         </div>
         {!mission.canApply ? <div className="text-center text-xs text-red-500">{mission.message}</div> : null}
 
