@@ -207,12 +207,12 @@ function canCreateEquivalences(young: YoungType, cohort?: CohortType) {
 }
 
 // Gestion des candidatures existantes (accepter/refuser proposition, abandonner)
-function canManageApplications(young: YoungType, cohort?: CohortType) {
+function canManageApplications(_young: YoungType, cohort?: CohortType) {
   return !isCohortFullyArchived(cohort);
 }
 
 // Accès au dossier de préparation militaire
-function canAccessMilitaryPreparation(young: YoungType, cohort?: CohortType) {
+function canAccessMilitaryPreparation(_young: YoungType, cohort?: CohortType) {
   return !isCohortFullyArchived(cohort);
 }
 
@@ -247,6 +247,14 @@ function canReferentCreateApplication(young: YoungType, applications: any[], coh
   return cohortNotArchived || hasCompletedMission;
 }
 
+function canReferentUpdateApplicationStatus(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
+function canReferentUpdatePhase2Status(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
 export {
   getSchoolYear,
   getCohortYear,
@@ -264,6 +272,8 @@ export {
   canAccessMilitaryPreparation,
   canAdminCreateApplication,
   canReferentCreateApplication,
+  canReferentUpdateApplicationStatus,
+  canReferentUpdatePhase2Status,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

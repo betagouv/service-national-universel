@@ -5,6 +5,7 @@ import api from "../../../../../services/api";
 import ModalConfirm from "../../../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../../../components/modals/ModalConfirmWithMessage";
 import { APPLICATION_STATUS, ROLES, SENDINBLUE_TEMPLATES, translate, translateApplication } from "../../../../../utils";
+import { canReferentUpdateApplicationStatus } from "snu-lib";
 import { BiChevronDown } from "react-icons/bi";
 
 export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dropdownClassName = "" }) => {
@@ -15,6 +16,7 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
   const ref = React.useRef(null);
 
   const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
 
   React.useEffect(() => {
     const handleClickOutside = (event) => {
@@ -53,7 +55,11 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
     },
   };
 
-  options = lookUpAuthorizedStatus({ status: hit.status, role: user.role });
+  const cohort = cohortList.find((c) => c.name === hit.youngCohort);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const canUpdateStatus = user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || canReferentUpdateApplicationStatus(cohort);
+
+  options = canUpdateStatus ? lookUpAuthorizedStatus({ status: hit.status, role: user.role }) : [];
 
   const onClickStatus = (status) => {
     setDropDownOpen(false);
