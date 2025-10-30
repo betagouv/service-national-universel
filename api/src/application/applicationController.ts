@@ -175,7 +175,7 @@ router.post(
           canCreate = canAdminCreateApplication(young);
         } else if ([ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(req.user.role)) {
           const applications = await ApplicationModel.find({ youngId: young._id });
-          canCreate = canReferentCreateApplication(young, applications);
+          canCreate = canReferentCreateApplication(young, applications, cohort);
         } else {
           canCreate = canCreateApplications(young, cohort);
         }

@@ -585,6 +585,47 @@ describe("Referent regional/departmental creating applications", () => {
     expect(res.status).toBe(403);
   });
 
+  it("should allow REFERENT_REGION to create application for young in non-archived cohort without completed mission", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.PUBLISHED }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: mission._id });
+    expect(res.status).toBe(200);
+    expect(res.body.data.youngId).toBe(young._id.toString());
+  });
+
+  it("should return 403 when REFERENT_DEPARTMENT tries to create application for young in archived cohort without completed mission", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.ARCHIVED }));
+    const young = await createYoungHelper(
+      getNewYoungFixture({
+        cohort: cohort.name,
+        cohortId: cohort._id,
+        statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+        statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      }),
+    );
+    const mission = await createMissionHelper(getNewMissionFixture());
+    const application = getNewApplicationFixture();
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+
+    const res = await request(await getAppHelperWithAcl(referent))
+      .post("/application")
+      .send({ ...application, youngId: young._id, missionId: mission._id });
+    expect(res.status).toBe(403);
+  });
+
   it("should return 403 when REFERENT_DEPARTMENT tries to create application for young with phase2 VALIDATED", async () => {
     const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
     const young = await createYoungHelper(
