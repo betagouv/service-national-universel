@@ -105,16 +105,17 @@ describe("canReferentCreateApplication", () => {
     expect(canReferentCreateApplication(young, applications)).toBe(false);
   });
 
-  it("devrait retourner false si aucune application", () => {
+  it("devrait retourner false si aucune application et cohorte archivée", () => {
     const young = {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
     } as any;
     const applications = [];
-    expect(canReferentCreateApplication(young, applications)).toBe(false);
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(false);
   });
 
-  it("devrait retourner false si applications sans statut DONE", () => {
+  it("devrait retourner false si applications sans statut DONE et cohorte archivée", () => {
     const young = {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
@@ -124,7 +125,8 @@ describe("canReferentCreateApplication", () => {
       { status: APPLICATION_STATUS.IN_PROGRESS },
       { status: APPLICATION_STATUS.WAITING_VALIDATION },
     ];
-    expect(canReferentCreateApplication(young, applications)).toBe(false);
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(false);
   });
 
   it("devrait retourner true si au moins une application DONE parmi plusieurs", () => {
@@ -138,6 +140,46 @@ describe("canReferentCreateApplication", () => {
       { status: APPLICATION_STATUS.IN_PROGRESS },
     ];
     expect(canReferentCreateApplication(young, applications)).toBe(true);
+  });
+
+  it("devrait retourner true si cohorte non archivée, phase1/phase2 OK, SANS mission effectuée", () => {
+    const young = {
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+    } as any;
+    const applications = [];
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(true);
+  });
+
+  it("devrait retourner false si cohorte archivée, phase1/phase2 OK, SANS mission effectuée", () => {
+    const young = {
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+    } as any;
+    const applications = [];
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(false);
+  });
+
+  it("devrait retourner true si cohorte archivée, phase1/phase2 OK, AVEC mission effectuée", () => {
+    const young = {
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+    } as any;
+    const applications = [{ status: APPLICATION_STATUS.DONE }];
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(true);
+  });
+
+  it("devrait retourner true si cohorte non archivée, phase1/phase2 OK, AVEC mission effectuée", () => {
+    const young = {
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+    } as any;
+    const applications = [{ status: APPLICATION_STATUS.DONE }];
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canReferentCreateApplication(young, applications, cohort)).toBe(true);
   });
 });
 
