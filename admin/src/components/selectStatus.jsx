@@ -20,6 +20,7 @@ import {
   ROLES,
 } from "../utils";
 import { toastr } from "react-redux-toastr";
+import { canReferentUpdatePhase2Status } from "snu-lib";
 
 import ModalCorrection from "./modals/ModalCorrection";
 import ModalRefused from "./modals/ModalRefused";
@@ -52,6 +53,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const [modal, setModal] = useState(null);
   const [young, setYoung] = useState(null);
   const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
   const [modalConfirm, setModalConfirm] = useState({ isOpen: false, onConfirm: null });
   const [modalGoal, setModalGoal] = useState({ isOpen: false, onConfirm: null });
   const [isModalValidatePhase2Open, setModalValidatePhase2] = useState(false);
@@ -76,6 +78,13 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   }, [hit._id]);
 
   if (!young) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
+
+  const cohort = cohortList.find((c) => c.name === young.cohort);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const isStatusPhase2 = statusName === "statusPhase2";
+  const canUpdatePhase2Status = isStatusPhase2 
+    ? (user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || canReferentUpdatePhase2Status(cohort))
+    : true;
 
   const handleClickStatus = async (status) => {
     if (statusName === "statusPhase2" && status === YOUNG_STATUS_PHASE2.VALIDATED) {
@@ -288,9 +297,9 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
 
       <ActionBox color={YOUNG_STATUS_COLORS[young[statusName]]}>
         <UncontrolledDropdown setActiveFromChild>
-          <DropdownToggle tag="button" disabled={disabled || !options.length}>
+          <DropdownToggle tag="button" disabled={disabled || !options.length || !canUpdatePhase2Status}>
             {translator(young[statusName])}
-            {!!options.length && !disabled && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
+            {!!options.length && !disabled && canUpdatePhase2Status && <Chevron color={YOUNG_STATUS_COLORS[young[statusName]]} />}
           </DropdownToggle>
           <DropdownMenu>
             {options

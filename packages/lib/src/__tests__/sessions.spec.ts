@@ -7,6 +7,8 @@ import {
   canCreateEquivalences,
   canManageApplications,
   canAccessMilitaryPreparation,
+  canReferentUpdateApplicationStatus,
+  canReferentUpdatePhase2Status,
 } from "../sessions";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, COHORT_STATUS } from "../constants/constants";
 
@@ -508,6 +510,48 @@ describe("canViewMissions", () => {
     } as any;
     const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
     expect(canViewMissions(young, cohort)).toBe(false);
+  });
+});
+
+describe("canReferentUpdateApplicationStatus", () => {
+  it("devrait retourner true pour cohorte PUBLISHED", () => {
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canReferentUpdateApplicationStatus(cohort)).toBe(true);
+  });
+
+  it("devrait retourner true pour cohorte ARCHIVED", () => {
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentUpdateApplicationStatus(cohort)).toBe(true);
+  });
+
+  it("devrait retourner false pour cohorte FULLY_ARCHIVED", () => {
+    const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
+    expect(canReferentUpdateApplicationStatus(cohort)).toBe(false);
+  });
+
+  it("devrait retourner true si cohort undefined", () => {
+    expect(canReferentUpdateApplicationStatus(undefined)).toBe(true);
+  });
+});
+
+describe("canReferentUpdatePhase2Status", () => {
+  it("devrait retourner true pour cohorte PUBLISHED", () => {
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canReferentUpdatePhase2Status(cohort)).toBe(true);
+  });
+
+  it("devrait retourner true pour cohorte ARCHIVED", () => {
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentUpdatePhase2Status(cohort)).toBe(true);
+  });
+
+  it("devrait retourner false pour cohorte FULLY_ARCHIVED", () => {
+    const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
+    expect(canReferentUpdatePhase2Status(cohort)).toBe(false);
+  });
+
+  it("devrait retourner true si cohort undefined", () => {
+    expect(canReferentUpdatePhase2Status(undefined)).toBe(true);
   });
 });
 
