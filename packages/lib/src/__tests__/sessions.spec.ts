@@ -9,6 +9,7 @@ import {
   canAccessMilitaryPreparation,
   canReferentUpdateApplicationStatus,
   canReferentUpdatePhase2Status,
+  canReferentCreateEquivalence,
 } from "../sessions";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, COHORT_STATUS } from "../constants/constants";
 
@@ -552,6 +553,27 @@ describe("canReferentUpdatePhase2Status", () => {
 
   it("devrait retourner true si cohort undefined", () => {
     expect(canReferentUpdatePhase2Status(undefined)).toBe(true);
+  });
+});
+
+describe("canReferentCreateEquivalence", () => {
+  it("should return true for PUBLISHED cohort", () => {
+    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
+    expect(canReferentCreateEquivalence(cohort)).toBe(true);
+  });
+
+  it("should return true for ARCHIVED cohort", () => {
+    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
+    expect(canReferentCreateEquivalence(cohort)).toBe(true);
+  });
+
+  it("should return false for FULLY_ARCHIVED cohort", () => {
+    const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
+    expect(canReferentCreateEquivalence(cohort)).toBe(false);
+  });
+
+  it("should return true if cohort is undefined", () => {
+    expect(canReferentCreateEquivalence(undefined)).toBe(true);
   });
 });
 

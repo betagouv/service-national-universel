@@ -255,6 +255,10 @@ function canReferentUpdatePhase2Status(cohort?: CohortType) {
   return !isCohortFullyArchived(cohort);
 }
 
+function canReferentCreateEquivalence(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
 export {
   getSchoolYear,
   getCohortYear,
@@ -274,6 +278,7 @@ export {
   canReferentCreateApplication,
   canReferentUpdateApplicationStatus,
   canReferentUpdatePhase2Status,
+  canReferentCreateEquivalence,
   getCohortStartDate,
   getCohortEndDate,
   COHORTS_WITH_JDM_COUNT,

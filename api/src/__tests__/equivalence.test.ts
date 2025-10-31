@@ -11,6 +11,7 @@ import { createMissionEquivalenceHelpers, notExistingMissionEquivalenceId } from
 import { createFixtureMissionEquivalence } from "./fixtures/equivalence";
 import { MissionEquivalenceModel, YoungModel } from "../models";
 import { createReferentHelper } from "./helpers/referent";
+import { COHORT_STATUS } from "snu-lib";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -164,6 +165,16 @@ describe("Equivalence Routes", () => {
 
       expect(res.status).toEqual(404);
     });
+  });
+  it("should return 403 when referent tries to create equivalence for a fully archived cohort", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", status: COHORT_STATUS.FULLY_ARCHIVED }));
+    const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023" }));
+    const referent = await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+
+    const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
+    const res = await request(getAppHelper(referent)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+    expect(res.status).toEqual(403);
   });
 
   describe("DELETE /equivalence/:idEquivalence", () => {
