@@ -1,4 +1,5 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
+import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import PaperClip from "../../../assets/icons/PaperClip";
 import AddImage from "../../../assets/icons/AddImage";
@@ -14,6 +15,7 @@ import Select from "../../../components/forms/SelectHookForm";
 import InputText from "../../../components/ui/forms/InputTextHookForm";
 import InputNumber from "../../../components/ui/forms/InputNumberHookForm";
 import { useForm, Controller } from "react-hook-form";
+import { canAdminCreateApplication, canReferentCreateEquivalence, ROLES } from "snu-lib";
 
 export default function FormEquivalence({ young, onChange }) {
   const [clickStartDate, setClickStartDate] = React.useState(false);
@@ -67,6 +69,16 @@ export default function FormEquivalence({ young, onChange }) {
     toastr.success("Fichier téléversé");
     setUploading(false);
   };
+
+  const cohort = cohortList.find((c) => c.name === young.cohort);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const canCreateEquivalence =
+    user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : isReferentRegionalOrDepartmental ? canReferentCreateEquivalence(cohort) : false;
+
+  if (!canCreateEquivalence) {
+    history.push(`/volontaire/${young._id}/phase2`);
+    return null;
+  }
 
   const sendData = async (data) => {
     setLoading(true);

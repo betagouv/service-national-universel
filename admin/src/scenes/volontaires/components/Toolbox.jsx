@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { HiOutlineSearch, HiOutlineAdjustments } from "react-icons/hi";
-import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES, canReferentCreateEquivalence } from "snu-lib";
 import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
@@ -30,6 +30,9 @@ export default function Toolbox({ young, applications = [] }) {
     : isRegionalOrDepartmental
       ? canReferentCreateApplication(young, applications, cohort)
       : canYoungApplyToPhase2;
+
+  const canCreateEquivalence =
+    user.role === ROLES.ADMIN ? canAdminCreateApplication(young) : isRegionalOrDepartmental ? canReferentCreateEquivalence(cohort) : canYoungApplyToPhase2;
 
   return (
     <div className="flex flex-col">
@@ -88,10 +91,19 @@ export default function Toolbox({ young, applications = [] }) {
             </div>
           </div>
           <button
-            className="group flex items-center justify-center gap-1 rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2 hover:border-[#4881FF] hover:bg-[#4881FF]"
-            onClick={() => history.push(`/volontaire/${young._id}/phase2/equivalence`)}>
+            data-tip=""
+            data-for="tooltip-equivalence"
+            className={`group flex items-center justify-center gap-1 rounded-[10px] border-[1px] border-blue-600 bg-blue-600 py-2 ${
+              canCreateEquivalence ? "hover:border-[#4881FF] hover:bg-[#4881FF]" : "!cursor-not-allowed"
+            }`}
+            onClick={() => canCreateEquivalence && history.push(`/volontaire/${young._id}/phase2/equivalence`)}>
             <div className="text-sm text-blue-100 group-hover:text-white ">Déclarer une équivalence MIG</div>
           </button>
+          {!canCreateEquivalence ? (
+            <ReactTooltip id="tooltip-equivalence" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+              <div className="text-[black]">Pour déclarer une équivalence de MIG, la cohorte du jeune ne doit pas être archivée.</div>
+            </ReactTooltip>
+          ) : null}
         </div>
         <div className="flex basis-1/3 flex-col rounded-xl bg-white p-4 shadow-block">
           <div className="mb-4 flex flex-1 items-center gap-6">
