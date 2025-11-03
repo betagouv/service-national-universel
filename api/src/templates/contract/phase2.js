@@ -394,7 +394,7 @@ function _page3Old(doc, contract) {
   doc.moveDown(1);
 
   doc.font(FONT).text(`Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission `, { continued: true });
-  doc.font(FONT_BOLD).text(`${contract.structureManagerLastName} ${contract.structureManagerFirstName}`, { continued: true });
+  doc.font(FONT_BOLD).text(`${contract.tutorLastName} ${contract.tutorFirstName}`, { continued: true });
   doc
     .font(FONT)
     .text(
@@ -557,7 +557,7 @@ function _page3(doc, contract) {
   doc.moveDown(1);
 
   doc.font(FONT).text(`Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission `, { continued: true });
-  doc.font(FONT_BOLD).text(`${contract.structureManagerLastName} ${contract.structureManagerFirstName}`, { continued: true });
+  doc.font(FONT_BOLD).text(`${contract.tutorLastName} ${contract.tutorFirstName}`, { continued: true });
   doc
     .font(FONT)
     .text(
