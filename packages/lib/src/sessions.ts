@@ -159,7 +159,7 @@ function canViewMissions(young: YoungType, cohort?: CohortType) {
     return false;
   }
 
-  // Si cohorte totalement archivée, ne peut plus voir les missions
+  // Si cohorte totalement archivée, aucun accès aux missions
   if (isCohortFullyArchived(cohort)) {
     return false;
   }

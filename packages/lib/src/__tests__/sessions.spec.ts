@@ -215,7 +215,7 @@ describe("canReferentCreateApplication", () => {
   });
 });
 
-describe("canViewMissions", () => {
+describe("canViewMissions - fully archived cases", () => {
   it("devrait retourner true si jeune pointé et cohorte non archivée", () => {
     const young = {
       cohesionStayPresence: "true",
