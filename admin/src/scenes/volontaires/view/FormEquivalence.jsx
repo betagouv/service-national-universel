@@ -18,6 +18,8 @@ import { useForm, Controller } from "react-hook-form";
 import { canAdminCreateApplication, canReferentCreateEquivalence, ROLES } from "snu-lib";
 
 export default function FormEquivalence({ young, onChange }) {
+  const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
   const [clickStartDate, setClickStartDate] = React.useState(false);
   const [clickEndDate, setClickEndDate] = React.useState(false);
   const [loading, setLoading] = React.useState(false);
