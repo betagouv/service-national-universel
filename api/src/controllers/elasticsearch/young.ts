@@ -15,6 +15,7 @@ import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterMod
 import { getCohortNamesEndAfter } from "../../utils/cohort";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
+import { logger } from "../../logger";
 
 function getYoungsFilters(user: UserDto): string[] {
   return [
@@ -597,10 +598,7 @@ router.post(
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // Context filters - ADMIN can propose missions to young with WITHDRAWN phase2 status
-      const statusPhase2Filter =
-        user.role === ROLES.ADMIN
-          ? ["IN_PROGRESS", "WAITING_REALISATION", "WITHDRAWN"]
-          : ["IN_PROGRESS", "WAITING_REALISATION"];
+      const statusPhase2Filter = user.role === ROLES.ADMIN ? ["IN_PROGRESS", "WAITING_REALISATION", "WITHDRAWN"] : ["IN_PROGRESS", "WAITING_REALISATION"];
 
       const contextFilters = [
         ...youngContextFilters!,
@@ -608,15 +606,17 @@ router.post(
         { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
         { terms: { "statusPhase2.keyword": statusPhase2Filter } },
       ];
-
       // For regional/departmental referents, filter youngs with at least one DONE application
       const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
       if (isRegionalOrDepartmental) {
         const { ApplicationModel } = require("../../models");
         const { APPLICATION_STATUS } = require("snu-lib");
-        const applicationsDone = await ApplicationModel.find({ status: APPLICATION_STATUS.DONE }, { youngId: 1 });
+        const startTime = Date.now();
+        const applicationsDone = await ApplicationModel.find({ status: APPLICATION_STATUS.DONE }, { youngId: 1 }).lean();
+        logger.info(`/propose-mission/:id/ - Found ${applicationsDone.length} applications done in ${Date.now() - startTime}ms`);
         const youngIdsWithCompletedMission = [...new Set(applicationsDone.map((app: any) => app.youngId))];
-        contextFilters.push({ terms: { "_id.keyword": youngIdsWithCompletedMission } });
+        logger.info(`/propose-mission/:id/ - youngIdsWithCompletedMission: ${youngIdsWithCompletedMission.length}`);
+        contextFilters.push({ terms: { _id: youngIdsWithCompletedMission } });
       }
 
       // Body params validation
