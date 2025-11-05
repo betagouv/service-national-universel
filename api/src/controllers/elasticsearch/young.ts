@@ -3,7 +3,7 @@ import express, { Response } from "express";
 import { addMonths } from "date-fns";
 import Joi from "joi";
 import { Router } from "express";
-import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, ES_NO_LIMIT, UserDto, COHORT_STATUS } from "snu-lib";
 import { capture } from "../../sentry";
 import esClient from "../../es";
 import { ERRORS } from "../../utils";
@@ -11,11 +11,10 @@ import { allRecords } from "../../es/utils";
 import { buildNdJson, buildRequestBody, joiElasticSearch, getResponsibleCenterField } from "./utils";
 
 import { serializeYoungs } from "../../utils/es-serializer";
-import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel } from "../../models";
+import { StructureModel, ApplicationModel, SessionPhase1Model, CohesionCenterModel, MissionModel, CohortModel } from "../../models";
 import { getCohortNamesEndAfter } from "../../utils/cohort";
 import { populateYoungExport } from "./populate/populateYoung";
 import { UserRequest } from "../request";
-import { logger } from "../../logger";
 
 function getYoungsFilters(user: UserDto): string[] {
   return [
@@ -606,17 +605,32 @@ router.post(
         { terms: { "statusPhase1.keyword": ["DONE", "EXEMPTED"] } },
         { terms: { "statusPhase2.keyword": statusPhase2Filter } },
       ];
-      // For regional/departmental referents, filter youngs with at least one DONE application
+
+      // For regional/departmental referents, apply archived cohort filter
+      // - Can propose missions to youngs in non-archived cohorts
+      // - Can only propose missions to youngs in archived cohorts if they have at least one DONE application
       const isRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
       if (isRegionalOrDepartmental) {
-        const { ApplicationModel } = require("../../models");
         const { APPLICATION_STATUS } = require("snu-lib");
-        const startTime = Date.now();
-        const applicationsDone = await ApplicationModel.find({ status: APPLICATION_STATUS.DONE }, { youngId: 1 }).lean();
-        logger.info(`/propose-mission/:id/ - Found ${applicationsDone.length} applications done in ${Date.now() - startTime}ms`);
-        const youngIdsWithCompletedMission = [...new Set(applicationsDone.map((app: any) => app.youngId))];
-        logger.info(`/propose-mission/:id/ - youngIdsWithCompletedMission: ${youngIdsWithCompletedMission.length}`);
-        contextFilters.push({ terms: { _id: youngIdsWithCompletedMission } });
+
+        const archivedCohorts = await CohortModel.find({ status: COHORT_STATUS.ARCHIVED }, { name: 1 }).lean();
+        const archivedCohortNames = archivedCohorts.map((c) => c.name);
+
+        if (archivedCohortNames.length > 0) {
+          contextFilters.push({
+            bool: {
+              should: [
+                { bool: { must_not: [{ terms: { "cohort.keyword": archivedCohortNames } }] } },
+                {
+                  bool: {
+                    must: [{ terms: { "cohort.keyword": archivedCohortNames } }, { term: { "phase2ApplicationStatus.keyword": APPLICATION_STATUS.DONE } }],
+                  },
+                },
+              ],
+              minimum_should_match: 1,
+            },
+          });
+        }
       }
 
       // Body params validation
