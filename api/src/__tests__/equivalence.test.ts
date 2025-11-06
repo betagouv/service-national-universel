@@ -9,9 +9,10 @@ import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, notExistingYoungId } from "./helpers/young";
 import { createMissionEquivalenceHelpers, notExistingMissionEquivalenceId } from "./helpers/equivalence";
 import { createFixtureMissionEquivalence } from "./fixtures/equivalence";
-import { MissionEquivalenceModel, YoungModel } from "../models";
+import { MissionEquivalenceModel, YoungModel, ReferentModel, CohortModel } from "../models";
 import { createReferentHelper } from "./helpers/referent";
 import { COHORT_STATUS } from "snu-lib";
+import * as applicationNotificationService from "../application/applicationNotificationService";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -19,11 +20,20 @@ jest.mock("../utils", () => ({
   deleteFilesByList: jest.fn(),
 }));
 
+jest.mock("../application/applicationNotificationService", () => ({
+  notifyReferentsEquivalenceSubmitted: jest.fn(),
+  notifyYoungEquivalenceSubmitted: jest.fn(),
+  notifyYoungChangementStatutEquivalence: jest.fn(),
+}));
+
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 beforeEach(async () => {
   await MissionEquivalenceModel.deleteMany({});
   await YoungModel.deleteMany({});
+  await ReferentModel.deleteMany({});
+  await CohortModel.deleteMany({});
+  jest.clearAllMocks();
 });
 
 describe("Equivalence Routes", () => {
@@ -167,9 +177,12 @@ describe("Equivalence Routes", () => {
     });
   });
   it("should return 403 when referent tries to create equivalence for a fully archived cohort", async () => {
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023", status: COHORT_STATUS.FULLY_ARCHIVED }));
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+    // Update status explicitly as the model has a default value
+    await CohortModel.updateOne({ _id: cohort._id }, { $set: { status: COHORT_STATUS.FULLY_ARCHIVED } });
+    
     const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023" }));
-    const referent = await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    const referent = await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, department: young.department, email: "referent-archived@test.com" });
 
     const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
 
@@ -178,9 +191,6 @@ describe("Equivalence Routes", () => {
   });
 
   describe("DELETE /equivalence/:idEquivalence", () => {
-    beforeEach(() => {
-      jest.clearAllMocks(); // Réinitialise les mocks avant chaque test
-    });
     it("should return 200 delete an equivalence", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
 

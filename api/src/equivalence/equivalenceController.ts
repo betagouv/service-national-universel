@@ -10,11 +10,11 @@ import {
   SENDINBLUE_TEMPLATES,
   ROLES,
   canReferentCreateEquivalence,
-  isReferent,
+  COHORT_STATUS,
 } from "snu-lib";
 import { capture } from "../sentry";
 import { MissionEquivalenceModel, YoungModel, CohortModel } from "../models";
-import { deleteFilesByList, getFile, isYoung as isYoungFn, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
+import { deleteFilesByList, getFile, isYoung as isYoungFn, isReferent, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
 import { UserRequest } from "../controllers/request";
 import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
 import { decrypt } from "../cryptoUtils";
@@ -106,8 +106,12 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     const isYoung = isYoungFn(req.user);
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (isYoung && !canCreateEquivalences(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (isReferent(req.user) && !canReferentCreateEquivalence(cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (cohort?.status === COHORT_STATUS.FULLY_ARCHIVED && !isYoung) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(req.user) && !canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const youngId = value.id;
     delete value.id;
@@ -156,7 +160,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (!canCreateEquivalences(young, cohort)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
