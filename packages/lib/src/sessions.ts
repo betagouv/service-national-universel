@@ -178,6 +178,24 @@ function canViewMissions(young: YoungType, cohort?: CohortType) {
   return phase2NotValidated && hasCompletedMission;
 }
 
+// Permet de voir le détail d'une mission spécifique même si la cohorte est FULLY_ARCHIVED
+// Utile pour consulter ses candidatures existantes
+function canViewMissionDetail(young: YoungType, cohort?: CohortType) {
+  const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
+  
+  if (!canAccessPhase2) {
+    return false;
+  }
+
+  // Si cohorte totalement archivée, peut uniquement voir les détails des missions (pas la liste)
+  if (isCohortFullyArchived(cohort)) {
+    return true;
+  }
+
+  // Sinon, même règle que canViewMissions
+  return canViewMissions(young, cohort);
+}
+
 // Mais ils ne peuvent candidater qu'après avoir été validés
 function canCreateApplications(young: YoungType, cohort?: CohortType) {
   const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
@@ -270,6 +288,7 @@ export {
   isCohortArchived,
   isCohortFullyArchived,
   canViewMissions,
+  canViewMissionDetail,
   canCreateApplications,
   canCreateEquivalences,
   canManageApplications,

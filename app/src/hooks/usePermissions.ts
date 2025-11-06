@@ -8,6 +8,7 @@ import {
   canCreateApplications, 
   canCreateEquivalences, 
   canViewMissions,
+  canViewMissionDetail,
   canManageApplications,
   canAccessMilitaryPreparation,
 } from "snu-lib";
@@ -27,6 +28,7 @@ export default function usePermissions() {
     canViewPhase1: permissionPhase1(young),
     canViewPhase2: canViewPhase2(young, cohort),
     canViewMissions: canViewMissions(young, cohort),
+    canViewMissionDetail: canViewMissionDetail(young, cohort),
     canCreateApplications: canCreateApplications(young, cohort),
     canCreateEquivalences: canCreateEquivalences(young, cohort),
     canManageApplications: canManageApplications(young, cohort),
