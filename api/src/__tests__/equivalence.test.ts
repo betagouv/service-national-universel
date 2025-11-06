@@ -190,6 +190,25 @@ describe("Equivalence Routes", () => {
     expect(res.status).toEqual(403);
   });
 
+  it("should return 200 when admin creates equivalence for a fully archived cohort", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
+    await CohortModel.updateOne({ _id: cohort._id }, { $set: { status: COHORT_STATUS.FULLY_ARCHIVED } });
+    
+    const young = await createYoungHelper(getNewYoungFixture({ 
+      cohortId: cohort._id, 
+      cohort: "Juillet 2023",
+      statusPhase1: "DONE"
+    }));
+    const admin = await createReferentHelper({ role: ROLES.ADMIN, email: "admin-test@test.com" });
+
+    const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
+    const res = await request(getAppHelper(admin)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+    expect(res.status).toEqual(200);
+    expect(res.body.ok).toBe(true);
+    expect(res.body.data.status).toEqual("VALIDATED");
+  });
+
   describe("DELETE /equivalence/:idEquivalence", () => {
     it("should return 200 delete an equivalence", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

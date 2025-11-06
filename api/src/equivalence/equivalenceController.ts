@@ -11,6 +11,7 @@ import {
   ROLES,
   canReferentCreateEquivalence,
   COHORT_STATUS,
+  isAdmin,
 } from "snu-lib";
 import { capture } from "../sentry";
 import { MissionEquivalenceModel, YoungModel, CohortModel } from "../models";
@@ -106,12 +107,8 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     const isYoung = isYoungFn(req.user);
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (cohort?.status === COHORT_STATUS.FULLY_ARCHIVED && !isYoung) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
     if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (isReferent(req.user) && !canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(req.user) && !isAdmin(req.user) && !canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const youngId = value.id;
     delete value.id;
