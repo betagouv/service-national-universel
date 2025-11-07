@@ -34,9 +34,7 @@ import {
 } from "@/utils";
 
 import ModalExportMail from "../components/modals/ModalExportMail";
-import FicheSanitaire from "./fiche-sanitaire";
 import General from "./general";
-import Pointage from "./pointage";
 import ModalExportPdfFile from "../components/modals/ModalExportPdfFile";
 
 export default function CenterYoungIndex() {
@@ -223,7 +221,7 @@ export default function CenterYoungIndex() {
   }
 
   React.useEffect(() => {
-    const listTab = ["general", "tableau-de-pointage", "fiche-sanitaire"];
+    const listTab = ["general"];
     if (!listTab.includes(currentTab)) history.push(`/centre/${id}/${sessionId}/general`);
   }, [currentTab]);
 
@@ -555,31 +553,11 @@ export default function CenterYoungIndex() {
         <div className=" flex flex-1 flex-col pt-4 lg:flex-row">
           <nav className="flex flex-1 gap-1">
             <TabItem icon={<Menu />} title="Général" to={`/centre/${id}/${sessionId}/general${urlParams && "?" + urlParams}`} />
-            <TabItem
-              icon={<PencilAlt />}
-              title="Tableau de pointage"
-              to={`/centre/${id}/${sessionId}/tableau-de-pointage${urlParams && "?" + urlParams}`}
-              extraIcon={!isYoungCheckinOpen ? <Warning className="cursor-pointer text-red-900" /> : null}
-              extraTooltip="Le pointage n'est pas ouvert"
-            />
-            <TabItem icon={<ShieldCheck />} title="Fiche sanitaire" to={`/centre/${id}/${sessionId}/fiche-sanitaire${urlParams && "?" + urlParams}`} />
           </nav>
         </div>
         <div className="bg-white pt-4">
           {currentTab === "general" && (
             <General filter={filter} updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} setHasYoungValidated={setHasYoungValidated} />
-          )}
-          {currentTab === "tableau-de-pointage" && (
-            <Pointage
-              updateFilter={updateFilter}
-              isYoungCheckinOpen={isYoungCheckinOpen}
-              focusedSession={focusedSession}
-              filterArray={filterArray}
-              setHasYoungValidated={setHasYoungValidated}
-            />
-          )}
-          {currentTab === "fiche-sanitaire" && (
-            <FicheSanitaire updateFilter={updateFilter} focusedSession={focusedSession} filterArray={filterArray} setHasYoungValidated={setHasYoungValidated} />
           )}
         </div>
       </div>
