@@ -13,6 +13,8 @@ import { MissionEquivalenceModel, YoungModel, ReferentModel, CohortModel } from 
 import { createReferentHelper } from "./helpers/referent";
 import { COHORT_STATUS } from "snu-lib";
 import * as applicationNotificationService from "../application/applicationNotificationService";
+import { TestScenarios } from "./fixtures/scenarios";
+import { CohortBuilder } from "./fixtures/builders/CohortBuilder";
 
 jest.mock("../utils", () => ({
   ...jest.requireActual("../utils"),
@@ -176,37 +178,74 @@ describe("Equivalence Routes", () => {
       expect(res.status).toEqual(404);
     });
   });
-  it("should return 403 when referent tries to create equivalence for a fully archived cohort", async () => {
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
-    // Update status explicitly as the model has a default value
-    await CohortModel.updateOne({ _id: cohort._id }, { $set: { status: COHORT_STATUS.FULLY_ARCHIVED } });
-    
-    const young = await createYoungHelper(getNewYoungFixture({ cohortId: cohort._id, cohort: "Juillet 2023" }));
-    const referent = await createReferentHelper({ role: ROLES.REFERENT_DEPARTMENT, department: young.department, email: "referent-archived@test.com" });
+  describe("Archived Cohorts - Using Test Scenarios", () => {
+    it("should return 200 when referent creates equivalence for partially archived cohort (with or without mission done)", async () => {
+      const { young } = await TestScenarios.youngInArchivedCohortWithoutMissionDone();
+      const referent = await createReferentHelper({ 
+        role: ROLES.REFERENT_DEPARTMENT, 
+        department: young.department, 
+        email: "referent-no-mission@test.com" 
+      });
 
-    const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
 
-    const res = await request(getAppHelper(referent)).post(`/young/${young._id}/phase2/equivalence`).send(body);
-    expect(res.status).toEqual(403);
-  });
+      const res = await request(getAppHelper(referent)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.status).toEqual("VALIDATED");
+    });
 
-  it("should return 200 when admin creates equivalence for a fully archived cohort", async () => {
-    const cohort = await createCohortHelper(getNewCohortFixture({ name: "Juillet 2023" }));
-    await CohortModel.updateOne({ _id: cohort._id }, { $set: { status: COHORT_STATUS.FULLY_ARCHIVED } });
-    
-    const young = await createYoungHelper(getNewYoungFixture({ 
-      cohortId: cohort._id, 
-      cohort: "Juillet 2023",
-      statusPhase1: "DONE"
-    }));
-    const admin = await createReferentHelper({ role: ROLES.ADMIN, email: "admin-test@test.com" });
+    it("should return 200 when referent creates equivalence for partially archived cohort WITH mission done", async () => {
+      const { young } = await TestScenarios.youngInArchivedCohortWithMissionDone();
+      const referent = await createReferentHelper({ 
+        role: ROLES.REFERENT_DEPARTMENT, 
+        department: young.department, 
+        email: "referent-with-mission@test.com" 
+      });
 
-    const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
 
-    const res = await request(getAppHelper(admin)).post(`/young/${young._id}/phase2/equivalence`).send(body);
-    expect(res.status).toEqual(200);
-    expect(res.body.ok).toBe(true);
-    expect(res.body.data.status).toEqual("VALIDATED");
+      const res = await request(getAppHelper(referent)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.status).toEqual("VALIDATED");
+    });
+
+    it("should return 403 when referent tries to create equivalence for fully archived cohort", async () => {
+      const { young } = await TestScenarios.youngInFullyArchivedCohort();
+      const referent = await createReferentHelper({ 
+        role: ROLES.REFERENT_DEPARTMENT, 
+        department: young.department, 
+        email: "referent-fully-archived@test.com" 
+      });
+
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
+      const res = await request(getAppHelper(referent)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      expect(res.status).toEqual(403);
+    });
+
+    it("should return 200 when admin creates equivalence for fully archived cohort", async () => {
+      const { young, admin } = await TestScenarios.adminWithYoung(new CohortBuilder().fullyArchived());
+
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
+      const res = await request(getAppHelper(admin)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.status).toEqual("VALIDATED");
+    });
+
+    it("should return 200 when admin creates equivalence for partially archived cohort", async () => {
+      const { young, admin } = await TestScenarios.adminWithYoung(new CohortBuilder().partiallyArchived());
+
+      const body = createFixtureMissionEquivalence({ youngId: young._id.toString() });
+
+      const res = await request(getAppHelper(admin)).post(`/young/${young._id}/phase2/equivalence`).send(body);
+      expect(res.status).toEqual(200);
+      expect(res.body.ok).toBe(true);
+      expect(res.body.data.status).toEqual("VALIDATED");
+    });
   });
 
   describe("DELETE /equivalence/:idEquivalence", () => {

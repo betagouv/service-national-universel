@@ -12,6 +12,7 @@ import {
   canReferentCreateEquivalence,
   COHORT_STATUS,
   isAdmin,
+  YOUNG_STATUS_PHASE1,
 } from "snu-lib";
 import { capture } from "../sentry";
 import { MissionEquivalenceModel, YoungModel, CohortModel } from "../models";
@@ -108,7 +109,15 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
     if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (isReferent(req.user) && !isAdmin(req.user) && !canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    
+    if (isReferent(req.user)) {
+      if (isAdmin(req.user)) {
+        const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+        if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      } else {
+        if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     const youngId = value.id;
     delete value.id;
