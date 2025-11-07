@@ -280,35 +280,28 @@ export default function Inscription(): JSX.Element {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            {!isClassLoading && invitationState ? (
-              <Button
-                onClick={handleClickInscription}
-                leftIcon={<AiOutlinePlus className="h-4 w-4" />}
-                className="w-full ml-2"
-                title={selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}
-              />
-            ) : null}
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            {!!paramData?.count && (
-              <>
-                <ExportInscriptionsButton
-                  selectedFilters={selectedFilters}
-                  isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-                  disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
-                />
-                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-                  <ExportInscriptionsScolariseButton
-                    user={user}
+            {!!paramData?.count &&
+              (isSuperAdmin(user) || user.role === ROLES.REFERENT_DEPARTMENT) && (
+                <div className="flex items-center gap-2">
+                  <ExportInscriptionsButton
                     selectedFilters={selectedFilters}
                     isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
                     disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
                   />
-                )}
-              </>
-            )}
+                  {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+                    <ExportInscriptionsScolariseButton
+                      user={user}
+                      selectedFilters={selectedFilters}
+                      isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                      disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                    />
+                  )}
+                </div>
+              )}
           </div>
         </div>
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
