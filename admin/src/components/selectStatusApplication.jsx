@@ -70,7 +70,7 @@ export default function SelectStatusApplication({ hit, options = [], callback })
 
   const cohort = cohortList.find((c) => c.name === application.youngCohort);
   const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
-  const canUpdateStatus = user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || canReferentUpdateApplicationStatus(cohort);
+  const canUpdateStatus = user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || (cohort && canReferentUpdateApplicationStatus(cohort));
 
   options = canUpdateStatus ? lookUpAuthorizedStatus({ status: application.status, role: user.role }) : [];
 

@@ -83,7 +83,7 @@ export default function SelectStatus({ hit, options = Object.keys(YOUNG_STATUS),
   const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
   const isStatusPhase2 = statusName === "statusPhase2";
   const canUpdatePhase2Status = isStatusPhase2 
-    ? (user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || canReferentUpdatePhase2Status(cohort))
+    ? (user.role === ROLES.ADMIN || !isReferentRegionalOrDepartmental || (cohort && canReferentUpdatePhase2Status(cohort)))
     : true;
 
   const handleClickStatus = async (status) => {

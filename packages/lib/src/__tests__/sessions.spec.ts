@@ -1,17 +1,17 @@
-import { 
-  canAdminCreateApplication, 
-  canReferentCreateApplication, 
-  canCreateApplications, 
+import { isCohortFullyArchived } from "../sessions";
+import {
+  canCreateApplications,
   canViewMissions,
   canViewMissionDetail,
-  isCohortFullyArchived,
   canCreateEquivalences,
   canManageApplications,
   canAccessMilitaryPreparation,
+  canAdminCreateApplication,
+  canReferentCreateApplication,
   canReferentUpdateApplicationStatus,
   canReferentUpdatePhase2Status,
   canReferentCreateEquivalence,
-} from "../sessions";
+} from "../roles";
 import { YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, APPLICATION_STATUS, COHORT_STATUS } from "../constants/constants";
 
 describe("canAdminCreateApplication", () => {

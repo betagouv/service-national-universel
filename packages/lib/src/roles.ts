@@ -1,12 +1,88 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import { APPLICATION_STATUS, COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
 import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
-import { isBefore } from "date-fns";
+import { isBefore, isPast } from "date-fns";
+import { isCohortArchived, isCohortFullyArchived } from "./sessions";
 
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
+
+
+const hasValidatedPhase1 = (young: YoungType) => {
+  return (
+    (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) ||
+    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)
+  );
+};
+
+const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
+
+export function canViewMissions(young: YoungType, cohort?: CohortType) {
+  const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
+  if (!canAccessPhase2) {
+    return false;
+  }
+
+  if (isCohortFullyArchived(cohort)) {
+    return false;
+  }
+
+  const cohortNotArchived = !isCohortArchived(cohort);
+  if (cohortNotArchived) {
+    return true;
+  }
+
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+  return phase2NotValidated && hasCompletedMission;
+}
+
+export function canViewMissionDetail(young: YoungType, cohort?: CohortType) {
+  const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
+  if (!canAccessPhase2) {
+    return false;
+  }
+
+  if (isCohortFullyArchived(cohort)) {
+    return true;
+  }
+
+  return canViewMissions(young, cohort);
+}
+
+export function canCreateApplications(young: YoungType, cohort?: CohortType) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+
+  if (isCohortFullyArchived(cohort)) {
+    return false;
+  }
+
+  const cohortNotArchived = !isCohortArchived(cohort);
+  return cohortNotArchived || hasCompletedMission;
+}
+
+export function canCreateEquivalences(young: YoungType, cohort?: CohortType) {
+  if (isCohortFullyArchived(cohort)) {
+    return false;
+  }
+  return hasValidatedPhase1(young);
+}
+
+export function canManageApplications(_young: YoungType, cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
+export function canAccessMilitaryPreparation(_young: YoungType, cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
 
 const ROLES = {
   ADMIN: "admin",
@@ -1179,6 +1255,92 @@ export function canValidateYoungToLP(actor: UserDto, cohort?: Pick<CohortType, "
   return true;
 }
 
+// Les admins peuvent créer des missions personnalisées pour les jeunes ayant validé leur phase 1
+// et dont la phase 2 n'est pas encore validée
+function canAdminCreateApplication(young: YoungType) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  return hasValidatedOrExemptedPhase1 && phase2NotValidated;
+}
+
+// Les référents régionaux/départementaux peuvent créer des missions personnalisées pour les jeunes :
+// - Cohorte non archivée : phase1 validée/dispensée + phase2 non validée
+// - Cohorte archivée partiellement : phase1 validée/dispensée + phase2 non validée + au moins 1 mission effectuée
+// - Cohorte archivée totalement : impossible
+function canReferentCreateApplication(young: YoungType, applications: any[], cohort?: CohortType) {
+  
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  const hasCompletedMission = applications?.some((app) => app.status === APPLICATION_STATUS.DONE);
+  
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+  
+  // Si cohorte totalement archivée, les référents ne peuvent plus proposer de missions
+  if (isCohortFullyArchived(cohort)) {
+    return false;
+  }
+  
+  // Si cohorte archivée partiellement, peut proposer si mission déjà DONE
+  const cohortNotArchived = !isCohortArchived(cohort);
+  return cohortNotArchived || hasCompletedMission;
+}
+
+function canReferentUpdateApplicationStatus(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
+function canReferentUpdatePhase2Status(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
+function canReferentCreateEquivalence(cohort?: CohortType) {
+  return !isCohortFullyArchived(cohort);
+}
+
+// Fonction générique pour déterminer si un utilisateur peut créer une application selon son rôle
+// Gère les cas : ADMIN, REFERENT_REGION, REFERENT_DEPARTMENT, et autres rôles
+function canUserCreateApplication(young: YoungType, cohort?: CohortType, userRole?: string, applications?: any[]) {
+  if (!userRole) {
+    return canCreateApplications(young, cohort);
+  }
+
+  if (userRole === ROLES.ADMIN) {
+    return canAdminCreateApplication(young);
+  }
+
+  const isRegionalOrDepartmental = userRole === ROLES.REFERENT_REGION || userRole === ROLES.REFERENT_DEPARTMENT;
+  if (isRegionalOrDepartmental && applications) {
+    return canReferentCreateApplication(young, applications, cohort);
+  }
+
+  if (!cohort) {
+    return false;
+  }
+
+  return canCreateApplications(young, cohort);
+}
+
+// Fonction générique pour déterminer si un utilisateur peut créer une équivalence selon son rôle
+// Gère les cas : ADMIN, REFERENT_REGION, REFERENT_DEPARTMENT, et autres rôles
+function canUserCreateEquivalence(young: YoungType, cohort?: CohortType, userRole?: string) {
+  if (!userRole) {
+    return canCreateEquivalences(young, cohort);
+  }
+
+  if (userRole === ROLES.ADMIN) {
+    return canAdminCreateApplication(young);
+  }
+
+  const isRegionalOrDepartmental = userRole === ROLES.REFERENT_REGION || userRole === ROLES.REFERENT_DEPARTMENT;
+  if (isRegionalOrDepartmental) {
+    return canReferentCreateEquivalence(cohort);
+  }
+
+  return canCreateEquivalences(young, cohort);
+}
+
 export {
   ROLES,
   SUB_ROLES,
@@ -1312,4 +1474,11 @@ export {
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
   canModifyDirectionCenterTeam,
+  canAdminCreateApplication,
+  canReferentCreateApplication,
+  canReferentUpdateApplicationStatus,
+  canReferentUpdatePhase2Status,
+  canReferentCreateEquivalence,
+  canUserCreateApplication,
+  canUserCreateEquivalence,
 };
