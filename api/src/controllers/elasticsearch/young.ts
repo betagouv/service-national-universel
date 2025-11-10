@@ -614,13 +614,15 @@ router.post(
         const { APPLICATION_STATUS } = require("snu-lib");
 
         const archivedCohorts = await CohortModel.find({ status: COHORT_STATUS.ARCHIVED }, { name: 1 }).lean();
+        const fullyArchivedCohorts = await CohortModel.find({ status: COHORT_STATUS.FULLY_ARCHIVED }, { name: 1 }).lean();
         const archivedCohortNames = archivedCohorts.map((c) => c.name);
+        const fullyArchivedCohortNames = fullyArchivedCohorts.map((c) => c.name);
 
         if (archivedCohortNames.length > 0) {
           contextFilters.push({
             bool: {
               should: [
-                { bool: { must_not: [{ terms: { "cohort.keyword": archivedCohortNames } }] } },
+                { bool: { must_not: [{ terms: { "cohort.keyword": [...archivedCohortNames, ...fullyArchivedCohortNames] } }] } },
                 {
                   bool: {
                     must: [{ terms: { "cohort.keyword": archivedCohortNames } }, { term: { "phase2ApplicationStatus.keyword": APPLICATION_STATUS.DONE } }],
