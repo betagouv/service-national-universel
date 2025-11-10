@@ -10,11 +10,13 @@ import {
   APPLICATION_STATUS,
   canCreateApplications,
   canCreateEquivalences,
+  isCohortFullyArchived,
 } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
 import { toastr } from "react-redux-toastr";
 import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
+import { isPast } from "date-fns";
 
 function addOneDay(date) {
   const newDate = new Date(date);
@@ -110,7 +112,19 @@ export function permissionPhase1(y) {
 const isDoingAMission = (young) => young.phase2ApplicationStatus.some((status) => [APPLICATION_STATUS.VALIDATED, APPLICATION_STATUS.IN_PROGRESS].includes(status));
 const isWaitingForEquivalence = (young) => [EQUIVALENCE_STATUS.WAITING_CORRECTION, EQUIVALENCE_STATUS.WAITING_VERIFICATION].includes(young.status_equivalence);
 
+const hasHadAccessToPhase2 = (young) => {
+  if (!young) return false;
+  const didAttendCohesionStay = young.cohesionStayPresence === "true";
+  const hasValidatedPhase1 =
+    (young.statusPhase2OpenedAt && isPast(new Date(young.statusPhase2OpenedAt))) ||
+    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1);
+  return didAttendCohesionStay || hasValidatedPhase1;
+};
+
 export function canViewPhase2(young, cohort) {
+  if (isCohortFullyArchived(cohort) && hasHadAccessToPhase2(young)) {
+    return true;
+  }
   return canViewMissions(young, cohort) || canCreateApplications(young, cohort) || canCreateEquivalences(young, cohort) || isDoingAMission(young) || isWaitingForEquivalence(young);
 }
 
