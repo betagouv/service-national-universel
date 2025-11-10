@@ -256,11 +256,6 @@ export default function Inscription(): JSX.Element {
 
   if (isLabelsPending) return <Loader />;
 
-  const handleClickInscription = (): void => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-    history.push(baseInscriptionPath);
-  };
-
   const handleBrevoContactCreationList = async (formValues: BrevoListData): Promise<void> => {
     await exportToCsv(
       formValues,
@@ -284,24 +279,23 @@ export default function Inscription(): JSX.Element {
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            {!!paramData?.count &&
-              (isSuperAdmin(user) || user.role === ROLES.REFERENT_DEPARTMENT) && (
-                <div className="flex items-center gap-2">
-                  <ExportInscriptionsButton
+            {!!paramData?.count && (isSuperAdmin(user) || user.role === ROLES.REFERENT_DEPARTMENT) && (
+              <div className="flex items-center gap-2">
+                <ExportInscriptionsButton
+                  selectedFilters={selectedFilters}
+                  isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
+                  disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
+                />
+                {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
+                  <ExportInscriptionsScolariseButton
+                    user={user}
                     selectedFilters={selectedFilters}
                     isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
                     disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
                   />
-                  {[ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role) && (
-                    <ExportInscriptionsScolariseButton
-                      user={user}
-                      selectedFilters={selectedFilters}
-                      isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
-                      disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
-                    />
-                  )}
-                </div>
-              )}
+                )}
+              </div>
+            )}
           </div>
         </div>
         <div className="mb-8 flex flex-col rounded-xl bg-white py-4">
