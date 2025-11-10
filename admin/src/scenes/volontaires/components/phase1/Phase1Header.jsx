@@ -51,7 +51,7 @@ const Phase1Header = ({ young = null, setYoung, user }) => {
               Dispenser le volontaire du séjour
             </div>
           )}
-          {canUserDownloadConvocation() && (
+          {/* {canUserDownloadConvocation() && (
             <DocumentSelect
               title="Convocation"
               onClickPdf={handleDownloadConvocationPdfFile}
@@ -64,7 +64,7 @@ const Phase1Header = ({ young = null, setYoung, user }) => {
                 })
               }
             />
-          )}
+          )} */}
         </div>
       </div>
       <ModalConfirm isOpen={modal?.isOpen} title={modal?.title} message={modal?.message} onCancel={() => setModal({ isOpen: false })} onConfirm={modal?.onConfirm} />
