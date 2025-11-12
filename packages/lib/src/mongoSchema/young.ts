@@ -2067,6 +2067,12 @@ export const YoungSchema = {
   citizenshipInterest: { type: String },
 
   deletedAt: { type: Date },
+  RL_deleted: {
+    type: Boolean,
+    documentation: {
+      description: "Indique si les données des représentants légaux ont été supprimées",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };
