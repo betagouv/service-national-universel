@@ -463,16 +463,23 @@ router.post("/by-tutor/:id/:action(search|export)", passport.authenticate(["refe
   }
 });
 
-const fillMissions = async (missions: MissionType[], exportFields: ExportFields): Promise<MissionType[]> => {
-  if (exportFields.tutorId) {
+const fillMissions = async (missions: MissionType[], exportFields: ExportFields | string[]): Promise<MissionType[]> => {
+  const needsTutor = Array.isArray(exportFields) ? exportFields.includes("tutorId") : exportFields.tutorId;
+  const needsStructure = Array.isArray(exportFields) ? exportFields.includes("structureId") : exportFields.structureId;
+
+  if (needsTutor) {
     const tutorIds = [...new Set(missions.map((item) => item.tutorId).filter((e) => e))];
-    const tutors = await allRecords("referent", { bool: { must: { ids: { values: tutorIds } } } });
-    missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+    if (tutorIds.length > 0) {
+      const tutors = await allRecords("referent", { bool: { must: [{ ids: { values: tutorIds } }] } });
+      missions = missions.map((item) => ({ ...item, tutor: tutors?.find((e) => e._id === item.tutorId) }));
+    }
   }
-  if (exportFields.structureId) {
+  if (needsStructure) {
     const structureIds = [...new Set(missions.map((item) => item.structureId).filter((e) => e))];
-    const structures = await allRecords("structure", { bool: { must: { ids: { values: structureIds } } } });
-    missions = missions.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
+    if (structureIds.length > 0) {
+      const structures = await allRecords("structure", { bool: { must: [{ ids: { values: structureIds } }] } });
+      missions = missions.map((item) => ({ ...item, structure: structures?.find((e) => e._id === item.structureId) }));
+    }
   }
   return missions;
 };

@@ -17,7 +17,7 @@ import { ImporterClasseEnMasse } from "@admin/core/sejours/cle/classe/importEnMa
 import { AdminTaskEngagementSelectorService } from "./AdminTaskEngagementSelector";
 import { SentryExceptionCaptured } from "@sentry/nestjs";
 
-@Processor(QueueName.ADMIN_TASK)
+@Processor(QueueName.ADMIN_TASK, { lockDuration: 1000 * 60 * 2 })
 export class AdminTaskConsumer extends WorkerHost {
     constructor(
         private readonly logger: Logger,
