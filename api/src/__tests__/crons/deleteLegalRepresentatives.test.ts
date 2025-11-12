@@ -101,6 +101,69 @@ describe("deleteLegalRepresentatives cron", () => {
     });
   });
 
+  describe("Idempotence", () => {
+    it("should skip processing if RL_deleted is already true", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const young = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: yesterday,
+        RL_deleted: true,
+        parent1Email: "parent1@test.com",
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      await handler();
+
+      expect(young.set).not.toHaveBeenCalled();
+      expect(young.save).not.toHaveBeenCalled();
+      expect(deleteContact).not.toHaveBeenCalled();
+      expect(mongo.startSession).not.toHaveBeenCalled();
+    });
+
+    it("should process if RL_deleted is false or null", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const young: any = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: yesterday,
+        RL_deleted: false,
+        parent1Email: "parent1@test.com",
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+      young.save.mockResolvedValue(young);
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      await handler();
+
+      expect(young.set).toHaveBeenCalled();
+      expect(young.save).toHaveBeenCalled();
+      expect(deleteContact).toHaveBeenCalled();
+    });
+  });
+
   describe("J+1 birthday calculation", () => {
     it("should process youngs at J+1 of their birthday (birthdate = yesterday)", async () => {
       const yesterday = new Date();
