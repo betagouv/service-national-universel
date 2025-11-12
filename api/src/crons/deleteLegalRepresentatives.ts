@@ -174,13 +174,16 @@ const buildQuery = (yesterdayStart: Date, yesterdayEnd: Date) => {
   };
 };
 
-const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; errors: number }> => {
+const BATCH_SIZE = 5;
+
+const processBatch = async (batch: any[]): Promise<{ processed: number; errors: number }> => {
+  const results = await Promise.allSettled(batch.map((young) => processYoung(young)));
+
   let processed = 0;
   let errors = 0;
 
-  for (const young of youngs) {
-    const success = await processYoung(young);
-    if (success) {
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value === true) {
       processed++;
     } else {
       errors++;
@@ -188,6 +191,24 @@ const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; err
   }
 
   return { processed, errors };
+};
+
+const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; errors: number }> => {
+  let totalProcessed = 0;
+  let totalErrors = 0;
+
+  for (let i = 0; i < youngs.length; i += BATCH_SIZE) {
+    const batch = youngs.slice(i, i + BATCH_SIZE);
+    const { processed, errors } = await processBatch(batch);
+    totalProcessed += processed;
+    totalErrors += errors;
+
+    if (i + BATCH_SIZE < youngs.length) {
+      logger.debug(`Processed ${i + BATCH_SIZE}/${youngs.length} youngs`);
+    }
+  }
+
+  return { processed: totalProcessed, errors: totalErrors };
 };
 
 const LOCK_COLLECTION = "cron_locks";
