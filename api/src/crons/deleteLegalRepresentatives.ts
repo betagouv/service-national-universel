@@ -116,6 +116,11 @@ const processYoung = async (young: any): Promise<boolean> => {
       return false;
     }
 
+    if (young.RL_deleted === true) {
+      logger.debug(`Young ${young._id} already has RL_deleted = true, skipping`);
+      return false;
+    }
+
     const parent1Email = young.parent1Email;
     const parent2Email = young.parent2Email;
 
