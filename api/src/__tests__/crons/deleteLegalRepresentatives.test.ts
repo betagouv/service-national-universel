@@ -21,6 +21,7 @@ jest.mock("../../mongo", () => ({
   startSession: jest.fn(),
   withTransaction: jest.fn(),
   endSession: jest.fn(),
+  getDb: jest.fn(),
 }));
 
 describe("deleteLegalRepresentatives cron", () => {
@@ -33,6 +34,17 @@ describe("deleteLegalRepresentatives cron", () => {
       return await callback();
     });
     (mongo.endSession as jest.Mock).mockResolvedValue(undefined);
+
+    const mockCollection = {
+      findOneAndUpdate: jest.fn().mockResolvedValue({
+        value: { locked: true },
+      }),
+      updateOne: jest.fn().mockResolvedValue(undefined),
+    };
+
+    (mongo.getDb as jest.Mock).mockReturnValue({
+      collection: jest.fn().mockReturnValue(mockCollection),
+    });
   });
 
   describe("Query MongoDB", () => {
@@ -600,6 +612,81 @@ describe("deleteLegalRepresentatives cron", () => {
 
       expect(young2.set).toHaveBeenCalled();
       expect(young2.save).toHaveBeenCalled();
+    });
+  });
+
+  describe("Distributed lock", () => {
+    it("should acquire lock and execute if lock is available", async () => {
+      const mockCollection = {
+        findOneAndUpdate: jest.fn().mockResolvedValue({
+          value: { locked: true },
+        }),
+        updateOne: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const mockDb = {
+        collection: jest.fn().mockReturnValue(mockCollection),
+      };
+
+      (mongo.getDb as jest.Mock).mockReturnValue(mockDb);
+      (YoungModel.find as jest.Mock).mockResolvedValue([]);
+
+      await handler();
+
+      expect(mockDb.collection).toHaveBeenCalledWith("cron_locks");
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalled();
+      expect(YoungModel.find).toHaveBeenCalled();
+      expect(mockCollection.updateOne).toHaveBeenCalled();
+    });
+
+
+    it("should release lock even if execution fails", async () => {
+      const mockCollection = {
+        findOneAndUpdate: jest.fn().mockResolvedValue({
+          value: { locked: true },
+        }),
+        updateOne: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const mockDb = {
+        collection: jest.fn().mockReturnValue(mockCollection),
+      };
+
+      (mongo.getDb as jest.Mock).mockReturnValue(mockDb);
+      (YoungModel.find as jest.Mock).mockRejectedValue(new Error("Database error"));
+
+      await expect(handler()).rejects.toThrow("Database error");
+
+      expect(mockCollection.updateOne).toHaveBeenCalledWith(
+        { _id: "deleteLegalRepresentatives" },
+        expect.objectContaining({
+          $set: expect.objectContaining({
+            locked: false,
+          }),
+        }),
+      );
+    });
+
+    it("should skip execution if another instance already has the lock", async () => {
+      const mockCollection = {
+        findOneAndUpdate: jest.fn().mockResolvedValue({
+          value: null,
+        }),
+        updateOne: jest.fn().mockResolvedValue(undefined),
+      };
+
+      const mockDb = {
+        collection: jest.fn().mockReturnValue(mockCollection),
+      };
+
+      (mongo.getDb as jest.Mock).mockReturnValue(mockDb);
+      (YoungModel.find as jest.Mock).mockResolvedValue([]);
+
+      await handler();
+
+      expect(mockCollection.findOneAndUpdate).toHaveBeenCalled();
+      expect(YoungModel.find).not.toHaveBeenCalled();
+      expect(mockCollection.updateOne).not.toHaveBeenCalled();
     });
   });
 
