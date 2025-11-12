@@ -2,7 +2,8 @@ import { YoungModel } from "../models";
 import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
-import { startSession, withTransaction, endSession } from "../mongo";
+import { startSession, withTransaction, endSession, getDb } from "../mongo";
+import { config } from "../config";
 
 const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
   if (!birthdateAt) return false;
@@ -189,7 +190,65 @@ const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; err
   return { processed, errors };
 };
 
+const LOCK_COLLECTION = "cron_locks";
+const LOCK_ID = "deleteLegalRepresentatives";
+
+const acquireLock = async (): Promise<boolean> => {
+  const db = getDb();
+  const collection = db.collection(LOCK_COLLECTION);
+
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+  const result = await collection.findOneAndUpdate(
+    {
+      _id: LOCK_ID as any,
+      $or: [
+        { locked: { $exists: false } },
+        { locked: false },
+        { lockedAt: { $lt: thirtyMinutesAgo } },
+      ],
+    },
+    {
+      $set: {
+        locked: true,
+        lockedBy: "deleteLegalRepresentatives",
+        lockedAt: new Date(),
+        lockedByEnvironment: config.ENVIRONMENT,
+      },
+    },
+    {
+      upsert: true,
+      returnDocument: "after",
+    },
+  );
+
+  return result.value !== null && result.value.locked === true;
+};
+
+const releaseLock = async (): Promise<void> => {
+  const db = getDb();
+  const collection = db.collection(LOCK_COLLECTION);
+
+  await collection.updateOne(
+    { _id: LOCK_ID as any },
+    {
+      $set: {
+        locked: false,
+        lockedBy: null,
+        lockedAt: null,
+        lockedByEnvironment: null,
+      },
+    },
+  );
+};
+
 export const handler = async (): Promise<void> => {
+  const lockAcquired = await acquireLock();
+  if (!lockAcquired) {
+    logger.warn("deleteLegalRepresentatives cron is already running, skipping execution");
+    return;
+  }
+
   try {
     const { start: yesterdayStart, end: yesterdayEnd } = getYesterdayDateRange();
     const query = buildQuery(yesterdayStart, yesterdayEnd);
@@ -202,6 +261,8 @@ export const handler = async (): Promise<void> => {
     capture(e);
     logger.error(`Error in deleteLegalRepresentatives cron: ${e.message}`);
     throw e;
+  } finally {
+    await releaseLock();
   }
 };
 
