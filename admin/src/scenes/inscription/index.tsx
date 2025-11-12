@@ -256,11 +256,6 @@ export default function Inscription(): JSX.Element {
 
   if (isLabelsPending) return <Loader />;
 
-  const handleClickInscription = (): void => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-    history.push(baseInscriptionPath);
-  };
-
   const handleBrevoContactCreationList = async (formValues: BrevoListData): Promise<void> => {
     await exportToCsv(
       formValues,
@@ -280,20 +275,12 @@ export default function Inscription(): JSX.Element {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            {!isClassLoading && invitationState ? (
-              <Button
-                onClick={handleClickInscription}
-                leftIcon={<AiOutlinePlus className="h-4 w-4" />}
-                className="w-full ml-2"
-                title={selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}
-              />
-            ) : null}
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            {!!paramData?.count && (
-              <>
+            {!!paramData?.count && (isSuperAdmin(user) || user.role === ROLES.REFERENT_DEPARTMENT) && (
+              <div className="flex items-center gap-2">
                 <ExportInscriptionsButton
                   selectedFilters={selectedFilters}
                   isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
@@ -307,7 +294,7 @@ export default function Inscription(): JSX.Element {
                     disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
                   />
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
