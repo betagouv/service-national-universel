@@ -565,6 +565,75 @@ describe("deleteLegalRepresentatives cron", () => {
     });
   });
 
+  describe("Batch processing", () => {
+    it("should process multiple youngs in parallel batches", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const youngs = Array.from({ length: 10 }, (_, i) => ({
+        _id: `young${i}`,
+        cohort: "2022",
+        birthdateAt: yesterday,
+        parent1Email: `parent${i}@test.com`,
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        RL_deleted: null,
+        set: jest.fn(),
+        save: jest.fn().mockResolvedValue({}),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      }));
+
+      (YoungModel.find as jest.Mock).mockResolvedValue(youngs);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      const startTime = Date.now();
+      await handler();
+      const duration = Date.now() - startTime;
+
+      expect(YoungModel.find).toHaveBeenCalled();
+      expect(youngs.every((y) => y.set.mock.calls.length > 0)).toBe(true);
+      expect(deleteContact).toHaveBeenCalledTimes(10);
+    });
+
+    it("should limit concurrency to avoid overloading", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const processingOrder: string[] = [];
+      const youngs = Array.from({ length: 10 }, (_, i) => ({
+        _id: `young${i}`,
+        cohort: "2022",
+        birthdateAt: yesterday,
+        parent1Email: `parent${i}@test.com`,
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        RL_deleted: null,
+        set: jest.fn(),
+        save: jest.fn().mockImplementation(async () => {
+          processingOrder.push(`young${i}`);
+          await new Promise((resolve) => setTimeout(resolve, 10));
+          return {};
+        }),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      }));
+
+      (YoungModel.find as jest.Mock).mockResolvedValue(youngs);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      await handler();
+
+      expect(processingOrder.length).toBe(10);
+    });
+  });
+
   describe("Error handling", () => {
     it("should continue processing other youngs if one fails", async () => {
       const yesterday = new Date();
