@@ -1,0 +1,299 @@
+import { YoungModel } from "../models";
+import { deleteContact } from "../brevo";
+import { capture } from "../sentry";
+import { logger } from "../logger";
+import { startSession, withTransaction, endSession, getDb } from "../mongo";
+import { config } from "../config";
+import { timeout } from "../utils";
+
+const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
+  if (!birthdateAt) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const birthday = new Date(birthdateAt);
+  birthday.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+  birthday.setFullYear(birthday.getFullYear() + 18);
+  return birthday.getTime() === yesterday.getTime();
+};
+
+const getParentFields = (): string[] => {
+  const fields: string[] = [];
+  for (let i = 1; i <= 2; i++) {
+    fields.push(
+      `parent${i}Status`,
+      `parent${i}FirstName`,
+      `parent${i}LastName`,
+      `parent${i}Email`,
+      `parent${i}Phone`,
+      `parent${i}PhoneZone`,
+      `parent${i}OwnAddress`,
+      `parent${i}Address`,
+      `parent${i}coordinatesAccuracyLevel`,
+      `parent${i}ComplementAddress`,
+      `parent${i}Zip`,
+      `parent${i}City`,
+      `parent${i}CityCode`,
+      `parent${i}Department`,
+      `parent${i}Region`,
+      `parent${i}Country`,
+      `parent${i}Location`,
+      `parent${i}FromFranceConnect`,
+      `parent${i}Inscription2023Token`,
+      `parent${i}DataVerified`,
+      `parent${i}AddressVerified`,
+      `parent${i}AllowCovidAutotest`,
+      `parent${i}AllowImageRights`,
+      `parent${i}ContactPreference`,
+      `parent${i}AllowSNU`,
+    );
+  }
+  return fields;
+};
+
+const cleanPatches = async (young: any, session: any): Promise<void> => {
+  const patches = await young.patches.find({ ref: young._id });
+  for (const patch of patches) {
+    const updatedOps = patch.ops.filter((op: any) => {
+      const fieldName = op.path.split("/")[1];
+      return !fieldName || (!fieldName.startsWith("parent1") && !fieldName.startsWith("parent2"));
+    });
+
+    if (updatedOps.length === 0) {
+      await patch.deleteOne({ session });
+    } else {
+      patch.set({ ops: updatedOps });
+      await patch.save({ session });
+    }
+  }
+};
+
+const BREVO_TIMEOUT_MS = 10000;
+
+const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, parent2Email: string | undefined, youngId: string): Promise<void> => {
+  if (parent1Email) {
+    try {
+      await timeout(deleteContact(parent1Email), BREVO_TIMEOUT_MS);
+    } catch (e: any) {
+      capture(e, { extra: { email: parent1Email, youngId } });
+      logger.warn(`Error deleting parent1Email ${parent1Email} from Brevo: ${e.message}`);
+    }
+  }
+
+  if (parent2Email) {
+    try {
+      await timeout(deleteContact(parent2Email), BREVO_TIMEOUT_MS);
+    } catch (e: any) {
+      capture(e, { extra: { email: parent2Email, youngId } });
+      logger.warn(`Error deleting parent2Email ${parent2Email} from Brevo: ${e.message}`);
+    }
+  }
+};
+
+const addHistoricEntry = (young: any): void => {
+  if (!young.historic) {
+    young.historic = [];
+  }
+  young.historic.push({
+    phase: young.phase || undefined,
+    userName: "Système",
+    userId: undefined,
+    status: young.status || undefined,
+    note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
+    createdAt: new Date(),
+  });
+};
+
+const deleteRLFieldsFromYoung = (young: any): void => {
+  const parentFields = getParentFields();
+  const updateFields: Record<string, undefined> = {};
+  parentFields.forEach((field) => {
+    updateFields[field] = undefined;
+  });
+  young.set(updateFields);
+};
+
+const MONGODB_TRANSACTION_TIMEOUT_MS = 30000;
+
+const processYoung = async (young: any): Promise<boolean> => {
+  try {
+    if (!isJPlus1Birthday(young.birthdateAt)) {
+      return false;
+    }
+
+    if (young.RL_deleted === true) {
+      logger.debug(`Young ${young._id} already has RL_deleted = true, skipping`);
+      return false;
+    }
+
+    const parent1Email = young.parent1Email;
+    const parent2Email = young.parent2Email;
+
+    const session = await startSession();
+
+    try {
+      await timeout(
+        withTransaction(session, async () => {
+          deleteRLFieldsFromYoung(young);
+          await cleanPatches(young, session);
+          addHistoricEntry(young);
+          young.set({ RL_deleted: true });
+          await young.save({ session });
+        }),
+        MONGODB_TRANSACTION_TIMEOUT_MS,
+      );
+
+      await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
+
+      logger.debug(`RL deleted for young ${young._id}`);
+      return true;
+    } finally {
+      await endSession(session);
+    }
+  } catch (e: any) {
+    capture(e, { extra: { youngId: young._id } });
+    logger.error(`Error processing young ${young._id}: ${e.message}`);
+    return false;
+  }
+};
+
+const getYesterdayDateRange = (): { start: Date; end: Date } => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const yesterday = new Date(today);
+  yesterday.setDate(yesterday.getDate() - 1);
+  yesterday.setHours(0, 0, 0, 0);
+  const yesterdayEnd = new Date(yesterday);
+  yesterdayEnd.setHours(23, 59, 59, 999);
+  return { start: yesterday, end: yesterdayEnd };
+};
+
+const buildQuery = (yesterdayEnd: Date) => {
+  const targetYears = ["2020", "2021", "2022", "2023"];
+  const cohortRegex = new RegExp(`(${targetYears.join("|")})`);
+  const eighteenYearsAgoEnd = new Date(yesterdayEnd);
+  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
+  return {
+    cohort: { $regex: cohortRegex },
+    RL_deleted: { $ne: true },
+    birthdateAt: {
+      $lte: eighteenYearsAgoEnd,
+    },
+  };
+};
+
+const BATCH_SIZE = 5;
+
+const processBatch = async (batch: any[]): Promise<{ processed: number; errors: number }> => {
+  const results = await Promise.allSettled(batch.map((young) => processYoung(young)));
+
+  let processed = 0;
+  let errors = 0;
+
+  for (const result of results) {
+    if (result.status === "fulfilled" && result.value === true) {
+      processed++;
+    } else {
+      errors++;
+    }
+  }
+
+  return { processed, errors };
+};
+
+const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; errors: number }> => {
+  let totalProcessed = 0;
+  let totalErrors = 0;
+
+  for (let i = 0; i < youngs.length; i += BATCH_SIZE) {
+    const batch = youngs.slice(i, i + BATCH_SIZE);
+    const { processed, errors } = await processBatch(batch);
+    totalProcessed += processed;
+    totalErrors += errors;
+
+    if (i + BATCH_SIZE < youngs.length) {
+      logger.debug(`Processed ${i + BATCH_SIZE}/${youngs.length} youngs`);
+    }
+  } 
+
+  return { processed: totalProcessed, errors: totalErrors };
+};
+
+const LOCK_COLLECTION = "cron_locks";
+const LOCK_ID = "deleteLegalRepresentatives";
+
+const acquireLock = async (): Promise<boolean> => {
+  const db = getDb();
+  const collection = db.collection(LOCK_COLLECTION);
+
+  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
+
+  const result = await collection.findOneAndUpdate(
+    {
+      _id: LOCK_ID as any,
+      $or: [
+        { locked: { $exists: false } },
+        { locked: false },
+        { lockedAt: { $lt: thirtyMinutesAgo } },
+      ],
+    },
+    {
+      $set: {
+        locked: true,
+        lockedBy: "deleteLegalRepresentatives",
+        lockedAt: new Date(),
+        lockedByEnvironment: config.ENVIRONMENT,
+      },
+    },
+    {
+      upsert: true,
+      returnDocument: "after",
+    },
+  );
+
+  return result.value !== null && result.value.locked === true;
+};
+
+const releaseLock = async (): Promise<void> => {
+  const db = getDb();
+  const collection = db.collection(LOCK_COLLECTION);
+
+  await collection.updateOne(
+    { _id: LOCK_ID as any },
+    {
+      $set: {
+        locked: false,
+        lockedBy: null,
+        lockedAt: null,
+        lockedByEnvironment: null,
+      },
+    },
+  );
+};
+
+export const handler = async (): Promise<void> => {
+  const lockAcquired = await acquireLock();
+  if (!lockAcquired) {
+    logger.warn("deleteLegalRepresentatives cron is already running, skipping execution");
+    return;
+  }
+
+  try {
+    const { end: yesterdayEnd } = getYesterdayDateRange();
+    const query = buildQuery(yesterdayEnd);
+    const youngs = await YoungModel.find(query);
+    logger.info(`Found ${youngs.length} youngs to process for RL deletion`);
+
+    const { processed, errors } = await processAllYoungs(youngs);
+    logger.info(`RL deletion cron completed: ${processed} processed, ${errors} errors`);
+  } catch (e: any) {
+    capture(e);
+    logger.error(`Error in deleteLegalRepresentatives cron: ${e.message}`);
+    throw e;
+  } finally {
+    await releaseLock();
+  }
+};
+
