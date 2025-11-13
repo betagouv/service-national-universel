@@ -2,7 +2,7 @@ import { YoungModel } from "../models";
 import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
-import { startSession, withTransaction, endSession, getDb } from "../mongo";
+import { startSession, withTransaction, endSession, getDb, initDB } from "../mongo";
 import { config } from "../config";
 import { timeout } from "../utils";
 
@@ -92,20 +92,6 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
   }
 };
 
-const addHistoricEntry = (young: any): void => {
-  if (!young.historic) {
-    young.historic = [];
-  }
-  young.historic.push({
-    phase: young.phase || undefined,
-    userName: "Système",
-    userId: undefined,
-    status: young.status || undefined,
-    note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
-    createdAt: new Date(),
-  });
-};
-
 const deleteRLFieldsFromYoung = (young: any): void => {
   const parentFields = getParentFields();
   const updateFields: Record<string, undefined> = {};
@@ -119,9 +105,9 @@ const MONGODB_TRANSACTION_TIMEOUT_MS = 30000;
 
 const processYoung = async (young: any): Promise<boolean> => {
   try {
-    if (!isJPlus1Birthday(young.birthdateAt)) {
-      return false;
-    }
+    //if (!isJPlus1Birthday(young.birthdateAt)) {
+    //  return false;
+    //}
 
     if (young.RL_deleted === true) {
       logger.debug(`Young ${young._id} already has RL_deleted = true, skipping`);
@@ -134,13 +120,14 @@ const processYoung = async (young: any): Promise<boolean> => {
     const session = await startSession();
 
     try {
+      const fromUser = { firstName: "Cron deleteLegalRepresentatives" };
+
       await timeout(
         withTransaction(session, async () => {
           deleteRLFieldsFromYoung(young);
           await cleanPatches(young, session);
-          addHistoricEntry(young);
           young.set({ RL_deleted: true });
-          await young.save({ session });
+          await young.save({ session, fromUser });
         }),
         MONGODB_TRANSACTION_TIMEOUT_MS,
       );
@@ -174,7 +161,7 @@ const buildQuery = (yesterdayEnd: Date) => {
   const targetYears = ["2020", "2021", "2022", "2023"];
   const cohortRegex = new RegExp(`(${targetYears.join("|")})`);
   const eighteenYearsAgoEnd = new Date(yesterdayEnd);
-  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
+  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 15);
   return {
     cohort: { $regex: cohortRegex },
     RL_deleted: { $ne: true },
@@ -184,7 +171,8 @@ const buildQuery = (yesterdayEnd: Date) => {
   };
 };
 
-const BATCH_SIZE = 5;
+const BATCH_SIZE = 1;
+const CONCURRENT_BATCH_SIZE = 5;
 
 const processBatch = async (batch: any[]): Promise<{ processed: number; errors: number }> => {
   const results = await Promise.allSettled(batch.map((young) => processYoung(young)));
@@ -207,14 +195,14 @@ const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; err
   let totalProcessed = 0;
   let totalErrors = 0;
 
-  for (let i = 0; i < youngs.length; i += BATCH_SIZE) {
-    const batch = youngs.slice(i, i + BATCH_SIZE);
+  for (let i = 0; i < youngs.length; i += CONCURRENT_BATCH_SIZE) {
+    const batch = youngs.slice(i, i + CONCURRENT_BATCH_SIZE);
     const { processed, errors } = await processBatch(batch);
     totalProcessed += processed;
     totalErrors += errors;
 
-    if (i + BATCH_SIZE < youngs.length) {
-      logger.debug(`Processed ${i + BATCH_SIZE}/${youngs.length} youngs`);
+    if (i + CONCURRENT_BATCH_SIZE < youngs.length) {
+      logger.debug(`Processed ${i + CONCURRENT_BATCH_SIZE}/${youngs.length} youngs`);
     }
   } 
 
@@ -283,7 +271,7 @@ export const handler = async (): Promise<void> => {
   try {
     const { end: yesterdayEnd } = getYesterdayDateRange();
     const query = buildQuery(yesterdayEnd);
-    const youngs = await YoungModel.find(query);
+    const youngs = await YoungModel.find(query).limit(BATCH_SIZE);
     logger.info(`Found ${youngs.length} youngs to process for RL deletion`);
 
     const { processed, errors } = await processAllYoungs(youngs);
@@ -296,4 +284,18 @@ export const handler = async (): Promise<void> => {
     await releaseLock();
   }
 };
+
+// Initialiser MongoDB avant d'exécuter le handler si le fichier est exécuté directement
+if (require.main === module) {
+  (async () => {
+    try {
+      await initDB();
+      await handler();
+      process.exit(0);
+    } catch (e: any) {
+      console.error("Error:", e);
+      process.exit(1);
+    }
+  })();
+}
 
