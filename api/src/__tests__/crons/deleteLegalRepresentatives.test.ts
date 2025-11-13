@@ -634,6 +634,73 @@ describe("deleteLegalRepresentatives cron", () => {
     });
   });
 
+  describe("Timeouts", () => {
+    it("should timeout Brevo operations after 10 seconds", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const young: any = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: yesterday,
+        parent1Email: "parent1@test.com",
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        RL_deleted: null,
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+      young.save.mockResolvedValue(young);
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (deleteContact as jest.Mock).mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 15000)));
+
+      const startTime = Date.now();
+      await handler();
+      const duration = Date.now() - startTime;
+
+      expect(duration).toBeLessThan(12000);
+      expect(young.save).toHaveBeenCalled();
+    });
+
+    it("should timeout MongoDB transaction after 30 seconds", async () => {
+      const yesterday = new Date();
+      yesterday.setDate(yesterday.getDate() - 1);
+      yesterday.setHours(0, 0, 0, 0);
+
+      const young: any = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: yesterday,
+        parent1Email: "parent1@test.com",
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        RL_deleted: null,
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+      young.save.mockImplementation(() => new Promise((resolve) => setTimeout(resolve, 35000)));
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      const startTime = Date.now();
+      await handler();
+      const duration = Date.now() - startTime;
+
+      expect(duration).toBeLessThan(35000);
+    });
+  });
+
   describe("Error handling", () => {
     it("should continue processing other youngs if one fails", async () => {
       const yesterday = new Date();

@@ -4,6 +4,7 @@ import { capture } from "../sentry";
 import { logger } from "../logger";
 import { startSession, withTransaction, endSession, getDb } from "../mongo";
 import { config } from "../config";
+import { timeout } from "../utils";
 
 const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
   if (!birthdateAt) return false;
@@ -68,10 +69,12 @@ const cleanPatches = async (young: any, session: any): Promise<void> => {
   }
 };
 
+const BREVO_TIMEOUT_MS = 10000;
+
 const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, parent2Email: string | undefined, youngId: string): Promise<void> => {
   if (parent1Email) {
     try {
-      await deleteContact(parent1Email);
+      await timeout(deleteContact(parent1Email), BREVO_TIMEOUT_MS);
     } catch (e: any) {
       capture(e, { extra: { email: parent1Email, youngId } });
       logger.warn(`Error deleting parent1Email ${parent1Email} from Brevo: ${e.message}`);
@@ -80,7 +83,7 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 
   if (parent2Email) {
     try {
-      await deleteContact(parent2Email);
+      await timeout(deleteContact(parent2Email), BREVO_TIMEOUT_MS);
     } catch (e: any) {
       capture(e, { extra: { email: parent2Email, youngId } });
       logger.warn(`Error deleting parent2Email ${parent2Email} from Brevo: ${e.message}`);
@@ -111,6 +114,8 @@ const deleteRLFieldsFromYoung = (young: any): void => {
   young.set(updateFields);
 };
 
+const MONGODB_TRANSACTION_TIMEOUT_MS = 30000;
+
 const processYoung = async (young: any): Promise<boolean> => {
   try {
     if (!isJPlus1Birthday(young.birthdateAt)) {
@@ -128,13 +133,16 @@ const processYoung = async (young: any): Promise<boolean> => {
     const session = await startSession();
 
     try {
-      await withTransaction(session, async () => {
-        deleteRLFieldsFromYoung(young);
-        await cleanPatches(young, session);
-        addHistoricEntry(young);
-        young.set({ RL_deleted: true });
-        await young.save({ session });
-      });
+      await timeout(
+        withTransaction(session, async () => {
+          deleteRLFieldsFromYoung(young);
+          await cleanPatches(young, session);
+          addHistoricEntry(young);
+          young.set({ RL_deleted: true });
+          await young.save({ session });
+        }),
+        MONGODB_TRANSACTION_TIMEOUT_MS,
+      );
 
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
 
