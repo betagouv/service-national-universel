@@ -856,11 +856,7 @@ describe("deleteLegalRepresentatives cron", () => {
       (YoungModel.find as jest.Mock).mockResolvedValue([young]);
       (deleteContact as jest.Mock).mockResolvedValue(undefined);
       (mongo.withTransaction as jest.Mock).mockImplementation(async (session, callback) => {
-        try {
-          return await callback();
-        } catch (error) {
-          throw error;
-        }
+        return await callback();
       });
 
       await handler();
