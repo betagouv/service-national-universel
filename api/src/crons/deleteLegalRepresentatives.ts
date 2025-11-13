@@ -15,6 +15,7 @@ const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
   yesterday.setHours(0, 0, 0, 0);
+  birthday.setFullYear(birthday.getFullYear() + 18);
   return birthday.getTime() === yesterday.getTime();
 };
 
@@ -169,15 +170,16 @@ const getYesterdayDateRange = (): { start: Date; end: Date } => {
   return { start: yesterday, end: yesterdayEnd };
 };
 
-const buildQuery = (yesterdayStart: Date, yesterdayEnd: Date) => {
+const buildQuery = (yesterdayEnd: Date) => {
   const targetYears = ["2020", "2021", "2022", "2023"];
   const cohortRegex = new RegExp(`(${targetYears.join("|")})`);
+  const eighteenYearsAgoEnd = new Date(yesterdayEnd);
+  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
   return {
     cohort: { $regex: cohortRegex },
     RL_deleted: { $ne: true },
     birthdateAt: {
-      $gte: yesterdayStart,
-      $lt: yesterdayEnd,
+      $lte: eighteenYearsAgoEnd,
     },
   };
 };
@@ -279,8 +281,8 @@ export const handler = async (): Promise<void> => {
   }
 
   try {
-    const { start: yesterdayStart, end: yesterdayEnd } = getYesterdayDateRange();
-    const query = buildQuery(yesterdayStart, yesterdayEnd);
+    const { end: yesterdayEnd } = getYesterdayDateRange();
+    const query = buildQuery(yesterdayEnd);
     const youngs = await YoungModel.find(query);
     logger.info(`Found ${youngs.length} youngs to process for RL deletion`);
 

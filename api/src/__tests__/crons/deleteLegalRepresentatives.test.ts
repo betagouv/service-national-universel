@@ -24,6 +24,15 @@ jest.mock("../../mongo", () => ({
   getDb: jest.fn(),
 }));
 
+const buildBirthdate = (dayOffset: number): Date => {
+  const reference = new Date();
+  reference.setHours(0, 0, 0, 0);
+  reference.setDate(reference.getDate() + dayOffset);
+  const birthdate = new Date(reference);
+  birthdate.setFullYear(birthdate.getFullYear() - 18);
+  return birthdate;
+};
+
 describe("deleteLegalRepresentatives cron", () => {
   const mockSession = { id: "session123" };
 
@@ -72,7 +81,7 @@ describe("deleteLegalRepresentatives cron", () => {
       expect(query.RL_deleted.$ne).toBe(true);
     });
 
-    it("should query only youngs with birthdateAt = yesterday", async () => {
+    it("should query only youngs with birthdateAt <= yesterday minus 18 years (more than 18 years old since yesterday)", async () => {
       const today = new Date();
       today.setHours(0, 0, 0, 0);
       const yesterday = new Date(today);
@@ -80,25 +89,26 @@ describe("deleteLegalRepresentatives cron", () => {
       yesterday.setHours(0, 0, 0, 0);
       const yesterdayEnd = new Date(yesterday);
       yesterdayEnd.setHours(23, 59, 59, 999);
+      const eighteenYearsAgoEnd = new Date(yesterdayEnd);
+      eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
 
       (YoungModel.find as jest.Mock).mockResolvedValue([]);
 
       await handler();
 
       const query = (YoungModel.find as jest.Mock).mock.calls[0][0];
-      expect(query.birthdateAt.$gte.getTime()).toBe(yesterday.getTime());
-      expect(query.birthdateAt.$lt.getTime()).toBe(yesterdayEnd.getTime());
+      expect(query.birthdateAt.$lte.getTime()).toBe(eighteenYearsAgoEnd.getTime());
+      expect(query.birthdateAt.$gte).toBeUndefined();
+      expect(query.birthdateAt.$lt).toBeUndefined();
     });
 
     it("should not process youngs already with RL_deleted = true", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         RL_deleted: true,
         set: jest.fn(),
         save: jest.fn(),
@@ -115,14 +125,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Idempotence", () => {
     it("should skip processing if RL_deleted is already true", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         RL_deleted: true,
         parent1Email: "parent1@test.com",
         set: jest.fn(),
@@ -144,14 +152,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should process if RL_deleted is false or null", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young: any = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         RL_deleted: false,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
@@ -178,14 +184,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("J+1 birthday calculation", () => {
     it("should process youngs at J+1 of their birthday (birthdate = yesterday)", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         parent2Email: "parent2@test.com",
         parent1FirstName: "Parent1",
@@ -214,14 +218,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should not process youngs not at J+1 of their birthday (birthdate = 2 days ago)", async () => {
-      const twoDaysAgo = new Date();
-      twoDaysAgo.setDate(twoDaysAgo.getDate() - 2);
-      twoDaysAgo.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-2);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: twoDaysAgo,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         RL_deleted: null,
         set: jest.fn(),
@@ -240,13 +242,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should not process youngs with birthdate = today", async () => {
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(0);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: today,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         RL_deleted: null,
         set: jest.fn(),
@@ -267,14 +268,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("RL fields deletion", () => {
     it("should delete ALL parent1 and parent2 fields", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Status: "MOTHER",
         parent1FirstName: "Parent1",
         parent1LastName: "Parent1Last",
@@ -345,9 +344,7 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Patches cleaning", () => {
     it("should clean patches containing parent fields", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const patch1 = {
         ops: [
@@ -376,7 +373,7 @@ describe("deleteLegalRepresentatives cron", () => {
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -405,14 +402,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Brevo deletion", () => {
     it("should delete parent emails from Brevo", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         parent2Email: "parent2@test.com",
         phase: "CONTINUE",
@@ -436,14 +431,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should handle Brevo errors gracefully", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -466,14 +459,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Historic entry", () => {
     it("should add entry to historic with correct data", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -501,14 +492,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should initialize historic if it does not exist", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -533,14 +522,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("RL_deleted flag", () => {
     it("should set RL_deleted to true in second set call", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -567,14 +554,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Batch processing", () => {
     it("should process multiple youngs in parallel batches", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const youngs = Array.from({ length: 10 }, (_, i) => ({
         _id: `young${i}`,
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: new Date(birthdate),
         parent1Email: `parent${i}@test.com`,
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -600,15 +585,13 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should limit concurrency to avoid overloading", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const processingOrder: string[] = [];
       const youngs = Array.from({ length: 10 }, (_, i) => ({
         _id: `young${i}`,
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: new Date(birthdate),
         parent1Email: `parent${i}@test.com`,
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -636,14 +619,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Timeouts", () => {
     it("should timeout Brevo operations after 10 seconds", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young: any = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -669,14 +650,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should timeout MongoDB transaction after 30 seconds", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young: any = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -703,14 +682,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("Error handling", () => {
     it("should continue processing other youngs if one fails", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young1 = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -728,7 +705,7 @@ describe("deleteLegalRepresentatives cron", () => {
       const young2 = {
         _id: "young2",
         cohort: "2021",
-        birthdateAt: yesterday,
+        birthdateAt: new Date(birthdate),
         parent1Email: "parent2@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -828,14 +805,12 @@ describe("deleteLegalRepresentatives cron", () => {
 
   describe("MongoDB transaction atomicity", () => {
     it("should use transaction for MongoDB operations", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young: any = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -860,14 +835,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should not call Brevo if transaction fails", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         phase: "CONTINUE",
         status: "VALIDATED",
@@ -897,14 +870,12 @@ describe("deleteLegalRepresentatives cron", () => {
     });
 
     it("should call Brevo only after successful transaction commit", async () => {
-      const yesterday = new Date();
-      yesterday.setDate(yesterday.getDate() - 1);
-      yesterday.setHours(0, 0, 0, 0);
+      const birthdate = buildBirthdate(-1);
 
       const young: any = {
         _id: "young1",
         cohort: "2022",
-        birthdateAt: yesterday,
+        birthdateAt: birthdate,
         parent1Email: "parent1@test.com",
         parent2Email: "parent2@test.com",
         phase: "CONTINUE",
