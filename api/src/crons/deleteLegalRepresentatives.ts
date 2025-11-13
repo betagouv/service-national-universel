@@ -216,7 +216,7 @@ const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; err
     if (i + BATCH_SIZE < youngs.length) {
       logger.debug(`Processed ${i + BATCH_SIZE}/${youngs.length} youngs`);
     }
-  }
+  } 
 
   return { processed: totalProcessed, errors: totalErrors };
 };
