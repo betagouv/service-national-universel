@@ -1,9 +1,12 @@
 import React from "react";
+import { useSelector } from "react-redux";
 import { BiCopy } from "react-icons/bi";
 import { BsCheck2, BsChevronDown } from "react-icons/bs";
 import { BsCircleFill } from "react-icons/bs";
 import { HiCheckCircle } from "react-icons/hi";
 import { toastr } from "react-redux-toastr";
+import ReactTooltip from "react-tooltip";
+import { isCohortFullyArchived, ROLES } from "snu-lib";
 import Bell from "../../../assets/icons/Bell";
 import CheckCircle from "../../../assets/icons/CheckCircle";
 import ChevronDown from "../../../assets/icons/ChevronDown";
@@ -17,7 +20,7 @@ import { copyToClipboard, formatDateFR, translate, translateEquivalenceStatus } 
 import ModalChangeStatus from "./ModalChangeStatus";
 import ModalFilesEquivalence from "./ModalFilesEquivalence";
 
-export default function CardEquivalence({ young, equivalence }) {
+export default function CardEquivalence({ young, equivalence, cohort }) {
   const optionsStatus = ["WAITING_CORRECTION", "REFUSED", "VALIDATED"];
   const [copied, setCopied] = React.useState(false);
   const [modalFiles, setModalFiles] = React.useState({ isOpen: false });
@@ -80,6 +83,17 @@ export default function CardEquivalence({ young, equivalence }) {
     }
   };
 
+  const user = useSelector((state) => state.Auth.user);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user?.role);
+  const isCohortFullyArchivedForEquivalence = isReferentRegionalOrDepartmental && cohort ? isCohortFullyArchived(cohort) : false;
+  const tooltipStatusId = `tooltip-equivalence-status-${equivalence._id}`;
+  const tooltipDownloadId = `tooltip-equivalence-download-${equivalence._id}`;
+  const tooltipMessage = "Vous ne pouvez plus effectuer cette action. la cohorte du jeune est archivée";
+
+  React.useEffect(() => {
+    ReactTooltip.rebuild();
+  });
+
   return (
     <>
       <div className="mb-4 flex w-full flex-col rounded-lg bg-white px-4 pt-3 shadow-md">
@@ -105,57 +119,89 @@ export default function CardEquivalence({ young, equivalence }) {
               <>
                 {equivalence.status === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5">
-                    <button
-                      className="group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400"
-                      onClick={() => setModalStatus({ isOpen: true, status: "WAITING_CORRECTION", equivalenceId: equivalence._id })}>
-                      <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
-                      <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
-                    </button>
-                    <button
-                      className="ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400"
-                      onClick={() => setModalStatus({ isOpen: true, status: "VALIDATED", equivalenceId: equivalence._id })}>
-                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
-                      <span className="text-sm font-medium leading-5 text-white">Valider</span>
-                    </button>
-                    <button
-                      className="ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400"
-                      onClick={() => setModalStatus({ isOpen: true, status: "REFUSED", equivalenceId: equivalence._id })}>
-                      <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
-                      <span className="text-sm font-medium leading-5 text-white">Refuser</span>
-                    </button>
+                    <span data-tip data-for={tooltipStatusId}>
+                      <button
+                        disabled={isCohortFullyArchivedForEquivalence}
+                        className={`group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400 ${
+                          isCohortFullyArchivedForEquivalence ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => !isCohortFullyArchivedForEquivalence && setModalStatus({ isOpen: true, status: "WAITING_CORRECTION", equivalenceId: equivalence._id })}>
+                        <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
+                        <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
+                      </button>
+                      {isCohortFullyArchivedForEquivalence && (
+                        <ReactTooltip id={tooltipStatusId} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                          <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltipMessage}</p>
+                        </ReactTooltip>
+                      )}
+                    </span>
+                    <span data-tip data-for={tooltipStatusId}>
+                      <button
+                        disabled={isCohortFullyArchivedForEquivalence}
+                        className={`ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400 ${
+                          isCohortFullyArchivedForEquivalence ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => !isCohortFullyArchivedForEquivalence && setModalStatus({ isOpen: true, status: "VALIDATED", equivalenceId: equivalence._id })}>
+                        <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
+                        <span className="text-sm font-medium leading-5 text-white">Valider</span>
+                      </button>
+                    </span>
+                    <span data-tip data-for={tooltipStatusId}>
+                      <button
+                        disabled={isCohortFullyArchivedForEquivalence}
+                        className={`ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400 ${
+                          isCohortFullyArchivedForEquivalence ? "opacity-50 cursor-not-allowed" : ""
+                        }`}
+                        onClick={() => !isCohortFullyArchivedForEquivalence && setModalStatus({ isOpen: true, status: "REFUSED", equivalenceId: equivalence._id })}>
+                        <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
+                        <span className="text-sm font-medium leading-5 text-white">Refuser</span>
+                      </button>
+                    </span>
                     <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 ) : (
                   <div className="flex items-center gap-5 ">
                     <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
                       <div className="relative" ref={ref}>
-                        <button
-                          className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
-                          onClick={() => setOpen((e) => !e)}>
-                          <div className="flex items-center gap-2">
-                            <BsCircleFill className={theme[equivalence.status]} />
-                            <span className="text-sm font-normal leading-5">{translate(equivalence?.status)}</span>
-                          </div>
-                          <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
-                        </button>
-                        {/* display options */}
-                        <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                          {optionsStatus.map((option) => (
-                            <div
-                              key={option}
-                              className={`${option === equivalence?.status && "bg-gray font-bold"}`}
-                              // eslint-disable-next-line react/jsx-no-duplicate-props
-                              onClick={() => {
-                                setModalStatus({ isOpen: true, status: option, equivalenceId: equivalence._id });
-                                setOpen(false);
-                              }}>
-                              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                                <div>{translate(option)}</div>
-                                {option === equivalence?.type ? <BsCheck2 /> : null}
-                              </div>
+                        <span data-tip data-for={tooltipStatusId}>
+                          <button
+                            disabled={isCohortFullyArchivedForEquivalence}
+                            className={`flex min-w-[200px] items-center justify-between ${
+                              isCohortFullyArchivedForEquivalence ? "opacity-50 cursor-not-allowed" : "cursor-pointer"
+                            } disabled:cursor-not-allowed disabled:opacity-50`}
+                            onClick={() => !isCohortFullyArchivedForEquivalence && setOpen((e) => !e)}>
+                            <div className="flex items-center gap-2">
+                              <BsCircleFill className={theme[equivalence.status]} />
+                              <span className="text-sm font-normal leading-5">{translate(equivalence?.status)}</span>
                             </div>
-                          ))}
-                        </div>
+                            <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
+                          </button>
+                          {isCohortFullyArchivedForEquivalence && (
+                            <ReactTooltip id={tooltipStatusId} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                              <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltipMessage}</p>
+                            </ReactTooltip>
+                          )}
+                        </span>
+                        {/* display options */}
+                        {!isCohortFullyArchivedForEquivalence && (
+                          <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
+                            {optionsStatus.map((option) => (
+                              <div
+                                key={option}
+                                className={`${option === equivalence?.status && "bg-gray font-bold"}`}
+                                // eslint-disable-next-line react/jsx-no-duplicate-props
+                                onClick={() => {
+                                  setModalStatus({ isOpen: true, status: option, equivalenceId: equivalence._id });
+                                  setOpen(false);
+                                }}>
+                                <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                                  <div>{translate(option)}</div>
+                                  {option === equivalence?.type ? <BsCheck2 /> : null}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     </div>
                     <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
@@ -205,13 +251,24 @@ export default function CardEquivalence({ young, equivalence }) {
                 <div className="mx-16 flex flex-col items-center justify-center gap-2">
                   <SimpleFileIcon />
                   <div className="text-center text-sm font-bold leading-5">
-                    Document justificatif <br /> d’engagement
+                    Document justificatif <br /> d'engagement
                   </div>
                 </div>
                 <div className="flex flex-col items-end justify-end px-7">
-                  <div className="flex cursor-pointer items-center justify-center rounded-full bg-blue-600 p-2 transition duration-150 ease-out hover:scale-110 hover:ease-in">
-                    <Download className=" bg-blue-600 text-indigo-100 " onClick={() => setModalFiles({ isOpen: true })} />
-                  </div>
+                  <span data-tip data-for={tooltipDownloadId}>
+                    <div
+                      className={`flex items-center justify-center rounded-full bg-blue-600 p-2 transition duration-150 ease-out ${
+                        isCohortFullyArchivedForEquivalence ? "opacity-50 cursor-not-allowed" : "cursor-pointer hover:scale-110 hover:ease-in"
+                      }`}
+                      onClick={() => !isCohortFullyArchivedForEquivalence && setModalFiles({ isOpen: true })}>
+                      <Download className="bg-blue-600 text-indigo-100" />
+                    </div>
+                    {isCohortFullyArchivedForEquivalence && (
+                      <ReactTooltip id={tooltipDownloadId} type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
+                        <p className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">{tooltipMessage}</p>
+                      </ReactTooltip>
+                    )}
+                  </span>
                 </div>
               </div>
               <div className="flex flex-col justify-center rounded-lg border-[1px] border-gray-200 py-4 px-8">

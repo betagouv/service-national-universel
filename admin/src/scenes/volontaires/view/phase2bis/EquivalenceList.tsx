@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from "react";
 import CardEquivalence from "../../components/Equivalence";
 import API from "@/services/api";
-import { MissionEquivalenceType, YoungType } from "snu-lib";
+import { MissionEquivalenceType, YoungType, CohortType } from "snu-lib";
 import Loader from "@/components/Loader";
 import { capture } from "@/sentry";
 import { toastr } from "react-redux-toastr";
 
-export default function EquivalenceList({ young }: { young: YoungType }) {
+export default function EquivalenceList({ young, cohort }: { young: YoungType; cohort?: CohortType }) {
   const [loading, setLoading] = useState(false);
   const [equivalences, setEquivalences] = useState<MissionEquivalenceType[]>([]);
 
@@ -32,7 +32,7 @@ export default function EquivalenceList({ young }: { young: YoungType }) {
   return (
     <section id="equivalences">
       {equivalences.map((equivalence) => (
-        <CardEquivalence key={equivalence._id} equivalence={equivalence} young={young} />
+        <CardEquivalence key={equivalence._id} equivalence={equivalence} young={young} cohort={cohort} />
       ))}
     </section>
   );
