@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import useAuth from "@/services/useAuth";
+import usePermissions from "@/hooks/usePermissions";
 import { toastr } from "react-redux-toastr";
 import { useHistory, useParams } from "react-router-dom";
+import ReactTooltip from "react-tooltip";
 import DoubleDayTile from "../../components/DoubleDayTile";
 import Loader from "../../components/Loader";
 import WithTooltip from "../../components/WithTooltip";
@@ -48,6 +50,7 @@ export default function ViewDesktop() {
   const history = useHistory();
 
   const { young } = useAuth();
+  const { canManageApplications } = usePermissions();
   const docRef = useRef();
   let { id } = useParams();
 
@@ -194,7 +197,7 @@ export default function ViewDesktop() {
           </div>
           <div className="mt-3 flex items-center justify-center lg:!mt-0">
             {mission.application ? (
-              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} />
+              <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} canManageApplications={canManageApplications} />
             ) : (
               <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
             )}
@@ -456,7 +459,7 @@ export default function ViewDesktop() {
   );
 }
 
-const ApplicationStatus = ({ mission, updateApplication, loading }) => {
+const ApplicationStatus = ({ mission, updateApplication, loading, canManageApplications }) => {
   const [cancelModal, setCancelModal] = React.useState({ isOpen: false, onConfirm: null });
   const application = mission?.application;
   const tutor = mission?.tutor;
@@ -467,20 +470,29 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
         <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
             {["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(application.status) ? (
-              <button
-                className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
-                disabled={loading}
-                onClick={() =>
-                  setCancelModal({
-                    isOpen: true,
-                    onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
-                    title: "Êtes-vous sûr ?",
-                    message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
-                  })
-                }>
-                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-                <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
-              </button>
+              <>
+                {!canManageApplications && (
+                  <ReactTooltip id="cancel-disabled" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <p className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée.</p>
+                  </ReactTooltip>
+                )}
+                <button
+                  data-tip
+                  data-for="cancel-disabled"
+                  className={`group flex items-center gap-1 ${loading || !canManageApplications ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:scale-105"}`}
+                  disabled={loading || !canManageApplications}
+                  onClick={() =>
+                    setCancelModal({
+                      isOpen: true,
+                      onConfirm: () => updateApplication(APPLICATION_STATUS.CANCEL),
+                      title: "Êtes-vous sûr ?",
+                      message: "Vous vous apprêtez à annuler votre candidature. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                    })
+                  }>
+                  <IoMdInformationCircleOutline className={`h-4 w-4 ${loading || !canManageApplications ? "text-gray-400" : "text-gray-700"}`} />
+                  <div className={`text-xs font-normal leading-none underline ${loading || !canManageApplications ? "text-gray-400" : "text-gray-700"}`}>Annuler cette candidature</div>
+                </button>
+              </>
             ) : null}
             <ApplicationStatusBadge status={application.status} />
           </div>
@@ -505,20 +517,29 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
         <div className="flex flex-col items-center justify-center gap-4 lg:items-end">
           <div className="flex items-center gap-6">
             {["IN_PROGRESS", "VALIDATED"].includes(application.status) ? (
-              <button
-                className={`group flex items-center gap-1 ${loading ? "cursor-wait hover:scale-100" : "cursor-pointer hover:scale-105"}`}
-                disabled={loading}
-                onClick={() =>
-                  setCancelModal({
-                    isOpen: true,
-                    onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
-                    title: "Êtes-vous sûr ?",
-                    message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
-                  })
-                }>
-                <IoMdInformationCircleOutline className={`h-4 w-4 ${loading ? "text-gray-400" : "text-gray-700"}`} />
-                <div className={`text-xs font-normal leading-none underline ${loading ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
-              </button>
+              <>
+                {!canManageApplications && (
+                  <ReactTooltip id="abandon-disabled" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <p className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée.</p>
+                  </ReactTooltip>
+                )}
+                <button
+                  data-tip
+                  data-for="abandon-disabled"
+                  className={`group flex items-center gap-1 ${loading || !canManageApplications ? "cursor-not-allowed opacity-50" : "cursor-pointer hover:scale-105"}`}
+                  disabled={loading || !canManageApplications}
+                  onClick={() =>
+                    setCancelModal({
+                      isOpen: true,
+                      onConfirm: () => updateApplication(APPLICATION_STATUS.ABANDON),
+                      title: "Êtes-vous sûr ?",
+                      message: "Vous vous apprêtez à abandonner cette mission. Cette action est irréversible, souhaitez-vous confirmer cette action ?",
+                    })
+                  }>
+                  <IoMdInformationCircleOutline className={`h-4 w-4 ${loading || !canManageApplications ? "text-gray-400" : "text-gray-700"}`} />
+                  <div className={`text-xs font-normal leading-none underline ${loading || !canManageApplications ? "text-gray-400" : "text-gray-700"}`}>Abandonner la mission</div>
+                </button>
+              </>
             ) : null}
             <ApplicationStatusBadge status={application.status} />
           </div>
@@ -560,9 +581,14 @@ const ApplicationStatus = ({ mission, updateApplication, loading }) => {
         <div className="text-center text-xs font-normal leading-none text-gray-500">
           Cette mission vous a été proposée <br /> par votre référent
         </div>
-        <div className="flex items-center gap-2">
-          <AcceptButton mission={mission} loading={loading} updateApplication={updateApplication} />
-          <DeclineButton loading={loading} updateApplication={updateApplication} />
+        {!canManageApplications && (
+          <ReactTooltip id="accept-decline-disabled" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+            <p className="text-gray-800">Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée.</p>
+          </ReactTooltip>
+        )}
+        <div className="flex items-center gap-2" data-tip data-for={!canManageApplications ? "accept-decline-disabled" : ""}>
+          <AcceptButton mission={mission} loading={loading} updateApplication={updateApplication} disabled={!canManageApplications} />
+          <DeclineButton loading={loading} updateApplication={updateApplication} disabled={!canManageApplications} />
         </div>
         <div className="text-xs font-normal leading-none text-gray-500">Places restantes : {mission.placesLeft}</div>
       </div>

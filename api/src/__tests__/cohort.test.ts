@@ -111,6 +111,21 @@ describe("Cohort", () => {
       expect(new Date(res.body.data.dateStart).toISOString()).toBe(formatDateTimeZone(startDate).toISOString());
       expect(new Date(res.body.data.dateEnd).toISOString()).toBe(setToEndOfDay(endDate).toISOString());
     });
+
+    it("should accept FULLY_ARCHIVED status", async () => {
+      const cohortFixture = getNewCohortFixture();
+      const cohort = await createCohortHelper(cohortFixture);
+      const now = new Date();
+      const tomorrow = new Date(now);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+
+      const res = await request(getAppHelper({ role: ROLES.ADMIN, subRole: "god" }))
+        .put(`/cohort/${cohort._id}/general`)
+        .send({ ...updatedData, status: COHORT_STATUS.FULLY_ARCHIVED, dateStart: now, dateEnd: tomorrow });
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(COHORT_STATUS.FULLY_ARCHIVED);
+    });
   });
 
   describe("PUT /:id/inscriptions", () => {

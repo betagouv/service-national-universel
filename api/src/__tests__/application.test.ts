@@ -527,7 +527,7 @@ describe("Referent regional/departmental creating applications", () => {
 
     const newMission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region as string }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -556,7 +556,7 @@ describe("Referent regional/departmental creating applications", () => {
 
     const newMission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department as string] : [] }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -577,7 +577,7 @@ describe("Referent regional/departmental creating applications", () => {
     );
     const mission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region as string }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -597,7 +597,7 @@ describe("Referent regional/departmental creating applications", () => {
     );
     const mission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region as string }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -618,7 +618,7 @@ describe("Referent regional/departmental creating applications", () => {
     );
     const mission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department as string] : [] }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -646,7 +646,7 @@ describe("Referent regional/departmental creating applications", () => {
 
     const newMission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department] : [] }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: young.department ? [young.department as string] : [] }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -674,7 +674,7 @@ describe("Referent regional/departmental creating applications", () => {
 
     const newMission = await createMissionHelper(getNewMissionFixture());
     const application = getNewApplicationFixture();
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region }));
+    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: young.region as string }));
 
     const res = await request(await getAppHelperWithAcl(referent))
       .post("/application")
@@ -795,5 +795,38 @@ describe("getAuthorizationToApply", () => {
 
     expect(result.canApply).toBe(true);
     expect(result.message).toBe("");
+  });
+
+  it("should return specific message when cohort is FULLY_ARCHIVED", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.FULLY_ARCHIVED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(false);
+    expect(result.message).toContain("Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée");
+  });
+
+  it("should return specific message when cohort is FULLY_ARCHIVED even with mission DONE", async () => {
+    const cohort = await createCohortHelper(getNewCohortFixture({ status: COHORT_STATUS.FULLY_ARCHIVED }));
+    const young = await createYoungHelper({
+      ...getNewYoungFixture(),
+      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
+      phase2ApplicationStatus: [APPLICATION_STATUS.DONE],
+      cohesionStayPresence: "true",
+    });
+    const mission = await createMissionHelper({ ...getNewMissionFixture(), placesLeft: 10 });
+
+    const result = await getAuthorizationToApply(mission, young, cohort);
+
+    expect(result.canApply).toBe(false);
+    expect(result.message).toContain("Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée");
   });
 });

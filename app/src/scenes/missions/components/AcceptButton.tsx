@@ -6,7 +6,7 @@ import { APPLICATION_STATUS, MILITARY_PREPARATION_FILES_STATUS } from "snu-lib";
 import ReactTooltip from "react-tooltip";
 import { BiCheckCircle } from "react-icons/bi";
 
-export default function AcceptButton({ mission, loading, updateApplication }) {
+export default function AcceptButton({ mission, loading, updateApplication, disabled = false }) {
   const { young } = useAuth();
   const { mutate, isPending } = useUpdateMPStatus();
 
@@ -41,7 +41,7 @@ export default function AcceptButton({ mission, loading, updateApplication }) {
         data-tip
         data-for="candidater-pm"
         className="flex gap-2 text-white rounded-lg bg-blue-600 px-4 py-2 transition duration-300 ease-in-out hover:bg-blue-500 disabled:bg-blue-400"
-        disabled={!mission.canApply || loading || isPending}
+        disabled={!mission.canApply || loading || isPending || disabled}
         onClick={handleClick}>
         <BiCheckCircle className="h-5 w-5" />
         <span className="text-sm font-medium leading-5 text-white">Accepter</span>

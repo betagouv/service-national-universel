@@ -5,10 +5,10 @@ import HomeMobile from "./HomeMobile";
 import usePermissions from "@/hooks/usePermissions";
 
 export default function View() {
-  const { canViewMissions } = usePermissions();
+  const { canAccessMilitaryPreparation } = usePermissions();
   const history = useHistory();
 
-  if (!canViewMissions) {
+  if (!canAccessMilitaryPreparation) {
     history.push("/phase2");
     return null;
   }

@@ -151,11 +151,14 @@ export const getAuthorizationToApply = async (mission: MissionType, young: Young
     const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
     const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
     const cohortArchived = cohort.status === COHORT_STATUS.ARCHIVED;
+    const cohortFullyArchived = cohort.status === COHORT_STATUS.FULLY_ARCHIVED;
 
     if (!hasValidatedOrExemptedPhase1) {
       refusalMessages.push("Vous devez avoir validé votre phase 1 pour candidater.");
     } else if (!phase2NotValidated) {
       refusalMessages.push("Votre phase 2 est déjà validée.");
+    } else if (cohortFullyArchived) {
+      refusalMessages.push("Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée.");
     } else if (cohortArchived && !hasCompletedMission) {
       refusalMessages.push("Votre cohorte est archivée. Pour candidater à de nouvelles missions, vous devez d'abord avoir effectué au moins une mission.");
     } else {

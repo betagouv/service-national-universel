@@ -118,12 +118,12 @@ export default function HomePhase2() {
                   </button>
                   <ReactTooltip id="tooltip-delai" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
                     <span className="text-gray-800">
-                      Vous ne pouvez plus postuler à des missions d'engagements car le délai de réalisation est dépassé. Vous pouvez tout de même ajouter un engagement réalisé.
+                      Vous ne pouvez plus postuler à des missions d'engagement car le délai de réalisation est dépassé.
                     </span>
                   </ReactTooltip>
                 </>
               )}
-              {canCreateEquivalences && (
+              {canCreateEquivalences ? (
                 <Link
                   to="/phase2/equivalence"
                   onClick={() => plausibleEvent("Phase2/CTA - Ajouter un engagement")}
@@ -131,6 +131,22 @@ export default function HomePhase2() {
                   <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
                   Ajouter un engagement réalisé
                 </Link>
+              ) : (
+                <>
+                  <button
+                    disabled
+                    data-tip
+                    data-for="tooltip-engagement-realise-home"
+                    className="border bg-gray-300 rounded-md px-3 py-2.5 text-gray-500 cursor-not-allowed text-center">
+                    <HiPlus className="inline-block mr-2 text-xl align-text-bottom" />
+                    Ajouter un engagement réalisé
+                  </button>
+                  <ReactTooltip id="tooltip-engagement-realise-home" className="!rounded-lg bg-white text-gray-800 !opacity-100 shadow-xl max-w-sm" arrowColor="white">
+                    <span className="text-gray-800">
+                      Vous ne pouvez plus ajouter un engagement déjà réalisé car le délai de réalisation est dépassé.
+                    </span>
+                  </ReactTooltip>
+                </>
               )}
             </div>
           </>

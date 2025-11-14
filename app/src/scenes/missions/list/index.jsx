@@ -15,13 +15,18 @@ import usePermissions from "@/hooks/usePermissions";
 
 export default function List() {
   const { young } = useAuth();
-  const { canViewMissions } = usePermissions();
+  const { canViewMissions, canAccessMilitaryPreparation } = usePermissions();
   const history = useHistory();
   const [data, setData] = useState();
   const urlParams = new URLSearchParams(window.location.search);
   const canDoMilitaryPreparation = young?.frenchNationality === "true";
 
   if (!canViewMissions) {
+    history.push("/phase2");
+  }
+
+  const isMilitaryPreparation = urlParams.get("MILITARY_PREPARATION");
+  if (isMilitaryPreparation && !canAccessMilitaryPreparation) {
     history.push("/phase2");
   }
 
