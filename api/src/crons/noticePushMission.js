@@ -2,11 +2,11 @@ const esClient = require("../es");
 const path = require("path");
 
 const { capture } = require("../sentry");
-const { YoungModel } = require("../models");
+const { YoungModel, CohortModel } = require("../models");
 
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge, COHORT_STATUS } = require("snu-lib");
 const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
@@ -18,10 +18,14 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
+    const fullyArchivedCohorts = await CohortModel.find({ status: COHORT_STATUS.FULLY_ARCHIVED }, { name: 1 }).lean();
+    const fullyArchivedCohortNames = fullyArchivedCohorts.map((c) => c.name);
+
     const cursor = YoungModel.find({
       status: "VALIDATED",
       statusPhase1: "DONE",
       statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
+      cohort: { $nin: fullyArchivedCohortNames },
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
