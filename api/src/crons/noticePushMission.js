@@ -6,7 +6,7 @@ const { YoungModel, CohortModel } = require("../models");
 
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge, COHORT_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, translate, formatStringDate, calculateAge, COHORT_STATUS, APPLICATION_STATUS } = require("snu-lib");
 const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
@@ -21,14 +21,25 @@ exports.handler = async () => {
     const fullyArchivedCohorts = await CohortModel.find({ status: COHORT_STATUS.FULLY_ARCHIVED }, { name: 1 }).lean();
     const fullyArchivedCohortNames = fullyArchivedCohorts.map((c) => c.name);
 
+    const archivedCohorts = await CohortModel.find({ status: COHORT_STATUS.ARCHIVED }, { name: 1 }).lean();
+    const archivedCohortNames = archivedCohorts.map((c) => c.name);
+
     const cursor = YoungModel.find({
       status: "VALIDATED",
-      statusPhase1: "DONE",
+      statusPhase1: { $in: ["DONE", "EXEMPTED"] },
       statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
       cohort: { $nin: fullyArchivedCohortNames },
     }).cursor();
     await cursor.eachAsync(async function (young) {
       countTotal++;
+
+      if (archivedCohortNames.includes(young.cohort)) {
+        const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+        if (!hasCompletedMission) {
+          return;
+        }
+      }
+
       const applicationsCount = young?.phase2ApplicationStatus.filter((obj) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(obj)).length;
       if (applicationsCount < 15) {
         const esMissions = await getMissions({ young });
