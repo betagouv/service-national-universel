@@ -18,14 +18,7 @@ exports.handler = async () => {
     let countMissionSent = {};
     let countMissionSentCohort = {};
 
-    const oneYearAgo = new Date();
-    oneYearAgo.setFullYear(oneYearAgo.getFullYear() - 1);
-
-    const cohorts = await CohortModel.find({ dateEnd: { $gte: oneYearAgo } });
-    const cohortsName = cohorts.map((s) => s.name);
-
     const cursor = YoungModel.find({
-      cohort: { $in: cohortsName },
       status: "VALIDATED",
       statusPhase1: "DONE",
       statusPhase2: { $nin: ["VALIDATED", "WITHDRAWN"] },
