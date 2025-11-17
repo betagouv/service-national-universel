@@ -166,7 +166,18 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (!canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const isYoung = isYoungFn(req.user);
+
+    if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(req.user)) {
+      if (isAdmin(req.user)) {
+        const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+        if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      } else {
+        if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
