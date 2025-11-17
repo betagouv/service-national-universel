@@ -9,11 +9,9 @@ import { SentryRoute } from "../../sentry";
 import useDevice from "../../hooks/useDevice";
 
 export default function Index() {
-  const { canViewPhase2 } = usePermissions();
+  const { canViewMissions, canViewMissionDetail } = usePermissions();
   const history = useHistory();
   const device = useDevice();
-
-  if (!canViewPhase2) history.push("/");
 
   const getMissionView = () => {
     if (device === "desktop") return <ViewDesktop />;
@@ -29,10 +27,23 @@ export default function Index() {
           if (!/^[0-9a-fA-F]{24}$/.test(id)) {
             return <Redirect to="/mission" />;
           }
-          return <SentryRoute component={getMissionView} />;
+          if (!canViewMissionDetail) {
+            history.push("/");
+            return null;
+          }
+          return getMissionView();
         }}
       />
-      <SentryRoute path="/mission" component={List} />
+      <SentryRoute 
+        path="/mission" 
+        render={() => {
+          if (!canViewMissions) {
+            history.push("/");
+            return null;
+          }
+          return <List />;
+        }}
+      />
     </Switch>
   );
 }

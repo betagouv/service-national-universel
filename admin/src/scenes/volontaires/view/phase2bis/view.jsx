@@ -34,6 +34,8 @@ export default function Phase2({ young, onChange }) {
   const applicationsToMilitaryPreparation = applications?.filter((e) => e.mission?.isMilitaryPreparation);
 
   const user = useSelector((state) => state.Auth.user);
+  const cohorts = useSelector((state) => state.Cohorts);
+  const cohort = cohorts.find(({ _id, name }) => _id === young?.cohortId || name === young?.cohort);
 
   const [dataPreference, setDataPreference] = React.useState({
     professionnalProject: young?.professionnalProject || "",
@@ -238,7 +240,7 @@ export default function Phase2({ young, onChange }) {
         </div>
 
         <Phase2MilitaryPreparation young={young} applications={applicationsToMilitaryPreparation} />
-        <EquivalenceList young={young} />
+        <EquivalenceList young={young} cohort={cohort} />
 
         <Toolbox young={young} applications={applications} />
         <Box>

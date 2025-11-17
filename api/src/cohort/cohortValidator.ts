@@ -95,7 +95,7 @@ export const validateCohortGeneralDto = (dto: Partial<CohortGeneralFields>): Joi
   return Joi.object<CohortGeneralFields>({
     dateStart: Joi.date().required(),
     dateEnd: Joi.date().required(),
-    status: Joi.string().valid(COHORT_STATUS.ARCHIVED, COHORT_STATUS.PUBLISHED).required(),
+    status: Joi.string().valid(COHORT_STATUS.ARCHIVED, COHORT_STATUS.PUBLISHED, COHORT_STATUS.FULLY_ARCHIVED).required(),
     cohortGroupId: Joi.string().allow(null),
     uselessInformation: Joi.object({
       toolkit: Joi.string().allow(null, "").default(""),
