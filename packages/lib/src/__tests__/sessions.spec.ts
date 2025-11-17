@@ -8,7 +8,6 @@ import {
   canAccessMilitaryPreparation,
   canAdminCreateApplication,
   canReferentCreateApplication,
-  canReferentAccessProposeMissionPage,
   canReferentUpdateApplicationStatus,
   canReferentUpdatePhase2Status,
   canReferentCreateEquivalence,
@@ -214,62 +213,6 @@ describe("canReferentCreateApplication", () => {
     const applications = [];
     const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
     expect(canReferentCreateApplication(young, applications, cohort)).toBe(false);
-  });
-});
-
-describe("canReferentAccessProposeMissionPage", () => {
-  it("devrait retourner false si phase1 DONE, phase2 IN_PROGRESS et cohorte FULLY_ARCHIVED", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
-    } as any;
-    const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(false);
-  });
-
-  it("devrait retourner false si phase1 EXEMPTED, phase2 WAITING_REALISATION et cohorte FULLY_ARCHIVED", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.EXEMPTED,
-      statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
-    } as any;
-    const cohort = { status: COHORT_STATUS.FULLY_ARCHIVED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(false);
-  });
-
-  it("devrait retourner false si phase2 VALIDATED même avec cohorte non archivée", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-    } as any;
-    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(false);
-  });
-
-  it("devrait retourner false si phase1 non validée même avec cohorte non archivée", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.WAITING_AFFECTATION,
-      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
-    } as any;
-    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(false);
-  });
-
-  it("devrait retourner true si phase1 DONE, phase2 IN_PROGRESS et cohorte non archivée", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
-    } as any;
-    const cohort = { status: COHORT_STATUS.PUBLISHED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(true);
-  });
-
-  it("devrait retourner true si phase1 DONE, phase2 IN_PROGRESS et cohorte partiellement archivée (ARCHIVED)", () => {
-    const young = {
-      statusPhase1: YOUNG_STATUS_PHASE1.DONE,
-      statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS,
-    } as any;
-    const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
-    expect(canReferentAccessProposeMissionPage(young, cohort)).toBe(true);
   });
 });
 
