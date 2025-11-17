@@ -7,6 +7,7 @@ import api from "../services/api";
 
 import { translate, translateApplication, APPLICATION_STATUS_COLORS, APPLICATION_STATUS, ROLES, colors, SENDINBLUE_TEMPLATES } from "../utils";
 import { toastr } from "react-redux-toastr";
+import { canReferentUpdateApplicationStatus } from "snu-lib";
 import Chevron from "./Chevron";
 import ModalConfirmWithMessage from "./modals/ModalConfirmWithMessage";
 import ModalConfirm from "./modals/ModalConfirm";
@@ -54,6 +55,7 @@ export default function SelectStatusApplication({ hit, options = [], callback })
   const [modalDone, setModalDone] = useState({ isOpen: false, onConfirm: null });
 
   const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
 
   useEffect(() => {
     (async () => {
@@ -66,7 +68,11 @@ export default function SelectStatusApplication({ hit, options = [], callback })
 
   if (!application) return <i style={{ color: colors.darkPurple }}>Chargement...</i>;
 
-  options = lookUpAuthorizedStatus({ status: application.status, role: user.role });
+  const cohort = cohortList.find((c) => c.name === application.youngCohort);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const canUpdateStatus = user.role === ROLES.ADMIN || (isReferentRegionalOrDepartmental && cohort && canReferentUpdateApplicationStatus(cohort));
+
+  options = canUpdateStatus ? lookUpAuthorizedStatus({ status: application.status, role: user.role }) : [];
 
   const onClickStatus = (status) => {
     setModalConfirm({

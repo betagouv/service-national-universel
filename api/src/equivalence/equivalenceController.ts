@@ -2,10 +2,21 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import mime from "mime-types";
-import { canCreateEquivalences, EQUIVALENCE_STATUS, ERRORS, PHASE2_TOTAL_HOURS, SENDINBLUE_TEMPLATES } from "snu-lib";
+import {
+  canCreateEquivalences,
+  EQUIVALENCE_STATUS,
+  ERRORS,
+  PHASE2_TOTAL_HOURS,
+  SENDINBLUE_TEMPLATES,
+  ROLES,
+  canReferentCreateEquivalence,
+  COHORT_STATUS,
+  isAdmin,
+  YOUNG_STATUS_PHASE1,
+} from "snu-lib";
 import { capture } from "../sentry";
-import { MissionEquivalenceModel, YoungModel } from "../models";
-import { deleteFilesByList, getFile, isYoung as isYoungFn, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
+import { MissionEquivalenceModel, YoungModel, CohortModel } from "../models";
+import { deleteFilesByList, getFile, isYoung as isYoungFn, isReferent, listFiles, updateYoungPhase2StatusAndHours } from "../utils";
 import { UserRequest } from "../controllers/request";
 import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquivalence, notifyYoungEquivalenceSubmitted } from "../application/applicationNotificationService";
 import { decrypt } from "../cryptoUtils";
@@ -95,8 +106,18 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const isYoung = isYoungFn(req.user);
+    const cohort = await CohortModel.findOne({ name: young.cohort });
 
-    if (isYoung && !canCreateEquivalences(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    
+    if (isReferent(req.user)) {
+      if (isAdmin(req.user)) {
+        const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+        if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      } else {
+        if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     const youngId = value.id;
     delete value.id;
@@ -143,7 +164,20 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
     const young = await YoungModel.findById(value.id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canCreateEquivalences(young)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const cohort = await CohortModel.findOne({ name: young.cohort });
+
+    const isYoung = isYoungFn(req.user);
+
+    if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isReferent(req.user)) {
+      if (isAdmin(req.user)) {
+        const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+        if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      } else {
+        if (!canReferentCreateEquivalence(cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 

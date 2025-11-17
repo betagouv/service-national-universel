@@ -1,6 +1,6 @@
 import API from "@/services/api";
 import { toastr } from "react-redux-toastr";
-import { APPLICATION_STATUS, MissionType, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
+import { APPLICATION_STATUS, COHORT_STATUS, MissionType, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
 
 export async function getApplicationsByMissionId(missionId: string) {
   const { ok, data } = await API.get(`/mission/${missionId}/application`);
@@ -33,6 +33,20 @@ export async function createApplication({ mission, young }: { mission: MissionTy
 }
 
 export async function sendNotificationApplicationWasCreated({ mission, young }: { mission: MissionType; young: YoungType }) {
+  const { ok: cohortOk, data: cohort } = await API.get(`/cohort/${young.cohort}`);
+  if (!cohortOk) return toastr.error("Impossible de récupérer les informations de la cohorte", "");
+
+  if (cohort.status === COHORT_STATUS.FULLY_ARCHIVED) {
+    return;
+  }
+
+  if (cohort.status === COHORT_STATUS.ARCHIVED) {
+    const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+    if (!hasCompletedMission) {
+      return;
+    }
+  }
+
   let template = "";
   if (mission.isMilitaryPreparation === "true") {
     template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_PM;

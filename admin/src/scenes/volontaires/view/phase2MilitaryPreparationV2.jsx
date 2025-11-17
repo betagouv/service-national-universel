@@ -1,4 +1,6 @@
 import React, { useState } from "react";
+import { useSelector } from "react-redux";
+import ReactTooltip from "react-tooltip";
 import { toastr } from "react-redux-toastr";
 import { BsCheck2, BsChevronDown, BsCircleFill } from "react-icons/bs";
 import Bell from "../../../assets/icons/Bell";
@@ -10,7 +12,8 @@ import FileCard from "../../../components/FileCard";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import ModalConfirmWithMessage from "../../../components/modals/ModalConfirmWithMessage";
 import api from "../../../services/api";
-import { APPLICATION_STATUS, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
+import { APPLICATION_STATUS, ROLES, SENDINBLUE_TEMPLATES, translate, translateStatusMilitaryPreparationFiles } from "../../../utils";
+import { isCohortFullyArchived } from "snu-lib";
 import ModalFilesPM from "../components/ModalFilesPM";
 import { queryClient } from "@/services/react-query";
 
@@ -21,6 +24,22 @@ export default function Phase2militaryPrepartionV2({ young, applications }) {
   const [cardOpen, setCardOpen] = useState(false);
   const [open, setOpen] = useState(false);
   const ref = React.useRef(null);
+
+  const user = useSelector((state) => state.Auth.user);
+  const cohortList = useSelector((state) => state.Cohorts);
+  const cohort = cohortList.find((c) => c.name === young.cohort);
+  const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
+  const isCohortFullyArchivedForReferent = isReferentRegionalOrDepartmental && cohort ? isCohortFullyArchived(cohort) : false;
+  const tooltipId = `tooltip-military-prep-${young._id}`;
+  const tooltipFilesId = `tooltip-military-prep-files-${young._id}`;
+  const tooltipButtonsId = `tooltip-military-prep-buttons-${young._id}`;
+  const shouldShowTooltip = isCohortFullyArchivedForReferent;
+  const shouldBlockFiles = isCohortFullyArchivedForReferent;
+  const shouldBlockButtons = isCohortFullyArchivedForReferent;
+
+  React.useEffect(() => {
+    ReactTooltip.rebuild();
+  });
 
   function refetch() {
     queryClient.invalidateQueries({ queryKey: ["young", young._id] });
@@ -186,69 +205,96 @@ export default function Phase2militaryPrepartionV2({ young, applications }) {
                 {/* todo: remove WAITING_VALIDATION after sync */}
                 {young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION" ? (
                   <div className="flex items-center gap-5 ">
-                    <button
-                      className="group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400"
-                      onClick={() => handleCorrection()}>
-                      <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
-                      <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
-                    </button>
-                    <button
-                      className="ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400"
-                      onClick={() => handleValidate()}>
-                      <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
-                      <span className="text-sm font-medium leading-5 text-white">Valider</span>
-                    </button>
-                    <button
-                      className="ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400"
-                      onClick={() => handleRefused()}>
-                      <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
-                      <span className="text-sm font-medium leading-5 text-white">Refuser</span>
-                    </button>
+                    <div
+                      className={shouldBlockButtons ? "opacity-50 cursor-not-allowed" : ""}
+                      data-tip=""
+                      data-for={shouldBlockButtons ? tooltipButtonsId : ""}>
+                      <button
+                        className="group flex items-center justify-center rounded-lg px-4 py-2 shadow-ninaButton transition duration-300 ease-in-out hover:bg-indigo-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => handleCorrection()}
+                        disabled={shouldBlockButtons}>
+                        <ExclamationCircle className="mr-2 h-5 w-5 text-indigo-400 group-hover:text-white" />
+                        <span className="text-sm font-medium leading-5 text-gray-700 group-hover:text-white">Demander une correction</span>
+                      </button>
+                    </div>
+                    <div
+                      className={shouldBlockButtons ? "opacity-50 cursor-not-allowed" : ""}
+                      data-tip=""
+                      data-for={shouldBlockButtons ? tooltipButtonsId : ""}>
+                      <button
+                        className="ease-in-ou flex items-center justify-center rounded-lg bg-green-500 px-4 py-2 transition duration-300 hover:bg-green-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => handleValidate()}
+                        disabled={shouldBlockButtons}>
+                        <CheckCircle className="mr-2 h-5 w-5 text-green-500 hover:bg-green-400" />
+                        <span className="text-sm font-medium leading-5 text-white">Valider</span>
+                      </button>
+                    </div>
+                    <div
+                      className={shouldBlockButtons ? "opacity-50 cursor-not-allowed" : ""}
+                      data-tip=""
+                      data-for={shouldBlockButtons ? tooltipButtonsId : ""}>
+                      <button
+                        className="ease-in-ou flex items-center justify-center rounded-lg bg-red-500 px-4 py-2 transition duration-300 hover:bg-red-400 disabled:cursor-not-allowed disabled:opacity-50"
+                        onClick={() => handleRefused()}
+                        disabled={shouldBlockButtons}>
+                        <XCircle className="mr-2 h-5 w-5 text-red-500 hover:bg-red-400" />
+                        <span className="text-sm font-medium leading-5 text-white">Refuser</span>
+                      </button>
+                    </div>
                     <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 ) : (
                   <div className="flex items-center gap-5 ">
-                    <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
-                      <div className="relative" ref={ref}>
-                        <button
-                          className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
-                          onClick={() => setOpen((e) => !e)}>
-                          <div className="flex items-center gap-2">
-                            <BsCircleFill className={theme[young.statusMilitaryPreparationFiles]} />
-                            <span className="text-sm font-normal leading-5">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
-                          </div>
-                          <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
-                        </button>
-                        {/* display options */}
-
-                        <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
-                          {optionsStatus.map((option) => (
-                            <div
-                              key={option}
-                              className={`${option === young.statusMilitaryPreparationFiles && "bg-gray font-bold"}`}
-                              onClick={() => {
-                                switch (option) {
-                                  case "WAITING_CORRECTION":
-                                    handleCorrection();
-                                    break;
-                                  case "REFUSED":
-                                    handleRefused();
-                                    break;
-                                  case "VALIDATED":
-                                    handleValidate();
-                                    break;
-                                }
-                                setOpen(false);
-                              }}>
-                              <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
-                                <div>{translate(option)}</div>
-                                {option === young.statusMilitaryPreparationFiles ? <BsCheck2 /> : null}
-                              </div>
-                            </div>
-                          ))}
+                    {shouldShowTooltip ? (
+                      <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5" data-tip="" data-for={tooltipId}>
+                        <div className="flex min-w-[200px] items-center gap-2">
+                          <BsCircleFill className={theme[young.statusMilitaryPreparationFiles]} />
+                          <span className="text-sm font-normal leading-5">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
                         </div>
                       </div>
-                    </div>
+                    ) : (
+                      <div className="rounded-lg border-[1px] border-gray-300 px-3 py-2.5">
+                        <div className="relative" ref={ref}>
+                          <button
+                            className="flex min-w-[200px] cursor-pointer items-center justify-between disabled:cursor-wait disabled:opacity-50"
+                            onClick={() => setOpen((e) => !e)}>
+                            <div className="flex items-center gap-2">
+                              <BsCircleFill className={theme[young.statusMilitaryPreparationFiles]} />
+                              <span className="text-sm font-normal leading-5">{translateStatusMilitaryPreparationFiles(young.statusMilitaryPreparationFiles)}</span>
+                            </div>
+                            <ChevronDown className="ml-2 cursor-pointer text-gray-400" />
+                          </button>
+                          {/* display options */}
+
+                          <div className={`${open ? "block" : "hidden"}  absolute left-0 top-[35px] z-50 min-w-full overflow-hidden rounded-lg bg-white shadow transition`}>
+                            {optionsStatus.map((option) => (
+                              <div
+                                key={option}
+                                className={`${option === young.statusMilitaryPreparationFiles && "bg-gray font-bold"}`}
+                                onClick={() => {
+                                  switch (option) {
+                                    case "WAITING_CORRECTION":
+                                      handleCorrection();
+                                      break;
+                                    case "REFUSED":
+                                      handleRefused();
+                                      break;
+                                    case "VALIDATED":
+                                      handleValidate();
+                                      break;
+                                  }
+                                  setOpen(false);
+                                }}>
+                                <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-sm leading-5 hover:bg-gray-50">
+                                  <div>{translate(option)}</div>
+                                  {option === young.statusMilitaryPreparationFiles ? <BsCheck2 /> : null}
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    )}
                     <BsChevronDown className="h-5 w-5 rotate-180 cursor-pointer text-gray-400" onClick={() => setCardOpen(false)} />
                   </div>
                 )}
@@ -258,64 +304,95 @@ export default function Phase2militaryPrepartionV2({ young, applications }) {
         </div>
         {cardOpen ? (
           <>
-            <hr className="text-gray-200" />
-            <div className="my-4 flex w-full flex-row flex-wrap justify-between gap-4 lg:!flex-nowrap">
-              <FileCard
-                name="Pièce d’identité"
-                icon="reglement"
-                filled={young.files?.militaryPreparationFilesIdentity.length}
-                onClick={() =>
-                  setModalFiles({
-                    isOpen: true,
-                    title: "Pièce d'identité",
-                    nameFiles: "militaryPreparationFilesIdentity",
-                  })
-                }
-              />
-              <FileCard
-                name="Autorisation parentale"
-                icon="image"
-                filled={young.files?.militaryPreparationFilesAuthorization.length}
-                onClick={() =>
-                  setModalFiles({
-                    isOpen: true,
-                    title: "Autorisation parentale",
-                    nameFiles: "militaryPreparationFilesAuthorization",
-                    initialValues: young.files?.militaryPreparationFilesAuthorization,
-                  })
-                }
-              />
-              <FileCard
-                name="Certificat médical de non contre-indication..."
-                icon="autotest"
-                filled={young.files?.militaryPreparationFilesCertificate.length}
-                onClick={() =>
-                  setModalFiles({
-                    isOpen: true,
-                    title: "Certificat médical de non contre-indication...",
-                    nameFiles: "militaryPreparationFilesCertificate",
-                    initialValues: young.files?.militaryPreparationFilesCertificate,
-                  })
-                }
-              />
-              <FileCard
-                name="Attestation de recensement"
-                icon="sanitaire"
-                filled={young.files?.militaryPreparationFilesCensus.length}
-                description="Facultatif"
-                onClick={() =>
-                  setModalFiles({
-                    isOpen: true,
-                    title: "Attestation de recensement",
-                    nameFiles: "militaryPreparationFilesCensus",
-                    initialValues: young.files?.militaryPreparationFilesCensus,
-                  })
-                }
-              />
-            </div>
+              <hr className="text-gray-200" />
+              <div className="my-4 flex w-full flex-row flex-wrap justify-between gap-4 lg:!flex-nowrap">
+                <div className={shouldBlockFiles ? "opacity-50 cursor-not-allowed" : ""} data-tip="" data-for={shouldBlockFiles ? tooltipFilesId : ""}>
+                  <FileCard
+                    name="Pièce d'identité"
+                    icon="reglement"
+                    filled={young.files?.militaryPreparationFilesIdentity.length}
+                    onClick={() => {
+                      if (!shouldBlockFiles) {
+                        setModalFiles({
+                          isOpen: true,
+                          title: "Pièce d'identité",
+                          nameFiles: "militaryPreparationFilesIdentity",
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <div className={shouldBlockFiles ? "opacity-50 cursor-not-allowed" : ""} data-tip="" data-for={shouldBlockFiles ? tooltipFilesId : ""}>
+                  <FileCard
+                    name="Autorisation parentale"
+                    icon="image"
+                    filled={young.files?.militaryPreparationFilesAuthorization.length}
+                    onClick={() => {
+                      if (!shouldBlockFiles) {
+                        setModalFiles({
+                          isOpen: true,
+                          title: "Autorisation parentale",
+                          nameFiles: "militaryPreparationFilesAuthorization",
+                          initialValues: young.files?.militaryPreparationFilesAuthorization,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <div className={shouldBlockFiles ? "opacity-50 cursor-not-allowed" : ""} data-tip="" data-for={shouldBlockFiles ? tooltipFilesId : ""}>
+                  <FileCard
+                    name="Certificat médical de non contre-indication..."
+                    icon="autotest"
+                    filled={young.files?.militaryPreparationFilesCertificate.length}
+                    onClick={() => {
+                      if (!shouldBlockFiles) {
+                        setModalFiles({
+                          isOpen: true,
+                          title: "Certificat médical de non contre-indication...",
+                          nameFiles: "militaryPreparationFilesCertificate",
+                          initialValues: young.files?.militaryPreparationFilesCertificate,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+                <div className={shouldBlockFiles ? "opacity-50 cursor-not-allowed" : ""} data-tip="" data-for={shouldBlockFiles ? tooltipFilesId : ""}>
+                  <FileCard
+                    name="Attestation de recensement"
+                    icon="sanitaire"
+                    filled={young.files?.militaryPreparationFilesCensus.length}
+                    description="Facultatif"
+                    onClick={() => {
+                      if (!shouldBlockFiles) {
+                        setModalFiles({
+                          isOpen: true,
+                          title: "Attestation de recensement",
+                          nameFiles: "militaryPreparationFilesCensus",
+                          initialValues: young.files?.militaryPreparationFilesCensus,
+                        });
+                      }
+                    }}
+                  />
+                </div>
+              </div>
           </>
         ) : null}
       </div>
+      {shouldShowTooltip ? (
+        <ReactTooltip id={tooltipId} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+          <div className="text-[black]">Vous ne pouvez plus effectuer cette action. La cohorte du jeune est archivée.</div>
+        </ReactTooltip>
+      ) : null}
+      {shouldBlockFiles ? (
+        <ReactTooltip id={tooltipFilesId} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+          <div className="text-[black]">Vous ne pouvez plus effectuer cette action. La cohorte du jeune est archivée.</div>
+        </ReactTooltip>
+      ) : null}
+      {shouldBlockButtons ? (
+        <ReactTooltip id={tooltipButtonsId} className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
+          <div className="text-[black]">Vous ne pouvez plus effectuer cette action. La cohorte du jeune est archivée.</div>
+        </ReactTooltip>
+      ) : null}
     </>
   );
 }

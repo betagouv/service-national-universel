@@ -1,7 +1,7 @@
 import { capture } from "../sentry";
 import slack from "../slack";
-import { ApplicationModel, StructureModel, YoungModel } from "../models";
-import { SENDINBLUE_TEMPLATES, APPLICATION_STATUS } from "snu-lib";
+import { ApplicationModel, CohortModel, StructureModel, YoungModel } from "../models";
+import { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, COHORT_STATUS } from "snu-lib";
 import { config } from "../config";
 import { sendTemplate } from "../brevo";
 import { getCcOfYoung } from "../utils";
@@ -36,10 +36,25 @@ const notify1Week = async () => {
   await cursor.eachAsync(async function (application) {
     total++;
     if (diffDays(application.createdAt, now) === 7) {
-      notice1week++;
       const structure = await StructureModel.findById(application.structureId);
       const young = await YoungModel.findById(application.youngId);
       if (!young || !structure) throw new Error("Young or structure not found for application");
+
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      if (!cohort) return;
+
+      if (cohort.status === COHORT_STATUS.FULLY_ARCHIVED) {
+        return;
+      }
+
+      if (cohort.status === COHORT_STATUS.ARCHIVED) {
+        const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+        if (!hasCompletedMission) {
+          return;
+        }
+      }
+
+      notice1week++;
       let emailTemplate = "";
       if (structure.isMilitaryPreparation === "true") {
         emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_1_WEEK_NOTICE_PM;
@@ -69,12 +84,27 @@ const notify13Days = async () => {
   await cursor.eachAsync(async function (application) {
     total++;
     if (diffDays(application.createdAt, now) === 13) {
-      notice13Days++;
       const structure = await StructureModel.findById(application.structureId);
       const young = await YoungModel.findById(application.youngId);
       if (!young || !structure) {
         throw new Error("Young or structure not found for application");
       }
+
+      const cohort = await CohortModel.findOne({ name: young.cohort });
+      if (!cohort) return;
+
+      if (cohort.status === COHORT_STATUS.FULLY_ARCHIVED) {
+        return;
+      }
+
+      if (cohort.status === COHORT_STATUS.ARCHIVED) {
+        const hasCompletedMission = young.phase2ApplicationStatus?.some((status) => status === APPLICATION_STATUS.DONE);
+        if (!hasCompletedMission) {
+          return;
+        }
+      }
+
+      notice13Days++;
       let emailTemplate = "";
       if (structure.isMilitaryPreparation === "true") {
         emailTemplate = SENDINBLUE_TEMPLATES.young.APPLICATION_CANCEL_13_DAY_NOTICE_PM;

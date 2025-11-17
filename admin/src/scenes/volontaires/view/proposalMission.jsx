@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES, isCohortFullyArchived } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";
@@ -122,11 +122,15 @@ export default function ProposeMission({ young, onSend }) {
           </>
         ) : (
           <p className="text-center ">
-            {user.role === ROLES.ADMIN
-              ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-              : isRegionalOrDepartmental
-                ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
-                : "Ce volontaire n'est pas éligible à la phase 2."}
+            {(() => {
+              if (isRegionalOrDepartmental && isCohortFullyArchived(cohort)) {
+                return "Vous ne pouvez plus effectuer cette action. La cohorte du jeune est archivée.";
+              }
+              if (user.role === ROLES.ADMIN || isRegionalOrDepartmental) {
+                return "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée.";
+              }
+              return "Ce volontaire n'est pas éligible à la phase 2.";
+            })()}
           </p>
         )}
       </div>

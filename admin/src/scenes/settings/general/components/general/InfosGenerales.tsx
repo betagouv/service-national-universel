@@ -62,6 +62,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
     { value: COHORT_STATUS.ARCHIVED, label: "Archivée partiellement" },
+    { value: COHORT_STATUS.FULLY_ARCHIVED, label: "Archivée totalement" },
   ];
 
   return (
@@ -97,10 +98,13 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                         <ReactTooltip id="statut" type="light" place="top" effect="solid" className="custom-tooltip-radius !opacity-100 !shadow-md">
                           <ul className="w-[275px] list-outside !px-2 !py-1.5 text-left text-xs text-gray-600">
                             <li>
-                              Si la cohorte est <strong>publiée</strong>, les volontaires peuvent s’inscrire si l'inscription est ouverte (voir cadre ci-dessous).
+                              Si la cohorte est <strong>publiée</strong>, les volontaires peuvent s'inscrire si l'inscription est ouverte (voir cadre ci-dessous).
                             </li>
                             <li className="mt-2">
-                              Si elle est <strong>archivée</strong>, ils ne peuvent plus poursuivre la phase engagement.
+                              Si elle est <strong>archivée partiellement</strong>, ils peuvent poursuivre la phase engagement sous certaines conditions.
+                            </li>
+                            <li className="mt-2">
+                              Si elle est <strong>archivée totalement</strong>, les jeunes ne peuvent plus candidater, ajouter des engagements réalisés, ni gérer leurs candidatures. Les référents ne peuvent plus proposer de missions ni créer de missions personnalisées.
                             </li>
                           </ul>
                         </ReactTooltip>
