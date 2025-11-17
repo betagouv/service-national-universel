@@ -31,7 +31,7 @@ export default function Index() {
             history.push("/");
             return null;
           }
-          return <SentryRoute component={getMissionView} />;
+          return getMissionView();
         }}
       />
       <SentryRoute 
