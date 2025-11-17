@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, canReferentAccessProposeMissionPage, ROLES } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";
@@ -30,7 +30,7 @@ export default function ProposeMission({ young, onSend }) {
   const canProposeMission = user.role === ROLES.ADMIN 
     ? canAdminCreateApplication(young) 
     : isRegionalOrDepartmental
-      ? canReferentCreateApplication(young, applications, cohort)
+      ? canReferentAccessProposeMissionPage(young, cohort)
       : canCreateApplications(young, cohort);
 
   useEffect(() => {
@@ -125,7 +125,7 @@ export default function ProposeMission({ young, onSend }) {
             {user.role === ROLES.ADMIN
               ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
               : isRegionalOrDepartmental
-                ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
+                ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
                 : "Ce volontaire n'est pas éligible à la phase 2."}
           </p>
         )}

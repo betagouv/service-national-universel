@@ -3,7 +3,7 @@ import { useSelector } from "react-redux";
 import { useHistory } from "react-router-dom";
 import ReactTooltip from "react-tooltip";
 import { HiOutlineSearch, HiOutlineAdjustments } from "react-icons/hi";
-import { canUserCreateApplication, canUserCreateEquivalence, ROLES, isCohortFullyArchived } from "snu-lib";
+import { canUserCreateApplication, canUserCreateEquivalence, canReferentAccessProposeMissionPage, ROLES, isCohortFullyArchived } from "snu-lib";
 import Hammer from "../../../assets/icons/Hammer";
 import Screwdriver from "../../../assets/icons/Screwdriver";
 import AdjustableWrench from "../../../assets/icons/AdjustableWrench";
@@ -19,7 +19,9 @@ export default function Toolbox({ young, applications = [] }) {
   const isCohortFullyArchivedForReferent = isRegionalOrDepartmental && isCohortFullyArchived(cohort);
   
   const canCreateCustomMission = canUserCreateApplication(young, cohort, user.role, applications);
-  const canProposeExistingMission = canUserCreateApplication(young, cohort, user.role, applications);
+  const canProposeExistingMission = isRegionalOrDepartmental
+    ? canReferentAccessProposeMissionPage(young, cohort)
+    : canUserCreateApplication(young, cohort, user.role, applications);
   const canCreateEquivalence = canUserCreateEquivalence(young, cohort, user.role);
 
   return (
@@ -57,13 +59,11 @@ export default function Toolbox({ young, applications = [] }) {
           {!canProposeExistingMission ? (
             <ReactTooltip id="tooltip-custom" className="bg-white text-black !opacity-100 shadow-xl" arrowColor="white" disable={false}>
               <div className="text-[black]">
-                {isCohortFullyArchivedForReferent
-                  ? "Vous ne pouvez plus effectuer cette action. La cohorte du jeune est archivée."
-                  : user.role === ROLES.ADMIN
+                {user.role === ROLES.ADMIN
+                  ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
+                  : isRegionalOrDepartmental
                     ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, et sa phase 2 ne doit pas être validée."
-                    : isRegionalOrDepartmental
-                      ? "Le jeune doit avoir validé ou être dispensé de sa phase 1, sa phase 2 ne doit pas être validée, et avoir au moins une mission effectuée."
-                      : "Le jeune n'est pas éligible à la phase 2"}
+                    : "Le jeune n'est pas éligible à la phase 2"}
               </div>
             </ReactTooltip>
           ) : null}

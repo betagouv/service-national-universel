@@ -1287,6 +1287,23 @@ function canReferentCreateApplication(young: YoungType, applications: any[], coh
   return cohortNotArchived || hasCompletedMission;
 }
 
+// Les référents régionaux/départementaux peuvent accéder à la page de proposition de mission
+// Conditions : phase1 validée/dispensée + phase2 non validée + cohorte non totπ∏alement archivée
+function canReferentAccessProposeMissionPage(young: YoungType, cohort?: CohortType) {
+  const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
+  const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
+  
+  if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
+    return false;
+  }
+  
+  if (isCohortFullyArchived(cohort)) {
+    return false;
+  }
+  
+  return true;
+}
+
 function canReferentUpdateApplicationStatus(cohort?: CohortType) {
   return !isCohortFullyArchived(cohort);
 }
@@ -1476,6 +1493,7 @@ export {
   canModifyDirectionCenterTeam,
   canAdminCreateApplication,
   canReferentCreateApplication,
+  canReferentAccessProposeMissionPage,
   canReferentUpdateApplicationStatus,
   canReferentUpdatePhase2Status,
   canReferentCreateEquivalence,
