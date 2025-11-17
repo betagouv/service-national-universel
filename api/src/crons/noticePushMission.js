@@ -2,7 +2,7 @@ const esClient = require("../es");
 const path = require("path");
 
 const { capture } = require("../sentry");
-const { YoungModel, CohortModel } = require("../models");
+const { YoungModel } = require("../models");
 
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
