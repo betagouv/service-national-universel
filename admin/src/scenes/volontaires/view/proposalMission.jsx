@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Link } from "react-router-dom";
-import { canCreateApplications, canAdminCreateApplication, canReferentAccessProposeMissionPage, ROLES, isCohortFullyArchived } from "snu-lib";
+import { canCreateApplications, canAdminCreateApplication, canReferentCreateApplication, ROLES, isCohortFullyArchived } from "snu-lib";
 import { ResultTable } from "../../../components/filters-system-v2";
 import { buildQuery } from "../../../components/filters-system-v2/components/filters/utils";
 import { capture } from "../../../sentry";

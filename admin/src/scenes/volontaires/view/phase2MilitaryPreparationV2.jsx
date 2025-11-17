@@ -33,9 +33,9 @@ export default function Phase2militaryPrepartionV2({ young, applications }) {
   const tooltipId = `tooltip-military-prep-${young._id}`;
   const tooltipFilesId = `tooltip-military-prep-files-${young._id}`;
   const tooltipButtonsId = `tooltip-military-prep-buttons-${young._id}`;
-  const shouldShowTooltip = ["REFUSED", "VALIDATED"].includes(young.statusMilitaryPreparationFiles) && isCohortFullyArchivedForReferent;
-  const shouldBlockFiles = isCohortFullyArchivedForReferent && young.statusMilitaryPreparationFiles !== "WAITING_CORRECTION";
-  const shouldBlockButtons = young.statusMilitaryPreparationFiles === "WAITING_VERIFICATION" && isCohortFullyArchivedForReferent;
+  const shouldShowTooltip = isCohortFullyArchivedForReferent;
+  const shouldBlockFiles = isCohortFullyArchivedForReferent;
+  const shouldBlockButtons = isCohortFullyArchivedForReferent;
 
   React.useEffect(() => {
     ReactTooltip.rebuild();
