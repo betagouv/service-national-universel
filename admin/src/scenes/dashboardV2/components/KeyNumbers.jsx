@@ -17,7 +17,7 @@ export default function KeyNumbers({ role }) {
   const [open, setOpen] = useState(false);
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const [phase, setPhase] = useState("all");
+  const [phase, setPhase] = useState("engagement");
   const [notes, setNotes] = useState(null);
 
   useEffect(() => {

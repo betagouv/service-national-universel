@@ -19,7 +19,8 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/dashboard/sejour" component={Sejour} />
+      {/* DÉCOMMISSIONNEMENT: Vue séjour complètement désactivée */}
+      {/* <SentryRoute path="/dashboard/sejour" component={Sejour} /> */}
       <SentryRoute path="/dashboard" component={General} />
     </Switch>
   );
