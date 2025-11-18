@@ -65,11 +65,7 @@ export default function Phase1(props) {
 
         <Details young={young} setYoung={setYoung} cohesionCenter={cohesionCenter} cohort={cohort} user={user} />
 
-        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
-        young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
-        young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
-          <DocumentPhase1 young={young} />
-        ) : null}
+        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED}
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}
