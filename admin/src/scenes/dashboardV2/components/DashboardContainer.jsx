@@ -8,10 +8,12 @@ export default function DashboardContainer({ active = "general", availableTab, n
       <div className="border-bottom flex items-center justify-between">
         <div className="justify-left flex items-center gap-1">
           {availableTab.includes("general") && <TabItem id="general" active={active} label="Vue générale" route={"/dashboard"} icon={HiOutlineEye} />}
-          {availableTab.includes("inscription") && (
+          {/* DÉCOMMISSIONNEMENT: Vue inscription complètement désactivée */}
+          {/* {availableTab.includes("inscription") && (
             <TabItem id="inscription" active={active} label="Inscriptions" route={"/dashboard/inscription"} icon={HiOutlineClipboardCheck} />
-          )}
-          {availableTab.includes("sejour") && <TabItem id="sejour" active={active} label="Séjour" route={"/dashboard/sejour"} icon={HiOutlineOfficeBuilding} />}
+          )} */}
+          {/* DÉCOMMISSIONNEMENT: Vue séjour complètement désactivée */}
+          {/* {availableTab.includes("sejour") && <TabItem id="sejour" active={active} label="Séjour" route={"/dashboard/sejour"} icon={HiOutlineOfficeBuilding} />} */}
           {availableTab.includes("engagement") && <TabItem id="engagement" active={active} label="Engagement" route={"/dashboard/engagement"} icon={HiOutlineHand} />}
           {availableTab.includes("analytics") && <TabItem id="analytics" active={active} label="Analytics" route={"/dashboard/analytics"} />}
         </div>
