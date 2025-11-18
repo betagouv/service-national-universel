@@ -8,18 +8,7 @@ import dayjs from "dayjs";
 import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import {
-  canInviteYoung,
-  getDepartmentNumber,
-  isSuperAdmin,
-  translateCniExpired,
-  translateYoungSource,
-  FeatureFlagName,
-  PERMISSION_RESOURCES,
-  isCreateAuthorized,
-  UserDto,
-  YoungDto,
-} from "snu-lib";
+import { getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, UserDto, YoungDto } from "snu-lib";
 
 import { Button } from "@snu/ds/admin";
 
@@ -248,11 +237,6 @@ export default function Inscription(): JSX.Element {
   const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
-  let baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
-  if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
-    baseInscriptionPath = `/classes/${selectedClassId}/inscription-manuelle`;
-  }
-  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.YOUNG, ignorePolicy: true });
 
   if (isLabelsPending) return <Loader />;
 
