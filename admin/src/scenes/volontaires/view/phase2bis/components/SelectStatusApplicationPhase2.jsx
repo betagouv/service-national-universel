@@ -57,7 +57,8 @@ export const SelectStatusApplicationPhase2 = ({ hit, options = [], callback, dro
 
   const cohort = cohortList.find((c) => c.name === hit.youngCohort);
   const isReferentRegionalOrDepartmental = [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role);
-  const canUpdateStatus = user.role === ROLES.ADMIN || (isReferentRegionalOrDepartmental && cohort && canReferentUpdateApplicationStatus(cohort));
+  const isResponsibleOrSupervisor = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role);
+  const canUpdateStatus = user.role === ROLES.ADMIN || (isReferentRegionalOrDepartmental && cohort && canReferentUpdateApplicationStatus(cohort)) || isResponsibleOrSupervisor;
 
   options = canUpdateStatus ? lookUpAuthorizedStatus({ status: hit.status, role: user.role }) : [];
 
