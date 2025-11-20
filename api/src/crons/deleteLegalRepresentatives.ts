@@ -91,14 +91,22 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
     }
   }
 };
-
-const deleteRLFieldsFromYoung = (young: any): void => {
+async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> {
   const parentFields = getParentFields();
+  const unsetFields: any = {};
   parentFields.forEach((field) => {
-    delete young[field];
-    young.markModified(field);
+    unsetFields[field] = 1;
   });
-};
+  
+  await YoungModel.updateOne(
+    { _id: young._id },
+    {
+      $unset: unsetFields,
+      $set: { rlDeleted: true },
+    },
+    { session }
+  );
+}
 
 const processYoung = async (young: any): Promise<boolean> => {
   try {
@@ -120,21 +128,7 @@ const processYoung = async (young: any): Promise<boolean> => {
       await withTransaction(session, async () => {
         await archiveLegalRepresentatives(young, session);
         await cleanPatches(young, session);
-        
-        const parentFields = getParentFields();
-        const unsetFields: any = {};
-        parentFields.forEach((field) => {
-          unsetFields[field] = 1;
-        });
-        
-        await YoungModel.updateOne(
-          { _id: young._id },
-          {
-            $unset: unsetFields,
-            $set: { rlDeleted: true },
-          },
-          { session }
-        );
+        await deleteRLFieldsFromYoung(young, session);
       });
 
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
@@ -238,11 +232,6 @@ export const handler = async (): Promise<void> => {
   }
 };
 
-function setRlDeletedField(young: any) {
-  young.rlDeleted = true;
-  young.markModified("rlDeleted");
-}
-
 // Initialiser MongoDB avant d'exécuter le handler si le fichier est exécuté directement
 if (require.main === module) {
   (async () => {
@@ -257,4 +246,4 @@ if (require.main === module) {
   })();
 }
 
-
+export default handler;
