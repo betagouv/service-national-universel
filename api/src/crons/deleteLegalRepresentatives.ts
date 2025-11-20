@@ -127,21 +127,11 @@ const processYoung = async (young: any): Promise<boolean> => {
           unsetFields[field] = 1;
         });
         
-        const historicEntry = {
-          userName: "Système",
-          userId: undefined,
-          phase: young.phase,
-          status: young.status,
-          note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
-          createdAt: new Date(),
-        };
-        
         await YoungModel.updateOne(
           { _id: young._id },
           {
             $unset: unsetFields,
             $set: { rlDeleted: true },
-            $push: { historic: historicEntry },
           },
           { session }
         );

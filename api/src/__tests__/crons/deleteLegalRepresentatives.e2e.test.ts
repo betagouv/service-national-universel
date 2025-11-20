@@ -237,32 +237,6 @@ describe("deleteLegalRepresentatives E2E", () => {
       expect(updatedYoung?.parent2AllowSNU).toBeUndefined();
     });
 
-    it("should add entry to historic", async () => {
-      const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
-
-      const young = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Février 2020",
-          phase: "CONTINUE",
-          status: "VALIDATED",
-        }),
-      );
-
-      await handler();
-
-      const updatedYoung = await YoungModel.findById(young._id);
-      const historicEntry = updatedYoung?.historic?.find(
-        (h: any) => h.note === "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
-      );
-
-      expect(historicEntry).toBeDefined();
-      expect(historicEntry?.userName).toBe("Système");
-      expect(historicEntry?.userId).toBeUndefined();
-      expect(historicEntry?.phase).toBe("CONTINUE");
-      expect(historicEntry?.status).toBe("VALIDATED");
-      expect(historicEntry?.createdAt).toBeInstanceOf(Date);
-    });
   });
 
   describe("Test 3: Vérification complète des archives", () => {
