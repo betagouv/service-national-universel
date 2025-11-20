@@ -9,6 +9,12 @@ jest.mock("../../brevo", () => ({
   deleteContact: jest.fn().mockResolvedValue(undefined),
 }));
 
+jest.mock("../../rateLimiters", () => ({
+  rateLimiterDeleteContactSIB: {
+    call: jest.fn((fn) => fn()),
+  },
+}));
+
 const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
 const buildBirthdateForAge = (years: number, daysOffset: number = 0): Date => {

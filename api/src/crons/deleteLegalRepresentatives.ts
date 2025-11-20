@@ -3,7 +3,6 @@ import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
 import { startSession, withTransaction, endSession, getDb, initDB } from "../mongo";
-import { rateLimiterDeleteContactSIB } from "../rateLimiters";
 
 const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
@@ -76,7 +75,7 @@ const cleanPatches = async (young: any, session: any): Promise<void> => {
 const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, parent2Email: string | undefined, youngId: string): Promise<void> => {
   if (parent1Email) {
     try {
-      await rateLimiterDeleteContactSIB.call(() => deleteContact(parent1Email));
+      await deleteContact(parent1Email);
     } catch (e: any) {
       capture(e, { extra: { email: parent1Email, youngId } });
       logger.warn(`Error deleting parent1Email ${parent1Email} from Brevo: ${e.message}`);
@@ -85,9 +84,10 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 
   if (parent2Email) {
     try {
-      await rateLimiterDeleteContactSIB.call(() => deleteContact(parent2Email));
+      await deleteContact(parent2Email);
     } catch (e: any) {
-      capture(e, { extra: { email: parent2Email, youngId } });
+      capture(e, { extra:
+         { email: parent2Email, youngId } });
       logger.warn(`Error deleting parent2Email ${parent2Email} from Brevo: ${e.message}`);
     }
   }
