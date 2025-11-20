@@ -132,7 +132,7 @@ const processYoung = async (young: any): Promise<boolean> => {
           note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
           createdAt: new Date(),
         });
-        logger.debug(`Before save: RL_deleted = ${young.RL_deleted}`);
+        logger.debug(`Before save: RL_deleted = ${young.rlDeleted}`);
         await young.save({ session, fromUser });
         logger.debug(`After save: RL_deleted = ${young.RL_deleted}`);
       });
