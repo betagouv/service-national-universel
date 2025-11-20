@@ -5,6 +5,7 @@ import { logger } from "../logger";
 import { startSession, withTransaction, endSession, getDb, initDB } from "../mongo";
 import { config } from "../config";
 import { timeout } from "../utils";
+const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
 const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
   if (!birthdateAt) return false;
@@ -105,9 +106,7 @@ const MONGODB_TRANSACTION_TIMEOUT_MS = 30000;
 
 const processYoung = async (young: any): Promise<boolean> => {
   try {
-    //if (!isJPlus1Birthday(young.birthdateAt)) {
-    //  return false;
-    //}
+    if (!isJPlus1Birthday(young.birthdateAt)) { return false; }
 
     if (young.RL_deleted === true) {
       logger.debug(`Young ${young._id} already has RL_deleted = true, skipping`);
@@ -124,9 +123,21 @@ const processYoung = async (young: any): Promise<boolean> => {
 
       await timeout(
         withTransaction(session, async () => {
+          await archiveLegalRepresentatives(young, session);
           deleteRLFieldsFromYoung(young);
           await cleanPatches(young, session);
           young.set({ RL_deleted: true });
+          if (!Array.isArray(young.historic)) {
+            young.historic = [];
+          }
+          young.historic.push({
+            userName: "Système",
+            userId: undefined,
+            phase: young.phase,
+            status: young.status,
+            note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
+            createdAt: new Date(),
+          });
           await young.save({ session, fromUser });
         }),
         MONGODB_TRANSACTION_TIMEOUT_MS,
@@ -161,7 +172,7 @@ const buildQuery = (yesterdayEnd: Date) => {
   const targetYears = ["2020", "2021", "2022", "2023"];
   const cohortRegex = new RegExp(`(${targetYears.join("|")})`);
   const eighteenYearsAgoEnd = new Date(yesterdayEnd);
-  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 15);
+  eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
   return {
     cohort: { $regex: cohortRegex },
     RL_deleted: { $ne: true },
@@ -204,7 +215,7 @@ const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; err
     if (i + CONCURRENT_BATCH_SIZE < youngs.length) {
       logger.debug(`Processed ${i + CONCURRENT_BATCH_SIZE}/${youngs.length} youngs`);
     }
-  } 
+  }
 
   return { processed: totalProcessed, errors: totalErrors };
 };
@@ -259,6 +270,32 @@ const releaseLock = async (): Promise<void> => {
       },
     },
   );
+};
+
+const archiveLegalRepresentatives = async (young: any, session: any): Promise<void> => {
+  const docs: any[] = [];
+  for (let i = 1; i <= 2; i++) {
+    const firstName = young[`parent${i}FirstName`];
+    const lastName = young[`parent${i}LastName`];
+    const allowImageRights = young[`parent${i}AllowImageRights`];
+    const allowSNU = young[`parent${i}AllowSNU`];
+    if (firstName !== undefined || lastName !== undefined) {
+      docs.push({
+        youngId: young._id,
+        parentIndex: i,
+        firstName,
+        lastName,
+        allowImageRights,
+        allowSNU,
+        archivedAt: new Date(),
+      });
+    }
+  }
+  if (docs.length > 0) {
+    const db = getDb();
+    const collection = db.collection(LEGAL_REP_ARCHIVE_COLLECTION);
+    await collection.insertMany(docs, { session });
+  }
 };
 
 export const handler = async (): Promise<void> => {
