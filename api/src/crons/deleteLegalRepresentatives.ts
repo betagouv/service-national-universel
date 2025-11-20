@@ -102,7 +102,6 @@ async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> 
     { _id: young._id },
     {
       $unset: unsetFields,
-      $set: { rlDeleted: true },
     },
     { session }
   );
@@ -124,13 +123,14 @@ const processYoung = async (young: any): Promise<boolean> => {
 
     try {
       const fromUser = { firstName: "Cron deleteLegalRepresentatives" };
-
       await withTransaction(session, async () => {
         await archiveLegalRepresentatives(young, session);
         await cleanPatches(young, session);
         await deleteRLFieldsFromYoung(young, session);
       });
 
+      young.set({ rlDeleted: true });
+      await young.save({ session, fromUser });
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
       return true;
     } finally {

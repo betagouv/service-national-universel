@@ -422,7 +422,38 @@ describe("deleteLegalRepresentatives E2E", () => {
     });
   });
 
-  describe("Test 5: Cas exclus non traités", () => {
+  describe("Test 5: Vérification du patch rlDeleted", () => {
+    it("should create a patch for rlDeleted field change", async () => {
+      const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
+
+      const young = await createYoungHelper(
+        getYoungWithCompleteParentsFixture({
+          birthdateAt: birthdate18Plus1Day,
+          cohort: "Février 2020",
+        }),
+      );
+
+      await handler();
+
+      const db = getDb();
+      const patchesCollection = db.collection("young_patches");
+      const patches = await patchesCollection.find({ ref: young._id }).toArray();
+
+      const rlDeletedPatch = patches.find((patch: any) => {
+        return patch.ops.some((op: any) => op.path === "/rlDeleted");
+      });
+
+      expect(rlDeletedPatch).toBeDefined();
+      expect(rlDeletedPatch?.user?.firstName).toBe("Cron deleteLegalRepresentatives");
+
+      const rlDeletedOp = (rlDeletedPatch as any).ops.find((op: any) => op.path === "/rlDeleted");
+      expect(rlDeletedOp).toBeDefined();
+      expect(rlDeletedOp?.op).toBe("add");
+      expect(rlDeletedOp?.value).toBe(true);
+    });
+  });
+
+  describe("Test 6: Cas exclus non traités", () => {
     it("should not process youngs under 18 years old", async () => {
       const birthdate17Years = buildBirthdateForAge(17, -1);
 
