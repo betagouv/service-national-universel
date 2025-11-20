@@ -128,10 +128,10 @@ const processYoung = async (young: any): Promise<boolean> => {
         await archiveLegalRepresentatives(young, session);
         await cleanPatches(young, session);
         await deleteRLFieldsFromYoung(young, session);
+        young.set({ rlDeleted: true });
+        await young.save({ session, fromUser });
       });
 
-      young.set({ rlDeleted: true });
-      await young.save({ session, fromUser });
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
       return true;
     } finally {
