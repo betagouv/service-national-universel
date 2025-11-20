@@ -181,13 +181,6 @@ describe("deleteLegalRepresentatives E2E", () => {
       await handler();
 
       const updatedYoung: any = await YoungModel.findById(young._id);
-      console.log("updatedYoung rlDeleted:", updatedYoung?.rlDeleted);
-      console.log("parent1Status:", updatedYoung?.parent1Status);
-      console.log("parent1Country:", updatedYoung?.parent1Country);
-      console.log("parent1FromFranceConnect:", updatedYoung?.parent1FromFranceConnect);
-      
-      const allParentKeys = Object.keys(updatedYoung?._doc || {}).filter(k => k.startsWith('parent'));
-      console.log("Remaining parent fields:", allParentKeys);
 
       expect(updatedYoung?.rlDeleted).toBe(true);
       expect(updatedYoung?.parent1Status).toBeUndefined();
