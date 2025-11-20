@@ -3,8 +3,7 @@ import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
 import { startSession, withTransaction, endSession, getDb, initDB } from "../mongo";
-import { config } from "../config";
-import { timeout } from "../utils";
+
 const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
 const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
@@ -71,12 +70,10 @@ const cleanPatches = async (young: any, session: any): Promise<void> => {
   }
 };
 
-const BREVO_TIMEOUT_MS = 10000;
-
 const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, parent2Email: string | undefined, youngId: string): Promise<void> => {
   if (parent1Email) {
     try {
-      await timeout(deleteContact(parent1Email), BREVO_TIMEOUT_MS);
+      await deleteContact(parent1Email);
     } catch (e: any) {
       capture(e, { extra: { email: parent1Email, youngId } });
       logger.warn(`Error deleting parent1Email ${parent1Email} from Brevo: ${e.message}`);
@@ -85,7 +82,7 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 
   if (parent2Email) {
     try {
-      await timeout(deleteContact(parent2Email), BREVO_TIMEOUT_MS);
+      await deleteContact(parent2Email);
     } catch (e: any) {
       capture(e, { extra: { email: parent2Email, youngId } });
       logger.warn(`Error deleting parent2Email ${parent2Email} from Brevo: ${e.message}`);
@@ -95,14 +92,12 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 
 const deleteRLFieldsFromYoung = (young: any): void => {
   const parentFields = getParentFields();
-  const updateFields: Record<string, undefined> = {};
   parentFields.forEach((field) => {
-    updateFields[field] = undefined;
+    young[field] = undefined;
   });
-  young.set(updateFields);
+  young.markModified("parent1Status");
+  young.markModified("parent2Status");
 };
-
-const MONGODB_TRANSACTION_TIMEOUT_MS = 30000;
 
 const processYoung = async (young: any): Promise<boolean> => {
   try {
@@ -121,27 +116,28 @@ const processYoung = async (young: any): Promise<boolean> => {
     try {
       const fromUser = { firstName: "Cron deleteLegalRepresentatives" };
 
-      await timeout(
-        withTransaction(session, async () => {
-          await archiveLegalRepresentatives(young, session);
-          deleteRLFieldsFromYoung(young);
-          await cleanPatches(young, session);
-          young.set({ RL_deleted: true });
-          if (!Array.isArray(young.historic)) {
-            young.historic = [];
-          }
-          young.historic.push({
-            userName: "Système",
-            userId: undefined,
-            phase: young.phase,
-            status: young.status,
-            note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
-            createdAt: new Date(),
-          });
-          await young.save({ session, fromUser });
-        }),
-        MONGODB_TRANSACTION_TIMEOUT_MS,
-      );
+      await withTransaction(session, async () => {
+        await archiveLegalRepresentatives(young, session);
+        deleteRLFieldsFromYoung(young);
+        await cleanPatches(young, session);
+        young.RL_deleted = true;
+        if (!Array.isArray(young.historic)) {
+          young.historic = [];
+        }
+        young.historic.push({
+          userName: "Système",
+          userId: undefined,
+          phase: young.phase,
+          status: young.status,
+          note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
+          createdAt: new Date(),
+        });
+        logger.debug(`Before save: RL_deleted = ${young.RL_deleted}`);
+        await young.save({ session, fromUser });
+        logger.debug(`After save: RL_deleted = ${young.RL_deleted}`);
+      });
+      
+      logger.debug(`After transaction: RL_deleted = ${young.RL_deleted}`);
 
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
 
@@ -182,95 +178,23 @@ const buildQuery = (yesterdayEnd: Date) => {
   };
 };
 
-const BATCH_SIZE = 1;
-const CONCURRENT_BATCH_SIZE = 5;
-
-const processBatch = async (batch: any[]): Promise<{ processed: number; errors: number }> => {
-  const results = await Promise.allSettled(batch.map((young) => processYoung(young)));
-
-  let processed = 0;
-  let errors = 0;
-
-  for (const result of results) {
-    if (result.status === "fulfilled" && result.value === true) {
-      processed++;
-    } else {
-      errors++;
-    }
-  }
-
-  return { processed, errors };
-};
-
 const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; errors: number }> => {
   let totalProcessed = 0;
   let totalErrors = 0;
 
-  for (let i = 0; i < youngs.length; i += CONCURRENT_BATCH_SIZE) {
-    const batch = youngs.slice(i, i + CONCURRENT_BATCH_SIZE);
-    const { processed, errors } = await processBatch(batch);
-    totalProcessed += processed;
-    totalErrors += errors;
-
-    if (i + CONCURRENT_BATCH_SIZE < youngs.length) {
-      logger.debug(`Processed ${i + CONCURRENT_BATCH_SIZE}/${youngs.length} youngs`);
+  for (const young of youngs) {
+    const success = await processYoung(young);
+    if (success) {
+      totalProcessed++;
+    } else {
+      totalErrors++;
     }
   }
 
   return { processed: totalProcessed, errors: totalErrors };
 };
 
-const LOCK_COLLECTION = "cron_locks";
-const LOCK_ID = "deleteLegalRepresentatives";
 
-const acquireLock = async (): Promise<boolean> => {
-  const db = getDb();
-  const collection = db.collection(LOCK_COLLECTION);
-
-  const thirtyMinutesAgo = new Date(Date.now() - 30 * 60 * 1000);
-
-  const result = await collection.findOneAndUpdate(
-    {
-      _id: LOCK_ID as any,
-      $or: [
-        { locked: { $exists: false } },
-        { locked: false },
-        { lockedAt: { $lt: thirtyMinutesAgo } },
-      ],
-    },
-    {
-      $set: {
-        locked: true,
-        lockedBy: "deleteLegalRepresentatives",
-        lockedAt: new Date(),
-        lockedByEnvironment: config.ENVIRONMENT,
-      },
-    },
-    {
-      upsert: true,
-      returnDocument: "after",
-    },
-  );
-
-  return result.value !== null && result.value.locked === true;
-};
-
-const releaseLock = async (): Promise<void> => {
-  const db = getDb();
-  const collection = db.collection(LOCK_COLLECTION);
-
-  await collection.updateOne(
-    { _id: LOCK_ID as any },
-    {
-      $set: {
-        locked: false,
-        lockedBy: null,
-        lockedAt: null,
-        lockedByEnvironment: null,
-      },
-    },
-  );
-};
 
 const archiveLegalRepresentatives = async (young: any, session: any): Promise<void> => {
   const docs: any[] = [];
@@ -279,6 +203,8 @@ const archiveLegalRepresentatives = async (young: any, session: any): Promise<vo
     const lastName = young[`parent${i}LastName`];
     const allowImageRights = young[`parent${i}AllowImageRights`];
     const allowSNU = young[`parent${i}AllowSNU`];
+    const validationDate = young[`parent${i}ValidationDate`];
+    const rulesParent = young[`rulesParent${i}`];
     if (firstName !== undefined || lastName !== undefined) {
       docs.push({
         youngId: young._id,
@@ -287,6 +213,8 @@ const archiveLegalRepresentatives = async (young: any, session: any): Promise<vo
         lastName,
         allowImageRights,
         allowSNU,
+        validationDate,
+        rulesParent,
         archivedAt: new Date(),
       });
     }
@@ -299,16 +227,10 @@ const archiveLegalRepresentatives = async (young: any, session: any): Promise<vo
 };
 
 export const handler = async (): Promise<void> => {
-  const lockAcquired = await acquireLock();
-  if (!lockAcquired) {
-    logger.warn("deleteLegalRepresentatives cron is already running, skipping execution");
-    return;
-  }
-
   try {
     const { end: yesterdayEnd } = getYesterdayDateRange();
     const query = buildQuery(yesterdayEnd);
-    const youngs = await YoungModel.find(query).limit(BATCH_SIZE);
+    const youngs = await YoungModel.find(query);
     logger.info(`Found ${youngs.length} youngs to process for RL deletion`);
 
     const { processed, errors } = await processAllYoungs(youngs);
@@ -317,8 +239,6 @@ export const handler = async (): Promise<void> => {
     capture(e);
     logger.error(`Error in deleteLegalRepresentatives cron: ${e.message}`);
     throw e;
-  } finally {
-    await releaseLock();
   }
 };
 
