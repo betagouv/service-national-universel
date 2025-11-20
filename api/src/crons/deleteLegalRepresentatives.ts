@@ -103,8 +103,8 @@ const processYoung = async (young: any): Promise<boolean> => {
   try {
     if (!isJPlus1Birthday(young.birthdateAt)) { return false; }
 
-    if (young.RL_deleted === true) {
-      logger.debug(`Young ${young._id} already has RL_deleted = true, skipping`);
+    if (young.rlDeleted === true) {
+      logger.debug(`Young ${young._id} already has rlDeleted = true, skipping`);
       return false;
     }
 
@@ -120,7 +120,7 @@ const processYoung = async (young: any): Promise<boolean> => {
         await archiveLegalRepresentatives(young, session);
         deleteRLFieldsFromYoung(young);
         await cleanPatches(young, session);
-        young.RL_deleted = true;
+        young.rlDeleted = true;
         if (!Array.isArray(young.historic)) {
           young.historic = [];
         }
@@ -132,16 +132,16 @@ const processYoung = async (young: any): Promise<boolean> => {
           note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
           createdAt: new Date(),
         });
-        logger.debug(`Before save: RL_deleted = ${young.rlDeleted}`);
+        logger.debug(`Before save: rlDeleted = ${young.rlDeleted}`);
         await young.save({ session, fromUser });
-        logger.debug(`After save: RL_deleted = ${young.RL_deleted}`);
+        logger.debug(`After save: rlDeleted = ${young.rlDeleted}`);
       });
       
-      logger.debug(`After transaction: RL_deleted = ${young.RL_deleted}`);
+      logger.debug(`After transaction: rlDeleted = ${young.rlDeleted}`);
 
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
 
-      logger.debug(`RL deleted for young ${young._id}`);
+      logger.debug(`rlDeleted for young ${young._id}`);
       return true;
     } finally {
       await endSession(session);
@@ -171,7 +171,7 @@ const buildQuery = (yesterdayEnd: Date) => {
   eighteenYearsAgoEnd.setFullYear(eighteenYearsAgoEnd.getFullYear() - 18);
   return {
     cohort: { $regex: cohortRegex },
-    RL_deleted: { $ne: true },
+    rlDeleted: { $ne: true },
     birthdateAt: {
       $lte: eighteenYearsAgoEnd,
     },
