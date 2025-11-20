@@ -47,7 +47,9 @@ const getParentFields = (): string[] => {
       `parent${i}AllowCovidAutotest`,
       `parent${i}AllowImageRights`,
       `parent${i}ContactPreference`,
+      `parent${i}ValidationDate`,
       `parent${i}AllowSNU`,
+      `rulesParent${i}`,
     );
   }
   return fields;
@@ -93,10 +95,9 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 const deleteRLFieldsFromYoung = (young: any): void => {
   const parentFields = getParentFields();
   parentFields.forEach((field) => {
-    young[field] = undefined;
+    delete young[field];
+    young.markModified(field);
   });
-  young.markModified("parent1Status");
-  young.markModified("parent2Status");
 };
 
 const processYoung = async (young: any): Promise<boolean> => {
@@ -118,30 +119,35 @@ const processYoung = async (young: any): Promise<boolean> => {
 
       await withTransaction(session, async () => {
         await archiveLegalRepresentatives(young, session);
-        deleteRLFieldsFromYoung(young);
         await cleanPatches(young, session);
-        young.rlDeleted = true;
-        if (!Array.isArray(young.historic)) {
-          young.historic = [];
-        }
-        young.historic.push({
+        
+        const parentFields = getParentFields();
+        const unsetFields: any = {};
+        parentFields.forEach((field) => {
+          unsetFields[field] = 1;
+        });
+        
+        const historicEntry = {
           userName: "Système",
           userId: undefined,
           phase: young.phase,
           status: young.status,
           note: "Suppression automatique des données des représentants légaux (J+1 anniversaire)",
           createdAt: new Date(),
-        });
-        logger.debug(`Before save: rlDeleted = ${young.rlDeleted}`);
-        await young.save({ session, fromUser });
-        logger.debug(`After save: rlDeleted = ${young.rlDeleted}`);
+        };
+        
+        await YoungModel.updateOne(
+          { _id: young._id },
+          {
+            $unset: unsetFields,
+            $set: { rlDeleted: true },
+            $push: { historic: historicEntry },
+          },
+          { session }
+        );
       });
-      
-      logger.debug(`After transaction: rlDeleted = ${young.rlDeleted}`);
 
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
-
-      logger.debug(`rlDeleted for young ${young._id}`);
       return true;
     } finally {
       await endSession(session);
@@ -242,6 +248,11 @@ export const handler = async (): Promise<void> => {
   }
 };
 
+function setRlDeletedField(young: any) {
+  young.rlDeleted = true;
+  young.markModified("rlDeleted");
+}
+
 // Initialiser MongoDB avant d'exécuter le handler si le fichier est exécuté directement
 if (require.main === module) {
   (async () => {
@@ -255,4 +266,5 @@ if (require.main === module) {
     }
   })();
 }
+
 
