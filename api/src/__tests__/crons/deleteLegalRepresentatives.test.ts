@@ -6,6 +6,8 @@ import { YoungModel } from "../../models";
 import { handler } from "../../crons/deleteLegalRepresentatives";
 // @ts-ignore - Jest mocks
 import * as mongo from "../../mongo";
+// @ts-ignore - Jest mocks
+import { rateLimiterDeleteContactSIB } from "../../rateLimiters";
 
 jest.mock("../../brevo", () => ({
   deleteContact: jest.fn(),
@@ -22,6 +24,12 @@ jest.mock("../../mongo", () => ({
   withTransaction: jest.fn(),
   endSession: jest.fn(),
   getDb: jest.fn(),
+}));
+
+jest.mock("../../rateLimiters", () => ({
+  rateLimiterDeleteContactSIB: {
+    call: jest.fn((fn) => fn()),
+  },
 }));
 
 const buildBirthdate = (dayOffset: number): Date => {
@@ -900,6 +908,94 @@ describe("deleteLegalRepresentatives cron", () => {
       expect(transactionCommitted).toBe(true);
       expect(deleteContact).toHaveBeenCalledWith("parent1@test.com");
       expect(deleteContact).toHaveBeenCalledWith("parent2@test.com");
+    });
+  });
+
+  describe("Brevo rate limiting", () => {
+    it("should use rate limiter for deleteContact calls", async () => {
+      const birthdate = buildBirthdate(-1);
+
+      const young = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: birthdate,
+        parent1Email: "parent1@test.com",
+        parent2Email: "parent2@test.com",
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        rlDeleted: null,
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      await handler();
+
+      expect(rateLimiterDeleteContactSIB.call).toHaveBeenCalledTimes(2);
+      expect(rateLimiterDeleteContactSIB.call).toHaveBeenCalledWith(expect.any(Function));
+    });
+
+    it("should respect rate limit of 1 call per second with multiple youngs", async () => {
+      const birthdate = buildBirthdate(-1);
+
+      const youngs = Array.from({ length: 3 }, (_, i) => ({
+        _id: `young${i}`,
+        cohort: "2022",
+        birthdateAt: new Date(birthdate),
+        parent1Email: `parent${i}@test.com`,
+        parent2Email: `parent${i}b@test.com`,
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        rlDeleted: null,
+        set: jest.fn(),
+        save: jest.fn().mockResolvedValue({}),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      }));
+
+      (YoungModel.find as jest.Mock).mockResolvedValue(youngs);
+      (deleteContact as jest.Mock).mockResolvedValue(undefined);
+
+      await handler();
+
+      expect(rateLimiterDeleteContactSIB.call).toHaveBeenCalledTimes(6);
+    });
+
+    it("should continue processing even if rate limiter throws", async () => {
+      const birthdate = buildBirthdate(-1);
+
+      const young = {
+        _id: "young1",
+        cohort: "2022",
+        birthdateAt: birthdate,
+        parent1Email: "parent1@test.com",
+        parent2Email: "parent2@test.com",
+        phase: "CONTINUE",
+        status: "VALIDATED",
+        historic: [],
+        rlDeleted: null,
+        set: jest.fn(),
+        save: jest.fn(),
+        patches: {
+          find: jest.fn().mockResolvedValue([]),
+        },
+      };
+
+      (YoungModel.find as jest.Mock).mockResolvedValue([young]);
+      (rateLimiterDeleteContactSIB.call as jest.Mock).mockImplementation((fn) => {
+        throw new Error("Rate limiter error");
+      });
+
+      await expect(handler()).resolves.not.toThrow();
+      expect(young.save).toHaveBeenCalled();
     });
   });
 });
