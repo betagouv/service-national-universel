@@ -28,6 +28,31 @@ function validateEmail(value) {
   return error;
 }
 
+function validateMissionDates(fieldName, value) {
+  console.log("fieldName", fieldName, value);
+  if (!value) return undefined;
+
+  const dateParts = value.split("-");
+  if (dateParts.length !== 3) return undefined;
+
+  const year = parseInt(dateParts[0], 10);
+  const month = parseInt(dateParts[1], 10) - 1;
+  const day = parseInt(dateParts[2], 10);
+
+  const selectedDate = new Date(year, month, day);
+  const limitDate = new Date(2026, 10, 30);
+
+  if (selectedDate > limitDate) {
+    if (fieldName === "missionStartAt") {
+      return "Début au plus tard le 30/11/2026";
+    } else if (fieldName === "missionEndAt") {
+      return "Fin au plus tard le 30/11/2026";
+    }
+  }
+
+  return undefined;
+}
+
 export default function Contract({ young }) {
   const history = useHistory();
   const user = useSelector((state) => state.Auth.user);
@@ -97,6 +122,18 @@ export default function Contract({ young }) {
           toastr.error(`Erreur avec le champ ${translateModelFields("contract", field)}`, error);
           return;
         }
+      }
+
+      const startDateError = validateMissionDates("missionStartAt", values.missionStartAt);
+      if (startDateError) {
+        toastr.error("Erreur avec le champ Date de début de mission", startDateError);
+        return;
+      }
+
+      const endDateError = validateMissionDates("missionEndAt", values.missionEndAt);
+      if (endDateError) {
+        toastr.error("Erreur avec le champ Date de fin de mission", endDateError);
+        return;
       }
       values.sendMessage
         ? setLoadings({
@@ -223,7 +260,7 @@ export default function Contract({ young }) {
       </BackLink>
       {environment === "production" && (
         <Box>
-          <Bloc title="Contrat d’engagement en mission d’intérêt général">
+          <Bloc title="Contrat d'engagement en mission d'intérêt général">
             <div style={{ display: "flex" }}>
               <div style={{ flex: 1, marginRight: "1rem", fontSize: "0.8rem", fontStyle: "italic", color: "#444" }}>
                 <p>Ce contrat doit être validé par le(s) représentant(s) légal(aux) du volontaire, le tuteur de mission et le référent départemental.</p>
@@ -315,7 +352,7 @@ export default function Contract({ young }) {
       ) : new Date(contract?.createdAt) < new Date("2024-03-14") ? (
         <ContractOld young={young} initialValues={initialValues} onSubmit={onSubmit} loadings={loadings} isYoungAdult={isYoungAdult} trimEmailValues={trimEmailValues} />
       ) : (
-        <Formik validateOnChange={false} validateOnBlur={false} initialValues={initialValues} onSubmit={onSubmit}>
+        <Formik validateOnChange={true} initialValues={initialValues} onSubmit={onSubmit}>
           {({ values, errors, touched, handleChange, handleSubmit, setFieldValue, validateForm }) => {
             const context = { values, errors, touched, handleChange };
             return (
@@ -328,13 +365,13 @@ export default function Contract({ young }) {
                           <img src={Img} height={96} />
                         </div>
                         <div style={{ marginRight: "2rem", textAlign: "center", marginTop: "-1rem" }}>
-                          <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>
+                          <h2>Contrat d'engagement en mission d'intérêt général (MIG) du service national universel (SNU)</h2>
                         </div>
                       </div>
                       <div>
                         <p>
                           Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé une réserve thématique dénommée «
-                          Réserve du service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté.
+                          Réserve du service national universel », régie par les dispositions de la loi du 27 janvier 2017 relative à l'égalité et à la citoyenneté.
                         </p>
                         <p>
                           La réserve est ouverte aux mineurs âgés de quinze ans révolus satisfaisant aux conditions fixées par l'article 3 de la loi du 27 janvier 2017 susvisée et
@@ -342,7 +379,7 @@ export default function Contract({ young }) {
                           du service national universel.
                         </p>
                         <p>
-                          La mission d’intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à
+                          La mission d'intérêt général revêt « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif ou culturel, ou concourent à
                           des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne ».
                         </p>
                         <p>
@@ -350,14 +387,14 @@ export default function Contract({ young }) {
                           création d'un emploi ou au recrutement d'un stagiaire.
                         </p>
                         <p>
-                          La phase d’engagement du volontaire, à l’issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en
-                          continu ou, dans la limite d’une période d’une année, de manière fractionnée.
+                          La phase d'engagement du volontaire, à l'issue du séjour de cohésion, couvre une durée minimale de quatre-vingt-quatre heures, qui peut être accomplie en
+                          continu ou, dans la limite d'une période d'une année, de manière fractionnée.
                         </p>
                       </div>
                       <div>
                         <h2>Entre les soussignés,</h2>
                         <div>
-                          <h3> L’Etat, représenté par</h3>
+                          <h3> L'Etat, représenté par</h3>
                           <div>
                             <ContractField name="projectManagerFirstName" placeholder="Prénom" context={context} />
                             <ContractField name="projectManagerLastName" placeholder="Nom" context={context} />
@@ -371,7 +408,7 @@ export default function Contract({ young }) {
                         </div>
                         <h2>ET</h2>
                         <div>
-                          <h3> La structure d’accueil représentée par</h3>
+                          <h3> La structure d'accueil représentée par</h3>
                           <div>
                             <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
                             <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
@@ -415,7 +452,7 @@ export default function Contract({ young }) {
                               1) Le représentant légal du volontaire n°1 :
                               <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
                               <ContractField name="parent1LastName" placeholder="Nom" context={context} />
-                              disposant de l’autorité parentale,
+                              disposant de l'autorité parentale,
                               <div>
                                 demeurant à
                                 <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
@@ -431,7 +468,7 @@ export default function Contract({ young }) {
                                 2) Le représentant légal du volontaire n°2 :
                                 <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
                                 <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                                disposant de l’autorité parentale,
+                                disposant de l'autorité parentale,
                                 <div>
                                   demeurant à
                                   <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
@@ -455,7 +492,7 @@ export default function Contract({ young }) {
                         <div>
                           <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                           <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                          s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale de gestion de la réserve du SNU :
+                          s'engage à réaliser une mission d'intérêt général validée par l'autorité territoriale de gestion de la réserve du SNU :
                           <div>
                             <ContractField className="lg mb-4" name="missionName" placeholder="Nom de la mission" context={context} />
                           </div>
@@ -468,31 +505,45 @@ export default function Contract({ young }) {
                             <ContractField name="missionAction" placeholder="Actions" as="textarea" context={context} />
                           </div>
                           <p>
-                            La nature ou l’exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c’est-à-dire
-                            les catégories de travaux définies en application de l’article L. 4153-8 du même code, interdites aux jeunes de moins de 18 ans, en ce qu’elles les
+                            La nature ou l'exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c'est-à-dire
+                            les catégories de travaux définies en application de l'article L. 4153-8 du même code, interdites aux jeunes de moins de 18 ans, en ce qu'elles les
                             exposeraient à des risques pour leur santé, leur sécurité, leur moralité ou excéderaient leurs forces.
                           </p>
                         </div>
-                        <h3>b) Date d’effet et durée du contrat</h3>
+                        <h3>b) Date d'effet et durée du contrat</h3>
                         <div>
                           Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                           prenantes. <br />
-                          La mission d’intérêt général débute le
-                          <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
-                          jusqu’au
-                          <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
+                          La mission d'intérêt général débute le
+                          <ContractField
+                            name="missionStartAt"
+                            placeholder="jj/mm/yyyy"
+                            max="2026-11-30"
+                            type="date"
+                            context={context}
+                            validate={(v) => validateMissionDates("missionStartAt", v)}
+                          />
+                          jusqu'au
+                          <ContractField
+                            name="missionEndAt"
+                            placeholder="jj/mm/yyyy"
+                            max="2026-11-30"
+                            type="date"
+                            context={context}
+                            validate={(v) => validateMissionDates("missionEndAt", v)}
+                          />
                           <br /> Le volontaire effectuera un total de
                           <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
                           heures de MIG.
                         </div>
-                        <h3>c) Conditions d’exercice des missions</h3>
+                        <h3>c) Conditions d'exercice des missions</h3>
                         <div>
-                          La mission s’effectue à
+                          La mission s'effectue à
                           <ContractField className="md" name="missionAddress" placeholder="adresse" context={context} />
                           <ContractField name="missionCity" placeholder="Ville" context={context} />
                           <ContractField name="missionZip" placeholder="Code postal" context={context} />
                           <br />
-                          au sein de la structure d’accueil retenue par l’administration :
+                          au sein de la structure d'accueil retenue par l'administration :
                           <ContractField className="lg" name="structureName" placeholder="Nom de la structure" context={context} />
                           <p>
                             La durée quotidienne de la mission est égale à huit heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission
@@ -504,38 +555,38 @@ export default function Contract({ young }) {
                           </p>
                           <p>Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire.</p>
                           <p>
-                            Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 8 heures par jour
+                            Si le volontaire travaille, le temps de travail cumulé avec le temps d'accomplissement de la mission d'intérêt général ne peut excéder 8 heures par jour
                             et 35 heures par semaine
                           </p>
                           <p>Les horaires du volontaire pour la présente mission sont :</p>
                           <ContractField name="missionFrequence" placeholder="Du lundi au vendredi" as="textarea" context={context} />
-                          Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
+                          Le volontaire bénéficie, pour assurer l'accomplissement de sa mission, de l'accompagnement d'un tuteur de mission
                           <ContractField name="tutorFirstName" placeholder="Prénom" context={context} />
                           <ContractField name="tutorLastName" placeholder="Nom" context={context} />
-                          de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que,
-                          le cas échéant, d’un accompagnement renforcé.
+                          de la structure d'accueil. Le volontaire bénéficie, par son tuteur, d'entretiens réguliers permettant un suivi de la réalisation des missions ainsi que,
+                          le cas échéant, d'un accompagnement renforcé.
                         </div>
                         <h3>d) Obligations réciproques des parties</h3>
                         <div>
                           <p>
-                            L’Etat, représenté par le directeur académique des services de l’Education nationale, valide la mission d’intérêt général et s’assure de la qualité des
+                            L'Etat, représenté par le directeur académique des services de l'Education nationale, valide la mission d'intérêt général et s'assure de la qualité des
                             conditions de réalisation de cette mission au regard des finalités du SNU.
                           </p>
                           <p>
-                            La structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur est nommé au
-                            sein de la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.
+                            La structure d'accueil s'engage à proposer des missions permettant la mobilisation du volontaire en faveur de l'intérêt général. Un tuteur est nommé au
+                            sein de la structure afin de s'assurer du suivi du volontaire et de la qualité des conditions de son accueil.
                           </p>
                           <p>
-                            Le cas échéant, la structure d’accueil précise les frais qu’elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission
-                            d’intérêt général (frais de transports, repas, hébergement…).
+                            Le cas échéant, la structure d'accueil précise les frais qu'elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission
+                            d'intérêt général (frais de transports, repas, hébergement…).
                           </p>
                           <p>
-                            Le volontaire s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à
+                            Le volontaire s'engage à respecter le règlement intérieur de la structure qui l'accueille, à respecter les personnes, le matériel et les locaux et à
                             agir en conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la
-                            discrétion pour les faits et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et
+                            discrétion pour les faits et informations dont il a connaissance dans l'exercice de ses missions. Il est également tenu aux obligations de convenance et
                             de réserve inhérentes à ses fonctions.
                           </p>
-                          <p>Le volontaire exécute la mission d’intérêt général à titre bénévole.</p>
+                          <p>Le volontaire exécute la mission d'intérêt général à titre bénévole.</p>
                           <p>
                             L&apos;engagement, l&apos;affectation et l&apos;activité du volontaire nne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n°
                             84-16 du 11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l'Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier
@@ -543,34 +594,34 @@ export default function Contract({ young }) {
                             dispositions statutaires relatives à la fonction publique hospitalière.
                           </p>
                           <p>
-                            Le cas échéant, la structure d’accueil, directement ou par le tuteur désigné, informe le représentant de l’Etat, signataire du présent contrat, des
-                            difficultés rencontrées dans l’exécution du présent contrat.
+                            Le cas échéant, la structure d'accueil, directement ou par le tuteur désigné, informe le représentant de l'Etat, signataire du présent contrat, des
+                            difficultés rencontrées dans l'exécution du présent contrat.
                           </p>
                           <p>
                             Conformément aux dispositions du décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel, le
-                            volontaire et la structure d’accueil s’engagent à respecter les principes directeurs ainsi que les engagements et obligations des réservistes et des
-                            structures d’accueil énoncés par la charte de la réserve civique, annexée au présent contrat, dans sa version issue du décret n° 2017-930 du 9 mai 2017.
+                            volontaire et la structure d'accueil s'engagent à respecter les principes directeurs ainsi que les engagements et obligations des réservistes et des
+                            structures d'accueil énoncés par la charte de la réserve civique, annexée au présent contrat, dans sa version issue du décret n° 2017-930 du 9 mai 2017.
                           </p>
                         </div>
                         <h3>e) Responsabilités</h3>
                         <div>
-                          <p>La structure d’accueil est chargée de la surveillance et de la sécurité du volontaire accueilli.</p>
+                          <p>La structure d'accueil est chargée de la surveillance et de la sécurité du volontaire accueilli.</p>
                           <p>L&apos;organisme d&apos;accueil le couvre des dommages subis par lui ou causés à des tiers dans l&apos;accomplissement de sa mission.</p>
                         </div>
                         <h3>f) Résiliation du contrat</h3>
                         <div>
                           <p>
-                            Le présent contrat de mission d’intérêt général peut être résilié moyennant un préavis d’une journée sauf en cas de force majeure ou de faute grave
-                            d’une des parties.
+                            Le présent contrat de mission d'intérêt général peut être résilié moyennant un préavis d'une journée sauf en cas de force majeure ou de faute grave
+                            d'une des parties.
                           </p>
-                          <p>Avant de résilier le contrat, la structure d’accueil prévient le représentant de l’Etat</p>
+                          <p>Avant de résilier le contrat, la structure d'accueil prévient le représentant de l'Etat</p>
                         </div>
-                        <h3>g) Conditions de validation de la mission d’intérêt général</h3>
+                        <h3>g) Conditions de validation de la mission d'intérêt général</h3>
                         <div>
                           La confirmation de la réalisation de la mission d&apos;intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d&apos;accueil,
                           effectue la procédure de fin de mission sur la plateforme.
                           <br />
-                          La validation est conditionnée à la réalisation du nombre d’heures prévu au présent contrat d’engagement. Toute modification pourra être formulée par
+                          La validation est conditionnée à la réalisation du nombre d'heures prévu au présent contrat d'engagement. Toute modification pourra être formulée par
                           avenant.
                         </div>
                         <div>
@@ -580,7 +631,7 @@ export default function Contract({ young }) {
                         <div>
                           <br />
                           <div>
-                            Représentant de l’Etat{" "}
+                            Représentant de l'Etat{" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
                                 text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -593,7 +644,7 @@ export default function Contract({ young }) {
                         </div>
                         <div>
                           <div>
-                            Représentant de la structure d’accueil{" "}
+                            Représentant de la structure d'accueil{" "}
                             {contract?.invitationSent === "true" ? (
                               <Badge
                                 text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -695,7 +746,6 @@ export default function Contract({ young }) {
                         </p>
                         <p>
                           Toute personne qui participe à la réserve civique, ses sections territoriales ou l&apos;une des réserves thématiques qu&apos;elle comporte s&apos;engage à
-                          :
                         </p>
                         <ul>
                           <li>respecter la présente charte ;</li>
@@ -842,22 +892,38 @@ export default function Contract({ young }) {
 }
 
 const ContractField = ({ name, placeholder, optional, context: { values, errors, handleChange }, ...rest }) => {
+  const { validate: customValidate, ...otherRest } = rest;
+
+  const validateField = (value) => {
+    if (!optional && !value) return "Ce champ est obligatoire";
+    if (customValidate) {
+      return customValidate(value);
+    }
+  };
   const content = (
-    <>
-      {errors[name] && <ErrorInContractField>{errors[name] === true ? "Ce champ est obligatoire" : errors[name]}</ErrorInContractField>}
-      <Field validate={(v) => (optional ? undefined : !v)} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} {...rest} />
-    </>
+    <ContractFieldWrapper>
+      {errors[name] && <ErrorInContractField>{errors[name]}</ErrorInContractField>}
+      <Field {...otherRest} validate={validateField} value={values[name]} onChange={handleChange} name={name} placeholder={placeholder} />
+    </ContractFieldWrapper>
   );
 
   if (rest.as === "textarea") return <div>{content}</div>;
-  return <span>{content}</span>;
+  return content;
 };
+
+const ContractFieldWrapper = styled.span`
+  position: relative;
+  display: inline-block;
+  margin-top: 1.2rem;
+`;
 
 const ErrorInContractField = styled.span`
   position: absolute;
+  top: -0.2rem;
+  left: 0;
   font-size: 0.75rem;
-  margin-left: 0.5rem;
   color: red;
+  white-space: nowrap;
 `;
 
 const Bloc = ({ children, title, borderBottom, borderRight, borderLeft, disabled }) => {
@@ -1066,23 +1132,23 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                       <img src={Img} height={96} />
                     </div>
                     <div style={{ marginRight: "2rem", textAlign: "center", marginTop: "-1rem" }}>
-                      <h2>Contrat d’engagement en mission d’intérêt général (MIG) du service national universel (SNU)</h2>
+                      <h2>Contrat d'engagement en mission d'intérêt général (MIG) du service national universel (SNU)</h2>
                     </div>
                   </div>
                   <div>
                     <p>
                       Le décret n° 2020-922 du 29 juillet 2020 portant dispositions diverses relatives au service national universel a créé la « Réserve du service national
-                      universel », nouvelle réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l’égalité et à la citoyenneté. Dans ce nouveau cadre
-                      réglementaire, les missions d’intérêt général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif, familial ou
+                      universel », nouvelle réserve civique relevant des dispositions de la loi du 27 janvier 2017 relative à l'égalité et à la citoyenneté. Dans ce nouveau cadre
+                      réglementaire, les missions d'intérêt général revêtent « un caractère philanthropique, éducatif, environnemental, scientifique, social, sportif, familial ou
                       culturel, ou concourent à des missions de défense et de sécurité civile ou de prévention ou à la prise de conscience de la citoyenneté française et européenne
-                      ». Le décret du 29 juillet 2020 a précisé qu’une mission d’intérêt général correspond à un engagement volontaire d’une durée minimale de quatre-vingt-quatre
-                      heures, qui peut être accomplie de manière continue ou, dans la limite d’une période d’une année, de manière discontinue.
+                      ». Le décret du 29 juillet 2020 a précisé qu'une mission d'intérêt général correspond à un engagement volontaire d'une durée minimale de quatre-vingt-quatre
+                      heures, qui peut être accomplie de manière continue ou, dans la limite d'une période d'une année, de manière discontinue.
                     </p>
                   </div>
                   <div>
                     <h2>Entre les soussignés,</h2>
                     <div>
-                      <h3> L’Etat, représenté par</h3>
+                      <h3> L'Etat, représenté par</h3>
                       <div>
                         <ContractField name="projectManagerFirstName" placeholder="Prénom" context={context} />
                         <ContractField name="projectManagerLastName" placeholder="Nom" context={context} />
@@ -1096,7 +1162,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                     </div>
                     <h2>ET</h2>
                     <div>
-                      <h3> La structure d’accueil représentée par</h3>
+                      <h3> La structure d'accueil représentée par</h3>
                       <div>
                         <ContractField name="structureManagerFirstName" placeholder="Prénom" context={context} />
                         <ContractField name="structureManagerLastName" placeholder="Nom" context={context} />
@@ -1140,7 +1206,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                           1) Le représentant légal du volontaire n°1 :
                           <ContractField name="parent1FirstName" placeholder="Prénom" context={context} />
                           <ContractField name="parent1LastName" placeholder="Nom" context={context} />
-                          disposant de l’autorité parentale,
+                          disposant de l'autorité parentale,
                           <div>
                             demeurant à
                             <ContractField name="parent1Address" placeholder="Adresse" className="md" context={context} />
@@ -1156,7 +1222,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                             2) Le représentant légal du volontaire n°2 :
                             <ContractField name="parent2FirstName" placeholder="Prénom" context={context} optional={true} />
                             <ContractField name="parent2LastName" placeholder="Nom" context={context} optional={true} />
-                            disposant de l’autorité parentale,
+                            disposant de l'autorité parentale,
                             <div>
                               demeurant à
                               <ContractField name="parent2Address" placeholder="Adresse" className="md" context={context} optional={true} />
@@ -1179,7 +1245,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                     <div>
                       <ContractField name="youngFirstName" placeholder="Prénom" context={context} />
                       <ContractField name="youngLastName" placeholder="Nom" context={context} />
-                      s’engage à réaliser une mission d’intérêt général validée par l’autorité territoriale en charge du SNU.
+                      s'engage à réaliser une mission d'intérêt général validée par l'autorité territoriale en charge du SNU.
                       <div>
                         La mission
                         <ContractField className="lg" name="missionName" placeholder="Nom de la mission" context={context} />
@@ -1194,31 +1260,45 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                         <ContractField name="missionAction" placeholder="Actions" as="textarea" context={context} />
                       </div>
                       <p>
-                        La nature ou l’exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c’est-à-dire les
-                        catégories de travaux définies en application de l’article L. 4153-8 du même code, interdites aux jeunes de moins de 18 ans, en ce qu’elles les exposeraient
+                        La nature ou l'exercice des missions ne peuvent porter sur les activités relevant des articles D. 4153-15 à D. 4153-40 du code du travail c'est-à-dire les
+                        catégories de travaux définies en application de l'article L. 4153-8 du même code, interdites aux jeunes de moins de 18 ans, en ce qu'elles les exposeraient
                         à des risques pour leur santé, leur sécurité, leur moralité ou excéderaient leurs forces.
                       </p>
                     </div>
-                    <h3>b) Date d’effet et durée du contrat</h3>
+                    <h3>b) Date d'effet et durée du contrat</h3>
                     <div>
                       Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                       prenantes. <br />
-                      La mission d’intérêt général débute le
-                      <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} />
-                      jusqu’au
-                      <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} />
+                      La mission d'intérêt général débute le
+                      <ContractField
+                        name="missionStartAt"
+                        placeholder="jj/mm/yyyy"
+                        max="2026-11-30"
+                        type="date"
+                        context={context}
+                        validate={(v) => validateMissionDates("missionStartAt", v)}
+                      />
+                      jusqu'au
+                      <ContractField
+                        name="missionEndAt"
+                        placeholder="jj/mm/yyyy"
+                        max="2026-11-30"
+                        type="date"
+                        context={context}
+                        validate={(v) => validateMissionDates("missionEndAt", v)}
+                      />
                       <br /> Le volontaire effectuera un total de
                       <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
                       heures de MIG.
                     </div>
-                    <h3>c) Conditions d’exercice des missions</h3>
+                    <h3>c) Conditions d'exercice des missions</h3>
                     <div>
-                      La mission s’effectue à
+                      La mission s'effectue à
                       <ContractField className="md" name="missionAddress" placeholder="adresse" context={context} />
                       <ContractField name="missionCity" placeholder="Ville" context={context} />
                       <ContractField name="missionZip" placeholder="Code postal" context={context} />
                       <br />
-                      au sein de la structure d’accueil retenue par l’administration :
+                      au sein de la structure d'accueil retenue par l'administration :
                       <ContractField className="lg" name="structureName" placeholder="Nom de la structure" context={context} />
                       <p>
                         La durée quotidienne de la mission est égale à sept heures au maximum. Une pause de trente minutes doit être appliquée pour toute période de mission
@@ -1230,71 +1310,71 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                       </p>
                       <p>Si le volontaire est scolarisé, la mission ne peut être effectuée sur le temps scolaire.</p>
                       <p>
-                        Si le volontaire travaille, le temps de travail cumulé avec le temps d’accomplissement de la mission d’intérêt général ne peut excéder 7 heures par jour et
+                        Si le volontaire travaille, le temps de travail cumulé avec le temps d'accomplissement de la mission d'intérêt général ne peut excéder 7 heures par jour et
                         35 heures par semaine.
                       </p>
                       <p>Les horaires du volontaire pour la présente mission sont :</p>
                       <ContractField name="missionFrequence" placeholder="Du lundi au vendredi" as="textarea" context={context} />
-                      Le volontaire bénéficie, pour assurer l’accomplissement de sa mission, de l’accompagnement d’un tuteur de mission
+                      Le volontaire bénéficie, pour assurer l'accomplissement de sa mission, de l'accompagnement d'un tuteur de mission
                       <ContractField name="tutorFirstName" placeholder="Prénom" context={context} />
                       <ContractField name="tutorLastName" placeholder="Nom" context={context} />
-                      de la structure d’accueil. Le volontaire bénéficie, par son tuteur, d’entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le
-                      cas échéant, d’un accompagnement renforcé.
+                      de la structure d'accueil. Le volontaire bénéficie, par son tuteur, d'entretiens réguliers permettant un suivi de la réalisation des missions ainsi que, le
+                      cas échéant, d'un accompagnement renforcé.
                     </div>
                     <h3>d) Obligations réciproques des parties</h3>
                     <div>
                       <p>
-                        L’Etat s’engage à identifier les missions susceptibles d’être proposées au volontaire dans le cadre des missions d’intérêt général. L’Etat s’assure de la
-                        qualité des conditions de réalisation de cette mission au regard des finalités du SNU. Enfin, l’Etat valide la réalisation de la mission du volontaire. La
-                        structure d’accueil s’engage à proposer des missions permettant la mobilisation du volontaire en faveur de l’intérêt général. Un tuteur est nommé au sein de
-                        la structure afin de s’assurer du suivi du volontaire et de la qualité des conditions de son accueil.
+                        L'Etat s'engage à identifier les missions susceptibles d'être proposées au volontaire dans le cadre des missions d'intérêt général. L'Etat s'assure de la
+                        qualité des conditions de réalisation de cette mission au regard des finalités du SNU. Enfin, l'Etat valide la réalisation de la mission du volontaire. La
+                        structure d'accueil s'engage à proposer des missions permettant la mobilisation du volontaire en faveur de l'intérêt général. Un tuteur est nommé au sein de
+                        la structure afin de s'assurer du suivi du volontaire et de la qualité des conditions de son accueil.
                       </p>
                       <p>
-                        Le cas échéant, la structure d’accueil précise les frais qu’elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission
-                        d’intérêt général (frais de transports, repas, hébergement…).
+                        Le cas échéant, la structure d'accueil précise les frais qu'elle entend prendre en charge, totalement ou partiellement, dans le cadre de la mission
+                        d'intérêt général (frais de transports, repas, hébergement…).
                       </p>
                       <p>
-                        Le volontaire s’engage à respecter le règlement intérieur de la structure qui l’accueille, à respecter les personnes, le matériel et les locaux et à agir en
+                        Le volontaire s'engage à respecter le règlement intérieur de la structure qui l'accueille, à respecter les personnes, le matériel et les locaux et à agir en
                         conformité avec les exigences de son engagement dans le cadre du SNU : ponctualité, politesse, implication. Le volontaire est tenu à la discrétion pour les
-                        faits et informations dont il a connaissance dans l’exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à
+                        faits et informations dont il a connaissance dans l'exercice de ses missions. Il est également tenu aux obligations de convenance et de réserve inhérentes à
                         ses fonctions.
                       </p>
-                      <p>Le volontaire exécute la mission d’intérêt général à titre bénévole.</p>
+                      <p>Le volontaire exécute la mission d'intérêt général à titre bénévole.</p>
                       <p>
                         L&apos;engagement, l&apos;affectation et l&apos;activité du volontaire ne sont régis ni par le code du travail, ni par le chapitre Ier de la loi n° 84-16 du
                         11 janvier 1984 portant dispositions statutaires relatives à la fonction publique de l&apos;Etat, le chapitre Ier de la loi n° 84-53 du 26 janvier 1984
                         portant dispositions statutaires relatives à la fonction publique territoriale ou le chapitre Ier de la loi n° 86-33 du 9 janvier 1986 portant dispositions
-                        statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d’accueil, directement ou par le tuteur désigné, informe le
-                        représentant de l’Etat, signataire du présent contrat, des difficultés rencontrées dans l’exécution du présent contrat.
+                        statutaires relatives à la fonction publique hospitalière. Le cas échéant, la structure d'accueil, directement ou par le tuteur désigné, informe le
+                        représentant de l'Etat, signataire du présent contrat, des difficultés rencontrées dans l'exécution du présent contrat.
                       </p>
                       <p>
                         Conformément aux dispositions du décret n° 2020-922 du 29 juillet 2020 portant diverses dispositions relatives au service national universel, le volontaire
-                        et la structure d’accueil s’engagent à respecter les principes directeurs ainsi que les engagements et obligations des réservistes et des structures
-                        d’accueil énoncés par la charte de la réserve civique, annexée au présent contrat, dans sa version issue du décret n° 2017-930 du 9 mai 2017.
+                        et la structure d'accueil s'engagent à respecter les principes directeurs ainsi que les engagements et obligations des réservistes et des structures
+                        d'accueil énoncés par la charte de la réserve civique, annexée au présent contrat, dans sa version issue du décret n° 2017-930 du 9 mai 2017.
                       </p>
                     </div>
-                    <h3>e) Journée de fin de mission d’intérêt général</h3>
+                    <h3>e) Journée de fin de mission d'intérêt général</h3>
                     <div>
                       <p>
-                        Une journée de fin de mission d’intérêt général est organisée, en dehors des heures de MIG mentionnées au b), pour préparer une éventuelle participation du
+                        Une journée de fin de mission d'intérêt général est organisée, en dehors des heures de MIG mentionnées au b), pour préparer une éventuelle participation du
                         volontaire à la phase III du SNU, soit un engagement volontaire de plusieurs mois, notamment dans le cadre du service civique ou du volontariat des armées.
                       </p>
                       <p>La participation du volontaire est requise.</p>
                     </div>
                     <h3>f) Responsabilités</h3>
                     <div>
-                      <p>La structure d’accueil est chargée de la surveillance et de la sécurité du volontaire accueilli.</p>
+                      <p>La structure d'accueil est chargée de la surveillance et de la sécurité du volontaire accueilli.</p>
                       <p>L&apos;organisme d&apos;accueil le couvre des dommages subis par lui ou causés à des tiers dans l&apos;accomplissement de sa mission.</p>
                     </div>
                     <h3>g) Résiliation du contrat</h3>
                     <div>
                       <p>
-                        Le présent contrat de mission d’intérêt général peut être résilié moyennant un préavis d’une journée sauf en cas de force majeure ou de faute grave d’une
+                        Le présent contrat de mission d'intérêt général peut être résilié moyennant un préavis d'une journée sauf en cas de force majeure ou de faute grave d'une
                         des parties.
                       </p>
-                      <p>Avant de résilier le contrat, la structure d’accueil prévient le représentant de l’Etat</p>
+                      <p>Avant de résilier le contrat, la structure d'accueil prévient le représentant de l'Etat</p>
                     </div>
-                    <h3>h) Conditions de validation de la mission d’intérêt général</h3>
+                    <h3>h) Conditions de validation de la mission d'intérêt général</h3>
                     <div>
                       La confirmation de la réalisation de la mission d&apos;intérêt général est effectuée par le tuteur de mission qui, au nom de la structure d&apos;accueil,
                       effectue la procédure de fin de mission sur la plateforme.
@@ -1303,7 +1383,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                       <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} />
                       heures de mission au minimum au sein de la structure.
                       <br />
-                      La mission est accomplie de manière continue, ou dans la limite de la période d’une année, de manière discontinue.
+                      La mission est accomplie de manière continue, ou dans la limite de la période d'une année, de manière discontinue.
                     </div>
                     <div>
                       Le
@@ -1312,7 +1392,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                     <div>
                       <br />
                       <div>
-                        Représentant de l’Etat{" "}
+                        Représentant de l'Etat{" "}
                         {contract?.invitationSent === "true" ? (
                           <Badge
                             text={contract.projectManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
@@ -1325,7 +1405,7 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                     </div>
                     <div>
                       <div>
-                        Représentant de la structure d’accueil{" "}
+                        Représentant de la structure d'accueil{" "}
                         {contract?.invitationSent === "true" ? (
                           <Badge
                             text={contract.structureManagerStatus === "VALIDATED" ? "Validé" : "En attente de validation"}
