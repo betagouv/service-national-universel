@@ -167,7 +167,7 @@ const buildQuery = (yesterdayEnd: Date) => {
   };
 };
 
-const processYoungsWithPagination = async (query: any, batchSize: number = 100): Promise<{ processed: number; errors: number }> => {
+const processYoungsWithPagination = async (query: any, batchSize: number = 30): Promise<{ processed: number; errors: number }> => {
   let totalProcessed = 0;
   let totalErrors = 0;
   let skip = 0;
