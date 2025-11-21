@@ -167,17 +167,33 @@ const buildQuery = (yesterdayEnd: Date) => {
   };
 };
 
-const processAllYoungs = async (youngs: any[]): Promise<{ processed: number; errors: number }> => {
+const processYoungsWithPagination = async (query: any, batchSize: number = 100): Promise<{ processed: number; errors: number }> => {
   let totalProcessed = 0;
   let totalErrors = 0;
+  let skip = 0;
+  let hasMore = true;
 
-  for (const young of youngs) {
-    const success = await processYoung(young);
-    if (success) {
-      totalProcessed++;
-    } else {
-      totalErrors++;
+  while (hasMore) {
+    const youngs = await YoungModel.find(query).skip(skip).limit(batchSize);
+    
+    if (youngs.length === 0) {
+      hasMore = false;
+      break;
     }
+
+    logger.info(`Processing batch: ${skip + 1} to ${skip + youngs.length} youngs`);
+
+    for (const young of youngs) {
+      const success = await processYoung(young);
+      if (success) {
+        totalProcessed++;
+      } else {
+        totalErrors++;
+      }
+    }
+
+    skip += batchSize;
+    hasMore = youngs.length === batchSize;
   }
 
   return { processed: totalProcessed, errors: totalErrors };
@@ -217,10 +233,10 @@ export const handler = async (): Promise<void> => {
   try {
     const { end: yesterdayEnd } = getYesterdayDateRange();
     const query = buildQuery(yesterdayEnd);
-    const youngs = await YoungModel.find(query);
-    logger.info(`Found ${youngs.length} youngs to process for RL deletion`);
+    const total = await YoungModel.countDocuments(query);
+    logger.info(`Found ${total} youngs to process for RL deletion`);
 
-    const { processed, errors } = await processAllYoungs(youngs);
+    const { processed, errors } = await processYoungsWithPagination(query);
     logger.info(`RL deletion cron completed: ${processed} processed, ${errors} errors`);
   } catch (e: any) {
     capture(e);
