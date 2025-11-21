@@ -1,11 +1,9 @@
-import { YoungModel } from "../models";
+import { YoungModel, LegalRepresentativeArchiveModel } from "../models";
 import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
-import { startSession, withTransaction, endSession, getDb, initDB } from "../mongo";
+import { startSession, withTransaction, endSession, initDB } from "../mongo";
 import { rateLimiterDeleteContactSIB } from "../rateLimiters";
-
-const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
 const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
   if (!birthdateAt) return false;
@@ -211,9 +209,7 @@ const archiveLegalRepresentatives = async (young: any, session: any): Promise<vo
     }
   }
   if (docs.length > 0) {
-    const db = getDb();
-    const collection = db.collection(LEGAL_REP_ARCHIVE_COLLECTION);
-    await collection.insertMany(docs, { session });
+    await LegalRepresentativeArchiveModel.insertMany(docs, { session });
   }
 };
 

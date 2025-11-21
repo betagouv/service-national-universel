@@ -1,9 +1,10 @@
-import { YoungModel } from "../../models";
+import { YoungModel, LegalRepresentativeArchiveModel } from "../../models";
 import { handler } from "../../crons/deleteLegalRepresentatives";
 import { dbConnect, dbClose } from "../helpers/db";
 import { getYoungWithCompleteParentsFixture } from "../fixtures/young";
 import { createYoungHelper } from "../helpers/young";
-import { getDb } from "../../mongo";
+import YoungPatchModel from "../../../src/crons/patch/models/youngPatch";
+import mongoose from "mongoose";
 
 jest.mock("../../brevo", () => ({
   deleteContact: jest.fn().mockResolvedValue(undefined),
@@ -14,8 +15,6 @@ jest.mock("../../rateLimiters", () => ({
     call: jest.fn((fn) => fn()),
   },
 }));
-
-const LEGAL_REP_ARCHIVE_COLLECTION = "legalRepresentativeArchives";
 
 const buildBirthdateForAge = (years: number, daysOffset: number = 0): Date => {
   const today = new Date();
@@ -30,10 +29,10 @@ beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
 
 beforeEach(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));  // 1. Connexion DB
   await YoungModel.deleteMany({});
-  const db = getDb();
-  await db.collection(LEGAL_REP_ARCHIVE_COLLECTION).deleteMany({});
-  await db.collection("youngPatches").deleteMany({});
+  await YoungPatchModel.deleteMany({});
+  await LegalRepresentativeArchiveModel.deleteMany({});
 });
 
 describe("deleteLegalRepresentatives E2E", () => {
@@ -135,9 +134,7 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       await handler();
 
-      const db = getDb();
-      const archiveCollection = db.collection(LEGAL_REP_ARCHIVE_COLLECTION);
-      const archives = await archiveCollection.find({ youngId: young._id }).toArray();
+      const archives = await LegalRepresentativeArchiveModel.find({ youngId: young._id });
 
       expect(archives.length).toBe(2);
 
@@ -269,16 +266,14 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       await handler();
 
-      const db = getDb();
-      const archiveCollection = db.collection(LEGAL_REP_ARCHIVE_COLLECTION);
-      const totalArchives = await archiveCollection.countDocuments({});
+      const totalArchives = await LegalRepresentativeArchiveModel.countDocuments({});
 
       expect(totalArchives).toBe(8);
 
-      const young1Archives = await archiveCollection.find({ youngId: young1._id }).toArray();
-      const young2Archives = await archiveCollection.find({ youngId: young2._id }).toArray();
-      const young3Archives = await archiveCollection.find({ youngId: young3._id }).toArray();
-      const young4Archives = await archiveCollection.find({ youngId: young4._id }).toArray();
+      const young1Archives = await LegalRepresentativeArchiveModel.find({ youngId: young1._id });
+      const young2Archives = await LegalRepresentativeArchiveModel.find({ youngId: young2._id });
+      const young3Archives = await LegalRepresentativeArchiveModel.find({ youngId: young3._id });
+      const young4Archives = await LegalRepresentativeArchiveModel.find({ youngId: young4._id });
 
       expect(young1Archives.length).toBe(2);
       expect(young2Archives.length).toBe(2);
@@ -287,7 +282,7 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       const youngs = [young1, young2, young3, young4];
 
-      const allArchives = await archiveCollection.find({ youngId: { $in: youngs.map((y) => y._id) } }).toArray();
+      const allArchives = await LegalRepresentativeArchiveModel.find({ youngId: { $in: youngs.map((y) => y._id) } });
 
       for (const young of youngs) {
         const archives = allArchives.filter((a) => String(a.youngId) === String(young._id));
@@ -328,7 +323,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       young.parent2FirstName = "UpdatedName2";
       await young.save();
 
-      const db = getDb();
+      const db = mongoose.connection;
       const patchesCollection = db.collection("young_patches");
       const patchesBeforeCount = await patchesCollection.countDocuments({ ref: young._id });
       expect(patchesBeforeCount).toBeGreaterThan(0);
@@ -363,7 +358,7 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       await handler();
 
-      const db = getDb();
+      const db = mongoose.connection;
       const patchesCollection = db.collection("youngPatches");
       const patchesAfter = await patchesCollection.find({ ref: young._id }).toArray();
 
@@ -397,7 +392,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       young.firstName = "UpdatedFirstName";
       await young.save();
 
-      const db = getDb();
+      const db = mongoose.connection;
       const patchesCollection = db.collection("youngPatches");
       const patchesBeforeHandler = await patchesCollection.find({ ref: young._id }).toArray();
       const nonParentPatchesBefore = patchesBeforeHandler.filter((patch: any) => {
@@ -434,7 +429,7 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       await handler();
 
-      const db = getDb();
+      const db = mongoose.connection;
       const patchesCollection = db.collection("young_patches");
       const patches = await patchesCollection.find({ ref: young._id }).toArray();
 
@@ -544,10 +539,8 @@ describe("deleteLegalRepresentatives E2E", () => {
 
       await handler();
 
-      const db = getDb();
-      const archiveCollection = db.collection(LEGAL_REP_ARCHIVE_COLLECTION);
-      const archives1 = await archiveCollection.find({ youngId: young1._id }).toArray();
-      const archives2 = await archiveCollection.find({ youngId: young2._id }).toArray();
+      const archives1 = await LegalRepresentativeArchiveModel.find({ youngId: young1._id });
+      const archives2 = await LegalRepresentativeArchiveModel.find({ youngId: young2._id });
 
       expect(archives1.length).toBe(0);
       expect(archives2.length).toBe(0);
