@@ -29,6 +29,7 @@ function validateEmail(value) {
 }
 
 function validateMissionDates(fieldName, value) {
+  console.log("fieldName", fieldName, value);
   if (!value) return undefined;
 
   const dateParts = value.split("-");
@@ -39,16 +40,13 @@ function validateMissionDates(fieldName, value) {
   const day = parseInt(dateParts[2], 10);
 
   const selectedDate = new Date(year, month, day);
+  const limitDate = new Date(2026, 10, 30);
 
-  if (fieldName === "missionStartAt") {
-    const limitDate = new Date(2026, 6, 15);
-    if (selectedDate > limitDate) {
-      return "Début au plus tard le 15/07/2026";
-    }
-  } else if (fieldName === "missionEndAt") {
-    const limitDate = new Date(2026, 10, 9);
-    if (selectedDate > limitDate) {
-      return "Fin au plus tard le 09/11/2026";
+  if (selectedDate > limitDate) {
+    if (fieldName === "missionStartAt") {
+      return "Début au plus tard le 30/11/2026";
+    } else if (fieldName === "missionEndAt") {
+      return "Fin au plus tard le 30/11/2026";
     }
   }
 
@@ -520,7 +518,7 @@ export default function Contract({ young }) {
                           <ContractField
                             name="missionStartAt"
                             placeholder="jj/mm/yyyy"
-                            max="2026-07-15"
+                            max="2026-11-30"
                             type="date"
                             context={context}
                             validate={(v) => validateMissionDates("missionStartAt", v)}
@@ -529,7 +527,7 @@ export default function Contract({ young }) {
                           <ContractField
                             name="missionEndAt"
                             placeholder="jj/mm/yyyy"
-                            max="2026-11-09"
+                            max="2026-11-30"
                             type="date"
                             context={context}
                             validate={(v) => validateMissionDates("missionEndAt", v)}
@@ -1272,9 +1270,23 @@ const ContractOld = ({ initialValues, onSubmit, contract, isYoungAdult, young, s
                       Le présent contrat, pour la réalisation de la mission indiquée ci-dessus, prend effet à la date de signature du présent contrat par les trois parties
                       prenantes. <br />
                       La mission d'intérêt général débute le
-                      <ContractField name="missionStartAt" placeholder="jj/mm/yyyy" type="date" context={context} validate={(v) => validateMissionDates("missionStartAt", v)} />
+                      <ContractField
+                        name="missionStartAt"
+                        placeholder="jj/mm/yyyy"
+                        max="2026-11-30"
+                        type="date"
+                        context={context}
+                        validate={(v) => validateMissionDates("missionStartAt", v)}
+                      />
                       jusqu'au
-                      <ContractField name="missionEndAt" placeholder="jj/mm/yyyy" type="date" context={context} validate={(v) => validateMissionDates("missionEndAt", v)} />
+                      <ContractField
+                        name="missionEndAt"
+                        placeholder="jj/mm/yyyy"
+                        max="2026-11-30"
+                        type="date"
+                        context={context}
+                        validate={(v) => validateMissionDates("missionEndAt", v)}
+                      />
                       <br /> Le volontaire effectuera un total de
                       <ContractField name="missionDuration" placeholder="nombre d'heure" context={context} type="number" />
                       heures de MIG.
