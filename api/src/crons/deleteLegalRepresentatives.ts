@@ -59,7 +59,7 @@ const cleanPatches = async (young: any, session: any): Promise<void> => {
   for (const patch of patches) {
     const updatedOps = patch.ops.filter((op: any) => {
       const fieldName = op.path.split("/")[1];
-      return !fieldName || (!fieldName.startsWith("parent1") && !fieldName.startsWith("parent2"));
+      return !fieldName || (!fieldName.startsWith("parent1") && !fieldName.startsWith("parent2") && !fieldName.startsWith("rulesParent"));
     });
 
     if (updatedOps.length === 0) {
