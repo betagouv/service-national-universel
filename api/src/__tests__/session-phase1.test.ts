@@ -30,7 +30,9 @@ jest.mock("../utils", () => ({
   getSignedUrl: () => "",
 }));
 
-beforeAll(dbConnect);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
 afterAll(dbClose);
 afterEach(resetAppAuth);
 

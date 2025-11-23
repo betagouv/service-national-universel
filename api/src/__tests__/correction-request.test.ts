@@ -10,7 +10,9 @@ import { ERRORS, YOUNG_STATUS } from "snu-lib";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 
-beforeAll(dbConnect);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
 afterAll(dbClose);
 
 describe("Young Correction Request Controller", () => {

@@ -21,7 +21,7 @@ import { addPermissionHelper } from "./helpers/permissions";
 jest.mock("passport");
 
 beforeAll(async () => {
-  await dbConnect();
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.REFERENT_REGION] } });
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PROGRAM, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.PROGRAM, PERMISSION_ACTIONS.FULL, [
