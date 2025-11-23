@@ -196,7 +196,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       expect(updatedYoung?.parent1Region).toBeUndefined();
       expect(updatedYoung?.parent1Country).toBeUndefined();
       expect(updatedYoung?.parent1Location).toMatchObject({});
-      expect(updatedYoung?.parent1FromFranceConnect).toBe("false");
+      expect(updatedYoung?.parent1FromFranceConnect).toBeUndefined();
       expect(updatedYoung?.parent1Inscription2023Token).toBeUndefined();
       expect(updatedYoung?.parent1DataVerified).toBeUndefined();
       expect(updatedYoung?.parent1AddressVerified).toBeUndefined();
@@ -222,7 +222,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       expect(updatedYoung?.parent2Region).toBeUndefined();
       expect(updatedYoung?.parent2Country).toBeUndefined();
       expect(updatedYoung?.parent2Location).toMatchObject({});
-      expect(updatedYoung?.parent2FromFranceConnect).toBe("false");
+      expect(updatedYoung?.parent2FromFranceConnect).toBeUndefined();
       expect(updatedYoung?.parent2Inscription2023Token).toBeUndefined();
       expect(updatedYoung?.parent2DataVerified).toBeUndefined();
       expect(updatedYoung?.parent2AddressVerified).toBeUndefined();

@@ -1182,7 +1182,6 @@ export const YoungSchema = {
   parent1FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le parent 1 s'est identifié via France Connect",
     },
@@ -1335,7 +1334,6 @@ export const YoungSchema = {
   parent2FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
     },
