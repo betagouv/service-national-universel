@@ -5,19 +5,6 @@ import { logger } from "../logger";
 import { startSession, withTransaction, endSession, initDB } from "../mongo";
 import { rateLimiterDeleteContactSIB } from "../rateLimiters";
 
-const isJPlus1Birthday = (birthdateAt: Date | undefined): boolean => {
-  if (!birthdateAt) return false;
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-  const birthday = new Date(birthdateAt);
-  birthday.setHours(0, 0, 0, 0);
-  const yesterday = new Date(today);
-  yesterday.setDate(yesterday.getDate() - 1);
-  yesterday.setHours(0, 0, 0, 0);
-  birthday.setFullYear(birthday.getFullYear() + 18);
-  return birthday.getTime() === yesterday.getTime();
-};
-
 const getParentFields = (): string[] => {
   const fields: string[] = [];
   for (let i = 1; i <= 2; i++) {
@@ -103,8 +90,6 @@ async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> 
 
 const processYoung = async (young: any): Promise<boolean> => {
   try {
-    if (!isJPlus1Birthday(young.birthdateAt)) { return false; }
-
     if (young.rlDeleted === true) {
       logger.debug(`Young ${young._id} already has rlDeleted = true, skipping`);
       return false;
