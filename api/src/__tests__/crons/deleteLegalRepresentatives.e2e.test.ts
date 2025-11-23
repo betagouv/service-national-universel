@@ -25,11 +25,10 @@ const buildBirthdateForAge = (years: number, daysOffset: number = 0): Date => {
   return targetDate;
 };
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
-afterAll(dbClose);
+beforeAll(async () => await dbConnect(__filename.slice(__dirname.length + 1, -3)));
+afterAll(async () => await dbClose());
 
 beforeEach(async () => {
-  await dbConnect(__filename.slice(__dirname.length + 1, -3));  // 1. Connexion DB
   await YoungModel.deleteMany({});
   await YoungPatchModel.deleteMany({});
   await LegalRepresentativeArchiveModel.deleteMany({});
