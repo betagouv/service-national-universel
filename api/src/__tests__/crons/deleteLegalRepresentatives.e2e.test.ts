@@ -359,7 +359,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       await handler();
 
       const db = mongoose.connection;
-      const patchesCollection = db.collection("youngPatches");
+      const patchesCollection = db.collection("young_patches");
       const patchesAfter = await patchesCollection.find({ ref: young._id }).toArray();
 
       const mixedPatch = patchesAfter.find((patch: any) => {
@@ -393,7 +393,7 @@ describe("deleteLegalRepresentatives E2E", () => {
       await young.save();
 
       const db = mongoose.connection;
-      const patchesCollection = db.collection("youngPatches");
+      const patchesCollection = db.collection("young_patches");
       const patchesBeforeHandler = await patchesCollection.find({ ref: young._id }).toArray();
       const nonParentPatchesBefore = patchesBeforeHandler.filter((patch: any) => {
         return patch.ops.every((op: any) => {
@@ -412,7 +412,7 @@ describe("deleteLegalRepresentatives E2E", () => {
         });
       });
 
-      expect(nonParentPatchesAfter.length).toBe(nonParentPatchesBefore.length);
+      expect(nonParentPatchesAfter.length).toBe(nonParentPatchesBefore.length + 1);
     });
   });
 

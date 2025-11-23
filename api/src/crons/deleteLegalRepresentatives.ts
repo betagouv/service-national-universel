@@ -64,7 +64,7 @@ const cleanPatches = async (young: any, session: any): Promise<void> => {
 
     if (updatedOps.length === 0) {
       await patch.deleteOne({ session });
-    } else {
+    } else if (updatedOps.length !== patch.ops.length) {
       patch.set({ ops: updatedOps });
       await patch.save({ session });
     }
@@ -92,18 +92,9 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 };
 async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> {
   const parentFields = getParentFields();
-  const unsetFields: any = {};
   parentFields.forEach((field) => {
-    unsetFields[field] = 1;
+    young.set(field, undefined);
   });
-  
-  await YoungModel.updateOne(
-    { _id: young._id },
-    {
-      $unset: unsetFields,
-    },
-    { session }
-  );
 }
 
 const processYoung = async (young: any): Promise<boolean> => {
