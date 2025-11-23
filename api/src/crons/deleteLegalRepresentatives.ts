@@ -55,7 +55,7 @@ const getParentFields = (): string[] => {
 };
 
 const cleanPatches = async (young: any, session: any): Promise<void> => {
-  const patches = await young.patches.find({ ref: young._id });
+  const patches = await young.patches.find({ ref: young._id }).session(session);
   for (const patch of patches) {
     const updatedOps = patch.ops.filter((op: any) => {
       const fieldName = op.path.split("/")[1];
