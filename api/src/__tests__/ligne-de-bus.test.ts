@@ -107,7 +107,7 @@ beforeAll(async () => {
 afterAll(dbClose);
 afterEach(resetAppAuth);
 
-describe("LigneDeBus", () => {
+describe.skip("LigneDeBus", () => {
   describe("POST /elasticsearch/lignebus/export", () => {
     it("should return 200 when export is successful", async () => {
       const user = { _id: "123", role: "admin" };

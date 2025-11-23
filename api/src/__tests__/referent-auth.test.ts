@@ -16,9 +16,15 @@ jest.mock("../brevo", () => ({
   sendEmail: () => Promise.resolve(),
 }));
 
-beforeAll(dbConnect);
-afterAll(dbClose);
-afterEach(resetAppAuth);
+beforeAll(async () => {
+    await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
+afterAll(async () => {
+    await dbClose();
+});
+afterEach(() => {
+    resetAppAuth();
+});
 
 describe("Referent", () => {
   let res;
