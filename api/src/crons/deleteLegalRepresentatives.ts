@@ -93,7 +93,11 @@ const deleteParentEmailsFromBrevo = async (parent1Email: string | undefined, par
 async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> {
   const parentFields = getParentFields();
   parentFields.forEach((field) => {
+    if (field.includes("Location")) {
+      young.set(field, { lat: 0, lon: 0 });
+    } else {
     young.set(field, undefined);
+    }
   });
 }
 
