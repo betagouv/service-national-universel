@@ -8,7 +8,6 @@ import { DropdownButton } from "@snu/ds/admin";
 
 import ButtonRelanceVerif from "./ButtonRelanceVerif";
 import VerifClassButton from "./VerifClassButton";
-import ButtonManualInvite from "./ButtonManualInvite";
 import ButtonLinkInvite from "./ButtonLinkInvite";
 import ButtonHandleInscription from "./ButtonHandleInscription";
 import ButtonInscriptionEnMasse from "./ButtonInscriptionEnMasse";
@@ -104,14 +103,6 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
           key: "link",
           render: <ButtonLinkInvite key="invite" url={url} />,
         },
-        ...(!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]
-          ? [
-              {
-                key: "manual",
-                render: <ButtonManualInvite key="manual" id={id} />,
-              },
-            ]
-          : []),
         ...(isReferentRegDep(user) || (isAdmin(user) && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE])
           ? [
               {

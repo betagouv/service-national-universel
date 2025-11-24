@@ -320,17 +320,19 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
                 {young.status === YOUNG_STATUS.VALIDATED && user.role === ROLES.ADMIN && <PhaseStatusSelector young={young} onChange={onChange} />}
               </div>
             </div>
-            <Field
-              mode="edition"
-              name="status"
-              label={translate(phase)}
-              value={translateInscriptionStatus(young.status)}
-              transformer={translate}
-              type="select"
-              options={statusOptions}
-              onChange={onSelectStatus}
-              className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
-            />
+            {user.role === ROLES.ADMIN && (
+              <Field
+                mode="edition"
+                name="status"
+                label={translate(phase)}
+                value={translateInscriptionStatus(young.status)}
+                transformer={translate}
+                type="select"
+                options={statusOptions}
+                onChange={onSelectStatus}
+                className={young.status === YOUNG_STATUS.DELETED ? "my-[15px]" : ""}
+              />
+            )}
 
             {young.status !== YOUNG_STATUS.DELETED && ![ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role) && (
               <div className="my-[15px] flex items-center justify-between">
