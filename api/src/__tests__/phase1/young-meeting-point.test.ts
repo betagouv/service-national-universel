@@ -1,12 +1,12 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
-import getNewYoungFixture from "./fixtures/young";
-import { createYoungHelper, notExistingYoungId } from "./helpers/young";
-import { createMeetingPointHelper, notExistingMeetingPointId } from "./helpers/meetingPoint";
-import getNewMeetingPointFixture from "./fixtures/meetingPoint";
-import { createBusHelper } from "./helpers/bus";
-import getNewBusFixture from "./fixtures/bus";
-import { dbConnect, dbClose } from "./helpers/db";
+import getAppHelper from "../helpers/app";
+import getNewYoungFixture from "../fixtures/young";
+import { createYoungHelper, notExistingYoungId } from "../helpers/young";
+import { createMeetingPointHelper, notExistingMeetingPointId } from "../helpers/meetingPoint";
+import getNewMeetingPointFixture from "../fixtures/meetingPoint";
+import { createBusHelper } from "../helpers/bus";
+import getNewBusFixture from "../fixtures/bus";
+import { dbConnect, dbClose } from "../helpers/db";
 
 beforeAll(dbConnect);
 afterAll(dbClose);

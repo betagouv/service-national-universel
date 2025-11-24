@@ -1,20 +1,20 @@
 import request from "supertest";
 import mongoose from "mongoose";
 import { ROLES } from "snu-lib";
-import { LigneBusModel } from "../models";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
-import { mockEsClient } from "./helpers/es";
-import { createSessionPhase1, notExistingSessionPhase1Id } from "./helpers/sessionPhase1";
-import { createSessionWithCohesionCenter } from "./helpers/cohesionCenter";
-import { dbConnect, dbClose } from "./helpers/db";
-import { createReferentHelper } from "./helpers/referent";
-import { createCohortHelper } from "./helpers/cohort";
-import { getNewCohesionCenterFixtureV2 } from "./fixtures/cohesionCenter";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
-import { getNewReferentFixture } from "./fixtures/referent";
-import getNewCohortFixture from "./fixtures/cohort";
-import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
-import { ReferentAuthFacade } from "../../../apiv2/src/admin/infra/iam/auth/ReferentAuth.facade";
+import { LigneBusModel } from "../../models";
+import getAppHelper, { resetAppAuth } from "../helpers/app";
+import { mockEsClient } from "../helpers/es";
+import { createSessionPhase1, notExistingSessionPhase1Id } from "../helpers/sessionPhase1";
+import { createSessionWithCohesionCenter } from "../helpers/cohesionCenter";
+import { dbConnect, dbClose } from "../helpers/db";
+import { createReferentHelper } from "../helpers/referent";
+import { createCohortHelper } from "../helpers/cohort";
+import { getNewCohesionCenterFixtureV2 } from "../fixtures/cohesionCenter";
+import { getNewSessionPhase1Fixture } from "../fixtures/sessionPhase1";
+import { getNewReferentFixture } from "../fixtures/referent";
+import getNewCohortFixture from "../fixtures/cohort";
+import getNewLigneBusFixture from "../fixtures/PlanDeTransport/ligneBus";
+import { ReferentAuthFacade } from "../../../../apiv2/src/admin/infra/iam/auth/ReferentAuth.facade";
 
 mockEsClient({
   sessionphase1: [{ _id: "sessionId" }],

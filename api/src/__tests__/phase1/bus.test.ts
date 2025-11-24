@@ -1,8 +1,8 @@
 import request from "supertest";
-import getNewBusFixture from "./fixtures/bus";
-import getAppHelper from "./helpers/app";
-import { createBusHelper, notExistingBusId } from "./helpers/bus";
-import { dbConnect, dbClose } from "./helpers/db";
+import getNewBusFixture from "../fixtures/bus";
+import getAppHelper from "../helpers/app";
+import { createBusHelper, notExistingBusId } from "../helpers/bus";
+import { dbConnect, dbClose } from "../helpers/db";
 
 beforeAll(dbConnect);
 afterAll(dbClose);

@@ -4,23 +4,23 @@ const { ObjectId } = Types;
 
 import { department2region, FUNCTIONAL_ERRORS, YOUNG_STATUS, INSCRIPTION_GOAL_LEVELS } from "snu-lib";
 
-import { InscriptionGoalModel, LigneBusModel, YoungModel } from "../models";
+import { InscriptionGoalModel, LigneBusModel, YoungModel } from "../../models";
 
-import { dbConnect, dbClose } from "./helpers/db";
-import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import getAppHelper from "../helpers/app";
 
-import getNewYoungFixture from "./fixtures/young";
-import { createYoungHelper } from "./helpers/young";
-import { createCohortHelper } from "./helpers/cohort";
-import getNewCohortFixture from "./fixtures/cohort";
-import { createSessionPhase1 } from "./helpers/sessionPhase1";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
-import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
-import { createPointDeRassemblementHelper } from "./helpers/PlanDeTransport/pointDeRassemblement";
-import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
-import { createInscriptionGoal } from "./helpers/inscriptionGoal";
-import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
-import { getCompletionObjectifs } from "../services/inscription-goal";
+import getNewYoungFixture from "../fixtures/young";
+import { createYoungHelper } from "../helpers/young";
+import { createCohortHelper } from "../helpers/cohort";
+import getNewCohortFixture from "../fixtures/cohort";
+import { createSessionPhase1 } from "../helpers/sessionPhase1";
+import { getNewSessionPhase1Fixture } from "../fixtures/sessionPhase1";
+import getNewLigneBusFixture from "../fixtures/PlanDeTransport/ligneBus";
+import { createPointDeRassemblementHelper } from "../helpers/PlanDeTransport/pointDeRassemblement";
+import getNewPointDeRassemblementFixture from "../fixtures/PlanDeTransport/pointDeRassemblement";
+import { createInscriptionGoal } from "../helpers/inscriptionGoal";
+import getNewInscriptionGoalFixture from "../fixtures/inscriptionGoal";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);

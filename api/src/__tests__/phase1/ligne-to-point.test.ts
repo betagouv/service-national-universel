@@ -1,15 +1,15 @@
 import request from "supertest";
-import { getAppHelperWithAcl } from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
-import { createPointDeRassemblementWithBus, notExistingMeetingPointId } from "./helpers/PlanDeTransport/pointDeRassemblement";
-import { createSessionPhase1 } from "./helpers/sessionPhase1";
-import { createCohesionCenter } from "./helpers/cohesionCenter";
-import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
-import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
-import { PointDeRassemblementModel, LigneToPointModel } from "../models";
-import { PermissionModel } from "../models/permissions/permission";
-import { addPermissionHelper } from "./helpers/permissions";
+import { getAppHelperWithAcl } from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import { createPointDeRassemblementWithBus, notExistingMeetingPointId } from "../helpers/PlanDeTransport/pointDeRassemblement";
+import { createSessionPhase1 } from "../helpers/sessionPhase1";
+import { createCohesionCenter } from "../helpers/cohesionCenter";
+import getNewPointDeRassemblementFixture from "../fixtures/PlanDeTransport/pointDeRassemblement";
+import { getNewCohesionCenterFixture } from "../fixtures/cohesionCenter";
+import { getNewSessionPhase1Fixture } from "../fixtures/sessionPhase1";
+import { PointDeRassemblementModel, LigneToPointModel } from "../../models";
+import { PermissionModel } from "../../models/permissions/permission";
+import { addPermissionHelper } from "../helpers/permissions";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 
 beforeAll(async () => {
