@@ -8,18 +8,7 @@ import dayjs from "dayjs";
 import { Listbox, Transition } from "@headlessui/react";
 import { AiOutlinePlus } from "react-icons/ai";
 import { HiOutlineChevronDown, HiOutlineChevronUp, HiOutlineSparkles } from "react-icons/hi";
-import {
-  canInviteYoung,
-  getDepartmentNumber,
-  isSuperAdmin,
-  translateCniExpired,
-  translateYoungSource,
-  FeatureFlagName,
-  PERMISSION_RESOURCES,
-  isCreateAuthorized,
-  UserDto,
-  YoungDto,
-} from "snu-lib";
+import { getDepartmentNumber, isSuperAdmin, translateCniExpired, translateYoungSource, UserDto, YoungDto } from "snu-lib";
 
 import { Button } from "@snu/ds/admin";
 
@@ -248,18 +237,8 @@ export default function Inscription(): JSX.Element {
   const { data: classe, isLoading: isClassLoading } = useClass(selectedClassId);
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const cohort = selectedClassId ? cohorts.find((c) => c.name === classe?.cohort) : null;
-  let baseInscriptionPath = hasFilterSelectedOneClass ? `/volontaire/create?classeId=${selectedClassId}` : "/volontaire/create";
-  if (hasFilterSelectedOneClass && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]) {
-    baseInscriptionPath = `/classes/${selectedClassId}/inscription-manuelle`;
-  }
-  const invitationState = selectedClassId ? canInviteYoung(user, cohort) : isCreateAuthorized({ user, resource: PERMISSION_RESOURCES.YOUNG, ignorePolicy: true });
 
   if (isLabelsPending) return <Loader />;
-
-  const handleClickInscription = (): void => {
-    plausibleEvent("Inscriptions/CTA - Nouvelle inscription");
-    history.push(baseInscriptionPath);
-  };
 
   const handleBrevoContactCreationList = async (formValues: BrevoListData): Promise<void> => {
     await exportToCsv(
@@ -280,20 +259,12 @@ export default function Inscription(): JSX.Element {
         <div className="flex items-center justify-between py-8">
           <Title>Inscriptions</Title>
           <div className="flex items-center gap-2">
-            {!isClassLoading && invitationState ? (
-              <Button
-                onClick={handleClickInscription}
-                leftIcon={<AiOutlinePlus className="h-4 w-4" />}
-                className="w-full ml-2"
-                title={selectedFilters?.classeId?.filter?.length === 1 ? "Nouvelle inscription CLE" : "Nouvelle inscription HTS"}
-              />
-            ) : null}
             {isSuperAdmin(user) ? (
               <Button type="wired" leftIcon={<HiOutlineSparkles size={20} className="mt-1" />} title="Brevo" className="ml-2" onClick={() => setIsCreationListeBrevo(true)} />
             ) : null}
 
-            {!!paramData?.count && (
-              <>
+            {!!paramData?.count && (isSuperAdmin(user) || user.role === ROLES.REFERENT_DEPARTMENT) && (
+              <div className="flex items-center gap-2">
                 <ExportInscriptionsButton
                   selectedFilters={selectedFilters}
                   isAsync={paramData.count > MAX_EXPORT_VOLONTAIRES_SYNC}
@@ -307,7 +278,7 @@ export default function Inscription(): JSX.Element {
                     disabled={paramData.count > MAX_EXPORT_VOLONTAIRES}
                   />
                 )}
-              </>
+              </div>
             )}
           </div>
         </div>
