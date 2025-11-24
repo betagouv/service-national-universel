@@ -50,18 +50,9 @@ export default function CohesionCenterInfos({ cohesionCenter, cohort, setModalAf
           {cohesionCenter.academy}
         </p>
       </div>
-      {/* <Link to={`/centre/${cohesionCenter._id}`} className="w-full" target="blank">
-        <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
-      </Link> */}
-
-      {/* {cohort.type !== COHORT_TYPE.CLE && isOpenForAffectation && (
-        <button
-          onClick={() => setModalAffectation({ ...modalAffectations, isOpen: true })}
-          className="flex w-fit mt-4 cursor-pointer flex-row items-center justify-center gap-2 self-center rounded border-[1px] border-gray-300 p-2">
-          <Refresh />
-          <div>Changer l&apos;affectation</div>
-        </button>
-      )} */}
+      <Link to={`/centre/${cohesionCenter._id}`} className="w-full" target="blank">
+        <Button type="tertiary" title="Voir le centre" className="w-full" />
+      </Link>
     </div>
   );
 }
