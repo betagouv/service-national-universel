@@ -179,7 +179,7 @@ export default function Details(props) {
         validatedYoung={validatedYoung}
       />
 
-      {classe.referents?.length && <ReferentInfos classe={classe} currentReferent={referent} rights={rights} isLoading={isLoading} onModifierReferent={handleModiferReferent} />}
+
 
       {(rights.showCenter || rights.showPDR) && classe?.status !== STATUS_CLASSE.WITHDRAWN && (
         <SejourInfos
