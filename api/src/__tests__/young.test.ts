@@ -69,7 +69,7 @@ jest.mock("node-fetch");
 const getMimeFromFileSpy = jest.spyOn(fileUtils, "getMimeFromFile");
 
 beforeAll(async () => {
-  await dbConnect();
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);

@@ -18,7 +18,7 @@ jest.mock("../brevo", () => ({
 }));
 
 beforeAll(async () => {
-  await dbConnect();
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } });
   await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.MISSION, PERMISSION_ACTIONS.FULL);

@@ -12,7 +12,7 @@ import { PermissionModel } from "../../models/permissions/permission";
 import { addPermissionHelper } from "../helpers/permissions";
 
 beforeAll(async () => {
-  await dbConnect();
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
   await addPermissionHelper(
     [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE],

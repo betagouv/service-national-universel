@@ -9,8 +9,11 @@ import getAppHelper from "./helpers/app";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
 
-beforeAll(dbConnect);
-afterAll(dbClose);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});afterAll(async () => {
+  await dbClose();
+});
 
 describe("Young Note Controller", () => {
   describe("POST /young/:youngId/note", () => {

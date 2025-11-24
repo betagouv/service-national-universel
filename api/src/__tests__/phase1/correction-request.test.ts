@@ -2,15 +2,17 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { dbConnect, dbClose } from "./helpers/db";
-import getAppHelper from "./helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import getAppHelper from "../helpers/app";
 import { ERRORS, YOUNG_STATUS } from "snu-lib";
 
 // young
-import getNewYoungFixture from "./fixtures/young";
-import { createYoungHelper } from "./helpers/young";
+import getNewYoungFixture from "../fixtures/young";
+import { createYoungHelper } from "../helpers/young";
 
-beforeAll(dbConnect);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
 afterAll(dbClose);
 
 describe("Young Correction Request Controller", () => {

@@ -1,6 +1,6 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
+import getAppHelper from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
 
 beforeAll(dbConnect);
 afterAll(dbClose);

@@ -1,15 +1,15 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
-import getAppHelper from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
-import getNewInscriptionGoalFixture from "./fixtures/inscriptionGoal";
-import { createInscriptionGoal } from "./helpers/inscriptionGoal";
+import getAppHelper from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import getNewInscriptionGoalFixture from "../fixtures/inscriptionGoal";
+import { createInscriptionGoal } from "../helpers/inscriptionGoal";
 import { department2region, ERRORS, FUNCTIONAL_ERRORS, INSCRIPTION_GOAL_LEVELS, region2department, YOUNG_STATUS } from "snu-lib";
-import { createYoungHelper } from "./helpers/young";
-import getNewYoungFixture from "./fixtures/young";
-import { getCompletionObjectifs } from "../services/inscription-goal";
-import { createCohortHelper } from "./helpers/cohort";
-import getNewCohortFixture from "./fixtures/cohort";
+import { createYoungHelper } from "../helpers/young";
+import getNewYoungFixture from "../fixtures/young";
+import { getCompletionObjectifs } from "../../services/inscription-goal";
+import { createCohortHelper } from "../helpers/cohort";
+import getNewCohortFixture from "../fixtures/cohort";
 
 beforeAll(dbConnect);
 afterAll(dbClose);

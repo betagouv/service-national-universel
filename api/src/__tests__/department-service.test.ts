@@ -18,7 +18,9 @@ import { createYoungHelper } from "./helpers/young";
 import { ROLES } from "snu-lib";
 import { CohortModel, DepartmentServiceModel, ReferentModel } from "../models";
 
-beforeAll(dbConnect);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
 afterAll(dbClose);
 afterEach(resetAppAuth);
 beforeEach(async () => {

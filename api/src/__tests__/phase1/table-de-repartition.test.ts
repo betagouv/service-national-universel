@@ -1,12 +1,12 @@
 import request from "supertest";
-import { getAppHelperWithAcl } from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
-import { createReferentHelper, deleteReferentByIdHelper } from "./helpers/referent";
-import { getNewReferentFixture } from "./fixtures/referent";
-import { TableDeRepartitionModel } from "../models";
-import { PermissionModel } from "../models/permissions/permission";
+import { getAppHelperWithAcl } from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import { createReferentHelper, deleteReferentByIdHelper } from "../helpers/referent";
+import { getNewReferentFixture } from "../fixtures/referent";
+import { TableDeRepartitionModel } from "../../models";
+import { PermissionModel } from "../../models/permissions/permission";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
-import { addPermissionHelper } from "./helpers/permissions";
+import { addPermissionHelper } from "../helpers/permissions";
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
