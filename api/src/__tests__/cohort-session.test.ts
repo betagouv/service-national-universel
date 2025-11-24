@@ -22,7 +22,9 @@ import getNewCohortFixture from "./fixtures/cohort";
 import { createCohortGroupHelper } from "./helpers/cohortGroup";
 import getNewCohortGroupFixture from "./fixtures/cohortGroup";
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
 afterAll(dbClose);
 
 describe("Cohort Session Controller", () => {

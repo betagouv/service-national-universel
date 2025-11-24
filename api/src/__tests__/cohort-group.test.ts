@@ -6,9 +6,15 @@ import { COHORT_TYPE } from "snu-lib";
 import getNewCohortFixture from "./fixtures/cohort";
 import getNewYoungFixture from "./fixtures/young";
 
-beforeAll(dbConnect);
-afterAll(dbClose);
-afterEach(resetAppAuth);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});
+afterAll(async () => {
+  await dbClose();
+});
+afterEach(async () => {
+  await resetAppAuth();
+});
 afterEach(async () => {
   await clearDatabase();
   resetAppAuth();

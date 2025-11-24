@@ -11,9 +11,14 @@ import { STEPS2023, YOUNG_SITUATIONS } from "../utils";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
 
-beforeAll(dbConnect);
-afterAll(dbClose);
-afterEach(resetAppAuth);
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+});afterAll(async () => {
+  await dbClose();
+});
+afterEach(async () => {
+  await resetAppAuth();
+});
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
