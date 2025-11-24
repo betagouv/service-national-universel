@@ -58,7 +58,7 @@ class RateLimiter {
 }
 
 const rateLimiterContactSIB = new RateLimiter(10);
-const rateLimiterDeleteContactSIB = new RateLimiter(1);
+const rateLimiterDeleteContactSIB = new RateLimiter(9);
 
 module.exports = {
   rateLimiterContactSIB,
