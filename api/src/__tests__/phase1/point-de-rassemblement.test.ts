@@ -1,16 +1,16 @@
 import { fakerFR as faker } from "@faker-js/faker";
 import request from "supertest";
-import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
-import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
-import { createPointDeRassemblementHelper, createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/pointDeRassemblement";
-import { createCohesionCenter } from "./helpers/cohesionCenter";
-import { createSessionPhase1 } from "./helpers/sessionPhase1";
-import getNewYoungFixture from "./fixtures/young";
-import getAppHelper, { resetAppAuth } from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
-import { createYoungHelper } from "./helpers/young";
-import { SchemaDeRepartitionModel, PointDeRassemblementModel, LigneToPointModel } from "../models";
+import getNewPointDeRassemblementFixture from "../fixtures/PlanDeTransport/pointDeRassemblement";
+import { getNewCohesionCenterFixture } from "../fixtures/cohesionCenter";
+import { getNewSessionPhase1Fixture } from "../fixtures/sessionPhase1";
+import { createPointDeRassemblementHelper, createPointDeRassemblementWithBus } from "../helpers/PlanDeTransport/pointDeRassemblement";
+import { createCohesionCenter } from "../helpers/cohesionCenter";
+import { createSessionPhase1 } from "../helpers/sessionPhase1";
+import getNewYoungFixture from "../fixtures/young";
+import getAppHelper, { resetAppAuth } from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
+import { createYoungHelper } from "../helpers/young";
+import { SchemaDeRepartitionModel, PointDeRassemblementModel, LigneToPointModel } from "../../models";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),

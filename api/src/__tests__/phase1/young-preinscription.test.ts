@@ -1,12 +1,12 @@
 import request from "supertest";
-import getAppHelper from "./helpers/app";
-import { dbConnect, dbClose } from "./helpers/db";
+import getAppHelper from "../helpers/app";
+import { dbConnect, dbClose } from "../helpers/db";
 import { ERRORS, GRADES, YOUNG_STATUS } from "snu-lib";
 import { fakerFR as faker } from "@faker-js/faker";
-import { createCohortHelper } from "./helpers/cohort";
-import getNewCohortFixture from "./fixtures/cohort";
+import { createCohortHelper } from "../helpers/cohort";
+import getNewCohortFixture from "../fixtures/cohort";
 import { addYears } from "date-fns";
-import { CohortModel } from "../models";
+import { CohortModel } from "../../models";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);

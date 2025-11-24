@@ -1,13 +1,13 @@
 import request from "supertest";
 
-import { CohortModel, LigneBusModel, PlanTransportModel } from "../models";
+import { CohortModel, LigneBusModel, PlanTransportModel } from "../../models";
 
-import getAppHelper from "./helpers/app";
-import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
-import { dbConnect, dbClose } from "./helpers/db";
-import getPlanDeTransportFixture from "./fixtures/PlanDeTransport/planDeTransport";
-import { createCohortHelper } from "./helpers/cohort";
-import getNewCohortFixture from "./fixtures/cohort";
+import getAppHelper from "../helpers/app";
+import getNewLigneBusFixture from "../fixtures/PlanDeTransport/ligneBus";
+import { dbConnect, dbClose } from "../helpers/db";
+import getPlanDeTransportFixture from "../fixtures/PlanDeTransport/planDeTransport";
+import { createCohortHelper } from "../helpers/cohort";
+import getNewCohortFixture from "../fixtures/cohort";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);

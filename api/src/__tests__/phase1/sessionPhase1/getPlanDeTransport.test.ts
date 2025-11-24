@@ -2,10 +2,10 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import getAppHelper from "../helpers/app";
-import { dbConnect, dbClose } from "../helpers/db";
-import { createSessionPhase1 } from "../helpers/sessionPhase1";
-import { getNewSessionPhase1Fixture } from "../fixtures/sessionPhase1";
+import getAppHelper from "../../helpers/app";
+import { dbConnect, dbClose } from "../../helpers/db";
+import { createSessionPhase1 } from "../../helpers/sessionPhase1";
+import { getNewSessionPhase1Fixture } from "../../fixtures/sessionPhase1";
 
 beforeAll(dbConnect);
 afterAll(dbClose);
