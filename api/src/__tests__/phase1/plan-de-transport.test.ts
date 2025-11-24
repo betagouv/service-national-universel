@@ -13,15 +13,15 @@ import {
   ClasseModel,
   PlanTransportModel,
   CohortModel,
-} from "../models";
+} from "../../models";
 
-import { getNewImportPlanTransportFixture, getNewImportPlanTransportLineFixture } from "./fixtures/PlanDeTransport/importPlanTransport";
-import getNewCohortFixture from "./fixtures/cohort";
+import { getNewImportPlanTransportFixture, getNewImportPlanTransportLineFixture } from "../fixtures/PlanDeTransport/importPlanTransport";
+import getNewCohortFixture from "../fixtures/cohort";
 
-import { dbConnect, dbClose, mockTransaction } from "./helpers/db";
-import getAppHelper from "./helpers/app";
-import { createCohortHelper } from "./helpers/cohort";
-import { initPlanTransport, getXlsxBufferPlanTransport } from "./helpers/PlanDeTransport/planDeTransport";
+import { dbConnect, dbClose, mockTransaction } from "../helpers/db";
+import getAppHelper from "../helpers/app";
+import { createCohortHelper } from "../helpers/cohort";
+import { initPlanTransport, getXlsxBufferPlanTransport } from "../helpers/PlanDeTransport/planDeTransport";
 
 const { ObjectId } = Types;
 
