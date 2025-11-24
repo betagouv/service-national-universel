@@ -13,11 +13,8 @@ afterAll(async () => {
   await dbClose();
 });
 afterEach(async () => {
-  await resetAppAuth();
-});
-afterEach(async () => {
   await clearDatabase();
-  resetAppAuth();
+  await resetAppAuth();
 });
 
 jest.mock("passport");
