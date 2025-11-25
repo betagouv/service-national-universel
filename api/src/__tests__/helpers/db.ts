@@ -14,10 +14,11 @@ export const dbConnect = async (customName = "main") => {
   mongoose.Promise = global.Promise;
   db = mongoose.connection;
 
-  const dbName = "snu-test_" + dbNameSuffix + "?directConnection=true";
+  const dbName = "snu-test_" + dbNameSuffix;
   mongoose.set("strictQuery", false);
   await mongoose.connect(`${MONGO_URL}${dbName}`, {
     appName: "snu-test",
+    directConnection: true,
   });
 };
 
