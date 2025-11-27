@@ -469,6 +469,8 @@ const translateFieldYoung = (f) => {
       return "Même département (handicap)";
     case "notes":
       return "Notes";
+    case "rlDeleted":
+      return "Représentants légaux supprimés";
     default:
       return f;
   }
@@ -506,8 +508,6 @@ const translateFieldReferent = (f) => {
       return "Email";
     case "cohorts":
       return "Cohortes";
-    case "rlDeleted":
-      return "Représentants légaux supprimés";
     default:
       return f;
   }
