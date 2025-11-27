@@ -88,7 +88,7 @@ async function deleteRLFieldsFromYoung(young: any, session: any): Promise<void> 
   });
 }
 
-const processYoung = async (young: any): Promise<boolean> => {
+export const processYoung = async (young: any): Promise<boolean> => {
   try {
     if (young.rlDeleted === true) {
       logger.debug(`Young ${young._id} already has rlDeleted = true, skipping`);
@@ -104,12 +104,12 @@ const processYoung = async (young: any): Promise<boolean> => {
       const fromUser = { firstName: "Cron deleteLegalRepresentatives" };
       await withTransaction(session, async () => {
         await archiveLegalRepresentatives(young, session);
-        await cleanPatches(young, session);
         await deleteRLFieldsFromYoung(young, session);
         young.set({ rlDeleted: true });
         await young.save({ session, fromUser });
+        await cleanPatches(young, session);
       });
-
+      
       await deleteParentEmailsFromBrevo(parent1Email, parent2Email, young._id.toString());
       return true;
     } finally {
@@ -224,19 +224,5 @@ export const handler = async (): Promise<void> => {
     throw e;
   }
 };
-
-// Initialiser MongoDB avant d'exécuter le handler si le fichier est exécuté directement
-if (require.main === module) {
-  (async () => {
-    try {
-      await initDB();
-      await handler();
-      process.exit(0);
-    } catch (e: any) {
-      console.error("Error:", e);
-      process.exit(1);
-    }
-  })();
-}
 
 export default handler;
