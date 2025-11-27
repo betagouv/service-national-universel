@@ -506,6 +506,8 @@ const translateFieldReferent = (f) => {
       return "Email";
     case "cohorts":
       return "Cohortes";
+    case "rlDeleted":
+      return "Représentants légaux supprimés";
     default:
       return f;
   }
