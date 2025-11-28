@@ -18,16 +18,16 @@ fi
 cd "$(dirname $0)/../.."
 
 turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global --ignore-scripts "turbo@$turbo_version"
+npm install --global "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune app admin api apiv2
 cp tsconfig.front.json out
 cp -r patches out
 cd out
-npm ci --no-audit --no-fund --ignore-scripts
+npm ci --no-audit --no-fund
 turbo run build
-npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root --ignore-scripts
+npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root
 cd ..
 
 rm -Rf $destination

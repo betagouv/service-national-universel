@@ -7,7 +7,7 @@ RUN --mount=type=bind,src=.,target=/src \
     --mount=type=cache,target=/root/.npm \
 <<EOF
 turbo_version=$(cat /src/package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global --ignore-scripts "turbo@$turbo_version"
+npm install --global "turbo@$turbo_version"
 EOF
 
 RUN --mount=type=bind,src=.,target=/src \
@@ -19,7 +19,7 @@ WORKDIR /build
 
 COPY --from=pruner /build/json/ .
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund --ignore-scripts
+    npm ci --no-audit --no-fund
 
 ARG RELEASE
 
@@ -32,7 +32,7 @@ EOF
 
 COPY patches/ patches/ 
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root --ignore-scripts
+    npm ci --omit dev --workspace api --workspace apiv2 --include-workspace-root
 
 
 

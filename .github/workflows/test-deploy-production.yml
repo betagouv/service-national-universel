@@ -90,7 +90,7 @@ jobs:
         run: git push --force origin HEAD:deploy-production
 
       - name: Install clever-tools
-        run: npm install -g --ignore-scripts clever-tools
+        run: npm install -g clever-tools
 
       - name: Watch deployments
         env:

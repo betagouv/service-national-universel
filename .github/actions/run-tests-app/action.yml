@@ -40,7 +40,7 @@ runs:
     - name: Install packages
       if: steps.cache-npm.outputs.cache-hit != 'true'
       shell: bash
-      run: npm ci --ignore-scripts
+      run: npm ci
 
     - name: Build lib
       working-directory: packages/lib
