@@ -20,7 +20,7 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/classes/create" component={Create} />
+
       <SentryRoute
         path="/classes/:id/inscription-masse"
         render={({ match }) => {
