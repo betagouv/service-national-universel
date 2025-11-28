@@ -40,9 +40,9 @@ jobs:
 
       - name: Install app
         run: |
-          npm i
+          npm i --ignore-scripts
           cd ${{ matrix.directory }}
-          npm i eslint@^8.56.0 @microsoft/eslint-formatter-sarif
+          npm i --ignore-scripts eslint@^8.56.0 @microsoft/eslint-formatter-sarif
         continue-on-error: true
 
       - name: Run ESLint

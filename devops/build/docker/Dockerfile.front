@@ -9,7 +9,7 @@ RUN --mount=type=bind,src=.,target=/src \
     --mount=type=cache,target=/root/.npm \
 <<EOF
 turbo_version=$(cat /src/package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global "turbo@$turbo_version"
+npm install --global --ignore-scripts "turbo@$turbo_version"
 EOF
 
 RUN --mount=type=bind,src=.,target=/src \
@@ -24,7 +24,7 @@ ARG APP_NAME
 COPY --from=pruner /build/json/ .
 RUN mkdir ${APP_NAME}/public
 RUN --mount=type=cache,target=/root/.npm \
-    npm ci --no-audit --no-fund
+    npm ci --no-audit --no-fund --ignore-scripts
 
 ARG RELEASE
 

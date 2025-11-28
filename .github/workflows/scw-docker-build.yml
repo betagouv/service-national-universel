@@ -37,7 +37,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install -g --ignore-scripts clever-tools
 
       # App
       - name: App - Fetch Build Secrets
