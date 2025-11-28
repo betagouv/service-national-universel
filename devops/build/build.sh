@@ -51,7 +51,7 @@ fi
 cd "$(dirname $0)/../.."
 
 turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global "turbo@$turbo_version"
+npm install --global --ignore-scripts "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune $application
@@ -62,10 +62,10 @@ if (( $use_patches )); then
     cp -r patches out
 fi
 cd out
-npm ci --no-audit --no-fund
+npm ci --no-audit --no-fund --ignore-scripts
 turbo run build
 if (( $back )); then
-    npm ci --omit dev --workspace $application --include-workspace-root
+    npm ci --omit dev --workspace $application --include-workspace-root --ignore-scripts
 fi
 cd ..
 
