@@ -14,7 +14,7 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/etablissement/create" component={Create} />
+
       <SentryRoute
         path="/etablissement/:id"
         render={({ match }) => {

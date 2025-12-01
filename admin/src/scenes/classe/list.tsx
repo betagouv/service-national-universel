@@ -139,17 +139,6 @@ export default function List() {
           [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && (
             <Button title="Exporter les classes" className="mr-2" onClick={() => exportData({ type: "export-des-classes" })} loading={exportLoading} />
           ),
-
-          [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role) && (
-            <Button
-              title="Exporter le SR"
-              className="mr-2"
-              onClick={() => exportData({ type: "schema-de-repartition" })}
-              loading={exportLoading}
-              disabled={!isCohortSelected}
-              tooltip="Vous devez selectionner une cohort pour pouvoir exporter le SR"
-            />
-          ),
         ].filter(Boolean)}
       />
       {!isClasses && (

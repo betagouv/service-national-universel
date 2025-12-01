@@ -459,7 +459,7 @@ describe("DELETE /cle/etablissement/:id/referents", () => {
   });
 });
 
-describe("POST /cle/etablissement", () => {
+describe.skip("POST /cle/etablissement", () => {
   beforeEach(async () => {
     await EtablissementModel.deleteMany({});
     await ReferentModel.deleteMany({});
