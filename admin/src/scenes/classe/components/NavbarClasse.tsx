@@ -22,22 +22,6 @@ export default function NavbarClasse({ classeId }: Props) {
             history.push(`/classes/${classeId}`);
           },
         },
-        {
-          title: "Historique de la classe",
-          leftIcon: <LuHistory size={20} className="mt-0.5 ml-2.5" />,
-          isActive: location.pathname === `/classes/${classeId}/historique`,
-          onClick: () => {
-            history.push(`/classes/${classeId}/historique`);
-          },
-        },
-        {
-          title: "Historique des inscriptions",
-          leftIcon: <LuHistory size={20} className="mt-0.5 ml-2.5" />,
-          isActive: location.pathname === `/classes/${classeId}/inscriptions`,
-          onClick: () => {
-            history.push(`/classes/${classeId}/inscriptions`);
-          },
-        },
       ]}
     />
   );
