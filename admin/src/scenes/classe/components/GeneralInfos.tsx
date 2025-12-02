@@ -33,8 +33,6 @@ export default function GeneralInfos({ classe, setClasse, edit, setEdit, errors,
           <Button key="validate" type="primary" title="Valider" className={"!h-8 ml-2"} onClick={onCheckInfo} loading={isLoading} disabled={isLoading} />
         </div>,
       ];
-    } else if (canEdit) {
-      return [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />];
     } else {
       return [];
     }

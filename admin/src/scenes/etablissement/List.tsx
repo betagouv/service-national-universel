@@ -55,9 +55,6 @@ export default function List() {
 
   const getActionsList = () => {
     const actionsList = [<Button key="export" title="Exporter" onClick={() => exportData()} />];
-    if (isAdmin(user)) {
-
-    }
     return actionsList;
   };
 
