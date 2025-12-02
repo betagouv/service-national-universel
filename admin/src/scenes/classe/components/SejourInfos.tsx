@@ -94,7 +94,9 @@ export default function SejourInfos({ classe, setClasse, editStay, setEditStay, 
                   <InputText name="centerDepartment" className="flex-1" label="Département" value={classe.cohesionCenter.department || ""} disabled />
                   <InputText name="centerRegion" className="flex-1" label="Région" value={classe.cohesionCenter.region || ""} disabled />
                 </div>
-
+                <Link to={`/centre/${classe.cohesionCenterId}`} className="w-full">
+                  <Button type="tertiary" title="Voir le centre" className="w-full max-w-none" />
+                </Link>
               </>
             )}
           </div>
