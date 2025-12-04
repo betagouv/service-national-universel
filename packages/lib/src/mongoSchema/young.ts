@@ -1182,7 +1182,6 @@ export const YoungSchema = {
   parent1FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le parent 1 s'est identifié via France Connect",
     },
@@ -1335,7 +1334,6 @@ export const YoungSchema = {
   parent2FromFranceConnect: {
     type: String,
     enum: ["true", "false"],
-    default: "false",
     documentation: {
       description: "Le parent 2 s'est identifié via France Connect",
     },
@@ -2067,6 +2065,12 @@ export const YoungSchema = {
   citizenshipInterest: { type: String },
 
   deletedAt: { type: Date },
+  rlDeleted: {
+    type: Boolean,
+    documentation: {
+      description: "Indique si les données des représentants légaux ont été supprimées",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };

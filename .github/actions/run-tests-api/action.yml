@@ -26,6 +26,7 @@ runs:
       uses: supercharge/mongodb-github-action@v1.10.0
       with:
         mongodb-version: "7.0"
+        mongodb-replica-set: "rs0"
 
     - uses: actions/cache@v4
       id: cache-npm
