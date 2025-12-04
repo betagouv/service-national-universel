@@ -279,6 +279,9 @@ function formatField(field) {
 }
 
 function formatValue(path, value) {
+  if (typeof value === 'boolean') {
+    return value ? "Oui" : "Non";
+  }
   if (!value) return "Vide";
   if (typeof value === "object") {
     if (Object.values(value).every((v) => !v?.length)) return "Vide";
@@ -324,8 +327,14 @@ export function createEvent(e, value, originalValue, role) {
 }
 
 function filterEmptyValues(e) {
-  const ignoredValues = [null, undefined, "", "Vide", "[]", false];
-  return (!e.value || !e.value.length || ignoredValues.includes(e.value)) && (!e.originalValue || !e.originalValue.length || ignoredValues.includes(e.originalValue));
+  const ignoredValues = [null, undefined, "", "Vide", "[]"];
+  
+  const checkEmpty = (val) => {
+    if (typeof val === 'boolean') return false;
+    return !val || (typeof val === 'string' && !val.length) || ignoredValues.includes(val);
+  };
+  
+  return checkEmpty(e.value) && checkEmpty(e.originalValue);
 }
 
 function filterHiddenFields(e) {
