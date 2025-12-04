@@ -4,6 +4,7 @@ import { capture } from "../sentry";
 import { logger } from "../logger";
 import { startSession, withTransaction, endSession, initDB } from "../mongo";
 import { rateLimiterDeleteContactSIB } from "../rateLimiters";
+import slack from "../slack";
 
 const getParentFields = (): string[] => {
   const fields: string[] = [];
@@ -218,9 +219,18 @@ export const handler = async (): Promise<void> => {
 
     const { processed, errors } = await processYoungsWithPagination(query);
     logger.info(`RL deletion cron completed: ${processed} processed, ${errors} errors`);
+    
+    await slack.success({
+      title: "deleteLegalRepresentatives",
+      text: `${processed} jeunes traités avec succès${errors > 0 ? `, ${errors} erreurs` : ""} sur ${total} jeunes trouvés`,
+    });
   } catch (e: any) {
     capture(e);
     logger.error(`Error in deleteLegalRepresentatives cron: ${e.message}`);
+    await slack.error({
+      title: "deleteLegalRepresentatives",
+      text: `Erreur lors de l'exécution du cron: ${e.message}`,
+    });
     throw e;
   }
 };
