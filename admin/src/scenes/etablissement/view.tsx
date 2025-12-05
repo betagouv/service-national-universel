@@ -67,21 +67,9 @@ export default function View() {
       <Header
         title={etablissement.name}
         breadcrumb={breadcrumb}
-        actions={[
-          [ROLES.ADMIN].includes(user.role) && (
-            <Button
-              key="create-classe"
-              title="Créer une classe"
-              leftIcon={<HiPlus size={20} />}
-              onClick={() => history.push("/classes/create?etablissementId=" + etablissement._id)}
-            />
-          ),
-          (isChefEtablissement(user) || isReferentOrAdmin(user)) && contacts.filter(isCoordinateurEtablissement).length < 2 && (
-            <ButtonAddCoordinator etablissement={etablissement} onChange={loadEtablissement} />
-          ),
-        ]}
+        actions={[]}
       />
-      <Contact contacts={contacts} user={user} etablissementId={etablissement?._id} onChange={loadEtablissement} />
+
 
       <GeneralInfos etablissement={etablissement} onUpdateEtab={setEtablissement} user={user} />
 
