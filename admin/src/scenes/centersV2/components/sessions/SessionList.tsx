@@ -1,42 +1,28 @@
 import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
-import cx from "classnames";
-import ReactTooltip from "react-tooltip";
-import { MdOutlineDangerous } from "react-icons/md";
+
 import { toastr } from "react-redux-toastr";
 
-import { Container, InputText, InputNumber, Label, ModalConfirmation } from "@snu/ds/admin";
+import { Container, InputText, InputNumber, Label } from "@snu/ds/admin";
 
-import {
-  canCreateOrUpdateCohesionCenter,
-  canPutSpecificDateOnSessionPhase1,
-  CohesionCenterType,
-  ROLES,
-  isAdmin,
-  isSessionEditionOpen,
-  isSuperAdmin,
-  validateEmailAcademique,
-} from "snu-lib";
+import { canPutSpecificDateOnSessionPhase1, CohesionCenterType, ROLES, isAdmin, isSessionEditionOpen, isSuperAdmin, validateEmailAcademique } from "snu-lib";
 import { capture } from "@/sentry";
 import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
-import Pencil from "@/assets/icons/Pencil";
+
 import { CohortState } from "@/redux/cohorts/reducer";
 import { AuthState } from "@/redux/auth/reducer";
 import { Session } from "@/types";
-import Trash from "@/assets/icons/Trash";
+
 import SessionHorizontalBar from "@/scenes/dashboardV2/components/graphs/SessionHorizontalBar";
 
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import { Title } from "../commons";
-import TimeSchedule from "../TimeSchedule";
-import PedagoProject from "../PedagoProject";
 import { getDefaultSession } from "@/utils/session";
 import SyncPlacesButton from "./SyncPlacesButton";
-import SessionVolontairesButton from "./SessionVolontairesButton";
 import { isResponsableDeCentre } from "snu-lib";
 
 type Props = {
@@ -61,10 +47,8 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
   const cohort = cohorts.find((cohort) => cohort.name === session?.cohort);
   const setSession = (newSession: Session) => onSessionsChange(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
 
-  const [loading, setLoading] = useState(false);
   const [values, setValues] = useState<Session | null>(null);
   const [errors, setErrors] = useState<Errors>({});
-  const [showModalDelete, setShowModalDelete] = useState(false);
 
   if (!session || !cohort) return <div></div>;
 
@@ -109,12 +93,11 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
       }
     }
 
-    setLoading(true);
     try {
       const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, dataToSend);
       if (!ok) {
         toastr.error("Oups, une erreur est survenue lors de la modification du centre", code || "");
-        setLoading(false);
+
         return;
       }
       toastr.success("La session a bien été modifiée avec succès", "");
@@ -124,31 +107,6 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
     } catch (e) {
       capture(e);
       toastr.error("Oups, une erreur est survenue lors de la modification du centre", "");
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleSessionDelete = async () => {
-    try {
-      setLoading(true);
-      const { ok, code } = await api.remove(`/session-phase1/${session._id}`);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la suppression de la session", code || "");
-        setLoading(false);
-        return;
-      }
-      setLoading(false);
-      setShowModalDelete(false);
-      onCenterChange({ ...center, cohorts: center.cohorts.filter((cohort) => cohort !== session.cohort) });
-      onSessionsChange(sessions.filter((s) => s._id !== session._id));
-      history.push({ search: `?cohorte=${center.cohorts[0]}` });
-      toastr.success("La session a bien été supprimée", "");
-    } catch (e) {
-      capture(e);
-      setLoading(false);
-      setShowModalDelete(false);
-      toastr.error("Oups, une erreur est survenue lors de la suppression de la session", "");
     }
   };
 
@@ -169,7 +127,6 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
     history.push(`?cohorte=${cohortName}`);
   };
 
-  const canEdit = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
   const cannotSelectSEssion = isResponsableDeCentre(user);
 
   return (
@@ -181,45 +138,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
             <SelectCohort cohort={session?.cohort} withBadge filterFn={(c) => Boolean(sessions.find((s) => s.cohort === c.name))} onChange={handleSelect} key="selectCohort" />
           )}
         </div>
-        <Container
-          title="Détails"
-          actions={
-            canEdit
-              ? [
-                  values ? (
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-gray-100 bg-gray-100 px-3 py-2 text-xs font-medium leading-5 text-gray-700 hover:border-gray-700 disabled:cursor-not-allowed disabled:opacity-50"
-                        onClick={() => {
-                          setValues(null);
-                          setErrors({});
-                        }}
-                        disabled={loading}>
-                        Annuler
-                      </button>
-                      <button
-                        className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                        type="submit"
-                        form="session-form"
-                        disabled={!values || loading}>
-                        <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
-                        Enregistrer les changements
-                      </button>
-                    </div>
-                  ) : (
-                    <button
-                      type="button"
-                      className="flex cursor-pointer items-center gap-2 rounded-full border-[1px] border-blue-100 bg-blue-100 px-3 py-2 text-xs font-medium leading-5 text-blue-600 hover:border-blue-600 disabled:cursor-not-allowed disabled:opacity-50"
-                      onClick={() => setValues(session)}
-                      disabled={loading}>
-                      <Pencil stroke="#2563EB" className="h-[12px] w-[12px]" />
-                      Modifier
-                    </button>
-                  ),
-                ]
-              : []
-          }>
+        <Container title="Détails">
           <div className="flex flex-row">
             <div className="w-[45%]">
               <div className="rounded-lg bg-white mb-4">
@@ -335,59 +254,10 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                 />
                 {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
               </div>
-              <div className="flex mt-8 text-blue-600">
-                <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 bg-white">
-                  <SessionVolontairesButton session={cohort} centreId={center?._id} sejour={session} />
-                  <div className="flex w-full flex-1 items-center justify-center rounded-md border-[1px] border-blue-300 bg-blue-100">
-                    <Link className="rounded-md px-4 py-2 text-sm" to={`/centre/${center._id}/${session._id}/equipe`}>
-                      Voir l&apos;équipe
-                    </Link>
-                  </div>
-                </div>
-              </div>
-              {canCreateOrUpdateCohesionCenter(user) && (
-                <div data-tip="" data-for="tooltip-delete-session">
-                  {!session.canBeDeleted && (
-                    <ReactTooltip id="tooltip-delete-session" className="bg-white text-black shadow-xl" arrowColor="white" disable={false}>
-                      <div className="text-[black]">Des jeunes sont encore associés à ce séjour ou une ligne de bus dessert ce centre dans le PDT</div>
-                    </ReactTooltip>
-                  )}
-                  <button
-                    type="button"
-                    disabled={!session.canBeDeleted}
-                    onClick={() => {
-                      session.canBeDeleted && setShowModalDelete(true);
-                    }}
-                    className={cx("mt-3 flex w-full flex-row items-center justify-end gap-2", { "cursor-pointer": session.canBeDeleted })}>
-                    <Trash className={cx({ "text-red-400": session.canBeDeleted, "text-gray-400": !session.canBeDeleted })} width={14} height={14} />
-                    <div className={cx("text-xs", { "text-gray-800": session.canBeDeleted, "text-gray-500": !session.canBeDeleted })}>Supprimer le séjour</div>
-                  </button>
-                  <ModalConfirmation
-                    isOpen={showModalDelete}
-                    onClose={() => setShowModalDelete(false)}
-                    className="md:max-w-[700px]"
-                    title="Supprimer la session"
-                    text="Êtes-vous sûr de vouloir supprimer cette session ?"
-                    actions={[
-                      { title: "Annuler", isCancel: true },
-                      {
-                        title: "Confirmer",
-                        leftIcon: <MdOutlineDangerous size={20} />,
-                        onClick: () => handleSessionDelete(),
-                        isDestructive: true,
-                      },
-                    ]}
-                  />
-                </div>
-              )}
             </div>
           </div>
         </Container>
       </form>
-      <div className="flex w-full mt-4 gap-2 pb-4 justify-center">
-        <PedagoProject session={session} className="p-1" setSession={setSession} />
-        <TimeSchedule session={session} className="p-1" setSession={setSession} />
-      </div>
     </div>
   );
 }
