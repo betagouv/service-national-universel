@@ -72,22 +72,14 @@ const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"))
 const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
 // @ts-ignore
 const INJEPExport = lazy(() => import("./scenes/injep-export"));
-// @ts-ignore
-const EditTransport = lazy(() => import("./scenes/edit-transport"));
+
 // @ts-ignore
 const Goal = lazy(() => import("./scenes/goal"));
 // @ts-ignore
 const Inscription = lazy(() => import("./scenes/inscription"));
 // @ts-ignore
 const Missions = lazy(() => import("./scenes/missions"));
-// @ts-ignore
-const LigneBus = lazy(() => import("./scenes/plan-transport/ligne-bus"));
-// @ts-ignore
-const SchemaDeRepartition = lazy(() => import("./scenes/plan-transport/schema-repartition"));
-// @ts-ignore
-const TableDeRepartition = lazy(() => import("./scenes/plan-transport/table-repartition"));
-// @ts-ignore
-const PointDeRassemblement = lazy(() => import("./scenes/pointDeRassemblement"));
+
 // @ts-ignore
 const Profil = lazy(() => import("./scenes/profil"));
 // @ts-ignore
@@ -322,7 +314,7 @@ const Home = () => {
                   <RestrictedRoute path="/contenu" component={Content} />
                   <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
                   <RestrictedRoute path="/centre" component={Center} />
-                  <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
+
                   <RestrictedRoute path="/association" component={Association} />
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
@@ -331,16 +323,6 @@ const Home = () => {
                   <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
                   {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={PlanMarketing} /> : null}
 
-                  {/* Plan de transport */}
-                  {isWriteAuthorized({ user, resource: PERMISSION_RESOURCES.LIGNE_BUS }) ? <RestrictedRoute path="/edit-transport" component={EditTransport} /> : null}
-                  {/* Table de répartition */}
-                  <RestrictedRoute path="/table-repartition" component={TableDeRepartition} />
-                  {/* Ligne de bus */}
-                  <RestrictedRoute path="/ligne-de-bus" component={LigneBus} />
-                  {/* Schéma de répartition */}
-                  <RestrictedRoute path="/schema-repartition/:region/:department" component={SchemaDeRepartition} />
-                  <RestrictedRoute path="/schema-repartition/:region" component={SchemaDeRepartition} />
-                  <RestrictedRoute path="/schema-repartition" component={SchemaDeRepartition} />
                   {/* Institution */}
                   <RestrictedRoute path="/accueil" component={Accueil} />
                   <RestrictedRoute path="/mon-etablissement" component={Etablissement} />
