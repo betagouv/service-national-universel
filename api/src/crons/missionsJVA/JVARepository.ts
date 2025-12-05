@@ -14,7 +14,10 @@ export async function fetchMissions(skip = 0): Promise<Response> {
     method: "GET",
   })
     .then((response) => response.json())
-    .catch((error) => capture(error));
+    .catch((error) => {
+      capture(error);
+      return { ok: false, code: 500, data: [], total: 0 };
+    });
 }
 
 export async function fetchStructureById(id: number) {
@@ -23,7 +26,10 @@ export async function fetchStructureById(id: number) {
     redirect: "follow",
   })
     .then((response) => response.json())
-    .catch((error) => capture(error));
+    .catch((error) => {
+      capture(error);
+      return null;
+    });
 }
 
 export type JeVeuxAiderMission = {

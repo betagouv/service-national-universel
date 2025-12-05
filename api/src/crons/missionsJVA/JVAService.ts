@@ -142,15 +142,17 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
 }
 
 export async function syncMissions() {
-  let total: number;
-  let count = 0;
-  let skip = 0;
-
-  do {
-    logger.info(`Fetching missions from ${skip} to ${skip + 50}`);
+  const limit = 50;
+  
+  for (let skip = 0; ; skip += limit) {
+    logger.info(`Fetching missions from ${skip} to ${skip + limit}`);
     const result = await fetchMissions(skip);
-    if (!result.ok) throw new Error("sync with JVA missions : " + result.code);
-    total = result.total;
+    if (!result || !result.ok) throw new Error("sync with JVA missions : " + (result?.code || "unknown error"));
+
+    if (!result.data || result.data.length === 0) {
+      logger.info(`No more missions to fetch. Total synced: ${skip}`);
+      break;
+    }
 
     // Do not parallelize because of shared structures and referents.
     for (const mission of result.data) {
@@ -161,9 +163,11 @@ export async function syncMissions() {
       }
     }
 
-    count += result.data.length;
-    skip += 50;
-  } while (count < total);
+    if (result.data.length < limit) {
+      logger.info(`Last page reached. Total synced: ${skip + result.data.length}`);
+      break;
+    }
+  }
 }
 
 export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {

@@ -20,6 +20,7 @@ import {
   isCreateAuthorized,
   isWriteAuthorized,
   isDeleteAuthorized,
+  canManageApplications,
 } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
 import patches from "./patches";
@@ -363,10 +364,16 @@ router.get(
         const cohort = await CohortModel.findById(req.user.cohortId);
         if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-        // Si une proposition existe, toujours autoriser l'acceptation
+        // Si une proposition existe, vérifier si on peut l'instruire selon le statut de la cohorte
         const isProposal = application?.status === APPLICATION_STATUS.WAITING_ACCEPTATION;
         const authorization = isProposal
-          ? { canApply: true, message: "" }
+          ? (() => {
+              const canManage = canManageApplications(req.user as unknown as YoungType, cohort);
+              return { 
+                canApply: canManage, 
+                message: canManage ? "" : "Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée." 
+              };
+            })()
           : await getAuthorizationToApply(mission, req.user as unknown as YoungType, cohort);
 
         return res.status(200).send({

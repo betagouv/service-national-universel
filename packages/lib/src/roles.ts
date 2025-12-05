@@ -39,17 +39,9 @@ export function canViewMissions(young: YoungType, cohort?: CohortType) {
   return phase2NotValidated && hasCompletedMission;
 }
 
-export function canViewMissionDetail(young: YoungType, cohort?: CohortType) {
+export function canViewMissionDetail(young: YoungType) {
   const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
-  if (!canAccessPhase2) {
-    return false;
-  }
-
-  if (isCohortFullyArchived(cohort)) {
-    return true;
-  }
-
-  return canViewMissions(young, cohort);
+  return canAccessPhase2;
 }
 
 export function canCreateApplications(young: YoungType, cohort?: CohortType) {

@@ -28,7 +28,7 @@ export default function usePermissions() {
     canViewPhase1: permissionPhase1(young),
     canViewPhase2: canViewPhase2(young, cohort),
     canViewMissions: canViewMissions(young, cohort),
-    canViewMissionDetail: canViewMissionDetail(young, cohort),
+    canViewMissionDetail: canViewMissionDetail(young),
     canCreateApplications: canCreateApplications(young, cohort),
     canCreateEquivalences: canCreateEquivalences(young, cohort),
     canManageApplications: canManageApplications(young, cohort),
