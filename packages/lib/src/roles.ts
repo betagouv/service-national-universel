@@ -39,7 +39,7 @@ export function canViewMissions(young: YoungType, cohort?: CohortType) {
   return phase2NotValidated && hasCompletedMission;
 }
 
-export function canViewMissionDetail(young: YoungType, cohort?: CohortType) {
+export function canViewMissionDetail(young: YoungType) {
   const canAccessPhase2 = didAttendCohesionStay(young) || hasValidatedPhase1(young);
   return canAccessPhase2;
 }
