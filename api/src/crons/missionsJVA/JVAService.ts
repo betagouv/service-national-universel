@@ -147,7 +147,7 @@ export async function syncMissions() {
   for (let skip = 0; ; skip += limit) {
     logger.info(`Fetching missions from ${skip} to ${skip + limit}`);
     const result = await fetchMissions(skip);
-    if (!result.ok) throw new Error("sync with JVA missions : " + result.code);
+    if (!result || !result.ok) throw new Error("sync with JVA missions : " + (result?.code || "unknown error"));
 
     if (!result.data || result.data.length === 0) {
       logger.info(`No more missions to fetch. Total synced: ${skip}`);
