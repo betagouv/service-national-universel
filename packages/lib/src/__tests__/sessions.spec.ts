@@ -567,14 +567,14 @@ describe("canViewMissionDetail", () => {
     expect(canViewMissionDetail(young, cohort)).toBe(true);
   });
 
-  it("devrait retourner false pour cohorte ARCHIVED sans mission DONE", () => {
+  it("devrait retourner true pour cohorte ARCHIVED sans mission DONE (accès autorisé, actions limitées)", () => {
     const young = {
       statusPhase1: YOUNG_STATUS_PHASE1.DONE,
       statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION,
       phase2ApplicationStatus: [],
     } as any;
     const cohort = { status: COHORT_STATUS.ARCHIVED } as any;
-    expect(canViewMissionDetail(young, cohort)).toBe(false);
+    expect(canViewMissionDetail(young, cohort)).toBe(true);
   });
 });
 
