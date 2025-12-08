@@ -24,6 +24,7 @@ import { Title } from "../commons";
 import { getDefaultSession } from "@/utils/session";
 import SyncPlacesButton from "./SyncPlacesButton";
 import { isResponsableDeCentre } from "snu-lib";
+import SessionVolontairesButton from "./SessionVolontairesButton";
 
 type Props = {
   center: CohesionCenterType;
@@ -253,6 +254,11 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                   }}
                 />
                 {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
+              </div>
+              <div className="flex mt-8 text-blue-600">
+                <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 bg-white">
+                  <SessionVolontairesButton session={cohort} centreId={center?._id} sejour={session} />
+                </div>
               </div>
             </div>
           </div>
