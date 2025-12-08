@@ -2,7 +2,6 @@ import React from "react";
 import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
-import Create from "./Create";
 
 import List from "./list";
 import View from "./view";
@@ -16,7 +15,7 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/centre/nouveau" component={Create} />
+      <SentryRoute path="/centre/nouveau" component={() => <NotFound />} />
       <SentryRoute path="/centre/import" component={() => <NotFound />} />
       <SentryRoute path="/centre/:id/:sessionId/equipe" component={Team} />
       <SentryRoute path="/centre/:id/:sessionId/:currentTab" component={Youngs} />
