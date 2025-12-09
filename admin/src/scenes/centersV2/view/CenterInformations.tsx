@@ -27,13 +27,7 @@ export default function Details({ center }: { center: CohesionCenterType }) {
       <div className="flex flex-col gap-8 !rounded-lg bg-white p-8">
         <div className="flex items-center justify-between">
           <div className="text-lg font-medium leading-6 text-gray-900">Informations générales</div>
-          <div className="flex items-center text-xs leading-4 font-medium text-gray-500">
-            <p>Modifier ces informations ?</p>
-            <HiOutlineInformationCircle data-tip="" data-for="tooltip-modif" className="ml-2 mt-0.5" size={20} />
-            <ReactTooltip id="tooltip-modif" className="bg-white shadow-xl" arrowColor="white" disable={false} place="top">
-              <div className="text-gray-700 text-xs font-[400] w-[260px] text-center">Les modifications se font uniquement dans le module de répartition SI SNU.</div>
-            </ReactTooltip>
-          </div>
+
         </div>
         <div className="flex text-sm leading-5 font-normal text-gray-900">
           <div className="flex w-[45%] flex-col gap-5">
