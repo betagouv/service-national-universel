@@ -213,13 +213,21 @@ router.post(
           MILITARY_PREPARATION_FILES_STATUS.REFUSED,
         ].includes(young.statusMilitaryPreparationFiles as string);
 
-      if (hasSubmittedMilitaryPreparationFiles) {
+        const hasValidatedMilitaryPreparationFiles =
+          mission.isMilitaryPreparation === "true" &&
+          young.statusMilitaryPreparationFiles === MILITARY_PREPARATION_FILES_STATUS.VALIDATED;
+
+
+      if (hasSubmittedMilitaryPreparationFiles && !hasValidatedMilitaryPreparationFiles) {
         young.set({ statusMilitaryPreparationFiles: MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION });
         await young.save({ fromUser: req.user });
       }
       // Si c'est une préparation militaire, on notifie le referent pour check le dossier eligibilité.
       // Mais pas si c'est une proposition de mission par un référent, seulement si c'est une candidature spontanée.
-      if (mission.isMilitaryPreparation === "true" && data.status !== APPLICATION_STATUS.WAITING_ACCEPTATION) {
+      if (mission.isMilitaryPreparation === "true" 
+        && data.status !== APPLICATION_STATUS.WAITING_ACCEPTATION
+        && !hasValidatedMilitaryPreparationFiles
+      ) {
         await notifyReferentMilitaryPreparationFilesSubmitted(young);
       }
 
