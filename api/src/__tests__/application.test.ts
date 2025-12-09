@@ -13,7 +13,7 @@ import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./hel
 import { createCohortHelper } from "./helpers/cohort";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { APPLICATION_STATUS, COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { APPLICATION_STATUS, COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS, SUB_ROLES } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 import { getAuthorizationToApply } from "../application/applicationService";
@@ -828,5 +828,180 @@ describe("getAuthorizationToApply", () => {
 
     expect(result.canApply).toBe(false);
     expect(result.message).toContain("Vous ne pouvez plus postuler à des missions d'engagements car la date de réalisation est dépassée");
+  });
+});
+
+describe("Military Preparation notifications", () => {
+  let sendTemplateSpy: jest.SpyInstance;
+
+  beforeEach(() => {
+    resetAppAuth();
+    sendTemplateSpy = jest.spyOn(require("../brevo"), "sendTemplate");
+    sendTemplateSpy.mockResolvedValue({});
+  });
+
+  afterEach(() => {
+    sendTemplateSpy.mockClear();
+  });
+
+  describe("POST /application - Military Preparation notification scenarios", () => {
+    const year = new Date().getFullYear();
+    const militaryPreparationFiles = {
+      files: {
+        militaryPreparationFilesIdentity: [{ name: "identity.pdf", uploadedAt: new Date(), size: 1000, mimetype: "application/pdf" }],
+        militaryPreparationFilesAuthorization: [{ name: "authorization.pdf", uploadedAt: new Date(), size: 1000, mimetype: "application/pdf" }],
+        militaryPreparationFilesCertificate: [{ name: "certificate.pdf", uploadedAt: new Date(), size: 1000, mimetype: "application/pdf" }],
+      },
+    };
+
+    it("should notify referent when young applies to PM for the first time (status is null)", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+          statusMilitaryPreparationFiles: undefined,
+          department: "75",
+          birthdateAt: new Date(`${year - 17}-01-01T00:00:00.000Z`),
+          ...militaryPreparationFiles,
+        }),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["75"], subRole: SUB_ROLES.manager_phase2 }));
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), isMilitaryPreparation: "true", tutorId: referent._id });
+      const application = getNewApplicationFixture();
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+
+      expect(res.status).toBe(200);
+
+      // Vérifier que le statut a été mis à WAITING_VERIFICATION
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung?.statusMilitaryPreparationFiles).toBe("WAITING_VERIFICATION");
+
+      // Vérifier que la notification a été envoyée au référent
+      expect(sendTemplateSpy).toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
+        expect.objectContaining({
+          emailTo: expect.arrayContaining([
+            expect.objectContaining({
+              email: referent.email,
+            }),
+          ]),
+        }),
+      );
+    });
+
+   
+
+    it("should NOT notify referent when young applies to PM with VALIDATED status", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+          statusMilitaryPreparationFiles: "VALIDATED",
+          department: "75",
+          birthdateAt: new Date(`${year - 17}-01-01T00:00:00.000Z`),
+          ...militaryPreparationFiles,
+        }),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["75"], subRole: SUB_ROLES.manager_phase2 }));
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), isMilitaryPreparation: "true", tutorId: referent._id });
+      const application = getNewApplicationFixture();
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id, tutorId: referent._id, status: APPLICATION_STATUS.WAITING_VALIDATION });
+
+      expect(res.status).toBe(200);
+
+      // Vérifier que la notification au référent n'a PAS été envoyée
+      expect(sendTemplateSpy).not.toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
+        expect.anything(),
+      );
+
+      // Vérifier que la notification au superviseur a été envoyée si le statut de la candidature est WAITING_VALIDATION
+      expect(sendTemplateSpy).toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED,
+        expect.objectContaining({
+          emailTo: expect.arrayContaining([
+            expect.objectContaining({
+              email: referent.email,
+            }),
+          ]),
+        }),
+      );
+    });
+
+    it("should notify referent when young applies to PM with WAITING_CORRECTION status", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+          statusMilitaryPreparationFiles: "WAITING_CORRECTION",
+          department: "75",
+          birthdateAt: new Date(`${year - 17}-01-01T00:00:00.000Z`),
+          ...militaryPreparationFiles,
+        }),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["75"], subRole: SUB_ROLES.manager_phase2 }));
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), isMilitaryPreparation: "true", tutorId: referent._id });
+      const application = getNewApplicationFixture();
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id });
+
+      expect(res.status).toBe(200);
+
+      // Vérifier que la notification a été envoyée au référent (le dossier nécessite une nouvelle vérification après correction)
+      expect(sendTemplateSpy).toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
+        expect.objectContaining({
+          emailTo: expect.arrayContaining([
+            expect.objectContaining({
+              email: referent.email,
+            }),
+          ]),
+        }),
+      );
+    });
+
+    it("should NOT notify referent when application is proposed by referent (status WAITING_ACCEPTATION)", async () => {
+      const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+      const young = await createYoungHelper(
+        getNewYoungFixture({
+          cohort: cohort.name,
+          cohortId: cohort._id,
+          statusPhase1: YOUNG_STATUS_PHASE1.DONE,
+          statusMilitaryPreparationFiles: undefined,
+          department: "75",
+          birthdateAt: new Date(`${year - 17}-01-01T00:00:00.000Z`),
+          ...militaryPreparationFiles,
+        }),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["75"], subRole: SUB_ROLES.manager_phase2 }));
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), isMilitaryPreparation: "true", tutorId: referent._id });
+      const application = getNewApplicationFixture();
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/application")
+        .send({ ...application, youngId: young._id, missionId: mission._id, status: APPLICATION_STATUS.WAITING_ACCEPTATION });
+
+      expect(res.status).toBe(200);
+
+      // Vérifier que la notification n'a PAS été envoyée (candidature proposée par référent)
+      expect(sendTemplateSpy).not.toHaveBeenCalledWith(
+        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
+        expect.anything(),
+      );
+    });
   });
 });
