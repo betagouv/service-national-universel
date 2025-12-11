@@ -4,11 +4,12 @@ const { capture } = require("../sentry");
 const slack = require("../slack");
 const { getUserAttributes } = require("../services/support");
 const { logger } = require("../logger");
+const { YOUNG_STATUS } = require("../../packages/lib/src/constants/constants");
 
 exports.handler = async () => {
   try {
     const processContacts = async (Model, type) => {
-      const cursor = Model.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) } }).cursor();
+      const cursor = Model.find({ updatedAt: { $gte: new Date(new Date() - 24 * 60 * 60 * 1000) }, status: { $ne: YOUNG_STATUS.DELETED } }).cursor();
       let contactsWithAttributes = [];
 
       async function syncContacts(contactsWithAttributes, type) {
