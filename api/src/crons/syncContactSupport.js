@@ -25,6 +25,7 @@ exports.handler = async () => {
       }
 
       for await (const contact of cursor) {
+        if (!contact.email) continue;
         contact.email = contact.email.toLowerCase();
         const attributes = await getUserAttributes(contact);
         contactsWithAttributes.push({
