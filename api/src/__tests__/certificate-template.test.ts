@@ -11,8 +11,8 @@ describe("Certificate Phase 2 Template Tests", () => {
       expect(result.template).toBe("certificates/certificateTemplate2024_3.png");
     });
 
-    it("should return Franck Thénard-Duvivier for dates from August 22, 2025", () => {
-      const dateAfter = new Date("2025-08-22"); // À partir du 22 août 2025
+    it("should return Franck Thénard-Duvivier for dates from August 22, 2025 to December 12, 2025", () => {
+      const dateAfter = new Date("2025-08-22");
       const result = getMinistres(dateAfter);
       
       expect(result).toBeDefined();
@@ -20,13 +20,22 @@ describe("Certificate Phase 2 Template Tests", () => {
       expect(result.template).toBe("certificates/attestationPhase2Template_FTD.png");
     });
 
-    it("should return Franck Thénard-Duvivier for future dates", () => {
+    it("should return Thibaut de Saint Pol for dates from December 12, 2025", () => {
+      const dateAfter = new Date("2025-12-12");
+      const result = getMinistres(dateAfter);
+      
+      expect(result).toBeDefined();
+      expect(result.ministres[0]).toContain("Thibaut de Saint Pol");
+      expect(result.template).toBe("certificates/AttestationPhase2_TSP.png");
+    });
+
+    it("should return Thibaut de Saint Pol for future dates", () => {
       const futureDate = new Date("2026-01-01");
       const result = getMinistres(futureDate);
       
       expect(result).toBeDefined();
-      expect(result.ministres).toContain("Franck Thénard-Duvivier");
-      expect(result.template).toBe("certificates/attestationPhase2Template_FTD.png");
+      expect(result.ministres[0]).toContain("Thibaut de Saint Pol");
+      expect(result.template).toBe("certificates/AttestationPhase2_TSP.png");
     });
 
     it("should return Nicole Belloubet and Sebastien Lecornu for dates in 2024", () => {
