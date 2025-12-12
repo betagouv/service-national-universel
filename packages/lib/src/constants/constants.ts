@@ -428,9 +428,14 @@ const MINISTRES = [
     template: "certificates/certificateTemplate2024_3.png",
   },
   {
-    date_end: "03-13-2050", 
+    date_end: "12-12-2025",
     ministres: ["Franck Thénard-Duvivier"],
     template: "certificates/attestationPhase2Template_FTD.png",
+  },
+  {
+    date_end: "03-13-2050",
+    ministres: ["Thibaut de Saint Pol, Délégué interministériel à la jeunesse, directeur de la jeunesse, de l'éducation populaire et de la vie associative"],
+    template: "certificates/AttestationPhase2_TSP.png",
   },
 ];
 
