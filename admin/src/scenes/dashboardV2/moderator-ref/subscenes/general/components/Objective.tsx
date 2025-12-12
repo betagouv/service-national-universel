@@ -122,7 +122,8 @@ export default function Index({ user }) {
   return (
     <>
       <FilterDashBoard selectedFilters={selectedFilters} setSelectedFilters={setSelectedFilters} filterArray={filterArray} />
-      <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
+      {/* DÉCOMMISSIONNEMENT: Graphique inscription désactivé */}
+      {/* <h1 className="text-[28px] font-bold leading-8 text-gray-900">Inscriptions</h1>
       <div className="rounded-lg bg-white p-8 shadow-[0_8px_16px_-3px_rgba(0,0,0,0.05)]">
         <HorizontalBar
           title="Objectif des inscriptions"
@@ -144,7 +145,7 @@ export default function Index({ user }) {
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "IN_PROGRESS" })] }),
           ]}
         />
-      </div>
+      </div> */}
       <VolontaireSection volontairesData={volontairesData} inAndOutCohort={inAndOutCohort} filter={selectedFilters} />
     </>
   );

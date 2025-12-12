@@ -14,7 +14,6 @@ import { generateCertifPhase2 } from "../templates/certificate/phase2";
 import { generateCertifPhase3 } from "../templates/certificate/phase3";
 import { generateCertifSNU } from "../templates/certificate/snu";
 import { generateDroitImage, generateBatchDroitImage } from "../templates/droitImage/droitImage";
-import { generateCohesion, generateBatchCohesion } from "../templates/convocation/cohesion";
 import { generateContractPhase2 } from "../templates/contract/phase2";
 import { generateBatchConsentement } from "../templates/consent/consent";
 
@@ -50,12 +49,6 @@ export async function generatePdfIntoStream(outStream, { type, template, young, 
   }
   if (type === "droitImage" && template === "droitImage" && young) {
     return generateDroitImage(outStream, young);
-  }
-  if (type === "convocation" && template === "cohesion" && young) {
-    return generateCohesion(outStream, young);
-  }
-  if (type === "convocation_batch" && template === "cohesion" && young) {
-    return generateBatchCohesion(outStream, young);
   }
   if (type === "contract" && template === "2" && contract) {
     return generateContractPhase2(outStream, contract);

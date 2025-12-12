@@ -95,7 +95,7 @@ export default function GeneralInfos({ etablissement, onUpdateEtab, user }: Prop
         </div>,
       ]
     : user.subRole === SUB_ROLES.referent_etablissement || [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)
-      ? [<Button key="change" type="modify" leftIcon={<HiOutlinePencil size={16} />} title="Modifier" onClick={() => setEdit(!edit)} disabled={isLoading} />]
+      ? []
       : [];
 
   return (
