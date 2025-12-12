@@ -43,19 +43,26 @@ const getParentFields = (): string[] => {
 };
 
 const cleanPatches = async (young: any, session: any): Promise<void> => {
-  const patches = await young.patches.find({ ref: young._id }).session(session);
+  const YoungPatch = young.patches;
+  const patches = await YoungPatch.find({ ref: young._id }).session(session).lean();
+
+  const bulkOps: any[] = [];
+
   for (const patch of patches) {
-    const updatedOps = patch.ops.filter((op: any) => {
+    const filteredOps = patch.ops.filter((op: any) => {
       const fieldName = op.path.split("/")[1];
       return !fieldName || (!fieldName.startsWith("parent1") && !fieldName.startsWith("parent2") && !fieldName.startsWith("rulesParent"));
     });
 
-    if (updatedOps.length === 0) {
-      await patch.deleteOne({ session });
-    } else if (updatedOps.length !== patch.ops.length) {
-      patch.set({ ops: updatedOps });
-      await patch.save({ session });
+    if (filteredOps.length === 0) {
+      bulkOps.push({ deleteOne: { filter: { _id: patch._id } } });
+    } else if (filteredOps.length !== patch.ops.length) {
+      bulkOps.push({ updateOne: { filter: { _id: patch._id }, update: { $set: { ops: filteredOps } } } });
     }
+  }
+
+  if (bulkOps.length > 0) {
+    await YoungPatch.collection.bulkWrite(bulkOps, { ordered: false, session });
   }
 };
 
