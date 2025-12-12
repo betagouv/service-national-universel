@@ -11,19 +11,6 @@ export const itemsSejourGod = [
     title: "Centres",
     link: "/centre",
   },
-
-  {
-    title: "Objectifs",
-    link: "/objectifs",
-  },
-  {
-    title: "Export DSNJ",
-    link: "/dsnj-export",
-  },
-  {
-    title: "Export INJEP",
-    link: "/injep-export",
-  },
 ];
 
 export const itemsSejourAdmin = [
@@ -38,19 +25,6 @@ export const itemsSejourAdmin = [
   {
     title: "Centres",
     link: "/centre",
-  },
-
-  {
-    title: "Objectifs",
-    link: "/objectifs",
-  },
-  {
-    title: "Export DSNJ",
-    link: "/dsnj-export",
-  },
-  {
-    title: "Export INJEP",
-    link: "/injep-export",
   },
 ];
 
