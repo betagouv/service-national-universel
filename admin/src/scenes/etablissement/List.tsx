@@ -55,13 +55,6 @@ export default function List() {
 
   const getActionsList = () => {
     const actionsList = [<Button key="export" title="Exporter" onClick={() => exportData()} />];
-    if (isAdmin(user)) {
-      actionsList.push(
-        <Link to="/etablissement/create">
-          <Button type="wired" leftIcon={<HiPlus size={20} className="mt-1" />} title="Créer un établissement" className="ml-2" />
-        </Link>,
-      );
-    }
     return actionsList;
   };
 

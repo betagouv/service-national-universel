@@ -18,7 +18,8 @@ export default function Index() {
 
   return (
     <Switch>
-      <SentryRoute path="/dashboard" component={Inscription} />
+      {/* DÉCOMMISSIONNEMENT: Vue inscription complètement désactivée */
+      /* <SentryRoute path="/dashboard" component={Inscription} /> */}
     </Switch>
   );
 }

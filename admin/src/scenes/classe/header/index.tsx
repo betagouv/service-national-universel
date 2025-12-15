@@ -8,7 +8,6 @@ import { DropdownButton } from "@snu/ds/admin";
 
 import ButtonRelanceVerif from "./ButtonRelanceVerif";
 import VerifClassButton from "./VerifClassButton";
-import ButtonManualInvite from "./ButtonManualInvite";
 import ButtonLinkInvite from "./ButtonLinkInvite";
 import ButtonHandleInscription from "./ButtonHandleInscription";
 import ButtonInscriptionEnMasse from "./ButtonInscriptionEnMasse";
@@ -104,14 +103,6 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
           key: "link",
           render: <ButtonLinkInvite key="invite" url={url} />,
         },
-        ...(!user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE]
-          ? [
-              {
-                key: "manual",
-                render: <ButtonManualInvite key="manual" id={id} />,
-              },
-            ]
-          : []),
         ...(isReferentRegDep(user) || (isAdmin(user) && user.featureFlags?.[FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE])
           ? [
               {
@@ -183,18 +174,7 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
         ]
       : optionsInscription;
 
-  actionsList.push(
-    <DropdownButton
-      key="inscription"
-      title="Inscrire les élèves"
-      type="wired"
-      optionsGroup={optionsInscriptionFiltered}
-      position="right"
-      buttonClassName={cx("mr-2", isManualInscriptionActionDisabled && "cursor-not-allowed")}
-      disabled={isManualInscriptionActionDisabled}
-      {...(isManualInscriptionActionDisabled && { tooltip: "Les inscriptions sont fermées. Vous n'avez pas les droits pour inscrire un élève." })}
-    />,
-  );
+
 
   if (classe?.status && (classe.status === STATUS_CLASSE.OPEN || classe.status === STATUS_CLASSE.CLOSED) && [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role)) {
     actionsList.push(
@@ -209,20 +189,8 @@ export const getHeaderActionList = ({ user, classe, setClasse, isLoading, setIsL
     );
   }
 
-  actionsList.push(<DropdownButton key="export" title="Exporter" optionsGroup={getOptionsExport()} position="right" buttonClassName="mr-2" disabled={isLoading} />);
 
-  if (user.role === ROLES.ADMIN) {
-    actionsList.push(
-      <DropdownButton
-        key="edit"
-        type="secondary"
-        title="Actions"
-        optionsGroup={optionsAdmin}
-        position="right"
-        tooltip="Vous ne pouvez pas supprimer une classe si des élèves sont validés, ou si la classe est affectée à un centre."
-        disabled={!isClasseDeletable()}
-      />,
-    );
-  }
+
+
   return actionsList;
 };
