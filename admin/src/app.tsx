@@ -68,13 +68,7 @@ const Content = lazy(() => import("./scenes/content"));
 const DevelopAssetsPresentationPage = lazy(() => import("./scenes/develop/AssetsPresentationPage"));
 // @ts-ignore
 const DesignSystemPage = lazy(() => import("./scenes/develop/DesignSystemPage"));
-// @ts-ignore
-const DSNJExport = lazy(() => import("./scenes/dsnj-export"));
-// @ts-ignore
-const INJEPExport = lazy(() => import("./scenes/injep-export"));
 
-// @ts-ignore
-const Goal = lazy(() => import("./scenes/goal"));
 // @ts-ignore
 const Inscription = lazy(() => import("./scenes/inscription"));
 // @ts-ignore
@@ -312,14 +306,11 @@ const Home = () => {
                   <RestrictedRoute path="/inscription" component={Inscription} />
                   <RestrictedRoute path="/user" component={Utilisateur} />
                   <RestrictedRoute path="/contenu" component={Content} />
-                  <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
                   <RestrictedRoute path="/centre" component={Center} />
 
                   <RestrictedRoute path="/association" component={Association} />
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
-                  <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
-                  <RestrictedRoute path="/injep-export" component={INJEPExport} />
                   <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
                   {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={PlanMarketing} /> : null}
 
