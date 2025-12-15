@@ -51,9 +51,7 @@ const apiEngagement = {
 
       if (!Object.keys(statusMap).includes(application.status)) return;
 
-      if (!application.apiEngagementId) {
-        throw new Error("No API Engagement ID found for application" + application._id);
-      }
+      if (!application.apiEngagementId) return;
 
       const url = config.API_ENGAGEMENT_URL + "/v2/activity/" + application.apiEngagementId;
 
