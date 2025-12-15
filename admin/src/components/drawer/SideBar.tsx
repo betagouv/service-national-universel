@@ -138,12 +138,7 @@ const SideBar = ({ sessionsList }) => {
       setCurrentOpen={setDropDownOpen}
     />
   );
-  const ExportDsnj = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export DSNJ" link="/dsnj-export" active={path === "dsnj-export"} setCurrentOpen={setDropDownOpen} />
-  );
-  const ExportInjep = () => (
-    <SimpleNavItem sideBarOpen={open} Icon={ClipboardIcon} title="Export INJEP" link="/injep-export" active={path === "injep-export"} setCurrentOpen={setDropDownOpen} />
-  );
+
   const Structure = () => (
     <SimpleNavItem
       sideBarOpen={open}
@@ -290,15 +285,6 @@ const SideBar = ({ sessionsList }) => {
         break;
     }
 
-    // clean la construction du menu qui est différente en fonction du rôle
-    if (!items.includes(SejoursAdmin) && !items.includes(SejoursGod)) {
-      if (isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.EXPORT_INJEP })) {
-        items.push(ExportInjep);
-      }
-      if (isExecuteAuthorized({ user, resource: PERMISSION_RESOURCES.EXPORT_DSNJ })) {
-        items.push(ExportDsnj);
-      }
-    }
     return items;
   };
 
