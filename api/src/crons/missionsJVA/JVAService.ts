@@ -198,7 +198,10 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
   let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
   if (!structure) {
     const newStructure = await createStructure(mission);
-    if (!newStructure) throw new Error("No structure created");
+    if (!newStructure) {
+      logger.warn(`No structure created for mission ${mission.clientId} (jvaStructureId: ${mission.organizationClientId})`);
+      return;
+    }
     structure = newStructure;
   }
 
@@ -207,9 +210,11 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
     return;
   }
 
-  //Get referent mission
-  let referent = await ReferentModel.findOne({ structureId: structure.id });
-  if (!referent) throw new Error("No referent found");
+  const referent = await ReferentModel.findOne({ structureId: structure.id });
+  if (!referent) {
+    logger.warn(`No referent found for structure ${structure.id} (jvaStructureId: ${structure.jvaStructureId}), skipping mission ${mission.clientId}`);
+    return;
+  }
 
   //Create or update mission
   const formattedMission = formatMission(mission, structure, referent);
@@ -222,17 +227,12 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
       placesLeft: mission.snuPlaces,
       status: MISSION_STATUS.WAITING_VALIDATION,
     });
-    if (!data) throw new Error("No mission created");
-    if (referent) {
-      await notifyReferentsNewMission(data, referent);
-    }
+    await notifyReferentsNewMission(data, referent);
     return data;
   }
 
   logger.info(`Updating mission ${mission.clientId}`);
-  const data = await updateMission(oldMission, formattedMission);
-  if (!data) throw new Error("No mission updated");
-  return data;
+  return updateMission(oldMission, formattedMission);
 }
 
 export async function cancelOldMissions(startTime: Date) {
@@ -250,11 +250,10 @@ export async function cancelOldMissions(startTime: Date) {
 async function cancelMission(mission: MissionDocument): Promise<MissionDocument> {
   logger.info(`Cancelling mission ${mission.jvaMissionId}`);
   mission.set({ status: MISSION_STATUS.CANCEL });
-  const data = await mission.save({ fromUser });
-  if (!data) throw new Error("Mission not updated");
+  await mission.save({ fromUser });
   await updateApplicationStatus(mission, fromUser);
   await notifyReferentCancelMission(mission);
-  return data;
+  return mission;
 }
 
 async function notifyReferentsNewMission(mission: MissionDocument, referentMission: ReferentDocument) {
