@@ -120,6 +120,24 @@ async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDo
   return structure;
 }
 
+async function getOrCreateStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
+  const existingStructure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
+  if (existingStructure) {
+    return existingStructure;
+  }
+
+  try {
+    return await createStructure(mission);
+  } catch (error: unknown) {
+    // Erreur E11000 = duplicate key (race condition)
+    if (error instanceof Error && "code" in error && (error as { code: number }).code === 11000) {
+      logger.info(`Structure ${mission.organizationClientId} already created by concurrent process, fetching...`);
+      return await StructureModel.findOne({ jvaStructureId: mission.organizationClientId }) ?? undefined;
+    }
+    throw error;
+  }
+}
+
 async function updateMission(mission: MissionDocument, updatedMission: Partial<MissionType>): Promise<MissionDocument> {
   const oldMissionTutorId = mission.tutorId;
   delete updatedMission.name;
@@ -195,14 +213,10 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
     return;
   }
 
-  let structure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
+  let structure = await getOrCreateStructure(mission);
   if (!structure) {
-    const newStructure = await createStructure(mission);
-    if (!newStructure) {
-      logger.warn(`No structure created for mission ${mission.clientId} (jvaStructureId: ${mission.organizationClientId})`);
-      return;
-    }
-    structure = newStructure;
+    logger.warn(`No structure created for mission ${mission.clientId} (jvaStructureId: ${mission.organizationClientId})`);
+    return;
   }
 
   if (SnuStructureException.includes(structure?.id)) {
