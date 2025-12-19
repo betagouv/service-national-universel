@@ -244,6 +244,8 @@ export const StructureSchema = {
 
   jvaStructureId: {
     type: Number,
+    unique: true,
+    sparse: true,
     documentation: {
       description: "JVA structure ID",
     },

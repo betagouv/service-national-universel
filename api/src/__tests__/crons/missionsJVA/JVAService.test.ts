@@ -4,8 +4,15 @@ jest.mock("../../../application/applicationService", () => ({
   updateApplicationStatus: jest.fn(),
 }));
 
+jest.mock("../../../crons/missionsJVA/JVARepository", () => ({
+  __esModule: true,
+  fetchMissions: jest.fn(),
+  fetchStructureById: jest.fn(),
+}));
+
 import { syncMission } from "../../../crons/missionsJVA/JVAService";
 import { MissionModel, ReferentModel, StructureModel } from "../../../models";
+import { fetchStructureById } from "../../../crons/missionsJVA/JVARepository";
 import { jest } from "@jest/globals";
 import { MISSION_STATUS } from "snu-lib";
 
@@ -19,6 +26,7 @@ jest.mock("../../../models", () => ({
   },
   ReferentModel: {
     findOne: jest.fn(),
+    exists: jest.fn(),
   },
 }));
 
@@ -170,5 +178,43 @@ describe("syncMission", () => {
     await syncMission(missionToSync as any);
 
     expect(MissionModel.create).toHaveBeenCalled();
+  });
+
+  it("should reuse existing structure when found", async () => {
+    const existingStructure = { _id: "structure-id", id: "structure-id", jvaStructureId: 456 };
+
+    // Structure déjà existante
+    (StructureModel.findOne as any).mockResolvedValue(existingStructure);
+    (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
+    (MissionModel.findOne as any).mockResolvedValue(null);
+    (MissionModel.create as any).mockResolvedValue({ _id: "new-mission-id" });
+
+    const missionToSync = {
+      ...JVA_MISSION_MOCK,
+      startAt: "2026-01-01T00:00:00.000Z",
+      endAt: "2026-02-01T00:00:00.000Z",
+    };
+
+    await syncMission(missionToSync as any);
+
+    // Vérifier que findOne a été appelé pour chercher la structure par jvaStructureId
+    expect(StructureModel.findOne).toHaveBeenCalledWith({ jvaStructureId: "456" });
+    // fetchStructureById ne doit PAS être appelé car la structure existe déjà
+    expect(fetchStructureById).not.toHaveBeenCalled();
+    // La mission doit être créée
+    expect(MissionModel.create).toHaveBeenCalled();
+  });
+});
+
+describe("Structure schema", () => {
+  it("should have unique sparse index on jvaStructureId to prevent duplicates", async () => {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const { StructureSchema } = require("snu-lib");
+
+    const jvaStructureIdField = StructureSchema.jvaStructureId;
+
+    expect(jvaStructureIdField).toBeDefined();
+    expect(jvaStructureIdField.unique).toBe(true);
+    expect(jvaStructureIdField.sparse).toBe(true);
   });
 });
