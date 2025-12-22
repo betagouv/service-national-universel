@@ -130,10 +130,6 @@ export const itemsEngagement = [
     link: "/mission",
   },
   {
-    title: "Annuaire des associations",
-    link: "/association",
-  },
-  {
     title: "Contenus",
     link: "/contenu",
   },
