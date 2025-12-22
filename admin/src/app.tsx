@@ -57,8 +57,6 @@ const CGU = lazy(() => import("./scenes/CGU"));
 // @ts-ignore
 const Alerte = lazy(() => import("./scenes/alerte"));
 // @ts-ignore
-const Association = lazy(() => import("./scenes/association"));
-// @ts-ignore
 const Auth = lazy(() => import("./scenes/auth"));
 // @ts-ignore
 const Center = lazy(() => import("./scenes/centersV2"));
@@ -323,7 +321,6 @@ const Home = () => {
                   <RestrictedRoute path="/objectifs" component={Goal} roles={[ROLES.ADMIN]} />
                   <RestrictedRoute path="/centre" component={Center} />
                   <RestrictedRoute path="/point-de-rassemblement" component={PointDeRassemblement} />
-                  <RestrictedRoute path="/association" component={Association} />
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
                   <RestrictedRoute path="/dsnj-export" component={DSNJExport} />
