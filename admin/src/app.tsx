@@ -109,7 +109,6 @@ const Contact = lazy(() => import("./scenes/contact"));
 // @ts-ignore
 const Signup = lazy(() => import("./scenes/signup"));
 // @ts-ignore
-const ImportSiSnu = lazy(() => import("./scenes/importSiSnu"));
 // @ts-ignore
 const PlanMarketing = lazy(() => import("./scenes/planMarketing"));
 
@@ -307,7 +306,6 @@ const Home = () => {
                   <RestrictedRoute path="/centre" component={Center} />
                   <RestrictedRoute path="/besoin-d-aide" component={SupportCenter} />
                   <RestrictedRoute path="/equipe" component={Team} />
-                  <RestrictedRoute path="/import-si-snu" component={ImportSiSnu} />
                   {[ROLES.ADMIN].includes(user?.role) && SUB_ROLE_GOD === user?.subRole ? <RestrictedRoute path="/plan-marketing/:tab?" component={PlanMarketing} /> : null}
 
                   {/* Institution */}
