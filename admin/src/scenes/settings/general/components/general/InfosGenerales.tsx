@@ -1,17 +1,14 @@
 import React from "react";
 import { MdInfoOutline } from "react-icons/md";
-import { HiOutlineExclamation } from "react-icons/hi";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
-import cx from "classnames";
 
 import { COHORT_TYPE, COHORT_STATUS, CohortDto } from "snu-lib";
 import InputText from "@/components/ui/forms/InputText";
-import { Select, Tooltip, Button, Container } from "@snu/ds/admin";
+import { Container, Select, Tooltip } from "@snu/ds/admin";
 import DatePickerInput from "@/components/ui/forms/dateForm/DatePickerInput";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
 import CohortGroupSelector from "./CohortGroupSelector";
-import { useUpdateCohortGeneral } from "../../hooks/useCohortUpdate";
 
 export type InfosGeneralesFormData = Pick<CohortDto, "dateStart" | "dateEnd" | "status" | "cohortGroupId" | "uselessInformation"> & {
   specificSnuIdCohort?: CohortDto["specificSnuIdCohort"];
@@ -25,9 +22,7 @@ interface InfosGeneralesProps {
 export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps) {
   const {
     control,
-    handleSubmit,
-    formState: { errors, isDirty, isSubmitting },
-    reset,
+    formState: { errors, isSubmitting },
   } = useForm<InfosGeneralesFormData>({
     defaultValues: {
       dateStart: cohort.dateStart,
@@ -43,21 +38,6 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
     },
     mode: "onChange",
   });
-  const isNotSaved = isDirty && !isSubmitting;
-  const updateCohortGeneralMutation = useUpdateCohortGeneral();
-
-  const handleOnCancel = () => {
-    reset();
-  };
-
-  const handleConfirmSubmit = (data: InfosGeneralesFormData) => {
-    if (!cohort._id) return;
-    updateCohortGeneralMutation.mutate({
-      data,
-      cohortId: cohort._id,
-    });
-    reset(data);
-  };
 
   const statusOptions = [
     { value: COHORT_STATUS.PUBLISHED, label: "Publiée" },
@@ -66,7 +46,7 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
   ];
 
   return (
-    <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
+    <Container>
       <div className="flex w-full flex-col gap-8">
         <p className="text-lg font-medium leading-5 text-gray-900">Informations générales</p>
         <div className="flex">
@@ -104,7 +84,8 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
                               Si elle est <strong>archivée partiellement</strong>, ils peuvent poursuivre la phase engagement sous certaines conditions.
                             </li>
                             <li className="mt-2">
-                              Si elle est <strong>archivée totalement</strong>, les jeunes ne peuvent plus candidater, ajouter des engagements réalisés, ni gérer leurs candidatures. Les référents ne peuvent plus proposer de missions ni créer de missions personnalisées.
+                              Si elle est <strong>archivée totalement</strong>, les jeunes ne peuvent plus candidater, ajouter des engagements réalisés, ni gérer leurs
+                              candidatures. Les référents ne peuvent plus proposer de missions ni créer de missions personnalisées.
                             </li>
                           </ul>
                         </ReactTooltip>
@@ -273,23 +254,6 @@ export default function InfosGenerales({ cohort, readOnly }: InfosGeneralesProps
             />
           </div>
         </div>
-      </div>
-      <hr className="border-t border-gray-200 mt-4" />
-      <div className="flex justify-end mt-4 gap-2">
-        {isNotSaved && (
-          <div className="flex items-center gap-2 text-gray-500">
-            <HiOutlineExclamation className="w-5 h-5" />
-            <span>Non enregistrée</span>
-          </div>
-        )}
-        {isDirty ? <Button title="Annuler" type="secondary" className="flex justify-center" onClick={handleOnCancel} disabled={isSubmitting} /> : null}
-        <Button
-          disabled={isSubmitting || !isDirty}
-          type="wired"
-          className="flex items-center gap-2 px-6 py-2 rounded-md"
-          title="Enregistrer"
-          onClick={handleSubmit(handleConfirmSubmit)}
-        />
       </div>
     </Container>
   );
