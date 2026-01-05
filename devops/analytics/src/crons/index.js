@@ -1,7 +1,6 @@
 const cron = require("node-cron");
 
 const { ENVIRONMENT } = require("../config");
-const addJdmaData = require("./add-jdma-data.job");
 const addUptimeRobotData = require("./add-uptime-robot-data.job");
 const addCodeClimateData = require("./add-code-climate-data.job");
 const addSentryData = require("./add-sentry-data.job");
@@ -25,10 +24,6 @@ const everyHours = (x) => `0 */${x} * * *`;
 
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
 if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  // Every day at 02:00
-  cron.schedule("0 2 * * *", () => {
-    addJdmaData.handler();
-  });
   // Every day at 02:10
   cron.schedule("10 2 * * *", () => {
     addCodeClimateData.handler();
