@@ -17,9 +17,9 @@ const DELAYED_PERIODS: Period[] = [
     message: "",
   },
   {
-    start: new Date("2025-12-22"),
-    end: new Date("2026-01-04"),
-    message: "Le support du SNU sera exceptionnellement ralenti du 22 décembre au 4 janvier inclus. 🎄🎉✨ Pendant cette période, les délais de réponse seront plus longs.",
+    start: new Date("2024-12-23"),
+    end: new Date("2025-01-06"),
+    message: "Nous vous souhaitons de très belles fêtes",
   },
 ];
 
