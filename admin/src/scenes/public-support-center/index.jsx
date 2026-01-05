@@ -200,8 +200,8 @@ export default function PublicSupportCenter(props) {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280", marginBottom: "0.5rem" }}>
-              Le support du SNU sera exceptionnellement ralenti du 22 décembre au 4 janvier inclus. Nous traiterons votre demande dès que possible. Vous recevrez une réponse par
-              mail.
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
+              une réponse par mail.
             </div>
             <div className="bda-container">
               <LinkButton

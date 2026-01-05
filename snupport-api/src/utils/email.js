@@ -12,7 +12,6 @@ const weekendRanges = [
   { start: new Date("2025-05-24"), end: new Date("2025-05-25") }, // CLE 19
   { start: new Date("2025-05-31"), end: new Date("2025-06-01") }, // CLE 20
   { start: new Date("2025-08-04"), end: new Date("2025-08-22") }, // Fermeture estivale startup
-  { start: new Date("2025-12-22"), end: new Date("2026-01-04") }, // Fermeture hivernale support
 ];
 
 function isDateInRange(newDate, ranges) {
