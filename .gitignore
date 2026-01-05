@@ -23,5 +23,3 @@ dump
 *.json.gz
 
 .clever.json
-
-.continue
