@@ -1,7 +1,6 @@
 const cron = require("node-cron");
 
 const { ENVIRONMENT } = require("../config");
-const addUptimeRobotData = require("./add-uptime-robot-data.job");
 
 // doubt ? -> https://crontab.guru/
 
@@ -15,15 +14,6 @@ const everyMinutes = (x) => `*/${x} * * * *`;
 const everyHours = (x) => `0 */${x} * * *`;
 /* eslint-enable no-unused-vars */
 
-// ! A jour du 16 juin 2023 (Source ChatGPT)
-// Voici les heures de déclenchement de chaque cron dans le fichier fourni (en UTC):
-
-// applicationPending.handler() : tous les jours à 2h00
-
 // See: https://www.clever-cloud.com/doc/administrate/cron/#deduplicating-crons (INSTANCE_NUMBER)
 if (ENVIRONMENT === "production" && process.env.INSTANCE_NUMBER === "0") {
-  // Every day at 02:20
-  cron.schedule("20 2 * * *", () => {
-    addUptimeRobotData.handler();
-  });
 }
