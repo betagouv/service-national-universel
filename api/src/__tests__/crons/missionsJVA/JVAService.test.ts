@@ -10,6 +10,16 @@ jest.mock("../../../crons/missionsJVA/JVARepository", () => ({
   fetchStructureById: jest.fn(),
 }));
 
+jest.mock("../../../brevo", () => ({
+  __esModule: true,
+  sendTemplate: jest.fn(),
+}));
+
+jest.mock("../../../slack", () => ({
+  __esModule: true,
+  default: { info: jest.fn() },
+}));
+
 import { syncMission } from "../../../crons/missionsJVA/JVAService";
 import { MissionModel, ReferentModel, StructureModel } from "../../../models";
 import { fetchStructureById } from "../../../crons/missionsJVA/JVARepository";
@@ -27,6 +37,7 @@ jest.mock("../../../models", () => ({
   ReferentModel: {
     findOne: jest.fn(),
     exists: jest.fn(),
+    find: jest.fn(),
   },
 }));
 
@@ -58,7 +69,7 @@ const JVA_MISSION_MOCK = {
 
 describe("syncMission", () => {
   beforeEach(() => {
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it("should cancel existing mission if start date is after limit", async () => {
@@ -167,7 +178,9 @@ describe("syncMission", () => {
     (MissionModel.findOne as any).mockResolvedValue(null);
     (MissionModel.create as any).mockResolvedValue({ _id: "new-mission-id" });
     (StructureModel.findOne as any).mockResolvedValue({ _id: "structure-id" });
+    (ReferentModel.exists as any).mockResolvedValue(true);
     (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
+    (ReferentModel.find as any).mockResolvedValue([]);
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
@@ -185,7 +198,9 @@ describe("syncMission", () => {
 
     // Structure déjà existante
     (StructureModel.findOne as any).mockResolvedValue(existingStructure);
+    (ReferentModel.exists as any).mockResolvedValue(true);
     (ReferentModel.findOne as any).mockResolvedValue({ _id: "referent-id", firstName: "John", lastName: "Doe" });
+    (ReferentModel.find as any).mockResolvedValue([]);
     (MissionModel.findOne as any).mockResolvedValue(null);
     (MissionModel.create as any).mockResolvedValue({ _id: "new-mission-id" });
 
