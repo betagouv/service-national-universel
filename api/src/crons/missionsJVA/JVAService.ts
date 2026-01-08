@@ -120,9 +120,23 @@ async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDo
   return structure;
 }
 
+async function createResponsablesForStructure(structure: StructureDocument, jvaStructureId: number): Promise<void> {
+  const jvaStructure = await fetchStructureById(jvaStructureId);
+  if (!jvaStructure?.responsables?.length) {
+    return;
+  }
+  logger.info(`Creating responsables for existing structure ${structure.id}`);
+  const referentPromises = jvaStructure.responsables.map((resp) => createReferentIfNotExists(resp, structure.id));
+  await Promise.all(referentPromises);
+}
+
 async function getOrCreateStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
   const existingStructure = await StructureModel.findOne({ jvaStructureId: mission.organizationClientId });
   if (existingStructure) {
+    const hasReferent = await ReferentModel.exists({ structureId: existingStructure.id });
+    if (!hasReferent) {
+      await createResponsablesForStructure(existingStructure, mission.organizationClientId);
+    }
     return existingStructure;
   }
 
