@@ -2,15 +2,13 @@ import React from "react";
 import { MdInfoOutline } from "react-icons/md";
 import ReactTooltip from "react-tooltip";
 import { Controller, useForm } from "react-hook-form";
-import { HiOutlineExclamation } from "react-icons/hi";
 import cx from "classnames";
 
 import { COHORT_TYPE, CohortDto } from "snu-lib";
-import { Button, Container } from "@snu/ds/admin";
+import { Container } from "@snu/ds/admin";
 import SimpleToggle from "@/components/ui/forms/dateForm/SimpleToggle";
 import ToggleDate from "@/components/ui/forms/dateForm/ToggleDate";
 import { InformationsConvoyage } from "./InformationsConvoyage";
-import { useUpdateCohortPreparation } from "../../hooks/useCohortUpdate";
 
 export type PreparationFormData = Pick<
   CohortDto,
@@ -34,14 +32,12 @@ interface PreparationProps {
   cohort: CohortDto;
   readOnly: boolean;
 }
-
 export default function InfosPreparation({ cohort, readOnly }: PreparationProps) {
   const {
     control,
     setValue,
     watch,
-    handleSubmit,
-    formState: { errors, isDirty, isSubmitting, dirtyFields },
+    formState: { isDirty, isSubmitting },
     reset,
   } = useForm<PreparationFormData>({
     defaultValues: {
@@ -73,21 +69,6 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
     },
     mode: "onChange",
   });
-  const isNotSaved = isDirty && !isSubmitting;
-  const updateCohortePreparationMutation = useUpdateCohortPreparation();
-
-  const handleOnCancel = () => {
-    reset();
-  };
-
-  const handleConfirmSubmit = (data: PreparationFormData) => {
-    if (!cohort._id) return;
-    updateCohortePreparationMutation.mutate({
-      data,
-      cohortId: cohort._id,
-    });
-    reset(data);
-  };
   return (
     <Container className={cx({ "outline outline-2 outline-blue-600": isDirty })}>
       <div className="flex w-full flex-col gap-8">
@@ -306,23 +287,6 @@ export default function InfosPreparation({ cohort, readOnly }: PreparationProps)
             </div>
           </div>
         </div>
-      </div>
-      <hr className="border-t border-gray-200 mt-4" />
-      <div className="flex justify-end mt-4 gap-2">
-        {isNotSaved && (
-          <div className="flex items-center gap-2 text-gray-500">
-            <HiOutlineExclamation className="w-5 h-5" />
-            <span>Non enregistrée</span>
-          </div>
-        )}
-        {isDirty ? <Button title="Annuler" type="secondary" className="flex justify-center" onClick={handleOnCancel} disabled={isSubmitting} /> : null}
-        <Button
-          disabled={isSubmitting || !isDirty}
-          type="wired"
-          className="flex items-center gap-2 px-6 py-2 rounded-md"
-          title="Enregistrer"
-          onClick={handleSubmit(handleConfirmSubmit)}
-        />
       </div>
     </Container>
   );
