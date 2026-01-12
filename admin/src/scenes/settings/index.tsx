@@ -34,7 +34,7 @@ export default function Settings() {
   const currentCohortName = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort") || "") : cohorts[0].name;
 
   const hasSuperAdminAccess = isSuperAdmin(user);
-  const isReadOnly = !hasSuperAdminAccess;
+  const isReadOnly = true;
 
   const { data: cohort, isLoading } = useQuery({
     queryKey: ["cohort", currentCohortName],
