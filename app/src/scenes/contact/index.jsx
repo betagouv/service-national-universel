@@ -54,7 +54,7 @@ export default function Contact() {
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">
         <p className="leading-relaxed mb-10">
-          Le support du SNU sera exceptionnellement ralenti du 22 décembre au 4 janvier inclus. Nous traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+          Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
         </p>
 
         <MessageDelayed />

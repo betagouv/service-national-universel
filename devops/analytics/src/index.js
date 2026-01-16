@@ -14,7 +14,6 @@
   app.use(helmet());
   app.use(helmet.hsts({ maxAge: 5184000 }));
 
-  require("./crons");
   require("./services/databases/redis.service");
 
   // @todo: can it be removed?
