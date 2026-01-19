@@ -2,8 +2,7 @@ import React from "react";
 import { useSelector } from "react-redux";
 import { useHistory, useParams } from "react-router-dom";
 import { CiSettings } from "react-icons/ci";
-import { MdOutlinePlace } from "react-icons/md";
-import { HiOutlineLightningBolt, HiOutlineMail } from "react-icons/hi";
+import { HiOutlineMail } from "react-icons/hi";
 import { useQueryClient } from "@tanstack/react-query";
 
 import { isSuperAdmin, ROLES } from "snu-lib";
@@ -18,12 +17,8 @@ import logo from "@/assets/logo-snu.png";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 import Loader from "@/components/Loader";
-
-import EligibilityTab from "./eligibility/EligibilityTab";
 import GeneralTab from "./general/GeneralTab";
-import OperationsTab from "./operations/OperationsTab";
 import MarketingTab from "./marketing/MarketingTab";
-import ExportContactConvocation from "./operations/actions/Inscription/ExportContactSimulation/ExportContactConvocation";
 
 import { useQuery } from "@tanstack/react-query";
 
@@ -39,7 +34,7 @@ export default function Settings() {
   const currentCohortName = urlParams.get("cohort") ? decodeURIComponent(urlParams.get("cohort") || "") : cohorts[0].name;
 
   const hasSuperAdminAccess = isSuperAdmin(user);
-  const isReadOnly = !hasSuperAdminAccess;
+  const isReadOnly = true;
 
   const { data: cohort, isLoading } = useQuery({
     queryKey: ["cohort", currentCohortName],
@@ -96,18 +91,6 @@ export default function Settings() {
     ...(hasSuperAdminAccess
       ? [
           {
-            id: "eligibility" as const,
-            title: "Éligibilités",
-            leftIcon: <MdOutlinePlace size={20} className="mt-0.5" />,
-            content: <EligibilityTab cohort={cohort} />,
-          },
-          {
-            id: "operations" as const,
-            title: "Opérations",
-            leftIcon: <HiOutlineLightningBolt size={20} className="mt-0.5" />,
-            content: <OperationsTab session={cohort} />,
-          },
-          {
             id: "marketing" as const,
             title: "Marketing",
             leftIcon: <HiOutlineMail size={20} className="mt-0.5" />,
@@ -124,7 +107,6 @@ export default function Settings() {
         <div className="flex items-center justify-between py-8">
           <div className="text-2xl font-bold leading-7 text-gray-900">Paramétrages dynamiques</div>
           <div className="flex items-center">
-            <ExportContactConvocation session={cohort} />
             <SelectCohort cohort={currentCohortName} onChange={onCohortChange} showArchived />
           </div>
         </div>

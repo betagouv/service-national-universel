@@ -40,32 +40,6 @@ export default function Phase1(props) {
         toastr.error("Impossible de récupérer les informations du centre de cohésion");
       }
     })();
-
-    if (!young?.meetingPointId) return;
-
-    if (young.meetingPointId && young.ligneId) {
-      (async () => {
-        try {
-          const { data, code, ok } = await api.get(`/point-de-rassemblement/fullInfo/${young?.meetingPointId}/${young?.ligneId}`);
-          if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-          setMeetingPoint(data);
-        } catch (err) {
-          capture(err);
-          toastr.error("Impossible de récupérer les informations du point de rassemblement");
-        }
-      })();
-    } else if (young.meetingPointId) {
-      (async () => {
-        try {
-          const { data, code, ok } = await api.get(`/point-de-rassemblement/${young?.meetingPointId}`);
-          if (!ok) return toastr.error("Impossible de récupérer les informations du point de rassemblement", translate(code));
-          setPointDeRassemblement(data);
-        } catch (err) {
-          capture(err);
-          toastr.error("Impossible de récupérer les informations du point de rassemblement");
-        }
-      })();
-    }
   }, [young]);
 
   if (!young) return <Loader />;
@@ -88,22 +62,11 @@ export default function Phase1(props) {
         ) : null}
         <Phase1Header young={young} setYoung={setYoung} user={user} />
         <General young={young} setYoung={setYoung} values={values} setValues={setValues} isCheckIsOpen={isCheckIsOpen} user={user} />
+        <div className="w-[50%]">
+          <Details young={young} setYoung={setYoung} cohesionCenter={cohesionCenter} cohort={cohort} user={user} />
+        </div>
 
-        <Details
-          young={young}
-          setYoung={setYoung}
-          cohesionCenter={cohesionCenter}
-          meetingPoint={meetingPoint}
-          pointDeRassemblement={pointDeRassemblement}
-          cohort={cohort}
-          user={user}
-        />
-
-        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION ||
-        young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED ||
-        young.statusPhase1 === YOUNG_STATUS_PHASE1.DONE ? (
-          <DocumentPhase1 young={young} />
-        ) : null}
+        {young.statusPhase1 === YOUNG_STATUS_PHASE1.WAITING_AFFECTATION || young.statusPhase1 === YOUNG_STATUS_PHASE1.AFFECTED}
       </div>
       <ModalConfirm
         isOpen={modal?.isOpen}

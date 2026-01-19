@@ -11,39 +11,6 @@ export const itemsSejourGod = [
     title: "Centres",
     link: "/centre",
   },
-  {
-    title: "Points de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
-  },
-  {
-    title: "Table de répartition",
-    link: "/table-repartition",
-  },
-  {
-    title: "Schéma de répartition",
-    link: "/schema-repartition",
-  },
-
-  {
-    title: "Plan de transport",
-    link: "/ligne-de-bus",
-  },
-  {
-    title: "Edit Plan de transport",
-    link: "/edit-transport",
-  },
-  {
-    title: "Objectifs",
-    link: "/objectifs",
-  },
-  {
-    title: "Export DSNJ",
-    link: "/dsnj-export",
-  },
-  {
-    title: "Export INJEP",
-    link: "/injep-export",
-  },
 ];
 
 export const itemsSejourAdmin = [
@@ -59,34 +26,6 @@ export const itemsSejourAdmin = [
     title: "Centres",
     link: "/centre",
   },
-  {
-    title: "Points de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
-  },
-  {
-    title: "Table de répartition",
-    link: "/table-repartition",
-  },
-  {
-    title: "Schéma de répartition",
-    link: "/schema-repartition",
-  },
-  {
-    title: "Plan de transport",
-    link: "/ligne-de-bus",
-  },
-  {
-    title: "Objectifs",
-    link: "/objectifs",
-  },
-  {
-    title: "Export DSNJ",
-    link: "/dsnj-export",
-  },
-  {
-    title: "Export INJEP",
-    link: "/injep-export",
-  },
 ];
 
 export const itemsSejourRef = [
@@ -101,22 +40,6 @@ export const itemsSejourRef = [
   {
     title: "Centres",
     link: "/centre",
-  },
-  {
-    title: "Points de rassemblement",
-    link: "/point-de-rassemblement/liste/liste-points",
-  },
-  {
-    title: "Table de répartition",
-    link: "/table-repartition",
-  },
-  {
-    title: "Schéma de répartition",
-    link: "/schema-repartition",
-  },
-  {
-    title: "Plan de transport",
-    link: "/ligne-de-bus",
   },
 ];
 
