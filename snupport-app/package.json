@@ -78,7 +78,7 @@
     "sortablejs": "^1.15.0",
     "styled-components": "^5.3.3",
     "urijs": "^1.19.10",
-    "validator": "^13.1.1",
+    "validator": "^13.15.22",
     "xlsx": "^0.18.5"
   },
   "devDependencies": {
