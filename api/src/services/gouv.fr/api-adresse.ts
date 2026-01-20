@@ -24,7 +24,7 @@ export const apiAdress = async (
       filters.autocomplete = 1;
     }
     const filtersString = !filters || Object.keys(filters).length > 0 ? "" : `&${qs.stringify(filters)}`;
-    const res = await fetch(`https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(queryString)}${filtersString}`, {
+    const res = await fetch(`https://data.geopf.fr/geocodage/search/?q=${encodeURIComponent(queryString)}${filtersString}`, {
       // @ts-ignore
       retries: 3,
       retryDelay: 1000,

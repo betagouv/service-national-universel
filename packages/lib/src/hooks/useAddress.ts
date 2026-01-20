@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { department2region, departmentLookUp } from "../region-and-departments";
 
-const baseURL = "https://api-adresse.data.gouv.fr/search/?q=";
+const baseURL = "https://data.geopf.fr/geocodage/search/?q=";
 
 export function useAddress({ query, options = {}, enabled = true }: { query: string; options: { [key: string]: string | number }; enabled?: boolean }) {
   let url = baseURL + encodeURIComponent(query);
