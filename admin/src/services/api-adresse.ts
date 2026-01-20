@@ -18,7 +18,7 @@ export const apiAdress = async (
     autocomplete?: 1 | 0;
   } = {},
 ) => {
-  let url = `https://api-adresse.data.gouv.fr/search/?q=${encodeURIComponent(query)}`;
+  let url = `https://data.geopf.fr/geocodage/search/?q=${encodeURIComponent(query)}`;
 
   for (const [key, value] of Object.entries(filters)) {
     url += `&${key}=${encodeURIComponent(value)}`;
