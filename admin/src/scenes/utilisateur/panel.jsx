@@ -129,7 +129,7 @@ export default function UserPanel({ onChange, value }) {
               </Tooltip>
             ) : null}
 
-            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? (
+            {canDeleteReferent({ actor: user }) ? (
               <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={value.status !== ReferentStatus.INACTIVE}>
                 <PanelActionButton
                   onClick={onClickDelete}

@@ -1,7 +1,15 @@
 import { CohortDto, ReferentDto, UserDto } from "./dto";
 import { region2department } from "./region-and-departments";
 import { isNowBetweenDates } from "./utils/date";
-import { APPLICATION_STATUS, COHORT_TYPE, LIMIT_DATE_ESTIMATED_SEATS, LIMIT_DATE_TOTAL_SEATS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, YOUNG_STATUS_PHASE3 } from "./constants/constants";
+import {
+  APPLICATION_STATUS,
+  COHORT_TYPE,
+  LIMIT_DATE_ESTIMATED_SEATS,
+  LIMIT_DATE_TOTAL_SEATS,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
+} from "./constants/constants";
 import { CohortType, MissionType, PointDeRassemblementType, ReferentType, SessionPhase1Type, StructureType, YoungType } from "./mongoSchema";
 import { isBefore, isPast } from "date-fns";
 import { isCohortArchived, isCohortFullyArchived } from "./sessions";
@@ -9,12 +17,8 @@ import { isCohortArchived, isCohortFullyArchived } from "./sessions";
 const DURATION_BEFORE_EXPIRATION_2FA_MONCOMPTE_MS = 1000 * 60 * 15; // 15 minutes
 const DURATION_BEFORE_EXPIRATION_2FA_ADMIN_MS = 1000 * 60 * 10; // 10 minutes
 
-
 const hasValidatedPhase1 = (young: YoungType) => {
-  return (
-    (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) ||
-    [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any)
-  );
+  return (young.statusPhase2OpenedAt && isPast(young.statusPhase2OpenedAt)) || [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
 };
 
 const didAttendCohesionStay = (young: YoungType) => young.cohesionStayPresence === "true";
@@ -245,62 +249,8 @@ function canEditYoung(actor, young) {
   return authorized;
 }
 
-function canDeleteReferent({ actor, originalTarget, structure }) {
-  // TODO: we must handle rights more precisely.
-  // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
-  const isMe = actor._id === originalTarget._id;
-
-  const isAdmin = actor.role === ROLES.ADMIN;
-  const isSupervisor = actor.role === ROLES.SUPERVISOR;
-
-  const geographicTargetData = {
-    region: originalTarget.region || structure?.region,
-    department: originalTarget.department || [structure?.department],
-  };
-
-  const actorAndTargetInTheSameRegion = actor.region === geographicTargetData.region;
-  // Check si il y a au moins un match entre les departements de la target et de l'actor
-  const actorAndTargetInTheSameDepartment = actor.department.some((department) => geographicTargetData.department.includes(department));
-
-  const targetIsReferentRegion = originalTarget.role === ROLES.REFERENT_REGION;
-  const targetIsReferentDepartment = originalTarget.role === ROLES.REFERENT_DEPARTMENT;
-  const targetIsSupervisor = originalTarget.role === ROLES.SUPERVISOR;
-  const targetIsResponsible = originalTarget.role === ROLES.RESPONSIBLE;
-  const targetIsVisitor = originalTarget.role === ROLES.VISITOR;
-  const targetIsHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role);
-
-  // actor is referent region
-  const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsReferentRegion && actorAndTargetInTheSameRegion;
-  const referentDepartmentFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsReferentDepartment && actorAndTargetInTheSameRegion;
-  const referentResponsibleFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsResponsible && actorAndTargetInTheSameRegion;
-  const responsibleFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsResponsible && actorAndTargetInTheSameRegion;
-  const visitorFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsVisitor && actorAndTargetInTheSameRegion;
-  const headCenterFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && targetIsHeadCenter && actorAndTargetInTheSameRegion;
-
-  // actor is referent department
-  const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && targetIsReferentDepartment && actorAndTargetInTheSameDepartment;
-  const responsibleFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && targetIsResponsible && actorAndTargetInTheSameDepartment;
-  const headCenterFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && targetIsHeadCenter && actorAndTargetInTheSameDepartment;
-
-  // same substructure
-  const responsibleFromSameStructure = (targetIsResponsible || targetIsSupervisor) && actor.structureId === originalTarget.structureId;
-  const supervisorOfMainStructure = structure && isSupervisor && actor.structureId === structure.networkId;
-
-  const authorized =
-    isAdmin ||
-    referentRegionFromTheSameRegion ||
-    referentDepartmentFromTheSameRegion ||
-    referentResponsibleFromTheSameRegion ||
-    responsibleFromTheSameRegion ||
-    visitorFromTheSameRegion ||
-    headCenterFromTheSameRegion ||
-    referentDepartmentFromTheSameDepartment ||
-    responsibleFromTheSameDepartment ||
-    headCenterFromTheSameDepartment ||
-    (responsibleFromSameStructure && !isMe) ||
-    supervisorOfMainStructure;
-
-  return authorized;
+function canDeleteReferent({ actor }) {
+  return isAdmin(actor);
 }
 
 function canDeletePatchesHistory(actor, target) {
@@ -1260,20 +1210,19 @@ function canAdminCreateApplication(young: YoungType) {
 // - Cohorte archivée partiellement : phase1 validée/dispensée + phase2 non validée + au moins 1 mission effectuée
 // - Cohorte archivée totalement : impossible
 function canReferentCreateApplication(young: YoungType, applications: any[], cohort?: CohortType) {
-  
   const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
   const phase2NotValidated = young.statusPhase2 !== YOUNG_STATUS_PHASE2.VALIDATED;
   const hasCompletedMission = applications?.some((app) => app.status === APPLICATION_STATUS.DONE);
-  
+
   if (!hasValidatedOrExemptedPhase1 || !phase2NotValidated) {
     return false;
   }
-  
+
   // Si cohorte totalement archivée, les référents ne peuvent plus proposer de missions
   if (isCohortFullyArchived(cohort)) {
     return false;
   }
-  
+
   // Si cohorte archivée partiellement, peut proposer si mission déjà DONE
   const cohortNotArchived = !isCohortArchived(cohort);
   return cohortNotArchived || hasCompletedMission;

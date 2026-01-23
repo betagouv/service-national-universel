@@ -308,7 +308,7 @@ const Action = ({ hit, structure, displayActionButton, setResponsable }) => {
     }
   };
 
-  const isDeleteEnabled = canDeleteReferent({ actor: user, originalTarget: hit, structure }) && hit.status !== ReferentStatus.INACTIVE;
+  const isDeleteEnabled = canDeleteReferent({ actor: user }) && hit.status !== ReferentStatus.INACTIVE;
   return (
     <>
       <div className="flex flex-row flex-wrap items-center justify-between">
