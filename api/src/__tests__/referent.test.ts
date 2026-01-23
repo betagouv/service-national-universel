@@ -769,11 +769,18 @@ describe("Referent", () => {
     });
     it("should return 200 if referent found", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());
-      const res = await request(await getAppHelperWithAcl())
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN, subRole: SUB_ROLE_GOD }))
         .delete(`/referent/${referent._id}`)
         .send();
       expect(res.statusCode).toEqual(200);
       expect(await getReferentByIdHelper(referent._id)).toBeNull();
+    });
+    it("should return 403 if not super admin", async () => {
+      const referent = await createReferentHelper(getNewReferentFixture());
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .delete(`/referent/${referent._id}`)
+        .send();
+      expect(res.statusCode).toEqual(403);
     });
     it("should return 403 if role is not admin", async () => {
       const referent = await createReferentHelper(getNewReferentFixture());

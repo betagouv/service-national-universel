@@ -1733,9 +1733,8 @@ router.delete(
     try {
       const referent = await ReferentModel.findById(req.params.id);
       if (!referent) return res.status(404).send({ ok: false });
-      const structure = await StructureModel.findById(referent.structureId);
 
-      if (!canDeleteReferent({ actor: req.user, originalTarget: referent, structure })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!canDeleteReferent({ actor: req.user })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (referent.role === ROLES.RESPONSIBLE || referent.role === ROLES.SUPERVISOR) {
         const referents = await ReferentModel.find({ structureId: referent.structureId });

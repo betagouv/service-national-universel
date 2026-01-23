@@ -80,7 +80,7 @@ export default function UserPanel({ onChange, value }) {
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
               {user.role === ROLES.ADMIN ? <PanelActionButton onClick={handleImpersonate} icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" /> : null}
-              {canDeleteReferent({ actor: user, originalTarget: value }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
+              {canDeleteReferent({ actor: user }) ? <PanelActionButton onClick={onClickDelete} icon="bin" title="Supprimer" /> : null}
             </div>
           )}
         </div>
