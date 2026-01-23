@@ -250,7 +250,7 @@ function canEditYoung(actor, young) {
 }
 
 function canDeleteReferent({ actor }) {
-  return isAdmin(actor);
+  return isSuperAdmin(actor);
 }
 
 function canDeletePatchesHistory(actor, target) {

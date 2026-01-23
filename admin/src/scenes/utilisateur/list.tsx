@@ -385,7 +385,7 @@ const Action = ({ hit, structure }: ActionProps) => {
   };
 
   const isSigninAsEnabled = canSigninAs(user, hit, "referent") && hit.status !== ReferentStatus.INACTIVE;
-  const isDeleteEnabled = (canDeleteReferent({ actor: user }) && hit.status !== ReferentStatus.INACTIVE) || isSuperAdmin(user);
+  const isDeleteEnabled = isSuperAdmin(user);
 
   return (
     <>

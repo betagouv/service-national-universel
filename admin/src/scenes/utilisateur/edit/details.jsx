@@ -357,7 +357,14 @@ export default function Details({ user, setUser, currentUser }) {
     roleMode = MODE_READONLY;
   }
 
-  const isDeleteEnabled = isSuperAdmin(currentUser) || user.status !== ReferentStatus.INACTIVE;
+  const canDelete = canDeleteReferent({ actor: currentUser });
+  const isDeleteEnabled = isSuperAdmin(currentUser);
+
+  const tooltipTitle = !canDelete
+    ? "Il est impossible de supprimer un compte utilisateur."
+    : user.status === ReferentStatus.INACTIVE && !isSuperAdmin(currentUser)
+      ? "Vous ne pouvez pas supprimer un utilisateur désactivé"
+      : "";
 
   return (
     <>
@@ -604,10 +611,10 @@ export default function Details({ user, setUser, currentUser }) {
           </Container>
         )}
 
-        {isDeleteAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) && canDeleteReferent({ actor: currentUser }) && (
+        {isDeleteAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) && (
           <div className="flex items-center justify-center">
             {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} user={user} />}
-            <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={isDeleteEnabled}>
+            <Tooltip title={tooltipTitle} disabled={isDeleteEnabled}>
               <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={!isDeleteEnabled} href={null}>
                 Supprimer le compte
               </BorderButton>
