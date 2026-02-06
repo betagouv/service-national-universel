@@ -241,20 +241,21 @@ export default function Index() {
           <h1 className="text-[28px] font-bold leading-8 text-gray-900">Volontaires</h1>
           <div className="flex items-stretch gap-4 ">
             <div className="flex w-[30%] flex-col gap-4">
+              {/* @ts-ignore */}
               <BoxWithPercentage
-                total={data?.pdrTotal || 0}
-                // @ts-expect-error fixme
-                number={data?.pdr?.NR + data?.pdr?.false || 0}
+                total={Number(data?.pdrTotal) || 0}
+                number={(Number(data?.pdr?.NR) || 0) + (Number(data?.pdr?.false) || 0)}
                 title="Point de rassemblement"
                 subLabel="restants à confirmer"
-                redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] })}
+                redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ hasMeetingInformation: "false" })] }) as any}
               />
+              {/* @ts-ignore */}
               <BoxWithPercentage
-                total={data?.participationTotal || 0}
-                number={data?.participation?.false || 0}
+                total={Number(data?.participationTotal) || 0}
+                number={Number(data?.participation?.false) || 0}
                 title="Participation"
                 subLabel="restants à confirmer"
-                redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] })}
+                redirect={getNewLink({ base: `/volontaire`, filter: selectedFilters, filtersUrl: [queryString.stringify({ youngPhase1Agreement: "false" })] }) as any}
               />
             </div>
             {/* @ts-expect-error jsx */}
@@ -271,12 +272,13 @@ export default function Index() {
             />
             {/* @ts-expect-error fixme */}
             <OccupationCardHorizontal total={dataCenter?.placesTotalSession || 0} taken={dataCenter?.placesTotalSession - dataCenter?.placesLeftSession || 0} />
+            {/* @ts-ignore */}
             <BoxWithPercentage
-              total={dataCenter?.totalSession || 0}
-              number={dataCenter?.timeSchedule?.false || 0}
+              total={Number(dataCenter?.totalSession) || 0}
+              number={Number(dataCenter?.timeSchedule?.false) || 0}
               title="Emplois du temps"
               subLabel="restants à renseigner"
-              redirect={getNewLink({ base: `/centre/liste/session`, filter: selectedFilters, filtersUrl: ["hasTimeSchedule=false"] }, "session")}
+              redirect={getNewLink({ base: `/centre/liste/session`, filter: selectedFilters, filtersUrl: ["hasTimeSchedule=false"] }, "session") as any}
             />
           </div>
           <div className="flex gap-4">

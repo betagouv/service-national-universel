@@ -2,6 +2,14 @@ import React from "react";
 import RoundRatio from "../graphs/RoundRatio";
 import { Link } from "react-router-dom";
 
+/**
+ * @param {Object} props
+ * @param {number} props.total
+ * @param {string} props.title
+ * @param {number} props.number
+ * @param {string} props.subLabel
+ * @param {string} props.redirect
+ */
 export default function BoxWithPercentage({ total, title, number, subLabel, redirect }) {
   const value = total ? (total - number) / total : 0;
   return (

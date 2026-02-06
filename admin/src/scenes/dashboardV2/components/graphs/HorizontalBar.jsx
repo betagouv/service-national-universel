@@ -2,6 +2,17 @@ import React, { useEffect, useState } from "react";
 import { getGraphColors } from "./graph-commons";
 import GraphTooltip from "./GraphTooltip";
 
+/**
+ * @param {Object} props
+ * @param {string} props.title
+ * @param {number[]} props.values
+ * @param {string[]} props.labels
+ * @param {boolean} [props.showTooltips]
+ * @param {string[]} [props.legendUrls]
+ * @param {number} props.goal
+ * @param {string} [props.className]
+ * @param {(index: number, label: string, value: string, color: string) => void} [props.onLegendClicked]
+ */
 export default function HorizontalBar({ title, values, labels, showTooltips = false, legendUrls, goal, className = "", onLegendClicked = () => {} }) {
   const [bars, setBars] = useState([]);
   const [total, setTotal] = useState(0);

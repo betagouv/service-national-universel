@@ -189,6 +189,14 @@ export const getLink = ({ base = "/", filter, filtersUrl = [] }) => {
 
 export const replaceSpacesNewList = (v) => v?.replace(/\s+/g, "%20");
 
+/**
+ * @param {{
+ *   base?: string,
+ *   filter?: any,
+ *   filtersUrl?: string[]
+ * }} param0
+ * @param {string} [from]
+ */
 export const getNewLink = ({ base = "/", filter, filtersUrl = [] }, from) => {
   Object.keys(filter).forEach((key) => {
     if (key === "cohorts" && from === "center") return;

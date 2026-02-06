@@ -1,9 +1,7 @@
 import React from "react";
 import cx from "classnames";
 import { HiInformationCircle, HiExclamationCircle, HiExclamation, HiLightBulb } from "react-icons/hi";
-// @ts-expect-error CommonJS module
 import Markdown from "react-markdown";
-// @ts-expect-error CommonJS module
 import remarkGfm from "remark-gfm";
 
 import { AlerteMessageDto } from "snu-lib";

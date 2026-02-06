@@ -111,7 +111,7 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
         if (!csvFile) throw new Error("Impossible de générer le fichier CSV");
 
         // 3. Create file and import recipients
-        const file = new File([csvFile.buffer], csvFile.filename, { type: csvFile.mimetype });
+        const file = new File([csvFile.buffer as unknown as BlobPart], csvFile.filename, { type: csvFile.mimetype });
         await importRecipientsMutation.mutateAsync(file);
 
         // 4. Create distribution list

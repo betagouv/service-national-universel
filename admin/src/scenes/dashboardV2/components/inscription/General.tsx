@@ -166,7 +166,7 @@ export default function General({ selectedFilters, onSelectedFiltersChange }: Ge
             inscriptionDetailObject.WAITING_CORRECTION || 0,
             inscriptionDetailObject.IN_PROGRESS || 0,
           ]}
-          goal={goal}
+          goal={goal || 0}
           showTooltips={true}
           legendUrls={[
             getNewLink({ base: `/inscription`, filter: selectedFilters, filtersUrl: [queryString.stringify({ status: "VALIDATED" })] }),
