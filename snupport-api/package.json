@@ -42,7 +42,7 @@
     "joi": "^17.11.0",
     "jsonwebtoken": "^8.5.1",
     "mailparser": "^3.6.5",
-    "mongoose": "^7.8.2",
+    "mongoose": "^7.8.4",
     "morgan": "^1.10.0",
     "node-cron": "^3.0.2",
     "node-fetch": "2.7.0",
