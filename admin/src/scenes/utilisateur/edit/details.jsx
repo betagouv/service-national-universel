@@ -357,7 +357,14 @@ export default function Details({ user, setUser, currentUser }) {
     roleMode = MODE_READONLY;
   }
 
-  const isDeleteEnabled = isSuperAdmin(currentUser) || user.status !== ReferentStatus.INACTIVE;
+  const canDelete = canDeleteReferent({ actor: currentUser });
+  const isDeleteEnabled = isSuperAdmin(currentUser);
+
+  const tooltipTitle = !canDelete
+    ? "Il est impossible de supprimer un compte utilisateur."
+    : user.status === ReferentStatus.INACTIVE && !isSuperAdmin(currentUser)
+      ? "Vous ne pouvez pas supprimer un utilisateur désactivé"
+      : "";
 
   return (
     <>
@@ -604,44 +611,43 @@ export default function Details({ user, setUser, currentUser }) {
           </Container>
         )}
 
-        {isDeleteAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) &&
-          canDeleteReferent({ actor: currentUser, originalTarget: user, structure }) && (
-            <div className="flex items-center justify-center">
-              {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} user={user} />}
-              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={isDeleteEnabled}>
-                <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={!isDeleteEnabled} href={null}>
-                  Supprimer le compte
-                </BorderButton>
-              </Tooltip>
-              <ConfirmationModal
-                isOpen={modal?.isOpen}
-                title={modal?.title}
-                message={modal?.message}
-                onCancel={() => setModal({ isOpen: false, onConfirm: null })}
-                onConfirm={() => {
-                  modal?.onConfirm();
-                  setModal({ isOpen: false, onConfirm: null });
-                }}
-              />
-              <ModalChangeTutor
-                isOpen={modalTutor?.isOpen}
-                title={modalTutor?.title}
-                message={modalTutor?.message}
-                tutor={modalTutor?.value}
-                onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
-                onConfirm={() => {
-                  modalTutor?.onConfirm();
-                  setModalTutor({ isOpen: false, onConfirm: null });
-                }}
-              />
-              <ModalUniqueResponsable
-                isOpen={modalUniqueResponsable?.isOpen}
-                responsable={modalUniqueResponsable?.responsable}
-                onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
-              />
-              <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
-            </div>
-          )}
+        {isDeleteAuthorized({ user: currentUser, resource: PERMISSION_RESOURCES.REFERENT, ignorePolicy: true }) && (
+          <div className="flex items-center justify-center">
+            {isSuperAdmin(currentUser) && <RenewInvitation userId={user._id} user={user} />}
+            <Tooltip title={tooltipTitle} disabled={isDeleteEnabled}>
+              <BorderButton mode="red" className="mt-3" onClick={onClickDelete} disabled={!isDeleteEnabled} href={null}>
+                Supprimer le compte
+              </BorderButton>
+            </Tooltip>
+            <ConfirmationModal
+              isOpen={modal?.isOpen}
+              title={modal?.title}
+              message={modal?.message}
+              onCancel={() => setModal({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modal?.onConfirm();
+                setModal({ isOpen: false, onConfirm: null });
+              }}
+            />
+            <ModalChangeTutor
+              isOpen={modalTutor?.isOpen}
+              title={modalTutor?.title}
+              message={modalTutor?.message}
+              tutor={modalTutor?.value}
+              onCancel={() => setModalTutor({ isOpen: false, onConfirm: null })}
+              onConfirm={() => {
+                modalTutor?.onConfirm();
+                setModalTutor({ isOpen: false, onConfirm: null });
+              }}
+            />
+            <ModalUniqueResponsable
+              isOpen={modalUniqueResponsable?.isOpen}
+              responsable={modalUniqueResponsable?.responsable}
+              onConfirm={() => setModalUniqueResponsable({ isOpen: false })}
+            />
+            <ModalReferentDeleted isOpen={modalReferentDeleted?.isOpen} onConfirm={() => history.push("/user")} />
+          </div>
+        )}
       </div>
     </>
   );

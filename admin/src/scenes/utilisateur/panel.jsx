@@ -7,7 +7,7 @@ import { Link, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { translate, ROLES, copyToClipboard, canDeleteReferent, formatPhoneNumberFR, department2region } from "../../utils";
-import { ReferentStatus, canSigninAs } from "snu-lib";
+import { ReferentStatus, canSigninAs, isSuperAdmin } from "snu-lib";
 import api from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
@@ -129,16 +129,16 @@ export default function UserPanel({ onChange, value }) {
               </Tooltip>
             ) : null}
 
-            {canDeleteReferent({ actor: user, originalTarget: value, structure }) ? (
-              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={value.status !== ReferentStatus.INACTIVE}>
+            {canDeleteReferent({ actor: user }) ? (
+              <Tooltip title="Vous ne pouvez pas supprimer un utilisateur désactivé" disabled={value.status !== ReferentStatus.INACTIVE || isSuperAdmin(user)}>
                 <PanelActionButton
                   onClick={onClickDelete}
                   icon="bin"
                   title="Supprimer"
-                  disabled={value.status === ReferentStatus.INACTIVE}
+                  disabled={value.status === ReferentStatus.INACTIVE && !isSuperAdmin(user)}
                   style={{
-                    backgroundColor: value.status === ReferentStatus.INACTIVE ? "gray" : "white",
-                    cursor: value.status === ReferentStatus.INACTIVE ? "not-allowed" : "pointer",
+                    backgroundColor: value.status === ReferentStatus.INACTIVE && !isSuperAdmin(user) ? "gray" : "white",
+                    cursor: value.status === ReferentStatus.INACTIVE && !isSuperAdmin(user) ? "not-allowed" : "pointer",
                   }}
                 />
               </Tooltip>
