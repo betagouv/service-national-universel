@@ -63,7 +63,7 @@
     "jsonwebtoken": "^9.0.1",
     "migrate-mongo": "^11.0.0",
     "mime-types": "^2.1.35",
-    "mongoose": "^7.8.2",
+    "mongoose": "^7.8.4",
     "mongoose-patch-history": "^2.0.0",
     "nanoid": "^2.1.11",
     "netmask": "^2.0.2",
