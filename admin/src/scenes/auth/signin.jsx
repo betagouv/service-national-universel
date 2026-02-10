@@ -14,8 +14,14 @@ import PasswordEye from "../../components/PasswordEye";
 import { GoTools } from "react-icons/go";
 import { FEATURES_NAME, isFeatureEnabled, formatToActualTime, isValidRedirectUrl, ERRORS } from "snu-lib";
 import { captureMessage } from "../../sentry";
+import { Alert } from "@codegouvfr/react-dsfr/Alert";
+import { startReactDsfr } from "@codegouvfr/react-dsfr/spa";
+import useDocumentCss from "../../hooks/useDocumentCss";
 
 export default function Signin() {
+  useDocumentCss(["/dsfr/utility/icons/icons.min.css", "/dsfr/dsfr.min.css"]);
+  startReactDsfr({ defaultColorScheme: "light", Link });
+
   const history = useHistory();
   const dispatch = useDispatch();
 
@@ -37,6 +43,12 @@ export default function Signin() {
         <div className="hidden min-h-[400px] flex-[1] bg-[url('./assets/computer.jpeg')] bg-cover bg-center bg-no-repeat md:block" />
         <div className="flex flex-1 flex-col justify-center bg-gray-50 p-8">
           <div className="px-16">
+            <Alert
+              severity="warning"
+              title="Problème technique avec l'envoi des mails"
+              description="Nous rencontrons actuellement un problème technique avec l'envoi des mails. Si vous ne recevez pas les mails d'authentification, cela est probablement lié à ce dysfonctionnement. Vous pouvez contacter le support, contact@snu.gouv.fr, afin que nous puissions revenir vers vous dès la résolution du problème."
+              className="mb-4"
+            />
             <h1 className="mb-4 text-xl font-bold text-brand-black md:text-3xl">Espace Administrateur</h1>
             <h2 className="mb-8 text-base font-normal text-brand-grey">
               Plateforme à destination des modérateurs, des référents, des chefs de centre, des responsable de structure, des transporteurs et des superviseurs
