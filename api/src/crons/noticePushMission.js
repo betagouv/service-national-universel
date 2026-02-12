@@ -56,9 +56,11 @@ exports.handler = async () => {
         if (!missions) return;
         countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
         if (missions?.length > 0) {
-          const template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
+          countHit++;
+          // send a mail to the young
+          let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
           let cc = getCcOfYoung({ template, young });
-          const sent = await sendTemplate(template, {
+          await sendTemplate(template, {
             emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
             params: {
               missions,
@@ -66,9 +68,6 @@ exports.handler = async () => {
             },
             cc,
           });
-          if (!sent) return;
-
-          countHit++;
           // stock the list in young
           const missionsInMail = (young.missionsInMail || []).concat(esMissions?.map((mission) => ({ missionId: mission._id, date: Date.now() })));
           // This is used in order to minimize risk of version conflict.
