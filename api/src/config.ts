@@ -34,7 +34,6 @@ export const config = {
   RUN_API_AND_TASKS: _env(envBool, "RUN_API_AND_TASKS", false),
   ENABLE_SENTRY: _env(envBool, "ENABLE_SENTRY", false),
   ENABLE_SENDINBLUE: _env(envBool, "ENABLE_SENDINBLUE", false),
-  ALLOW_EMAIL_TO_MICROSOFT_PUBLIC: _env(envBool, "ALLOW_EMAIL_TO_MICROSOFT_PUBLIC", true),
   MAIL_TRANSPORT: _env(envStr, "MAIL_TRANSPORT", null), // BREVO / SMTP / null (pas d'envoi d'email)
   SMTP_HOST: _env(envStr, "SMTP_HOST", "localhost"),
   SMTP_PORT: _env(envInt, "SMTP_PORT", 1025),
