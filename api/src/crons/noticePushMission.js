@@ -11,6 +11,23 @@ const { config } = require("../config");
 const { getCcOfYoung } = require("../utils");
 const fileName = path.basename(__filename, ".js");
 
+const MICROSOFT_PUBLIC_EMAIL_DOMAINS = new Set([
+  "outlook.com",
+  "outlook.fr",
+  "live.fr",
+  "live.com",
+  "msn.fr",
+  "msn.com",
+  "hotmail.fr",
+  "hotmail.com",
+]);
+
+const isMicrosoftPublicEmail = (email) => {
+  if (!email || typeof email !== "string") return false;
+  const domain = email.split("@")[1]?.toLowerCase();
+  return domain ? MICROSOFT_PUBLIC_EMAIL_DOMAINS.has(domain) : false;
+};
+
 exports.handler = async () => {
   try {
     let countTotal = 0;
@@ -56,9 +73,10 @@ exports.handler = async () => {
         if (!missions) return;
         countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
         if (missions?.length > 0) {
+          if (isMicrosoftPublicEmail(young.email)) return;
+
           countHit++;
-          // send a mail to the young
-          let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
+          const template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
           let cc = getCcOfYoung({ template, young });
           await sendTemplate(template, {
             emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
