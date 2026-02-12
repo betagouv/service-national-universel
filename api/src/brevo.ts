@@ -51,28 +51,6 @@ export type Email = {
   name?: string;
 };
 
-const MICROSOFT_EMAIL_DOMAINS = [
-  "outlook.com",
-  "outlook.fr",
-  "live.fr",
-  "live.com",
-  "msn.fr",
-  "msn.com",
-  "hotmail.fr",
-  "hotmail.com",
-];
-
-function isMicrosoftEmail(email: string): boolean {
-  const domain = email?.split("@")[1]?.toLowerCase();
-  if (!domain) return false;
-  return MICROSOFT_EMAIL_DOMAINS.some((d) => domain === d || domain.endsWith("." + d));
-}
-
-function filterMicrosoftEmails(emails: Email[]): Email[] {
-  if (config.ALLOW_EMAIL_TO_MICROSOFT_PUBLIC) return emails;
-  return emails.filter((e) => !isMicrosoftEmail(e.email));
-}
-
 const api = async (path, options: any = {}, force?: boolean) => {
   try {
     if (!config.ENABLE_SENDINBLUE && !force) {
@@ -134,13 +112,8 @@ export async function sendSMS(phoneNumber, content, tag) {
 // https://developers.sendinblue.com/reference#sendtransacemail
 export async function sendEmail(to: Email[], subject: string, htmlContent, { params, attachment, cc, bcc }: Omit<SendMailParameters, "emailTo"> = {}) {
   try {
-    const filteredTo = filterMicrosoftEmails(to);
-    const filteredCc = cc ? filterMicrosoftEmails(cc) : undefined;
-    const filteredBcc = bcc ? filterMicrosoftEmails(bcc) : undefined;
-    if (!filteredTo.length) return;
-
     if (config.MAIL_TRANSPORT === "SMTP") {
-      await sendMailCatcher(subject, htmlContent, { emailTo: filteredTo, cc: filteredCc, bcc: filteredBcc, attachment });
+      await sendMailCatcher(subject, htmlContent, { emailTo: to, cc, bcc, attachment });
       return;
     }
 
@@ -149,9 +122,9 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
     }
 
     const body: any = {};
-    body.to = [filteredTo];
-    if (filteredCc?.length) body.cc = filteredCc;
-    if (filteredBcc?.length) body.bcc = filteredBcc;
+    body.to = [to];
+    if (cc?.length) body.cc = cc;
+    if (bcc?.length) body.bcc = bcc;
     body.htmlContent = htmlContent;
     body.sender = { name: SENDER_NAME, email: SENDER_EMAIL };
     body.subject = subject;
@@ -282,22 +255,17 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
   try {
     if (!id) throw new Error("No template id provided");
 
-    const filteredEmailTo = emailTo ? filterMicrosoftEmails(emailTo) : undefined;
-    const filteredCc = cc ? filterMicrosoftEmails(cc) : undefined;
-    const filteredBcc = bcc ? filterMicrosoftEmails(bcc) : undefined;
-    if (!filteredEmailTo?.length) return;
-
     if (!options.force && config.MAIL_TRANSPORT === "SMTP") {
-      await simulateTemplate(id, { params, emailTo: filteredEmailTo, cc: filteredCc, bcc: filteredBcc, attachment });
-      return true;
+      await simulateTemplate(id, { params, emailTo, cc, bcc, attachment });
+      return;
     }
     if (!options.force && config.MAIL_TRANSPORT !== "BREVO") {
       return;
     }
     const body: any = { templateId: parseInt(id) };
-    if (filteredEmailTo) body.to = filteredEmailTo;
-    if (filteredCc?.length) body.cc = filteredCc;
-    if (filteredBcc?.length) body.bcc = filteredBcc;
+    if (emailTo) body.to = emailTo;
+    if (cc?.length) body.cc = cc;
+    if (bcc?.length) body.bcc = bcc;
     if (params) body.params = params;
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
@@ -316,7 +284,7 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
     if (config.ENVIRONMENT !== "production" || options.force) {
       logger.debug("", { body, mail });
     }
-    return mail ?? true;
+    return mail;
   } catch (e) {
     capture(e);
   }
