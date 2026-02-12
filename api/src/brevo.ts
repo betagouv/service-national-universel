@@ -289,7 +289,7 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
 
     if (!options.force && config.MAIL_TRANSPORT === "SMTP") {
       await simulateTemplate(id, { params, emailTo: filteredEmailTo, cc: filteredCc, bcc: filteredBcc, attachment });
-      return;
+      return true;
     }
     if (!options.force && config.MAIL_TRANSPORT !== "BREVO") {
       return;
@@ -316,7 +316,7 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
     if (config.ENVIRONMENT !== "production" || options.force) {
       logger.debug("", { body, mail });
     }
-    return mail;
+    return mail ?? true;
   } catch (e) {
     capture(e);
   }
