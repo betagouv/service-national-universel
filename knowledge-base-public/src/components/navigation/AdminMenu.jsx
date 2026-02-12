@@ -2,7 +2,7 @@ import { Fragment, useContext, useEffect } from "react";
 import useUser from "../../hooks/useUser";
 import SeeAsContext from "../../contexts/seeAs";
 import { useSWRConfig } from "swr";
-import { adminURL, snuApiUrl } from "../../config";
+import { adminURL, snuApiUrl, supportApiUrl } from "../../config";
 import API from "../../services/api";
 import Link from "next/link";
 import { Popover, Transition } from "@headlessui/react";
@@ -69,6 +69,11 @@ export default function AdminMenu() {
     cache.clear();
   };
 
+  const onExportArticles = async (event) => {
+    event.preventDefault();
+    await API.post({ origin: supportApiUrl, path: "/knowledge-base/export" });
+  };
+
   return (
     <>
       {withSeeAs && (
@@ -133,6 +138,17 @@ export default function AdminMenu() {
                         </Link>
                       </li>
 
+                      <hr />
+
+                      <li>
+                        <button
+                          onClick={onExportArticles}
+                          className="flex w-full items-center justify-between border border-none bg-transparent p-4 text-sm font-medium text-gray-800 shadow-none transition-colors hover:bg-gray-100"
+                        >
+                          <span>Exporter les articles</span>
+                          <HiOutlineLogout className="text-xl text-gray-400" />
+                        </button>
+                      </li>
                       <hr />
 
                       <li>
