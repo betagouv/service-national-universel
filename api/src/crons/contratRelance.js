@@ -14,12 +14,13 @@ const trigger = async () => {
   await cursor.eachAsync(async function (contract) {
     total++;
     if (diffDays(contract.updatedAt, now) === 1) {
-      countContractNotified++;
       let referentManagerPhase2 = await getReferentManagerPhase2(contract.youngDepartment);
       let emailTo = referentManagerPhase2.map((referent) => ({
         name: `${referent.firstName} ${referent.lastName}`,
         email: referent.email,
       }));
+      if (!emailTo.length) return;
+      countContractNotified++;
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.CONTRACT_DRAFT, {
         emailTo: emailTo,
         params: {

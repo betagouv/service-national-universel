@@ -5,7 +5,7 @@ import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
 
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus } from "snu-lib";
 
 import slack from "../slack";
 import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
@@ -529,7 +529,7 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   const department = ticketCreator.department;
   const departmentReferents = await ReferentModel.find({
     role: ROLES.REFERENT_DEPARTMENT,
-    department,
+    department, status: ReferentStatus.ACTIVE,
   });
 
   for (let referent of departmentReferents) {
