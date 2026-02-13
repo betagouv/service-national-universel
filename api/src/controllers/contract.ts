@@ -12,6 +12,7 @@ import {
   isReadAuthorized,
   isWriteAuthorized,
   isCreateAuthorized,
+  ReferentStatus,
 } from "snu-lib";
 import { capture } from "../sentry";
 import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
@@ -117,6 +118,7 @@ async function sendProjectManagerContractEmail(contract: ContractType, isValidat
   const departmentReferentPhase2 = await ReferentModel.find({
     department: contract.youngDepartment,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    status: ReferentStatus.ACTIVE,
   });
 
   return sendContractEmail(contract, {

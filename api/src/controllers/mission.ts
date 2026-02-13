@@ -21,6 +21,7 @@ import {
   isWriteAuthorized,
   isDeleteAuthorized,
   canManageApplications,
+  ReferentStatus,
 } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
 import patches from "./patches";
@@ -108,6 +109,7 @@ router.post(
         const referentsDepartment = await ReferentModel.find({
           department: checkedMission.department,
           subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+          status: ReferentStatus.ACTIVE,
         });
         if (referentsDepartment?.length) {
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
@@ -118,7 +120,7 @@ router.post(
           });
         }
 
-        if (responsible)
+        if (responsible && responsible.status !== ReferentStatus.INACTIVE)
           await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
             emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
             params: {
@@ -240,6 +242,7 @@ router.put(
           const referentsDepartment = await ReferentModel.find({
             department: checkedMission.department,
             subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+            status: ReferentStatus.ACTIVE,
           });
           if (referentsDepartment?.length) {
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.NEW_MISSION, {
@@ -250,7 +253,7 @@ router.put(
             });
           }
           const responsible = await ReferentModel.findById(mission.tutorId);
-          if (responsible)
+          if (responsible && responsible.status !== ReferentStatus.INACTIVE)
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {
@@ -260,7 +263,7 @@ router.put(
         }
         if (mission.status === MISSION_STATUS.VALIDATED) {
           const responsible = await ReferentModel.findById(mission.tutorId);
-          if (responsible)
+          if (responsible && responsible.status !== ReferentStatus.INACTIVE)
             await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_VALIDATED, {
               emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
               params: {

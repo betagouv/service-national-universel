@@ -64,7 +64,7 @@ import {
   PERMISSION_RESOURCES,
   isReadAuthorized,
   PERMISSION_CODES,
-  PERMISSION_ACTIONS,
+  PERMISSION_ACTIONS, ReferentStatus,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -654,7 +654,7 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       if (bus) await updateSeatsTakenInBusLine(bus);
     }
 
-    const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department });
+    const referents = await ReferentModel.find({ role: ROLES.REFERENT_DEPARTMENT, department: young.department, status: ReferentStatus.ACTIVE });
     for (let referent of referents) {
       await sendTemplate(SENDINBLUE_TEMPLATES.referent.YOUNG_CHANGE_COHORT, {
         emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],

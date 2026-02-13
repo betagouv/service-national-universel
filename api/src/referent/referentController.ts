@@ -113,7 +113,7 @@ import {
   ROLE_JEUNE,
   PERMISSION_RESOURCES,
   isWriteAuthorized,
-  PERMISSION_ACTIONS,
+  PERMISSION_ACTIONS, ReferentStatus,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -1193,6 +1193,7 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    if (tutor.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
     if (!canSendTutorTemplate(req.user)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
 

@@ -1,5 +1,5 @@
 import { config } from "../config";
-import { ApplicationType, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
+import { ApplicationType, ReferentStatus, SENDINBLUE_TEMPLATES, YoungType } from "snu-lib";
 import { getCcOfYoung, getReferentManagerPhase2 } from "../utils";
 import { sendTemplate } from "../brevo";
 import { ReferentModel, YoungDocument } from "../models";
@@ -16,7 +16,7 @@ export async function notifyReferentMilitaryPreparationFilesSubmitted(user: Youn
 
 export async function notifyReferentNewApplication(application: ApplicationType, young: YoungType) {
   const referent = await ReferentModel.findById(application.tutorId);
-  if (!referent) return;
+  if (!referent || referent.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
   const template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
   const params = {
@@ -30,7 +30,7 @@ export async function notifyReferentNewApplication(application: ApplicationType,
 
 export async function notifySupervisorMilitaryPreparationFilesValidated(application: ApplicationType) {
   const superviseur = await ReferentModel.findById(application.tutorId);
-  if (!superviseur) return;
+  if (!superviseur || superviseur.status === ReferentStatus.INACTIVE) return;
   const emailTo = [{ name: `${superviseur.firstName} ${superviseur.lastName}`, email: superviseur.email }];
   const template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
   const params = { cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
