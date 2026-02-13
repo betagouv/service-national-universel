@@ -45,6 +45,7 @@ import {
   SessionPhase1Type,
   YOUNG_STATUS,
   canModifyDirectionCenterTeam,
+  ReferentStatus,
 } from "snu-lib";
 import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
 import { validateSessionPhase1, validateId } from "../utils/validator";
@@ -853,7 +854,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
 
     // --- get headCenter
     const headCenter = await ReferentModel.findById(session.headCenterId);
-    if (!headCenter) {
+    if (!headCenter || headCenter.status === ReferentStatus.INACTIVE) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
     if (headCenter.email === null || headCenter.email === undefined) {
