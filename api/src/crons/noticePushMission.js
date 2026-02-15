@@ -56,6 +56,11 @@ exports.handler = async () => {
         if (!missions) return;
         countMissionSentCohort[young?.cohort] = (countMissionSentCohort[young?.cohort] || 0) + 1;
         if (missions?.length > 0) {
+          const blockedDomains = ["hotmail.com", "hotmail.fr", "live.fr", "live.com", "msn.com", "msn.fr", "outlook.com", "outlook.fr"];
+          const emailDomain = young.email?.toLowerCase().split("@")[1];
+          if (blockedDomains.includes(emailDomain)) {
+            return;
+          }
           countHit++;
           // send a mail to the young
           let template = SENDINBLUE_TEMPLATES.young.MISSION_PROPOSITION_AUTO;
