@@ -5,13 +5,13 @@ import { Link } from "react-router-dom";
 
 export default function HeaderComponent() {
   return (
-    <div className="sticky left-0 top-0 z-20 flex w-full items-center justify-between bg-white shadow">
-      <div className="flex flex-1 items-center">
-        <a href="https://www.snu.gouv.fr/">
-          <img className="hidden h-20 py-1 px-4 align-top md:block" src={Img3} />
+    <div className="sticky left-0 top-0 z-20 flex w-full items-center justify-between bg-white border-0 shadow-none" style={{ borderBottom: "none", boxShadow: "none", borderTop: "none", borderLeft: "none", borderRight: "none", outline: "none" }}>
+      <div className="flex flex-1 items-center" style={{ color: "rgba(58, 58, 58, 0)" }}>
+        <a href="https://www.snu.gouv.fr/" style={{ border: "none", outline: "none" }}>
+          <img className="hidden h-20 py-1 px-4 align-top md:block" src={Img3} style={{ border: "none", outline: "none", display: "block" }} />
         </a>
-        <a href="https://www.snu.gouv.fr/">
-          <img className="h-10 py-1 px-4 align-top md:h-20" src={Img2} />
+        <a href="https://www.snu.gouv.fr/" style={{ border: "none", outline: "none" }}>
+          <img className="h-10 py-1 px-4 align-top md:h-20" src={Img2} style={{ border: "none", outline: "none", display: "block" }} />
         </a>
       </div>
       <div className="flex flex-col border-l border-gray-200">
