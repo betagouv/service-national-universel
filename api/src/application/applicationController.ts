@@ -22,6 +22,7 @@ import {
   isWriteAuthorized,
   isSupervisor,
   isResponsible,
+  ReferentStatus,
 } from "snu-lib";
 
 import { capture, captureMessage } from "../sentry";
@@ -628,6 +629,7 @@ router.post(
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const referent = await ReferentModel.findById(mission.tutorId);
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const isReferentActive = referent.status !== ReferentStatus.INACTIVE;
       const young = await YoungModel.findById(application.youngId);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -662,6 +664,7 @@ router.post(
       let params: Params = { youngFirstName: application.youngFirstName || "", youngLastName: application.youngLastName || "", missionName: mission.name };
 
       if (template === SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED) {
+        if (!isReferentActive) return res.status(200).send({ ok: true });
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2/application/${application._id}/contrat` };
       } else if (template === SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION) {
@@ -672,13 +675,16 @@ router.post(
         ].filter((destinataire) => destinataire.email);
         params = { ...params, cta: `${config.APP_URL}/candidature?utm_campaign=transactionel+mig+candidature+approuvee&utm_source=notifauto&utm_medium=mail+151+faire` };
       } else if (template === SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR) {
+        if (!isReferentActive) return res.status(200).send({ ok: true });
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
         params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}` };
       } else if (template === SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION) {
+        if (!isReferentActive) return res.status(200).send({ ok: true });
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
       } else if (template === SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION) {
         emailTo = [{ name: `${application.youngFirstName} ${application.youngLastName}`, email: application.youngEmail }];
       } else if (template === SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION) {
+        if (!isReferentActive) return res.status(200).send({ ok: true });
         emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
       } else if (template === SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION) {
         emailTo = [
@@ -695,6 +701,7 @@ router.post(
         // when it is a new application, there are 2 possibilities
         if (mission.isMilitaryPreparation === "true") {
           if (young.statusMilitaryPreparationFiles === "VALIDATED") {
+            if (!isReferentActive) return res.status(200).send({ ok: true });
             emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
             template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
             params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
@@ -708,6 +715,7 @@ router.post(
             params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
           }
         } else {
+          if (!isReferentActive) return res.status(200).send({ ok: true });
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
           template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
           params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
@@ -715,10 +723,12 @@ router.post(
       } else if (template === SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION) {
         // when it is a new application, there are 2 possibilities
         if (mission.isMilitaryPreparation === "true") {
+          if (!isReferentActive) return res.status(200).send({ ok: true });
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
           template = SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_VALIDATED;
           params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
         } else {
+          if (!isReferentActive) return res.status(200).send({ ok: true });
           emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
           template = SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION_MIG;
           params = { ...params, cta: `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2` };
@@ -753,7 +763,9 @@ router.post(
             name: `${referent.firstName} ${referent.lastName}`,
             email: referent.email,
           }));
-          emailTo.push({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email });
+          if (isReferentActive) {
+            emailTo.push({ name: `${referent.firstName} ${referent.lastName}`, email: referent.email });
+          }
 
           const mail = await sendTemplate(template, {
             emailTo,
@@ -764,13 +776,15 @@ router.post(
           // envoyer le mail au jeune / RP
           if (req.user.role === ROLES.REFERENT_DEPARTMENT) {
             // prevenir tuteur mission
-            emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-            params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+            if (isReferentActive) {
+              emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+              params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
 
-            await sendTemplate(template, {
-              emailTo,
-              params,
-            });
+              await sendTemplate(template, {
+                emailTo,
+                params,
+              });
+            }
 
             return sendYoungRPMail();
           } else if (isResponsible(req.user) || isSupervisor(req.user)) {
@@ -789,12 +803,14 @@ router.post(
             return sendYoungRPMail();
           } else if (req.user.role === ROLES.ADMIN || req.user.role === ROLES.REFERENT_REGION) {
             // prevenir tutor
-            emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
-            params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
-            await sendTemplate(template, {
-              emailTo,
-              params,
-            });
+            if (isReferentActive) {
+              emailTo = [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }];
+              params.cta = `${config.ADMIN_URL}/volontaire/${application.youngId}/phase2`;
+              await sendTemplate(template, {
+                emailTo,
+                params,
+              });
+            }
             return sendYoungRPMail();
           } else {
             emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];

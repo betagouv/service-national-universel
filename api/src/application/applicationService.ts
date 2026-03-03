@@ -13,6 +13,7 @@ import {
   YOUNG_STATUS_PHASE1,
   YOUNG_STATUS_PHASE2,
   COHORT_STATUS,
+  ReferentStatus,
 } from "snu-lib";
 import { deletePatches } from "../controllers/patches";
 import { ApplicationModel, MissionModel, ReferentDocument, YoungDocument } from "../models";
@@ -223,6 +224,7 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
     subRole: SUB_ROLES.manager_phase2,
     role: ROLES.REFERENT_DEPARTMENT,
     department: department,
+    status: ReferentStatus.ACTIVE,
   });
   if (managersPhase2.length > 0) {
     return managersPhase2;
@@ -232,6 +234,7 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
     subRole: SUB_ROLES.manager_department,
     role: ROLES.REFERENT_DEPARTMENT,
     department: department,
+    status: ReferentStatus.ACTIVE,
   });
   if (!referentDepartemental) {
     throw new Error(`notifyReferentsEquivalenceSubmitted: no referent found for department ${department}`);

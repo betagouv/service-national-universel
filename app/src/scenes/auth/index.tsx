@@ -8,7 +8,6 @@ import Signin2FA from "./signin2FA";
 import SignupInvite from "./signupInvite";
 import { SentryRoute } from "../../sentry";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import { Alert } from "@codegouvfr/react-dsfr/Alert";
 
 export default function Index() {
   const location = useLocation();
@@ -16,12 +15,6 @@ export default function Index() {
 
   return (
     <DSFRLayout>
-      <Alert
-        severity="warning"
-        title="Problème technique avec l'envoi des mails"
-        description="Nous rencontrons actuellement un problème technique avec l'envoi des mails. Si vous ne recevez pas les mails d'authentification, cela est probablement lié à ce dysfonctionnement. Vous pouvez contacter le support, contact@snu.gouv.fr, afin que nous puissions revenir vers vous dès la résolution du problème."
-        className="mb-4"
-      />
       <Switch>
         <SentryRoute path="/auth/signup/invite" component={() => <SignupInvite />} />
         <SentryRoute path="/auth/reset" component={() => <Reset />} />

@@ -365,6 +365,18 @@ export const YoungSchema = {
       description: "Date à laquelle la troisième phase est validée",
     },
   },
+  passeportPhase1SentAt: {
+    type: Date,
+    documentation: {
+      description: "Date du dernier envoi du passeport pour la phase 1",
+    },
+  },
+  passeportPhase2SentAt: {
+    type: Date,
+    documentation: {
+      description: "Date du dernier envoi du passeport pour la phase 2",
+    },
+  },
   lastStatusAt: {
     type: Date,
     default: Date.now,

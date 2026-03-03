@@ -1,6 +1,6 @@
 import { config } from "../../config";
 import { addHours } from "date-fns";
-import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
+import { department2region, departmentLookUp, MISSION_STATUS, MissionType, ReferentType, ReferentStatus, ROLES, SENDINBLUE_TEMPLATES, StructureType } from "snu-lib";
 import { getTutorName } from "../../services/mission";
 import { MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
 import { updateApplicationStatus, updateApplicationTutor } from "../../application/applicationService";
@@ -286,7 +286,7 @@ async function cancelMission(mission: MissionDocument): Promise<MissionDocument>
 
 async function notifyReferentsNewMission(mission: MissionDocument, referentMission: ReferentDocument) {
   //Send mail to responsable mission
-  if (referentMission) {
+  if (referentMission && referentMission.status !== ReferentStatus.INACTIVE) {
     await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_WAITING_VALIDATION, {
       emailTo: [{ name: `${referentMission.firstName} ${referentMission.lastName}`, email: referentMission.email }],
       params: {
@@ -301,6 +301,7 @@ async function notifyReferentsNewMission(mission: MissionDocument, referentMissi
   const referentsDepartment = await ReferentModel.find({
     department: mission.department,
     subRole: { $in: ["manager_department_phase2", "manager_phase2"] },
+    status: ReferentStatus.ACTIVE,
   });
 
   if (referentsDepartment?.length) {
@@ -315,7 +316,7 @@ async function notifyReferentsNewMission(mission: MissionDocument, referentMissi
 
 async function notifyReferentCancelMission(mission: MissionDocument) {
   const referent = await ReferentModel.findOne({ _id: mission.tutorId });
-  if (!referent) return;
+  if (!referent || referent.status === ReferentStatus.INACTIVE) return;
   await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_CANCEL, {
     emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
     params: { missionName: mission.name },

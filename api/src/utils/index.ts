@@ -11,7 +11,7 @@ import fs from "fs";
 import { addDays } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
-import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS } from "snu-lib";
+import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
 import dayjs from "dayjs";
 import { getCohortIdsFromCohortName } from "../cohort/cohortService";
@@ -720,6 +720,7 @@ export const getReferentManagerPhase2 = async (department) => {
     subRole: SUB_ROLES.manager_phase2,
     role: ROLES.REFERENT_DEPARTMENT,
     department,
+    status: ReferentStatus.ACTIVE,
   });
 
   if (!toReferent.length) {
@@ -727,6 +728,7 @@ export const getReferentManagerPhase2 = async (department) => {
       subRole: SUB_ROLES.secretariat,
       role: ROLES.REFERENT_DEPARTMENT,
       department,
+      status: ReferentStatus.ACTIVE,
     });
   }
 
@@ -735,6 +737,7 @@ export const getReferentManagerPhase2 = async (department) => {
       subRole: SUB_ROLES.manager_department,
       role: ROLES.REFERENT_DEPARTMENT,
       department,
+      status: ReferentStatus.ACTIVE,
     });
   }
 
@@ -743,6 +746,7 @@ export const getReferentManagerPhase2 = async (department) => {
       subRole: SUB_ROLES.assistant_manager_department,
       role: ROLES.REFERENT_DEPARTMENT,
       department,
+      status: ReferentStatus.ACTIVE,
     });
   }
 
@@ -750,6 +754,7 @@ export const getReferentManagerPhase2 = async (department) => {
     toReferent = await ReferentModel.find({
       role: ROLES.REFERENT_DEPARTMENT,
       department,
+      status: ReferentStatus.ACTIVE,
     });
   }
   return toReferent;

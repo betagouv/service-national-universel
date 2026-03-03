@@ -2,7 +2,7 @@ const { capture } = require("../sentry");
 const { ApplicationModel, ReferentModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, ReferentStatus } = require("snu-lib");
 const { config } = require("../config");
 const { differenceInDays, getMonth } = require("date-fns");
 
@@ -24,7 +24,7 @@ exports.handler = async () => {
       if (!patches.length) return;
       if (!application.tutorId) return;
       const tutor = await ReferentModel.findById(application.tutorId);
-      if (!tutor) return;
+      if (!tutor || tutor.status === ReferentStatus.INACTIVE) return;
       if (differenceInDays(now, patches[0].date) >= 7) {
         // send a mail to the tutor
         countHit++;

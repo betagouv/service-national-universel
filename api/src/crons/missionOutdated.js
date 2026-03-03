@@ -3,7 +3,7 @@ const { capture } = require("../sentry");
 const { MissionModel, ReferentModel, ApplicationModel, YoungModel } = require("../models");
 const { sendTemplate } = require("../brevo");
 const slack = require("../slack");
-const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, MISSION_STATUS } = require("snu-lib");
+const { SENDINBLUE_TEMPLATES, APPLICATION_STATUS, MISSION_STATUS, ReferentStatus } = require("snu-lib");
 const { config } = require("../config");
 const { logger } = require("../logger");
 const { getCcOfYoung } = require("../utils");
@@ -27,7 +27,7 @@ const clean = async () => {
     // notify structure
     if (mission.tutorId) {
       const responsible = await ReferentModel.findById(mission.tutorId);
-      if (responsible)
+      if (responsible && responsible.status !== ReferentStatus.INACTIVE)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
@@ -54,7 +54,7 @@ const notify1Week = async () => {
     // notify structure
     if (mission.tutorId) {
       const responsible = await ReferentModel.findById(mission.tutorId);
-      if (responsible)
+      if (responsible && responsible.status !== ReferentStatus.INACTIVE)
         await sendTemplate(SENDINBLUE_TEMPLATES.referent.MISSION_ARCHIVED_1_WEEK_NOTICE, {
           emailTo: [{ name: `${responsible.firstName} ${responsible.lastName}`, email: responsible.email }],
           params: {
