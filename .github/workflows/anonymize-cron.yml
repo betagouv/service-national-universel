@@ -19,7 +19,7 @@ jobs:
           ref: production
 
       - name: Install clever-tools
-        run: npm install -g clever-tools@3.14.0
+        run: npm install -g clever-tools
 
       - name: Merge production in anonymization
         run: git push --force origin HEAD:anonymization
