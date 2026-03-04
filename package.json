@@ -28,7 +28,8 @@
   "overrides": {
     "@bull-board/express": {
       "express": "^5.1.0"
-    }
+    },
+    "@sentry/utils": "8.25.0"
   },
   "workspaces": [
     "packages/*",
