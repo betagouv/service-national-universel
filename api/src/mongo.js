@@ -9,7 +9,7 @@ async function initDB() {
     throw new Error("ERROR CONNECTION. MONGO URL EMPTY");
   }
   const db = mongoose.connection;
-
+  //
   db.on("error", (error) => capture(error));
 
   db.on("connecting", () => logger.debug("MONGODB: connecting"));
