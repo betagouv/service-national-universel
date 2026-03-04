@@ -1,7 +1,7 @@
 import { Inject, Injectable } from "@nestjs/common";
 import { UseCase } from "@shared/core/UseCase";
 import { ReferentToBeNotifiedModel } from "./ReferentToBeNotifiedModel";
-import { ReferentGateway } from "src/admin/core/iam/Referent.gateway";
+import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ROLES, SUB_ROLES } from "snu-lib";
 
 @Injectable()

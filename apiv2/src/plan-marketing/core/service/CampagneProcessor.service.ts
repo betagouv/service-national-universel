@@ -2,7 +2,7 @@ import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { ListeDiffusionService } from "./ListeDiffusion.service";
-import { SearchYoungGateway, SearchYoungResult } from "src/analytics/core/SearchYoung.gateway";
+import { SearchYoungGateway, SearchYoungResult } from "@analytics/core/SearchYoung.gateway";
 import { DestinataireListeDiffusion } from "snu-lib";
 import { isCampagneGenerique, isCampagneSansRef, isCampagneWithRef } from "snu-lib";
 import { CampagneSpecifiqueModelWithRefAndGeneric, CampagneSpecifiqueModelWithoutRef } from "../Campagne.model";

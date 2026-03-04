@@ -25,7 +25,7 @@ import { listeDiffusionMongoProviders } from "./infra/ListeDiffusion.provider";
 import { MettreAJourCampagne } from "./core/useCase/MettreAJourCampagne";
 import { CreerListeDiffusion } from "./core/useCase/CreerListeDiffusion";
 import { ImporterContacts } from "./core/useCase/ImporterContacts";
-import { AnalyticsModule } from "src/analytics/analytics.module";
+import { AnalyticsModule } from "@analytics/analytics.module";
 import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
 import { SearchYoungElasticRepository } from "@analytics/infra/SearchYoungElastic.repository";
 import { AdminModule } from "@admin/Admin.module";
