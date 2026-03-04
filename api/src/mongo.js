@@ -11,7 +11,7 @@ async function initDB() {
   const db = mongoose.connection;
 
   db.on("error", (error) => capture(error));
-
+  //
   db.on("connecting", () => logger.debug("MONGODB: connecting"));
   db.on("open", () => logger.debug("MONGODB: open"));
   db.on("connected", () => logger.debug("MONGODB: connected"));
