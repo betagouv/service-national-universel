@@ -81,8 +81,13 @@ const KnowledgeBasePublicSection = ({ item, isRoot, isLoading, device }) => {
     return (
       <>
         <div className="border border-gray-200 bg-white p-4 flex items-center justify-center">
-          <div className="text-sm text-blue-800 font-bold px-32">
-            <p>Aucun séjour SNU n'est à ce jour programmé pour l'année scolaire 2025-2026</p>
+          <div className="text-sm text-blue-800 font-bold px-4 md:px-32 text-center">
+            <p className="whitespace-pre-line">
+              {"Les séjours de cohésion ne sont plus reconduits. La phase d'engagement se poursuit pour les volontaires des séjours de 2025.\nL'engagement des jeunes se déploie à travers de nombreux autres dispositifs. Retrouvez-les sur l'engagement civique | "}
+              <a href="https://jeunes.gouv.fr/sengager/" target="_blank" rel="noreferrer" className="underline">
+                jeunes.gouv.fr
+              </a>
+            </p>
           </div>
         </div>
         <div className="w-full flex flex-col justify-center gap-6 border-t-[1px] border-white border-opacity-20 bg-[#32257F]">

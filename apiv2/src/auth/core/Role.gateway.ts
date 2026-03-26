@@ -6,5 +6,5 @@ export interface RoleGateway {
     findByCodesAndParent(codes: string[]): Promise<RoleModel[]>;
     create(role: CreateRoleModel): Promise<RoleModel>;
 }
-
+//
 export const RoleGateway = Symbol("RoleGateway");
