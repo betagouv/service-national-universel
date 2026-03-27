@@ -2,7 +2,7 @@ import { Test, TestingModule } from "@nestjs/testing";
 import { CampagneProcessorService } from "./CampagneProcessor.service";
 import { CampagneGateway } from "../gateway/Campagne.gateway";
 import { ListeDiffusionService } from "./ListeDiffusion.service";
-import { SearchYoungGateway } from "src/analytics/core/SearchYoung.gateway";
+import { SearchYoungGateway } from "@analytics/core/SearchYoung.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { DestinataireListeDiffusion } from "snu-lib";
 import { Logger } from "@nestjs/common";

@@ -1,5 +1,5 @@
 import { Body, Controller, Inject, Post, UseGuards } from "@nestjs/common";
-import { SearchYoungGateway, SearchYoungResult } from "src/analytics/core/SearchYoung.gateway";
+import { SearchYoungGateway, SearchYoungResult } from "@analytics/core/SearchYoung.gateway";
 import { SearchYoungDto } from "./dto/SearchYoung.validation";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";

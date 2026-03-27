@@ -69,7 +69,6 @@ export default defineConfig(({ command, mode }) => {
               "date-fns",
               "validator",
               "libphonenumber-js",
-              "@sentry",
               "react-dom",
               "react-router-dom",
               "react-redux",
@@ -83,8 +82,9 @@ export default defineConfig(({ command, mode }) => {
               "@codegouvfr/react-dsfr",
               "@tanstack/react-query",
             ];
-            if (HugeLibraries.some((libName) => id.includes(`node_modules/${libName}`))) {
-              return id.toString().split("node_modules/")[1].split("/")[0].toString();
+            const match = HugeLibraries.find((libName) => id.includes(`node_modules/${libName}`));
+            if (match) {
+              return match;
             }
           },
         },

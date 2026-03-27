@@ -8,7 +8,7 @@ import { FunctionalException, FunctionalExceptionCode } from "@shared/core/Funct
 import { DestinataireListeDiffusion, YoungType } from "snu-lib";
 import { ColumnCsvName, ColumnType } from "../ListeDiffusion.model";
 import { Logger } from "@nestjs/common";
-import { SearchYoungResult } from "src/analytics/core/SearchYoung.gateway";
+import { SearchYoungResult } from "@analytics/core/SearchYoung.gateway";
 import { ClasseModel } from "@admin/core/sejours/cle/classe/Classe.model";
 import { CentreModel } from "@admin/core/sejours/phase1/centre/Centre.model";
 import { PointDeRassemblementModel } from "@admin/core/sejours/phase1/pointDeRassemblement/PointDeRassemblement.model";
