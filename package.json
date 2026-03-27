@@ -28,6 +28,9 @@
   "overrides": {
     "@bull-board/express": {
       "express": "^5.1.0"
+    },
+    "@nestjs/cli": {
+      "commander": "4.1.1"
     }
   },
   "workspaces": [
