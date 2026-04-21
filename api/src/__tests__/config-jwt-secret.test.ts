@@ -20,7 +20,7 @@ describe("config JWT_SECRET fail-fast", () => {
   it("does not throw in test environment when JWT_SECRET is missing/empty", async () => {
     process.env.ENVIRONMENT = "test";
     process.env.JWT_SECRET = "";
-Ln
+
     await expect(import("../config")).resolves.toBeDefined();
   });
 });
