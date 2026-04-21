@@ -24,6 +24,9 @@ const staticConfig = {
 const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
 const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
 
+const jwtSecret =
+  environment === "development" || environment === "test" ? _env(envStr, "JWT_SECRET", "dev-secret") : _env(envStr, "JWT_SECRET");
+
 export const config = {
   ...staticConfig,
   ENVIRONMENT: environment,
@@ -47,7 +50,7 @@ export const config = {
   SENTRY_PROFILE_SAMPLE_RATE: _env(envFloat, "SENTRY_PROFILE_SAMPLE_RATE", 1),
   SENTRY_DEBUG_MODE: _env(envBool, "SENTRY_DEBUG_MODE", false),
   MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),
-  JWT_SECRET: _env(envStr, "JWT_SECRET", "my-secret"),
+  JWT_SECRET: jwtSecret,
   SUPPORT_URL: _env(envStr, "SUPPORT_URL", "http://localhost:8090"),
   SUPPORT_FRONT_URL: _env(envStr, "SUPPORT_FRONT_URL", "http://localhost:8083"),
   SUPPORT_APIKEY: _env(envStr, "SUPPORT_APIKEY"),
@@ -94,3 +97,7 @@ export const config = {
   LOG_LEVEL: _env(envStr, "LOG_LEVEL", "debug"), // error, warn, info, http, debug
   DO_MIGRATION: _env(envBool, "DO_MIGRATION", false),
 };
+
+if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT) && !config.JWT_SECRET) {
+  throw new Error("Missing required environment variable JWT_SECRET");
+}
