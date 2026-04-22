@@ -39,14 +39,12 @@ router.post(
     if (!user) return res.status(401).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
 
     const userWithPassword = await AgentModel.findById(user._id).select("password");
-    // TODO: remove this code when all new users have password
     if (!userWithPassword.password) {
-      user.set({ password });
-      await user.save();
-    } else {
-      const match = await userWithPassword.comparePassword(password);
-      if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
+      return res.status(403).send({ ok: false, code: ERRORS.PASSWORD_NOT_SET });
     }
+
+    const match = await userWithPassword.comparePassword(password);
+    if (!match) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
 
     user.set({ lastLoginAt: Date.now() });
     await user.save();
