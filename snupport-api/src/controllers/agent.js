@@ -13,6 +13,7 @@ const { SCHEMA_EMAIL, SCHEMA_ROLE } = require("../schemas");
 const { config } = require("../config");
 const AgentModel = require("../models/agent");
 const { validatePassword } = require("../utils");
+const { hashResetToken } = require("../utils/resetToken");
 const { cookieOptions, logoutCookieOptions } = require("../cookie-options");
 const { JWT_MAX_AGE, JWT_VERSION } = require("../jwt-options");
 
@@ -154,7 +155,8 @@ router.post(
     const agent = await AgentModel.findOne({ email });
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
     const token = crypto.randomBytes(SCHEMA_TOKEN_LENGTH).toString("hex");
-    agent.set({ forgotPasswordResetToken: token, forgotPasswordResetExpires: Date.now() + JWT_MAX_AGE });
+    const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
+    agent.set({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: Date.now() + JWT_MAX_AGE });
     await agent.save();
     const subject = "Réinitialiser votre mot de passe";
     const body = `Une demande de réinitialisation de mot de passe a été faite, si elle vient bien de vous vous pouvez <a href="${config.SNUPPORT_URL_ADMIN}/auth/reset?token=${token}" style="color: #584FEC">cliquer ici pour réinitialiser votre mot de passe</a>`;
@@ -174,7 +176,8 @@ router.post(
   ),
   async (req, res) => {
     const { token, password, passwordConfirm } = req.cleanBody;
-    const agent = await AgentModel.findOne({ forgotPasswordResetToken: token, forgotPasswordResetExpires: { $gt: Date.now() } });
+    const tokenHash = hashResetToken({ token, secret: config.PASSWORD_RESET_TOKEN_SECRET });
+    const agent = await AgentModel.findOne({ forgotPasswordResetToken: tokenHash, forgotPasswordResetExpires: { $gt: Date.now() } });
     if (!agent) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
     if (password !== passwordConfirm) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });

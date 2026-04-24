@@ -70,6 +70,11 @@ export const config = {
   PORT: _env(envInt, "PORT", 8090),
   MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),
   JWT_SECRET: _env(envStr, "JWT_SECRET", "my-secret"),
+  PASSWORD_RESET_TOKEN_SECRET: _env(
+    envStr,
+    "PASSWORD_RESET_TOKEN_SECRET",
+    environment === "development" || environment === "test" ? "dev-reset-token-secret" : undefined
+  ),
   SNU_URL_APP: _env(envStr, "SNU_URL_APP", "http://localhost:8081"),
   SNU_URL_ADMIN: _env(envStr, "SNU_URL_ADMIN", "http://localhost:8082"),
   SNUPPORT_URL_ADMIN: _env(envStr, "SNUPPORT_URL_ADMIN", "http://localhost:8092"),
@@ -95,3 +100,9 @@ export const config = {
   SENDINBLUEKEY: _env(envStr, "SENDINBLUEKEY"),
   SENTRY_DEBUG_MODE: _env(envBool, "SENTRY_DEBUG_MODE", false),
 };
+
+if (environment !== "development" && environment !== "test") {
+  if (!config.PASSWORD_RESET_TOKEN_SECRET) {
+    throw new Error("Missing required environment variable PASSWORD_RESET_TOKEN_SECRET");
+  }
+}
