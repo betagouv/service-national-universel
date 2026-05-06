@@ -46,5 +46,4 @@ export const MONGO_COLLECTION = {
   TASK: "task",
   WAITING_LIST: "waitinglist",
   YOUNG: "young",
-  LEGAL_REPRESENTATIVE_ARCHIVE: "legalRepresentativeArchives",
 } as const;
