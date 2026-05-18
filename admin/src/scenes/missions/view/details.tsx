@@ -155,6 +155,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
     setLoadingBottom(true);
     const error: Record<string, string> = {};
     const errorBottom: Record<string, string> = {};
+    const maxMissionDate = new Date("2026-11-09T23:59:59.999Z");
 
     setLoading(true);
     const baseError = "Ce champ est obligatoire";
@@ -171,12 +172,10 @@ export default function DetailsView({ mission, setMission, getMission }: Details
     if (!values.startAt) error.startAt = "La date de début est incorrecte";
     if (values.startAt && values.endAt && new Date(values.startAt) > new Date(values.endAt)) error.endAt = "La date de fin est incorrecte";
 
-    const maxStartDate = new Date("2026-07-15T00:00:00.000Z");
-    const maxEndDate = new Date("2026-11-09T00:00:00.000Z");
-    if (values.startAt && new Date(values.startAt) > maxStartDate) {
-      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 15 juillet 2026";
+    if (values.startAt && new Date(values.startAt) > maxMissionDate) {
+      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 9 novembre 2026";
     }
-    if (values.endAt && new Date(values.endAt) > maxEndDate) {
+    if (values.endAt && new Date(values.endAt) > maxMissionDate) {
       error.endAt = "La date de fin de la mission ne peut pas être ultérieure au 9 novembre 2026";
     }
 

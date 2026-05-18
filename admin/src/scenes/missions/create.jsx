@@ -106,6 +106,8 @@ export default function Create(props) {
     setLoading(true);
     const error = {};
     const baseError = "Ce champ est obligatoire";
+    const submissionDeadline = new Date("2026-07-15T23:59:59.999Z");
+    const maxMissionDate = new Date("2026-11-09T23:59:59.999Z");
     valuesToCheck.map((val) => {
       if (!values[val]) error[val] = baseError;
     });
@@ -115,12 +117,13 @@ export default function Create(props) {
     if (values.startAt && values.startAt < new Date() && ![ROLES.ADMIN].includes(user.role)) error.startAt = "La date de début est incorrecte";
     if (values.startAt > values.endAt) error.endAt = "La date de fin est incorrecte";
 
-    const maxStartDate = new Date("2026-07-15T00:00:00.000Z");
-    const maxEndDate = new Date("2026-11-09T00:00:00.000Z");
-    if (values.startAt && new Date(values.startAt) > maxStartDate) {
-      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 15 juillet 2026";
+    if (new Date() > submissionDeadline) {
+      error.startAt = "La mission ne peut plus être déposée après le 15 juillet 2026";
     }
-    if (values.endAt && new Date(values.endAt) > maxEndDate) {
+    if (values.startAt && new Date(values.startAt) > maxMissionDate) {
+      error.startAt = "La date de début de la mission ne peut pas être ultérieure au 9 novembre 2026";
+    }
+    if (values.endAt && new Date(values.endAt) > maxMissionDate) {
       error.endAt = "La date de fin de la mission ne peut pas être ultérieure au 9 novembre 2026";
     }
     if ((values.startAt && values.endAt && values.placesTotal === "") || isNaN(values.placesTotal) || values.placesTotal < 0)
