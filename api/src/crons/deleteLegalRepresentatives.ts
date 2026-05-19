@@ -1,4 +1,4 @@
-import { YoungModel, LegalRepresentativeArchiveModel } from "../models";
+import { YoungModel } from "../models";
 import { deleteContact } from "../brevo";
 import { capture } from "../sentry";
 import { logger } from "../logger";
@@ -111,7 +111,6 @@ export const processYoung = async (young: any): Promise<boolean> => {
     try {
       const fromUser = { firstName: "Cron deleteLegalRepresentatives" };
       await withTransaction(session, async () => {
-        await archiveLegalRepresentatives(young, session);
         await deleteRLFieldsFromYoung(young, session);
         young.set({ rlDeleted: true });
         await young.save({ session, fromUser });
@@ -188,34 +187,6 @@ const processYoungsWithPagination = async (query: any, batchSize: number = 30): 
 };
 
 
-
-const archiveLegalRepresentatives = async (young: any, session: any): Promise<void> => {
-  const docs: any[] = [];
-  for (let i = 1; i <= 2; i++) {
-    const firstName = young[`parent${i}FirstName`];
-    const lastName = young[`parent${i}LastName`];
-    const allowImageRights = young[`parent${i}AllowImageRights`];
-    const allowSNU = young[`parent${i}AllowSNU`];
-    const validationDate = young[`parent${i}ValidationDate`];
-    const rulesParent = young[`rulesParent${i}`];
-    if (firstName !== undefined || lastName !== undefined) {
-      docs.push({
-        youngId: young._id,
-        parentIndex: i,
-        firstName,
-        lastName,
-        allowImageRights,
-        allowSNU,
-        validationDate,
-        rulesParent,
-        archivedAt: new Date(),
-      });
-    }
-  }
-  if (docs.length > 0) {
-    await LegalRepresentativeArchiveModel.insertMany(docs, { session });
-  }
-};
 
 export const handler = async (): Promise<void> => {
   try {
