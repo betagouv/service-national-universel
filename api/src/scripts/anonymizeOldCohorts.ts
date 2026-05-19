@@ -56,6 +56,8 @@ const anonymizeApplicationsForYoung = async (youngId: string, session: any): Pro
     const anonymized = anonymizeApplication(app.toObject());
     app.set(anonymized);
     await app.save({ session, fromUser: { firstName: "Script anonymizeOldCohorts" } });
+    // Supprimer les patches créés par le save (contiennent les PII originales via trackOriginalValue)
+    await (app as any).patches.collection.deleteMany({ ref: app._id }, { session });
   }
 };
 
@@ -65,6 +67,7 @@ const anonymizeContractsForYoung = async (youngId: string, session: any): Promis
     const anonymized = anonymizeContract(contract.toObject());
     contract.set(anonymized);
     await contract.save({ session, fromUser: { firstName: "Script anonymizeOldCohorts" } });
+    await (contract as any).patches.collection.deleteMany({ ref: contract._id }, { session });
   }
 };
 
@@ -74,6 +77,13 @@ const processYoung = async (young: any): Promise<boolean> => {
       logger.info(`[DRY-RUN] Would anonymize young ${young._id} (cohort: ${young.cohort})`);
       return true;
     }
+
+    // Capturer les vrais emails avant toute mutation pour le unsync Brevo
+    const realEmails = {
+      email: young.email,
+      parent1Email: young.parent1Email,
+      parent2Email: young.parent2Email,
+    };
 
     await deleteS3Files(young._id.toString());
 
@@ -91,7 +101,7 @@ const processYoung = async (young: any): Promise<boolean> => {
       });
 
       try {
-        await unsync(young);
+        await unsync(realEmails);
       } catch (e: any) {
         capture(e, { extra: { youngId: young._id } });
         logger.warn(`Failed to unsync young ${young._id} from Brevo: ${e.message}`);
@@ -123,7 +133,7 @@ export const handler = async (): Promise<void> => {
 
     for (let i = 0; i < ids.length; i += BATCH_SIZE) {
       const batch = ids.slice(i, i + BATCH_SIZE);
-      const youngs = await YoungModel.find({ _id: { $in: batch.map((d: any) => d._id) } });
+      const youngs = await YoungModel.find({ _id: { $in: batch.map((d: any) => d._id) } }).select("+password +forgotPasswordResetExpires");
 
       logger.info(`${mode}Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(ids.length / BATCH_SIZE)} — processing ${youngs.length} youngs`);
 

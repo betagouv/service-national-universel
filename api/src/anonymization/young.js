@@ -18,6 +18,7 @@ function anonymize(itemToAnonymize) {
     "phoneZone",
     "gender",
     "birthdateAt",
+    "accountStatus",
     "cohort",
     "cohortId",
     "originalCohort",
@@ -31,12 +32,12 @@ function anonymize(itemToAnonymize) {
     "statusPhase1Motif",
     "statusPhase1MotifDetail",
     "statusPhase2",
-    "statusPhase2updatedAt",
+    "statusPhase2UpdatedAt",
     "statusPhase2OpenedAt",
     "statusPhase2ValidatedAt",
     "statusPhase2Contract",
     "statusPhase3",
-    "statusPhase3updatedAt",
+    "statusPhase3UpdatedAt",
     "statusPhase3ValidatedAt",
     "lastStatusAt",
     "withdrawnReason",
@@ -265,6 +266,7 @@ function anonymize(itemToAnonymize) {
     "aknowledgmentTerminaleSessionAvailability",
     "parentStatementOfHonorInvalidId",
     "jdc",
+    "roadCodeRefund",
     "motivations",
     "domains",
     "professionnalProject",
@@ -485,10 +487,14 @@ function anonymize(itemToAnonymize) {
   item.token2FA = "";
   item.tokenEmailValidation = "";
   item.forgotPasswordResetToken = "";
+  item.forgotPasswordResetExpires = undefined;
   item.invitationToken = "";
   item.phase3Token = "";
   item.parent1Inscription2023Token = randomUUID();
   item.parent2Inscription2023Token = randomUUID();
+  item.password = "";
+  item.accountStatus = undefined;
+  item.roadCodeRefund = undefined;
 
   return item;
 }
