@@ -1,4 +1,4 @@
-import { YoungModel, LegalRepresentativeArchiveModel } from "../../models";
+import { YoungModel } from "../../models";
 import { handler } from "../../crons/deleteLegalRepresentatives";
 import { dbConnect, dbClose } from "../helpers/db";
 import { getYoungWithCompleteParentsFixture } from "../fixtures/young";
@@ -31,11 +31,10 @@ afterAll(async () => await dbClose());
 beforeEach(async () => {
   await YoungModel.deleteMany({});
   await YoungPatchModel.deleteMany({});
-  await LegalRepresentativeArchiveModel.deleteMany({});
 });
 
 describe("deleteLegalRepresentatives E2E", () => {
-  describe("Test 1: Vérification de la requête MongoDB et archivage", () => {
+  describe("Test 1: Vérification de la requête MongoDB", () => {
     it("should query exactly 4 youngs aged 18+ from cohorts 2020-2023", async () => {
       const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
       const birthdate17Years = buildBirthdateForAge(17, -1);
@@ -105,58 +104,6 @@ describe("deleteLegalRepresentatives E2E", () => {
       const cohorts = processedYoungs.map((y) => y.cohort).sort();
       const expectedCohorts = ["Avril 2023", "Février 2020", "Juin 2022", "Juillet 2021"].sort();
       expect(cohorts).toEqual(expectedCohorts);
-    });
-
-    it("should archive legal representatives data for one young", async () => {
-      const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
-      const parent1ValidationDate = new Date("2023-01-15");
-      const parent2ValidationDate = new Date("2023-01-16");
-
-      const young = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Février 2020",
-          parent1FirstName: "Marie",
-          parent1LastName: "Dupont",
-          parent1AllowImageRights: "true",
-          parent1AllowSNU: "true",
-          parent1ValidationDate,
-          rulesParent1: "true",
-          parent2FirstName: "Jean",
-          parent2LastName: "Dupont",
-          parent2AllowImageRights: "false",
-          parent2AllowSNU: "true",
-          parent2ValidationDate,
-          rulesParent2: "true",
-        }),
-      );
-
-      await handler();
-
-      const archives = await LegalRepresentativeArchiveModel.find({ youngId: young._id });
-
-      expect(archives.length).toBe(2);
-
-      const parent1Archive = archives.find((a) => a.parentIndex === 1);
-      const parent2Archive = archives.find((a) => a.parentIndex === 2);
-
-      expect(parent1Archive).toBeDefined();
-      expect(parent1Archive?.firstName).toBe("Marie");
-      expect(parent1Archive?.lastName).toBe("Dupont");
-      expect(parent1Archive?.allowImageRights).toBe("true");
-      expect(parent1Archive?.allowSNU).toBe("true");
-      expect(parent1Archive?.validationDate).toEqual(parent1ValidationDate);
-      expect(parent1Archive?.rulesParent).toBe("true");
-      expect(parent1Archive?.archivedAt).toBeInstanceOf(Date);
-
-      expect(parent2Archive).toBeDefined();
-      expect(parent2Archive?.firstName).toBe("Jean");
-      expect(parent2Archive?.lastName).toBe("Dupont");
-      expect(parent2Archive?.allowImageRights).toBe("false");
-      expect(parent2Archive?.allowSNU).toBe("true");
-      expect(parent2Archive?.validationDate).toEqual(parent2ValidationDate);
-      expect(parent2Archive?.rulesParent).toBe("true");
-      expect(parent2Archive?.archivedAt).toBeInstanceOf(Date);
     });
   });
 
@@ -232,77 +179,6 @@ describe("deleteLegalRepresentatives E2E", () => {
       expect(updatedYoung?.parent2AllowSNU).toBeUndefined();
     });
 
-  });
-
-  describe("Test 3: Vérification complète des archives", () => {
-    it("should create 8 archive entries for 4 youngs with 2 parents each", async () => {
-      const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
-
-      const young1 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Février 2020",
-        }),
-      );
-      const young2 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Juillet 2021",
-        }),
-      );
-      const young3 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Juin 2022",
-        }),
-      );
-      const young4 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Avril 2023",
-        }),
-      );
-
-      await handler();
-
-      const totalArchives = await LegalRepresentativeArchiveModel.countDocuments({});
-
-      expect(totalArchives).toBe(8);
-
-      const young1Archives = await LegalRepresentativeArchiveModel.find({ youngId: young1._id });
-      const young2Archives = await LegalRepresentativeArchiveModel.find({ youngId: young2._id });
-      const young3Archives = await LegalRepresentativeArchiveModel.find({ youngId: young3._id });
-      const young4Archives = await LegalRepresentativeArchiveModel.find({ youngId: young4._id });
-
-      expect(young1Archives.length).toBe(2);
-      expect(young2Archives.length).toBe(2);
-      expect(young3Archives.length).toBe(2);
-      expect(young4Archives.length).toBe(2);
-
-      const youngs = [young1, young2, young3, young4];
-
-      const allArchives = await LegalRepresentativeArchiveModel.find({ youngId: { $in: youngs.map((y) => y._id) } });
-
-      for (const young of youngs) {
-        const archives = allArchives.filter((a) => String(a.youngId) === String(young._id));
-        expect(archives.length).toBe(2);
-
-        for (const archive of archives) {
-          expect([1, 2]).toContain(archive.parentIndex);
-
-          const parentIndex = archive.parentIndex;
-          const parentPrefix = `parent${parentIndex}`;
-          expect(archive.firstName).toBe(young[`${parentPrefix}FirstName`]);
-          expect(archive.lastName).toBe(young[`${parentPrefix}LastName`]);
-          expect(archive.allowImageRights).toBe(young[`${parentPrefix}AllowImageRights`]);
-          expect(archive.allowSNU).toBe(young[`${parentPrefix}AllowSNU`]);
-          expect(archive.validationDate?.toISOString()).toBe(young[`${parentPrefix}ValidationDate`]?.toISOString?.());
-          expect(archive.rulesParent).toEqual(young[`rulesParent${parentIndex}`]);
-          expect(archive.youngId.toString()).toBe(young._id.toString());
-          expect(archive.archivedAt).not.toBeUndefined();
-        }
-      }
-    });
   });
 
   describe("Test 4: Nettoyage des patches", () => {
@@ -483,31 +359,5 @@ describe("deleteLegalRepresentatives E2E", () => {
       expect(updatedYoung?.rlDeleted).not.toBe(true);
     });
 
-    it("should not create archive entries for excluded youngs", async () => {
-      const birthdate17Years = buildBirthdateForAge(17, -1);
-      const birthdate18Plus1Day = buildBirthdateForAge(18, -1);
-
-      const young1 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate17Years,
-          cohort: "Février 2020",
-        }),
-      );
-
-      const young2 = await createYoungHelper(
-        getYoungWithCompleteParentsFixture({
-          birthdateAt: birthdate18Plus1Day,
-          cohort: "Février 2024",
-        }),
-      );
-
-      await handler();
-
-      const archives1 = await LegalRepresentativeArchiveModel.find({ youngId: young1._id });
-      const archives2 = await LegalRepresentativeArchiveModel.find({ youngId: young2._id });
-
-      expect(archives1.length).toBe(0);
-      expect(archives2.length).toBe(0);
-    });
   });
 });

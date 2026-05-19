@@ -11,7 +11,6 @@ export { EmailModel, EmailDocument } from "./email";
 export { EventModel, EventDocument } from "./event";
 export { FiltersModel, FiltersDocument } from "./filters";
 export { InscriptionGoalModel, InscriptionGoalDocument } from "./inscriptionGoal";
-export { LegalRepresentativeArchiveModel, LegalRepresentativeArchiveDocument } from "./legalRepresentativeArchive";
 export { MeetingPointModel, MeetingPointDocument } from "./meetingPoint";
 export { MissionModel, MissionDocument } from "./mission";
 export { MissionAPIModel, MissionAPIDocument } from "./missionAPI";
