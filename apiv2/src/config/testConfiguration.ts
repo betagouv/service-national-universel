@@ -24,7 +24,7 @@ export default () => ({
         apiv2: "config.APIV2_URL",
     },
     auth: {
-        jwtSecret: "my-secret",
+        jwtSecret: "dev-secret",
     },
     elastic: {
         url: "local_url",
