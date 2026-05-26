@@ -13,7 +13,8 @@ import slack from "../../slack";
 
 const fromUser = { firstName: "Cron JeVeuxAiderService.js" };
 
-const MISSION_START_DATE_LIMIT = new Date("2026-07-15T23:59:59.999Z");
+const MISSION_SUBMISSION_DEADLINE = new Date("2026-07-15T23:59:59.999Z");
+const MISSION_START_DATE_LIMIT = new Date("2026-11-09T23:59:59.999Z");
 const MISSION_END_DATE_LIMIT = new Date("2026-11-09T00:00:00.000Z");
 
 function formatStructure(jvaStructure): Partial<StructureType> {
@@ -205,6 +206,19 @@ export async function syncMissions() {
 export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionDocument | undefined> {
   logger.info(`Syncing mission ${mission.clientId}: ${mission.title}`);
 
+  const now = new Date();
+  if (now > MISSION_SUBMISSION_DEADLINE) {
+    const existingMission = await MissionModel.findOne({ jvaMissionId: mission.clientId });
+    if (!existingMission) {
+      logger.info(`Mission ${mission.clientId} not created because submission deadline is passed.`);
+      await slack.info({
+        title: "Mission JVA non creee",
+        text: `La mission ${mission.title} (${mission.clientId}) n'a pas ete creee car la date limite de depot est depassee depuis le 15/07/2026.`,
+      });
+      return;
+    }
+  }
+
   const startAt = new Date(mission.startAt);
   if (startAt > MISSION_START_DATE_LIMIT) {
     const oldMission = await MissionModel.findOne({ jvaMissionId: mission.clientId });
@@ -214,7 +228,7 @@ export async function syncMission(mission: JeVeuxAiderMission): Promise<MissionD
       logger.info(`Mission ${mission.clientId} cancelled because start date is after limit.`);
       await slack.info({
         title: "Mission JVA annulée",
-        text: `La mission ${mission.title} (${mission.clientId}) a été annulée car sa date de début est après le 15/07/2026.`,
+        text: `La mission ${mission.title} (${mission.clientId}) a été annulée car sa date de début est après le 09/11/2026.`,
       });
     } else {
       logger.info(`Mission ${mission.clientId} not created because start date is after limit.`);

@@ -16,8 +16,12 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 // - jest : unit test (NODE_ENV == "test")
 const defaultEnv = process.env.NODE_ENV === "test" ? "test" : "development";
 const environment = _env(envStr, "ENVIRONMENT", defaultEnv);
+const jwtSecret =
+    environment === "development" || environment === "test"
+        ? _env(envStr, "JWT_SECRET", "dev-secret")
+        : _env(envStr, "JWT_SECRET");
 
-export default () => ({
+const configuration = () => ({
     environment,
     release: _env(envStr, "RELEASE", "development"),
     sentry: {
@@ -56,7 +60,7 @@ export default () => ({
         apiv2: _env(envStr, "APIV2_URL", "http://localhost:8086"),
     },
     auth: {
-        jwtSecret: _env(envStr, "JWT_SECRET", "my-secret"),
+        jwtSecret,
     },
     bucket: {
         name: _env(envStr, "BUCKET_NAME", "BUCKET_NAME"),
@@ -71,3 +75,11 @@ export default () => ({
         url: _env(envStr, "ES_ENDPOINT", "http://localhost:9200"),
     },
 });
+
+const config = configuration();
+
+if (["production", "staging", "ci", "custom"].includes(config.environment ?? "") && !config.auth.jwtSecret) {
+    throw new Error("Missing required environment variable JWT_SECRET");
+}
+
+export default configuration;
