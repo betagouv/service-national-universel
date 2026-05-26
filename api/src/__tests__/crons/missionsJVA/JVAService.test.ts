@@ -70,6 +70,12 @@ const JVA_MISSION_MOCK = {
 describe("syncMission", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date("2026-05-01T00:00:00.000Z"));
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("should cancel existing mission if start date is after limit", async () => {
@@ -85,7 +91,7 @@ describe("syncMission", () => {
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
-      startAt: "2026-07-16T00:00:00.000Z",
+      startAt: "2026-11-10T00:00:00.000Z",
     };
 
     const mission = await syncMission(missionToSync as any);
@@ -102,7 +108,7 @@ describe("syncMission", () => {
 
     const missionToSync = {
       ...JVA_MISSION_MOCK,
-      startAt: "2026-07-16T00:00:00.000Z",
+      startAt: "2026-11-10T00:00:00.000Z",
     };
 
     await syncMission(missionToSync as any);
