@@ -116,7 +116,7 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const { clickId } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
+      const { clickId }: { clickId?: string } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
 
       if (!("priority" in value)) {
         const applications = await ApplicationModel.find({ youngId: value.youngId });
@@ -170,7 +170,7 @@ router.post(
         if (!cohort) {
           return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
         }
-        
+
         let canCreate: boolean;
         if (req.user.role === ROLES.ADMIN) {
           canCreate = canAdminCreateApplication(young);
@@ -180,7 +180,7 @@ router.post(
         } else {
           canCreate = canCreateApplications(young, cohort);
         }
-        
+
         if (!canCreate) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
@@ -194,7 +194,7 @@ router.post(
 
       // Send tracking data to API Engagement
       if (mission.apiEngagementId) {
-        const data = await apiEngagement.create(value, mission.apiEngagementId, clickId);
+        const data = await apiEngagement.create(value, clickId);
         value.apiEngagementId = data?._id;
       }
 
@@ -214,10 +214,7 @@ router.post(
           MILITARY_PREPARATION_FILES_STATUS.REFUSED,
         ].includes(young.statusMilitaryPreparationFiles as string);
 
-        const hasValidatedMilitaryPreparationFiles =
-          mission.isMilitaryPreparation === "true" &&
-          young.statusMilitaryPreparationFiles === MILITARY_PREPARATION_FILES_STATUS.VALIDATED;
-
+      const hasValidatedMilitaryPreparationFiles = mission.isMilitaryPreparation === "true" && young.statusMilitaryPreparationFiles === MILITARY_PREPARATION_FILES_STATUS.VALIDATED;
 
       if (hasSubmittedMilitaryPreparationFiles && !hasValidatedMilitaryPreparationFiles) {
         young.set({ statusMilitaryPreparationFiles: MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION });
@@ -225,10 +222,7 @@ router.post(
       }
       // Si c'est une préparation militaire, on notifie le referent pour check le dossier eligibilité.
       // Mais pas si c'est une proposition de mission par un référent, seulement si c'est une candidature spontanée.
-      if (mission.isMilitaryPreparation === "true" 
-        && data.status !== APPLICATION_STATUS.WAITING_ACCEPTATION
-        && !hasValidatedMilitaryPreparationFiles
-      ) {
+      if (mission.isMilitaryPreparation === "true" && data.status !== APPLICATION_STATUS.WAITING_ACCEPTATION && !hasValidatedMilitaryPreparationFiles) {
         await notifyReferentMilitaryPreparationFilesSubmitted(young);
       }
 
@@ -429,7 +423,7 @@ router.put(
         if (youngHasAcceptedAProposedMission) {
           const mission = await MissionModel.findById(application.missionId);
           if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          const data = await apiEngagement.create(application, mission.apiEngagementId!);
+          const data = await apiEngagement.create(application);
           application.set({ apiEngagementId: data._id });
         } else {
           await apiEngagement.update(application);

@@ -1,4 +1,7 @@
-// API doc: https://www.notion.so/jeveuxaider/API-x-SNU-MIG-b6fd11bcb6ff485ca1d42ae175af8411?pvs=4
+// API doc: https://doc.api-engagement.beta.gouv.fr/api-reference/tracking-activity/qualifier
+
+import { Model } from "mongoose";
+import { ApplicationDocument } from "../../models";
 
 const { APPLICATION_STATUS } = require("snu-lib");
 const { config } = require("../../config");
@@ -8,36 +11,41 @@ const statusMap = {
   [APPLICATION_STATUS.WAITING_VALIDATION]: "PENDING",
   [APPLICATION_STATUS.VALIDATED]: "VALIDATED",
   [APPLICATION_STATUS.DONE]: "CARRIED_OUT",
-  [APPLICATION_STATUS.CANCEL]: "CANCEL",
+  [APPLICATION_STATUS.CANCEL]: "CANCELED",
   [APPLICATION_STATUS.REFUSED]: "REFUSED",
 };
 
-const apiEngagement = {
+export const apiEngagement = {
   /**
    * Create a new application in API Engagement.
    * @param {object} application - Application object
-   * @param {string} missionId - API Engagement GUID, not SNU ID or JVA ID
-   * @param {string} [clickId] - Optional. Click ID stored in local storage to match a redirection with an application creation.
+   * @param {string} optional clickId - Click ID
    */
-  create: async (application, missionId, clickId) => {
+  create: async (application: Partial<ApplicationDocument>, clickId?: string) => {
     try {
       if (config.ENVIRONMENT !== "production") return;
 
       // When a ref proposes a mission, it does not count as an application creation in API Engagement
       if (application.status === APPLICATION_STATUS.WAITING_ACCEPTATION) return;
 
-      let url = config.API_ENGAGEMENT_URL + "/v2/activity/" + missionId + "/apply?tag=MIG";
+      let url = config.API_ENGAGEMENT_URL + "/v2/activity";
 
       const options = {
         method: "POST",
-        headers: { "X-API-KEY": config.API_ENGAGEMENT_KEY },
+        headers: {
+          "X-API-KEY": config.API_ENGAGEMENT_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ type: "apply", clickId, tag: "MIG" }),
       };
 
       const res = await fetch(url, options);
-      if (clickId) url += `&clickId=${clickId}`;
       const { ok, data, code } = await res.json();
 
-      if (!ok) throw new Error(code);
+      if (!ok) {
+        capture(`API Engagement responded with code ${code} for application ${application._id}`, "Error while sending tracking data to API Engagement:");
+        throw new Error(code);
+      }
 
       return data;
     } catch (e) {
@@ -67,7 +75,10 @@ const apiEngagement = {
       const res = await fetch(url, options);
       const { ok, data, code } = await res.json();
 
-      if (!ok) throw new Error(code);
+      if (!ok) {
+        capture(`API Engagement responded with code ${code} for application ${application._id}`, "Error while sending tracking data to API Engagement:");
+        throw new Error(code);
+      }
 
       return data;
     } catch (e) {
@@ -75,5 +86,3 @@ const apiEngagement = {
     }
   },
 };
-
-module.exports = { apiEngagement };
