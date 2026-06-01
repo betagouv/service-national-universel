@@ -10,7 +10,9 @@
  */
 
 import { ApplicationModel, ContractModel, YoungModel } from "../models";
-import { unsync } from "../brevo";
+import { deleteContact, getContact, BREVO_ERROR_TEMPLATE_NOT_FOUND } from "../brevo";
+import { rateLimiterContactSIB, rateLimiterDeleteContactSIB } from "../rateLimiters";
+import { config } from "../config";
 import { capture } from "../sentry";
 import { logger } from "../logger";
 import { startSession, withTransaction, endSession, initDB, closeDB } from "../mongo";
@@ -18,16 +20,22 @@ import { listFiles, deleteFilesByList } from "../utils/index";
 import slack from "../slack";
 import { YOUNG_STATUS } from "snu-lib";
 
-const anonymizeYoung = require("../anonymization/young");
 const anonymizeApplication = require("../anonymization/application");
 const anonymizeContract = require("../anonymization/contract");
 
 const DRY_RUN = process.env.DRY_RUN === "true" || process.argv.includes("--dry-run");
 const BATCH_SIZE = 30;
-const COHORT_REGEX = /2019|2020|2021|2022/;
+// Liste explicite (vs $regex) : non ambiguë et robuste à de futures cohortes contenant
+// "2022" en sous-chaîne. Issue de db.youngs.distinct("cohort") au 2026-06.
+const DEFAULT_OLD_COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"];
+// Override ponctuel pour un test ciblé (ex. staging) : COHORTS="2019".
+const OLD_COHORTS = process.env.COHORTS ? process.env.COHORTS.split(",").map((c) => c.trim()).filter(Boolean) : DEFAULT_OLD_COHORTS;
+if (OLD_COHORTS.length === 0) {
+  throw new Error("COHORTS est défini mais vide après parsing — abandon (un $in:[] n'anonymiserait rien silencieusement).");
+}
 
 const buildQuery = () => ({
-  cohort: { $regex: COHORT_REGEX },
+  cohort: { $in: OLD_COHORTS },
   anonymized: { $ne: true },
 });
 
@@ -71,6 +79,22 @@ const anonymizeContractsForYoung = async (youngId: string, session: any): Promis
   }
 };
 
+// Supprime les contacts Brevo PUIS vérifie leur absence. api() avale les erreurs,
+// on ne peut pas se fier à une exception : seule la vérification positive est fiable.
+// throw si un contact subsiste => le jeune n'est pas marqué anonymized et sera rejoué.
+const purgeBrevoContacts = async (emails: (string | undefined)[]): Promise<void> => {
+  if (config.ENVIRONMENT !== "production") return; // miroir du garde-fou de unsync()
+  for (const email of [...new Set(emails.filter((e): e is string => Boolean(e)))]) {
+    await rateLimiterDeleteContactSIB.call(() => deleteContact(email));
+    // On ne se fie pas au retour de deleteContact : api() renvoie `true` sur toute réponse
+    // non-JSON (y compris 429/503). Seul un getContact => document_not_found confirme l'absence.
+    const check: any = await rateLimiterContactSIB.call(() => getContact(email));
+    if (check?.code !== BREVO_ERROR_TEMPLATE_NOT_FOUND) {
+      throw new Error(`Brevo: contact ${email} toujours présent après suppression`);
+    }
+  }
+};
+
 const processYoung = async (young: any): Promise<boolean> => {
   try {
     if (DRY_RUN) {
@@ -78,34 +102,34 @@ const processYoung = async (young: any): Promise<boolean> => {
       return true;
     }
 
-    // Capturer les vrais emails avant toute mutation pour le unsync Brevo
-    const realEmails = {
-      email: young.email,
-      parent1Email: young.parent1Email,
-      parent2Email: young.parent2Email,
-    };
+    // Brevo D'ABORD, avant toute mutation : si la purge échoue, on n'anonymise rien
+    // et le jeune (anonymized != true) sera repris au prochain run. young.email est
+    // encore le vrai email à ce stade (plus besoin de capturer realEmails).
+    await purgeBrevoContacts([young.email, young.parent1Email, young.parent2Email]);
 
     await deleteS3Files(young._id.toString());
 
     const session = await startSession();
     try {
-      const anonymizedData = anonymizeYoung(young.toObject());
-      const fromUser = { firstName: "Script anonymizeOldCohorts" };
-
       await withTransaction(session, async () => {
-        young.set({ ...anonymizedData, status: YOUNG_STATUS.DELETED, anonymized: true });
-        await young.save({ session, fromUser });
+        // On ne garde RIEN : replaceOne réduit le jeune au plancher (champs `required`
+        // du schéma + bookkeeping). `email` est un placeholder non personnel.
+        await YoungModel.collection.replaceOne(
+          { _id: young._id },
+          {
+            cohort: young.cohort,
+            createdAt: young.createdAt,
+            status: YOUNG_STATUS.DELETED,
+            anonymized: true,
+            email: `anonymized-${young._id}@deleted.snu`,
+            updatedAt: new Date(),
+          },
+          { session },
+        );
         await deleteAllPatches(young, session);
         await anonymizeApplicationsForYoung(young._id.toString(), session);
         await anonymizeContractsForYoung(young._id.toString(), session);
       });
-
-      try {
-        await unsync(realEmails);
-      } catch (e: any) {
-        capture(e, { extra: { youngId: young._id } });
-        logger.warn(`Failed to unsync young ${young._id} from Brevo: ${e.message}`);
-      }
 
       return true;
     } finally {

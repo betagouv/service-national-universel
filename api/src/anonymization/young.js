@@ -391,7 +391,7 @@ function anonymize(itemToAnonymize) {
   item.medicosocialStructureCity = undefined;
   item.medicosocialStructureDepartment = undefined;
   item.medicosocialStructureRegion = undefined;
-  item.medicosocialStructureLocation = { lat: 0, lon: 0 };
+  item.medicosocialStructureLocation = undefined;
 
   // 🔴 PII de tiers — famille d'accueil
   item.hostFirstName = undefined;
@@ -427,7 +427,7 @@ function anonymize(itemToAnonymize) {
   item.city = undefined;
   item.cityCode = undefined;
   item.department = undefined;
-  item.location = { lat: 0, lon: 0 };
+  item.location = undefined;
 
   // 🟠 Adresse étrangère
   item.foreignAddress = undefined;
@@ -441,7 +441,7 @@ function anonymize(itemToAnonymize) {
   item.parent1City = undefined;
   item.parent1CityCode = undefined;
   item.parent1Department = undefined;
-  item.parent1Location = { lat: 0, lon: 0 };
+  item.parent1Location = undefined;
 
   // 🟠 Localisation parent 2
   item.parent2ComplementAddress = undefined;
@@ -449,7 +449,7 @@ function anonymize(itemToAnonymize) {
   item.parent2City = undefined;
   item.parent2CityCode = undefined;
   item.parent2Department = undefined;
-  item.parent2Location = { lat: 0, lon: 0 };
+  item.parent2Location = undefined;
 
   // 🟠 École
   item.schoolName = undefined;
@@ -459,7 +459,7 @@ function anonymize(itemToAnonymize) {
   item.schoolZip = undefined;
   item.schoolCity = undefined;
   item.schoolDepartment = undefined;
-  item.schoolLocation = { lat: 0, lon: 0 };
+  item.schoolLocation = undefined;
 
   // 🟡 Texte libre potentiellement identifiant
   item.cohortChangeReason && (item.cohortChangeReason = starify(item.cohortChangeReason));
