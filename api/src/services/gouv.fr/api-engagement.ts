@@ -20,7 +20,7 @@ export const apiEngagement = {
    * Create a new application in API Engagement.
    * @param {object} application - Application object
    * @param {string} [clickId] - Optional. Click ID stored by frontend in local storage.
-   * @param {string} [missionId] - Optional. API Engagement mission ID.
+   * @param {string} [missionId] - Optional. ID de la MISSION dans l'API Engagement.
    */
   create: async (application: Partial<ApplicationDocument>, clickId?: string, missionId?: string) => {
     try {
@@ -50,7 +50,7 @@ export const apiEngagement = {
       const { ok, data, code } = await res.json();
 
       if (!ok) {
-        capture(`API Engagement responded with code ${code} for application ${application._id}`, "Error while sending tracking data to API Engagement:");
+        capture(`API Engagement responded with code ${code} for missionId ${missionId} on application ${application._id}`, "Error while sending tracking data to API Engagement:");
         throw new Error(code);
       }
 

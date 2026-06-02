@@ -194,7 +194,9 @@ router.post(
 
       // Send tracking data to API Engagement
       if (mission.apiEngagementId) {
+        // !!! mission.apiEngagementId représente l'ID de la MISSION dans l'API Engagement !!!
         const data = await apiEngagement.create(value, clickId, mission.apiEngagementId);
+        // !!! application.apiEngagementId représente l'ID d'une ACTIVITY dans l'API Engagement !!!
         value.apiEngagementId = data?._id;
       }
 
@@ -423,8 +425,12 @@ router.put(
       if (application.isJvaMission === "true") {
         // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
         if (youngHasAcceptedAProposedMission) {
+          // !!! mission.apiEngagementId représente l'ID de la MISSION dans l'API Engagement !!!
           const data = await apiEngagement.create(application, clickId, mission.apiEngagementId);
-          application.set({ apiEngagementId: data._id });
+          if (data?._id) {
+            // !!! application.apiEngagementId représente l'ID d'une ACTIVITY dans l'API Engagement !!!
+            application.set({ apiEngagementId: data._id });
+          }
         } else {
           await apiEngagement.update(application);
         }
