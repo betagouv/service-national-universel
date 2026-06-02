@@ -110,7 +110,7 @@ export default function VolontairePanel({ onChange, value }) {
               <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
                 <PanelActionButton icon="eye" title="Consulter" />
               </Link>
-              {!isResponsableDeCentre(user) && (
+              {!isResponsableDeCentre(user) && young.status !== YOUNG_STATUS.DELETED && (
                 <>
                   <button onClick={() => onPrendreLaPlace(young._id)}>
                     <PanelActionButton icon="impersonate" title="Prendre&nbsp;sa&nbsp;place" />

@@ -119,6 +119,10 @@ function anonymize(itemToAnonymize) {
   item.parent2Token = "";
   item.youngContractToken = "";
 
+  // On rompt le lien vers le jeune : depuis sa fiche supprimée, on ne doit plus
+  // pouvoir lister ses contrats.
+  item.youngId = undefined;
+
   return item;
 }
 

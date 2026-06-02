@@ -855,6 +855,8 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Un compte déjà supprimé ne peut pas l'être de nouveau.
+    if (young.status === YOUNG_STATUS.DELETED) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const fieldToKeep = [

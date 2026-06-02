@@ -54,6 +54,10 @@ function anonymize(itemToAnonymize) {
   item.feedBackExperienceFiles && (item.feedBackExperienceFiles = []);
   item.othersFiles && (item.othersFiles = []);
 
+  // On rompt le lien vers le jeune : depuis sa fiche supprimée, on ne doit plus
+  // pouvoir lister ses candidatures / missions.
+  item.youngId = undefined;
+
   return item;
 }
 

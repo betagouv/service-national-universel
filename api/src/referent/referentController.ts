@@ -290,6 +290,11 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
     }
 
+    // On ne doit pas pouvoir prendre la place d'un compte supprimé/anonymisé.
+    if (type === "young" && (user as YoungDocument).status === YOUNG_STATUS.DELETED) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (!canSigninAs(req.user, user, type)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
