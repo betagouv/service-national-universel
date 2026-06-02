@@ -859,33 +859,9 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     if (young.status === YOUNG_STATUS.DELETED) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const fieldToKeep = [
-      "_id",
-      "__v",
-      "birthdateAt",
-      "cohort",
-      "gender",
-      "situation",
-      "grade",
-      "qpv",
-      "populationDensity",
-      "handicap",
-      "ppsBeneficiary",
-      "paiBeneficiary",
-      "highSkilledActivity",
-      "statusPhase1",
-      "statusPhase2",
-      "phase2ApplicationStatus",
-      "statusPhase3",
-      "inscriptionStep2023",
-      "inscriptionDoneDate",
-      "reinscriptionStep2023",
-      "department",
-      "region",
-      "zip",
-      "city",
-      "createdAt",
-    ];
+    // « On ne garde rien » : seul le plancher (email requis/unique + bookkeeping).
+    // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.
+    const fieldToKeep = ["_id", "__v", "createdAt"];
 
     for (const key in young.files) {
       if (key.length) {
@@ -901,19 +877,27 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       }
     }
 
+    // Brevo AVANT le wipe : la boucle ci-dessous efface les emails, donc unsync
+    // doit lire les vrais emails maintenant (sinon il ne supprime aucun contact).
+    await unsync(young);
+
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
         young.set({ [key]: undefined });
       }
     }
 
-    await unsync(young);
-
-    young.set({ email: `${young._doc!["_id"]}@delete.com` });
+    young.set({ email: `anonymized-${young._doc!["_id"]}@deleted.snu` });
+    young.set({ cohort: "-" }); // marqueur « anonymisé » (la vraie cohorte n'est pas conservée)
     young.set({ status: YOUNG_STATUS.DELETED });
+    young.set({ anonymized: true });
     young.set({ lastStatusAt: Date.now() });
 
     await young.save({ fromUser: req.user });
+
+    // password est select:false (jamais chargé) et un hook bcrypt se déclenche si on le
+    // modifie via .save() : on le retire donc par une écriture brute, hors hook.
+    await YoungModel.collection.updateOne({ _id: young._id }, { $unset: { password: "" } });
 
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await patches.deletePatches({ id, model: YoungModel });

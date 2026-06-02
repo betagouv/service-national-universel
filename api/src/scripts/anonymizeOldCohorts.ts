@@ -112,12 +112,13 @@ const processYoung = async (young: any): Promise<boolean> => {
     const session = await startSession();
     try {
       await withTransaction(session, async () => {
-        // On ne garde RIEN : replaceOne réduit le jeune au plancher (champs `required`
-        // du schéma + bookkeeping). `email` est un placeholder non personnel.
+        // On ne garde RIEN : replaceOne réduit le jeune au plancher (email requis/unique
+        // + bookkeeping). `email` est un placeholder non personnel ; cohort = "-" marque
+        // le compte comme anonymisé (la vraie cohorte n'est pas conservée).
         await YoungModel.collection.replaceOne(
           { _id: young._id },
           {
-            cohort: young.cohort,
+            cohort: "-",
             createdAt: young.createdAt,
             status: YOUNG_STATUS.DELETED,
             anonymized: true,

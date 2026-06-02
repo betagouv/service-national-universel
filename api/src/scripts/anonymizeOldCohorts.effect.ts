@@ -162,13 +162,12 @@ const anonymizeDb = (young: any) =>
           const now = new Date();
 
           // Jeune : on ne garde RIEN. replaceOne réduit le document au plancher
-          // (champs `required` du schéma + bookkeeping) ; tout le reste disparaît.
-          // `email` est un placeholder non personnel (jamais le vrai), `cohort` est
-          // non personnel (groupe) et utile à l'audit.
+          // (email requis/unique + bookkeeping) ; tout le reste disparaît.
+          // cohort = "-" : marqueur « anonymisé » (la vraie cohorte n'est pas conservée).
           await YoungModel.collection.replaceOne(
             { _id: young._id },
             {
-              cohort: young.cohort,
+              cohort: "-",
               createdAt: young.createdAt,
               status: YOUNG_STATUS.DELETED,
               anonymized: true,

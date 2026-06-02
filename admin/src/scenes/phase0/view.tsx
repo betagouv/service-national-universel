@@ -65,8 +65,9 @@ export default function VolontairePhase0View({ young, globalMode, onChange }: Vo
     if (!young) throw new Error("Young is missing");
 
     setRequests(young.correctionRequests ? young.correctionRequests.filter((r) => r.status !== "CANCELED") : []);
+    // Cohorte introuvable (jeune anonymisé avec cohort "-", ou cohorte historique hors liste) :
+    // on ne crash pas — `oldCohort` gère ce cas et le rendu retombe sur `if (!cohort) return null`.
     const currentCohort = cohorts.find((c) => c.name === young.cohort);
-    if (!currentCohort) throw new Error("Cohort is missing");
     setCohort(currentCohort);
     setOldCohort(!currentCohort);
   }, [young, cohorts]);
