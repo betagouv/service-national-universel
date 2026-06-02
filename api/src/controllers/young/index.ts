@@ -860,7 +860,7 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // « On ne garde rien » : seul le plancher (email requis/unique + bookkeeping).
-    // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.
+    // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.effect.
     const fieldToKeep = ["_id", "__v", "createdAt"];
 
     for (const key in young.files) {
