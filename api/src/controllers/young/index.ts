@@ -14,7 +14,7 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument } from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -904,6 +904,14 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     await anonymizeApplicationsFromYoungId({ youngId: young._id, anonymizedYoung: young });
     await anonymizeContractsFromYoungId({ youngId: young._id, anonymizedYoung: young });
+
+    // Équivalences de mission : rompre le lien youngId + supprimer les patches (qui retiennent l'ancien youngId).
+    const equivalences = await MissionEquivalenceModel.find({ youngId: young._id.toString() });
+    for (const equivalence of equivalences) {
+      equivalence.set({ youngId: undefined });
+      await equivalence.save();
+      await patches.deletePatches({ id: equivalence._id.toString(), model: MissionEquivalenceModel });
+    }
 
     logger.debug(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });

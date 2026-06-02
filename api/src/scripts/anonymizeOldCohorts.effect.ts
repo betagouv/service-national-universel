@@ -33,7 +33,7 @@
 import { Cause, Data, Duration, Effect, Schedule } from "effect";
 import mongoose from "mongoose";
 
-import { YoungModel, ApplicationModel, ContractModel } from "../models";
+import { YoungModel, ApplicationModel, ContractModel, MissionEquivalenceModel } from "../models";
 import * as brevo from "../brevo";
 import { rateLimiterContactSIB, rateLimiterDeleteContactSIB } from "../rateLimiters";
 import { config } from "../config";
@@ -194,6 +194,14 @@ const anonymizeDb = (young: any) =>
             anonContract.updatedAt = now;
             await ContractModel.collection.updateOne({ _id: contract._id }, buildUpdate(anonContract), { session });
             await (contract as any).patches.collection.deleteMany({ ref: contract._id }, { session });
+          }
+
+          // Équivalences de mission : pas de PII directe (seulement le lien youngId).
+          // On rompt le lien et on supprime les patches (qui contiennent l'ancien youngId).
+          const equivalences = await MissionEquivalenceModel.find({ youngId: young._id.toString() }).session(session);
+          for (const eq of equivalences) {
+            await MissionEquivalenceModel.collection.updateOne({ _id: eq._id }, { $unset: { youngId: "" }, $set: { updatedAt: now } }, { session });
+            await (eq as any).patches.collection.deleteMany({ ref: eq._id }, { session });
           }
         });
       } finally {
