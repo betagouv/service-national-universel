@@ -13,10 +13,22 @@ import { notExistingYoungId, createYoungHelper, getYoungByIdHelper } from "./hel
 import { createCohortHelper } from "./helpers/cohort";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
-import { APPLICATION_STATUS, COHORT_STATUS, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE2, ROLES, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS, SUB_ROLES } from "snu-lib";
+import {
+  APPLICATION_STATUS,
+  COHORT_STATUS,
+  SENDINBLUE_TEMPLATES,
+  YOUNG_STATUS_PHASE1,
+  YOUNG_STATUS_PHASE2,
+  ROLES,
+  ROLE_JEUNE,
+  PERMISSION_RESOURCES,
+  PERMISSION_ACTIONS,
+  SUB_ROLES,
+} from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 import { getAuthorizationToApply } from "../application/applicationService";
+import { apiEngagement } from "../services/gouv.fr/api-engagement";
 
 jest.setTimeout(60_000);
 
@@ -28,7 +40,11 @@ jest.mock("../brevo", () => ({
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLE_JEUNE] } });
-  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper(
+    [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT],
+    PERMISSION_RESOURCES.APPLICATION,
+    PERMISSION_ACTIONS.FULL,
+  );
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL, [
     {
@@ -75,6 +91,28 @@ describe("Application", () => {
         .send({ ...application, youngId: young._id, missionId: mission._id });
       expect(res.status).toBe(200);
       expect(res.body.data.youngId).toBe(young._id.toString());
+    });
+    it("should send clickId and mission apiEngagementId to API Engagement when young applies", async () => {
+      const clickId = "click-id";
+      const apiEngagementMissionId = "api-engagement-mission-id";
+      const createSpy = jest.spyOn(apiEngagement, "create").mockResolvedValue({ _id: "api-engagement-activity-id" } as any);
+
+      try {
+        const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
+        const young = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id, statusPhase1: YOUNG_STATUS_PHASE1.DONE }));
+        const mission = await createMissionHelper({ ...getNewMissionFixture(), apiEngagementId: apiEngagementMissionId });
+        const application = getNewApplicationFixture();
+
+        const res = await request(await getAppHelperWithAcl(young, "young"))
+          .post(`/application?clickId=${clickId}`)
+          .send({ ...application, youngId: young._id, missionId: mission._id });
+
+        expect(res.status).toBe(200);
+        expect(createSpy).toHaveBeenCalledTimes(1);
+        expect(createSpy).toHaveBeenCalledWith(expect.objectContaining({ youngId: young._id.toString(), missionId: mission._id.toString() }), clickId, apiEngagementMissionId);
+      } finally {
+        createSpy.mockRestore();
+      }
     });
     it("should not allow young to apply for others", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
@@ -215,7 +253,7 @@ describe("Application", () => {
         expect(res.status).toBe(200);
         expect(res.body.data.youngId).toBe(young._id.toString());
       });
-      
+
       it("should allow admin to create application even if cohort is archived", async () => {
         const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test", status: COHORT_STATUS.ARCHIVED }));
         const young = await createYoungHelper(
@@ -894,8 +932,6 @@ describe("Military Preparation notifications", () => {
       );
     });
 
-   
-
     it("should NOT notify referent when young applies to PM with VALIDATED status", async () => {
       const cohort = await createCohortHelper(getNewCohortFixture({ name: "Test" }));
       const young = await createYoungHelper(
@@ -920,10 +956,7 @@ describe("Military Preparation notifications", () => {
       expect(res.status).toBe(200);
 
       // Vérifier que la notification au référent n'a PAS été envoyée
-      expect(sendTemplateSpy).not.toHaveBeenCalledWith(
-        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
-        expect.anything(),
-      );
+      expect(sendTemplateSpy).not.toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED, expect.anything());
 
       // Vérifier que la notification au superviseur a été envoyée si le statut de la candidature est WAITING_VALIDATION
       expect(sendTemplateSpy).toHaveBeenCalledWith(
@@ -998,10 +1031,7 @@ describe("Military Preparation notifications", () => {
       expect(res.status).toBe(200);
 
       // Vérifier que la notification n'a PAS été envoyée (candidature proposée par référent)
-      expect(sendTemplateSpy).not.toHaveBeenCalledWith(
-        SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED,
-        expect.anything(),
-      );
+      expect(sendTemplateSpy).not.toHaveBeenCalledWith(SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED, expect.anything());
     });
   });
 });

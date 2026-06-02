@@ -19,16 +19,19 @@ export const apiEngagement = {
   /**
    * Create a new application in API Engagement.
    * @param {object} application - Application object
-   * @param {string} optional clickId - Click ID
+   * @param {string} [clickId] - Optional. Click ID stored by frontend in local storage.
+   * @param {string} [missionId] - Optional. API Engagement mission ID.
    */
-  create: async (application: Partial<ApplicationDocument>, clickId?: string) => {
+  create: async (application: Partial<ApplicationDocument>, clickId?: string, missionId?: string) => {
     try {
       if (config.ENVIRONMENT !== "production") return;
 
       // When a ref proposes a mission, it does not count as an application creation in API Engagement
       if (application.status === APPLICATION_STATUS.WAITING_ACCEPTATION) return;
 
-      let url = config.API_ENGAGEMENT_URL + "/v2/activity";
+      if (!clickId && !missionId) return;
+
+      const url = config.API_ENGAGEMENT_URL + "/v2/activity";
 
       const options = {
         method: "POST",
@@ -36,7 +39,11 @@ export const apiEngagement = {
           "X-API-KEY": config.API_ENGAGEMENT_KEY,
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ type: "apply", clickId, tag: "MIG" }),
+        body: JSON.stringify({
+          type: "apply",
+          tag: "MIG",
+          ...(clickId ? { clickId } : { missionId }),
+        }),
       };
 
       const res = await fetch(url, options);

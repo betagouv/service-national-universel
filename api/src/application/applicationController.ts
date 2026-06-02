@@ -194,7 +194,7 @@ router.post(
 
       // Send tracking data to API Engagement
       if (mission.apiEngagementId) {
-        const data = await apiEngagement.create(value, clickId);
+        const data = await apiEngagement.create(value, clickId, mission.apiEngagementId);
         value.apiEngagementId = data?._id;
       }
 
@@ -377,6 +377,8 @@ router.put(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
+      const { clickId }: { clickId?: string } = Joi.object({ clickId: Joi.string().optional() }).validate(req.query, { stripUnknown: true }).value;
+
       const application = await ApplicationModel.findById(value._id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -421,9 +423,7 @@ router.put(
       if (application.isJvaMission === "true") {
         // When a young accepts a mission proposed by a ref, it counts as an application creation in API Engagement
         if (youngHasAcceptedAProposedMission) {
-          const mission = await MissionModel.findById(application.missionId);
-          if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          const data = await apiEngagement.create(application);
+          const data = await apiEngagement.create(application, clickId, mission.apiEngagementId);
           application.set({ apiEngagementId: data._id });
         } else {
           await apiEngagement.update(application);
