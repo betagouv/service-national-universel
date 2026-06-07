@@ -43,6 +43,7 @@ import { initDB, closeDB } from "../mongo";
 import { listFiles, deleteFilesByList } from "../utils/index";
 import slack from "../slack";
 import { YOUNG_STATUS } from "snu-lib";
+import { buildUpdate } from "./anonymizeOldCohorts.helpers";
 
 const anonymizeApplication = require("../anonymization/application");
 const anonymizeContract = require("../anonymization/contract");
@@ -75,26 +76,6 @@ class DbError extends Data.TaggedError("DbError")<{ youngId: string; cause: unkn
 // ──────────────────────────────────────────────────────────────────────────
 // Helpers
 // ──────────────────────────────────────────────────────────────────────────
-
-/**
- * Construit l'update Mongo à partir de l'objet anonymisé.
- * `anonymize()` met les champs à supprimer à `undefined` en comptant sur mongoose
- * pour les traduire en $unset. Le driver brut, lui, IGNORE `undefined` (il laisserait
- * la PII en place). On scinde donc explicitement : valeurs définies → $set, undefined → $unset.
- */
-function buildUpdate(anon: Record<string, any>): { $set?: Record<string, any>; $unset?: Record<string, any> } {
-  const set: Record<string, any> = {};
-  const unset: Record<string, any> = {};
-  for (const [key, value] of Object.entries(anon)) {
-    if (key === "_id") continue; // jamais modifier l'identifiant
-    if (value === undefined) unset[key] = "";
-    else set[key] = value;
-  }
-  const update: { $set?: Record<string, any>; $unset?: Record<string, any> } = {};
-  if (Object.keys(set).length) update.$set = set;
-  if (Object.keys(unset).length) update.$unset = unset;
-  return update;
-}
 
 // Retry court pour absorber les aléas réseau Brevo (3 tentatives espacées exponentiellement)
 const brevoRetry = Schedule.exponential(Duration.millis(200)).pipe(Schedule.intersect(Schedule.recurs(3)));
