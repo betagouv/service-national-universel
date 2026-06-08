@@ -43,20 +43,14 @@ import { initDB, closeDB } from "../mongo";
 import { listFiles, deleteFilesByList } from "../utils/index";
 import slack from "../slack";
 import { YOUNG_STATUS } from "snu-lib";
-import { buildUpdate } from "./anonymizeOldCohorts.helpers";
+import { buildUpdate, resolveOldCohorts } from "./anonymizeOldCohorts.helpers";
 
 const anonymizeApplication = require("../anonymization/application");
 const anonymizeContract = require("../anonymization/contract");
 
 const DRY_RUN = process.env.DRY_RUN === "true" || process.argv.includes("--dry-run");
-// Liste explicite (vs $regex) : non ambiguë, auto-documentée, robuste à de futures
-// cohortes contenant "2022" en sous-chaîne (ex. un hypothétique "CLE 2022-2023").
-// Issue de db.youngs.distinct("cohort") au 2026-06 — à re-valider si la donnée évolue.
-const DEFAULT_OLD_COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"];
-// Override ponctuel pour un test ciblé (ex. staging) : COHORTS="2019" ou COHORTS="2019,2020".
-const OLD_COHORTS = process.env.COHORTS
-  ? process.env.COHORTS.split(",").map((c) => c.trim()).filter(Boolean)
-  : DEFAULT_OLD_COHORTS;
+// Cohortes ciblées (liste partagée + override COHORTS) — cf. anonymizeOldCohorts.helpers.
+const OLD_COHORTS = resolveOldCohorts();
 // Test ciblé : YOUNG_ID="<objectId>" anonymise EXACTEMENT ce jeune (ignore cohorte + flag
 // anonymized) pour valider le chemin d'écriture sur un cas réel choisi. Irréversible.
 const YOUNG_ID = process.env.YOUNG_ID?.trim();
