@@ -17,14 +17,17 @@ export type AuthState = {
   };
 };
 
-const initState = {
+const initState: { young: AuthYoung | null } = {
   young: null,
 };
 
 export default function reducer(state = initState, action: Action) {
   switch (action.type) {
-    case authActions.SETYOUNG:
-      return { ...state, young: action.young };
+    case authActions.SETYOUNG: {
+      if (!action.young) return { ...state, young: action.young };
+      // Seules les réponses d'auth portent les featureFlags : on conserve ceux déjà en mémoire quand une autre réponse API les omet.
+      return { ...state, young: { ...action.young, featureFlags: action.young.featureFlags ?? state.young?.featureFlags } };
+    }
     default:
       return state;
   }
