@@ -15,24 +15,37 @@ const buildCohort = (overrides = {}) => ({
 });
 
 describe("shouldDisplayNonEligibleBanner", () => {
-  it("devrait retourner true pour un volontaire 2024 validé sans phase 2 validée", () => {
-    expect(shouldDisplayNonEligibleBanner(buildYoung(), buildCohort())).toBe(true);
+  // Non éligibles : les 2024 n'ayant réalisé aucune heure de MIG, ou les 2024/2025 ayant validé leur phase 2.
+  it.each([undefined, "", "0"])("devrait retourner true pour un 2024 n'ayant réalisé aucune heure de MIG (%p)", (phase2NumberHoursDone) => {
+    const young = buildYoung({ phase2NumberHoursDone });
+    expect(shouldDisplayNonEligibleBanner(young, buildCohort())).toBe(true);
   });
 
-  it("devrait retourner true pour un volontaire 2025 désisté avec phase 2 en cours", () => {
-    const young = buildYoung({ status: YOUNG_STATUS.WITHDRAWN, statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+  it("devrait retourner true pour un 2024 avec phase 2 validée, même avec des heures de MIG", () => {
+    const young = buildYoung({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED, phase2NumberHoursDone: "84" });
+    expect(shouldDisplayNonEligibleBanner(young, buildCohort())).toBe(true);
+  });
+
+  it("devrait retourner true pour un 2025 avec phase 2 validée", () => {
+    const young = buildYoung({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED, phase2NumberHoursDone: "84" });
     const cohort = buildCohort({ name: "2025 HTS 02 - Février", dateStart: "2025-02-15T00:00:00.000Z" });
     expect(shouldDisplayNonEligibleBanner(young, cohort)).toBe(true);
   });
 
-  it("devrait retourner true quand la phase 2 est désistée (WITHDRAWN)", () => {
-    const young = buildYoung({ statusPhase2: YOUNG_STATUS_PHASE2.WITHDRAWN });
+  it("devrait retourner true pour un compte désisté (WITHDRAWN) 2024 sans aucune heure de MIG", () => {
+    const young = buildYoung({ status: YOUNG_STATUS.WITHDRAWN, statusPhase2: YOUNG_STATUS_PHASE2.WITHDRAWN });
     expect(shouldDisplayNonEligibleBanner(young, buildCohort())).toBe(true);
   });
 
-  it("devrait retourner false quand la phase 2 est validée (équivalence comprise)", () => {
-    const young = buildYoung({ statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED });
+  it("devrait retourner false pour un 2024 avec des heures de MIG et une phase 2 non validée (peut encore finir)", () => {
+    const young = buildYoung({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, phase2NumberHoursDone: "12" });
     expect(shouldDisplayNonEligibleBanner(young, buildCohort())).toBe(false);
+  });
+
+  it("devrait retourner false pour un 2025 sans phase 2 validée, même sans aucune heure de MIG", () => {
+    const young = buildYoung({ status: YOUNG_STATUS.WITHDRAWN, statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS });
+    const cohort = buildCohort({ name: "2025 HTS 02 - Février", dateStart: "2025-02-15T00:00:00.000Z" });
+    expect(shouldDisplayNonEligibleBanner(young, cohort)).toBe(false);
   });
 
   it("devrait retourner false pour une cohorte 2023", () => {
@@ -68,7 +81,7 @@ describe("shouldDisplayNonEligibleBanner", () => {
   });
 
   it("devrait accepter un dateStart de type Date (année extraite en UTC)", () => {
-    expect(shouldDisplayNonEligibleBanner(buildYoung(), buildCohort({ dateStart: new Date("2025-01-01T00:00:00.000Z") }))).toBe(true);
+    expect(shouldDisplayNonEligibleBanner(buildYoung(), buildCohort({ dateStart: new Date("2024-01-01T00:00:00.000Z") }))).toBe(true);
     expect(shouldDisplayNonEligibleBanner(buildYoung(), buildCohort({ dateStart: new Date("2026-01-01T00:00:00.000Z") }))).toBe(false);
   });
 });
