@@ -69,6 +69,7 @@ import {
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
+import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
@@ -879,7 +880,10 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     // Brevo AVANT le wipe : la boucle ci-dessous efface les emails, donc unsync
     // doit lire les vrais emails maintenant (sinon il ne supprime aucun contact).
-    await unsync(young);
+    // Garde-fou « email partagé » : on ne désinscrit que les emails qui n'appartiennent
+    // à aucun AUTRE dossier actif (fratrie) ni à un référent — sinon le parent d'un
+    // enfant actif perdrait les communications le concernant. cf. services/rgpdEmailGuard.
+    await unsync(await keepOnlyUnsharedEmails(young));
 
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
@@ -900,7 +904,11 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     await YoungModel.collection.updateOne({ _id: young._id }, { $unset: { password: "" } });
 
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    await patches.deletePatches({ id, model: YoungModel });
+    // Patches : suppression TOTALE, alignée sur anonymizeOldCohorts.effect. deletePatches
+    // CONSERVERAIT les ops birthdateAt/gender/zip/city/handicap/pps/pai… (son fieldToKeep
+    // interne) — or le save() du wipe ci-dessus vient justement de créer un patch portant
+    // ces valeurs réelles en originalValue : « on ne garde rien » serait faux en base.
+    await (young as any).patches.collection.deleteMany({ ref: young._id });
 
     await anonymizeApplicationsFromYoungId({ youngId: young._id, anonymizedYoung: young });
     await anonymizeContractsFromYoungId({ youngId: young._id, anonymizedYoung: young });
@@ -910,7 +918,9 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     for (const equivalence of equivalences) {
       equivalence.set({ youngId: undefined });
       await equivalence.save();
-      await patches.deletePatches({ id: equivalence._id.toString(), model: MissionEquivalenceModel });
+      // Suppression totale (même raison que pour le jeune : deletePatches retiendrait
+      // des ops — dont celles du save() ci-dessus, ancien youngId en originalValue).
+      await (equivalence as any).patches.collection.deleteMany({ ref: equivalence._id });
     }
 
     logger.debug(`Young ${id} has been soft deleted`);

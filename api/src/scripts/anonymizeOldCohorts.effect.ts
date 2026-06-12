@@ -11,9 +11,15 @@
  *    `anonymized` et sera rejoué au prochain run. (api() avale les erreurs, on ne peut
  *    pas se fier à une exception : la vérification positive est indispensable.)
  *
- * PRÉREQUIS :
- *   mongodump complet AVANT toute exécution sur la production :
- *     mongodump --uri="$MONGO_URL" --out=/backup/$(date +%Y%m%d_%H%M%S)
+ * PRÉREQUIS (ordre impératif) :
+ *   1. Exporter les emails pour la purge support AVANT ce run — l'anonymisation détruit
+ *      les emails ET les patches qui en gardaient l'historique ; exporté après coup, le
+ *      fichier serait quasi vide SANS ERREUR et la purge support raterait tout :
+ *        npx tsx src/scripts/exportOldCohortSupportEmails.ts
+ *      cf. snupport-api/docs/purge-contacts-support.md
+ *   2. mongodump complet AVANT toute exécution sur la production :
+ *        mongodump --uri="$MONGO_URL" --out=/backup/$(date +%Y%m%d_%H%M%S)
+ *      (le dump ne couvre ni S3 ni Brevo : ces suppressions sont définitives.)
  *
  * NON COUVERT par ce script (à traiter séparément) :
  *   - Réindexation / purge de l'index Elasticsearch `young` (PII encore interrogeable
@@ -43,12 +49,14 @@ import { initDB, closeDB } from "../mongo";
 import { listFiles, deleteFilesByList } from "../utils/index";
 import slack from "../slack";
 import { YOUNG_STATUS } from "snu-lib";
+import { getProtectedEmails } from "../services/rgpdEmailGuard";
 import { buildUpdate, resolveOldCohorts } from "./anonymizeOldCohorts.helpers";
 
 const anonymizeApplication = require("../anonymization/application");
 const anonymizeContract = require("../anonymization/contract");
 
-const DRY_RUN = process.env.DRY_RUN === "true" || process.argv.includes("--dry-run");
+const DRY_RUN_RAW = process.env.DRY_RUN;
+const DRY_RUN = DRY_RUN_RAW === "true" || process.argv.includes("--dry-run");
 // Cohortes ciblées (liste partagée + override COHORTS) — cf. anonymizeOldCohorts.helpers.
 const OLD_COHORTS = resolveOldCohorts();
 // Test ciblé : YOUNG_ID="<objectId>" anonymise EXACTEMENT ce jeune (ignore cohorte + flag
@@ -189,9 +197,18 @@ const anonymizeDb = (young: any) =>
 // ──────────────────────────────────────────────────────────────────────────
 // Traitement d'un jeune : Brevo (gate) → S3 → base. Toute erreur remonte typée.
 // ──────────────────────────────────────────────────────────────────────────
-const processYoung = (young: any) =>
+const processYoung = (young: any, protectedEmails: Set<string>) =>
   Effect.gen(function* () {
-    yield* purgeBrevo([young.email, young.parent1Email, young.parent2Email]);
+    // Garde-fou « email partagé » : ne désinscrire de Brevo que les emails qui
+    // n'appartiennent à aucun dossier actif hors périmètre (fratrie, référent) —
+    // sinon le parent d'un enfant ACTIF perdrait les communications le concernant.
+    const emails = [young.email, young.parent1Email, young.parent2Email].filter((e): e is string => Boolean(e));
+    const purgeable = emails.filter((e) => !protectedEmails.has(e.trim().toLowerCase()));
+    if (purgeable.length < emails.length) {
+      // Compte seulement — ne jamais logger les emails eux-mêmes (PII dans les logs).
+      logger.info(`Brevo : ${emails.length - purgeable.length} email(s) conservé(s) pour le jeune ${young._id} (partagés avec un dossier actif ou un référent)`);
+    }
+    yield* purgeBrevo(purgeable);
     yield* deleteS3Files(young._id.toString());
     yield* anonymizeDb(young);
   });
@@ -202,11 +219,23 @@ const processYoung = (young: any) =>
 const program = Effect.gen(function* () {
   const mode = DRY_RUN ? "[DRY-RUN] " : "";
 
+  // Garde-fou : DRY_RUN=1 / TRUE / yes serait silencieusement un run RÉEL — on refuse
+  // toute valeur non reconnue plutôt que de lancer une anonymisation en croyant prévisualiser.
+  if (DRY_RUN_RAW !== undefined && !["true", "false"].includes(DRY_RUN_RAW)) {
+    return yield* Effect.fail(new ConfigError({ reason: `DRY_RUN="${DRY_RUN_RAW}" non reconnu — utiliser DRY_RUN=true ou DRY_RUN=false.` }));
+  }
+
   // Garde-fou : COHORTS surchargé mais vide après parsing ⇒ un $in:[] n'anonymiserait rien.
-  // (sans objet si on cible un YOUNG_ID précis.)
+  // (sans objet si on cible un YOUNG_ID précis.) Couvre aussi COHORTS="" depuis que
+  // resolveOldCohorts teste la présence de la variable et non sa truthiness.
   if (!YOUNG_ID && OLD_COHORTS.length === 0) {
     return yield* Effect.fail(new ConfigError({ reason: "COHORTS défini mais vide après parsing — abandon (un $in:[] n'anonymiserait rien)." }));
   }
+
+  // Garde-fou « email partagé » (Brevo) : chargé UNE fois pour tout le run. Inutile
+  // hors production sans run réel (purgeBrevo y est no-op) — on évite alors le scan.
+  const protectedEmails: Set<string> =
+    config.ENVIRONMENT === "production" && !DRY_RUN ? yield* Effect.tryPromise(() => getProtectedEmails(OLD_COHORTS)) : new Set<string>();
 
   // IDs collectés en amont : évite la dérive de pagination pendant le traitement.
   const ids: Array<{ _id: any }> = yield* Effect.tryPromise(() => YoungModel.find(query()).select("_id").lean());
@@ -228,7 +257,7 @@ const program = Effect.gen(function* () {
               YoungModel.findById(idDoc._id).select("+password +forgotPasswordResetExpires"),
             );
             if (!young) return "skipped" as const;
-            yield* processYoung(young);
+            yield* processYoung(young, protectedEmails);
             return "processed" as const;
           }).pipe(
             Effect.catchAllCause((cause) =>

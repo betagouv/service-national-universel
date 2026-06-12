@@ -22,7 +22,7 @@ import anonymizeApplication from "../anonymization/application";
 import anonymizeContract from "../anonymization/contract";
 import { anonymizeNonDeclaredFields } from "../anonymization/utils/anonymise-model-fields";
 import { STAR_EMAIL } from "../anonymization/utils/anonymise";
-import { buildUpdate } from "../scripts/anonymizeOldCohorts.helpers";
+import { buildUpdate, resolveOldCohorts, DEFAULT_OLD_COHORTS } from "../scripts/anonymizeOldCohorts.helpers";
 
 import getNewYoungFixture from "./fixtures/young";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -212,5 +212,38 @@ describe("buildUpdate (script) — traduction undefined → $unset", () => {
   it("n'émet pas de clé vide ($set seul, ou $unset seul)", () => {
     expect(buildUpdate({ a: 1 })).not.toHaveProperty("$unset");
     expect(buildUpdate({ a: undefined })).not.toHaveProperty("$set");
+  });
+});
+
+describe("resolveOldCohorts (sélection des cohortes à anonymiser)", () => {
+  // process.env est un état global : on le restaure après chaque test.
+  const ORIGINAL = process.env.COHORTS;
+  afterEach(() => {
+    if (ORIGINAL === undefined) delete process.env.COHORTS;
+    else process.env.COHORTS = ORIGINAL;
+  });
+
+  it("sans COHORTS → la liste par défaut", () => {
+    delete process.env.COHORTS;
+    expect(resolveOldCohorts()).toEqual(DEFAULT_OLD_COHORTS);
+  });
+
+  it("surcharge simple, et liste avec espaces/entrées vides → trim + filtre", () => {
+    process.env.COHORTS = "2019";
+    expect(resolveOldCohorts()).toEqual(["2019"]);
+    process.env.COHORTS = "2019, ,2020 ";
+    expect(resolveOldCohorts()).toEqual(["2019", "2020"]);
+  });
+
+  it('"," → [] (doit déclencher la garde d\'abandon des scripts, pas un run)', () => {
+    process.env.COHORTS = ",";
+    expect(resolveOldCohorts()).toEqual([]);
+  });
+
+  it('"" (définie mais vide, ex. COHORTS="$TARGET" avec $TARGET non défini) → [] — PAS la liste complète', () => {
+    // Piège opérateur : avant ce verrou, la chaîne vide (falsy) retombait en silence
+    // sur les 7 cohortes par défaut → run de production intégral au lieu d'un abandon.
+    process.env.COHORTS = "";
+    expect(resolveOldCohorts()).toEqual([]);
   });
 });

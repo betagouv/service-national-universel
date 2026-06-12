@@ -13,9 +13,14 @@ export const DEFAULT_OLD_COHORTS = ["2019", "2020", "2021", "2022", "Février 20
 /**
  * Cohortes à anonymiser. Override ponctuel via COHORTS="2019" ou "2019,2020"
  * (ex. test ciblé staging). Sinon la liste par défaut.
+ *
+ * `!== undefined` (et PAS la truthiness) : COHORTS="" — le cas le plus probable d'un
+ * override accidentel, ex. COHORTS="$TARGET" avec $TARGET non défini — doit donner []
+ * (attrapé par la garde d'abandon des scripts), surtout pas retomber en silence sur la
+ * liste complète et déclencher un run de production intégral.
  */
 export function resolveOldCohorts(): string[] {
-  return process.env.COHORTS
+  return process.env.COHORTS !== undefined
     ? process.env.COHORTS.split(",").map((c) => c.trim()).filter(Boolean)
     : DEFAULT_OLD_COHORTS;
 }

@@ -25,3 +25,5 @@ dump
 .clever.json
 
 .continue
+# Export RGPD (purge support) : emails en clair — ne jamais commiter
+emails*.json

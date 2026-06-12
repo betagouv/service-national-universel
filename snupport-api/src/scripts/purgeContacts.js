@@ -24,7 +24,14 @@ const MessageModel = require("../models/message");
 const { deleteFile } = require("../utils");
 const { filePathsOf } = require("../utils/messageAttachments");
 
-const DRY_RUN = process.env.DRY_RUN === "true";
+const DRY_RUN_RAW = process.env.DRY_RUN;
+// Fail-fast : DRY_RUN=1 / TRUE / yes serait silencieusement un run RÉEL destructif.
+if (DRY_RUN_RAW !== undefined && !["true", "false"].includes(DRY_RUN_RAW)) {
+  // eslint-disable-next-line no-console
+  console.error(`DRY_RUN="${DRY_RUN_RAW}" non reconnu — utiliser DRY_RUN=true ou DRY_RUN=false.`);
+  process.exit(1);
+}
+const DRY_RUN = DRY_RUN_RAW === "true";
 const EMAILS_FILE = process.env.EMAILS_FILE || "./emails.json";
 
 function loadEmails() {
