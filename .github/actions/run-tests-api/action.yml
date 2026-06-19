@@ -61,6 +61,12 @@ runs:
     - name: Run tests
       working-directory: api
       shell: bash
+      # jest --maxWorkers=3 lance 3 workers, chacun en ts-jest type-check complet
+      # sous le tas Node par défaut (~2 Go) → OOM (« Reached heap limit ») sous
+      # pression mémoire des runners, qui fait « failed to run » des suites. On relève
+      # le tas par worker (runner 16 Go ; même dette que le job apiv2).
+      env:
+        NODE_OPTIONS: --max-old-space-size=4096
       run: npm run test
 
     # TODO: Uncomment this when we can use Code Climate again
