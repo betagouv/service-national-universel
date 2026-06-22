@@ -61,6 +61,12 @@ runs:
     - name: Run tests
       working-directory: api
       shell: bash
+      # Chaque fichier de test peut faire grimper un worker au-delà du heap V8
+      # par défaut (~2 Go) -> heap OOM puis SIGTERM en cascade. On exécute donc
+      # en un seul worker (--maxWorkers=1 dans le script) avec un heap relevé,
+      # tout en restant sous les 7 Go de RAM du runner ubuntu-latest.
+      env:
+        NODE_OPTIONS: --max-old-space-size=4096
       run: npm run test
 
     # TODO: Uncomment this when we can use Code Climate again

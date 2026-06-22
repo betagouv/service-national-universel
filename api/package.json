@@ -14,7 +14,7 @@
     "dev:api": "nodemon",
     "dev:tasks": "RUN_TASKS=true PORT=8087 nodemon",
     "debug": "DEBUG=express:* nodemon",
-    "test": "jest --silent --testTimeout=60000 --maxWorkers=2 --workerIdleMemoryLimit=1024MB",
+    "test": "jest --silent --testTimeout=60000 --maxWorkers=1",
     "test:debug": "jest --detectOpenHandles --forceExit --testTimeout=60000 --runInBand",
     "coverage": "npm run test -- --coverage",
     "lint": "eslint src --ext .js,.ts",
