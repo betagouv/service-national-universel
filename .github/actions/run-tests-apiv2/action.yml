@@ -50,4 +50,9 @@ runs:
     - name: Run tests
       working-directory: apiv2
       shell: bash
+      # jest --runInBand exécute toute la suite dans un seul process : la mémoire
+      # s'accumule et dépasse le heap par défaut (~2 Go) -> OOM (exit 134).
+      # On augmente le heap (runner ubuntu-latest = 7 Go de RAM).
+      env:
+        NODE_OPTIONS: --max-old-space-size=4096
       run: npm test
