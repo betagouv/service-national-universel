@@ -20,8 +20,18 @@ import { wasYoungExcluded, hasCompletedPhase2 } from "../../utils";
 import useReinscription from "../changeSejour/lib/useReinscription";
 import { shouldRedirectToReinscription } from "@/utils/navigation";
 import usePermissions from "@/hooks/usePermissions";
+import NonEligibleBanner from "./components/NonEligibleBanner";
 
 export default function Home() {
+  return (
+    <>
+      <NonEligibleBanner />
+      <HomeContent />
+    </>
+  );
+}
+
+function HomeContent() {
   useDocumentTitle("Accueil");
   const { young, isCLE } = useAuth();
   const { cohort } = useCohort();

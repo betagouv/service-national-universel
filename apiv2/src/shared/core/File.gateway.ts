@@ -39,9 +39,31 @@ export interface FileGateway {
         values: any[][];
         sheetName: string;
     }): Promise<Buffer>;
+    // Génère un fichier xlsx en streaming (ligne par ligne) directement sur disque,
+    // pour ne jamais charger l'intégralité du classeur en mémoire (gros exports).
+    generateExcelToFileFromRows(params: {
+        filePath: string;
+        columnsName: string[];
+        rows: Iterable<any[]> | AsyncIterable<any[]>;
+        sheetName?: string;
+    }): Promise<void>;
     uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },
+        options?: {
+            ACL?: "private" | "public-read";
+        },
+    ): Promise<{
+        Location: string;
+        ETag: string;
+        Bucket: string;
+        Key: string;
+    }>;
+    // Upload d'un fichier local vers S3 en flux (sans charger le buffer en mémoire).
+    uploadFileFromPath(
+        path: string,
+        localFilePath: string,
+        file: { encoding?: string; mimetype: string },
         options?: {
             ACL?: "private" | "public-read";
         },
