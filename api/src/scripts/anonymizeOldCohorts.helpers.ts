@@ -5,10 +5,11 @@
  */
 
 // Liste explicite (vs $regex) : non ambiguë, auto-documentée, robuste à de futures
-// cohortes contenant "2022" en sous-chaîne (ex. un hypothétique "CLE 2022-2023").
-// Issue de db.youngs.distinct("cohort") au 2026-06 — à re-valider si la donnée évolue.
+// cohortes contenant "2019" en sous-chaîne (ex. un hypothétique "CLE 2019-2020").
+// Restreinte à la seule cohorte 2019 pour ce premier run ; les cohortes suivantes
+// (2020, 2021, 2022…) seront traitées ultérieurement, ou ponctuellement via COHORTS=.
 // Source unique partagée par anonymizeOldCohorts.effect.ts et exportOldCohortSupportEmails.ts.
-export const DEFAULT_OLD_COHORTS = ["2019", "2020", "2021", "2022", "Février 2022", "Juin 2022", "Juillet 2022"];
+export const DEFAULT_OLD_COHORTS = ["2019"];
 
 /**
  * Cohortes à anonymiser. Override ponctuel via COHORTS="2019" ou "2019,2020"
