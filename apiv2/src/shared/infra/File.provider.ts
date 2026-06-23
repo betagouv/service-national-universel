@@ -103,19 +103,28 @@ export class FileProvider implements FileGateway {
         });
         const worksheet = workbook.addWorksheet(sheetName);
 
-        worksheet.addRow(columnsName).commit();
-        let count = 0;
-        for await (const row of rows) {
-            worksheet.addRow(row).commit();
-            count++;
-            if (count % 1000 === 0) {
-                this.logger.log(`generateExcelToFileFromRows: ${count} rows written`);
+        try {
+            worksheet.addRow(columnsName).commit();
+            let count = 0;
+            for await (const row of rows) {
+                // exceljs sérialise une cellule à valeur tableau en JSON (`["a","b"]`) et un
+                // tableau vide en `"[]"`. On joint donc les tableaux pour garder un rendu texte.
+                worksheet.addRow(row.map((cell) => (Array.isArray(cell) ? cell.join(", ") : cell))).commit();
+                count++;
+                if (count % 1000 === 0) {
+                    this.logger.log(`generateExcelToFileFromRows: ${count} rows written`);
+                }
             }
-        }
 
-        await worksheet.commit();
-        await workbook.commit();
-        this.logger.log(`generateExcelToFileFromRows: done (${count} rows) -> ${filePath}`);
+            await worksheet.commit();
+            await workbook.commit();
+            this.logger.log(`generateExcelToFileFromRows: done (${count} rows) -> ${filePath}`);
+        } catch (error) {
+            // Erreur en plein flux : le WorkbookWriter n'est pas finalisé (pas de commit()).
+            // On détruit le flux fichier sous-jacent pour ne pas fuiter de descripteur.
+            (workbook as unknown as { stream?: { destroy?: () => void } }).stream?.destroy?.();
+            throw error;
+        }
     }
 
     async uploadFile(
