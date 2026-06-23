@@ -62,6 +62,11 @@ const OLD_COHORTS = resolveOldCohorts();
 // Test ciblé : YOUNG_ID="<objectId>" anonymise EXACTEMENT ce jeune (ignore cohorte + flag
 // anonymized) pour valider le chemin d'écriture sur un cas réel choisi. Irréversible.
 const YOUNG_ID = process.env.YOUNG_ID?.trim();
+// SKIP_BREVO="true" : bypass de la purge Brevo (DB + S3 seulement). La désinscription
+// Brevo sera faite séparément à partir du fichier d'emails exporté AVANT l'anonymisation
+// (la DB ne contient plus les emails après coup). Rompt volontairement la précondition
+// fail-closed « Brevo d'abord » — n'utiliser que si l'export support est bien en place.
+const SKIP_BREVO = process.env.SKIP_BREVO === "true";
 // Concurrence volontairement basse : chaque jeune ouvre sa propre transaction Mongo.
 const CONCURRENCY = 5;
 
@@ -106,8 +111,8 @@ const deleteAndVerifyContact = (email: string) =>
 
 /** Purge des contacts Brevo (jeune + parents). Échec ⇒ rien d'autre n'est anonymisé. */
 const purgeBrevo = (emails: Array<string | undefined>) =>
-  config.ENVIRONMENT !== "production"
-    ? Effect.void // miroir du garde-fou de brevo.unsync()
+  SKIP_BREVO || config.ENVIRONMENT !== "production"
+    ? Effect.void // SKIP_BREVO : purge déléguée au run support ; sinon miroir du garde-fou de brevo.unsync()
     : Effect.forEach([...new Set(emails.filter((e): e is string => Boolean(e)))], deleteAndVerifyContact, { discard: true });
 
 /**
@@ -232,10 +237,15 @@ const program = Effect.gen(function* () {
     return yield* Effect.fail(new ConfigError({ reason: "COHORTS défini mais vide après parsing — abandon (un $in:[] n'anonymiserait rien)." }));
   }
 
+  if (SKIP_BREVO) {
+    logger.warn(`${mode}SKIP_BREVO actif : la purge Brevo est bypassée (DB + S3 seulement) — à compléter via le run support sur le fichier d'emails exporté.`);
+  }
+
   // Garde-fou « email partagé » (Brevo) : chargé UNE fois pour tout le run. Inutile
-  // hors production sans run réel (purgeBrevo y est no-op) — on évite alors le scan.
+  // hors production sans run réel (purgeBrevo y est no-op), ou quand SKIP_BREVO bypasse
+  // la purge — on évite alors le scan (le garde-fou ne sert qu'à filtrer les emails Brevo).
   const protectedEmails: Set<string> =
-    config.ENVIRONMENT === "production" && !DRY_RUN ? yield* Effect.tryPromise(() => getProtectedEmails(OLD_COHORTS)) : new Set<string>();
+    config.ENVIRONMENT === "production" && !DRY_RUN && !SKIP_BREVO ? yield* Effect.tryPromise(() => getProtectedEmails(OLD_COHORTS)) : new Set<string>();
 
   // IDs collectés en amont : évite la dérive de pagination pendant le traitement.
   const ids: Array<{ _id: any }> = yield* Effect.tryPromise(() => YoungModel.find(query()).select("_id").lean());
