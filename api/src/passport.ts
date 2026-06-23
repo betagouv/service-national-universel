@@ -51,6 +51,10 @@ async function validateUser(userModel: Model<any>, jwtPayload: JwtPayload, done:
 
     const user = await userModel.findById(value._id);
     if (user) {
+      // Compte supprimé/anonymisé : on rejette même un JWT encore valide, pour invalider
+      // les sessions existantes (un jeune connecté avant anonymisation ne doit plus l'être).
+      if (user.status === "DELETED" || user.anonymized) return done(null, false);
+
       const passwordMatch = user.passwordChangedAt?.getTime() === value.passwordChangedAt?.getTime();
       const logoutMatch = user.lastLogoutAt?.getTime() === value.lastLogoutAt?.getTime();
 

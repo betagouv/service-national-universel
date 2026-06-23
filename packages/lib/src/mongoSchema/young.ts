@@ -2083,6 +2083,12 @@ export const YoungSchema = {
       description: "Indique si les données des représentants légaux ont été supprimées",
     },
   },
+  anonymized: {
+    type: Boolean,
+    documentation: {
+      description: "Indique si le jeune a été anonymisé conformément aux exigences RGPD",
+    },
+  },
   createdAt: { type: Date, default: Date.now },
   updatedAt: { type: Date, default: Date.now },
 };

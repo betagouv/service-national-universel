@@ -521,6 +521,7 @@ class Auth {
       });
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      if (user.status === "DELETED" || (user as any).anonymized) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.token2FA !== token_2fa) {
         user.set({ attempts2FA: (user.attempts2FA || 0) + 1 });
         await user.save();

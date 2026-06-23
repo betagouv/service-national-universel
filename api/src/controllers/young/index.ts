@@ -14,7 +14,7 @@ import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument } from "../../models";
+import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
 import AuthObject from "../../auth";
 import {
   uploadFile,
@@ -69,6 +69,7 @@ import {
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
 import { anonymizeContractsFromYoungId } from "../../services/contract";
+import { keepOnlyUnsharedEmails } from "../../services/rgpdEmailGuard";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../../jwt-options";
 import { scanFile } from "../../utils/virusScanner";
@@ -855,35 +856,13 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
 
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Un compte déjà supprimé ne peut pas l'être de nouveau.
+    if (young.status === YOUNG_STATUS.DELETED) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     if (!canDeleteYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    const fieldToKeep = [
-      "_id",
-      "__v",
-      "birthdateAt",
-      "cohort",
-      "gender",
-      "situation",
-      "grade",
-      "qpv",
-      "populationDensity",
-      "handicap",
-      "ppsBeneficiary",
-      "paiBeneficiary",
-      "highSkilledActivity",
-      "statusPhase1",
-      "statusPhase2",
-      "phase2ApplicationStatus",
-      "statusPhase3",
-      "inscriptionStep2023",
-      "inscriptionDoneDate",
-      "reinscriptionStep2023",
-      "department",
-      "region",
-      "zip",
-      "city",
-      "createdAt",
-    ];
+    // « On ne garde rien » : seul le plancher (email requis/unique + bookkeeping).
+    // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.effect.
+    const fieldToKeep = ["_id", "__v", "createdAt"];
 
     for (const key in young.files) {
       if (key.length) {
@@ -899,25 +878,50 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
       }
     }
 
+    // Brevo AVANT le wipe : la boucle ci-dessous efface les emails, donc unsync
+    // doit lire les vrais emails maintenant (sinon il ne supprime aucun contact).
+    // Garde-fou « email partagé » : on ne désinscrit que les emails qui n'appartiennent
+    // à aucun AUTRE dossier actif (fratrie) ni à un référent — sinon le parent d'un
+    // enfant actif perdrait les communications le concernant. cf. services/rgpdEmailGuard.
+    await unsync(await keepOnlyUnsharedEmails(young));
+
     for (const key in young._doc) {
       if (!fieldToKeep.find((val) => val === key)) {
         young.set({ [key]: undefined });
       }
     }
 
-    await unsync(young);
-
-    young.set({ email: `${young._doc!["_id"]}@delete.com` });
+    young.set({ email: `anonymized-${young._doc!["_id"]}@deleted.snu` });
+    young.set({ cohort: "-" }); // marqueur « anonymisé » (la vraie cohorte n'est pas conservée)
     young.set({ status: YOUNG_STATUS.DELETED });
+    young.set({ anonymized: true });
     young.set({ lastStatusAt: Date.now() });
 
     await young.save({ fromUser: req.user });
 
+    // password est select:false (jamais chargé) et un hook bcrypt se déclenche si on le
+    // modifie via .save() : on le retire donc par une écriture brute, hors hook.
+    await YoungModel.collection.updateOne({ _id: young._id }, { $unset: { password: "" } });
+
     if (!canDeletePatchesHistory(req.user, young)) return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    await patches.deletePatches({ id, model: YoungModel });
+    // Patches : suppression TOTALE, alignée sur anonymizeOldCohorts.effect. deletePatches
+    // CONSERVERAIT les ops birthdateAt/gender/zip/city/handicap/pps/pai… (son fieldToKeep
+    // interne) — or le save() du wipe ci-dessus vient justement de créer un patch portant
+    // ces valeurs réelles en originalValue : « on ne garde rien » serait faux en base.
+    await (young as any).patches.collection.deleteMany({ ref: young._id });
 
     await anonymizeApplicationsFromYoungId({ youngId: young._id, anonymizedYoung: young });
     await anonymizeContractsFromYoungId({ youngId: young._id, anonymizedYoung: young });
+
+    // Équivalences de mission : rompre le lien youngId + supprimer les patches (qui retiennent l'ancien youngId).
+    const equivalences = await MissionEquivalenceModel.find({ youngId: young._id.toString() });
+    for (const equivalence of equivalences) {
+      equivalence.set({ youngId: undefined });
+      await equivalence.save();
+      // Suppression totale (même raison que pour le jeune : deletePatches retiendrait
+      // des ops — dont celles du save() ci-dessus, ancien youngId en originalValue).
+      await (equivalence as any).patches.collection.deleteMany({ ref: equivalence._id });
+    }
 
     logger.debug(`Young ${id} has been soft deleted`);
     res.status(200).send({ ok: true, data: young });

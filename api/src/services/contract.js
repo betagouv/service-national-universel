@@ -13,6 +13,7 @@ const anonymizeContractsFromYoungId = async ({ youngId = "", anonymizedYoung = {
 
   for (const contract of contracts) {
     contract.set({
+      youngId: undefined, // rompt le lien : plus de contrats listables depuis la fiche du jeune supprimé
       youngFirstName: anonymizedYoung.firstName,
       youngLastName: anonymizedYoung.lastName,
       youngEmail: anonymizedYoung.email,
