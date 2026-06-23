@@ -99,59 +99,27 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
       const updatedYoung = res.body.data;
 
-      const fieldToKeep = [
-        "_id",
-        "__v",
-        "birthdateAt",
-        "cohort",
-        "gender",
-        "situation",
-        "grade",
-        "qpv",
-        "populationDensity",
-        "handicap",
-        "ppsBeneficiary",
-        "paiBeneficiary",
-        "highSkilledActivity",
-        "statusPhase1",
-        "statusPhase2",
-        "phase2ApplicationStatus",
-        "statusPhase3",
-        "inscriptionStep2023",
-        "inscriptionDoneDate",
-        "reinscriptionStep2023",
-        "department",
-        "region",
-        "zip",
-        "city",
-        "createdAt",
-      ];
+      // « On ne garde rien » : seul le plancher (email requis/unique + bookkeeping).
+      const fieldToKeep = ["_id", "__v", "createdAt"];
+      // Champs (re)posés par la route, à ne pas considérer comme "effacés".
+      const bookkeeping = ["updatedAt", "status", "email", "anonymized", "lastStatusAt", "cohort"];
 
-      //Check that the fields deleted are deleted
+      // Tout ce qui n'est ni gardé ni bookkeeping doit être effacé.
       for (const key in updatedYoung) {
-        if (!fieldToKeep.find((val) => val === key)) {
-          if (!["updatedAt", "status", "email", "_id", "phase2ApplicationStatus", "birthdateAt", "lastStatusAt"].includes(key)) expect(updatedYoung[key]).toEqual(undefined);
+        if (!fieldToKeep.includes(key) && !bookkeeping.includes(key)) {
+          expect(updatedYoung[key]).toEqual(undefined);
         }
       }
 
-      //Check that the saved fields are equals to the old one
-      for (const key in updatedYoung) {
-        if (fieldToKeep.find((val) => val === key)) {
-          if (key === "status") {
-            expect(updatedYoung[key]).toEqual("DELETED");
-          } else if (key === "email") {
-            expect(updatedYoung[key]).toEqual(`${young._doc?.["_id"]}@delete.com`);
-          } else if (key === "_id") {
-            expect(updatedYoung[key]).toEqual(young[key].toString());
-          } else if (key === "phase2ApplicationStatus") {
-            expect(updatedYoung[key]).toEqual(Array.from(young[key]));
-          } else if (["birthdateAt", "createdAt"].includes(key)) {
-            expect(new Date(updatedYoung[key])).toEqual(new Date(young[key]));
-          } else {
-            expect(updatedYoung[key]).toEqual(young[key]);
-          }
-        }
-      }
+      // Bookkeeping de l'anonymisation.
+      expect(updatedYoung.status).toEqual("DELETED");
+      expect(updatedYoung.anonymized).toEqual(true);
+      expect(updatedYoung.cohort).toEqual("-"); // marqueur « anonymisé »
+      expect(updatedYoung.email).toEqual(`anonymized-${young._id}@deleted.snu`);
+
+      // Champs gardés = identiques à l'origine.
+      expect(updatedYoung._id).toEqual(young._id.toString());
+      expect(new Date(updatedYoung.createdAt)).toEqual(new Date(young.createdAt));
     });
 
     it("should return 404 with wrong id", async () => {

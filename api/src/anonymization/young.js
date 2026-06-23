@@ -1,4 +1,4 @@
-const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, getYoungLocation, generateNewPhoneNumber, starify } = require("./utils/anonymise");
+const { generateAddress, generateRandomName, generateRandomEmail, generateBirthdate, generateNewPhoneNumber, starify } = require("./utils/anonymise");
 const { anonymizeNonDeclaredFields } = require("./utils/anonymise-model-fields");
 const { randomUUID } = require("crypto");
 
@@ -18,6 +18,7 @@ function anonymize(itemToAnonymize) {
     "phoneZone",
     "gender",
     "birthdateAt",
+    "accountStatus",
     "cohort",
     "cohortId",
     "originalCohort",
@@ -31,12 +32,12 @@ function anonymize(itemToAnonymize) {
     "statusPhase1Motif",
     "statusPhase1MotifDetail",
     "statusPhase2",
-    "statusPhase2updatedAt",
+    "statusPhase2UpdatedAt",
     "statusPhase2OpenedAt",
     "statusPhase2ValidatedAt",
     "statusPhase2Contract",
     "statusPhase3",
-    "statusPhase3updatedAt",
+    "statusPhase3UpdatedAt",
     "statusPhase3ValidatedAt",
     "lastStatusAt",
     "withdrawnReason",
@@ -265,6 +266,7 @@ function anonymize(itemToAnonymize) {
     "aknowledgmentTerminaleSessionAvailability",
     "parentStatementOfHonorInvalidId",
     "jdc",
+    "roadCodeRefund",
     "motivations",
     "domains",
     "professionnalProject",
@@ -372,12 +374,100 @@ function anonymize(itemToAnonymize) {
       return e;
     }));
 
-  const newLocation = getYoungLocation(item.zip);
-  item.location &&
-    (item.location = {
-      lat: newLocation?.latitude || 0,
-      lon: newLocation?.longitude || 0,
-    });
+  // 🔴 Données de santé (catégorie spéciale RGPD)
+  item.handicap = undefined;
+  item.allergies = undefined;
+  item.handicapInSameDepartment = undefined;
+  item.reducedMobilityAccess = undefined;
+  item.ppsBeneficiary = undefined;
+  item.paiBeneficiary = undefined;
+  item.specificAmenagment = undefined;
+  item.specificAmenagmentType = undefined;
+  item.medicosocialStructure = undefined;
+  item.medicosocialStructureName = undefined;
+  item.medicosocialStructureAddress = undefined;
+  item.medicosocialStructureComplementAddress = undefined;
+  item.medicosocialStructureZip = undefined;
+  item.medicosocialStructureCity = undefined;
+  item.medicosocialStructureDepartment = undefined;
+  item.medicosocialStructureRegion = undefined;
+  item.medicosocialStructureLocation = undefined;
+
+  // 🔴 PII de tiers — famille d'accueil
+  item.hostFirstName = undefined;
+  item.hostLastName = undefined;
+  item.hostRelationship = undefined;
+  item.hostAddress = undefined;
+  item.hostCity = undefined;
+  item.hostZip = undefined;
+  item.hostDepartment = undefined;
+  item.hostRegion = undefined;
+
+  // 🔴 PII de tiers — tuteur phase 3
+  item.phase3TutorFirstName = undefined;
+  item.phase3TutorLastName = undefined;
+  item.phase3TutorEmail = undefined;
+  item.phase3TutorPhone = undefined;
+  item.phase3TutorNote = undefined;
+
+  // 🔴 PII de tiers — proche mobilité
+  item.mobilityNearRelativeName = undefined;
+  item.mobilityNearRelativeAddress = undefined;
+  item.mobilityNearRelativeZip = undefined;
+  item.mobilityNearRelativeCity = undefined;
+
+  // 🟠 Quasi-identifiants — naissance
+  item.birthCity = undefined;
+  item.birthCityZip = undefined;
+  item.birthCountry = undefined;
+
+  // 🟠 Quasi-identifiants — adresse du jeune
+  item.complementAddress = undefined;
+  item.zip = undefined;
+  item.city = undefined;
+  item.cityCode = undefined;
+  item.department = undefined;
+  item.location = undefined;
+
+  // 🟠 Adresse étrangère
+  item.foreignAddress = undefined;
+  item.foreignCity = undefined;
+  item.foreignZip = undefined;
+  item.foreignCountry = undefined;
+
+  // 🟠 Localisation parent 1
+  item.parent1ComplementAddress = undefined;
+  item.parent1Zip = undefined;
+  item.parent1City = undefined;
+  item.parent1CityCode = undefined;
+  item.parent1Department = undefined;
+  item.parent1Location = undefined;
+
+  // 🟠 Localisation parent 2
+  item.parent2ComplementAddress = undefined;
+  item.parent2Zip = undefined;
+  item.parent2City = undefined;
+  item.parent2CityCode = undefined;
+  item.parent2Department = undefined;
+  item.parent2Location = undefined;
+
+  // 🟠 École
+  item.schoolName = undefined;
+  item.schoolNameOld = undefined;
+  item.schoolAddress = undefined;
+  item.schoolComplementAdresse = undefined;
+  item.schoolZip = undefined;
+  item.schoolCity = undefined;
+  item.schoolDepartment = undefined;
+  item.schoolLocation = undefined;
+
+  // 🟡 Texte libre potentiellement identifiant
+  item.cohortChangeReason && (item.cohortChangeReason = starify(item.cohortChangeReason));
+  item.cohortDetailedChangeReason && (item.cohortDetailedChangeReason = starify(item.cohortDetailedChangeReason));
+  item.inscriptionCorrectionMessage && (item.inscriptionCorrectionMessage = starify(item.inscriptionCorrectionMessage));
+  item.inscriptionRefusedMessage && (item.inscriptionRefusedMessage = starify(item.inscriptionRefusedMessage));
+  item.desiredLocation && (item.desiredLocation = starify(item.desiredLocation));
+  item.phase3MissionDescription && (item.phase3MissionDescription = starify(item.phase3MissionDescription));
 
   item.cniFiles && (item.cniFiles = []);
   item.highSkilledActivityProofFiles && (item.highSkilledActivityProofFiles = []);
@@ -397,10 +487,14 @@ function anonymize(itemToAnonymize) {
   item.token2FA = "";
   item.tokenEmailValidation = "";
   item.forgotPasswordResetToken = "";
+  item.forgotPasswordResetExpires = undefined;
   item.invitationToken = "";
   item.phase3Token = "";
   item.parent1Inscription2023Token = randomUUID();
   item.parent2Inscription2023Token = randomUUID();
+  item.password = "";
+  item.accountStatus = undefined;
+  item.roadCodeRefund = undefined;
 
   return item;
 }

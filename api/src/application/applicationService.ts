@@ -38,6 +38,7 @@ export const anonymizeApplicationsFromYoungId = async ({ youngId = "", anonymize
 
     for (const application of applications) {
       application.set({
+        youngId: undefined, // rompt le lien : plus de candidatures/missions listables depuis la fiche du jeune supprimé
         youngFirstName: anonymizedYoung.firstName,
         youngLastName: anonymizedYoung.lastName,
         youngEmail: anonymizedYoung.email,

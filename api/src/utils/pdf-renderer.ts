@@ -35,6 +35,12 @@ class InMemoryWritable extends Writable {
 }
 
 export async function generatePdfIntoStream(outStream, { type, template, young, contract }: { type: string; template: string; young?: YoungType; contract?: ContractType }) {
+  // Un jeune anonymisé (RGPD) ne doit plus pouvoir générer/télécharger ses documents
+  // (attestations phase 1/2/3, droit à l'image…). Garde central : couvre toutes les
+  // variantes ci-dessous. Les flux batch (tableau d'youngs) sont déjà filtrés par statut.
+  if (young && !Array.isArray(young) && (young as any).anonymized) {
+    throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+  }
   if (type === "certificate" && template === "1" && young) {
     return await generateCertifPhase1(outStream, young);
   }
