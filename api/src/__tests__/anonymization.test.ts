@@ -33,7 +33,7 @@ const MASKED_EMAIL = /^\*+@\*+\.\*+$/;
 const ONLY_STARS = /^\*+$/;
 
 describe("anonymizeNonDeclaredFields (moteur de whitelist)", () => {
-  // BUG PRE-EXISTANT (cf. docs/anonymization-engine-noop-bug.md) : le moteur est
+  // BUG PRE-EXISTANT : le moteur est
   // un NO-OP. `anonymizeNonDeclaredFields` fait `seen.add(item)` puis appelle
   // `getAllPaths(item, "", seen)`, qui court-circuite sur `seen.has(item)` et renvoie
   // un tableau vide. Aucun champ non-whiteliste n'est donc neutralise ; seules les
