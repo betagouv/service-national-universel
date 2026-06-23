@@ -1,3 +1,6 @@
+import { promises as fs } from "fs";
+import { tmpdir } from "os";
+import { join } from "path";
 import { UseCase } from "@shared/core/UseCase";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
@@ -206,23 +209,34 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
 
         this.logger.log(`jeunes count: ${inscriptions.hits.length}`);
 
-        const excelData = await this.generateRapport(inscriptions.hits, fields, auteur, format);
+        // Préparation des données enrichies + un générateur de lignes paresseux :
+        // les lignes ne sont jamais matérialisées toutes ensemble en mémoire.
+        const { columnsName, rows } = await this.generateRapport(inscriptions.hits, fields, auteur, format);
 
-        this.logger.log(`Generate excel`);
-        // création du fichier excel de rapport
-        const fileBuffer = await this.fileGateway.generateExcelFromValues({
-            ...excelData,
-            sheetName: "data",
-        });
-
-        this.logger.log(`Upload excel`);
-        // upload du rapport du s3
         const timestamp = this.clockGateway.formatSafeDateTime(new Date());
         const fileName = `${name}s_${this.cryptoGateway.getUuid()}_${timestamp}.xlsx`;
-        const rapportFile = await this.fileGateway.uploadFile(`${EXPORT_JEUNE_FOLDER}/${fileName}`, {
-            data: fileBuffer,
-            mimetype: MIME_TYPES.EXCEL,
-        });
+        const tmpFilePath = join(tmpdir(), fileName);
+
+        let rapportFile: ExporterJeunesResult["rapportFile"];
+        try {
+            this.logger.log(`Generate excel (stream) -> ${tmpFilePath}`);
+            // génération du fichier excel en streaming sur disque (mémoire bornée)
+            await this.fileGateway.generateExcelToFileFromRows({
+                filePath: tmpFilePath,
+                columnsName,
+                rows,
+                sheetName: "data",
+            });
+
+            this.logger.log(`Upload excel`);
+            // upload du rapport vers s3 en flux (depuis le fichier temporaire)
+            rapportFile = await this.fileGateway.uploadFileFromPath(`${EXPORT_JEUNE_FOLDER}/${fileName}`, tmpFilePath, {
+                mimetype: MIME_TYPES.EXCEL,
+            });
+        } finally {
+            // nettoyage du fichier temporaire, qu'il y ait eu succès ou erreur
+            await fs.unlink(tmpFilePath).catch(() => undefined);
+        }
 
         // envoi de l'email à celui qui a demandé l'export
         await this.notificationGateway.sendEmail<ExportDownloadParams>(
@@ -287,12 +301,9 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             etablissementsById = await this.retrieveEtablissements(jeunes);
         }
 
-        const result: any[] = [];
-        updatedJeunes.forEach((jeune, index) => {
-            if (index % 1000 === 0) {
-                this.logger.log(`mapping ${format} ${index}/${updatedJeunes.length}`);
-            }
-
+        // Enrichit un jeune avec ses données liées puis le mappe vers la ligne d'export.
+        // Appelé à la demande pour chaque ligne (jamais tout le dataset en même temps).
+        const mapOne = (jeune: YoungType) => {
             if (jeune.schoolId) {
                 // @ts-ignore
                 jeune.school = schoolsById[jeune.schoolId];
@@ -324,19 +335,25 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             // @ts-ignore
             jeune.emailDeConnexion = jeune.email;
 
-            const mappedJeune =
-                format === "volontaire"
-                    ? this.mapVolontaire(jeune, selectedFields, auteur)
-                    : this.mapInscription(jeune, selectedFields, auteur);
-            result.push(mappedJeune);
-        });
-
-        this.logger.log(`result ${result.length}`);
-
-        return {
-            columnsName: result.length ? Object.keys(result[0]) : [],
-            values: result.map((item) => Object.values(item)),
+            return format === "volontaire"
+                ? this.mapVolontaire(jeune, selectedFields, auteur)
+                : this.mapInscription(jeune, selectedFields, auteur);
         };
+
+        // Les noms de colonnes sont déduits de la première ligne (jeu de champs identique pour toutes).
+        const columnsName = updatedJeunes.length ? Object.keys(mapOne(updatedJeunes[0])) : [];
+
+        const logger = this.logger;
+        function* rows(): Generator<any[]> {
+            for (let index = 0; index < updatedJeunes.length; index++) {
+                if (index % 1000 === 0) {
+                    logger.log(`mapping ${format} ${index}/${updatedJeunes.length}`);
+                }
+                yield Object.values(mapOne(updatedJeunes[index]));
+            }
+        }
+
+        return { columnsName, rows: rows() };
     }
 
     async retrieveSchools(jeunes: YoungType[]) {

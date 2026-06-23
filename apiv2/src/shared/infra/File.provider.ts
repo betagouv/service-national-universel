@@ -1,7 +1,8 @@
-import { promises as fs } from "fs";
+import { promises as fs, createReadStream } from "fs";
 import { parse, ParserOptionsArgs } from "@fast-csv/parse";
 import { writeToString } from "@fast-csv/format";
 import * as XLSX from "xlsx";
+import * as ExcelJS from "exceljs";
 import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
@@ -82,6 +83,50 @@ export class FileProvider implements FileGateway {
         return XLSX.write(wb, { bookType: "xlsx", type: "buffer" });
     }
 
+    async generateExcelToFileFromRows({
+        filePath,
+        columnsName,
+        rows,
+        sheetName = "data",
+    }: {
+        filePath: string;
+        columnsName: string[];
+        rows: Iterable<any[]> | AsyncIterable<any[]>;
+        sheetName?: string;
+    }): Promise<void> {
+        // WorkbookWriter écrit les lignes au fil de l'eau sur disque : la mémoire reste bornée,
+        // contrairement à XLSX.write qui matérialise tout le classeur en RAM.
+        const workbook = new ExcelJS.stream.xlsx.WorkbookWriter({
+            filename: filePath,
+            useStyles: false,
+            useSharedStrings: false,
+        });
+        const worksheet = workbook.addWorksheet(sheetName);
+
+        try {
+            worksheet.addRow(columnsName).commit();
+            let count = 0;
+            for await (const row of rows) {
+                // exceljs sérialise une cellule à valeur tableau en JSON (`["a","b"]`) et un
+                // tableau vide en `"[]"`. On joint donc les tableaux pour garder un rendu texte.
+                worksheet.addRow(row.map((cell) => (Array.isArray(cell) ? cell.join(", ") : cell))).commit();
+                count++;
+                if (count % 1000 === 0) {
+                    this.logger.log(`generateExcelToFileFromRows: ${count} rows written`);
+                }
+            }
+
+            await worksheet.commit();
+            await workbook.commit();
+            this.logger.log(`generateExcelToFileFromRows: done (${count} rows) -> ${filePath}`);
+        } catch (error) {
+            // Erreur en plein flux : le WorkbookWriter n'est pas finalisé (pas de commit()).
+            // On détruit le flux fichier sous-jacent pour ne pas fuiter de descripteur.
+            (workbook as unknown as { stream?: { destroy?: () => void } }).stream?.destroy?.();
+            throw error;
+        }
+    }
+
     async uploadFile(
         path: string,
         file: { data: Buffer; encoding?: string; mimetype: string },
@@ -101,6 +146,37 @@ export class FileProvider implements FileGateway {
             Bucket: bucket,
             Key: cleanPath,
             Body: file.data,
+            ContentEncoding: file.encoding || "",
+            ContentType: file.mimetype,
+            Metadata: { "Cache-Control": "max-age=31536000" },
+            ...options,
+        };
+
+        return s3bucket.upload(params).promise();
+    }
+
+    async uploadFileFromPath(
+        path: string,
+        localFilePath: string,
+        file: { encoding?: string; mimetype: string },
+        options: {
+            ACL?: "private" | "public-read";
+        } = {},
+    ): Promise<AWS.S3.ManagedUpload.SendData> {
+        const bucket = this.config.getOrThrow("bucket.name");
+        const endpoint = this.config.getOrThrow("bucket.endpoint");
+        const accessKeyId = this.config.getOrThrow("bucket.accessKeyId");
+        const secretAccessKey = this.config.getOrThrow("bucket.secretAccessKey");
+
+        const cleanPath = cleanFileNamePath(path);
+
+        const s3bucket = new AWS.S3({ endpoint, accessKeyId, secretAccessKey });
+        // Body en ReadStream : l'upload S3 (multipart) lit le fichier au fil de l'eau,
+        // le buffer complet n'est jamais en mémoire.
+        const params: AWS.S3.Types.PutObjectRequest = {
+            Bucket: bucket,
+            Key: cleanPath,
+            Body: createReadStream(localFilePath),
             ContentEncoding: file.encoding || "",
             ContentType: file.mimetype,
             Metadata: { "Cache-Control": "max-age=31536000" },
