@@ -39,7 +39,7 @@ async function runAPI() {
   }
 
   await Promise.all([initDB(), initRedisClient(), initVirusScanner()]);
-
+//
   /*
     Download all certificate templates when instance is starting,
     making them available for PDF generation
