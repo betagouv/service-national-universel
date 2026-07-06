@@ -2,8 +2,9 @@ name: Anonymize (CRON)
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: "23 2 * * 3" # Every wednesday at 02:23 UTC
+  # Temporarily disabled.
+  # schedule:
+  #   - cron: "23 2 * * 3" # Every wednesday at 02:23 UTC
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
