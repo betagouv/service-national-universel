@@ -27,4 +27,49 @@ function formatProgress(done, totals, width = 30) {
   );
 }
 
-module.exports = { formatProgress };
+/** Extrait un email d'un item : chaîne, ou objet { email } (format du fichier d'erreurs JSONL). */
+function extractEmail(item) {
+  if (typeof item === "string") return item;
+  if (item && typeof item === "object" && typeof item.email === "string") return item.email;
+  return null;
+}
+
+/** dedup + trim + minuscules (les contacts support sont stockés en minuscules). */
+function normalizeEmails(emails) {
+  return [...new Set(emails.map((e) => String(e).trim().toLowerCase()).filter((e) => e.length > 0))];
+}
+
+/**
+ * Parse le contenu d'un fichier d'emails, tolérant à 3 formats :
+ *   - tableau JSON : ["a@x", "b@y"]
+ *   - objet { "emails": [...] }
+ *   - JSONL { "email", "reason" } par ligne (re-run depuis ERRORS_FILE)
+ * Permet de relancer directement la purge sur le fichier d'erreurs généré.
+ */
+function loadEmailsFromContent(content) {
+  const trimmed = String(content).trim();
+  if (!trimmed) return [];
+
+  try {
+    const raw = JSON.parse(trimmed);
+    const items = Array.isArray(raw) ? raw : Array.isArray(raw && raw.emails) ? raw.emails : [raw];
+    return normalizeEmails(items.map(extractEmail).filter((e) => e !== null));
+  } catch {
+    // Pas du JSON valide → tenter du JSONL (une entrée par ligne).
+    const fromJsonl = trimmed
+      .split("\n")
+      .map((line) => line.trim())
+      .filter((line) => line.length > 0)
+      .flatMap((line) => {
+        try {
+          const email = extractEmail(JSON.parse(line));
+          return email ? [email] : [];
+        } catch {
+          return [];
+        }
+      });
+    return normalizeEmails(fromJsonl);
+  }
+}
+
+module.exports = { formatProgress, loadEmailsFromContent };

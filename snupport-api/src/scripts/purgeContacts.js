@@ -5,17 +5,24 @@
  * Aligné sur le « on ne garde rien » du jeune côté SNU : on supprime réellement les
  * enregistrements, on ne masque pas.
  *
- * Entrée : un fichier JSON = tableau d'emails (jeune + parents), exporté côté SNU
+ * Entrée : un fichier (JSON ou JSONL) d'emails (jeune + parents), exporté côté SNU
  * AVANT l'anonymisation SNU (sinon les emails y sont déjà masqués). Chemin via
  * EMAILS_FILE (défaut ./emails.json). Le Contact support est clé par email.
+ *
+ * Résilience : une erreur sur UN email (ex. clé S3 introuvable) n'arrête pas le
+ * lot — l'email fautif est journalisé en JSONL dans ERRORS_FILE et le script
+ * poursuit, puis sort en code non-zéro s'il reste des erreurs. Le fichier
+ * d'erreurs est réinjectable tel quel via EMAILS_FILE (re-run des seuls échecs).
  *
  * PRÉREQUIS : mongodump du Mongo support AVANT exécution (irréversible).
  *
  * Usage (depuis snupport-api/) :
  *   DRY_RUN=true EMAILS_FILE=./emails.json node src/scripts/purgeContacts.js   # aperçu (compte, aucune écriture)
  *   EMAILS_FILE=./emails.json node src/scripts/purgeContacts.js                # exécution
+ *   EMAILS_FILE=./purge-contacts-errors.json node src/scripts/purgeContacts.js # re-run des échecs
  */
 require("../mongo");
+const fs = require("fs");
 const path = require("path");
 
 const ContactModel = require("../models/contact");
@@ -23,7 +30,7 @@ const TicketModel = require("../models/ticket");
 const MessageModel = require("../models/message");
 const { deleteFile } = require("../utils");
 const { filePathsOf } = require("../utils/messageAttachments");
-const { formatProgress } = require("./purgeContacts.helpers");
+const { formatProgress, loadEmailsFromContent } = require("./purgeContacts.helpers");
 
 const DRY_RUN_RAW = process.env.DRY_RUN;
 // Fail-fast : DRY_RUN=1 / TRUE / yes serait silencieusement un run RÉEL destructif.
@@ -34,12 +41,18 @@ if (DRY_RUN_RAW !== undefined && !["true", "false"].includes(DRY_RUN_RAW)) {
 }
 const DRY_RUN = DRY_RUN_RAW === "true";
 const EMAILS_FILE = process.env.EMAILS_FILE || "./emails.json";
+const ERRORS_FILE = process.env.ERRORS_FILE || "./purge-contacts-errors.json";
 
 function loadEmails() {
-  const raw = require(path.resolve(EMAILS_FILE));
-  const emails = (Array.isArray(raw) ? raw : raw.emails) || [];
-  // dedup + minuscules (les contacts support sont stockés en minuscules)
-  return [...new Set(emails.filter(Boolean).map((e) => String(e).trim().toLowerCase()))];
+  return loadEmailsFromContent(fs.readFileSync(path.resolve(EMAILS_FILE), "utf8"));
+}
+
+function ensureErrorsFileExists(filePath) {
+  if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, "", { mode: 0o600 });
+}
+
+function appendErrorEntry(filePath, entry) {
+  fs.appendFileSync(filePath, `${JSON.stringify(entry)}\n`, { mode: 0o600 });
 }
 
 // Retrouve le contact + ses tickets pour un email. Tickets par email ET par
@@ -148,7 +161,7 @@ async function main() {
         2
       )
     );
-    return;
+    return 0;
   }
 
   // --- Suppression réelle, barre de progression « par objet » ---
@@ -160,17 +173,34 @@ async function main() {
   };
   renderProgress();
 
+  const errorsPath = path.resolve(ERRORS_FILE);
+  ensureErrorsFileExists(errorsPath);
+  let errors = 0;
+
   for (const email of emails) {
-    await purgeByEmail(email, stats, renderProgress);
+    try {
+      await purgeByEmail(email, stats, renderProgress);
+    } catch (e) {
+      // Isolation par email : on journalise l'échec et on poursuit le lot.
+      // La suppression étant ordonnée (contact en DERNIER), le fichier d'erreurs
+      // est réinjectable via EMAILS_FILE pour reprendre proprement les échecs.
+      errors++;
+      appendErrorEntry(errorsPath, { email, reason: (e && e.message) || String(e) });
+      if (showProgress) process.stdout.write("\n");
+      // eslint-disable-next-line no-console
+      console.error(`Erreur sur ${email} : ${(e && e.message) || String(e)}`);
+      renderProgress();
+    }
   }
   if (showProgress) process.stdout.write("\n");
 
   // eslint-disable-next-line no-console
-  console.log(JSON.stringify({ ok: true, dryRun: false, emails: emails.length, ...stats }, null, 2));
+  console.log(JSON.stringify({ ok: errors === 0, dryRun: false, emails: emails.length, ...stats, errors, ...(errors > 0 ? { errorsFile: ERRORS_FILE } : {}) }, null, 2));
+  return errors;
 }
 
 main()
-  .then(() => process.exit(0))
+  .then((errors) => process.exit(errors > 0 ? 1 : 0))
   .catch((e) => {
     // eslint-disable-next-line no-console
     console.error(e);
