@@ -3,7 +3,7 @@ const { logger } = require("../src/logger");
 const { CohortModel, CohortGroupModel } = require("../src/models");
 
 // Cohortes 2024 archivées seulement partiellement (exceptions à l'archivage total).
-const PARTIAL_EXCEPTIONS = ["Toussaint 2024", "Toussaint 2024 - La Réunion"];
+const PARTIAL_EXCEPTIONS = ["Toussaint 2024", "Toussaint 2024 - La Réunion", "2024 CLE 05", "2024 CLE 06 - Novembre"];
 
 // Résout les ids des groupes de cohortes d'une année donnée.
 // cohortGroupId est stocké en String côté cohorte -> on convertit les ObjectId.

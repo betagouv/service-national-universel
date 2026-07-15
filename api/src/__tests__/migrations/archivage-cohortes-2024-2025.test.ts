@@ -32,7 +32,7 @@ async function createCohort(name: string, groupId?: any) {
 const statusOf = async (id: any) => (await CohortModel.findById(id))?.status;
 
 describe("Migration archivage cohortes 2024/2025", () => {
-  it("up() : total pour 2024, partiel pour 2025, exceptions Toussaint en partiel, hors-périmètre inchangé", async () => {
+  it("up() : total pour 2024, partiel pour 2025, exceptions 2024 en partiel, hors-périmètre inchangé", async () => {
     const cle2024 = await createGroup("CLE 2024", 2024);
     const hts2024 = await createGroup("HTS 2024", 2024);
     const cle2025 = await createGroup("CLE 2025", 2025);
@@ -42,9 +42,11 @@ describe("Migration archivage cohortes 2024/2025", () => {
     // 2024 -> FULLY_ARCHIVED (dont CLE 23-24 dont le nom ne contient pas "2024")
     const fev2024 = await createCohort("Février 2024 - A", hts2024._id);
     const cle2324 = await createCohort("CLE 23-24", cle2024._id);
-    // Exceptions Toussaint (groupe 2024) -> ARCHIVED
+    // Exceptions (groupe 2024) -> ARCHIVED
     const toussaint = await createCohort("Toussaint 2024", hts2024._id);
     const toussaintReunion = await createCohort("Toussaint 2024 - La Réunion", hts2024._id);
+    const cle05 = await createCohort("2024 CLE 05", cle2024._id);
+    const cle06 = await createCohort("2024 CLE 06 - Novembre", cle2024._id);
     // 2025 -> ARCHIVED
     const juin2025 = await createCohort("2025 HTS 03 - Juin", hts2025._id);
     const cleJanv2025 = await createCohort("2025 CLE 01 - Janvier", cle2025._id);
@@ -57,6 +59,8 @@ describe("Migration archivage cohortes 2024/2025", () => {
     expect(await statusOf(cle2324._id)).toBe(COHORT_STATUS.FULLY_ARCHIVED);
     expect(await statusOf(toussaint._id)).toBe(COHORT_STATUS.ARCHIVED);
     expect(await statusOf(toussaintReunion._id)).toBe(COHORT_STATUS.ARCHIVED);
+    expect(await statusOf(cle05._id)).toBe(COHORT_STATUS.ARCHIVED);
+    expect(await statusOf(cle06._id)).toBe(COHORT_STATUS.ARCHIVED);
     expect(await statusOf(juin2025._id)).toBe(COHORT_STATUS.ARCHIVED);
     expect(await statusOf(cleJanv2025._id)).toBe(COHORT_STATUS.ARCHIVED);
     expect(await statusOf(aVenir._id)).toBe(COHORT_STATUS.PUBLISHED);
