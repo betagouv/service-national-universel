@@ -77,6 +77,18 @@ describe("colonnes", () => {
   it("modèle lié = youngEmail en tête puis champs", () => {
     expect(modelColumns("classe")).toEqual(["youngEmail", "department", "filiere", "grade", "grades", "schoolYear"]);
   });
+  it("modelColumns('application') : youngEmail unique et en tête (déduplication)", () => {
+    const cols = modelColumns("application");
+    expect(cols[0]).toBe("youngEmail");
+    expect(cols.filter((c) => c === "youngEmail")).toHaveLength(1);
+    expect(new Set(cols).size).toBe(cols.length); // aucune colonne dupliquée
+    expect(cols).toEqual([
+      "youngEmail", "createdAt", "feedBackExperienceFiles", "hidden", "isJvaMission",
+      "missionDepartment", "missionDuration", "missionName", "missionRegion", "priority",
+      "status", "updatedAt", "youngBirthdateAt", "youngCity", "youngCohort",
+      "youngDepartment", "youngFirstName",
+    ]);
+  });
 });
 
 describe("buildRow", () => {

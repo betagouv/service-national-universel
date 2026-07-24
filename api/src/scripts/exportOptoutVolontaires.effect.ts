@@ -134,7 +134,11 @@ async function run(): Promise<void> {
     try { fs.chmodSync(path.resolve(OUT_FILE), 0o600); } catch { /* best-effort */ }
   } catch (e) {
     // Échec/interruption : jamais de fichier partiel visible sous OUT_FILE ni sous le temporaire.
-    if (fs.existsSync(path.resolve(tmpOut))) fs.unlinkSync(path.resolve(tmpOut));
+    try {
+      if (fs.existsSync(path.resolve(tmpOut))) fs.unlinkSync(path.resolve(tmpOut));
+    } catch {
+      /* best-effort : ne pas masquer l'erreur d'origine */
+    }
     throw e;
   }
 
