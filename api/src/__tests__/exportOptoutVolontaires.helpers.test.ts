@@ -1,4 +1,5 @@
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
+import { normalizeEmail, chunk, getByPath, toCell, buildProjection } from "../scripts/exportOptoutVolontaires.helpers";
 
 describe("exportOptoutVolontaires.fields", () => {
   it("couvre exactement les 7 modèles liés, sans area ni importplandetransport", () => {
@@ -20,5 +21,46 @@ describe("exportOptoutVolontaires.fields", () => {
 
   it("expose les 4 champs représentants légaux", () => {
     expect(YOUNG_REPRESENTATIVE_FIELDS).toEqual(["parent1Email", "parent1FirstName", "parent2Email", "parent2FirstName"]);
+  });
+});
+
+describe("normalizeEmail", () => {
+  it("trim + lowercase", () => expect(normalizeEmail("  Foo@Bar.FR ")).toBe("foo@bar.fr"));
+  it("non-string -> ''", () => expect(normalizeEmail(undefined)).toBe(""));
+});
+
+describe("chunk", () => {
+  it("découpe par taille", () => expect(chunk([1, 2, 3, 4, 5], 2)).toEqual([[1, 2], [3, 4], [5]]));
+  it("tableau vide -> []", () => expect(chunk([], 3)).toEqual([]));
+});
+
+describe("getByPath", () => {
+  it("chemin simple", () => expect(getByPath({ a: 1 }, "a")).toBe(1));
+  it("chemin imbriqué", () => expect(getByPath({ location: { lat: 48.8 } }, "location.lat")).toBe(48.8));
+  it("segment manquant -> undefined", () => expect(getByPath({}, "location.lat")).toBeUndefined());
+});
+
+describe("toCell", () => {
+  it("passe les primitives", () => {
+    expect(toCell("x")).toBe("x");
+    expect(toCell(3)).toBe(3);
+    expect(toCell(true)).toBe(true);
+    const d = new Date("2024-01-01"); expect(toCell(d)).toBe(d);
+  });
+  it("null/undefined -> null", () => { expect(toCell(null)).toBeNull(); expect(toCell(undefined)).toBeNull(); });
+  it("tableau/objet -> JSON", () => {
+    expect(toCell(["a", "b"])).toBe('["a","b"]');
+    expect(toCell({ k: 1 })).toBe('{"k":1}');
+  });
+  it("plafonne à 32767 caractères", () => {
+    const big = "a".repeat(40000);
+    const out = toCell(big) as string;
+    expect(out.length).toBe(32767);
+  });
+});
+
+describe("buildProjection", () => {
+  it("réduit les chemins au 1er segment", () => {
+    expect(buildProjection(["email", "location.lat", "location.lon"])).toEqual({ email: 1, location: 1 });
   });
 });
