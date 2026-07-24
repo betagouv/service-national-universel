@@ -1,5 +1,10 @@
+import { tmpdir } from "os";
+import { join } from "path";
+import * as fs from "fs";
+import * as XLSX from "xlsx";
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
 import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow } from "../scripts/exportOptoutVolontaires.helpers";
+import { createExportWorkbook } from "../scripts/exportOptoutVolontaires.workbook";
 
 describe("exportOptoutVolontaires.fields", () => {
   it("couvre exactement les 7 modèles liés, sans area ni importplandetransport", () => {
@@ -90,5 +95,27 @@ describe("buildRow", () => {
     expect(row.youngEmail).toBe("a@b.fr");
     expect(row.name).toBe("Mission X");
     expect(row["location.lat"]).toBe(48.8);
+  });
+});
+
+describe("createExportWorkbook (streaming round-trip)", () => {
+  it("écrit des onglets relisibles avec les bonnes valeurs", async () => {
+    const out = join(tmpdir(), `export-test-${process.pid}.xlsx`);
+    const wb = createExportWorkbook(out);
+    wb.openSheet("Young", ["email", "firstName"]);
+    wb.openSheet("Classe", ["youngEmail", "department"]);
+    wb.writeRow("Young", { email: "a@b.fr", firstName: "Léa" });
+    wb.writeRow("Classe", { youngEmail: "a@b.fr", department: "75" });
+    await wb.commitSheet("Young");
+    await wb.commitSheet("Classe");
+    await wb.commit();
+
+    const read = XLSX.readFile(out);
+    expect(read.SheetNames).toEqual(["Young", "Classe"]);
+    const young = XLSX.utils.sheet_to_json(read.Sheets.Young);
+    expect(young).toEqual([{ email: "a@b.fr", firstName: "Léa" }]);
+    const classe = XLSX.utils.sheet_to_json(read.Sheets.Classe);
+    expect(classe).toEqual([{ youngEmail: "a@b.fr", department: "75" }]);
+    fs.unlinkSync(out);
   });
 });
