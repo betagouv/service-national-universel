@@ -54,7 +54,13 @@ const addTo = (map: Map<string, Set<string>>, key: unknown, email: string) => {
 };
 
 async function run(): Promise<void> {
+  if (!Number.isInteger(CHUNK) || CHUNK <= 0) {
+    throw new Error(`CHUNK invalide: "${process.env.CHUNK}" — attendu un entier > 0.`);
+  }
   const emails = readEmails(EMAILS_FILE);
+  if (emails.length === 0) {
+    throw new Error("Aucun email lu — vérifier EMAILS_FILE et l'en-tête de colonne 'EMAIL'.");
+  }
   logger.info(`Emails à traiter: ${emails.length} (fichier ${EMAILS_FILE}${LIMIT ? `, LIMIT=${LIMIT}` : ""})`);
 
   const counts: Record<string, number> = { Young: 0, Application: 0, MissionEquivalence: 0, Mission: 0, Etablissement: 0, Classe: 0, MissionAPI: 0 };

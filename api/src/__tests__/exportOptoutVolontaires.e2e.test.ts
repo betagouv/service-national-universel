@@ -138,3 +138,68 @@ describe("exportOptoutVolontaires e2e (offline, local test mongo)", () => {
     expect(nfContent).not.toContain("e2e-deux@test.fr");
   }, 30000);
 });
+
+// NOTE: contrairement au describe ci-dessus, ces deux tests utilisent `jest.isolateModules`
+// pour forcer une ré-évaluation fraîche du module à chaque test (les consts EMAILS_FILE/OUT_FILE/
+// CHUNK sont lues une seule fois, au premier chargement du module -- il faut donc un rechargement
+// par test pour que chacun voie ses propres env vars). C'est sûr ici seulement parce que les deux
+// gardes testées lèvent AVANT toute requête Mongo (cf. tête de fichier : un module fraîchement
+// isolé récupère un mongoose déconnecté, ce qui ferait "hang" une vraie requête -- mais on n'en
+// atteint jamais une dans ces deux tests).
+describe("run() garde-fous d'entrée", () => {
+  it("rejette quand le fichier d'emails est vide (en-tête seul)", async () => {
+    const emptyEmailsPath = join(tmpdir(), `e2e-guard-empty-emails-${process.pid}.xlsx`);
+    const guardOutPath = join(tmpdir(), `e2e-guard-empty-out-${process.pid}.xlsx`);
+    try {
+      const ws = XLSX.utils.aoa_to_sheet([["EMAIL"]]);
+      const wbIn = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wbIn, ws, "Sheet1");
+      XLSX.writeFile(wbIn, emptyEmailsPath);
+
+      process.env.EMAILS_FILE = emptyEmailsPath;
+      process.env.OUT_FILE = guardOutPath;
+      process.env.CHUNK = "1000";
+      delete process.env.LIMIT;
+      delete process.env.DRY_RUN;
+
+      let run: any;
+      jest.isolateModules(() => {
+        ({ run } = require("../scripts/exportOptoutVolontaires.effect"));
+      });
+
+      await expect(run()).rejects.toThrow(/Aucun email lu/);
+      expect(fs.existsSync(guardOutPath)).toBe(false);
+    } finally {
+      try { fs.unlinkSync(emptyEmailsPath); } catch { /* best-effort */ }
+      try { if (fs.existsSync(guardOutPath)) fs.unlinkSync(guardOutPath); } catch { /* best-effort */ }
+    }
+  });
+
+  it("rejette quand CHUNK n'est pas un entier positif", async () => {
+    const emailsPath = join(tmpdir(), `e2e-guard-chunk-emails-${process.pid}.xlsx`);
+    const guardOutPath = join(tmpdir(), `e2e-guard-chunk-out-${process.pid}.xlsx`);
+    try {
+      const ws = XLSX.utils.aoa_to_sheet([["EMAIL"], ["guard-chunk@test.fr"]]);
+      const wbIn = XLSX.utils.book_new();
+      XLSX.utils.book_append_sheet(wbIn, ws, "Sheet1");
+      XLSX.writeFile(wbIn, emailsPath);
+
+      process.env.EMAILS_FILE = emailsPath;
+      process.env.OUT_FILE = guardOutPath;
+      process.env.CHUNK = "0";
+      delete process.env.LIMIT;
+      delete process.env.DRY_RUN;
+
+      let run: any;
+      jest.isolateModules(() => {
+        ({ run } = require("../scripts/exportOptoutVolontaires.effect"));
+      });
+
+      await expect(run()).rejects.toThrow(/CHUNK invalide/);
+      expect(fs.existsSync(guardOutPath)).toBe(false);
+    } finally {
+      try { fs.unlinkSync(emailsPath); } catch { /* best-effort */ }
+      try { if (fs.existsSync(guardOutPath)) fs.unlinkSync(guardOutPath); } catch { /* best-effort */ }
+    }
+  });
+});
