@@ -37,7 +37,12 @@ export function youngColumns(): string[] {
 }
 
 export function modelColumns(model: Exclude<keyof typeof MODEL_FIELDS, "young">): string[] {
-  return ["youngEmail", ...MODEL_FIELDS[model]];
+  // "youngEmail" est toujours la 1ère colonne (clé de jointure). Pour "application", le
+  // dictionnaire liste aussi "youngEmail" comme champ propre (cf. exportOptoutVolontaires.fields.ts)
+  // : sans ce filtre, la colonne apparaîtrait deux fois. ExcelJS ne supporte pas deux colonnes avec
+  // la même clé (la 1ère ne reçoit alors jamais de valeur, la 2e est renommée "youngEmail_1" à la
+  // relecture SheetJS) — on déduplique donc pour garantir une seule colonne "youngEmail" par onglet.
+  return ["youngEmail", ...MODEL_FIELDS[model].filter((f) => f !== "youngEmail")];
 }
 
 export function buildRow(doc: Record<string, any>, columns: string[]): Record<string, string | number | boolean | Date | null> {
