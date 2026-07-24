@@ -1,10 +1,13 @@
 import { YoungModel, ApplicationModel, MissionEquivalenceModel, MissionModel, EtablissementModel, ClasseModel, MissionAPIModel } from "../models";
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS } from "./exportOptoutVolontaires.fields";
-import { chunk, buildProjection } from "./exportOptoutVolontaires.helpers";
+import { chunk, buildProjection, isObjectIdString } from "./exportOptoutVolontaires.helpers";
 
 async function findByIn(model: any, field: string, values: string[], projection: Record<string, 1>, chunkSize: number): Promise<any[]> {
+  // Requête par `_id` (ObjectId) : on écarte toute valeur non-ObjectId — sinon Mongoose
+  // lève une CastError qui rejette la requête entière (garde-fou, cf. isObjectIdString).
+  const safeValues = field === "_id" ? values.filter(isObjectIdString) : values;
   const out: any[] = [];
-  for (const part of chunk(values, chunkSize)) {
+  for (const part of chunk(safeValues, chunkSize)) {
     if (part.length === 0) continue;
     const docs = await model.find({ [field]: { $in: part } }, projection).lean(); // lecture seule
     out.push(...docs);

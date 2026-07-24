@@ -1,6 +1,7 @@
 import { dbConnect, dbClose } from "./helpers/db";
-import { YoungModel, ApplicationModel } from "../models";
-import { findYoungsByEmails, findApplicationsByYoungIds } from "../scripts/exportOptoutVolontaires.queries";
+import { YoungModel, ApplicationModel, MissionModel } from "../models";
+import getNewMissionFixture from "./fixtures/mission";
+import { findYoungsByEmails, findApplicationsByYoungIds, findMissionsByIds, findClassesByIds } from "../scripts/exportOptoutVolontaires.queries";
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -25,5 +26,19 @@ describe("queries export opt-out (lecture seule)", () => {
     expect(res.map((r: any) => r.missionId)).toContain("MID1");
     await ApplicationModel.deleteOne({ _id: a._id });
     await YoungModel.deleteOne({ _id: y._id });
+  });
+
+  // Régression : en prod, missionId/classeId/etablissementId/apiEngagementId sont typés String
+  // et contiennent des valeurs non-ObjectId (legacy/JVA/vides). Sans garde-fou, un tel id dans un
+  // `_id: { $in }` lève une CastError Mongoose qui rejette TOUTE la requête (crash phase B).
+  it("findMissionsByIds ignore les ids non-ObjectId (garde-fou CastError) et conserve les valides", async () => {
+    const m = await MissionModel.create({ ...getNewMissionFixture(), name: "Mission RO" });
+    const res = await findMissionsByIds([String(m._id), "MID1", "", "not-an-objectid"], 1000);
+    expect(res.map((r: any) => String(r._id))).toEqual([String(m._id)]);
+    await MissionModel.deleteOne({ _id: m._id });
+  });
+
+  it("findClassesByIds ne lève pas sur des ids non-ObjectId (renvoie [])", async () => {
+    await expect(findClassesByIds(["not-an-objectid", "MID1"], 1000)).resolves.toEqual([]);
   });
 });

@@ -32,6 +32,15 @@ export function buildProjection(fields: string[]): Record<string, 1> {
   return proj;
 }
 
+// Vrai si `value` a la forme d'un ObjectId stocké (hex 24 caractères). Les champs de
+// jointure `application.missionId`, `young.classeId/etablissementId` et
+// `mission.apiEngagementId` sont typés String et peuvent contenir des valeurs non-ObjectId
+// (legacy, JVA, id d'un autre format). Les passer tels quels à une requête `_id: { $in }`
+// déclenche une CastError Mongoose qui rejette TOUTE la requête → on filtre en amont.
+export function isObjectIdString(value: unknown): boolean {
+  return typeof value === "string" && /^[0-9a-fA-F]{24}$/.test(value);
+}
+
 export function youngColumns(): string[] {
   return [...MODEL_FIELDS.young, ...YOUNG_REPRESENTATIVE_FIELDS];
 }

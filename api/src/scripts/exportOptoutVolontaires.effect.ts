@@ -20,7 +20,7 @@ import { Effect } from "effect";
 import { initDB, closeDB } from "../mongo";
 import { logger } from "../logger";
 import { EXPORT_MODELS } from "./exportOptoutVolontaires.fields";
-import { normalizeEmail, youngColumns, modelColumns, buildRow } from "./exportOptoutVolontaires.helpers";
+import { normalizeEmail, youngColumns, modelColumns, buildRow, isObjectIdString } from "./exportOptoutVolontaires.helpers";
 import { createExportWorkbook } from "./exportOptoutVolontaires.workbook";
 import {
   findYoungsByEmails, findApplicationsByYoungIds, findEquivalencesByYoungIds,
@@ -51,6 +51,18 @@ const addTo = (map: Map<string, Set<string>>, key: unknown, email: string) => {
   if (!key) return;
   const k = String(key);
   (map.get(k) ?? map.set(k, new Set()).get(k)!).add(email);
+};
+
+// Ne conserve que les références au format ObjectId et logue celles écartées (non-ObjectId :
+// legacy/JVA/autre format). Les requêtes `_id: { $in }` de la phase B lèveraient sinon une
+// CastError qui rejette toute la requête. Une référence non-ObjectId ne peut de toute façon
+// correspondre à aucun `_id` : la journaliser (pas de silence) et l'ignorer est correct.
+const validRefs = (label: string, ids: string[]): string[] => {
+  const valid = ids.filter(isObjectIdString);
+  if (valid.length < ids.length) {
+    logger.info(`${label}: ${ids.length - valid.length} référence(s) non-ObjectId ignorée(s) sur ${ids.length}`);
+  }
+  return valid;
 };
 
 async function run(): Promise<void> {
@@ -114,21 +126,21 @@ async function run(): Promise<void> {
 
     // --- Phase B : onglets référentiels dédupliqués ---
     const apiEmails = new Map<string, Set<string>>();
-    for (const m of await findMissionsByIds([...missionEmails.keys()], CHUNK)) {
+    for (const m of await findMissionsByIds(validRefs("Mission", [...missionEmails.keys()]), CHUNK)) {
       const emailsForMission = [...(missionEmails.get(String(m._id)) ?? new Set())];
       wb.writeRow(SHEET.mission, buildRow({ ...m, youngEmail: emailsForMission.join("; ") }, modelColumns("mission")));
       counts.Mission++;
       if (m.apiEngagementId) for (const em of emailsForMission) addTo(apiEmails, m.apiEngagementId, em);
     }
-    for (const c of await findClassesByIds([...classeEmails.keys()], CHUNK)) {
+    for (const c of await findClassesByIds(validRefs("Classe", [...classeEmails.keys()]), CHUNK)) {
       wb.writeRow(SHEET.classe, buildRow({ ...c, youngEmail: [...(classeEmails.get(String(c._id)) ?? [])].join("; ") }, modelColumns("classe")));
       counts.Classe++;
     }
-    for (const et of await findEtablissementsByIds([...etabEmails.keys()], CHUNK)) {
+    for (const et of await findEtablissementsByIds(validRefs("Etablissement", [...etabEmails.keys()]), CHUNK)) {
       wb.writeRow(SHEET.etablissement, buildRow({ ...et, youngEmail: [...(etabEmails.get(String(et._id)) ?? [])].join("; ") }, modelColumns("etablissement")));
       counts.Etablissement++;
     }
-    for (const ma of await findMissionAPIByIds([...apiEmails.keys()], CHUNK)) {
+    for (const ma of await findMissionAPIByIds(validRefs("MissionAPI", [...apiEmails.keys()]), CHUNK)) {
       wb.writeRow(SHEET.missionAPI, buildRow({ ...ma, youngEmail: [...(apiEmails.get(String(ma._id)) ?? [])].join("; ") }, modelColumns("missionAPI")));
       counts.MissionAPI++;
     }
@@ -175,7 +187,13 @@ const main = Effect.acquireUseRelease(
 if (require.main === module) {
   Effect.runPromise(main)
     .then(() => process.exit(0))
-    .catch((e) => { logger.error(e); process.exit(1); });
+    .catch((e) => {
+      // `logger.error(e)` sérialise le FiberFailure Effect en `{"name":"UnknownException"}`
+      // et masque la cause. `console.error(e)` en rend l'arbre complet (erreur réelle + stack).
+      logger.error("Export échoué — détail ci-dessous :");
+      console.error(e);
+      process.exit(1);
+    });
 }
 
 export { main, run, readEmails };

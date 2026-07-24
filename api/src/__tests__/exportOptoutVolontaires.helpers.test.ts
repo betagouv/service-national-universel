@@ -3,7 +3,7 @@ import { join } from "path";
 import * as fs from "fs";
 import * as XLSX from "xlsx";
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
-import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow } from "../scripts/exportOptoutVolontaires.helpers";
+import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow, isObjectIdString } from "../scripts/exportOptoutVolontaires.helpers";
 import { createExportWorkbook } from "../scripts/exportOptoutVolontaires.workbook";
 
 describe("exportOptoutVolontaires.fields", () => {
@@ -129,5 +129,22 @@ describe("createExportWorkbook (streaming round-trip)", () => {
     const classe = XLSX.utils.sheet_to_json(read.Sheets.Classe);
     expect(classe).toEqual([{ youngEmail: "a@b.fr", department: "75" }]);
     fs.unlinkSync(out);
+  });
+});
+
+describe("isObjectIdString", () => {
+  it("accepte une chaîne hex 24 caractères (forme ObjectId)", () => {
+    expect(isObjectIdString("507f1f77bcf86cd799439011")).toBe(true);
+    expect(isObjectIdString("AAAAAAAAAAAAAAAAAAAAAAAA")).toBe(true);
+  });
+  it("rejette les valeurs non-ObjectId (legacy/JVA/vide/mauvaise longueur/non-string)", () => {
+    expect(isObjectIdString("MID1")).toBe(false);
+    expect(isObjectIdString("")).toBe(false);
+    expect(isObjectIdString("507f1f77bcf86cd79943901")).toBe(false); // 23 car.
+    expect(isObjectIdString("507f1f77bcf86cd799439011x")).toBe(false); // 25 car.
+    expect(isObjectIdString("zzzzzzzzzzzzzzzzzzzzzzzz")).toBe(false); // non-hex
+    expect(isObjectIdString(null)).toBe(false);
+    expect(isObjectIdString(undefined)).toBe(false);
+    expect(isObjectIdString(123)).toBe(false);
   });
 });
