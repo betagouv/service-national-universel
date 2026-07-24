@@ -2,8 +2,8 @@ import { tmpdir } from "os";
 import { join } from "path";
 import * as fs from "fs";
 import * as XLSX from "xlsx";
-import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
-import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow, isObjectIdString, buildRepresentantRows } from "../scripts/exportOptoutVolontaires.helpers";
+import { MODEL_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
+import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow, isObjectIdString } from "../scripts/exportOptoutVolontaires.helpers";
 import { createExportWorkbook } from "../scripts/exportOptoutVolontaires.workbook";
 
 describe("exportOptoutVolontaires.fields", () => {
@@ -22,10 +22,6 @@ describe("exportOptoutVolontaires.fields", () => {
     expect(MODEL_FIELDS.etablissement).toEqual(["academy", "city", "department", "region", "schoolYears", "type", "zip"]);
     expect(MODEL_FIELDS.classe).toEqual(["department", "filiere", "grade", "grades", "schoolYear"]);
     expect(MODEL_FIELDS.missionAPI).toEqual(["adresse", "applicationUrl", "city", "country", "createdAt", "departmentCode", "departmentName", "description", "domain", "endAt", "format", "lastSyncAt", "location.lat", "location.lon", "organizationName", "places", "postalCode", "publisherName", "publisherUrl", "region", "remote", "startAt", "status", "structureName", "title", "updatedAt"]);
-  });
-
-  it("expose les 4 champs représentants légaux", () => {
-    expect(YOUNG_REPRESENTATIVE_FIELDS).toEqual(["parent1Email", "parent1FirstName", "parent2Email", "parent2FirstName"]);
   });
 });
 
@@ -105,25 +101,6 @@ describe("buildRow", () => {
     expect(row.youngEmail).toBe("a@b.fr");
     expect(row.name).toBe("Mission X");
     expect(row["location.lat"]).toBe(48.8);
-  });
-});
-
-describe("buildRepresentantRows", () => {
-  it("une ligne par représentant renseigné : rôle + prénom + email + email du jeune", () => {
-    const y = { parent1FirstName: "Papa", parent1Email: "p1@b.fr", parent2FirstName: "Maman", parent2Email: "p2@b.fr" };
-    expect(buildRepresentantRows(y, "jeune@b.fr")).toEqual([
-      { youngEmail: "jeune@b.fr", role: "Représentant légal 1", firstName: "Papa", email: "p1@b.fr" },
-      { youngEmail: "jeune@b.fr", role: "Représentant légal 2", firstName: "Maman", email: "p2@b.fr" },
-    ]);
-  });
-  it("ignore un représentant sans prénom ni email, garde l'autre (email manquant -> null)", () => {
-    const y = { parent1FirstName: "Papa", parent1Email: "" }; // pas de parent2
-    expect(buildRepresentantRows(y, "jeune@b.fr")).toEqual([
-      { youngEmail: "jeune@b.fr", role: "Représentant légal 1", firstName: "Papa", email: null },
-    ]);
-  });
-  it("young sans aucun représentant -> []", () => {
-    expect(buildRepresentantRows({}, "jeune@b.fr")).toEqual([]);
   });
 });
 

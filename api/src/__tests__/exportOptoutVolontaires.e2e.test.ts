@@ -33,7 +33,7 @@ jest.mock("../brevo", () => ({
 // which would make `run()`'s queries hang against a never-connected connection. A plain first-time
 // `require()` reuses this file's single, already-connected module registry instead.
 
-const EXPECTED_SHEETS = ["Young", "RepresentantsLegaux", "Application", "MissionEquivalence", "Mission", "Etablissement", "Classe", "MissionAPI"];
+const EXPECTED_SHEETS = ["Young", "Application", "MissionEquivalence", "Mission", "Etablissement", "Classe", "MissionAPI"];
 
 describe("exportOptoutVolontaires e2e (offline, local test mongo)", () => {
   let missionId: any;
@@ -118,15 +118,8 @@ describe("exportOptoutVolontaires e2e (offline, local test mongo)", () => {
     expect(youngRows).toHaveLength(2);
     expect(youngRows.map((r) => r.email)).toEqual(expect.arrayContaining(["e2e-un@test.fr", "e2e-deux@test.fr"]));
     const rowUn = youngRows.find((r) => r.email === "e2e-un@test.fr");
-    expect(rowUn?.parent1Email).toBeUndefined(); // les représentants ne sont plus sur l'onglet Young
+    expect(rowUn?.parent1Email).toBeUndefined(); // les représentants légaux ne sont pas exportés
     expect(rowUn?.parent1FirstName).toBeUndefined();
-
-    // Onglet dédié RepresentantsLegaux : une ligne RL1 pour e2e-un (rôle + prénom + email + email jeune).
-    const rlRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(read.Sheets.RepresentantsLegaux);
-    const rl1 = rlRows.find((r) => r.youngEmail === "e2e-un@test.fr" && r.role === "Représentant légal 1");
-    expect(rl1).toBeDefined();
-    expect(rl1?.firstName).toBe("Parent Un");
-    expect(rl1?.email).toBe("p1@test.fr");
 
     const appRows = XLSX.utils.sheet_to_json<Record<string, unknown>>(read.Sheets.Application);
     expect(appRows).toHaveLength(1);

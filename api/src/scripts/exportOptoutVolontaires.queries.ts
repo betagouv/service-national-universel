@@ -1,5 +1,5 @@
 import { YoungModel, ApplicationModel, MissionEquivalenceModel, MissionModel, EtablissementModel, ClasseModel, MissionAPIModel } from "../models";
-import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS } from "./exportOptoutVolontaires.fields";
+import { MODEL_FIELDS } from "./exportOptoutVolontaires.fields";
 import { chunk, buildProjection, isObjectIdString } from "./exportOptoutVolontaires.helpers";
 
 async function findByIn(model: any, field: string, values: string[], projection: Record<string, 1>, chunkSize: number): Promise<any[]> {
@@ -16,7 +16,7 @@ async function findByIn(model: any, field: string, values: string[], projection:
 }
 
 export function findYoungsByEmails(emails: string[], chunkSize: number) {
-  const proj = { ...buildProjection([...MODEL_FIELDS.young, ...YOUNG_REPRESENTATIVE_FIELDS]), _id: 1, classeId: 1, etablissementId: 1 } as Record<string, 1>;
+  const proj = { ...buildProjection([...MODEL_FIELDS.young]), _id: 1, classeId: 1, etablissementId: 1 } as Record<string, 1>;
   return findByIn(YoungModel, "email", emails, proj, chunkSize);
 }
 export function findApplicationsByYoungIds(youngIds: string[], chunkSize: number) {

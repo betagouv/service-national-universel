@@ -14,6 +14,4 @@ export const MODEL_FIELDS: Record<"young" | "application" | "missionEquivalence"
   missionAPI: ["adresse", "applicationUrl", "city", "country", "createdAt", "departmentCode", "departmentName", "description", "domain", "endAt", "format", "lastSyncAt", "location.lat", "location.lon", "organizationName", "places", "postalCode", "publisherName", "publisherUrl", "region", "remote", "startAt", "status", "structureName", "title", "updatedAt"],
 };
 
-export const YOUNG_REPRESENTATIVE_FIELDS: string[] = ["parent1Email", "parent1FirstName", "parent2Email", "parent2FirstName"];
-
 export const EXPORT_MODELS = ["young", "application", "missionEquivalence", "mission", "etablissement", "classe", "missionAPI"] as const;

@@ -14,7 +14,7 @@ describe("queries export opt-out (lecture seule)", () => {
     const res = await findYoungsByEmails(["case@b.fr"], 1000);
     expect(res).toHaveLength(1);
     expect(res[0].firstName).toBe("Léa");
-    expect(res[0].parent1Email).toBe("p1@b.fr");
+    expect(res[0].parent1Email).toBeUndefined(); // parents non projetés (RGPD : représentants non exportés)
     expect(res[0].lastName).toBeUndefined(); // hors projection -> non lu
     await YoungModel.deleteOne({ _id: y._id });
   });

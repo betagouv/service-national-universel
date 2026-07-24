@@ -45,27 +45,6 @@ export function youngColumns(): string[] {
   return [...MODEL_FIELDS.young];
 }
 
-// Colonnes de l'onglet dédié "RepresentantsLegaux" : email du jeune (traçabilité),
-// rôle (indique que c'est un représentant légal et lequel), prénom et email du RL.
-export const REPRESENTANT_COLUMNS = ["youngEmail", "role", "firstName", "email"];
-
-// Une ligne par représentant légal renseigné (parent1/parent2) du jeune. Un représentant
-// sans prénom ni email est ignoré (pas de RL renseigné).
-export function buildRepresentantRows(young: Record<string, any>, youngEmail: string): Array<Record<string, string | null>> {
-  const defs = [
-    { role: "Représentant légal 1", firstName: young.parent1FirstName, email: young.parent1Email },
-    { role: "Représentant légal 2", firstName: young.parent2FirstName, email: young.parent2Email },
-  ];
-  const rows: Array<Record<string, string | null>> = [];
-  for (const d of defs) {
-    const firstName = d.firstName || null;
-    const email = d.email || null;
-    if (!firstName && !email) continue;
-    rows.push({ youngEmail, role: d.role, firstName, email });
-  }
-  return rows;
-}
-
 export function modelColumns(model: Exclude<keyof typeof MODEL_FIELDS, "young">): string[] {
   // "youngEmail" est toujours la 1ère colonne (clé de jointure). Pour "application", le
   // dictionnaire liste aussi "youngEmail" comme champ propre (cf. exportOptoutVolontaires.fields.ts)
