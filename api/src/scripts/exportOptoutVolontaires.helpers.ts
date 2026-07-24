@@ -1,3 +1,5 @@
+import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS } from "./exportOptoutVolontaires.fields";
+
 const EXCEL_CELL_MAX = 32767;
 
 export function normalizeEmail(raw: unknown): string {
@@ -28,4 +30,18 @@ export function buildProjection(fields: string[]): Record<string, 1> {
   const proj: Record<string, 1> = {};
   for (const f of fields) proj[f.split(".")[0]] = 1;
   return proj;
+}
+
+export function youngColumns(): string[] {
+  return [...MODEL_FIELDS.young, ...YOUNG_REPRESENTATIVE_FIELDS];
+}
+
+export function modelColumns(model: Exclude<keyof typeof MODEL_FIELDS, "young">): string[] {
+  return ["youngEmail", ...MODEL_FIELDS[model]];
+}
+
+export function buildRow(doc: Record<string, any>, columns: string[]): Record<string, string | number | boolean | Date | null> {
+  const row: Record<string, string | number | boolean | Date | null> = {};
+  for (const col of columns) row[col] = toCell(getByPath(doc, col));
+  return row;
 }

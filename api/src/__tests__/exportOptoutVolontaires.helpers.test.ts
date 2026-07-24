@@ -1,5 +1,5 @@
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
-import { normalizeEmail, chunk, getByPath, toCell, buildProjection } from "../scripts/exportOptoutVolontaires.helpers";
+import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow } from "../scripts/exportOptoutVolontaires.helpers";
 
 describe("exportOptoutVolontaires.fields", () => {
   it("couvre exactement les 7 modèles liés, sans area ni importplandetransport", () => {
@@ -62,5 +62,33 @@ describe("toCell", () => {
 describe("buildProjection", () => {
   it("réduit les chemins au 1er segment", () => {
     expect(buildProjection(["email", "location.lat", "location.lon"])).toEqual({ email: 1, location: 1 });
+  });
+});
+
+describe("colonnes", () => {
+  it("young = champs young + représentants", () => {
+    expect(youngColumns()).toEqual(["birthdateAt", "domains", "email", "employed", "engaged", "engagedDescription", "engagedStructure", "firstName", "gender", "grade", "qpv", "parent1Email", "parent1FirstName", "parent2Email", "parent2FirstName"]);
+  });
+  it("modèle lié = youngEmail en tête puis champs", () => {
+    expect(modelColumns("classe")).toEqual(["youngEmail", "department", "filiere", "grade", "grades", "schoolYear"]);
+  });
+});
+
+describe("buildRow", () => {
+  it("young : champs plats, imbriqués, tableaux, représentants", () => {
+    const doc = { email: "a@b.fr", firstName: "Léa", domains: ["Défense", "Santé"], parent1Email: "p1@b.fr", parent1FirstName: "Papa", parent2Email: null };
+    const row = buildRow(doc, youngColumns());
+    expect(row.email).toBe("a@b.fr");
+    expect(row.domains).toBe('["Défense","Santé"]');
+    expect(row.parent1FirstName).toBe("Papa");
+    expect(row.parent2Email).toBeNull();
+    expect(row.gender).toBeNull(); // absent -> null
+  });
+  it("modèle : injecte youngEmail + chemin imbriqué location.lat", () => {
+    const doc = { youngEmail: "a@b.fr", name: "Mission X", location: { lat: 48.8, lon: 2.3 } };
+    const row = buildRow(doc, modelColumns("mission"));
+    expect(row.youngEmail).toBe("a@b.fr");
+    expect(row.name).toBe("Mission X");
+    expect(row["location.lat"]).toBe(48.8);
   });
 });
