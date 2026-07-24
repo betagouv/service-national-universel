@@ -20,7 +20,7 @@ import { Effect } from "effect";
 import { initDB, closeDB } from "../mongo";
 import { logger } from "../logger";
 import { EXPORT_MODELS } from "./exportOptoutVolontaires.fields";
-import { normalizeEmail, youngColumns, modelColumns, buildRow, isObjectIdString } from "./exportOptoutVolontaires.helpers";
+import { normalizeEmail, youngColumns, modelColumns, buildRow, isObjectIdString, buildRepresentantRows, REPRESENTANT_COLUMNS } from "./exportOptoutVolontaires.helpers";
 import { createExportWorkbook } from "./exportOptoutVolontaires.workbook";
 import {
   findYoungsByEmails, findApplicationsByYoungIds, findEquivalencesByYoungIds,
@@ -38,6 +38,8 @@ const SHEET: Record<(typeof EXPORT_MODELS)[number], string> = {
   young: "Young", application: "Application", missionEquivalence: "MissionEquivalence",
   mission: "Mission", etablissement: "Etablissement", classe: "Classe", missionAPI: "MissionAPI",
 };
+// Onglet dédié (non issu d'un modèle Mongo) listant les représentants légaux.
+const SHEET_RL = "RepresentantsLegaux";
 
 function readEmails(file: string): string[] {
   const wb = XLSX.readFile(path.resolve(file));
@@ -75,7 +77,7 @@ async function run(): Promise<void> {
   }
   logger.info(`Emails à traiter: ${emails.length} (fichier ${EMAILS_FILE}${LIMIT ? `, LIMIT=${LIMIT}` : ""})`);
 
-  const counts: Record<string, number> = { Young: 0, Application: 0, MissionEquivalence: 0, Mission: 0, Etablissement: 0, Classe: 0, MissionAPI: 0 };
+  const counts: Record<string, number> = { Young: 0, RepresentantsLegaux: 0, Application: 0, MissionEquivalence: 0, Mission: 0, Etablissement: 0, Classe: 0, MissionAPI: 0 };
   const foundEmails = new Set<string>();
   const missionEmails = new Map<string, Set<string>>();
   const classeEmails = new Map<string, Set<string>>();
@@ -87,6 +89,7 @@ async function run(): Promise<void> {
   const wb = createExportWorkbook(tmpOut);
   try {
     wb.openSheet(SHEET.young, youngColumns());
+    wb.openSheet(SHEET_RL, REPRESENTANT_COLUMNS);
     wb.openSheet(SHEET.application, modelColumns("application"));
     wb.openSheet(SHEET.missionEquivalence, modelColumns("missionEquivalence"));
     wb.openSheet(SHEET.mission, modelColumns("mission"));
@@ -105,6 +108,10 @@ async function run(): Promise<void> {
         emailById.set(String(y._id), email);
         wb.writeRow(SHEET.young, buildRow(y, youngColumns()));
         counts.Young++;
+        for (const rl of buildRepresentantRows(y, email)) {
+          wb.writeRow(SHEET_RL, rl);
+          counts.RepresentantsLegaux++;
+        }
         addTo(classeEmails, y.classeId, email);
         addTo(etabEmails, y.etablissementId, email);
       }
@@ -146,6 +153,7 @@ async function run(): Promise<void> {
     }
 
     for (const model of EXPORT_MODELS) await wb.commitSheet(SHEET[model]);
+    await wb.commitSheet(SHEET_RL);
     await wb.commit();
     // Succès uniquement à partir d'ici : bascule atomique du temporaire vers OUT_FILE.
     fs.renameSync(path.resolve(tmpOut), path.resolve(OUT_FILE));

@@ -3,7 +3,7 @@ import { join } from "path";
 import * as fs from "fs";
 import * as XLSX from "xlsx";
 import { MODEL_FIELDS, YOUNG_REPRESENTATIVE_FIELDS, EXPORT_MODELS } from "../scripts/exportOptoutVolontaires.fields";
-import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow, isObjectIdString } from "../scripts/exportOptoutVolontaires.helpers";
+import { normalizeEmail, chunk, getByPath, toCell, buildProjection, youngColumns, modelColumns, buildRow, isObjectIdString, buildRepresentantRows } from "../scripts/exportOptoutVolontaires.helpers";
 import { createExportWorkbook } from "../scripts/exportOptoutVolontaires.workbook";
 
 describe("exportOptoutVolontaires.fields", () => {
@@ -71,8 +71,8 @@ describe("buildProjection", () => {
 });
 
 describe("colonnes", () => {
-  it("young = champs young + représentants", () => {
-    expect(youngColumns()).toEqual(["birthdateAt", "domains", "email", "employed", "engaged", "engagedDescription", "engagedStructure", "firstName", "gender", "grade", "qpv", "parent1Email", "parent1FirstName", "parent2Email", "parent2FirstName"]);
+  it("young = uniquement les 11 champs du dico (représentants dans un onglet à part)", () => {
+    expect(youngColumns()).toEqual(["birthdateAt", "domains", "email", "employed", "engaged", "engagedDescription", "engagedStructure", "firstName", "gender", "grade", "qpv"]);
   });
   it("modèle lié = youngEmail en tête puis champs", () => {
     expect(modelColumns("classe")).toEqual(["youngEmail", "department", "filiere", "grade", "grades", "schoolYear"]);
@@ -92,13 +92,11 @@ describe("colonnes", () => {
 });
 
 describe("buildRow", () => {
-  it("young : champs plats, imbriqués, tableaux, représentants", () => {
-    const doc = { email: "a@b.fr", firstName: "Léa", domains: ["Défense", "Santé"], parent1Email: "p1@b.fr", parent1FirstName: "Papa", parent2Email: null };
+  it("young : champs plats, tableau -> JSON, absent -> null", () => {
+    const doc = { email: "a@b.fr", firstName: "Léa", domains: ["Défense", "Santé"] };
     const row = buildRow(doc, youngColumns());
     expect(row.email).toBe("a@b.fr");
     expect(row.domains).toBe('["Défense","Santé"]');
-    expect(row.parent1FirstName).toBe("Papa");
-    expect(row.parent2Email).toBeNull();
     expect(row.gender).toBeNull(); // absent -> null
   });
   it("modèle : injecte youngEmail + chemin imbriqué location.lat", () => {
@@ -107,6 +105,25 @@ describe("buildRow", () => {
     expect(row.youngEmail).toBe("a@b.fr");
     expect(row.name).toBe("Mission X");
     expect(row["location.lat"]).toBe(48.8);
+  });
+});
+
+describe("buildRepresentantRows", () => {
+  it("une ligne par représentant renseigné : rôle + prénom + email + email du jeune", () => {
+    const y = { parent1FirstName: "Papa", parent1Email: "p1@b.fr", parent2FirstName: "Maman", parent2Email: "p2@b.fr" };
+    expect(buildRepresentantRows(y, "jeune@b.fr")).toEqual([
+      { youngEmail: "jeune@b.fr", role: "Représentant légal 1", firstName: "Papa", email: "p1@b.fr" },
+      { youngEmail: "jeune@b.fr", role: "Représentant légal 2", firstName: "Maman", email: "p2@b.fr" },
+    ]);
+  });
+  it("ignore un représentant sans prénom ni email, garde l'autre (email manquant -> null)", () => {
+    const y = { parent1FirstName: "Papa", parent1Email: "" }; // pas de parent2
+    expect(buildRepresentantRows(y, "jeune@b.fr")).toEqual([
+      { youngEmail: "jeune@b.fr", role: "Représentant légal 1", firstName: "Papa", email: null },
+    ]);
+  });
+  it("young sans aucun représentant -> []", () => {
+    expect(buildRepresentantRows({}, "jeune@b.fr")).toEqual([]);
   });
 });
 
