@@ -12,8 +12,8 @@
  * dossier actif hors périmètre est EXCLU — la purge support hard-delete TOUS les
  * tickets du contact, y compris ceux d'un enfant actif ou d'un compte référent.
  *
- * Lecture seule côté SNU (n'écrit qu'un fichier local). Réutilise la liste de
- * cohortes partagée (anonymizeOldCohorts.helpers) — une seule source de vérité.
+ * Lecture seule côté SNU (n'écrit qu'un fichier local). Réutilise le sélecteur
+ * partagé (anonymizeOldCohorts.helpers : population ou cohortes) — une seule source de vérité.
  *
  * Usage (depuis api/) :
  *   OUT_FILE=./emails.json npx tsx src/scripts/exportOldCohortSupportEmails.ts

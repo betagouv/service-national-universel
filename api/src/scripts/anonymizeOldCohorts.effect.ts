@@ -26,7 +26,7 @@
  *     tant que le pipeline de reindex n'a pas tourné).
  *
  * À VALIDER avant le run :
- *   - OLD_COHORTS vs db.youngs.distinct("cohort") (re-vérifier si la donnée a évolué depuis 2026-06).
+ *   - le périmètre sélectionné (POPULATION=… ou COHORTS=…) vs les comptes réels en base (re-vérifier si la donnée a évolué depuis 2026-06).
  *   - DRY_RUN ne couvre PAS le chemin d'écriture (buildUpdate) : tester d'abord sur 1 jeune réel.
  *
  * Usage (depuis api/) :

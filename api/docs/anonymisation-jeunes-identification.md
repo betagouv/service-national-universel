@@ -146,13 +146,15 @@ L'anonymisation détruit la donnée sur **3 systèmes** ; l'ordre est impératif
 
 Le script d'anonymisation **et** le script d'export support sélectionnent **par `cohort`** (`{ cohort: { $in: OLD_COHORTS } }`), pas par statut.
 
-| Population | Identifiable maintenant (§2) | Anonymisable via runbook actuel |
-|---|---|---|
-| 1 — Cohorte à venir | ✅ | ✅ `COHORTS="à venir"` |
-| 2 — En attente d'affectation | ✅ | ❌ nécessite extension des scripts (sélecteur par statut) |
-| 3 — Listes complémentaires | ✅ | ❌ nécessite extension des scripts (sélecteur par statut) |
+| Population | Identifiable (§2) | Anonymisable via runbook | `POPULATION=` |
+|---|---|---|---|
+| 1 — Cohorte à venir | ✅ | ✅ | `cohorte-a-venir` |
+| 2 — En attente d'affectation | ✅ | ✅ | `attente-affectation` |
+| 3 — Listes complémentaires | ✅ | ✅ | `liste-complementaire` |
 
-Pour exécuter l'anonymisation des populations 2 & 3, il faut au préalable **étendre** `anonymizeOldCohorts.effect.ts` et `exportOldCohortSupportEmails.ts` pour accepter un sélecteur par statut (ex. variable `SELECTOR`/`QUERY`, ou flags dédiés), en conservant les gardes existantes (`anonymized ≠ true`, abandon si sélecteur vide, garde « email partagé »). → Sujet à cadrer séparément (brainstorming + plan) si retenu.
+> **Résolu.** Les scripts `anonymizeOldCohorts.effect.ts` et `exportOldCohortSupportEmails.ts` acceptent désormais `POPULATION=<nom>` (sélecteur par statut, source de vérité unique partagée avec la garde email). `POPULATION` et `COHORTS` sont exclusifs. Détails : [docs/superpowers/specs/2026-07-28-anonymisation-selecteur-population-design.md](../../docs/superpowers/specs/2026-07-28-anonymisation-selecteur-population-design.md).
+
+Rappel : au run, appliquer le garde-fou §5 (mongodump + DRY_RUN + réconciliation des comptes) — la sélection étant fidèle, elle inclut les inscriptions en cours et les désistés comptés au §5.
 
 ---
 
