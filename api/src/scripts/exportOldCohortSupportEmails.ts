@@ -63,7 +63,7 @@ async function main() {
     // Garde-fou « email partagé » : ne jamais cibler un email encore rattaché à un
     // dossier actif hors périmètre (fratrie avec un enfant d'une cohorte récente,
     // jeune devenu référent). cf. services/rgpdEmailGuard.
-    const protectedEmails = await getProtectedEmails(cohorts);
+    const protectedEmails = await getProtectedEmails({ cohort: { $nin: cohorts } });
     const emails = candidates.filter((e) => !protectedEmails.has(e));
     const excluded = candidates.length - emails.length;
 

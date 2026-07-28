@@ -245,7 +245,7 @@ const program = Effect.gen(function* () {
   // hors production sans run réel (purgeBrevo y est no-op), ou quand SKIP_BREVO bypasse
   // la purge — on évite alors le scan (le garde-fou ne sert qu'à filtrer les emails Brevo).
   const protectedEmails: Set<string> =
-    config.ENVIRONMENT === "production" && !DRY_RUN && !SKIP_BREVO ? yield* Effect.tryPromise(() => getProtectedEmails(OLD_COHORTS)) : new Set<string>();
+    config.ENVIRONMENT === "production" && !DRY_RUN && !SKIP_BREVO ? yield* Effect.tryPromise(() => getProtectedEmails({ cohort: { $nin: OLD_COHORTS } })) : new Set<string>();
 
   // IDs collectés en amont : évite la dérive de pagination pendant le traitement.
   const ids: Array<{ _id: any }> = yield* Effect.tryPromise(() => YoungModel.find(query()).select("_id").lean());

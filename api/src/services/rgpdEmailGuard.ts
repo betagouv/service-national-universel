@@ -17,16 +17,16 @@ const norm = (email: string) => email.trim().toLowerCase();
 
 /**
  * Ensemble (minuscules) des emails encore rattachés à un dossier actif HORS périmètre :
- * jeunes non supprimés d'une cohorte non ciblée (email + parents) et tous les référents.
- * Chargé UNE fois (2 requêtes projetées, en cursor) — aucune requête par jeune ensuite.
- * La comparaison se fait en minuscules des deux côtés : insensible à la casse même sur
- * les documents anciens (emails non normalisés avant 2024, cf. commit 58452270c).
+ * jeunes non supprimés NON ciblés par la sélection (`outOfPerimeter` = complément du
+ * sélecteur : `{ cohort: { $nin } }` ou `{ $nor: [core] }`), email + parents, plus tous
+ * les référents. Chargé UNE fois (2 requêtes projetées, en cursor).
+ * La comparaison se fait en minuscules des deux côtés (documents anciens non normalisés).
  */
-export async function getProtectedEmails(cohorts: string[]): Promise<Set<string>> {
+export async function getProtectedEmails(outOfPerimeter: Record<string, any>): Promise<Set<string>> {
   const protectedEmails = new Set<string>();
 
   const youngCursor = YoungModel.find(
-    { cohort: { $nin: cohorts }, status: { $ne: YOUNG_STATUS.DELETED } },
+    { ...outOfPerimeter, status: { $ne: YOUNG_STATUS.DELETED } },
     { email: 1, parent1Email: 1, parent2Email: 1 },
   )
     .lean()
