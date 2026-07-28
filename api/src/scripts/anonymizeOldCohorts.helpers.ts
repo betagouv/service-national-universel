@@ -45,3 +45,77 @@ export function buildUpdate(anon: Record<string, any>): { $set?: Record<string, 
   if (Object.keys(unset).length) update.$unset = unset;
   return update;
 }
+
+// ──────────────────────────────────────────────────────────────────────────
+// Sélection à anonymiser : cohortes (historique) OU population nommée (par statut).
+// Valeurs d'énum reproduites en LITTÉRAUX (et non importées de snu-lib) pour garder
+// ce module pur et compilable par ts-jest sans charger les types mongo — cf. en-tête.
+// Miroir de YOUNG_STATUS / YOUNG_STATUS_PHASE1 (valeurs stables).
+// ──────────────────────────────────────────────────────────────────────────
+const STATUS_DELETED = "DELETED";
+const STATUS_WAITING_LIST = "WAITING_LIST";
+const PHASE1_WAITING_AFFECTATION = "WAITING_AFFECTATION";
+const PHASE1_WAITING_LIST = "WAITING_LIST";
+
+export type Selection = {
+  label: string; // logs / Slack
+  matchFilter: Record<string, unknown>; // find() : jeunes à anonymiser / exporter
+  guardComplement: Record<string, unknown>; // getProtectedEmails : périmètre « hors cible »
+};
+
+type PopulationDef = { label: string; core: Record<string, unknown> };
+
+// Filtres FIGÉS — toute nouvelle population passe par une revue de code.
+export const POPULATIONS: Record<string, PopulationDef> = {
+  "cohorte-a-venir": { label: "Cohorte à venir", core: { cohort: "à venir" } },
+  "attente-affectation": { label: "En attente d'affectation", core: { statusPhase1: PHASE1_WAITING_AFFECTATION } },
+  "liste-complementaire": {
+    label: "Listes complémentaires",
+    core: { $or: [{ status: STATUS_WAITING_LIST }, { statusPhase1: PHASE1_WAITING_LIST }] },
+  },
+};
+
+// Chemin cohorte (rétro-compat) : comportement historique, SANS status≠DELETED.
+export function cohortSelection(cohorts: string[]): Selection {
+  return {
+    label: `Cohortes ${cohorts.join(", ")}`,
+    matchFilter: { cohort: { $in: cohorts }, anonymized: { $ne: true } },
+    guardComplement: { cohort: { $nin: cohorts } },
+  };
+}
+
+// Chemin population : ajoute status≠DELETED (cohérence avec les comptes d'identification).
+export function populationSelection(name: string): Selection {
+  const def = POPULATIONS[name];
+  return {
+    label: def.label,
+    matchFilter: { ...def.core, anonymized: { $ne: true }, status: { $ne: STATUS_DELETED } },
+    guardComplement: { $nor: [def.core] },
+  };
+}
+
+/**
+ * Résout la sélection depuis l'environnement. POPULATION et COHORTS sont EXCLUSIFS.
+ * PUR : lève un Error simple sur sélecteur invalide (le script Effect le mappe en
+ * ConfigError ; l'export le laisse remonter à son catch). Ne jamais appeler au
+ * chargement du module (court-circuiterait la gestion d'erreur Effect).
+ */
+export function resolveSelection(): Selection {
+  const population = process.env.POPULATION?.trim();
+  const cohortsDefined = process.env.COHORTS !== undefined;
+
+  if (population && cohortsDefined) {
+    throw new Error("POPULATION et COHORTS sont exclusifs — n'en fournir qu'un.");
+  }
+  if (population) {
+    if (!(population in POPULATIONS)) {
+      throw new Error(`POPULATION inconnue: "${population}". Attendu: ${Object.keys(POPULATIONS).join(", ")}.`);
+    }
+    return populationSelection(population);
+  }
+  const cohorts = resolveOldCohorts();
+  if (cohorts.length === 0) {
+    throw new Error("COHORTS défini mais vide après parsing — abandon (un $in:[] n'anonymiserait rien).");
+  }
+  return cohortSelection(cohorts);
+}

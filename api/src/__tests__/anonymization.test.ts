@@ -22,7 +22,7 @@ import anonymizeApplication from "../anonymization/application";
 import anonymizeContract from "../anonymization/contract";
 import { anonymizeNonDeclaredFields } from "../anonymization/utils/anonymise-model-fields";
 import { STAR_EMAIL } from "../anonymization/utils/anonymise";
-import { buildUpdate, resolveOldCohorts, DEFAULT_OLD_COHORTS } from "../scripts/anonymizeOldCohorts.helpers";
+import { buildUpdate, resolveOldCohorts, DEFAULT_OLD_COHORTS, resolveSelection, POPULATIONS } from "../scripts/anonymizeOldCohorts.helpers";
 
 import getNewYoungFixture from "./fixtures/young";
 import { getNewApplicationFixture } from "./fixtures/application";
@@ -245,5 +245,66 @@ describe("resolveOldCohorts (sélection des cohortes à anonymiser)", () => {
     // sur les 7 cohortes par défaut → run de production intégral au lieu d'un abandon.
     process.env.COHORTS = "";
     expect(resolveOldCohorts()).toEqual([]);
+  });
+});
+
+describe("resolveSelection (sélection population | cohorte)", () => {
+  // process.env est global : on sauvegarde/restaure POPULATION et COHORTS.
+  const ORIG_POP = process.env.POPULATION;
+  const ORIG_COH = process.env.COHORTS;
+  afterEach(() => {
+    if (ORIG_POP === undefined) delete process.env.POPULATION;
+    else process.env.POPULATION = ORIG_POP;
+    if (ORIG_COH === undefined) delete process.env.COHORTS;
+    else process.env.COHORTS = ORIG_COH;
+  });
+
+  it("registre = 3 populations figées", () => {
+    expect(Object.keys(POPULATIONS).sort()).toEqual(["attente-affectation", "cohorte-a-venir", "liste-complementaire"]);
+    expect(POPULATIONS["cohorte-a-venir"].core).toEqual({ cohort: "à venir" });
+  });
+
+  it("population attente-affectation → matchFilter (anonymized≠true + status≠DELETED) + guardComplement $nor", () => {
+    delete process.env.COHORTS;
+    process.env.POPULATION = "attente-affectation";
+    const sel = resolveSelection();
+    expect(sel.label).toBe("En attente d'affectation");
+    expect(sel.matchFilter).toEqual({ statusPhase1: "WAITING_AFFECTATION", anonymized: { $ne: true }, status: { $ne: "DELETED" } });
+    expect(sel.guardComplement).toEqual({ $nor: [{ statusPhase1: "WAITING_AFFECTATION" }] });
+  });
+
+  it("population liste-complementaire → $or status/statusPhase1", () => {
+    delete process.env.COHORTS;
+    process.env.POPULATION = "liste-complementaire";
+    const sel = resolveSelection();
+    const core = { $or: [{ status: "WAITING_LIST" }, { statusPhase1: "WAITING_LIST" }] };
+    expect(sel.matchFilter).toEqual({ ...core, anonymized: { $ne: true }, status: { $ne: "DELETED" } });
+    expect(sel.guardComplement).toEqual({ $nor: [core] });
+  });
+
+  it("population inconnue → throw", () => {
+    delete process.env.COHORTS;
+    process.env.POPULATION = "n-existe-pas";
+    expect(() => resolveSelection()).toThrow(/POPULATION inconnue/);
+  });
+
+  it("POPULATION + COHORTS ensemble → throw (exclusifs)", () => {
+    process.env.POPULATION = "cohorte-a-venir";
+    process.env.COHORTS = "2019";
+    expect(() => resolveSelection()).toThrow(/exclusifs/);
+  });
+
+  it("sans sélecteur → chemin cohorte par défaut (sans status≠DELETED)", () => {
+    delete process.env.POPULATION;
+    delete process.env.COHORTS;
+    const sel = resolveSelection();
+    expect(sel.matchFilter).toEqual({ cohort: { $in: DEFAULT_OLD_COHORTS }, anonymized: { $ne: true } });
+    expect(sel.guardComplement).toEqual({ cohort: { $nin: DEFAULT_OLD_COHORTS } });
+  });
+
+  it('COHORTS="" → throw (garde d\'abandon)', () => {
+    delete process.env.POPULATION;
+    process.env.COHORTS = "";
+    expect(() => resolveSelection()).toThrow(/vide après parsing/);
   });
 });
