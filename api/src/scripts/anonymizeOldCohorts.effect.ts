@@ -30,10 +30,13 @@
  *   - DRY_RUN ne couvre PAS le chemin d'écriture (buildUpdate) : tester d'abord sur 1 jeune réel.
  *
  * Usage (depuis api/) :
- *   DRY_RUN=true npx tsx src/scripts/anonymizeOldCohorts.effect.ts          # aperçu (compte)
- *   YOUNG_ID=<objectId> npx tsx src/scripts/anonymizeOldCohorts.effect.ts   # test sur 1 jeune réel
- *   COHORTS="2019" npx tsx src/scripts/anonymizeOldCohorts.effect.ts        # run ciblé staging
- *   npx tsx src/scripts/anonymizeOldCohorts.effect.ts                       # run complet
+ *   DRY_RUN=true npx tsx src/scripts/anonymizeOldCohorts.effect.ts               # aperçu (compte)
+ *   YOUNG_ID=<objectId> npx tsx src/scripts/anonymizeOldCohorts.effect.ts        # test sur 1 jeune réel
+ *   COHORTS="2019" npx tsx src/scripts/anonymizeOldCohorts.effect.ts             # run ciblé par cohorte
+ *   POPULATION=attente-affectation npx tsx src/scripts/anonymizeOldCohorts.effect.ts  # run par population (statut)
+ *   npx tsx src/scripts/anonymizeOldCohorts.effect.ts                            # run complet (cohortes par défaut)
+ *   # Populations disponibles : cohorte-a-venir | attente-affectation | liste-complementaire
+ *   # POPULATION et COHORTS sont exclusifs.
  */
 
 import { Cause, Data, Duration, Effect, Schedule } from "effect";
@@ -50,15 +53,13 @@ import { listFiles, deleteFilesByList } from "../utils/index";
 import slack from "../slack";
 import { YOUNG_STATUS } from "snu-lib";
 import { getProtectedEmails } from "../services/rgpdEmailGuard";
-import { buildUpdate, resolveOldCohorts } from "./anonymizeOldCohorts.helpers";
+import { buildUpdate, cohortSelection, resolveSelection, DEFAULT_OLD_COHORTS, type Selection } from "./anonymizeOldCohorts.helpers";
 
 const anonymizeApplication = require("../anonymization/application");
 const anonymizeContract = require("../anonymization/contract");
 
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = DRY_RUN_RAW === "true" || process.argv.includes("--dry-run");
-// Cohortes ciblées (liste partagée + override COHORTS) — cf. anonymizeOldCohorts.helpers.
-const OLD_COHORTS = resolveOldCohorts();
 // Test ciblé : YOUNG_ID="<objectId>" anonymise EXACTEMENT ce jeune (ignore cohorte + flag
 // anonymized) pour valider le chemin d'écriture sur un cas réel choisi. Irréversible.
 const YOUNG_ID = process.env.YOUNG_ID?.trim();
@@ -69,8 +70,6 @@ const YOUNG_ID = process.env.YOUNG_ID?.trim();
 const SKIP_BREVO = process.env.SKIP_BREVO === "true";
 // Concurrence volontairement basse : chaque jeune ouvre sa propre transaction Mongo.
 const CONCURRENCY = 5;
-
-const query = () => (YOUNG_ID ? { _id: YOUNG_ID } : { cohort: { $in: OLD_COHORTS }, anonymized: { $ne: true } });
 
 // ──────────────────────────────────────────────────────────────────────────
 // Erreurs typées (canal d'erreur Effect — interdit l'échec silencieux)
@@ -230,11 +229,18 @@ const program = Effect.gen(function* () {
     return yield* Effect.fail(new ConfigError({ reason: `DRY_RUN="${DRY_RUN_RAW}" non reconnu — utiliser DRY_RUN=true ou DRY_RUN=false.` }));
   }
 
-  // Garde-fou : COHORTS surchargé mais vide après parsing ⇒ un $in:[] n'anonymiserait rien.
-  // (sans objet si on cible un YOUNG_ID précis.) Couvre aussi COHORTS="" depuis que
-  // resolveOldCohorts teste la présence de la variable et non sa truthiness.
-  if (!YOUNG_ID && OLD_COHORTS.length === 0) {
-    return yield* Effect.fail(new ConfigError({ reason: "COHORTS défini mais vide après parsing — abandon (un $in:[] n'anonymiserait rien)." }));
+  // Sélection à anonymiser (population nommée ou cohortes). Résolue DANS le programme
+  // pour mapper tout sélecteur invalide en ConfigError (abandon gracieux + Slack).
+  // YOUNG_ID court-circuite la query et tolère l'absence de sélecteur (garde historique) :
+  // on n'exige un sélecteur valide que pour un run de masse.
+  let selection: Selection;
+  if (YOUNG_ID) {
+    selection = cohortSelection(DEFAULT_OLD_COHORTS);
+  } else {
+    selection = yield* Effect.try({
+      try: () => resolveSelection(),
+      catch: (reason) => new ConfigError({ reason: reason instanceof Error ? reason.message : String(reason) }),
+    });
   }
 
   if (SKIP_BREVO) {
@@ -245,11 +251,13 @@ const program = Effect.gen(function* () {
   // hors production sans run réel (purgeBrevo y est no-op), ou quand SKIP_BREVO bypasse
   // la purge — on évite alors le scan (le garde-fou ne sert qu'à filtrer les emails Brevo).
   const protectedEmails: Set<string> =
-    config.ENVIRONMENT === "production" && !DRY_RUN && !SKIP_BREVO ? yield* Effect.tryPromise(() => getProtectedEmails({ cohort: { $nin: OLD_COHORTS } })) : new Set<string>();
+    config.ENVIRONMENT === "production" && !DRY_RUN && !SKIP_BREVO ? yield* Effect.tryPromise(() => getProtectedEmails(selection.guardComplement)) : new Set<string>();
 
   // IDs collectés en amont : évite la dérive de pagination pendant le traitement.
-  const ids: Array<{ _id: any }> = yield* Effect.tryPromise(() => YoungModel.find(query()).select("_id").lean());
-  logger.info(`${mode}${ids.length} jeunes à anonymiser`);
+  const ids: Array<{ _id: any }> = yield* Effect.tryPromise(() =>
+    YoungModel.find(YOUNG_ID ? { _id: YOUNG_ID } : selection.matchFilter).select("_id").lean(),
+  );
+  logger.info(`${mode}${ids.length} jeunes à anonymiser (${selection.label})`);
 
   const results = yield* Effect.forEach(
     ids,
@@ -289,7 +297,7 @@ const program = Effect.gen(function* () {
   yield* Effect.tryPromise(() =>
     slack.success({
       title: "anonymizeOldCohorts (effect)",
-      text: `${mode}${processed} jeunes anonymisés${errors > 0 ? `, ${errors} erreurs` : ""}${skipped > 0 ? `, ${skipped} introuvables` : ""} sur ${ids.length} trouvés`,
+      text: `${mode}[${selection.label}] ${processed} jeunes anonymisés${errors > 0 ? `, ${errors} erreurs` : ""}${skipped > 0 ? `, ${skipped} introuvables` : ""} sur ${ids.length} trouvés`,
     }),
   ).pipe(Effect.catchAll(() => Effect.void));
 }).pipe(
