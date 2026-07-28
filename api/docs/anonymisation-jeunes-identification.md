@@ -90,7 +90,7 @@ mongosh "$MONGO_URL" --quiet --eval '
 
 > Pour un export complet destiné à la purge support, réutiliser le pattern de
 > `exportOldCohortSupportEmails.ts` (fichier `0600`, gitignoré `emails*.json`, canal chiffré,
-> suppression après purge). ⚠ Ce script filtre **par cohorte** aujourd'hui (cf. §4).
+> suppression après purge). Ce script accepte désormais aussi `POPULATION=<nom>` (même sélecteur que l'anonymisation, cf. §4).
 
 ---
 
@@ -144,7 +144,7 @@ L'anonymisation détruit la donnée sur **3 systèmes** ; l'ordre est impératif
 
 ## 4. ⚠ Gap d'exécution — populations 2 & 3
 
-Le script d'anonymisation **et** le script d'export support sélectionnent **par `cohort`** (`{ cohort: { $in: OLD_COHORTS } }`), pas par statut.
+Le script d'anonymisation **et** le script d'export support acceptent un sélecteur par statut via `POPULATION=<nom>` (source de vérité unique partagée avec la garde email), en plus de la sélection par `cohort`. `POPULATION` et `COHORTS` sont exclusifs.
 
 | Population | Identifiable (§2) | Anonymisable via runbook | `POPULATION=` |
 |---|---|---|---|
@@ -185,4 +185,4 @@ Ventilation de la pop. 2 (`statusPhase1: WAITING_AFFECTATION`) par `status` gén
 
 **Décision (explicite) :** population 2 conservée **telle quelle** (48 723), désistés et inscriptions en cours inclus.
 
-> ⚠ **Garde-fou obligatoire au run.** Cette définition inclut **~2 818 inscriptions vivantes** (WAITING_VALIDATION + WAITING_CORRECTION + REINSCRIPTION) et **24 748 désistés**. Le même risque vaut pour la **pop. 1** (`cohort:"à venir"` sans filtre de statut → contient probablement aussi des inscriptions en cours). L'anonymisation étant irréversible (Mongo + S3 + Brevo), tout run devra : (1) `mongodump` préalable ; (2) `DRY_RUN` puis réconciliation du compte affiché avec les comptes ci-dessus ; (3) validation `YOUNG_ID` sur 1 cas réel ; (4) décision explicitement tracée d'inclure ou non les statuts « en cours ». Rappel §4 : les scripts actuels étant cohort-based, aucun run pop. 2/3 n'est possible sans extension préalable.
+> ⚠ **Garde-fou obligatoire au run.** Cette définition inclut **~2 818 inscriptions vivantes** (WAITING_VALIDATION + WAITING_CORRECTION + REINSCRIPTION) et **24 748 désistés**. Le même risque vaut pour la **pop. 1** (`cohort:"à venir"` sans filtre de statut → contient probablement aussi des inscriptions en cours). L'anonymisation étant irréversible (Mongo + S3 + Brevo), tout run devra : (1) `mongodump` préalable ; (2) `DRY_RUN` puis réconciliation du compte affiché avec les comptes ci-dessus ; (3) validation `YOUNG_ID` sur 1 cas réel ; (4) décision explicitement tracée d'inclure ou non les statuts « en cours ». Rappel §4 : les scripts supportent maintenant `POPULATION=<nom>` pour sélectionner par statut (pop. 2/3 exécutables), en plus de la sélection classique par cohorte.
