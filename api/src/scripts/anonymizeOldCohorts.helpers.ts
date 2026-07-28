@@ -67,6 +67,9 @@ type PopulationDef = { label: string; core: Record<string, unknown> };
 
 // Filtres FIGÉS — toute nouvelle population passe par une revue de code.
 export const POPULATIONS: Record<string, PopulationDef> = {
+  // cohort:"à venir" = valeur littérale figée. Avant un run, pré-check des variantes
+  // (ex. "à venir " avec espace final, cf. doc §2.0) ; un écart est rattrapé par la
+  // réconciliation DRY_RUN.
   "cohorte-a-venir": { label: "Cohorte à venir", core: { cohort: "à venir" } },
   "attente-affectation": { label: "En attente d'affectation", core: { statusPhase1: PHASE1_WAITING_AFFECTATION } },
   "liste-complementaire": {
@@ -87,6 +90,7 @@ export function cohortSelection(cohorts: string[]): Selection {
 // Chemin population : ajoute status≠DELETED (cohérence avec les comptes d'identification).
 export function populationSelection(name: string): Selection {
   const def = POPULATIONS[name];
+  if (!def) throw new Error(`POPULATION inconnue: "${name}". Attendu: ${Object.keys(POPULATIONS).join(", ")}.`);
   return {
     label: def.label,
     matchFilter: { ...def.core, anonymized: { $ne: true }, status: { $ne: STATUS_DELETED } },
@@ -101,17 +105,20 @@ export function populationSelection(name: string): Selection {
  * chargement du module (court-circuiterait la gestion d'erreur Effect).
  */
 export function resolveSelection(): Selection {
-  const population = process.env.POPULATION?.trim();
+  const populationRaw = process.env.POPULATION;
+  const population = populationRaw?.trim();
   const cohortsDefined = process.env.COHORTS !== undefined;
 
+  // POPULATION fourni mais vide/espaces (ex. POPULATION="$X" avec $X non défini) ⇒ abandon
+  // fail-closed, comme COHORTS="" — ne jamais retomber en silence sur les cohortes par défaut.
+  if (populationRaw !== undefined && !population) {
+    throw new Error("POPULATION défini mais vide — abandon (préciser une population ou retirer la variable).");
+  }
   if (population && cohortsDefined) {
     throw new Error("POPULATION et COHORTS sont exclusifs — n'en fournir qu'un.");
   }
   if (population) {
-    if (!(population in POPULATIONS)) {
-      throw new Error(`POPULATION inconnue: "${population}". Attendu: ${Object.keys(POPULATIONS).join(", ")}.`);
-    }
-    return populationSelection(population);
+    return populationSelection(population); // valide le nom (throw si inconnu)
   }
   const cohorts = resolveOldCohorts();
   if (cohorts.length === 0) {

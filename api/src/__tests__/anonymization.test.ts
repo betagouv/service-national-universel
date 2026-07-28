@@ -307,4 +307,26 @@ describe("resolveSelection (sélection population | cohorte)", () => {
     process.env.COHORTS = "";
     expect(() => resolveSelection()).toThrow(/vide après parsing/);
   });
+
+  it("population cohorte-a-venir → matchFilter + guardComplement complets", () => {
+    delete process.env.COHORTS;
+    process.env.POPULATION = "cohorte-a-venir";
+    const sel = resolveSelection();
+    expect(sel.label).toBe("Cohorte à venir");
+    expect(sel.matchFilter).toEqual({ cohort: "à venir", anonymized: { $ne: true }, status: { $ne: "DELETED" } });
+    expect(sel.guardComplement).toEqual({ $nor: [{ cohort: "à venir" }] });
+  });
+
+  it("POPULATION vide ou espaces → throw (fail-closed)", () => {
+    delete process.env.COHORTS;
+    process.env.POPULATION = "   ";
+    expect(() => resolveSelection()).toThrow(/POPULATION défini mais vide/);
+  });
+
+  it("chemin cohorte : label = 'Cohortes …'", () => {
+    delete process.env.POPULATION;
+    process.env.COHORTS = "2019,2020";
+    const sel = resolveSelection();
+    expect(sel.label).toBe("Cohortes 2019, 2020");
+  });
 });
