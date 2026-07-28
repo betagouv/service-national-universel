@@ -18,6 +18,8 @@
  * Usage (depuis api/) :
  *   OUT_FILE=./emails.json npx tsx src/scripts/exportOldCohortSupportEmails.ts
  *   COHORTS="2019" OUT_FILE=./emails-2019.json npx tsx src/scripts/exportOldCohortSupportEmails.ts
+ *   POPULATION=attente-affectation OUT_FILE=./emails-attente.json npx tsx src/scripts/exportOldCohortSupportEmails.ts
+ *   # Même sélecteur que anonymizeOldCohorts (POPULATION et COHORTS exclusifs).
  */
 import fs from "fs";
 import path from "path";
@@ -26,26 +28,20 @@ import { YoungModel } from "../models";
 import { initDB, closeDB } from "../mongo";
 import { logger } from "../logger";
 import { getProtectedEmails } from "../services/rgpdEmailGuard";
-import { resolveOldCohorts } from "./anonymizeOldCohorts.helpers";
+import { resolveSelection } from "./anonymizeOldCohorts.helpers";
 
 const OUT_FILE = process.env.OUT_FILE || "./emails.json";
 
 async function main() {
   await initDB();
   try {
-    const cohorts = resolveOldCohorts();
-    // Miroir de la garde du script d'anonymisation : COHORTS défini mais vide (ex.
-    // COHORTS="$TARGET" avec $TARGET non défini) ⇒ abandon plutôt qu'un export vide.
-    if (cohorts.length === 0) {
-      throw new Error("COHORTS défini mais vide après parsing — abandon (un $in:[] n'exporterait rien).");
-    }
+    // Même sélection que l'anonymisation (source unique) : population nommée ou cohortes.
+    // resolveSelection lève sur sélecteur invalide/vide → remonte au catch (log + exit 1).
+    const selection = resolveSelection();
 
-    // anonymized != true : on ne veut que des emails réels. Un jeune déjà anonymisé
-    // a un email placeholder, inutile (et inexploitable) côté support.
-    const youngs = await YoungModel.find(
-      { cohort: { $in: cohorts }, anonymized: { $ne: true } },
-      { email: 1, parent1Email: 1, parent2Email: 1 },
-    ).lean();
+    // matchFilter porte déjà anonymized != true : on ne veut que des emails réels
+    // (un jeune déjà anonymisé a un email placeholder, inutile côté support).
+    const youngs = await YoungModel.find(selection.matchFilter, { email: 1, parent1Email: 1, parent2Email: 1 }).lean();
 
     const candidates = [
       ...new Set(
@@ -63,14 +59,14 @@ async function main() {
     // Garde-fou « email partagé » : ne jamais cibler un email encore rattaché à un
     // dossier actif hors périmètre (fratrie avec un enfant d'une cohorte récente,
     // jeune devenu référent). cf. services/rgpdEmailGuard.
-    const protectedEmails = await getProtectedEmails({ cohort: { $nin: cohorts } });
+    const protectedEmails = await getProtectedEmails(selection.guardComplement);
     const emails = candidates.filter((e) => !protectedEmails.has(e));
     const excluded = candidates.length - emails.length;
 
     // 0600 : PII en clair — lisible par l'opérateur seul.
     fs.writeFileSync(path.resolve(OUT_FILE), JSON.stringify(emails, null, 2), { mode: 0o600 });
     logger.info(
-      `${youngs.length} jeunes (cohortes ${cohorts.join(", ")}) → ${emails.length} emails uniques écrits dans ${OUT_FILE}` +
+      `${youngs.length} jeunes (${selection.label}) → ${emails.length} emails uniques écrits dans ${OUT_FILE}` +
         ` (${excluded} exclus car partagés avec un dossier actif hors périmètre ou un référent)`,
     );
   } finally {
