@@ -63,7 +63,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   deploy_production:
-    needs: test
+    needs: prepare
     runs-on: ubuntu-latest
 
     steps:
