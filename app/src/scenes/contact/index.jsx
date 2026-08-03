@@ -54,7 +54,8 @@ export default function Contact() {
     <DSFRLayout title="Formulaire de contact">
       <DSFRContainer title="Je n'ai pas trouvé de réponse à ma question">
         <p className="leading-relaxed mb-10">
-          Contactez nos équipes. Nous travaillons du lundi au vendredi de 9h00 à 18h00 et traiterons votre demande dès que possible. Vous recevrez une réponse par mail.
+          Le support du SNU sera exceptionnellement ralenti du <strong>1er août au 1er septembre inclus</strong>. Nous traiterons votre demande dès que possible. Vous recevrez une
+          réponse par mail.
         </p>
 
         <MessageDelayed />
