@@ -3,8 +3,7 @@ name: Test Environment - Stop (CRON)
 on:
   workflow_dispatch:
   schedule:
-    - cron: "33 20 * * *" # Every day at 20:33
-
+    - cron: "0 15 * * 5" # Every friday at 15:00
 jobs:
   stop:
     runs-on: ubuntu-latest
