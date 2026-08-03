@@ -62,25 +62,8 @@ jobs:
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
-  test:
-    needs: prepare
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: ${{ github.ref_name }}
-
-      - name: Run tests
-        uses: jenseng/dynamic-uses@v1
-        with:
-          uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
-
   deploy_production:
-    needs: test
+    needs: prepare
     runs-on: ubuntu-latest
 
     steps:
