@@ -181,4 +181,22 @@ describe("unmatchedCsvLine", () => {
     const line = unmatchedCsvLine({ line: 3, lastName: "X", firstName: "Y" }, "INVALID_BIRTHDATE");
     expect(line).toContain("INVALID_BIRTHDATE");
   });
+
+  it("joins all candidate ids on AMBIGUOUS", () => {
+    const line = unmatchedCsvLine(
+      {
+        line: 12,
+        lastName: "RALAIMAZAVA",
+        firstName: "Mathieu",
+        birthdate: new Date(2007, 5, 13),
+      },
+      "AMBIGUOUS",
+      [
+        { _id: "id-a", statusPhase2: "VALIDATED" },
+        { _id: "id-b", statusPhase2: "IN_PROGRESS" },
+      ],
+    );
+    expect(line).toContain("AMBIGUOUS");
+    expect(line).toContain("id-a;id-b");
+  });
 });

@@ -19,6 +19,7 @@ export type UnmatchedReason =
   | "AMBIGUOUS"
   | "PHASE2_NOT_VALIDATED"
   | "SAVE_ERROR"
+  | "LOOKUP_ERROR"
   | "INVALID_BIRTHDATE"
   | "MISSING_NAME";
 
@@ -222,15 +223,15 @@ export function csvEscape(value: string | number | undefined | null): string {
   return text;
 }
 
-export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, young?: YoungMatchCandidate): string {
+export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, youngs: YoungMatchCandidate[] = []): string {
   return [
     csvEscape(row.line),
     csvEscape(row.lastName),
     csvEscape(row.firstName),
     csvEscape(row.birthdate ? toYmd(row.birthdate, false) : ""),
     csvEscape(reason),
-    csvEscape(young?._id),
-    csvEscape(young?.statusPhase2),
+    csvEscape(youngs.map((young) => young._id).join(";")),
+    csvEscape(youngs.map((young) => young.statusPhase2 ?? "").join(";")),
   ].join(",");
 }
 

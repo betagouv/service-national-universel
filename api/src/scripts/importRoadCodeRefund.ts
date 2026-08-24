@@ -147,26 +147,29 @@ const reimburseYoung = (id: string) =>
     catch: (cause) => new DbError({ cause }),
   });
 
-const unmatched = (row: BeneficiaryRow, reason: UnmatchedReason, young?: YoungMatchCandidate): RowOutcome => ({
+const unmatched = (row: BeneficiaryRow, reason: UnmatchedReason, youngs: YoungMatchCandidate[] = []): RowOutcome => ({
   _tag: "UNMATCHED",
   reason,
-  line: unmatchedCsvLine(row, reason, young),
+  line: unmatchedCsvLine(row, reason, youngs),
 });
 
 const processRow = (row: BeneficiaryRow) =>
   Effect.gen(function* () {
-    const candidates = yield* findCandidates(row);
+    const candidates = yield* findCandidates(row).pipe(Effect.catchTag("DbError", () => Effect.succeed(null)));
+    if (candidates === null) {
+      return unmatched(row, "LOOKUP_ERROR");
+    }
     const decision = decideMatch(row, candidates);
     if (decision.status === "NOT_FOUND") {
       return unmatched(row, "NOT_FOUND");
     }
     if (decision.status === "AMBIGUOUS") {
-      return unmatched(row, "AMBIGUOUS");
+      return unmatched(row, "AMBIGUOUS", decision.youngs);
     }
     if (decision.status === "PHASE2_NOT_VALIDATED") {
-      return unmatched(row, "PHASE2_NOT_VALIDATED", decision.youngs[0]);
+      return unmatched(row, "PHASE2_NOT_VALIDATED", decision.youngs);
     }
-    if (decision.status === "INVALID_BIRTHDATE" || decision.status === "MISSING_NAME" || decision.status === "SAVE_ERROR") {
+    if (decision.status === "INVALID_BIRTHDATE" || decision.status === "MISSING_NAME" || decision.status === "SAVE_ERROR" || decision.status === "LOOKUP_ERROR") {
       return unmatched(row, decision.status);
     }
     if (decision.status === "ALREADY") {
