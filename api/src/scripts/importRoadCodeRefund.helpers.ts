@@ -3,7 +3,7 @@ export type BeneficiaryRow = {
   lastName: string;
   firstName: string;
   neph: string;
-  birthdate: Date;
+  birthdate?: Date;
   examCenter: string;
   sessionDate: string;
 };
@@ -17,11 +17,24 @@ export type YoungMatchCandidate = {
   roadCodeRefund?: string;
 };
 
-export type UnmatchedReason = "NOT_FOUND" | "AMBIGUOUS" | "PHASE2_NOT_VALIDATED" | "SAVE_ERROR";
+export type UnmatchedReason =
+  | "NOT_FOUND"
+  | "AMBIGUOUS"
+  | "PHASE2_NOT_VALIDATED"
+  | "SAVE_ERROR"
+  | "INVALID_BIRTHDATE"
+  | "MISSING_NAME";
 
 export type MatchDecision =
   | { status: "MATCH" | "ALREADY"; young: YoungMatchCandidate }
   | { status: UnmatchedReason; youngs: YoungMatchCandidate[] };
+
+export type ParseIssue = BeneficiaryRow & { reason: "INVALID_BIRTHDATE" | "MISSING_NAME" };
+
+export type ParseResult = {
+  rows: BeneficiaryRow[];
+  issues: ParseIssue[];
+};
 
 const HEADER_LAST_NAME = "NOM DES BENEFICIAIRES";
 const HEADER_FIRST_NAME = "PRENOMS DES BENEFICIAIRES";
@@ -37,6 +50,12 @@ export function normalizeName(value: string): string {
     .replace(/\s+/g, " ")
     .trim()
     .toUpperCase();
+}
+
+export function lastNamesMatch(excelLastName: string, dbLastName: string): boolean {
+  const excel = normalizeName(excelLastName);
+  const db = normalizeName(dbLastName);
+  return Boolean(excel && db && excel === db);
 }
 
 export function firstNamesMatch(excelFirstName: string, dbFirstName: string): boolean {
@@ -71,6 +90,16 @@ export function birthdateMatches(excelBirthdate: Date, dbBirthdate: Date | strin
   }
   const excelDays = new Set([toYmd(excelBirthdate, false), toYmd(excelBirthdate, true)]);
   return excelDays.has(toYmd(db, true)) || excelDays.has(toYmd(db, false));
+}
+
+export function birthdateQueryRange(excelBirthdate: Date): { $gte: Date; $lt: Date } {
+  const year = excelBirthdate.getFullYear();
+  const month = excelBirthdate.getMonth();
+  const day = excelBirthdate.getDate();
+  return {
+    $gte: new Date(Date.UTC(year, month, day - 1)),
+    $lt: new Date(Date.UTC(year, month, day + 2)),
+  };
 }
 
 export function parseExcelDate(value: unknown): Date | null {
@@ -108,8 +137,18 @@ function normalizeHeader(value: unknown): string {
   return normalizeName(cellText(value));
 }
 
-export function parseBeneficiaryRows(sheets: unknown[][][]): BeneficiaryRow[] {
+function isBlankRow(row: unknown[], lastNameIndex: number, firstNameIndex: number, nephIndex: number, birthdateIndex: number): boolean {
+  const lastName = cellText(row[lastNameIndex]);
+  const firstName = cellText(row[firstNameIndex]);
+  const neph = cellText(nephIndex >= 0 ? row[nephIndex] : "");
+  const birthdate = row[birthdateIndex];
+  const hasBirthdate = birthdate != null && cellText(birthdate) !== "";
+  return !lastName && !firstName && !neph && !hasBirthdate;
+}
+
+export function parseBeneficiaryRows(sheets: unknown[][][]): ParseResult {
   const rows: BeneficiaryRow[] = [];
+  const issues: ParseIssue[] = [];
   for (const sheet of sheets) {
     const headerIndex = sheet.findIndex((row) => {
       const headers = (row ?? []).map(normalizeHeader);
@@ -130,35 +169,45 @@ export function parseBeneficiaryRows(sheets: unknown[][][]): BeneficiaryRow[] {
     }
     for (let i = headerIndex + 1; i < sheet.length; i++) {
       const row = sheet[i] ?? [];
+      if (isBlankRow(row, lastNameIndex, firstNameIndex, nephIndex, birthdateIndex)) {
+        continue;
+      }
       const lastName = cellText(row[lastNameIndex]);
       const firstName = cellText(row[firstNameIndex]);
-      if (!lastName || !firstName) {
-        continue;
-      }
-      const birthdate = parseExcelDate(row[birthdateIndex]);
-      if (!birthdate) {
-        continue;
-      }
-      rows.push({
+      const base: BeneficiaryRow = {
         line: i + 1,
         lastName,
         firstName,
         neph: cellText(nephIndex >= 0 ? row[nephIndex] : ""),
-        birthdate,
         examCenter: cellText(centerIndex >= 0 ? row[centerIndex] : ""),
         sessionDate: cellText(sessionIndex >= 0 ? row[sessionIndex] : ""),
-      });
+      };
+      if (!lastName || !firstName) {
+        issues.push({ ...base, reason: "MISSING_NAME" });
+        continue;
+      }
+      const birthdate = parseExcelDate(row[birthdateIndex]);
+      if (!birthdate) {
+        issues.push({ ...base, reason: "INVALID_BIRTHDATE" });
+        continue;
+      }
+      rows.push({ ...base, birthdate });
     }
   }
-  return rows;
+  return { rows, issues };
 }
 
 export function decideMatch(row: BeneficiaryRow, candidates: YoungMatchCandidate[]): MatchDecision {
-  const matches = candidates.filter((young) => {
-    if (!young.firstName || !young.birthdateAt) {
+  const excelBirthdate = row.birthdate;
+  if (!excelBirthdate) {
+    return { status: "INVALID_BIRTHDATE", youngs: [] };
+  }
+  const byDate = candidates.filter((young) => young.birthdateAt && birthdateMatches(excelBirthdate, young.birthdateAt));
+  const matches = byDate.filter((young) => {
+    if (!young.lastName || !young.firstName) {
       return false;
     }
-    return firstNamesMatch(row.firstName, young.firstName) && birthdateMatches(row.birthdate, young.birthdateAt);
+    return lastNamesMatch(row.lastName, young.lastName) && firstNamesMatch(row.firstName, young.firstName);
   });
   if (matches.length === 0) {
     return { status: "NOT_FOUND", youngs: [] };
@@ -190,7 +239,7 @@ export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, y
     csvEscape(row.lastName),
     csvEscape(row.firstName),
     csvEscape(row.neph),
-    csvEscape(toYmd(row.birthdate, false)),
+    csvEscape(row.birthdate ? toYmd(row.birthdate, false) : ""),
     csvEscape(row.examCenter),
     csvEscape(row.sessionDate),
     csvEscape(reason),
@@ -199,4 +248,4 @@ export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, y
   ].join(",");
 }
 
-export const UNMATCHED_CSV_HEADER = ["ligne", "nom", "prenoms", "neph", "dateNaissance", "centre", "dateSession", "raison", "youngId", "statusPhase2"].join(",");
+export const ERRORS_CSV_HEADER = ["ligne", "nom", "prenoms", "neph", "dateNaissance", "centre", "dateSession", "raison", "youngId", "statusPhase2"].join(",");

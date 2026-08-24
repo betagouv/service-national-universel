@@ -1,9 +1,10 @@
 /**
  * Import remboursement code de la route depuis une liste récap La Poste (xlsx).
  *
- * Matching : nom (collation FR) + prénom + date de naissance.
- * Attribution : statusPhase2 === VALIDATED, comme le bouton admin.
- * Dry-run par défaut. Les lignes non traitées sont exportées en CSV (0600, gitignoré).
+ * Matching : date de naissance, puis nom + prénom.
+ * Attribution : statusPhase2 === VALIDATED. Dry-run par défaut.
+ * Relance : les déjà remboursés sont ignorés. Les échecs vont dans un CSV d'erreurs.
+ * save({ fromUser }) pour les patches ; sync Brevo désactivé le temps du run.
  *
  * Usage (depuis api/) :
  *   INPUT_FILE=".../liste.xlsx" npx tsx src/scripts/importRoadCodeRefund.ts
@@ -16,14 +17,16 @@ import { Data, Effect, Ref } from "effect";
 import * as XLSX from "xlsx";
 import { YOUNG_STATUS } from "snu-lib";
 
+import * as brevo from "../brevo";
 import { YoungModel } from "../models";
 import { initDB, closeDB } from "../mongo";
 import { logger } from "../logger";
 import {
   BeneficiaryRow,
-  UNMATCHED_CSV_HEADER,
+  ERRORS_CSV_HEADER,
   UnmatchedReason,
   YoungMatchCandidate,
+  birthdateQueryRange,
   decideMatch,
   parseBeneficiaryRows,
   unmatchedCsvLine,
@@ -33,7 +36,8 @@ const INPUT_FILE = process.env.INPUT_FILE;
 const DRY_RUN_RAW = process.env.DRY_RUN;
 const DRY_RUN = DRY_RUN_RAW !== "false";
 const ORGANIZATION = process.env.ORGANIZATION || "LA POSTE";
-const UNMATCHED_FILE = process.env.UNMATCHED_FILE || "./road-code-refund-unmatched.csv";
+const ERRORS_FILE = process.env.ERRORS_FILE || "./road-code-refund-errors.csv";
+const FROM_USER = { firstName: "import-road-code-refund" };
 
 class ConfigError extends Data.TaggedError("ConfigError")<{ reason: string }> {}
 class FileError extends Data.TaggedError("FileError")<{ reason: string; cause?: unknown }> {}
@@ -100,15 +104,22 @@ const readSheets = (filePath: string) =>
     catch: (cause) => new FileError({ reason: `Lecture xlsx impossible : ${filePath}`, cause }),
   });
 
+const disableBrevoSync = () =>
+  Effect.sync(() => {
+    brevo.sync = async () => undefined;
+  });
+
 const findCandidates = (row: BeneficiaryRow) =>
   Effect.tryPromise({
     try: async (): Promise<YoungMatchCandidate[]> => {
+      if (!row.birthdate) {
+        return [];
+      }
       const docs = await YoungModel.find({
-        lastName: row.lastName,
+        birthdateAt: birthdateQueryRange(row.birthdate),
         anonymized: { $ne: true },
         status: { $ne: YOUNG_STATUS.DELETED },
       })
-        .collation({ locale: "fr", strength: 1 })
         .select({ firstName: 1, lastName: 1, birthdateAt: 1, statusPhase2: 1, roadCodeRefund: 1 })
         .lean();
       return docs.map((young) => ({ ...young, _id: String(young._id) }));
@@ -123,12 +134,15 @@ const reimburseYoung = (id: string) =>
       if (!young) {
         throw new Error("jeune introuvable au moment du save");
       }
+      if (young.roadCodeRefund === "true") {
+        return;
+      }
       young.set({
         roadCodeRefund: "true",
         roadCodeRefundDate: new Date(),
         roadCodeRefundOrganization: ORGANIZATION,
       });
-      await young.save();
+      await young.save({ fromUser: FROM_USER });
     },
     catch: (cause) => new DbError({ cause }),
   });
@@ -152,6 +166,9 @@ const processRow = (row: BeneficiaryRow) =>
     if (decision.status === "PHASE2_NOT_VALIDATED") {
       return unmatched(row, "PHASE2_NOT_VALIDATED", decision.youngs[0]);
     }
+    if (decision.status === "INVALID_BIRTHDATE" || decision.status === "MISSING_NAME" || decision.status === "SAVE_ERROR") {
+      return unmatched(row, decision.status);
+    }
     if (decision.status === "ALREADY") {
       return { _tag: "ALREADY" } as const;
     }
@@ -162,34 +179,37 @@ const processRow = (row: BeneficiaryRow) =>
     return { _tag: "REIMBURSED" } as const;
   }).pipe(Effect.catchAll(() => Effect.succeed(unmatched(row, "SAVE_ERROR"))));
 
-const writeUnmatchedFile = (lines: string[]) =>
+const writeErrorsFile = (lines: string[]) =>
   Effect.try({
     try: () => {
-      const unmatchedPath = path.resolve(UNMATCHED_FILE);
+      const errorsPath = path.resolve(ERRORS_FILE);
       if (lines.length > 0) {
-        fs.writeFileSync(unmatchedPath, [UNMATCHED_CSV_HEADER, ...lines].join("\n") + "\n", { mode: 0o600 });
-        return unmatchedPath;
+        fs.writeFileSync(errorsPath, [ERRORS_CSV_HEADER, ...lines].join("\n") + "\n", { mode: 0o600 });
+        return errorsPath;
       }
-      if (fs.existsSync(unmatchedPath)) {
-        fs.unlinkSync(unmatchedPath);
+      if (fs.existsSync(errorsPath)) {
+        fs.unlinkSync(errorsPath);
       }
       return null;
     },
-    catch: (cause) => new FileError({ reason: "Écriture du CSV des non traités impossible", cause }),
+    catch: (cause) => new FileError({ reason: "Écriture du CSV d'erreurs impossible", cause }),
   });
 
-const loadRows = (inputPath: string) =>
+const loadParsedFile = (inputPath: string) =>
   Effect.gen(function* () {
     const sheets = yield* readSheets(inputPath);
-    const rows = parseBeneficiaryRows(sheets);
-    if (rows.length === 0) {
+    const parsed = parseBeneficiaryRows(sheets);
+    if (parsed.rows.length === 0 && parsed.issues.length === 0) {
       return yield* Effect.fail(new FileError({ reason: "Aucune ligne bénéficiaire (en-tête Nom/Prénoms des bénéficiaires introuvable)." }));
     }
-    return rows;
+    return parsed;
   });
 
 const processRows = (rows: BeneficiaryRow[]) =>
   Effect.gen(function* () {
+    if (!DRY_RUN) {
+      yield* disableBrevoSync();
+    }
     const showProgress = Boolean(process.stdout.isTTY);
     const processed = yield* Ref.make(0);
     const outcomes = yield* Effect.forEach(
@@ -224,27 +244,32 @@ const program = Effect.gen(function* () {
     return yield* Effect.fail(new FileError({ reason: `Fichier introuvable : ${inputPath}` }));
   }
 
-  const rows = yield* loadRows(inputPath);
-  const outcomes = yield* Effect.acquireUseRelease(
-    Effect.tryPromise({
-      try: () => initDB(),
-      catch: (cause) => new DbError({ cause }),
-    }),
-    () => processRows(rows),
-    () => Effect.tryPromise(() => closeDB()).pipe(Effect.ignore),
-  );
+  const parsed = yield* loadParsedFile(inputPath);
+  const parseErrorOutcomes: RowOutcome[] = parsed.issues.map((issue) => unmatched(issue, issue.reason));
+  const matchOutcomes =
+    parsed.rows.length === 0
+      ? []
+      : yield* Effect.acquireUseRelease(
+          Effect.tryPromise({
+            try: () => initDB(),
+            catch: (cause) => new DbError({ cause }),
+          }),
+          () => processRows(parsed.rows),
+          () => Effect.tryPromise(() => closeDB()).pipe(Effect.ignore),
+        );
 
-  const stats = outcomes.reduce(accumulate, emptyStats(rows.length));
-  const unmatchedLines = outcomes.flatMap((outcome) => (outcome._tag === "UNMATCHED" ? [outcome.line] : []));
-  const unmatchedFile = yield* writeUnmatchedFile(unmatchedLines);
+  const outcomes = [...parseErrorOutcomes, ...matchOutcomes];
+  const stats = outcomes.reduce(accumulate, emptyStats(parsed.rows.length + parsed.issues.length));
+  const errorLines = outcomes.flatMap((outcome) => (outcome._tag === "UNMATCHED" ? [outcome.line] : []));
+  const errorsFile = yield* writeErrorsFile(errorLines);
 
   logger.info(
     JSON.stringify({
-      ok: stats.errors === 0,
+      ok: stats.errors === 0 && stats.notFound === 0 && stats.ambiguous === 0 && stats.phase2 === 0,
       dryRun: DRY_RUN,
       organization: ORGANIZATION,
       input: inputPath,
-      unmatchedFile,
+      errorsFile,
       ...stats,
     }),
   );
