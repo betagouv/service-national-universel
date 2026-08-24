@@ -2,10 +2,7 @@ export type BeneficiaryRow = {
   line: number;
   lastName: string;
   firstName: string;
-  neph: string;
   birthdate?: Date;
-  examCenter: string;
-  sessionDate: string;
 };
 
 export type YoungMatchCandidate = {
@@ -38,7 +35,6 @@ export type ParseResult = {
 
 const HEADER_LAST_NAME = "NOM DES BENEFICIAIRES";
 const HEADER_FIRST_NAME = "PRENOMS DES BENEFICIAIRES";
-const HEADER_NEPH = "NEPH";
 const HEADER_BIRTHDATE = "DATE DE NAISSANCE";
 
 export function normalizeName(value: string): string {
@@ -137,13 +133,12 @@ function normalizeHeader(value: unknown): string {
   return normalizeName(cellText(value));
 }
 
-function isBlankRow(row: unknown[], lastNameIndex: number, firstNameIndex: number, nephIndex: number, birthdateIndex: number): boolean {
+function isBlankRow(row: unknown[], lastNameIndex: number, firstNameIndex: number, birthdateIndex: number): boolean {
   const lastName = cellText(row[lastNameIndex]);
   const firstName = cellText(row[firstNameIndex]);
-  const neph = cellText(nephIndex >= 0 ? row[nephIndex] : "");
   const birthdate = row[birthdateIndex];
   const hasBirthdate = birthdate != null && cellText(birthdate) !== "";
-  return !lastName && !firstName && !neph && !hasBirthdate;
+  return !lastName && !firstName && !hasBirthdate;
 }
 
 export function parseBeneficiaryRows(sheets: unknown[][][]): ParseResult {
@@ -160,16 +155,13 @@ export function parseBeneficiaryRows(sheets: unknown[][][]): ParseResult {
     const header = (sheet[headerIndex] ?? []).map(normalizeHeader);
     const lastNameIndex = header.findIndex((cell) => cell.includes(HEADER_LAST_NAME));
     const firstNameIndex = header.findIndex((cell) => cell.includes(HEADER_FIRST_NAME));
-    const nephIndex = header.findIndex((cell) => cell.includes(HEADER_NEPH));
     const birthdateIndex = header.findIndex((cell) => cell.includes(HEADER_BIRTHDATE));
-    const centerIndex = header.findIndex((cell) => cell.includes("CENTRE D EXAMEN") || cell.includes("CENTRE"));
-    const sessionIndex = header.findIndex((cell) => cell.includes("DATE DE LA SESSION"));
     if (lastNameIndex < 0 || firstNameIndex < 0 || birthdateIndex < 0) {
       continue;
     }
     for (let i = headerIndex + 1; i < sheet.length; i++) {
       const row = sheet[i] ?? [];
-      if (isBlankRow(row, lastNameIndex, firstNameIndex, nephIndex, birthdateIndex)) {
+      if (isBlankRow(row, lastNameIndex, firstNameIndex, birthdateIndex)) {
         continue;
       }
       const lastName = cellText(row[lastNameIndex]);
@@ -178,9 +170,6 @@ export function parseBeneficiaryRows(sheets: unknown[][][]): ParseResult {
         line: i + 1,
         lastName,
         firstName,
-        neph: cellText(nephIndex >= 0 ? row[nephIndex] : ""),
-        examCenter: cellText(centerIndex >= 0 ? row[centerIndex] : ""),
-        sessionDate: cellText(sessionIndex >= 0 ? row[sessionIndex] : ""),
       };
       if (!lastName || !firstName) {
         issues.push({ ...base, reason: "MISSING_NAME" });
@@ -238,14 +227,11 @@ export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, y
     csvEscape(row.line),
     csvEscape(row.lastName),
     csvEscape(row.firstName),
-    csvEscape(row.neph),
     csvEscape(row.birthdate ? toYmd(row.birthdate, false) : ""),
-    csvEscape(row.examCenter),
-    csvEscape(row.sessionDate),
     csvEscape(reason),
     csvEscape(young?._id),
     csvEscape(young?.statusPhase2),
   ].join(",");
 }
 
-export const ERRORS_CSV_HEADER = ["ligne", "nom", "prenoms", "neph", "dateNaissance", "centre", "dateSession", "raison", "youngId", "statusPhase2"].join(",");
+export const ERRORS_CSV_HEADER = ["ligne", "nom", "prenoms", "dateNaissance", "raison", "youngId", "statusPhase2"].join(",");

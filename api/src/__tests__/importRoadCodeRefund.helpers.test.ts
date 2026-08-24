@@ -97,7 +97,6 @@ describe("parseBeneficiaryRows", () => {
     expect(parsed.issues).toHaveLength(0);
     expect(parsed.rows[0].lastName).toBe("RALAIMAZAVA");
     expect(parsed.rows[0].firstName).toBe("Mathieu");
-    expect(parsed.rows[0].neph).toBe("250494102260");
   });
 
   it("records unreadable birthdates and missing names as issues", () => {
@@ -118,10 +117,7 @@ describe("decideMatch", () => {
     line: 12,
     lastName: "RALAIMAZAVA",
     firstName: "Mathieu",
-    neph: "1",
     birthdate: new Date(2007, 5, 13),
-    examCenter: "La Poste",
-    sessionDate: "",
   };
 
   it("filters by birthdate then last name + first name", () => {
@@ -173,10 +169,7 @@ describe("unmatchedCsvLine", () => {
         line: 12,
         lastName: "CHERON",
         firstName: "Lohan",
-        neph: "251260100979",
         birthdate: new Date(2009, 4, 26),
-        examCenter: "PONT STE MAXENCE",
-        sessionDate: "2026-03-02",
       },
       "NOT_FOUND",
     );
@@ -185,7 +178,7 @@ describe("unmatchedCsvLine", () => {
   });
 
   it("allows a missing birthdate for parse errors", () => {
-    const line = unmatchedCsvLine({ line: 3, lastName: "X", firstName: "Y", neph: "", examCenter: "", sessionDate: "" }, "INVALID_BIRTHDATE");
+    const line = unmatchedCsvLine({ line: 3, lastName: "X", firstName: "Y" }, "INVALID_BIRTHDATE");
     expect(line).toContain("INVALID_BIRTHDATE");
   });
 });
