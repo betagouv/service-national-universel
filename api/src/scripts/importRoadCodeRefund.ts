@@ -96,7 +96,7 @@ const accumulate = (stats: Stats, outcome: RowOutcome): Stats => {
 const readSheets = (filePath: string) =>
   Effect.try({
     try: () => {
-      const workbook = XLSX.readFile(filePath, { cellDates: true });
+      const workbook = XLSX.readFile(filePath, { cellDates: false });
       return workbook.SheetNames.map((name) =>
         XLSX.utils.sheet_to_json<(string | number | Date | null)[]>(workbook.Sheets[name], { header: 1, raw: true, defval: null }),
       );

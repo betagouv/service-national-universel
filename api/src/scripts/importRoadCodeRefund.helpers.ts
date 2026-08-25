@@ -12,6 +12,8 @@ export type YoungMatchCandidate = {
   birthdateAt?: Date | string;
   statusPhase2?: string;
   roadCodeRefund?: string;
+  status?: string;
+  cohort?: string;
 };
 
 export type UnmatchedReason =
@@ -221,6 +223,136 @@ export function csvEscape(value: string | number | undefined | null): string {
     return `"${text.replace(/"/g, '""')}"`;
   }
   return text;
+}
+
+export type CloseMatch = {
+  young: YoungMatchCandidate;
+  score: number;
+  reasons: string[];
+};
+
+export function repairMojibake(value: string): string {
+  if (!value.includes("Ã") && !value.includes("Â")) {
+    return value;
+  }
+  const repaired = Buffer.from(value, "latin1").toString("utf8");
+  return repaired.includes("\uFFFD") ? value : repaired;
+}
+
+export function levenshtein(a: string, b: string): number {
+  if (a === b) {
+    return 0;
+  }
+  if (!a.length) {
+    return b.length;
+  }
+  if (!b.length) {
+    return a.length;
+  }
+  const prev = Array.from({ length: b.length + 1 }, (_, i) => i);
+  for (let i = 0; i < a.length; i++) {
+    const curr = [i + 1];
+    for (let j = 0; j < b.length; j++) {
+      const cost = a[i] === b[j] ? 0 : 1;
+      curr.push(Math.min(curr[j] + 1, prev[j + 1] + 1, prev[j] + cost));
+    }
+    for (let j = 0; j <= b.length; j++) {
+      prev[j] = curr[j];
+    }
+  }
+  return prev[b.length];
+}
+
+export function nameTokens(value: string): string[] {
+  return normalizeName(repairMojibake(value))
+    .split(" ")
+    .filter((token) => token.length >= 2);
+}
+
+function ymdUtcMs(ymd: string): number {
+  const [year, month, day] = ymd.split("-").map(Number);
+  return Date.UTC(year, month - 1, day);
+}
+
+export function birthdateDistanceDays(excelBirthdate: Date, dbBirthdate: Date | string): number {
+  const db = dbBirthdate instanceof Date ? dbBirthdate : new Date(dbBirthdate);
+  if (Number.isNaN(db.getTime()) || Number.isNaN(excelBirthdate.getTime())) {
+    return Number.POSITIVE_INFINITY;
+  }
+  const excelDays = [toYmd(excelBirthdate, false), toYmd(excelBirthdate, true)];
+  const dbDays = [toYmd(db, false), toYmd(db, true)];
+  let min = Number.POSITIVE_INFINITY;
+  for (const excelDay of excelDays) {
+    for (const dbDay of dbDays) {
+      min = Math.min(min, Math.abs(ymdUtcMs(excelDay) - ymdUtcMs(dbDay)) / 86_400_000);
+    }
+  }
+  return min;
+}
+
+export function rankCloseCandidates(row: BeneficiaryRow, candidates: YoungMatchCandidate[], limit = 5): CloseMatch[] {
+  const excelLast = normalizeName(repairMojibake(row.lastName));
+  const excelFirst = normalizeName(repairMojibake(row.firstName));
+  const excelLastTokens = nameTokens(row.lastName);
+  const ranked = candidates.flatMap((young) => {
+    if (!young.lastName || !young.firstName) {
+      return [];
+    }
+    const reasons: string[] = [];
+    let score = 0;
+    const dbLast = normalizeName(young.lastName);
+    const dbFirst = normalizeName(young.firstName);
+    const dbLastTokens = nameTokens(young.lastName);
+    if (excelLast && dbLast && excelLast === dbLast) {
+      reasons.push("LAST_NAME");
+      score += 50;
+    } else if (excelLastTokens.some((token) => dbLastTokens.includes(token))) {
+      reasons.push("LAST_NAME_TOKEN");
+      score += 30;
+    } else {
+      const lastDistance = levenshtein(excelLast, dbLast);
+      if (excelLast.length >= 5 && lastDistance > 0 && lastDistance <= 2) {
+        reasons.push("LAST_NAME_CLOSE");
+        score += lastDistance === 1 ? 25 : 15;
+      }
+    }
+    if (firstNamesMatch(repairMojibake(row.firstName), young.firstName)) {
+      reasons.push("FIRST_NAME");
+      score += 40;
+    } else {
+      const excelFirstToken = nameTokens(row.firstName)[0];
+      const dbFirstToken = nameTokens(young.firstName)[0];
+      if (excelFirstToken && excelFirstToken === dbFirstToken) {
+        reasons.push("FIRST_NAME_TOKEN");
+        score += 20;
+      } else {
+        const firstDistance = levenshtein(excelFirst, dbFirst);
+        if (excelFirst.length >= 4 && firstDistance > 0 && firstDistance <= 2) {
+          reasons.push("FIRST_NAME_CLOSE");
+          score += firstDistance === 1 ? 20 : 12;
+        }
+      }
+    }
+    if (row.birthdate && young.birthdateAt) {
+      const distance = birthdateDistanceDays(row.birthdate, young.birthdateAt);
+      if (distance === 0) {
+        reasons.push("BIRTHDATE");
+        score += 40;
+      } else if (distance <= 3) {
+        reasons.push("BIRTHDATE_CLOSE");
+        score += 20;
+      }
+    }
+    const hasLast = reasons.some((reason) => reason.startsWith("LAST_NAME"));
+    const hasFirst = reasons.some((reason) => reason.startsWith("FIRST_NAME"));
+    const hasDate = reasons.some((reason) => reason.startsWith("BIRTHDATE"));
+    const keep = (hasLast && hasFirst) || (hasLast && hasDate) || (hasFirst && hasDate && score >= 60);
+    if (!keep) {
+      return [];
+    }
+    return [{ young, score, reasons }];
+  });
+  return ranked.sort((a, b) => b.score - a.score || a.young._id.localeCompare(b.young._id)).slice(0, limit);
 }
 
 export function unmatchedCsvLine(row: BeneficiaryRow, reason: UnmatchedReason, youngs: YoungMatchCandidate[] = []): string {

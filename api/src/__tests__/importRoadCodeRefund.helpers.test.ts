@@ -7,6 +7,7 @@ import {
   normalizeName,
   parseBeneficiaryRows,
   parseExcelDate,
+  rankCloseCandidates,
   unmatchedCsvLine,
 } from "../scripts/importRoadCodeRefund.helpers";
 
@@ -79,6 +80,7 @@ describe("parseExcelDate", () => {
     expect(fromFr && fromFr.getFullYear() === 2007 && fromFr.getMonth() === 5 && fromFr.getDate() === 13).toBe(true);
     const fromSerial = parseExcelDate(39246);
     expect(fromSerial?.toISOString().slice(0, 10)).toBe("2007-06-13");
+    expect(fromSerial && fromSerial.getFullYear() === 2007 && fromSerial.getMonth() === 5 && fromSerial.getDate() === 13).toBe(true);
   });
 });
 
@@ -198,5 +200,46 @@ describe("unmatchedCsvLine", () => {
     );
     expect(line).toContain("AMBIGUOUS");
     expect(line).toContain("id-a;id-b");
+  });
+});
+
+describe("rankCloseCandidates", () => {
+  const row = {
+    line: 1,
+    lastName: "NDORIMANA-NIZIGAMA",
+    firstName: "Dan-Marcus",
+    birthdate: new Date(2008, 6, 2),
+  };
+
+  it("keeps a hyphenated last name token match with the same first name", () => {
+    const ranked = rankCloseCandidates(row, [
+      {
+        _id: "a",
+        lastName: "NDORIMANA",
+        firstName: "Dan Marcus",
+        birthdateAt: new Date("2008-07-02T00:00:00.000Z"),
+        statusPhase2: "VALIDATED",
+      },
+      { _id: "b", lastName: "DUPONT", firstName: "Paul", birthdateAt: new Date("2001-01-01T00:00:00.000Z") },
+    ]);
+    expect(ranked.map((item) => item.young._id)).toEqual(["a"]);
+    expect(ranked[0].reasons).toEqual(expect.arrayContaining(["LAST_NAME_TOKEN", "FIRST_NAME"]));
+  });
+
+  it("keeps a one-typo last name with the same birthdate", () => {
+    const ranked = rankCloseCandidates(
+      { line: 1, lastName: "MORCRETTE", firstName: "Matthiad", birthdate: new Date(2008, 7, 25) },
+      [
+        {
+          _id: "a",
+          lastName: "MORCRETTE",
+          firstName: "Matthias",
+          birthdateAt: new Date("2008-08-25T00:00:00.000Z"),
+          statusPhase2: "VALIDATED",
+        },
+      ],
+    );
+    expect(ranked).toHaveLength(1);
+    expect(ranked[0].reasons).toEqual(expect.arrayContaining(["LAST_NAME", "FIRST_NAME_CLOSE"]));
   });
 });
