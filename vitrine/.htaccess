@@ -1,9 +1,6 @@
 AuthType Basic
 AuthName "Vitrine SNU"
-# Ajuster selon l’hébergement : Apache résout un chemin relatif par rapport à ServerRoot.
-# AuthUserFile .htpasswd
-# AuthUserFile /chemin/absolu/vers/vitrine/.htpasswd
-AuthUserFile %{DOCUMENT_ROOT}/.htpasswd
+AuthUserFile .htpasswd
 Require valid-user
 
 <Files ".htpasswd">
