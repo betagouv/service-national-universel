@@ -1,8 +1,0 @@
-AuthType Basic
-AuthName "Vitrine SNU"
-AuthUserFile .htpasswd
-Require valid-user
-
-<Files ".htpasswd">
-	Require all denied
-</Files>
