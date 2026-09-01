@@ -220,7 +220,7 @@ const Dashboard = (props) => {
         <div className="help-section">
           <div className="help-section-block">
             <div className="help-section-text" style={{ color: "#6B7280" }}>
-              Le support du SNU sera exceptionnellement ralenti du <strong>1er août au 1er septembre inclus</strong>. Nous traiterons votre demande dès que possible. Vous recevrez
+              Contactez nos équipes. Nous travaillons généralement du <strong>lundi au vendredi de 9h00 à 18h00</strong> et traiterons votre demande dès que possible. Vous recevrez
               une réponse par mail.
             </div>
             <div className="buttons mt-4">
