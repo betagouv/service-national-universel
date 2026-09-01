@@ -106,7 +106,7 @@ const readSheets = (filePath: string) =>
 
 const disableBrevoSync = () =>
   Effect.sync(() => {
-    brevo.sync = async () => undefined;
+    (brevo as { sync: typeof brevo.sync }).sync = async () => undefined;
   });
 
 const findCandidates = (row: BeneficiaryRow) =>
@@ -172,14 +172,14 @@ const processRow = (row: BeneficiaryRow) =>
     if (decision.status === "INVALID_BIRTHDATE" || decision.status === "MISSING_NAME" || decision.status === "SAVE_ERROR" || decision.status === "LOOKUP_ERROR") {
       return unmatched(row, decision.status);
     }
-    if (decision.status === "ALREADY") {
-      return { _tag: "ALREADY" } as const;
+    if (decision.status === "MATCH") {
+      if (DRY_RUN) {
+        return { _tag: "MATCH" } as const;
+      }
+      yield* reimburseYoung(decision.young._id);
+      return { _tag: "REIMBURSED" } as const;
     }
-    if (DRY_RUN) {
-      return { _tag: "MATCH" } as const;
-    }
-    yield* reimburseYoung(decision.young._id);
-    return { _tag: "REIMBURSED" } as const;
+    return { _tag: "ALREADY" } as const;
   }).pipe(Effect.catchAll(() => Effect.succeed(unmatched(row, "SAVE_ERROR"))));
 
 const writeErrorsFile = (lines: string[]) =>
