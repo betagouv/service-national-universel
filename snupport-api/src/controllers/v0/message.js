@@ -108,13 +108,13 @@ router.post(
 
       ticket = await matchVentilationRule(ticket);
 
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message });
+
       if (isDateInRange(new Date(), weekendRanges)) {
         const templateId = SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED;
         await sendTemplate(templateId, {
           emailTo: [{ email: user.email }],
         });
-      } else {
-        await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message });
       }
     }
     if (!ticket) return res.status(400).send({ ok: false, code: WRONG_REQUEST });
