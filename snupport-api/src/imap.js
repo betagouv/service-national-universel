@@ -32,8 +32,6 @@ cron.schedule("*/30 * * * *", () => {
 
 async function addMessage(mail) {
   try {
-    const isSupportClosed = isDateInRange(new Date(), weekendRanges);
-
     // create contact if it doesnt exist yet
     let contact = await ContactModel.findOne({ email: mail.fromAddress.toLowerCase() });
     if (!contact) contact = await ContactModel.create({ firstName: mail.fromName, lastName: "", email: mail.fromAddress.toLowerCase() });
@@ -86,9 +84,7 @@ async function addMessage(mail) {
       if (mail.copyRecipient) obj.copyRecipient = mail.copyRecipient;
       ticket = await TicketModel.create(obj);
       ticket = await matchVentilationRule(ticket);
-      if (!isSupportClosed) {
-        await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text, attachment: [] });
-      }
+      await sendNotif({ ticket, templateId: SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED, message: mail.text, attachment: [] });
     }
 
     // create message
@@ -138,7 +134,7 @@ async function addMessage(mail) {
     ticket.updatedAt = new Date();
     await ticket.save();
 
-    if (isSupportClosed) {
+    if (isDateInRange(new Date(), weekendRanges)) {
       const templateId = SENDINBLUE_TEMPLATES.SNUPPORT_CLOSED;
       await sendTemplate(templateId, {
         emailTo: [{ email: contact.email }],
