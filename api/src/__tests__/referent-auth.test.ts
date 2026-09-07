@@ -5,6 +5,7 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import getNewStructureFixture from "./fixtures/structure";
 import { createReferentHelper, getReferentByIdHelper } from "./helpers/referent";
 import { dbConnect, dbClose } from "./helpers/db";
+import { ReferentModel, StructureModel } from "../models";
 import { fakerFR as faker } from "@faker-js/faker";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
@@ -75,82 +76,27 @@ describe("Referent", () => {
   });
   describe("POST /referent/signup", () => {
     const structureFixture = getNewStructureFixture();
-    it("should return 400 when no email, no password, wrong email, no firstname or no lastname", async () => {
-      res = await request(getAppHelper()).post("/referent/signup");
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo", password: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ password: "foo", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", password: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: "foo@bar.fr", password: "bar", firstName: "foo", ...structureFixture });
-      expect(res.status).toBe(400);
-    });
-
-    it("should return 400 when password does not match requirments", async () => {
+    it("should reject public registrations without creating a referent or structure", async () => {
       const fixture = getNewReferentFixture();
       const email = fixture.email?.toLowerCase();
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: "bar", firstName: "foo", lastName: "bar", ...structureFixture });
-      expect(res.status).toBe(400);
-    });
+      const referentCount = await ReferentModel.countDocuments();
+      const structureCount = await StructureModel.countDocuments();
 
-    it("should return 200", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
-    });
+      const [emptyPayloadResponse, validPayloadResponse] = await Promise.all([
+        request(getAppHelper()).post("/referent/signup"),
+        request(getAppHelper())
+          .post("/referent/signup")
+          .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture }),
+      ]);
 
-    it("should transform firstName and lastName", async () => {
-      const fixture = getNewReferentFixture();
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email: fixture.email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.body.user.firstName).toBe("Foo");
-      expect(res.body.user.lastName).toBe("BAR");
-      expect(res.body.user.email).toBe(fixture.email?.toLowerCase());
-    });
-
-    it("should return 409 when user already exists", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      await createReferentHelper({ ...fixture, email });
-      const res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", acceptCGU: "true", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(409);
-    });
-    it("should return 400 when user doesnt specify CGU choice", async () => {
-      const fixture = getNewReferentFixture();
-      const email = fixture.email?.toLowerCase();
-      await createReferentHelper({ ...fixture, email });
-      res = await request(getAppHelper())
-        .post("/referent/signup")
-        .send({ email, password: VALID_PASSWORD, firstName: "foo", lastName: "bar", phone: "0606060606", ...structureFixture });
-      expect(res.status).toBe(400);
+      for (const response of [emptyPayloadResponse, validPayloadResponse]) {
+        expect(response.status).toBe(403);
+        expect(response.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+        expect(response.body.token).toBeUndefined();
+        expect(response.headers["set-cookie"]).toBeUndefined();
+      }
+      expect(await ReferentModel.countDocuments()).toBe(referentCount);
+      expect(await StructureModel.countDocuments()).toBe(structureCount);
     });
   });
   describe("POST /referent/logout", () => {
