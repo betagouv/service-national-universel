@@ -9,7 +9,6 @@ import InvitationExpired from "./invitationexpired";
 import Reset from "./reset";
 import Signin from "./signin";
 import Signin2FA from "./signin2FA";
-import Signup from "./signup";
 import SignupInvite from "./signupInvite";
 import api, { setJwtToken } from "../../services/api";
 import { setUser } from "../../redux/auth/actions";
@@ -51,7 +50,6 @@ export default function AuthIndex() {
         <SentryRoute path="/auth/reset" component={Reset} />
         <SentryRoute path="/auth/forgot" component={Forgot} />
         <SentryRoute path="/auth/signup/invite" component={SignupInvite} />
-        <SentryRoute path="/auth/signup" component={Signup} />
         <SentryRoute path="/auth/invitationexpired" component={InvitationExpired} />
         <SentryRoute exact path="/auth/2fa" component={Signin2FA} />
         <SentryRoute exact path="/auth" component={Signin} />
