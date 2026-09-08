@@ -1,57 +1,111 @@
-import { ROLES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, PermissionDto } from "snu-lib";
 
 import { buildStructureScopeFilter } from "./Structure.scope";
 
+// Mirrors production STRUCTURE READ policies seeded by
+// api/migrations/20250624122150-seed-responsable-permissions.js.
+const adminAcl: PermissionDto[] = [
+    { code: "STRUCTURE_FULL", action: PERMISSION_ACTIONS.FULL, resource: PERMISSION_RESOURCES.STRUCTURE, policy: [] },
+];
+
+const referentRegionAcl: PermissionDto[] = [
+    {
+        code: "STRUCTURE_REGIONread",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        policy: [{ where: [{ field: "region", source: "region" }] } as any],
+    },
+];
+
+const referentDepartmentAcl: PermissionDto[] = [
+    {
+        code: "STRUCTURE_DEPARTEMENTread",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        policy: [{ where: [{ field: "department", source: "department" }] } as any],
+    },
+];
+
+const responsibleAcl: PermissionDto[] = [
+    {
+        code: "STRUCTURE_SAME_STRUCTUREread",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        policy: [{ where: [{ field: "_id", source: "structureId" }] } as any],
+    },
+];
+
+// Supervisor accumulates both the "tête de réseau" and "same structure" policies (order matters).
+const supervisorAcl: PermissionDto[] = [
+    {
+        code: "STRUCTURE_TETERESEAUread",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        policy: [{ where: [{ field: "networkId", source: "structureId" }] } as any],
+    },
+    {
+        code: "STRUCTURE_SAME_STRUCTUREread",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.STRUCTURE,
+        policy: [{ where: [{ field: "_id", source: "structureId" }] } as any],
+    },
+];
+
+const otherResourceAcl: PermissionDto[] = [
+    {
+        code: "MISSION_READ",
+        action: PERMISSION_ACTIONS.READ,
+        resource: PERMISSION_RESOURCES.MISSION,
+        policy: [{ where: [{ field: "structureId", source: "structureId" }] } as any],
+    },
+];
+
 describe("buildStructureScopeFilter", () => {
-    it("returns null (no restriction) for an ADMIN", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.ADMIN })).toBeNull();
+    it("returns null (no restriction) for an admin (FULL permission without policy)", () => {
+        expect(buildStructureScopeFilter({ acl: adminAcl })).toBeNull();
     });
 
-    it("returns a region filter for a REFERENT_REGION with a region", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.REFERENT_REGION, region: "Bretagne" })).toEqual({
-            region: "Bretagne",
+    it("returns a region filter for a referent_region with a region", () => {
+        expect(buildStructureScopeFilter({ acl: referentRegionAcl, region: "Bretagne" })).toEqual({
+            $or: [{ region: "Bretagne" }],
         });
     });
 
-    it("returns undefined (forbidden) for a REFERENT_REGION without a region", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.REFERENT_REGION })).toBeUndefined();
+    it("returns undefined (forbidden) for a referent_region without a region", () => {
+        expect(buildStructureScopeFilter({ acl: referentRegionAcl, region: "" })).toBeUndefined();
     });
 
-    it("returns a department $in filter for a REFERENT_DEPARTMENT with departements", () => {
+    it("returns a department $in filter for a referent_department with departements", () => {
         expect(
-            buildStructureScopeFilter({ role: ROLES.REFERENT_DEPARTMENT, departement: ["A", "B"] }),
-        ).toEqual({ department: { $in: ["A", "B"] } });
+            buildStructureScopeFilter({ acl: referentDepartmentAcl, departement: ["A", "B"] }),
+        ).toEqual({ $or: [{ department: { $in: ["A", "B"] } }] });
     });
 
-    it("returns undefined (forbidden) for a REFERENT_DEPARTMENT with an empty departement array", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.REFERENT_DEPARTMENT, departement: [] })).toBeUndefined();
+    it("returns undefined (forbidden) for a referent_department with an empty departement array", () => {
+        expect(buildStructureScopeFilter({ acl: referentDepartmentAcl, departement: [] })).toBeUndefined();
     });
 
-    it("returns undefined (forbidden) for a REFERENT_DEPARTMENT with no departement", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.REFERENT_DEPARTMENT })).toBeUndefined();
-    });
-
-    it("returns an $or structureId filter for a RESPONSIBLE with a structureId", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.RESPONSIBLE, structureId: "s1" })).toEqual({
-            $or: [{ _id: "s1" }, { networkId: "s1" }],
+    it("returns an $or _id filter for a responsible with a structureId", () => {
+        expect(buildStructureScopeFilter({ acl: responsibleAcl, structureId: "s1" })).toEqual({
+            $or: [{ _id: "s1" }],
         });
     });
 
-    it("returns undefined (forbidden) for a RESPONSIBLE without a structureId", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.RESPONSIBLE })).toBeUndefined();
-    });
-
-    it("returns an $or structureId filter for a SUPERVISOR with a structureId", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.SUPERVISOR, structureId: "s1" })).toEqual({
-            $or: [{ _id: "s1" }, { networkId: "s1" }],
+    it("returns an $or networkId/_id filter for a supervisor with a structureId, in policy order", () => {
+        expect(buildStructureScopeFilter({ acl: supervisorAcl, structureId: "s1" })).toEqual({
+            $or: [{ networkId: "s1" }, { _id: "s1" }],
         });
     });
 
-    it("returns undefined (forbidden) for a SUPERVISOR without a structureId", () => {
-        expect(buildStructureScopeFilter({ role: ROLES.SUPERVISOR })).toBeUndefined();
+    it("returns undefined (forbidden) for a supervisor without a structureId", () => {
+        expect(buildStructureScopeFilter({ acl: supervisorAcl })).toBeUndefined();
     });
 
-    it("returns undefined (forbidden) for an unknown role", () => {
-        expect(buildStructureScopeFilter({ role: "unknown" as any })).toBeUndefined();
+    it("returns undefined (forbidden) for a user with no acl", () => {
+        expect(buildStructureScopeFilter({})).toBeUndefined();
+    });
+
+    it("returns undefined (forbidden) for a user whose acl only covers another resource", () => {
+        expect(buildStructureScopeFilter({ acl: otherResourceAcl, structureId: "s1" })).toBeUndefined();
     });
 });
