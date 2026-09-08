@@ -70,3 +70,4 @@ Les déploiements sont effectués de maniere hebdomadaire. Pour lancer un déplo
 Plus d'information sur la plateforme du Service National Universel et l'engagement civique ici : [https://beta.gouv.fr/startups/snu.html](https://beta.gouv.fr/startups/snu.html)
 
 Pour contacter l’équipe: <contact@snu.gouv.fr>
+
