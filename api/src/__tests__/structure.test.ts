@@ -40,6 +40,7 @@ beforeAll(async () => {
 
   await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.MISSION, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
+  await addPermissionHelper([ROLES.SUPERVISOR], PERMISSION_RESOURCES.USER_HISTORY, PERMISSION_ACTIONS.READ);
 });
 afterAll(dbClose);
 afterEach(resetAppAuth);
@@ -200,6 +201,28 @@ describe("Structure", () => {
           }),
         ]),
       );
+    });
+    it("should return 403 (not 404) to a RESPONSIBLE for an unknown structure", async () => {
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: "000000000000000000000001" }))
+        .get(`/structure/${notExistingStructureId}/patches`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+    it("SUPERVISOR should get 403 on the history of a structure outside their network", async () => {
+      const mine = await createStructureHelper({ ...getNewStructureFixture(), name: "mine", isNetwork: "true" });
+      const other = await createStructureHelper({ ...getNewStructureFixture(), name: "other" });
+      other.name = "OTHER RENAMED";
+      await other.save();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${other._id}/patches`);
+      expect(res.status).toBe(403);
+    });
+    it("SUPERVISOR should read the history of their own network structure", async () => {
+      const mine = await createStructureHelper({ ...getNewStructureFixture(), name: "mine", isNetwork: "true" });
+      mine.name = "MINE RENAMED";
+      await mine.save();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${mine._id}/patches`);
+      expect(res.status).toBe(200);
+      expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MINE RENAMED" })]) })]));
     });
   });
 

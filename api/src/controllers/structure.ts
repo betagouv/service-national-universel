@@ -257,8 +257,25 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
+      if (
+        !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.USER_HISTORY, ignorePolicy: true }) &&
+        !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.PATCH, ignorePolicy: true })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      if (
+        !isReadAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: structure.toJSON() },
+        })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
       const structurePatches = await patches.get(req, StructureModel);
       if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
