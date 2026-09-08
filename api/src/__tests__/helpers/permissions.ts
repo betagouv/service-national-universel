@@ -17,7 +17,7 @@ export const addPermissionHelper = async (
     }
   }
   await PermissionModel.create({
-    code: `${resource}_${action}_${new Date().getTime()}`,
+    code: `${resource}_${action}_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
     titre: `${resource} ${action}`,
     resource,
     action,
