@@ -30,14 +30,17 @@ export class StructureRepository implements StructureGateway {
         return StructureMapper.toModels(structures);
     }
 
-    async findAll(projection?: StructureProjection[]): Promise<Partial<StructureModel>[]> {
+    async findAll(
+        projection?: StructureProjection[],
+        filter?: Record<string, unknown> | null,
+    ): Promise<Partial<StructureModel>[]> {
         const projectionObj: Record<string, 1> = {};
         if (projection && projection.length > 0) {
             projection.forEach((key) => {
                 projectionObj[key] = 1;
             });
         }
-        const structures = await this.structureMongooseEntity.find({}, { ...projectionObj, _id: 1 });
+        const structures = await this.structureMongooseEntity.find(filter ?? {}, { ...projectionObj, _id: 1 });
         return StructureMapper.toModelProjections(structures, { ...projectionObj, id: 1 });
     }
 }
