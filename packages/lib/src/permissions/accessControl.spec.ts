@@ -264,4 +264,28 @@ describe("isAuthorized", () => {
       expect(result).toBe(true);
     });
   });
+
+  describe("fail-closed on empty values", () => {
+    const acl = [{ resource: "structure", action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "region", source: "region" }] }] }];
+
+    it("refuses when both user value and context value are undefined", () => {
+      const user = { _id: "u1", acl } as any;
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { name: "x" } } })).toBe(false);
+    });
+
+    it("refuses when both are empty strings", () => {
+      const user = { _id: "u1", region: "", acl } as any;
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { region: "" } } })).toBe(false);
+    });
+
+    it("refuses when the context resource is missing", () => {
+      const user = { _id: "u1", region: "Bretagne", acl } as any;
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: {} })).toBe(false);
+    });
+
+    it("still accepts a real match", () => {
+      const user = { _id: "u1", region: "Bretagne", acl } as any;
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { region: "Bretagne" } } })).toBe(true);
+    });
+  });
 });

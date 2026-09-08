@@ -29,15 +29,23 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
         if (policy.where?.length) {
           for (const where of policy.where) {
             const contextResource = where.resource || resource;
+            const contextValue = contextUpdated[contextResource]?.[where.field];
+            // fail-closed : une valeur absente ne peut jamais matcher
+            if (contextValue === undefined || contextValue === null || contextValue === "") {
+              authorized.push(false);
+              continue;
+            }
             if (where.source) {
               const userValue = user[where.source];
               if (Array.isArray(userValue)) {
-                authorized.push(userValue.includes(String(contextUpdated[contextResource]?.[where.field])));
+                authorized.push(userValue.filter(Boolean).map(String).includes(String(contextValue)));
+              } else if (userValue === undefined || userValue === null || userValue === "") {
+                authorized.push(false);
               } else {
-                authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(userValue));
+                authorized.push(String(contextValue) === String(userValue));
               }
             } else if (where.value) {
-              authorized.push(String(contextUpdated[contextResource]?.[where.field]) === String(where.value));
+              authorized.push(String(contextValue) === String(where.value));
             } else {
               authorized.push(false);
             }
