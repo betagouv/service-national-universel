@@ -19,6 +19,7 @@ import {
   isReadAuthorized,
   isWriteAuthorized,
   isResponsible,
+  getPolicyMongoFilter,
 } from "snu-lib";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
@@ -336,7 +337,11 @@ router.get(
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const data = await StructureModel.find({});
+      // Périmètre issu des policies de l'ACL : null = aucune restriction (admin), undefined = aucun accès exploitable.
+      const scope = getPolicyMongoFilter({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ });
+      if (scope === undefined) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const data = await StructureModel.find(scope ?? {});
       return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
     } catch (error) {
       capture(error);

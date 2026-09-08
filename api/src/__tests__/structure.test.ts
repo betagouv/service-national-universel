@@ -20,7 +20,24 @@ jest.mock("../brevo", () => ({
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } });
-  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
+
+  // Structure : même jeu que la migration 20250624122150 (policies incluses)
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
+  for (const action of [PERMISSION_ACTIONS.READ, PERMISSION_ACTIONS.WRITE]) {
+    await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, action, [
+      { where: [{ field: "region", source: "region" }], blacklist: [], whitelist: [] },
+    ]);
+    await addPermissionHelper([ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.STRUCTURE, action, [
+      { where: [{ field: "department", source: "department" }], blacklist: [], whitelist: [] },
+    ]);
+    await addPermissionHelper([ROLES.SUPERVISOR], PERMISSION_RESOURCES.STRUCTURE, action, [
+      { where: [{ field: "networkId", source: "structureId" }], blacklist: [], whitelist: [] },
+    ]);
+    await addPermissionHelper([ROLES.RESPONSIBLE, ROLES.SUPERVISOR], PERMISSION_RESOURCES.STRUCTURE, action, [
+      { where: [{ field: "_id", source: "structureId" }], blacklist: [], whitelist: [] },
+    ]);
+  }
+
   await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.MISSION, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
 });
@@ -187,11 +204,48 @@ describe("Structure", () => {
   });
 
   describe("GET /structure", () => {
-    it("should return all structures", async () => {
+    it("ADMIN should return all structures", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
       const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN })).get("/structure");
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: structure._id.toString() })]));
+    });
+
+    it("RESPONSIBLE should only see their own structure", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const other = await createStructureHelper({ ...getNewStructureFixture(), name: "other" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get("/structure");
+      expect(res.status).toBe(200);
+      const ids = res.body.data.map((s) => s._id);
+      expect(ids).toContain(own._id.toString());
+      expect(ids).not.toContain(other._id.toString());
+    });
+
+    it("SUPERVISOR should see their network and its children only", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const child = await createStructureHelper({ ...getNewStructureFixture(), name: "child", networkId: network._id.toString() });
+      const other = await createStructureHelper({ ...getNewStructureFixture(), name: "other" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() })).get("/structure");
+      expect(res.status).toBe(200);
+      const ids = res.body.data.map((s) => s._id);
+      expect(ids).toEqual(expect.arrayContaining([network._id.toString(), child._id.toString()]));
+      expect(ids).not.toContain(other._id.toString());
+    });
+
+    it("REFERENT_DEPARTMENT should only see structures of their departments", async () => {
+      const inDep = await createStructureHelper({ ...getNewStructureFixture(), department: "Loire-Atlantique" });
+      const outDep = await createStructureHelper({ ...getNewStructureFixture(), department: "Vendée" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"] })).get("/structure");
+      expect(res.status).toBe(200);
+      const ids = res.body.data.map((s) => s._id);
+      expect(ids).toContain(inDep._id.toString());
+      expect(ids).not.toContain(outDep._id.toString());
+    });
+
+    it("RESPONSIBLE without structureId should get 403 (fail-closed)", async () => {
+      await createStructureHelper(getNewStructureFixture());
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE })).get("/structure");
+      expect(res.status).toBe(403);
     });
   });
 
