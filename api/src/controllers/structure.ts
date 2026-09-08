@@ -227,8 +227,9 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const data = await StructureModel.find({ networkId: structure._id });
-      return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+      // Liste d'affiliation : seuls les champs d'identification sont nécessaires (pas de coordonnées du représentant).
+      const data = await StructureModel.find({ networkId: structure._id }).select("_id name networkName isNetwork region department").lean();
+      return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -281,6 +282,8 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
+      // Vérification dupliquée intentionnellement : reproduit en amont le contrôle fait par patches.get, afin de
+      // répondre 403 (et non 500) et d'éviter de révéler l'existence de la structure avant ce contrôle.
       if (
         !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.USER_HISTORY, ignorePolicy: true }) &&
         !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.PATCH, ignorePolicy: true })

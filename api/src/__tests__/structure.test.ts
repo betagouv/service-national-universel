@@ -276,6 +276,16 @@ describe("Structure", () => {
       expect(ids).not.toContain(outDep._id.toString());
     });
 
+    it("REFERENT_REGION should only see structures of their region", async () => {
+      const inRegion = await createStructureHelper({ ...getNewStructureFixture(), region: "Bretagne" });
+      const outRegion = await createStructureHelper({ ...getNewStructureFixture(), region: "Occitanie" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Bretagne" })).get("/structure");
+      expect(res.status).toBe(200);
+      const ids = res.body.data.map((s) => s._id);
+      expect(ids).toContain(inRegion._id.toString());
+      expect(ids).not.toContain(outRegion._id.toString());
+    });
+
     it("RESPONSIBLE without structureId should get 403 (fail-closed)", async () => {
       await createStructureHelper(getNewStructureFixture());
       const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE })).get("/structure");
@@ -338,6 +348,22 @@ describe("Structure", () => {
       await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id.toString(), name: "child" });
       const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${network._id}/children`);
       expect(res.status).toBe(403);
+    });
+    it("should not expose structureManager, address nor siret on children", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const child = await createStructureHelper({
+        ...getNewStructureFixture(),
+        networkId: network._id.toString(),
+        name: "child",
+        structureManager: { firstName: "Jean", lastName: "Dupont", mobile: "0600000000", email: "jean@example.org", role: "Président" },
+      });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() })).get(`/structure/${network._id}/children`);
+      expect(res.status).toBe(200);
+      const returnedChild = res.body.data.find((s) => s._id === child._id.toString());
+      expect(returnedChild).toBeDefined();
+      expect(returnedChild.structureManager).toBeUndefined();
+      expect(returnedChild.address).toBeUndefined();
+      expect(returnedChild.siret).toBeUndefined();
     });
   });
 

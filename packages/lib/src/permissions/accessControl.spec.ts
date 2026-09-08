@@ -287,5 +287,13 @@ describe("isAuthorized", () => {
       const user = { _id: "u1", region: "Bretagne", acl } as any;
       expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { region: "Bretagne" } } })).toBe(true);
     });
+
+    it("matches when the context value is one of the user's array entries, ignoring empty entries", () => {
+      const aclDep = [{ resource: "structure", action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "department", source: "department" }] }] }];
+      const user = { _id: "u1", department: ["", "Loire-Atlantique"], acl: aclDep } as any;
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { department: "Loire-Atlantique" } } })).toBe(true);
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { department: "Vendée" } } })).toBe(false);
+      expect(isAuthorized({ user, resource: "structure", action: PERMISSION_ACTIONS.READ, context: { structure: { department: "" } } })).toBe(false);
+    });
   });
 });
