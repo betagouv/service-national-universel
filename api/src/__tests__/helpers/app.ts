@@ -36,8 +36,6 @@ export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & {
       // @ts-ignore
       user.acl = await getAcl(user as any);
     }
-    // @ts-ignore
-    console.log("userWithAcl", user?._id, JSON.stringify(user?.acl, null, 2));
     return getAppHelper(user, authStrategy);
   } else {
     return getAppHelper({ role: ROLES.ADMIN, acl: await getAcl({ role: ROLES.ADMIN }) } as any, authStrategy);

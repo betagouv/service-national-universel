@@ -9,7 +9,11 @@ import { validateId } from "../utils/validator";
 import { ClasseModel } from "../models";
 import { RouteRequest, UserRequest } from "./request";
 
-export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: Model<any>): Promise<any[]> => {
+/**
+ * Historique d'un document. `preloaded` permet de réutiliser un document déjà chargé par l'appelant
+ * (par exemple pour un contrôle de périmètre) au lieu de le relire en base.
+ */
+export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: Model<any>, preloaded?: any): Promise<any[]> => {
   try {
     const { error, value } = Joi.object({ id: Joi.string().required() })
       .unknown()
@@ -26,7 +30,7 @@ export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: 
       throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
     }
 
-    const elem = await model.findById(value.id);
+    const elem = preloaded && String(preloaded._id) === String(value.id) ? preloaded : await model.findById(value.id);
     if (!elem) throw new Error(ERRORS.NOT_FOUND);
 
     const data = await elem.patches.find({ ref: elem.id }).sort("-date").lean();
