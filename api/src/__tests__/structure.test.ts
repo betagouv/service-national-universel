@@ -292,6 +292,21 @@ describe("Structure", () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: network._id.toString() })]));
     });
+    it("should not expose structureManager nor address on networks", async () => {
+      await createStructureHelper({
+        ...getNewStructureFixture(),
+        name: "network",
+        isNetwork: "true",
+        structureManager: { firstName: "Jean", lastName: "Dupont", mobile: "0600000000", email: "jean@example.org", role: "Président" },
+      });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: "000000000000000000000001" })).get("/structure/networks");
+      expect(res.status).toBe(200);
+      const network = res.body.data.find((s) => s.name === "network");
+      expect(network).toBeDefined();
+      expect(network.structureManager).toBeUndefined();
+      expect(network.address).toBeUndefined();
+      expect(network.siret).toBeUndefined();
+    });
   });
 
   describe("GET /structure/:id/children", () => {

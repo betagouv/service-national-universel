@@ -189,9 +189,10 @@ router.get(
   [permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }])],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const data = await StructureModel.find({ isNetwork: "true" }).sort("name");
       if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
+      // Liste d'affiliation : seuls les champs d'identification sont nécessaires (pas de coordonnées du représentant).
+      const data = await StructureModel.find({ isNetwork: "true" }).select("_id name networkName isNetwork region department").sort("name").lean();
+      return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
