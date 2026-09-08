@@ -303,6 +303,27 @@ describe("Structure", () => {
       expect(res.status).toBe(200);
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: structure._id.toString() })]));
     });
+    it("SUPERVISOR should list children of their own network", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const child = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id.toString(), name: "child" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() })).get(`/structure/${network._id}/children`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.map((s) => s._id)).toContain(child._id.toString());
+    });
+    it("RESPONSIBLE should get 403 on children of another network", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id.toString(), name: "child" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get(`/structure/${network._id}/children`);
+      expect(res.status).toBe(403);
+    });
+    it("SUPERVISOR should get 403 on children of another network", async () => {
+      const mine = await createStructureHelper({ ...getNewStructureFixture(), name: "mine", isNetwork: "true" });
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id.toString(), name: "child" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${network._id}/children`);
+      expect(res.status).toBe(403);
+    });
   });
 
   describe("GET /structure/:id/mission", () => {

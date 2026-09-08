@@ -215,6 +215,17 @@ router.get(
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // Le réseau parent doit être dans le périmètre de lecture de l'utilisateur.
+      if (
+        !isReadAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: structure.toJSON() },
+        })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       const data = await StructureModel.find({ networkId: structure._id });
       return res.status(200).send({ ok: true, data: serializeArray(data, req.user, serializeStructure) });
     } catch (error) {
