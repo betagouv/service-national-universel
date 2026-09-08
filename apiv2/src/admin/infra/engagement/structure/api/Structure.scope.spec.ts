@@ -86,14 +86,14 @@ describe("buildStructureScopeFilter", () => {
     });
 
     it("returns an $or _id filter for a responsible with a structureId", () => {
-        expect(buildStructureScopeFilter({ acl: responsibleAcl, structureId: "s1" })).toEqual({
-            $or: [{ _id: "s1" }],
+        expect(buildStructureScopeFilter({ acl: responsibleAcl, structureId: "64a1f0c2b7e4d3a9c8f1e2d3" })).toEqual({
+            $or: [{ _id: "64a1f0c2b7e4d3a9c8f1e2d3" }],
         });
     });
 
     it("returns an $or networkId/_id filter for a supervisor with a structureId, in policy order", () => {
-        expect(buildStructureScopeFilter({ acl: supervisorAcl, structureId: "s1" })).toEqual({
-            $or: [{ networkId: "s1" }, { _id: "s1" }],
+        expect(buildStructureScopeFilter({ acl: supervisorAcl, structureId: "64a1f0c2b7e4d3a9c8f1e2d3" })).toEqual({
+            $or: [{ networkId: "64a1f0c2b7e4d3a9c8f1e2d3" }, { _id: "64a1f0c2b7e4d3a9c8f1e2d3" }],
         });
     });
 
@@ -106,6 +106,6 @@ describe("buildStructureScopeFilter", () => {
     });
 
     it("returns undefined (forbidden) for a user whose acl only covers another resource", () => {
-        expect(buildStructureScopeFilter({ acl: otherResourceAcl, structureId: "s1" })).toBeUndefined();
+        expect(buildStructureScopeFilter({ acl: otherResourceAcl, structureId: "64a1f0c2b7e4d3a9c8f1e2d3" })).toBeUndefined();
     });
 });

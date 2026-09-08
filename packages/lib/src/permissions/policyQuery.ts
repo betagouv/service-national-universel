@@ -1,8 +1,19 @@
 import { UserDto } from "../dto";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { PermissionType } from "../mongoSchema";
+import { getMatchingPermissions, hasUnrestrictedPermission } from "./utils";
 
 type Action = PermissionType["action"];
+
+const OBJECT_ID_REGEX = /^[0-9a-fA-F]{24}$/;
+
+/**
+ * Une valeur destinée à un champ `_id` doit être un ObjectId valide : sinon Mongoose lève une CastError
+ * (donc un 500) au lieu de ne rien renvoyer. Une valeur invalide est traitée comme absente (fail-closed).
+ */
+function isUsableValue(field: string, value: string): boolean {
+  return field === "_id" ? OBJECT_ID_REGEX.test(value) : true;
+}
 
 export interface GetPolicyMongoFilterParams {
   user: UserDto;
@@ -23,10 +34,10 @@ export interface GetPolicyMongoFilterParams {
 export function getPolicyMongoFilter({ user, resource, action = PERMISSION_ACTIONS.READ }: GetPolicyMongoFilterParams): Record<string, unknown> | null | undefined {
   if (!user?.acl?.length) return undefined;
 
-  const permissions = user.acl.filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
+  const permissions = getMatchingPermissions(user, resource, action);
   if (!permissions.length) return undefined;
 
-  if (permissions.some((acl) => !acl.policy?.length)) return null;
+  if (hasUnrestrictedPermission(permissions)) return null;
 
   const clauses: Record<string, unknown>[] = [];
   for (const permission of permissions) {
@@ -44,11 +55,16 @@ export function getPolicyMongoFilter({ user, resource, action = PERMISSION_ACTIO
         }
 
         if (Array.isArray(value)) {
-          const values = value.filter((v) => v !== undefined && v !== null && v !== "").map(String);
+          const values = value
+            .filter((v) => v !== undefined && v !== null && v !== "")
+            .map(String)
+            .filter((v) => isUsableValue(where.field, v));
           if (!values.length) continue;
           clauses.push({ [where.field]: { $in: values } });
         } else if (value !== undefined && value !== null && value !== "") {
-          clauses.push({ [where.field]: String(value) });
+          const stringValue = String(value);
+          if (!isUsableValue(where.field, stringValue)) continue;
+          clauses.push({ [where.field]: stringValue });
         }
       }
     }

@@ -19,7 +19,9 @@ jest.mock("../brevo", () => ({
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
-  await PermissionModel.deleteMany({ roles: { $in: [ROLES.SUPERVISOR, ROLES.RESPONSIBLE] } });
+  // Base de test persistante en local : repartir d'un jeu de permissions vierge (un ancien seed sans policy
+  // donnerait un accès sans restriction aux référents et ferait échouer les tests de périmètre).
+  await PermissionModel.deleteMany({});
 
   // Structure : même jeu que la migration 20250624122150 (policies incluses)
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
@@ -303,7 +305,7 @@ describe("Structure", () => {
       expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ _id: network._id.toString() })]));
     });
     it("should not expose structureManager nor address on networks", async () => {
-      await createStructureHelper({
+      const created = await createStructureHelper({
         ...getNewStructureFixture(),
         name: "network",
         isNetwork: "true",
@@ -311,7 +313,8 @@ describe("Structure", () => {
       });
       const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: "000000000000000000000001" })).get("/structure/networks");
       expect(res.status).toBe(200);
-      const network = res.body.data.find((s) => s.name === "network");
+      // repérer la structure créée par ce test (d'autres tests créent des structures nommées "network")
+      const network = res.body.data.find((s) => s._id === created._id.toString());
       expect(network).toBeDefined();
       expect(network.structureManager).toBeUndefined();
       expect(network.address).toBeUndefined();
@@ -320,6 +323,16 @@ describe("Structure", () => {
   });
 
   describe("GET /structure/:id/children", () => {
+    it("REFERENT_DEPARTMENT should only see children of their department", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true", department: "Loire-Atlantique" });
+      const inDep = await createStructureHelper({ ...getNewStructureFixture(), name: "child-in", networkId: network._id.toString(), department: "Loire-Atlantique" });
+      const outDep = await createStructureHelper({ ...getNewStructureFixture(), name: "child-out", networkId: network._id.toString(), department: "Vendée" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"] })).get(`/structure/${network._id}/children`);
+      expect(res.status).toBe(200);
+      const ids = res.body.data.map((s) => s._id);
+      expect(ids).toContain(inDep._id.toString());
+      expect(ids).not.toContain(outDep._id.toString());
+    });
     it("should return children of network", async () => {
       const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
       const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id, name: "child" });

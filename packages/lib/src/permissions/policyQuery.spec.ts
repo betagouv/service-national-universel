@@ -16,22 +16,22 @@ describe("getPolicyMongoFilter", () => {
   it("builds an _id filter for a responsible", () => {
     const user = {
       _id: "u1",
-      structureId: "s1",
+      structureId: "64a1f0c2b7e4d3a9c8f1e2d3",
       acl: [{ resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "_id", source: "structureId" }] }] }],
     } as any;
-    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toEqual({ $or: [{ _id: "s1" }] });
+    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toEqual({ $or: [{ _id: "64a1f0c2b7e4d3a9c8f1e2d3" }] });
   });
 
   it("merges several permissions/policies into one $or (supervisor: own structure + network)", () => {
     const user = {
       _id: "u1",
-      structureId: "s1",
+      structureId: "64a1f0c2b7e4d3a9c8f1e2d3",
       acl: [
         { resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "_id", source: "structureId" }] }] },
         { resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "networkId", source: "structureId" }] }] },
       ],
     } as any;
-    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toEqual({ $or: [{ _id: "s1" }, { networkId: "s1" }] });
+    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toEqual({ $or: [{ _id: "64a1f0c2b7e4d3a9c8f1e2d3" }, { networkId: "64a1f0c2b7e4d3a9c8f1e2d3" }] });
   });
 
   it("uses $in when the user value is an array (referent_department)", () => {
@@ -56,7 +56,7 @@ describe("getPolicyMongoFilter", () => {
   it("ignores where clauses targeting another resource", () => {
     const user = {
       _id: "u1",
-      structureId: "s1",
+      structureId: "64a1f0c2b7e4d3a9c8f1e2d3",
       acl: [{ resource: "mission", action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ resource: "structure", field: "_id", source: "structureId" }] }] }],
     } as any;
     expect(getPolicyMongoFilter({ user, resource: "mission", action: PERMISSION_ACTIONS.READ })).toBeUndefined();
@@ -71,10 +71,33 @@ describe("getPolicyMongoFilter", () => {
     expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toBeUndefined();
   });
 
+  it("is fail-closed when a value targeting _id is not a valid ObjectId (avoids a Mongoose CastError)", () => {
+    const user = {
+      _id: "u1",
+      structureId: "not-an-object-id",
+      acl: [{ resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "_id", source: "structureId" }] }] }],
+    } as any;
+    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toBeUndefined();
+  });
+
+  it("keeps a valid ObjectId targeting _id and does not validate other fields", () => {
+    const user = {
+      _id: "u1",
+      structureId: "64a1f0c2b7e4d3a9c8f1e2d3",
+      acl: [
+        { resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "_id", source: "structureId" }] }] },
+        { resource: STRUCTURE, action: PERMISSION_ACTIONS.READ, policy: [{ where: [{ field: "networkId", source: "structureId" }] }] },
+      ],
+    } as any;
+    expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toEqual({
+      $or: [{ _id: "64a1f0c2b7e4d3a9c8f1e2d3" }, { networkId: "64a1f0c2b7e4d3a9c8f1e2d3" }],
+    });
+  });
+
   it("ignores permissions for another action", () => {
     const user = {
       _id: "u1",
-      structureId: "s1",
+      structureId: "64a1f0c2b7e4d3a9c8f1e2d3",
       acl: [{ resource: STRUCTURE, action: PERMISSION_ACTIONS.WRITE, policy: [{ where: [{ field: "_id", source: "structureId" }] }] }],
     } as any;
     expect(getPolicyMongoFilter({ user, resource: STRUCTURE, action: PERMISSION_ACTIONS.READ })).toBeUndefined();

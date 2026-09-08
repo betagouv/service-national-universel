@@ -1,6 +1,6 @@
 import { StructureModel, STRUCTURE_PROJECTION_KEYS } from "@admin/core/engagement/structure/Structure.model";
 import { StructureGateway } from "@admin/core/engagement/structure/Structure.gateway";
-import { Body, Controller, ForbiddenException, Inject, Post, Request } from "@nestjs/common";
+import { Body, Controller, Inject, Post, Request } from "@nestjs/common";
 import { UseAnyGuard } from "@admin/infra/iam/guard/Any.guard";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
 import { ReferentRegionalGuard } from "@admin/infra/iam/guard/ReferentRegional.guard";
@@ -28,11 +28,13 @@ export class StructureController {
         }
 
         const filter = buildStructureScopeFilter(request.user);
+        // Aucun périmètre exploitable (ex. référent sans région) : cette route ne sert qu'à alimenter des listes,
+        // une liste vide est la réponse fail-closed attendue par le front (pas d'erreur remontée à l'utilisateur).
         if (filter === undefined) {
-            throw new ForbiddenException();
+            return [];
         }
 
-        // `null` means "no restriction" (e.g. admin); normalize to `undefined` for the gateway.
-        return this.structureGateway.findAll(projection, filter ?? undefined);
+        // `null` = aucune restriction (admin), transmis tel quel au gateway.
+        return this.structureGateway.findAll(projection, filter);
     }
 }

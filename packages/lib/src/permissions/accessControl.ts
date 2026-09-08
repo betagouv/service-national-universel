@@ -2,6 +2,7 @@ import { PermissionType } from "../mongoSchema";
 import { UserDto } from "../dto";
 import { PERMISSION_ACTIONS } from "./constantes/actions";
 import { HasPermissionParams } from "./types";
+import { getMatchingPermissions, hasUnrestrictedPermission } from "./utils";
 
 export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ, context, ignorePolicy = false }: HasPermissionParams): boolean {
   if (!user) {
@@ -12,16 +13,15 @@ export function isAuthorized({ user, resource, action = PERMISSION_ACTIONS.READ,
     console.warn(`user ${user._id} has no acl`);
     return false;
   }
-  const permissions = user.acl.filter((acl) => acl.resource === resource && [action, PERMISSION_ACTIONS.FULL].includes(acl.action));
+  const permissions = getMatchingPermissions(user, resource, action);
   if (permissions?.length) {
     if (ignorePolicy) {
       return true;
     }
-    const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
-    if (permissions.length > permissionWithpolicies.length) {
-      // au moins une permission sans policy
+    if (hasUnrestrictedPermission(permissions)) {
       return true;
     }
+    const permissionWithpolicies = permissions.filter((acl) => acl.policy?.length);
     const contextUpdated = { referent: user, ...context };
     const authorized: boolean[] = [];
     for (const permission of permissionWithpolicies) {

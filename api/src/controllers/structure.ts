@@ -37,6 +37,15 @@ const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserD
   await data.save({ fromUser });
 };
 
+// Listes d'identification (affiliation, antennes) : aucune coordonnée du représentant, ni adresse, ni SIRET.
+const STRUCTURE_LIGHT_PROJECTION = "_id name networkName isNetwork region department";
+
+/** Applique la policy STRUCTURE (lecture ou écriture) de l'utilisateur à une structure chargée. */
+function isStructureAuthorized(user: UserDto, structure: { toJSON: () => any }, action: typeof PERMISSION_ACTIONS.READ | typeof PERMISSION_ACTIONS.WRITE): boolean {
+  const check = action === PERMISSION_ACTIONS.WRITE ? isWriteAuthorized : isReadAuthorized;
+  return check({ user, resource: PERMISSION_RESOURCES.STRUCTURE, context: { structure: structure.toJSON() } });
+}
+
 const populateWithMissions = async (structures: StructureType[]): Promise<StructureType[]> => {
   const structureIds = [...new Set(structures.map((item) => item._id))].filter(Boolean);
   const missions = await allRecords("mission", { bool: { filter: [{ terms: { "structureId.keyword": structureIds } }] } });
@@ -148,13 +157,7 @@ router.put(
     try {
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).json({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -191,7 +194,7 @@ router.get(
     try {
       if (!canViewStructureChildren(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       // Liste d'affiliation : seuls les champs d'identification sont nécessaires (pas de coordonnées du représentant).
-      const data = await StructureModel.find({ isNetwork: "true" }).select("_id name networkName isNetwork region department").sort("name").lean();
+      const data = await StructureModel.find({ isNetwork: "true" }).select(STRUCTURE_LIGHT_PROJECTION).sort("name").lean();
       return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
@@ -217,18 +220,16 @@ router.get(
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // Le réseau parent doit être dans le périmètre de lecture de l'utilisateur.
-      if (
-        !isReadAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      // Liste d'affiliation : seuls les champs d'identification sont nécessaires (pas de coordonnées du représentant).
-      const data = await StructureModel.find({ networkId: structure._id }).select("_id name networkName isNetwork region department").lean();
+      // Les antennes renvoyées sont elles aussi limitées au périmètre de lecture (un référent départemental
+      // autorisé sur une tête de réseau de son département ne voit pas les antennes des autres départements).
+      const scope = getPolicyMongoFilter({ user: req.user, resource: PERMISSION_RESOURCES.STRUCTURE, action: PERMISSION_ACTIONS.READ });
+      if (scope === undefined) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const filter = scope ? { $and: [{ networkId: structure._id }, scope] } : { networkId: structure._id };
+      const data = await StructureModel.find(filter).select(STRUCTURE_LIGHT_PROJECTION).lean();
       return res.status(200).send({ ok: true, data });
     } catch (error) {
       capture(error);
@@ -252,13 +253,7 @@ router.get(
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // La structure doit être dans le périmètre de lecture de l'utilisateur (policy STRUCTURE).
-      if (
-        !isReadAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -283,7 +278,8 @@ router.get(
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
       // Vérification dupliquée intentionnellement : reproduit en amont le contrôle fait par patches.get, afin de
-      // répondre 403 (et non 500) et d'éviter de révéler l'existence de la structure avant ce contrôle.
+      // répondre 403 (et non 500) aux rôles sans droit d'historique, avant même de charger la structure.
+      // Comme sur GET /:id et PUT /:id, un rôle qui a ce droit obtient ensuite 404 (inconnue) ou 403 (hors périmètre).
       if (
         !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.USER_HISTORY, ignorePolicy: true }) &&
         !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.PATCH, ignorePolicy: true })
@@ -294,17 +290,11 @@ router.get(
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (
-        !isReadAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.READ)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
-      const structurePatches = await patches.get(req, StructureModel);
+      const structurePatches = await patches.get(req, StructureModel, structure);
       if (!structurePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: structurePatches });
@@ -455,13 +445,7 @@ router.post(
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -488,13 +472,7 @@ router.delete(
     try {
       const structure = await StructureModel.findById(req.validatedParams.id);
       if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (
-        !isWriteAuthorized({
-          user: req.user,
-          resource: PERMISSION_RESOURCES.STRUCTURE,
-          context: { structure: structure.toJSON() },
-        })
-      ) {
+      if (!isStructureAuthorized(req.user, structure, PERMISSION_ACTIONS.WRITE)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 

@@ -1,4 +1,3 @@
-import { ForbiddenException } from "@nestjs/common";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, PermissionDto } from "snu-lib";
 
 import { CustomRequest } from "@shared/infra/CustomRequest";
@@ -32,11 +31,11 @@ describe("StructureController", () => {
     it("passes a scope filter for a RESPONSIBLE", async () => {
         const gateway = { findAll: jest.fn().mockResolvedValue([]) };
         const controller = new StructureController(gateway as any);
-        const req = { user: { acl: responsibleAcl, structureId: "s1" } } as unknown as CustomRequest;
+        const req = { user: { acl: responsibleAcl, structureId: "64a1f0c2b7e4d3a9c8f1e2d3" } } as unknown as CustomRequest;
 
         await controller.findAll({ fields: ["id", "name"] } as any, req);
 
-        expect(gateway.findAll).toHaveBeenCalledWith(["id", "name"], { $or: [{ _id: "s1" }] });
+        expect(gateway.findAll).toHaveBeenCalledWith(["id", "name"], { $or: [{ _id: "64a1f0c2b7e4d3a9c8f1e2d3" }] });
     });
 
     it("passes no filter for an ADMIN", async () => {
@@ -46,15 +45,15 @@ describe("StructureController", () => {
 
         await controller.findAll({} as any, req);
 
-        expect(gateway.findAll).toHaveBeenCalledWith(undefined, undefined);
+        expect(gateway.findAll).toHaveBeenCalledWith(undefined, null);
     });
 
-    it("throws ForbiddenException for a user without a usable perimeter", async () => {
-        const gateway = { findAll: jest.fn().mockResolvedValue([]) };
+    it("returns an empty list without querying for a user without a usable perimeter", async () => {
+        const gateway = { findAll: jest.fn().mockResolvedValue([{ id: "64a1f0c2b7e4d3a9c8f1e2d3" }]) };
         const controller = new StructureController(gateway as any);
         const req = { user: { acl: referentRegionAcl, region: "" } } as unknown as CustomRequest;
 
-        await expect(controller.findAll({} as any, req)).rejects.toBeInstanceOf(ForbiddenException);
+        await expect(controller.findAll({} as any, req)).resolves.toEqual([]);
         expect(gateway.findAll).not.toHaveBeenCalled();
     });
 });
