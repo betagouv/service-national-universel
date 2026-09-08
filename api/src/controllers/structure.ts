@@ -235,9 +235,21 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
-      const missions = await MissionModel.find({ structureId: req.validatedParams.id });
-      if (!missions) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      const structure = await StructureModel.findById(req.validatedParams.id);
+      if (!structure) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // La structure doit être dans le périmètre de lecture de l'utilisateur (policy STRUCTURE).
+      if (
+        !isReadAuthorized({
+          user: req.user,
+          resource: PERMISSION_RESOURCES.STRUCTURE,
+          context: { structure: structure.toJSON() },
+        })
+      ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const missions = await MissionModel.find({ structureId: req.validatedParams.id });
       return res.status(200).send({ ok: true, data: missions.map(serializeMission) });
     } catch (error) {
       capture(error);

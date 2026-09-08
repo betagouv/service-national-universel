@@ -168,6 +168,17 @@ describe("Structure", () => {
       const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN })).get("/structure/" + structure._id);
       expect(res.status).toBe(200);
     });
+    it("RESPONSIBLE should get 403 on another structure", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const other = await createStructureHelper({ ...getNewStructureFixture(), name: "other" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get("/structure/" + other._id);
+      expect(res.status).toBe(403);
+    });
+    it("RESPONSIBLE should read their own structure", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get("/structure/" + own._id);
+      expect(res.status).toBe(200);
+    });
   });
 
   describe("GET /structure/:id/patches", () => {
@@ -305,6 +316,26 @@ describe("Structure", () => {
       expectStructureToEqual(res.body.data[0], missionFixture);
       await deleteMissionByIdHelper(mission._id);
       await deleteStructureByIdHelper(structure._id);
+    });
+    it("RESPONSIBLE should get 403 for missions of another structure", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const other = await createStructureHelper({ ...getNewStructureFixture(), name: "other" });
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: other._id });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get(`/structure/${other._id}/mission`);
+      expect(res.status).toBe(403);
+      await deleteMissionByIdHelper(mission._id);
+    });
+    it("RESPONSIBLE should list missions of their own structure", async () => {
+      const own = await createStructureHelper({ ...getNewStructureFixture(), name: "own" });
+      const mission = await createMissionHelper({ ...getNewMissionFixture(), structureId: own._id });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: own._id.toString() })).get(`/structure/${own._id}/mission`);
+      expect(res.status).toBe(200);
+      expect(res.body.data.length).toEqual(1);
+      await deleteMissionByIdHelper(mission._id);
+    });
+    it("should return 404 when structure does not exist", async () => {
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN })).get(`/structure/${notExistingStructureId}/mission`);
+      expect(res.status).toBe(404);
     });
   });
 });
