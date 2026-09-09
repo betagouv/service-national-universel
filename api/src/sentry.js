@@ -3,6 +3,7 @@ const { nodeProfilingIntegration } = require("@sentry/profiling-node");
 
 const { config } = require("./config");
 const { logger } = require("./logger");
+const { redactSentryEvent } = require("./utils/logRedaction");
 
 function initSentry() {
   if (config.ENABLE_SENTRY) {
@@ -12,6 +13,8 @@ function initSentry() {
       environment: config.ENVIRONMENT,
       release: config.RELEASE,
       normalizeDepth: 16,
+      // Sentry lit `req.body` au moment de l'événement et reçoit tout `extra` : secrets et PII y sont masqués ici
+      beforeSend: redactSentryEvent,
       integrations: [extraErrorDataIntegration({ depth: 16 }), rewriteFramesIntegration({ root: process.cwd() }), nodeProfilingIntegration()],
       tracesSampleRate: Number(config.SENTRY_TRACING_SAMPLE_RATE) || 0.01,
       profilesSampleRate: Number(config.SENTRY_PROFILE_SAMPLE_RATE) || 0.1, // Percent of Transactions profiled
