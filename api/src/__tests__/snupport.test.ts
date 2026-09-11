@@ -33,14 +33,14 @@ const OTHER_TICKET_ID = new Types.ObjectId().toString();
 
 const user = getNewReferentFixture({ email: "owner@example.org" }) as any;
 
-// Réponse de /v0/ticket?email= : la liste des tickets dont l'utilisateur est le contact.
+// Réponse de /v0/ticket?email= : la liste, exhaustive, des tickets dont l'utilisateur est le contact.
 const ownTicketsResponse = { ok: true, data: [{ _id: OWN_TICKET_ID, subject: "Mon ticket", status: "OPEN" }] };
 
 const mockSNUpport = () => {
   SNUpport.api.mockImplementation(async (path: string) => {
     if (path.startsWith("/v0/ticket?email=")) return ownTicketsResponse;
-    if (path.startsWith("/v0/ticket/withMessages")) return { ok: true, data: { ticket: { _id: OTHER_TICKET_ID }, messages: [] } };
-    if (path === "/v0/message") return { ok: true, data: { ticket: { _id: OTHER_TICKET_ID }, message: {} } };
+    if (path.startsWith("/v0/ticket/withMessages")) return { ok: true, data: { ticket: { _id: path.split("ticketId=")[1] }, messages: [] } };
+    if (path === "/v0/message") return { ok: true, data: { ticket: { _id: OWN_TICKET_ID }, message: {} } };
     return { ok: false };
   });
 };
@@ -62,7 +62,13 @@ describe("GET /SNUpport/ticket/:id", () => {
   it("should return 403 when the ticket does not belong to the user", async () => {
     const res = await request(await getAppHelper(user)).get(`/SNUpport/ticket/${OTHER_TICKET_ID}`);
     expect(res.status).toBe(403);
+    expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
     expect(calledPaths().some((path: string) => path.startsWith("/v0/ticket/withMessages"))).toBe(false);
+  });
+
+  it("should return the ticket when its id is spelled in uppercase hexadecimal", async () => {
+    const res = await request(await getAppHelper(user)).get(`/SNUpport/ticket/${OWN_TICKET_ID.toUpperCase()}`);
+    expect(res.status).toBe(200);
   });
 
   it("should return the ticket when it belongs to the user", async () => {
