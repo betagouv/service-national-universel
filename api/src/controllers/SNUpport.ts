@@ -83,12 +83,14 @@ const router = express.Router();
 // Un ticket SNUpport n'appartient qu'à son contact : l'identifiant passé dans l'URL ne suffit pas à autoriser
 // l'accès. On s'appuie sur la même source de vérité que GET /SNUpport/tickets (la liste des tickets de
 // l'utilisateur côté SNUpport), qui est aussi la seule d'où le front tire les identifiants qu'il envoie ici.
-// En cas de doute (support injoignable, réponse inattendue), on refuse.
+// Cette liste est exhaustive : GET /v0/ticket (snupport-api/src/controllers/v0/ticket.js) renvoie tous les
+// tickets du contact, sans limite ni pagination. En cas de doute (support injoignable, réponse inattendue), on refuse.
 const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
   if (!user?.email) return false;
   const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(user.email)}`, { method: "GET", credentials: "include" });
   if (!ok || !Array.isArray(data)) return false;
-  return data.some((ticket: Ticket) => String(ticket._id) === ticketId);
+  // validateId accepte l'hexadécimal en majuscules : on compare sans tenir compte de la casse.
+  return data.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
 };
 
 router.get(
