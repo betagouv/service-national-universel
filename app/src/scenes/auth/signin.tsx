@@ -11,6 +11,7 @@ import Error from "../../components/error";
 import { capture, captureMessage } from "../../sentry";
 import api from "../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
+import UnavailabilityNotice from "./components/UnavailabilityNotice";
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 interface ErrorState {
@@ -98,6 +99,7 @@ const Signin: React.FC = () => {
 
   return (
     <DSFRContainer title="Me connecter" className="flex flex-col bg-[#F9F6F2] py-6">
+      <UnavailabilityNotice />
       {error && Object.keys(error).length > 0 && <Error {...error} onClose={() => setError({})} />}
       <div className="mb-4 flex items-center gap-4">
         <RightArrow />
