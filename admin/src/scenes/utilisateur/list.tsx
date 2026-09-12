@@ -105,11 +105,15 @@ export default function List() {
   useEffect(() => {
     (async () => {
       if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) return;
-      const structures = await apiv2.post<StructureRoutes["FindAll"]["response"]>("/structure", {
-        fields: ["id", "name", "region", "department", "networkId"],
-      });
+      try {
+        const structures = await apiv2.post<StructureRoutes["FindAll"]["response"]>("/structure", {
+          fields: ["id", "name", "region", "department", "networkId"],
+        });
 
-      setStructures(structures);
+        setStructures(structures);
+      } catch {
+        setStructures([]);
+      }
     })();
     (async () => {
       const { data, ok } = await api.get(`/department-service`);

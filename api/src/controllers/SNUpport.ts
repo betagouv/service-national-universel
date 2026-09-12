@@ -43,6 +43,7 @@ interface ResponsePostTicketData {
 
 interface Ticket {
   id?: string;
+  _id?: string;
   status?: string;
   contactEmail?: string;
 }
@@ -78,6 +79,19 @@ interface UploadedFile {
 }
 
 const router = express.Router();
+
+// Un ticket SNUpport n'appartient qu'à son contact : l'identifiant passé dans l'URL ne suffit pas à autoriser
+// l'accès. On s'appuie sur la même source de vérité que GET /SNUpport/tickets (la liste des tickets de
+// l'utilisateur côté SNUpport), qui est aussi la seule d'où le front tire les identifiants qu'il envoie ici.
+// Cette liste est exhaustive : GET /v0/ticket (snupport-api/src/controllers/v0/ticket.js) renvoie tous les
+// tickets du contact, sans limite ni pagination. En cas de doute (support injoignable, réponse inattendue), on refuse.
+const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
+  if (!user?.email) return false;
+  const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(user.email)}`, { method: "GET", credentials: "include" });
+  if (!ok || !Array.isArray(data)) return false;
+  // validateId accepte l'hexadécimal en majuscules : on compare sans tenir compte de la casse.
+  return data.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
+};
 
 router.get(
   "/tickets",
@@ -204,6 +218,8 @@ router.get("/ticket/:id", authMiddleware(["referent", "young"]), async (req: Use
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    if (!(await isTicketOwner(req.user, checkedId))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const messages = await SNUpport.api(`/v0/ticket/withMessages?ticketId=${checkedId}`, { method: "GET", credentials: "include" });
     if (!messages.ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -401,6 +417,8 @@ router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async 
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
+
+    if (!(await isTicketOwner(req.user, checkedId))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { error: validationError, value } = Joi.object({
       message: Joi.string().allow(null, ""),
