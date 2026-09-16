@@ -11,7 +11,7 @@ import { ERRORS } from "../errors";
 import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "../schemas";
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
-import { canAccessTicket } from "../utils/ticketScope";
+import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -712,10 +712,7 @@ router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Respo
 });
 
 router.get("/linkTicket/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
-  let query: any = { contactId: req.cleanParams.id };
-  if (req.user.role === "REFERENT_DEPARTMENT" || req.user.role === "REFERENT_REGION") {
-    query.formSubjectStep1 = "QUESTION";
-  }
+  const query = scopeTicketQuery(req.user, { contactId: req.cleanParams.id });
   const ticket = await TicketModel.find(query);
   return res.status(200).send({ ok: true, data: ticket });
 });

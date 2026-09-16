@@ -1,4 +1,4 @@
-const { canAccessTicket } = require("../utils/ticketScope");
+const { canAccessTicket, scopeTicketQuery } = require("../utils/ticketScope");
 
 describe("canAccessTicket", () => {
   describe("AGENT, ADMIN and DG roles", () => {
@@ -46,6 +46,37 @@ describe("canAccessTicket", () => {
       const user = { role: "REFERENT_REGION", region: "Ile-de-France" };
       const ticket = {};
       expect(canAccessTicket(user, ticket)).toBe(false);
+    });
+  });
+});
+
+describe("scopeTicketQuery", () => {
+  describe("AGENT, ADMIN and DG roles", () => {
+    it.each(["AGENT", "ADMIN", "DG"])("leaves the base query untouched for %s", (role) => {
+      const user = { role };
+      expect(scopeTicketQuery(user, { contactId: "abc" })).toEqual({ contactId: "abc" });
+    });
+  });
+
+  describe("REFERENT_DEPARTMENT role", () => {
+    it("restricts the query to the referent's departments and QUESTION tickets", () => {
+      const user = { role: "REFERENT_DEPARTMENT", departments: ["Paris", "Essonne"] };
+      expect(scopeTicketQuery(user, { contactId: "abc" })).toEqual({
+        contactId: "abc",
+        contactDepartment: { $in: ["Paris", "Essonne"] },
+        formSubjectStep1: "QUESTION",
+      });
+    });
+  });
+
+  describe("REFERENT_REGION role", () => {
+    it("restricts the query to the referent's region and QUESTION tickets", () => {
+      const user = { role: "REFERENT_REGION", region: "Ile-de-France" };
+      expect(scopeTicketQuery(user, { contactId: "abc" })).toEqual({
+        contactId: "abc",
+        contactRegion: "Ile-de-France",
+        formSubjectStep1: "QUESTION",
+      });
     });
   });
 });

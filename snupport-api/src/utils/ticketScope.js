@@ -12,4 +12,19 @@ function canAccessTicket(user, ticket) {
   return true;
 }
 
-module.exports = { canAccessTicket };
+// Same scoping rule as canAccessTicket, expressed as a Mongo query filter for list-style
+// endpoints (mirrors the pattern already used in ticket.ts's buildContextFilter).
+function scopeTicketQuery(user, baseQuery) {
+  const query = { ...baseQuery };
+  if (user.role === "REFERENT_DEPARTMENT") {
+    query.contactDepartment = { $in: user.departments };
+    query.formSubjectStep1 = "QUESTION";
+  }
+  if (user.role === "REFERENT_REGION") {
+    query.contactRegion = user.region;
+    query.formSubjectStep1 = "QUESTION";
+  }
+  return query;
+}
+
+module.exports = { canAccessTicket, scopeTicketQuery };
