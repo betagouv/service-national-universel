@@ -158,8 +158,12 @@ router.delete(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
-    await deleteFile(req.cleanBody.path);
     const message = await MessageModel.findById(req.cleanParams.id);
+    if (!message) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const ticket = await TicketModel.findById(message.ticketId);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await deleteFile(req.cleanBody.path);
     message.files = message.files.filter((file) => file.path !== req.cleanBody.path);
     await message.save();
     return res.status(200).send({ ok: true });
