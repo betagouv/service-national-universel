@@ -18,6 +18,15 @@ const { canAccessTicket } = require("../utils/ticketScope");
 
 router.use(agentGuard);
 
+// Un attachment n'a pas de ticketId direct : il faut d'abord retrouver le message qui le
+// référence (dans `files` ou `attachments`, alimentés par des flux différents) pour remonter
+// à son ticket et vérifier le périmètre.
+async function ticketForAttachmentPath(path) {
+  const message = await MessageModel.findOne({ $or: [{ "files.path": path }, { "attachments.path": path }] });
+  if (!message) return null;
+  return TicketModel.findById(message.ticketId);
+}
+
 router.post(
   "/",
   validateBody(
@@ -124,6 +133,9 @@ router.post(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await ticketForAttachmentPath(req.cleanBody.path);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
     const buffer = decrypt(file.Body);
     return res.status(200).send({ ok: true, data: buffer });
@@ -139,6 +151,9 @@ router.post(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await ticketForAttachmentPath(req.cleanBody.path);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
     // decrypt and upload the file to a temp private folder (deleted after 1 day)
     const tempPath = req.cleanBody.path.replace("message", "temp");
