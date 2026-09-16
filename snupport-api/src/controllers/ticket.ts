@@ -11,6 +11,7 @@ import { ERRORS } from "../errors";
 import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "../schemas";
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
+import { canAccessTicket } from "../utils/ticketScope";
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -705,6 +706,7 @@ router.post("/stats/feedback", validateBody(SCHEMA_PERIOD), async (req: UserRequ
 router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const ticket = await TicketModel.findById(req.cleanParams.id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   const tags = await TagModel.find({ _id: { $in: ticket.tagsId }, deletedAt: null });
   return res.status(200).send({ ok: true, data: { ticket, tags } });
 });
@@ -768,6 +770,7 @@ router.patch(
 
     let ticket = await TicketModel.findOne({ _id: id });
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     ticket.set(req.cleanBody);
 
@@ -802,6 +805,9 @@ router.patch(
 
 router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const id = req.cleanParams.id;
+  const ticket = await TicketModel.findById(id);
+  if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   await TicketModel.findOneAndDelete({ _id: id });
   return res.status(200).send({ ok: true });
 });
@@ -818,6 +824,7 @@ router.put(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     await sendEmailWithConditions({ ticket, dest: req.cleanBody.contactEmail, messageHistory: "all", copyRecipient: null, attachment: null, lastMessageId: null });
     const agent = await AgentModel.findById(req.user._id);
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -843,6 +850,7 @@ router.put(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     ticket.viewingAgent = req.cleanBody.isViewing
       ? [...new Set([...ticket.viewingAgent, { email: req.user.email, lastName: req.user.lastName, firstName: req.user.firstName, role: req.user.role }])]
       : ticket.viewingAgent.filter((agent) => agent.email !== req.user.email);
@@ -855,6 +863,7 @@ router.get("/viewing/:id", validateParams(idSchema), async (req: UserRequest, re
   const id = req.cleanParams.id;
   let ticket = await TicketModel.findById(id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   return res.status(200).send({ ok: true, data: ticket.viewingAgent });
 });
 

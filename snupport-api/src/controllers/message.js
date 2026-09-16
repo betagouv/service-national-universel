@@ -14,6 +14,7 @@ const { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
+const { canAccessTicket } = require("../utils/ticketScope");
 
 router.use(agentGuard);
 
@@ -34,6 +35,7 @@ router.post(
     const user = req.user;
     let ticket = await TicketModel.findById(ticketId);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
     if (ticket.messageCount === 1) {
@@ -105,6 +107,9 @@ router.get(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    const ticket = await TicketModel.findById(req.cleanQuery.ticketId);
+    if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await MessageModel.find(req.cleanQuery);
     return res.status(200).send({ ok: true, data });
   }
@@ -173,6 +178,7 @@ router.post(
     const id = req.cleanParams.id;
     let ticket = await TicketModel.findById(id);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
+    if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let parsedBody;
 
     try {
