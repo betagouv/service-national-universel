@@ -65,7 +65,7 @@ class api {
         const file = await response.blob();
         resolve(file);
       } catch (e) {
-        capture(e, { extra: { body: body, path: path } });
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -148,7 +148,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
-          capture(e, { extra: { path: path, body: body } });
+          capture(e, { extra: { path: path } });
           reject(e);
         }
       }
@@ -178,7 +178,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path, arr: arr } });
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -246,7 +246,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR }); // You may want to resolve with a specific value or handle differently
         } else {
-          capture(e, { extra: { path: path, body: body } });
+          capture(e, { extra: { path: path } });
           reject(e);
         }
       }
