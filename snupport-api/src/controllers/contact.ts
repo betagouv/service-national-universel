@@ -8,6 +8,7 @@ import { agentGuard } from "../middlewares/authenticationGuards";
 import { validateParams, validateBody, validateQuery, idSchema } from "../middlewares/validation";
 import { ERRORS } from "../errors";
 import { SCHEMA_EMAIL } from "../schemas";
+import { canAccessContact } from "../utils/contactScope";
 import escapeStringRegexp from "escape-string-regexp";
 
 const router = express.Router();
@@ -76,6 +77,7 @@ router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Respo
   let data = await ContactModel.findById(id);
   if (!data) data = await AgentModel.findById(id);
   if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canAccessContact(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   return res.status(200).send({ ok: true, data });
 });
 
