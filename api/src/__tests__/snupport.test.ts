@@ -22,6 +22,15 @@ jest.mock("../slack", () => ({
   info: jest.fn(),
   success: jest.fn(),
 }));
+// optionalAuth lit un cookie JWT : on pilote directement l'utilisateur qu'il expose au contrôleur.
+let mockOptionalAuthUser: any = null;
+jest.mock("../middlewares/optionalAuth", () => ({
+  __esModule: true,
+  default: (req: any, _res: any, next: any) => {
+    if (mockOptionalAuthUser) req.user = mockOptionalAuthUser;
+    next();
+  },
+}));
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const SNUpport = require("../SNUpport");
@@ -41,6 +50,7 @@ const mockSNUpport = () => {
     if (path.startsWith("/v0/ticket?email=")) return ownTicketsResponse;
     if (path.startsWith("/v0/ticket/withMessages")) return { ok: true, data: { ticket: { _id: path.split("ticketId=")[1] }, messages: [] } };
     if (path === "/v0/message") return { ok: true, data: { ticket: { _id: OWN_TICKET_ID }, message: {} } };
+    if (path.startsWith("/knowledge-base/")) return { ok: true, data: [] };
     return { ok: false };
   });
 };
@@ -49,6 +59,7 @@ beforeEach(() => {
   resetAppAuth();
   jest.clearAllMocks();
   mockSNUpport();
+  mockOptionalAuthUser = null;
 });
 
 const calledPaths = () => SNUpport.api.mock.calls.map((call: any[]) => call[0]);
@@ -93,5 +104,46 @@ describe("POST /SNUpport/ticket/:id/message", () => {
       .send({ message: "coucou" });
     expect(res.status).toBe(200);
     expect(calledPaths().includes("/v0/message")).toBe(true);
+  });
+});
+
+describe("GET /SNUpport/knowledgeBase/search", () => {
+  const search = (query: string) => request(getAppHelper()).get(`/SNUpport/knowledgeBase/search?${query}`);
+
+  it("should search the public knowledge base without authentication", async () => {
+    const res = await search("search=mot&restriction=public");
+    expect(res.status).toBe(200);
+    expect(calledPaths()).toEqual(["/knowledge-base/public/search?search=mot&status=PUBLISHED"]);
+  });
+
+  it("should reject a restriction outside the knowledge base roles", async () => {
+    const res = await search("search=mot&restriction=agent");
+    expect(res.status).toBe(400);
+    expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  it("should reject a restriction escaping the knowledge base path towards the trusted /v0 routes", async () => {
+    const res = await search(`search=x&restriction=${encodeURIComponent("../v0/ticket?email=victime@example.com#")}`);
+    expect(res.status).toBe(400);
+    expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  it("should reject a non-public restriction for an anonymous visitor", async () => {
+    const res = await search("search=mot&restriction=referent");
+    expect(res.status).toBe(403);
+    expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  it("should accept a non-public restriction for an authenticated user", async () => {
+    mockOptionalAuthUser = user;
+    const res = await search("search=mot&restriction=referent");
+    expect(res.status).toBe(200);
+    expect(calledPaths()).toEqual(["/knowledge-base/referent/search?search=mot&status=PUBLISHED"]);
+  });
+
+  it("should encode the search terms instead of letting them forge the query string", async () => {
+    const res = await search(`search=${encodeURIComponent("a&status=DRAFT")}&restriction=public`);
+    expect(res.status).toBe(200);
+    expect(calledPaths()).toEqual(["/knowledge-base/public/search?search=a%26status%3DDRAFT&status=PUBLISHED"]);
   });
 });
