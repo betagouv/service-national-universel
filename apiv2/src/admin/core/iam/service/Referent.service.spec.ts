@@ -8,13 +8,16 @@ import { InviterReferentClasse } from "../../sejours/cle/referent/useCase/Invite
 import { ReferentGateway } from "../Referent.gateway";
 import { ReferentModel, ReferentModelLight } from "../Referent.model";
 import { ReferentService } from "./Referent.service";
+import { EtablissementGateway } from "../../sejours/cle/etablissement/Etablissement.gateway";
 import { FunctionalException } from "@shared/core/FunctionalException";
+import { ForbiddenException } from "@nestjs/common";
 
 describe("ReferentService", () => {
     let service: ReferentService;
     let referentGateway: ReferentGateway;
     let notificationGateway: NotificationGateway;
     let classeGateway: ClasseGateway;
+    let etablissementGateway: EtablissementGateway;
     let inviterReferentClasse: InviterReferentClasse;
 
     const mockReferent: ReferentModel = {
@@ -61,6 +64,12 @@ describe("ReferentService", () => {
                     },
                 },
                 {
+                    provide: EtablissementGateway,
+                    useValue: {
+                        findById: jest.fn(),
+                    },
+                },
+                {
                     provide: InviterReferentClasse,
                     useValue: {
                         execute: jest.fn(),
@@ -73,6 +82,7 @@ describe("ReferentService", () => {
         referentGateway = module.get<ReferentGateway>(ReferentGateway);
         notificationGateway = module.get<NotificationGateway>(NotificationGateway);
         classeGateway = module.get<ClasseGateway>(ClasseGateway);
+        etablissementGateway = module.get<EtablissementGateway>(EtablissementGateway);
         inviterReferentClasse = module.get<InviterReferentClasse>(InviterReferentClasse);
     });
 
@@ -129,20 +139,88 @@ describe("ReferentService", () => {
             expect(createdReferent).toEqual(newReferent);
         });
     });
-    describe("findByRole", () => {
-        it("should return an array of ReferentModelLight based on role and search", async () => {
-            const mockRole = ROLES.REFERENT_CLASSE;
-            const mockSearch = "John";
-            const mockReferents: ReferentModelLight[] = [
-                { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
-                { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
-            ];
+    describe("findByRoleAndEtablissement", () => {
+        const mockRole = ROLES.REFERENT_CLASSE;
+        const mockSearch = "John";
+        const mockReferents: ReferentModelLight[] = [
+            { id: "1", email: "john@example.com", prenom: "John", nom: "Doe" },
+            { id: "2", email: "john2@example.com", prenom: "John", nom: "Smith" },
+        ];
+        const etablissement = {
+            id: "etab-1",
+            departement: "Gironde",
+            region: "Nouvelle-Aquitaine",
+            referentEtablissementIds: ["chef-etab"],
+            coordinateurIds: ["coordo"],
+        };
+
+        beforeEach(() => {
             (referentGateway.findByRoleAndEtablissement as jest.Mock).mockResolvedValue(mockReferents);
+            (etablissementGateway.findById as jest.Mock).mockResolvedValue(etablissement);
+        });
 
-            const result = await service.findByRoleAndEtablissement(mockRole, undefined, mockSearch);
+        it("should return the referents of the etablissement for its chef d'établissement", async () => {
+            const result = await service.findByRoleAndEtablissement(
+                { id: "chef-etab", role: ROLES.ADMINISTRATEUR_CLE },
+                mockRole,
+                etablissement.id,
+                mockSearch,
+            );
 
-            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalledWith(mockRole, undefined, mockSearch);
+            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalledWith(
+                mockRole,
+                etablissement.id,
+                mockSearch,
+            );
             expect(result).toEqual(mockReferents);
+        });
+
+        it("should reject an admin_cle of another etablissement (C25)", async () => {
+            await expect(
+                service.findByRoleAndEtablissement(
+                    { id: "chef-d-un-autre-etab", role: ROLES.ADMINISTRATEUR_CLE },
+                    mockRole,
+                    etablissement.id,
+                ),
+            ).rejects.toThrow(ForbiddenException);
+            expect(referentGateway.findByRoleAndEtablissement).not.toHaveBeenCalled();
+        });
+
+        it("should reject a referent departemental outside of its departement (C25)", async () => {
+            await expect(
+                service.findByRoleAndEtablissement(
+                    { id: "ref-dep", role: ROLES.REFERENT_DEPARTMENT, departement: ["Paris"] },
+                    mockRole,
+                    etablissement.id,
+                ),
+            ).rejects.toThrow(ForbiddenException);
+        });
+
+        it("should accept a referent departemental of the same departement", async () => {
+            await service.findByRoleAndEtablissement(
+                { id: "ref-dep", role: ROLES.REFERENT_DEPARTMENT, departement: ["Gironde"] },
+                mockRole,
+                etablissement.id,
+            );
+            expect(referentGateway.findByRoleAndEtablissement).toHaveBeenCalled();
+        });
+
+        it("should reject a referent regional outside of its region (C25)", async () => {
+            await expect(
+                service.findByRoleAndEtablissement(
+                    { id: "ref-reg", role: ROLES.REFERENT_REGION, region: "Bretagne" },
+                    mockRole,
+                    etablissement.id,
+                ),
+            ).rejects.toThrow(ForbiddenException);
+        });
+
+        it("should require an etablissementId (C25)", async () => {
+            await expect(
+                service.findByRoleAndEtablissement({ id: "admin", role: ROLES.ADMIN }, mockRole, ""),
+            ).rejects.toThrow(FunctionalException);
+            expect(etablissementGateway.findById).not.toHaveBeenCalled();
+            expect(referentGateway.findByRoleAndEtablissement).not.toHaveBeenCalled();
         });
     });
     describe("findByEmail", () => {
