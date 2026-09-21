@@ -1,7 +1,6 @@
 import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
-import crypto from "crypto";
 import * as datefns from "date-fns";
 import { fr } from "date-fns/locale";
 import fileUpload from "express-fileupload";
@@ -17,9 +16,7 @@ import {
   CohortModel,
   YoungModel,
   ReferentModel,
-  PointDeRassemblementModel,
   LigneBusModel,
-  SessionPhase1TokenModel,
   SchemaDeRepartitionModel,
   SessionPhase1Document,
 } from "../models";
@@ -33,17 +30,11 @@ import {
   canViewCohesionCenter,
   canSearchSessionPhase1,
   canViewSessionPhase1,
-  canDownloadYoungDocuments,
-  canShareSessionPhase1,
   canCreateOrUpdateCohesionCenter,
-  isReferentOrAdmin,
   isSessionEditionOpen,
   canSendTimeScheduleReminderForSessionPhase1,
-  canSendImageRightsForSessionPhase1,
   formatDateTimeZone,
-  YoungDto,
   SessionPhase1Type,
-  YOUNG_STATUS,
   canModifyDirectionCenterTeam,
   ReferentStatus,
 } from "snu-lib";
@@ -51,6 +42,7 @@ import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serial
 import { validateSessionPhase1, validateId } from "../utils/validator";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
+import { isSessionPhase1InUserScope } from "../services/sejourAccess";
 import { encrypt, decrypt } from "../cryptoUtils";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
@@ -352,8 +344,9 @@ router.post("/:id/certificate", passport.authenticate("referent", { session: fal
     const cohesionCenter = await CohesionCenterModel.findById(session.cohesionCenterId);
     if (!cohesionCenter) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // FIXME: any, young et cohesion se parteg les champs nécessaire à canDownloadYoungDocuments
-    if (!canDownloadYoungDocuments(req.user, cohesionCenter as any)) {
+    // `canDownloadYoungDocuments` ne testait que le rôle : n'importe quel responsable de
+    // structure ou chef de centre éditait les attestations de toutes les sessions de France.
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -409,217 +402,6 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
 
     await sessionPhase1.deleteOne();
     await updateHeadCenter(sessionPhase1.headCenterId, req.user);
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:sessionId/share", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      sessionId: Joi.string().required(),
-      emails: Joi.array().items(Joi.string().lowercase().trim().email().required()).required().min(1),
-    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
-
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const sessionPhase1 = await SessionPhase1Model.findById(value.sessionId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (!canShareSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    //Create token
-    const cohort = await CohortModel.findById(sessionPhase1.cohortId);
-    if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const sessionToken = await SessionPhase1TokenModel.create({
-      token: crypto.randomBytes(50).toString("hex"),
-      sessionId: sessionPhase1._id,
-    });
-
-    //Send emails to share session
-    for (const email of value.emails) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.SHARE_SESSION_PHASE1, {
-        emailTo: [{ email: email }],
-        params: { link: `${config.ADMIN_URL}/session-phase1-partage?token=${sessionToken.token}`, session: sessionPhase1.cohort?.toLowerCase() },
-      });
-    }
-
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/check-token/:token", async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({
-      token: Joi.string().required(),
-    }).validate({ ...req.params }, { stripUnknown: true });
-
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const sessionPhase1Token = await SessionPhase1TokenModel.findOne({ token: value.token });
-    if (!sessionPhase1Token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const sessionPhase1 = await SessionPhase1Model.findById(sessionPhase1Token.sessionId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const cohortParam = await CohortModel.findById(sessionPhase1.cohortId);
-    if (!cohortParam) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (cohortParam?.busListAvailability) {
-      let result: {
-        noMeetingPoint: {
-          youngs: YoungDto[];
-          meetingPoint: string[];
-        };
-        transportInfoGivenByLocal: {
-          youngs: YoungDto[];
-          meetingPoint: string[];
-        };
-      } = {
-        noMeetingPoint: {
-          youngs: [],
-          meetingPoint: [],
-        },
-        transportInfoGivenByLocal: {
-          youngs: [],
-          meetingPoint: [],
-        },
-      };
-      const youngs = await YoungModel.find({ status: YOUNG_STATUS.VALIDATED, sessionPhase1Id: sessionPhase1._id });
-
-      const ligneBus = await LigneBusModel.find({ cohortId: sessionPhase1.cohortId, centerId: sessionPhase1.cohesionCenterId });
-
-      let arrayMeetingPoints: string[] = [];
-      ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
-
-      const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
-
-      for (const young of youngs) {
-        const tempYoung = {
-          _id: young._id,
-          firstName: young.firstName,
-          lastName: young.lastName,
-          email: young.email,
-          phone: young.phone,
-          city: young.city,
-          department: young.department,
-          parent1FirstName: young.parent1FirstName,
-          parent1LastName: young.parent1LastName,
-          parent1Email: young.parent1Email,
-          parent1Phone: young.parent1Phone,
-          parent1Status: young.parent1Status,
-          parent2FirstName: young.parent2FirstName,
-          parent2LastName: young.parent2LastName,
-          parent2Email: young.parent2Email,
-          parent2Phone: young.parent2Phone,
-          parent2Status: young.parent2Status,
-          statusPhase1: young.statusPhase1,
-          meetingPointId: young.meetingPointId,
-        };
-        if (young.deplacementPhase1Autonomous === "true") {
-          result.noMeetingPoint.youngs.push(tempYoung);
-        } else if (young.transportInfoGivenByLocal === "true") {
-          result.transportInfoGivenByLocal.youngs.push(tempYoung);
-        } else {
-          const youngMeetingPoint = meetingPoints.find((meetingPoint) => meetingPoint._id.toString() === young.meetingPointId);
-          const youngLigneBus = ligneBus.find((ligne) => ligne._id.toString() === young.ligneId && young?.cohesionStayPresence !== "false" && young?.departInform !== "true");
-          if (youngMeetingPoint && youngLigneBus) {
-            if (!result[youngLigneBus.busId]) {
-              result[youngLigneBus.busId] = {};
-              result[youngLigneBus.busId]["youngs"] = [];
-              result[youngLigneBus.busId]["ligneBus"] = [];
-              result[youngLigneBus.busId]["meetingPoint"] = [];
-            }
-            if (!result[youngLigneBus.busId]["meetingPoint"].find((meetingPoint) => meetingPoint._id.toString() === youngMeetingPoint._id.toString())) {
-              result[youngLigneBus.busId]["meetingPoint"].push(youngMeetingPoint);
-            }
-            if (!result[youngLigneBus.busId]["ligneBus"].find((ligne) => ligne._id.toString() === young.ligneId)) {
-              result[youngLigneBus.busId]["ligneBus"].push(youngLigneBus);
-            }
-            result[youngLigneBus.busId]["youngs"].push(tempYoung);
-          }
-        }
-      }
-
-      res.status(200).send({ ok: true, data: result });
-    } else {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    if ((!isReferentOrAdmin(req.user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) || req.user.role === ROLES.TRANSPORTER)
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    if (sessionPhase1.headCenterId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { error: errorIdHeadCenter, value: checkedIdHeadCenter } = validateId(req.body.id);
-    if (errorIdHeadCenter) {
-      capture(errorIdHeadCenter);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const referent = await ReferentModel.findById(checkedIdHeadCenter);
-    if (!referent) {
-      return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    }
-    if (!referent.role || ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(referent.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // Cannot be head of center in more than one centers for the same cohort
-    const overlappingSessionPhase1 = await SessionPhase1Model.find({ cohortId: sessionPhase1.cohortId, headCenterId: checkedIdHeadCenter });
-    if (overlappingSessionPhase1.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    sessionPhase1.set({ headCenterId: checkedIdHeadCenter });
-    await sessionPhase1.save({ fromUser: req.user });
-    await updateHeadCenter(checkedIdHeadCenter, req.user);
-
-    res.status(200).send({ ok: true });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.delete("/:id/headCenter", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    if ((!isReferentOrAdmin(req.user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) || req.user.role === ROLES.TRANSPORTER)
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { error: errorId, value: checkedId } = validateId(req.params.id);
-    if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
-    if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const oldHeadCenterId = sessionPhase1.headCenterId;
-
-    sessionPhase1.set({ headCenterId: undefined });
-    await sessionPhase1.save({ fromUser: req.user });
-    await updateHeadCenter(oldHeadCenterId, req.user);
-
     res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
@@ -901,7 +683,8 @@ router.post("/:sessionId/image-rights/export", passport.authenticate(["referent"
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (!canSendImageRightsForSessionPhase1(req.user)) {
+    // `canSendImageRightsForSessionPhase1` ne testait que le rôle, sans lien avec la session.
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
     // --- found youngs
