@@ -45,7 +45,7 @@ beforeAll(async () => {
     PERMISSION_RESOURCES.APPLICATION,
     PERMISSION_ACTIONS.FULL,
   );
-  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
+  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.APPLICATION, PERMISSION_ACTIONS.FULL, [
     {
       where: [
@@ -541,6 +541,31 @@ describe("GET /application/:id/patches", () => {
       .get(`/application/${applicationId}/patches`)
       .send();
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+  });
+
+  // M13 : l'historique d'une candidature doit rester cloisonné au périmètre du référent
+  it("devrait renvoyer 403 à un référent départemental hors du département du jeune", async () => {
+    const young = await createYoungHelper({ ...getNewYoungFixture(), department: "Ain", region: "Auvergne-Rhône-Alpes" });
+    const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, youngDepartment: "Ain" });
+    application.missionName = "MY NEW NAME";
+    await application.save();
+
+    const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+      .get(`/application/${application._id}/patches`)
+      .send();
+    expect(res.status).toBe(403);
+  });
+
+  it("devrait renvoyer 200 au référent départemental du jeune", async () => {
+    const young = await createYoungHelper({ ...getNewYoungFixture(), department: "Ain", region: "Auvergne-Rhône-Alpes" });
+    const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, youngDepartment: "Ain" });
+    application.missionName = "MY NEW NAME";
+    await application.save();
+
+    const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+      .get(`/application/${application._id}/patches`)
+      .send();
+    expect(res.status).toBe(200);
   });
 });
 

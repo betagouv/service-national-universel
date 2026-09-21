@@ -141,17 +141,9 @@ export function validateContract(program) {
       tutorFirstName: Joi.string().allow(null, ""),
       tutorLastName: Joi.string().allow(null, ""),
       isYoungAdult: Joi.string().allow(null, ""),
-      parent1Token: Joi.string().allow(null, ""),
-      projectManagerToken: Joi.string().allow(null, ""),
-      structureManagerToken: Joi.string().allow(null, ""),
-      parent2Token: Joi.string().allow(null, ""),
-      youngContractToken: Joi.string().allow(null, ""),
-      parent1Status: Joi.string().allow(null, ""),
-      projectManagerStatus: Joi.string().allow(null, ""),
-      structureManagerStatus: Joi.string().allow(null, ""),
-      parent2Status: Joi.string().allow(null, ""),
-      youngContractStatus: Joi.string().allow(null, ""),
-      invitationSent: Joi.string().allow(null, ""),
+      // Les jetons de signature, les statuts de signature et `invitationSent` sont pilotés
+      // exclusivement par le serveur : les accepter depuis le client permettrait de marquer
+      // un contrat comme signé sans aucune signature. `stripUnknown` les retire silencieusement.
       youngFirstName: Joi.string().allow(null, ""),
       youngLastName: Joi.string().allow(null, ""),
       youngBirthdate: Joi.string().allow(null, ""),

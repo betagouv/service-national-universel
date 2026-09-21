@@ -60,6 +60,7 @@ import { UserRequest } from "../controllers/request";
 import patches from "../controllers/patches";
 import { logger } from "../logger";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -513,6 +514,11 @@ router.get(
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       if (!isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.CONTRACT, context: { contract: contract.toJSON() } })) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
@@ -993,7 +999,11 @@ router.get(
       const application = await ApplicationModel.findById(id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const applicationPatches = await patches.get(req, ApplicationModel);
+      if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const applicationPatches = await patches.get(req, ApplicationModel, application);
       if (!applicationPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: applicationPatches });
