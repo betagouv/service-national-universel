@@ -3,15 +3,26 @@ const router = express.Router({ mergeParams: true });
 const passport = require("passport");
 const Joi = require("joi");
 const { capture } = require("../../sentry");
-const { ERRORS, isYoung, isReferent, updateSeatsTakenInBusLine } = require("../../utils");
-const { canEditYoung } = require("snu-lib");
-const { YoungModel } = require("../../models");
+const { ERRORS, updateSeatsTakenInBusLine } = require("../../utils");
 const { LigneBusModel } = require("../../models");
 const { LigneToPointModel } = require("../../models");
 const { PointDeRassemblementModel } = require("../../models");
 const { serializeYoung } = require("../../utils/serializer");
-const { validateId } = require("../../utils/validator");
 const { isPDRChoiceOpenForYoung } = require("../../services/pointDeRassemblement.service");
+
+/**
+ * Le tableau `team` d'une ligne de bus contient l'identité, la date de naissance, l'email et le
+ * téléphone des accompagnateurs : ces données n'ont pas à être renvoyées au volontaire (constat H48).
+ */
+function serializeLigneBusForYoung(bus) {
+  if (!bus) return bus;
+  return bus.toObject({
+    transform: (_doc, ret) => {
+      delete ret.team;
+      return ret;
+    },
+  });
+}
 
 router.put("/", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -39,17 +50,8 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // A young can only update their own meeting points.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    if (isReferent(req.user) && !canEditYoung(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/point-de-rassemblement).
+    const young = req.targetYoung;
 
     let bus = null;
 
@@ -81,12 +83,6 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
 
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    // --- params
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
     // --- query
     const { error: queryError, value } = Joi.object({
       withbus: Joi.string().valid("true").optional(),
@@ -99,9 +95,8 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     }
     const withBus = value.withbus === "true";
 
-    // --- verify young.
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // --- verify young. (appartenance contrôlée par youngPerimeterMiddleware)
+    const young = req.targetYoung;
 
     // --- PDR
     let pdr = await PointDeRassemblementModel.findById(young.meetingPointId);
@@ -113,12 +108,12 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
       const bus = await LigneBusModel.findById(young.ligneId);
       const ligneToPoint = await LigneToPointModel.findOne({ lineId: young.ligneId, meetingPointId: young.meetingPointId, deletedAt: { $exists: false } });
       if (pdr) {
-        data = { ...pdr.toObject(), bus, ligneToPoint };
+        data = { ...pdr.toObject(), bus: serializeLigneBusForYoung(bus), ligneToPoint };
       } else {
-        data = { bus, ligneToPoint };
+        data = { bus: serializeLigneBusForYoung(bus), ligneToPoint };
       }
     } else {
-      data = pdr.toObject();
+      data = pdr ? pdr.toObject() : null;
     }
 
     return res.status(200).send({ ok: true, data });

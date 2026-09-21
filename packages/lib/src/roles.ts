@@ -257,8 +257,10 @@ function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
 
-  const actorAndTargetInTheSameRegion = actor.region === young.region;
-  const actorAndTargetInTheSameDepartment = actor.department.includes(young.department);
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher (et ne doit pas
+  // faire planter l'appelant, ce qui transformait une 403 en 500).
+  const actorAndTargetInTheSameRegion = !!young?.region && actor.region === young.region;
+  const actorAndTargetInTheSameDepartment = !!young?.department && (actor.department || []).includes(young.department);
   const referentRegionFromTheSameRegion = actor.role === ROLES.REFERENT_REGION && actorAndTargetInTheSameRegion;
   const referentDepartmentFromTheSameDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actorAndTargetInTheSameDepartment;
   //TODO update this
