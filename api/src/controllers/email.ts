@@ -14,6 +14,8 @@ import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isEmailInUserScope } from "../email/emailNotificationScope";
+import { serializeEmailContent } from "../email/emailContent";
 
 const router = express.Router();
 
@@ -26,6 +28,12 @@ router.get(
   ],
   async (req: RouteRequest<any>, res: RouteResponse<any>) => {
     try {
+      // La permission USER_NOTIFICATIONS_READ est seedée sans policy : sans ce contrôle, l'historique
+      // de n'importe quelle adresse est lisible par n'importe quel référent (audit 2026-09-21, M18).
+      if (!(await isEmailInUserScope(req.user, req.validatedQuery.email))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       const data = await EmailModel.find({ email: req.validatedQuery.email }).sort("-date");
       if (!data) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -56,6 +64,12 @@ router.get(
 
       const { email, messageId } = mail;
 
+      // Le destinataire doit appartenir au périmètre de l'appelant : sinon, tout référent peut lire
+      // le contenu du mail de n'importe qui, liens de réinitialisation compris (audit 2026-09-21, C12).
+      if (!email || !(await isEmailInUserScope(req.user, email))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
       if (!messageId) {
         captureMessage("Error: messageId is undefined for email with id : " + JSON.stringify(req.validatedParams.id));
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -79,7 +93,9 @@ router.get(
         captureMessage("Error while fetching email" + JSON.stringify(emailData));
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      return res.status(200).send({ ok: true, data: emailData });
+      // Jamais le corps Brevo brut : les mails d'authentification sont restitués sans contenu,
+      // les autres voient les valeurs de token masquées.
+      return res.status(200).send({ ok: true, data: serializeEmailContent(emailData, mail.templateId) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

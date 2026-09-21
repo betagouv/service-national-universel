@@ -5,6 +5,11 @@ import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
+// Les cas de périmètre (qui peut consulter les notifications de qui) sont couverts par email-scope.test.ts.
+// Ici on ne teste que la validation de la query et la porte « permission », en visant sa propre adresse :
+// un utilisateur est toujours dans son propre périmètre.
+const MON_EMAIL = "moi@example.org";
+
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE] } });
@@ -37,19 +42,13 @@ describe("Email", () => {
     it("should reject if not ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, REFERENT_CLASSE, ADMINISTRATEUR_CLE", async () => {
       const { ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, REFERENT_CLASSE, ADMINISTRATEUR_CLE, ...unauthorizedRoles } = ROLES;
       for (const role of Object.values(unauthorizedRoles)) {
-        res = await request(await getAppHelperWithAcl({ role })).get("/email?email=test@example.org");
+        res = await request(await getAppHelperWithAcl({ role, email: MON_EMAIL })).get(`/email?email=${MON_EMAIL}`);
         expect(res.statusCode).toEqual(403);
       }
-      res = await request(await getAppHelperWithAcl({ role: ADMIN })).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(200);
-      res = await request(await getAppHelperWithAcl({ role: REFERENT_DEPARTMENT })).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(200);
-      res = await request(await getAppHelperWithAcl({ role: REFERENT_REGION })).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(200);
-      res = await request(await getAppHelperWithAcl({ role: REFERENT_CLASSE })).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(200);
-      res = await request(await getAppHelperWithAcl({ role: ADMINISTRATEUR_CLE })).get("/email?email=test@example.org");
-      expect(res.statusCode).toEqual(200);
+      for (const role of [ADMIN, REFERENT_DEPARTMENT, REFERENT_REGION, REFERENT_CLASSE, ADMINISTRATEUR_CLE]) {
+        res = await request(await getAppHelperWithAcl({ role, email: MON_EMAIL })).get(`/email?email=${MON_EMAIL}`);
+        expect(res.statusCode).toEqual(200);
+      }
     });
   });
 });

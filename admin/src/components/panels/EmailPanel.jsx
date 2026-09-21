@@ -90,7 +90,14 @@ export default function EmailPanel({ open, setOpen, email }) {
                 </div>
               ))}
             </div>
-            <iframe srcDoc={emailData.body} className="flex-1 border-t" />
+            {emailData.contentRedacted ? (
+              <p className="flex-1 border-t pt-4 text-gray-500">
+                Le contenu de ce message n&apos;est pas consultable : il s&apos;agit d&apos;un e-mail d&apos;authentification (code de connexion, lien de réinitialisation ou
+                d&apos;invitation).
+              </p>
+            ) : (
+              <iframe srcDoc={emailData.body} className="flex-1 border-t" />
+            )}
           </div>
         )
       )}
