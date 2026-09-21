@@ -2,7 +2,7 @@ import { promises as fs } from "fs";
 import { tmpdir } from "os";
 import { join } from "path";
 import { UseCase } from "@shared/core/UseCase";
-import { Inject, Injectable, Logger } from "@nestjs/common";
+import { ForbiddenException, Inject, Injectable, Logger } from "@nestjs/common";
 import { FileGateway } from "@shared/core/File.gateway";
 import {
     ClasseType,
@@ -168,7 +168,7 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
                 );
             }
             const candidatures = await this.candidatureGateway.findByStructureId(referent.structureId);
-            musts._id = candidatures.map((candidature) => candidature.jeuneId!);
+            this.appliquerPerimetreCandidatures(musts, candidatures);
         }
 
         if (isSupervisor(auteur)) {
@@ -182,14 +182,19 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
             const candidatures = await this.candidatureGateway.findByStructureIds(
                 structures.map((structure) => structure.id),
             );
-            musts._id = candidatures.map((candidature) => candidature.jeuneId!);
+            this.appliquerPerimetreCandidatures(musts, candidatures);
         }
 
-        if (isReferentReg(auteur) && filters.schoolRegion !== referent.region) {
-            filters.region = referent.region;
+        if (isReferentReg(auteur)) {
+            this.appliquerPerimetreTerritorial(
+                filters,
+                "schoolRegion",
+                "region",
+                referent.region ? [referent.region] : [],
+            );
         }
-        if (isReferentDep(auteur) && filters.schoolDepartment?.[0] !== referent.departement?.[0]) {
-            filters.department = referent.departement!;
+        if (isReferentDep(auteur)) {
+            this.appliquerPerimetreTerritorial(filters, "schoolDepartment", "department", referent.departement ?? []);
         }
 
         if (isVisiteur(auteur)) {
@@ -254,6 +259,55 @@ export class ExporterJeunes implements UseCase<ExporterJeunesResult> {
                 errors: 0,
             },
         };
+    }
+
+    /**
+     * Restreint l'export aux jeunes ayant candidaté sur la/les structure(s) de l'auteur.
+     *
+     * Deux pièges :
+     *  - une liste vide ne doit PAS produire une requête non contrainte (le builder ES ignore
+     *    silencieusement les contraintes vides, ce qui donnait un export national) ;
+     *  - la clé Elasticsearch valide est `ids`, pas `_id`.
+     */
+    private appliquerPerimetreCandidatures(
+        musts: Record<string, string | string[]>,
+        candidatures: { jeuneId?: string }[],
+    ): void {
+        const jeuneIds = candidatures.map((candidature) => candidature.jeuneId!).filter(Boolean);
+        if (!jeuneIds.length) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                "Aucune candidature sur cette structure : il n'y a aucun jeune à exporter",
+            );
+        }
+        musts.ids = jeuneIds;
+    }
+
+    /**
+     * Force le périmètre géographique d'un référent territorial.
+     *
+     * Si l'auteur demande un filtre « scolarisés dans … », on l'intersecte avec son propre
+     * périmètre — comparer la seule première valeur laissait passer toutes les suivantes.
+     * Sinon on impose le filtre de résidence.
+     */
+    private appliquerPerimetreTerritorial(
+        filters: Record<string, any>,
+        filtreScolarise: "schoolRegion" | "schoolDepartment",
+        filtreResidence: "region" | "department",
+        perimetre: string[],
+    ): void {
+        const demandes = [filters[filtreScolarise] ?? []].flat().filter(Boolean) as string[];
+
+        if (!demandes.length) {
+            filters[filtreResidence] = perimetre;
+            return;
+        }
+
+        const autorises = demandes.filter((valeur) => perimetre.includes(valeur));
+        if (!autorises.length) {
+            throw new ForbiddenException(`${filtreScolarise} hors du périmètre de l'utilisateur`);
+        }
+        filters[filtreScolarise] = autorises;
     }
 
     async generateRapport(

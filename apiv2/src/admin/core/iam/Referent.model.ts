@@ -46,10 +46,6 @@ export interface ReferentModel {
     updatedAt?: Date;
 }
 
-export interface ReferentPasswordModel extends ReferentModel {
-    password?: string;
-}
-
 export class ReferentMetadataModel {
     invitationType?: InvitationType;
     isFirstInvitationPending?: boolean;
