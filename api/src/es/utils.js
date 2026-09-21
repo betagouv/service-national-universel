@@ -34,6 +34,13 @@ async function* scrollSearch(params, client) {
 
 // Can get more than 10k results.
 // The es param is given to scroll function
+/**
+ * @param {string} index
+ * @param {any} query
+ * @param {any} [client]
+ * @param {string | string[]} [fieldsToExport]
+ * @returns {Promise<any[]>}
+ */
 async function allRecords(index, query, client = esClient, fieldsToExport = "*") {
   const params = {
     index,
