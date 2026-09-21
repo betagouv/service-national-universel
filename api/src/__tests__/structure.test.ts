@@ -129,15 +129,15 @@ describe("Structure", () => {
       expect(updatedMission?.structureName).toBe("changed");
     });
 
-    it("should update responsible structure name", async () => {
+    it("should not change referent roles when isNetwork changes", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false" });
       const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
-      const res = await request(await getAppHelperWithAcl())
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .put("/structure/" + structure._id)
         .send({ isNetwork: "true" });
       expect(res.status).toBe(200);
       const updatedResponsible = await getReferentByIdHelper(responsible._id);
-      expect(updatedResponsible?.role).toBe(ROLES.SUPERVISOR);
+      expect(updatedResponsible?.role).toBe(ROLES.RESPONSIBLE);
     });
 
     it("should not update isNetwork when responsible", async () => {
@@ -147,6 +147,52 @@ describe("Structure", () => {
         .put("/structure/" + structure._id)
         .send({ isNetwork: "true" });
       expect(res.status).toBe(403);
+    });
+
+    it("SUPERVISOR should not flag a child structure as network head", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const child = await createStructureHelper({ ...getNewStructureFixture(), name: "child", isNetwork: "false", networkId: network._id });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: child._id, role: ROLES.RESPONSIBLE });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+        .put("/structure/" + child._id)
+        .send({ isNetwork: "true" });
+      expect(res.status).toBe(403);
+      const updatedChild = await getStructureByIdHelper(child._id);
+      expect(updatedChild?.isNetwork).toBe("false");
+      const updatedResponsible = await getReferentByIdHelper(responsible._id);
+      expect(updatedResponsible?.role).toBe(ROLES.RESPONSIBLE);
+    });
+
+    it("REFERENT_DEPARTMENT should not flag a structure as network head", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", department: "Loire-Atlantique" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Loire-Atlantique"] }))
+        .put("/structure/" + structure._id)
+        .send({ isNetwork: "true" });
+      expect(res.status).toBe(403);
+      const updatedStructure = await getStructureByIdHelper(structure._id);
+      expect(updatedStructure?.isNetwork).toBe("false");
+    });
+
+    it("SUPERVISOR should still update a child structure sending an unchanged isNetwork", async () => {
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const child = await createStructureHelper({ ...getNewStructureFixture(), name: "child", isNetwork: "false", networkId: network._id });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: network._id.toString() }))
+        .put("/structure/" + child._id)
+        .send({ name: "changed", isNetwork: "false" });
+      expect(res.status).toBe(200);
+      const updatedChild = await getStructureByIdHelper(child._id);
+      expect(updatedChild?.name).toBe("changed");
+    });
+
+    it("RESPONSIBLE should still update a structure whose isNetwork is unset in database", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: undefined });
+      const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+      const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+        .put("/structure/" + structure._id)
+        .send({ name: "changed", isNetwork: "false" });
+      expect(res.status).toBe(200);
+      const updatedStructure = await getStructureByIdHelper(structure._id);
+      expect(updatedStructure?.name).toBe("changed");
     });
   });
 
