@@ -33,12 +33,10 @@ import {
   youngCheckinField,
 } from "@/utils";
 
-import ModalExportMail from "../components/modals/ModalExportMail";
 import General from "./general";
 import ModalExportPdfFile from "../components/modals/ModalExportPdfFile";
 
 export default function CenterYoungIndex() {
-  const [modalExportMail, setModalExportMail] = useState({ isOpen: false });
   const [filter, setFilter] = useState({});
   const [urlParams, setUrlParams] = useState("");
   const user = useSelector((state) => state.Auth.user);
@@ -520,32 +518,6 @@ export default function CenterYoungIndex() {
                   title: "Télécharger",
                   items: exportItems,
                 },
-                {
-                  key: "exportMail",
-                  title: "Envoyer par mail",
-                  items: [
-                    {
-                      key: "infoTransport",
-                      action: async () => {
-                        setModalExportMail({
-                          isOpen: true,
-                          onSubmit: async (emails) => {
-                            const { ok } = await api.post(`/session-phase1/${sessionId}/share`, { emails });
-                            if (!ok) toastr.error("Oups, une erreur s'est produite");
-                            toastr.success("Un mail a été envoyé à tous les destinataires renseignés");
-                            setModalExportMail({ isOpen: false });
-                          },
-                        });
-                      },
-                      render: (
-                        <div className="group flex cursor-pointer items-center gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                          <Bus className="text-gray-400 group-hover:scale-105 group-hover:text-green-500" />
-                          <div className="text-sm text-gray-700">Informations transports</div>
-                        </div>
-                      ),
-                    },
-                  ],
-                },
               ]}
             />
           </div>
@@ -561,7 +533,6 @@ export default function CenterYoungIndex() {
           )}
         </div>
       </div>
-      <ModalExportMail isOpen={modalExportMail?.isOpen} onCancel={() => setModalExportMail({ isOpen: false, value: null })} onSubmit={modalExportMail?.onSubmit} />
     </>
   );
 }

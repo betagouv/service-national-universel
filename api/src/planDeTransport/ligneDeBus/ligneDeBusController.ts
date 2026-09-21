@@ -42,6 +42,7 @@ import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBus
 import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { getCenterIdsInUserScope, isLigneBusInUserScope, serializeLigneBus, serializeLigneBusList, canViewConvoyeurTeam } from "../../services/sejourAccess";
 
 const router = express.Router();
 
@@ -51,16 +52,19 @@ const router = express.Router();
 router.get(
   "/all",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
-      const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false } });
+      // Sans périmètre, cette route renvoyait le plan de transport national complet.
+      const centerIds = await getCenterIdsInUserScope(req.user);
+      const scopeFilter = centerIds === null ? {} : { centerId: { $in: centerIds } };
+      const ligneBus = await LigneBusModel.find({ deletedAt: { $exists: false }, ...scopeFilter });
       let arrayMeetingPoints = [];
       // @ts-ignore
       ligneBus.map((l) => (arrayMeetingPoints = arrayMeetingPoints.concat(l.meetingPointsIds)));
       const meetingPoints = await PointDeRassemblementModel.find({ _id: { $in: arrayMeetingPoints }, deletedAt: { $exists: false } });
       const ligneToPoints = await LigneToPointModel.find({ lineId: { $in: ligneBus.map((l) => l._id) } });
-      return res.status(200).send({ ok: true, data: { ligneBus, meetingPoints, ligneToPoints } });
+      return res.status(200).send({ ok: true, data: { ligneBus: serializeLigneBusList(ligneBus, req.user), meetingPoints, ligneToPoints } });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -73,7 +77,7 @@ router.get(
 router.get(
   "/cohort/:cohort",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -84,12 +88,14 @@ router.get(
 
       const { cohort } = value;
 
-      const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false } });
+      const centerIds = await getCenterIdsInUserScope(req.user);
+      const scopeFilter = centerIds === null ? {} : { centerId: { $in: centerIds } };
+      const ligneBus = await LigneBusModel.find({ cohort: { $in: [cohort] }, deletedAt: { $exists: false }, ...scopeFilter });
       let arrayCenter = [];
       // @ts-ignore
       ligneBus.map((l) => (arrayCenter = arrayCenter.concat(l.centerId)));
       const centers = await CohesionCenterModel.find({ _id: { $in: arrayCenter } });
-      return res.status(200).send({ ok: true, data: { ligneBus, centers } });
+      return res.status(200).send({ ok: true, data: { ligneBus: serializeLigneBusList(ligneBus, req.user), centers } });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -576,7 +582,7 @@ router.post("/:id/point-de-rassemblement/:meetingPointId", passport.authenticate
 router.get(
   "/:id",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -590,8 +596,12 @@ router.get(
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
       const infoBus = await getInfoBus(ligneBus);
-      return res.status(200).send({ ok: true, data: infoBus });
+      return res.status(200).send({ ok: true, data: serializeLigneBus(infoBus, req.user) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -602,7 +612,7 @@ router.get(
 router.get(
   "/:id/availablePDRByRegion",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res) => {
     try {
       const { error, value } = Joi.object({
@@ -615,6 +625,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       if (!ligneBus.meetingPointsIds.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -634,7 +648,7 @@ router.get(
 router.get(
   "/:id/availablePDR",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res) => {
     try {
       const { error, value } = Joi.object({
@@ -647,6 +661,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const listGroup = await SchemaDeRepartitionModel.find({ centerId: ligneBus.centerId });
 
@@ -672,7 +690,7 @@ router.get(
 router.get(
   "/:id/ligne-to-points",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -685,6 +703,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const ligneToPoints = await LigneToPointModel.find({ lineId: id, meetingPointId: { $in: ligneBus.meetingPointsIds }, deletedAt: { $exists: false } });
 
@@ -705,7 +727,7 @@ router.get(
 router.get(
   "/:id/data-for-check",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value: id } = validateId(req.params.id);
@@ -714,6 +736,10 @@ router.get(
 
       const ligneBus = await LigneBusModel.findById(id);
       if (!ligneBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Périmètre : la permission LIGNE_BUS:READ est seedée sans policy, elle vaut donc
+      // accès national pour tout référent départemental / régional.
+      if (!(await isLigneBusInUserScope(req.user, ligneBus))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       //Get all youngs for this ligne and by meeting point
       const queryYoung = [
         { $match: { _id: ligneBus._id } },
@@ -796,7 +822,7 @@ router.get(
 router.get(
   "/cohort/:cohort/hasValue",
   authMiddleware("referent"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
+  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }]),
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
@@ -819,6 +845,8 @@ router.get(
 
 const PATCHES_COUNT_PER_PAGE = 20;
 const HIDDEN_FIELDS = ["/missionsInMail", "/historic", "/uploadedAt", "/sessionPhase1Id", "/correctedAt", "/lastStatusAt", "/token", "/Token"];
+/** Les patches `team/...` portent l'état civil, la date de naissance, l'email et le téléphone des accompagnateurs. */
+const isConvoyeurTeamPath = (path: string) => typeof path === "string" && path.startsWith("/team");
 const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
 
 /**
@@ -899,8 +927,14 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     }
 
     // --- security
-    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user!, ignorePolicy: true })) {
+    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user! })) {
       throw new Error(ERRORS.OPERATION_UNAUTHORIZED);
+    }
+    // PATCHES:READ est porté par des rôles à périmètre (référent de classe, administrateur CLE…) :
+    // sans filtre, l'historique national du plan de transport était lisible par tous.
+    const scopedCenterIds = await getCenterIdsInUserScope(req.user);
+    if (scopedCenterIds !== null && scopedCenterIds.length === 0) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     // --- query
@@ -908,7 +942,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
     const { cohort: cohortName } = value;
     const cohort = await CohortModel.findOne({ name: cohortName });
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const lines = await LigneBusModel.find({ cohort: cohort.name });
+    const lines = await LigneBusModel.find({ cohort: cohort.name, ...(scopedCenterIds === null ? {} : { centerId: { $in: scopedCenterIds } }) });
     if (lines.length > 0) {
       const lineIds = lines.map((line) => line._id);
       const lineSet = {};
@@ -960,6 +994,7 @@ router.get("/patches/:cohort", passport.authenticate("referent", { session: fals
             if (
               filterOpFunction(op) &&
               !HIDDEN_FIELDS.includes(op.path) &&
+              !(isConvoyeurTeamPath(op.path) && !canViewConvoyeurTeam(req.user)) &&
               (!IGNORED_VALUES.includes(op.value) || op.path.match(/\/[0-9]+$/)) &&
               (!IGNORED_VALUES.includes(op.originalValue) || op.op === "create")
             ) {

@@ -79,7 +79,6 @@ const PublicSupport = lazy(() => import("./scenes/public-support-center"));
 // @ts-ignore
 const School = lazy(() => import("./scenes/school"));
 // @ts-ignore
-const SessionShareIndex = lazy(() => import("./scenes/session-phase1/index"));
 // @ts-ignore
 const Settings = lazy(() => import("./scenes/settings"));
 // @ts-ignore
@@ -145,7 +144,6 @@ class App extends React.Component {
                   <SentryRoute path="/email-preview/:id" component={EmailPreview} />
                   <SentryRoute path="/validate" component={Validate} />
                   <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
-                  <SentryRoute path="/session-phase1-partage" component={SessionShareIndex} />
                   <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
                   <SentryRoute path="/creer-mon-compte" component={Signup} />
                   <SentryRoute path="/verifier-mon-compte" component={Signup} />
