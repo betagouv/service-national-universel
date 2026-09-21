@@ -51,7 +51,8 @@ export function requestBodyValidator<T>(validator: Joi.AnySchema<T> | undefined,
   if (body && validator) {
     const { error, value } = validator.validate(body, { stripUnknown: true });
     if (error) {
-      logger.debug(error);
+      // `error` porte `_original` (le body complet) et la valeur de chaque champ invalide
+      logger.debug(`Invalid body: ${error.message}`);
       throw new Error(ERRORS.INVALID_BODY);
     }
     return value;

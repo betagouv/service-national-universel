@@ -292,7 +292,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      logger.debug("joi error: ", error);
+      logger.debug(`joi error: ${error.message}`);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -407,7 +407,7 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      logger.debug("joi error: ", error);
+      logger.debug(`joi error: ${error.message}`);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
@@ -516,7 +516,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     const result = bodySchema.validate(req.body, { stripUnknown: true });
     const { error, value } = result;
     if (error) {
-      logger.debug("joi error: ", error);
+      logger.debug(`joi error: ${error.message}`);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
