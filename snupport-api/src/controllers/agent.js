@@ -18,6 +18,7 @@ const { cookieOptions, logoutCookieOptions } = require("../cookie-options");
 const { JWT_MAX_AGE, JWT_VERSION } = require("../jwt-options");
 
 const { sendEmail } = require("../brevo");
+const { serializeOrganisation } = require("../utils/organisation");
 
 const SCHEMA_PASSWORD = Joi.string().pattern(/^\S+$/).message("{{#label}} must be a valid password");
 const SCHEMA_TOKEN_LENGTH = 20;
@@ -53,9 +54,9 @@ router.post(
       expiresIn: JWT_MAX_AGE,
     });
     res.cookie("jwtzamoud", token, cookieOptions());
-    const organisations = await OrganisationModel.find({});
+    const organisation = await OrganisationModel.findById(user.organisationId);
 
-    return res.status(200).send({ ok: true, user, organisation: organisations[0], token });
+    return res.status(200).send({ ok: true, user, organisation: serializeOrganisation(organisation), token });
   }
 );
 
@@ -133,7 +134,7 @@ router.get("/me", agentGuard, async (req, res) => {
   const organisation = await OrganisationModel.findOne({ _id: user.organisationId });
   await user.save();
 
-  res.send({ user, organisation, ok: true, token: req.cookies.jwtzamoud });
+  res.send({ user, organisation: serializeOrganisation(organisation), ok: true, token: req.cookies.jwtzamoud });
 });
 
 router.get("/", agentGuard, async (req, res) => {
