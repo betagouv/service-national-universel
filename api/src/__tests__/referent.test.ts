@@ -64,6 +64,10 @@ beforeAll(async () => {
   await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN] } });
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.FULL);
   await addPermissionHelper([ROLES.RESPONSIBLE, ROLES.SUPERVISOR], PERMISSION_RESOURCES.REFERENT, PERMISSION_ACTIONS.CREATE);
+  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
+  await addPermissionHelper([ROLES.RESPONSIBLE, ROLES.SUPERVISOR], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.WRITE, {
+    where: [{ field: "_id", source: "structureId" }],
+  } as any);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.USER_HISTORY, PERMISSION_ACTIONS.READ);
 });
@@ -81,7 +85,7 @@ describe("Referent", () => {
       const referentFixture = getNewReferentFixture();
       const referentsBefore = await getReferentsHelper();
       const res = await request(await getAppHelperWithAcl())
-        .post("/referent/signup_invite/001")
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(referentFixture);
       expect(res.statusCode).toEqual(200);
       const referentsAfter = await getReferentsHelper();
@@ -89,16 +93,17 @@ describe("Referent", () => {
       await deleteReferentByIdHelper(res.body.data._id);
     });
     it("should invite and add referent (responsible)", async () => {
-      const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE };
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
-        .post("/referent/signup_invite/001")
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(referentFixture);
       expect(res.statusCode).toEqual(200);
     });
     it("should return 400 if no templates given", async () => {
       const referentFixture = getNewReferentFixture();
       const res = await request(await getAppHelperWithAcl())
-        .post("/referent/signup_invite/001")
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
     });
@@ -107,7 +112,7 @@ describe("Referent", () => {
       for (const role of ROLES_LIST) {
         if (role !== ROLES.RESPONSIBLE) {
           const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
-            .post("/referent/signup_invite/001")
+            .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
             .send({ ...referentFixture, role });
           expect(res.statusCode).toEqual(403);
         }
@@ -118,7 +123,7 @@ describe("Referent", () => {
       const email = fixture.email?.toLowerCase();
       await createReferentHelper({ ...fixture, email });
       let res = await request(await getAppHelperWithAcl())
-        .post("/referent/signup_invite/001")
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(fixture);
       expect(res.status).toBe(409);
     });
@@ -183,7 +188,7 @@ describe("Referent", () => {
         },
         { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
         { keepYoung: true },
-        { role: ROLES.HEAD_CENTER, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
+        { role: ROLES.REFERENT_DEPARTMENT, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );
       expect(responseSuccessed.statusCode).toEqual(200);
 
