@@ -148,7 +148,12 @@ router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: Us
 
 router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
-    const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+    // On transmet l'identifiant SNU du référent : c'est lui qui désigne le compte agent côté
+    // support, l'email seul ne suffit pas à prouver qu'il s'agit bien du même utilisateur.
+    const { ok, data, token } = await SNUpport.api(
+      `/v0/sso/signin?email=${encodeURIComponent(req.user.email)}&snuReferentId=${encodeURIComponent(req.user._id.toString())}`,
+      { method: "GET", credentials: "include" },
+    );
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const options: CookieOptions = {
