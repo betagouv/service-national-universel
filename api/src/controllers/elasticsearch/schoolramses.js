@@ -28,7 +28,8 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         aggs: {
           school: {
             terms: { field: "schoolId.keyword", size: ES_NO_LIMIT },
-            aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
+            // `top_hits` sans `_source` remonterait le document jeune complet.
+            aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1, _source: ["schoolId", "schoolDepartment"] } } },
           },
         },
         size: 0,
