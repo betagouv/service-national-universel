@@ -173,6 +173,24 @@ const ADMINISTRATEUR_CLE_SUBROLE = {
   coordinateur_cle: SUB_ROLES.coordinateur_cle,
 };
 
+/**
+ * Sous-rôles autorisés pour chaque rôle principal.
+ * `god` n'y figure volontairement pas : il n'est attribuable par aucun flux d'invitation ni d'édition.
+ */
+const SUB_ROLES_BY_ROLE: Record<string, string[]> = {
+  [ROLES.REFERENT_DEPARTMENT]: Object.values(REFERENT_DEPARTMENT_SUBROLE),
+  [ROLES.REFERENT_REGION]: Object.values(REFERENT_REGION_SUBROLE),
+  [ROLES.ADMINISTRATEUR_CLE]: Object.values(ADMINISTRATEUR_CLE_SUBROLE),
+  [ROLES.VISITOR]: Object.keys(VISITOR_SUBROLES),
+};
+
+/** Un sous-rôle n'est acceptable que s'il appartient au rôle principal visé (cf. collection `roles`). */
+function isSubRoleAllowedForRole(role?: string | null, subRole?: string | null): boolean {
+  if (!subRole) return true;
+  if (!role) return false;
+  return (SUB_ROLES_BY_ROLE[role] || []).includes(subRole);
+}
+
 // TODO - Geography department ref-ref array-array ref-ref/struc|young array-string
 const sameGeography = (actor, target) => {
   const actorAndTargetInTheSameRegion = (actor?.region && actor?.region === target?.region) || region2department[actor?.region].includes(target?.department);
@@ -285,8 +303,19 @@ type CanUpdateReferent = {
   structure?: StructureType | null;
 };
 
+/**
+ * Matrice des rôles pour l'édition d'un référent.
+ *
+ * /!\ Cette fonction est partagée avec le front (affichage des boutons d'édition) : sa vérification
+ * géographique est *indicative*. Elle ne peut pas être le périmètre de référence, car les chefs de
+ * centre n'ont ni `region` ni `department` et la `structure` reçue peut provenir de la requête.
+ * Le périmètre faisant foi est appliqué côté API par `isReferentInUserScope`
+ * (api/src/referent/referentScope.ts), à partir de données serveur uniquement.
+ */
 function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, structure }: CanUpdateReferent) {
   const isMe = actor._id?.toString() === originalTarget._id?.toString();
+  // Un `modifiedTarget` sans `role` ne change pas le rôle de la cible : le rôle effectif reste celui d'origine.
+  const targetRoleAfterUpdate = modifiedTarget?.role || originalTarget.role;
   const isActorAdmin = isAdmin(actor);
   const isStructureTeamMember = isResponsibleOrSupervisor(actor);
   const withoutChangingRole = modifiedTarget === null || !("role" in modifiedTarget) || modifiedTarget.role === originalTarget.role;
@@ -328,14 +357,14 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
     // ... modifying referent ...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(modifiedTarget.role!));
+    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE].includes(targetRoleAfterUpdate!);
   const isReferentModifyingHeadCenterWithoutChangingRole =
     // Is referent...
     [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role) &&
     // ... modifying referent ...
     [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(originalTarget.role!) &&
     // ... witout changing its role.
-    (modifiedTarget === null || [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(modifiedTarget.role!));
+    [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(targetRoleAfterUpdate!);
 
   const geographicTargetData = {
     region: originalTarget.region || structure?.region,
@@ -1298,6 +1327,8 @@ export {
   REFERENT_DEPARTMENT_SUBROLE,
   REFERENT_REGION_SUBROLE,
   ADMINISTRATEUR_CLE_SUBROLE,
+  SUB_ROLES_BY_ROLE,
+  isSubRoleAllowedForRole,
   canInviteUser,
   canDeleteYoung,
   canEditYoung,
