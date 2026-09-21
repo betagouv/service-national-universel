@@ -66,7 +66,12 @@ router.post("/youngBySchool", passport.authenticate(["referent"], { session: fal
       aggs: {
         school: {
           terms: { field: "schoolId.keyword", size: 500 },
-          aggs: { departments: { terms: { field: "department.keyword" } }, firstUser: { top_hits: { size: 1 } } },
+          aggs: {
+            departments: { terms: { field: "department.keyword" } },
+            // Un `top_hits` sans `_source` renvoie le document jeune complet.
+            // Le tableau du dashboard n'a besoin que de l'établissement.
+            firstUser: { top_hits: { size: 1, _source: ["schoolId", "schoolName", "schoolCity", "schoolZip", "schoolDepartment", "schoolRegion"] } },
+          },
         },
       },
       size: 0,

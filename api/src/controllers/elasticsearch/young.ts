@@ -70,8 +70,30 @@ function getYoungsFilters(user: UserDto): string[] {
   ].filter(Boolean) as string[];
 }
 
-async function buildYoungContext(user: UserDto, showAffectedToRegionOrDep = false): Promise<any> {
+/**
+ * Rôles pour lesquels `buildYoungContext` sait construire un périmètre.
+ * Un rôle absent de cette liste n'obtiendrait AUCUN filtre : il verrait l'index
+ * `young` complet. La fonction refuse donc par défaut (cf. C9).
+ * ADMIN est national par conception.
+ *
+ * Volontairement absents : `transporter`, `administrateur_cle`, `referent_classe`,
+ * `head_center`, `head_center_adjoint` et `referent_sanitaire`, qui n'existent
+ * plus sur la plateforme. Des comptes résiduels peuvent encore porter ces rôles
+ * en base : ils doivent être refusés, pas tolérés.
+ */
+const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.VISITOR];
+
+interface YoungContextOptions {
+  showAffectedToRegionOrDep?: boolean;
+}
+
+async function buildYoungContext(user: UserDto, options: YoungContextOptions = {}): Promise<any> {
+  const { showAffectedToRegionOrDep = false } = options;
   const contextFilters: any[] = [];
+
+  if (!YOUNG_CONTEXT_SCOPED_ROLES.includes(user.role)) {
+    return { youngContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  }
 
   if (user.role !== ROLES.ADMIN)
     contextFilters.push({
@@ -165,7 +187,7 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     const searchFields = ["email", "firstName", "lastName", "city", "zip"];
     const filterFields = ["meetingPointId.keyword", "meetingPointName.keyword", "meetingPointCity.keyword", "region.keyword", "department.keyword"];
     const sortFields: string[] = [];
-    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
@@ -226,7 +248,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     const { queryFilters, error }: any = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+    const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
     if (youngContextError) {
       return res.status(youngContextError.status).send(youngContextError.body);
     }
@@ -256,7 +278,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     };
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeYoungs(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -274,7 +296,7 @@ router.post(
       const filterFields = ["cohort.keyword", "region.keyword", "sessionPhase1Id.keyword", "sessionPhase1Name", "sessionPhase1City", "department.keyword", "ligneId.keyword"];
       const sortFields: string[] = [];
 
-      const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, true);
+      const { youngContextFilters, youngContextError } = await buildYoungContext(req.user, { showAffectedToRegionOrDep: true });
       if (youngContextError) {
         return res.status(youngContextError.status).send(youngContextError.body);
       }
@@ -508,7 +530,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);
@@ -527,6 +549,12 @@ router.post(
       const filterFields = getYoungsFilters(user);
 
       const sortFields = ["lastName.keyword", "firstName.keyword", "createdAt"];
+
+      // Authorization : seuls ces rôles ont un périmètre défini ci-dessous. Tout
+      // autre rôle n'aurait aucun filtre d'établissement et verrait l'index complet.
+      if (!canSearchInElasticSearch(user, "young-having-school-in-department") && !canSearchInElasticSearch(user, "young-having-school-in-region")) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
       const { error: errorQuery, value: query } = Joi.object({
         tab: Joi.string().trim().valid("volontaire"),
@@ -567,7 +595,7 @@ router.post(
         return res.status(200).send({ ok: true, data });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(response.body);
+        return res.status(200).send(serializeYoungs(response.body));
       }
     } catch (error) {
       capture(error);
@@ -658,7 +686,7 @@ router.post(
         return res.status(200).send({ ok: true, data: serializeYoungs(response) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(response.body);
+        return res.status(200).send(serializeYoungs(response.body));
       }
     } catch (error) {
       capture(error);

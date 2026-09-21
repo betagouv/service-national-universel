@@ -8,9 +8,10 @@ ARG MONGO_DB_NAME=""
 ENV MONGO_DB_NAME=${MONGO_DB_NAME}
 
 COPY collections.csv .
+COPY sensitive-fields.csv .
 COPY generate_config.sh .
 COPY docker_start.sh .
 
-RUN sh generate_config.sh $MONGO_DB_NAME collections.csv > monstache.toml
+RUN sh generate_config.sh $MONGO_DB_NAME collections.csv sensitive-fields.csv > monstache.toml
 
 ENTRYPOINT ["./docker_start.sh"]

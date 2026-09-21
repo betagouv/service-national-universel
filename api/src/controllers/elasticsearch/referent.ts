@@ -1,8 +1,9 @@
 import passport from "passport";
 import express, { Response } from "express";
 import Joi from "joi";
+import { isValidObjectId } from "mongoose";
 
-import { ROLES, canSearchInElasticSearch, department2region, departmentList, ES_NO_LIMIT, UserDto, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, department2region, region2department, departmentList, ES_NO_LIMIT, UserDto, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 
 import { capture } from "../../sentry";
 import esClient from "../../es";
@@ -24,6 +25,42 @@ interface ReferentContext {
       code: string;
     };
   };
+}
+
+/**
+ * Rôles rattachés à un département (et parfois à une région).
+ * `referent_classe`, `administrateur_cle` et la famille chef de centre en sont
+ * absents : ces rôles n'existent plus sur la plateforme, l'annuaire ne doit plus
+ * les remonter même si des comptes résiduels subsistent en base.
+ */
+const DEPARTMENT_SCOPED_ROLES = [ROLES.REFERENT_DEPARTMENT];
+
+/** Rôles rattachés à une structure et non à une géographie. */
+const STRUCTURE_SCOPED_ROLES = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+/** `department` est typé `string | string[]` dans le modèle. */
+function toDepartments(department: UserDto["department"]): string[] {
+  if (!department) return [];
+  return Array.isArray(department) ? department : [department];
+}
+
+/**
+ * Structures du périmètre d'un référent départemental ou régional, têtes de
+ * réseau incluses (elles ne portent pas toujours de région).
+ */
+async function getStructureIdsInPerimeter(user: UserDto): Promise<string[]> {
+  const userDepartments = toDepartments(user.department);
+  const regions = user.role === ROLES.REFERENT_REGION ? [user.region] : [...new Set(userDepartments.map((department) => department2region[department]).filter(Boolean))];
+  const departments = user.role === ROLES.REFERENT_REGION ? region2department[user.region as string] || [] : userDepartments;
+
+  const structures = await StructureModel.find({ $or: [{ region: { $in: regions } }, { department: { $in: departments } }] }).select({ _id: 1, networkId: 1 });
+
+  const ids = new Set<string>();
+  for (const structure of structures) {
+    ids.add(structure._id.toString());
+    if (structure.networkId) ids.add(String(structure.networkId));
+  }
+  return [...ids];
 }
 
 async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
@@ -49,55 +86,40 @@ async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
   }
 
   // See: https://trello.com/c/Wv2TrQnQ/383-admin-ajouter-onglet-utilisateurs-pour-les-r%C3%A9f%C3%A9rents
+  // Ces deux branches listaient les rôles SANS borne géographique : un référent
+  // départemental voyait l'intégralité de l'annuaire des référents (H24).
   if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = toDepartments(user.department);
+    const regions = [...new Set(departments.map((department) => department2region[department]).filter(Boolean))];
     contextFilters.push({
       bool: {
+        minimum_should_match: 1,
         should: [
-          {
-            terms: {
-              "role.keyword": [
-                ROLES.REFERENT_DEPARTMENT,
-                ROLES.SUPERVISOR,
-                ROLES.RESPONSIBLE,
-                ROLES.HEAD_CENTER,
-                ROLES.HEAD_CENTER_ADJOINT,
-                ROLES.REFERENT_SANITAIRE,
-                ROLES.REFERENT_REGION,
-                ROLES.REFERENT_CLASSE,
-                ROLES.ADMINISTRATEUR_CLE,
-              ],
-            },
-          },
-          {
-            bool: {
-              must: [{ terms: { "role.keyword": [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE] } }, { terms: { "department.keyword": user.department } }],
-            },
-          },
+          { bool: { must: [{ terms: { "role.keyword": DEPARTMENT_SCOPED_ROLES } }, { terms: { "department.keyword": departments } }] } },
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.VISITOR] } }, { terms: { "region.keyword": regions } }] } },
+          { bool: { must: [{ terms: { "role.keyword": STRUCTURE_SCOPED_ROLES } }, { terms: { "structureId.keyword": await getStructureIdsInPerimeter(user) } }] } },
         ],
       },
     });
   }
 
   if (user.role === ROLES.REFERENT_REGION) {
+    const departments = region2department[user.region as string] || [];
     contextFilters.push({
       bool: {
+        minimum_should_match: 1,
         should: [
+          { bool: { must: [{ terms: { "role.keyword": [ROLES.REFERENT_REGION, ROLES.VISITOR] } }, { term: { "region.keyword": user.region } }] } },
           {
-            terms: {
-              "role.keyword": [
-                ROLES.REFERENT_REGION,
-                ROLES.SUPERVISOR,
-                ROLES.RESPONSIBLE,
-                ROLES.HEAD_CENTER,
-                ROLES.HEAD_CENTER_ADJOINT,
-                ROLES.REFERENT_SANITAIRE,
-                ROLES.ADMINISTRATEUR_CLE,
-                ROLES.REFERENT_CLASSE,
+            bool: {
+              must: [
+                { terms: { "role.keyword": DEPARTMENT_SCOPED_ROLES } },
+                // Certains référents ne portent que la région, d'autres que le département.
+                { bool: { minimum_should_match: 1, should: [{ term: { "region.keyword": user.region } }, { terms: { "department.keyword": departments } }] } },
               ],
             },
           },
-          { bool: { must: [{ term: { "role.keyword": ROLES.REFERENT_DEPARTMENT } }, { term: { "region.keyword": user.region } }] } },
-          { bool: { must: [{ term: { "role.keyword": ROLES.VISITOR } }, { term: { "region.keyword": user.region } }] } },
+          { bool: { must: [{ terms: { "role.keyword": STRUCTURE_SCOPED_ROLES } }, { terms: { "structureId.keyword": await getStructureIdsInPerimeter(user) } }] } },
         ],
       },
     });
@@ -156,6 +178,36 @@ async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
   return { referentContextFilters: contextFilters };
 }
 
+/**
+ * Qui peut lister les référents (tuteurs) d'une structure donnée ?
+ * Ce endpoint alimente les sélecteurs de tuteur : il ne doit pas servir d'oracle
+ * pour énumérer les tuteurs de n'importe quelle structure (H25).
+ */
+async function canReadStructureReferents(user: UserDto, structureId: string): Promise<boolean> {
+  if ([ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role)) return true;
+
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role)) {
+    if (!user.structureId) return false;
+    if (String(user.structureId) === String(structureId)) return true;
+    // Un superviseur voit aussi les structures de son réseau.
+    if (user.role === ROLES.SUPERVISOR) {
+      const structure = await findStructureById(structureId);
+      return !!structure && String(structure.networkId) === String(user.structureId);
+    }
+    // Un responsable voit la tête de réseau de sa propre structure.
+    const ownStructure = await findStructureById(String(user.structureId));
+    return !!ownStructure?.networkId && String(ownStructure.networkId) === String(structureId);
+  }
+
+  return false;
+}
+
+/** Un identifiant arbitraire ne doit pas provoquer de CastError (500). */
+async function findStructureById(id: string) {
+  if (!isValidObjectId(id)) return null;
+  return StructureModel.findById(id);
+}
+
 const router = express.Router();
 
 router.post(
@@ -204,10 +256,10 @@ router.post(
 
       if (req.params.action === "export") {
         const response = await allRecords("referent", hitsRequestBody.query);
-        return res.status(200).send({ ok: true, data: response });
+        return res.status(200).send({ ok: true, data: serializeReferents(response) });
       } else {
         const response = await esClient.msearch({ index: "referent", body: buildNdJson({ index: "referent", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(response.body);
+        return res.status(200).send(serializeReferents(response.body));
       }
     } catch (error) {
       capture(error);
@@ -284,17 +336,29 @@ router.post("/structure/:structure", passport.authenticate(["referent"], { sessi
   try {
     if (!canSearchInElasticSearch(req.user, "referent")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    const { error: errorParams, value: params } = Joi.object({
+      structure: Joi.string().trim().required(),
+    }).validate(req.params, { stripUnknown: true });
+    if (errorParams) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    if (!(await canReadStructureReferents(req.user, params.structure))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const response = await esClient.msearch({
       index: "referent",
       body: buildNdJson(
         { index: "referent", type: "_doc" },
         {
-          query: { bool: { must: { match_all: {} }, filter: [{ term: { "structureId.keyword": req.params.structure } }] } },
+          query: {
+            bool: {
+              must: { match_all: {} },
+              filter: [{ term: { "structureId.keyword": params.structure } }, { terms: { "role.keyword": [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } }],
+            },
+          },
           size: ES_NO_LIMIT,
         },
       ),
     });
-    return res.status(200).send(response.body);
+    return res.status(200).send(serializeReferents(response.body));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
