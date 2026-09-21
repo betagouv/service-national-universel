@@ -81,7 +81,9 @@ router.post("/:type/:template/send-email", passport.authenticate(["young", "refe
     if (type === "contract") {
       if (!contract_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-      contract = await ContractModel.exists({ _id: contract_id });
+      // Le contrat doit appartenir au jeune destinataire : sinon n'importe quel identifiant de
+      // contrat ferait envoyer par mail le PDF du contrat d'un autre jeune.
+      contract = await ContractModel.exists({ _id: contract_id, youngId: young._id.toString() });
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 

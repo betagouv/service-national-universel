@@ -12,6 +12,9 @@ import getNewYoungFixture from "./fixtures/young";
 import { createApplication, getApplicationByIdHelper } from "./helpers/application";
 import { getYoungByIdHelper, createYoungHelper } from "./helpers/young";
 import { expectContractToEqual, getContractByIdHelper, createContractHelper } from "./helpers/contract";
+import { createStructureHelper } from "./helpers/structure";
+import getNewStructureFixture from "./fixtures/structure";
+import { ApplicationModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -39,9 +42,14 @@ jest.mock("../brevo", () => ({
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
-  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLE_JEUNE] } });
-  await addPermissionHelper([ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE], PERMISSION_RESOURCES.CONTRACT, PERMISSION_ACTIONS.FULL);
-  await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
+  await PermissionModel.deleteMany({ roles: { $in: [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLE_JEUNE] } });
+  // Mêmes rôles que le seed de production (migration 20250624122150-seed-responsable-permissions)
+  await addPermissionHelper(
+    [ROLES.ADMIN, ROLES.SUPERVISOR, ROLES.RESPONSIBLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION],
+    PERMISSION_RESOURCES.CONTRACT,
+    PERMISSION_ACTIONS.FULL,
+  );
+  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLE_JEUNE], PERMISSION_RESOURCES.CONTRACT, PERMISSION_ACTIONS.READ, [
     {
       where: [{ field: "youngId", source: "_id" }],
@@ -385,5 +393,284 @@ describe("GET /contract/:id/patches", () => {
       .get(`/contract/${contractId}/patches`)
       .send();
     expect(passport.lastTypeCalledOnAuthenticate).toEqual("referent");
+  });
+});
+
+describe("Contrat - cloisonnement des lectures (C2)", () => {
+  async function setupContract() {
+    const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+    const young = await createYoungHelper({ ...getNewYoungFixture(), department: "Ain", region: "Auvergne-Rhône-Alpes" });
+    const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
+    const contract = await createContractHelper({
+      ...getNewContractFixture(),
+      youngId: young._id,
+      applicationId: application._id,
+      structureId: structure._id,
+      youngDepartment: "Ain",
+      projectManagerToken: "tok-project-manager",
+      structureManagerToken: "tok-structure-manager",
+      parent1Token: "tok-parent1",
+      parent2Token: "tok-parent2",
+      youngContractToken: "tok-young",
+    });
+    await ApplicationModel.findByIdAndUpdate(application._id, { contractId: contract._id.toString() });
+    return { structure, young, application, contract };
+  }
+
+  describe("GET /contract/:id", () => {
+    it("devrait renvoyer 403 à un responsable d'une autre structure", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au responsable de la structure du contrat", async () => {
+      const { contract, structure } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait renvoyer 403 à un superviseur d'un autre réseau", async () => {
+      const { contract } = await setupContract();
+      const autreTete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: autreTete._id.toString() }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au superviseur du réseau de la structure", async () => {
+      const tete = await createStructureHelper({ ...getNewStructureFixture(), networkId: "" });
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: tete._id.toString() });
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, structureId: structure._id });
+      const contract = await createContractHelper({
+        ...getNewContractFixture(),
+        youngId: young._id,
+        applicationId: application._id,
+        structureId: structure._id.toString(),
+      });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: tete._id.toString() }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait renvoyer 403 à un référent départemental hors du département du jeune", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au référent départemental du jeune", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+
+    it("devrait renvoyer 403 à un référent régional hors de la région du jeune", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, department: [], region: "Hauts-de-France" }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au référent régional du jeune", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, department: [], region: "Auvergne-Rhône-Alpes" }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+
+    it("ne devrait pas exposer les jetons de signature à un responsable d'une autre structure", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.body?.data?.projectManagerToken).toBeUndefined();
+      expect(res.body?.data?.structureManagerToken).toBeUndefined();
+      expect(res.body?.data?.parent1Token).toBeUndefined();
+      expect(res.body?.data?.parent2Token).toBeUndefined();
+      expect(res.body?.data?.youngContractToken).toBeUndefined();
+    });
+  });
+
+  describe("POST /contract/:id/download", () => {
+    it("devrait renvoyer 403 à un responsable d'une autre structure", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .post(`/contract/${contract._id}/download`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 403 à un référent départemental hors du département du jeune", async () => {
+      const { contract } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+        .post(`/contract/${contract._id}/download`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+  });
+
+  describe("GET /application/:id/contract", () => {
+    it("devrait renvoyer 403 à un responsable d'une autre structure", async () => {
+      const { application } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }))
+        .get(`/application/${application._id}/contract`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au responsable de la structure du contrat", async () => {
+      const { application, structure } = await setupContract();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .get(`/application/${application._id}/contract`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+  });
+
+  describe("GET /contract/:id/patches (M2)", () => {
+    it("devrait renvoyer 403 à un référent départemental hors du département du jeune", async () => {
+      const { contract } = await setupContract();
+      contract.youngFirstName = "NOUVEAU PRENOM";
+      await contract.save();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Nord"], region: "Hauts-de-France" }))
+        .get(`/contract/${contract._id}/patches`)
+        .send();
+      expect(res.status).toBe(403);
+    });
+
+    it("devrait renvoyer 200 au référent départemental du jeune", async () => {
+      const { contract } = await setupContract();
+      contract.youngFirstName = "NOUVEAU PRENOM";
+      await contract.save();
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }))
+        .get(`/contract/${contract._id}/patches`)
+        .send();
+      expect(res.status).toBe(200);
+    });
+  });
+});
+
+describe("POST /contract - champs pilotés par le serveur (H21)", () => {
+  it("ne devrait pas accepter les statuts et jetons de signature envoyés par le client", async () => {
+    const young = await createYoungHelper(getNewYoungFixture());
+    const application = await createApplication({ ...getNewApplicationFixture(), status: "VALIDATED", youngId: young._id });
+    const creation = await request(await getAppHelperWithAcl())
+      .post("/contract")
+      .send({ ...getNewContractFixture(), youngId: young._id, applicationId: application._id, sendMessage: true });
+    expect(creation.status).toBe(200);
+
+    const contratInitial = await getContractByIdHelper(creation.body.data._id);
+    expect(contratInitial?.projectManagerStatus).toBe("WAITING_VALIDATION");
+
+    const res = await request(await getAppHelperWithAcl())
+      .post("/contract")
+      .send({
+        ...creation.body.data,
+        projectManagerStatus: "VALIDATED",
+        structureManagerStatus: "VALIDATED",
+        parent1Status: "VALIDATED",
+        youngContractStatus: "VALIDATED",
+        projectManagerToken: "jeton-forge",
+        structureManagerToken: "jeton-forge",
+        sendMessage: false,
+      });
+    expect(res.status).toBe(200);
+
+    const contrat = await getContractByIdHelper(creation.body.data._id);
+    expect(contrat?.projectManagerStatus).toBe("WAITING_VALIDATION");
+    expect(contrat?.structureManagerStatus).toBe("WAITING_VALIDATION");
+    expect(contrat?.parent1Status).toBe("WAITING_VALIDATION");
+    expect(contrat?.projectManagerToken).not.toBe("jeton-forge");
+    expect(contrat?.structureManagerToken).not.toBe("jeton-forge");
+    expect(contrat?.projectManagerToken).toBe(contratInitial?.projectManagerToken);
+  });
+});
+
+describe("POST /contract/token/:token - rejeu du jeton (L9)", () => {
+  it("ne devrait pas rejouer une signature déjà validée", async () => {
+    const young = await createYoungHelper(getNewYoungFixture());
+    const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+    const token = crypto.randomBytes(40).toString("hex");
+    const contract = await createContractHelper({
+      ...getNewContractFixture(),
+      youngId: young._id,
+      applicationId: application._id,
+      projectManagerToken: token,
+      projectManagerStatus: "WAITING_VALIDATION",
+    });
+
+    const premiere = await request(await getAppHelperWithAcl())
+      .post(`/contract/token/${token}`)
+      .send();
+    expect(premiere.status).toBe(200);
+
+    const apresPremiere = await getContractByIdHelper(contract._id);
+    expect(apresPremiere?.projectManagerStatus).toBe("VALIDATED");
+    const dateDeSignature = apresPremiere?.projectManagerValidationDate;
+
+    // la signature doit rester tracée dans l'historique du contrat
+    const historique = await request(await getAppHelperWithAcl())
+      .get(`/contract/${contract._id}/patches`)
+      .send();
+    expect(historique.status).toBe(200);
+    expect(historique.body.data).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/projectManagerStatus", value: "VALIDATED" })]),
+        }),
+      ]),
+    );
+    const nombreDeRevisions = historique.body.data.length;
+
+    const seconde = await request(await getAppHelperWithAcl())
+      .post(`/contract/token/${token}`)
+      .send();
+    expect(seconde.status).toBe(200);
+
+    const apresSeconde = await getContractByIdHelper(contract._id);
+    expect(apresSeconde?.projectManagerValidationDate?.toISOString()).toBe(dateDeSignature?.toISOString());
+
+    const historiqueApresRejeu = await request(await getAppHelperWithAcl())
+      .get(`/contract/${contract._id}/patches`)
+      .send();
+    expect(historiqueApresRejeu.body.data.length).toBe(nombreDeRevisions);
+  });
+
+  it("ne devrait valider que la signature du porteur du jeton", async () => {
+    const young = await createYoungHelper(getNewYoungFixture());
+    const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+    const token = crypto.randomBytes(40).toString("hex");
+    const contract = await createContractHelper({
+      ...getNewContractFixture(),
+      youngId: young._id,
+      applicationId: application._id,
+      parent1Token: token,
+      parent1Status: "WAITING_VALIDATION",
+      projectManagerToken: crypto.randomBytes(40).toString("hex"),
+      projectManagerStatus: "WAITING_VALIDATION",
+    });
+
+    const res = await request(await getAppHelperWithAcl())
+      .post(`/contract/token/${token}`)
+      .send();
+    expect(res.status).toBe(200);
+
+    const misAJour = await getContractByIdHelper(contract._id);
+    expect(misAJour?.parent1Status).toBe("VALIDATED");
+    expect(misAJour?.projectManagerStatus).toBe("WAITING_VALIDATION");
   });
 });

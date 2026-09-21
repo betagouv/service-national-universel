@@ -16,7 +16,7 @@ import {
 } from "snu-lib";
 import { capture } from "../sentry";
 import { ContractModel, YoungModel, ApplicationModel, StructureModel, ReferentModel } from "../models";
-import { ERRORS } from "../utils";
+import { ERRORS, isYoung } from "../utils";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
 import { logger } from "../logger";
@@ -31,6 +31,7 @@ import { accessControlMiddleware } from "../middlewares/accessControlMiddleware"
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isContractInUserScope } from "../services/contractAccess";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
@@ -315,18 +316,10 @@ router.post(
       if (!isWriteAuthorized({ resource: PERMISSION_RESOURCES.CONTRACT, user: req.user, context: { contract: contract.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
-      if (req.user.role === ROLES.RESPONSIBLE) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (contract.structureId?.toString() !== req.user.structureId.toString()) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
-      }
-      if (req.user.role === ROLES.SUPERVISOR) {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures.map((e) => e._id.toString()).includes(contract.structureId?.toString())) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-        }
+      // Ces mails contiennent les liens de signature : le périmètre doit être vérifié pour tous
+      // les rôles, la permission étant seedée sans policy.
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
       if (type === "projectManager") await sendProjectManagerContractEmail(contract, false);
@@ -364,6 +357,11 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!isYoung(req.user) && !(await isContractInUserScope(req.user, data.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       return res.status(200).send({ ok: true, data: serializeContract(data, req.user) });
     } catch (error) {
       capture(error);
@@ -388,7 +386,11 @@ router.get(
       const contract = await ContractModel.findById(id);
       if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const contractPatches = await patches.get(req, ContractModel);
+      if (!(await isContractInUserScope(req.user, contract.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      const contractPatches = await patches.get(req, ContractModel, contract);
       if (!contractPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: contractPatches });
@@ -399,14 +401,23 @@ router.get(
   },
 );
 
+// Champs liés à chaque signataire : un jeton ne peut valider que sa propre signature.
+const CONTRACT_SIGNATURES = [
+  { tokenField: "youngContractToken", statusField: "youngContractStatus", dateField: "youngContractValidationDate" },
+  { tokenField: "parent1Token", statusField: "parent1Status", dateField: "parent1ValidationDate" },
+  { tokenField: "parent2Token", statusField: "parent2Status", dateField: "parent2ValidationDate" },
+  { tokenField: "projectManagerToken", statusField: "projectManagerStatus", dateField: "projectManagerValidationDate" },
+  { tokenField: "structureManagerToken", statusField: "structureManagerStatus", dateField: "structureManagerValidationDate" },
+] as const;
+
+const contractTokenFilter = (token: string) => ({ $or: CONTRACT_SIGNATURES.map(({ tokenField }) => ({ [tokenField]: token })) });
+
 // Get a contract by its token.
 router.get("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractModel.findOne({
-      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
-    });
+    const data = await ContractModel.findOne(contractTokenFilter(token));
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     return res.status(200).send({ ok: true, data: serializeContract(data, null, false) });
@@ -421,39 +432,32 @@ router.post("/token/:token", async (req: UserRequest, res: Response) => {
   try {
     const token = String(req.params.token);
     if (!token) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const data = await ContractModel.findOne({
-      $or: [{ youngContractToken: token }, { parent1Token: token }, { projectManagerToken: token }, { structureManagerToken: token }, { parent2Token: token }],
-    });
-    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    const contract = await ContractModel.findOne(contractTokenFilter(token));
+    if (!contract) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (token === data.parent1Token) {
-      data.parent1Status = "VALIDATED";
-      data.parent1ValidationDate = new Date();
-    }
-    if (token === data.parent2Token) {
-      data.parent2Status = "VALIDATED";
-      data.parent2ValidationDate = new Date();
-    }
-    if (token === data.projectManagerToken) {
-      data.projectManagerStatus = "VALIDATED";
-      data.projectManagerValidationDate = new Date();
-    }
-    if (token === data.structureManagerToken) {
-      data.structureManagerStatus = "VALIDATED";
-      data.structureManagerValidationDate = new Date();
-    }
-    if (token === data.youngContractToken) {
-      data.youngContractStatus = "VALIDATED";
-      data.youngContractValidationDate = new Date();
-    }
+    const signature = CONTRACT_SIGNATURES.find(({ tokenField }) => contract[tokenField] === token);
+    if (!signature) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Écriture atomique et conditionnelle : elle ne porte que sur la signature du porteur du jeton,
+    // ce qui évite d'écraser une signature concurrente, et elle ne s'applique qu'une fois, ce qui
+    // rend le rejeu du jeton sans effet (ni réécriture du contrat, ni nouvel envoi de mail).
+    // `new: false` : on récupère le document d'avant mise à jour, `null` signifiant que la
+    // signature était déjà validée (rejeu ou double soumission) — il n'y a alors rien à refaire.
+    const avantSignature = await ContractModel.findOneAndUpdate(
+      { _id: contract._id, [signature.tokenField]: token, [signature.statusField]: { $ne: "VALIDATED" } },
+      { $set: { [signature.statusField]: "VALIDATED", [signature.dateField]: new Date() } },
+      { fromUser: req.user },
+    );
+    if (!avantSignature) return res.status(200).send({ ok: true });
+
+    const data = await ContractModel.findById(contract._id);
+    if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const application = await ApplicationModel.findById(data.applicationId);
     if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const young = await YoungModel.findById(data.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    await data.save({ fromUser: req.user });
 
     await updateYoungStatusPhase2Contract(young, req.user);
 
@@ -510,6 +514,11 @@ router.post(
           context: { contract: contract.toJSON() },
         })
       ) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
+      // La permission des référents est seedée sans policy : le périmètre est contrôlé ici.
+      if (!isYoung(req.user) && !(await isContractInUserScope(req.user, contract.toJSON()))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
