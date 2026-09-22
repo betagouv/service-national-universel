@@ -3,13 +3,21 @@ import request from "supertest";
 import { dbConnect, dbClose } from "./helpers/db";
 import getAppHelper from "./helpers/app";
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+// L'app Express (injectRoutes) est reconstruite une seule fois ici : c'est ce montage de routes, pas
+// une requête en particulier, qui absorbe le coût constaté (> 5s par défaut) sur le premier cas exécuté.
+// La réutiliser pour tous les cas traite la cause plutôt que de relever le délai d'un test au hasard.
+let app: ReturnType<typeof getAppHelper>;
+
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  app = getAppHelper();
+});
 afterAll(dbClose);
 
 type Method = "get" | "post" | "put" | "delete";
 
 async function callRoute(method: Method, path: string) {
-  const agent = request(getAppHelper()) as any;
+  const agent = request(app) as any;
   return agent[method](path).send({});
 }
 
