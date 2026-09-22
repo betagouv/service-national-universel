@@ -139,31 +139,37 @@ H9, H14, H18, L4.
 
 ### 4.1 Routes conservées et correctif attendu
 
-| Route | Constat | Correctif |
-|---|---|---|
-| `GET /cle/classe/:id` | — | Sérialiseur ; périmètre dep/région |
-| `GET /cle/classe/from-etablissement/:id` | **C1** | Sérialiseur référent — ne jamais sortir de document référent brut ; périmètre |
-| `POST /cle/classe/export` | **H9** | Idem |
-| `GET /cle/classe/:id/patches` | — | Sérialiseur ; périmètre |
-| `GET /cle/classe/public/:id` | **L4** | Sérialiseur strict, cf. §4.2 |
-| `GET /cle/etablissement/:id`, `GET /cle/etablissement/from-user` | **H14** | Périmètre dep/région ; retirer emails et téléphones du chef et des coordinateurs |
-| `POST /cle/referent/getMany` | **H18** | Sérialiseur référent |
-| `GET /cle/young/by-classe-stats/:idClasse` et les deux `by-classe-historic/:idClasse/patches*` | — | Périmètre |
-| `/elasticsearch/cle/{classe,etablissement,young}` | **C3** | Sérialiseur des hits ES ; périmètre |
+> Les constats de cette section sont **encore ouverts** à la date de rédaction. Ce dépôt étant
+> public, la nature des données en jeu et le mécanisme de chaque constat ne sont pas décrits ici :
+> se reporter au rapport d'audit, qui n'est pas commité. Seuls les identifiants et les routes
+> concernées figurent ci-dessous, pour permettre le suivi du chantier.
 
-Le périmètre s'appuie sur `getPolicyMongoFilter` et sur les helpers rendus dépendants du
-document cible, conformément au chantier transverse n°1 de l'audit. `ADMIN` reste national.
+| Route | Constat |
+|---|---|
+| `GET /cle/classe/:id` | — |
+| `GET /cle/classe/from-etablissement/:id` | **C1** |
+| `POST /cle/classe/export` | **H9** |
+| `GET /cle/classe/:id/patches` | — |
+| `GET /cle/classe/public/:id` | **L4** |
+| `GET /cle/etablissement/:id`, `GET /cle/etablissement/from-user` | **H14** |
+| `POST /cle/referent/getMany` | **H18** |
+| `GET /cle/young/by-classe-stats/:idClasse` et les deux `by-classe-historic/:idClasse/patches*` | — |
+| `/elasticsearch/cle/{classe,etablissement,young}` | **C3** (part sérialisation close par #5310) |
+
+Deux correctifs s'appliquent selon les routes : une sérialisation stricte des sorties, et un
+contrôle de périmètre départemental ou régional appuyé sur `getPolicyMongoFilter` et sur des
+helpers rendus dépendants du document cible, conformément au chantier transverse n°1 de l'audit.
+`ADMIN` reste national. Le détail route par route est à établir au moment du correctif, à partir
+du rapport.
 
 ### 4.2 `GET /cle/classe/public/:id`
 
 Route non authentifiée, consommée par `app/` dans le tunnel volontaire — étape consentements,
 contexte représentants légaux, situation scolaire, formulaire de contact. Elle est conservée
-telle quelle dans son principe : elle n'expose aucun secret, le `populate` des référents ne
-sélectionnant que `firstName` et `lastName`
-([`classeService.ts:154`](../../../api/src/cle/classe/classeService.ts)). Elle renvoie en
-revanche le document classe entier, ce qui est **L4**.
+dans son principe, et fait l'objet du constat **L4**.
 
-Sérialiseur strict, limité aux champs réellement consommés :
+Le correctif consiste à lui ajouter un sérialiseur strict, limité aux champs réellement
+consommés par `app/` :
 
 | Champ | Consommateur |
 |---|---|
