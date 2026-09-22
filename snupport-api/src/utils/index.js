@@ -280,9 +280,13 @@ function uploadAttachment(path, file) {
   });
 }
 
-function getSignedUrl(path) {
+// `download` force le navigateur à télécharger le fichier au lieu de le rendre : une pièce
+// jointe provient d'un tiers, elle ne doit jamais s'exécuter dans l'origine de l'agent.
+function getSignedUrl(path, { download = false } = {}) {
   const s3bucket = new AWS.S3({ endpoint: config.CELLAR_ENDPOINT_SUPPORT, accessKeyId: config.CELLAR_KEYID_SUPPORT, secretAccessKey: config.CELLAR_KEYSECRET_SUPPORT });
-  return s3bucket.getSignedUrl("getObject", { Bucket: config.PUBLIC_BUCKET_NAME_SUPPORT, Key: path, Expires: 60 * 5 });
+  const params = { Bucket: config.PUBLIC_BUCKET_NAME_SUPPORT, Key: path, Expires: 60 * 5 };
+  if (download) params.ResponseContentDisposition = "attachment";
+  return s3bucket.getSignedUrl("getObject", params);
 }
 
 const getFile = (path, bucket) => {

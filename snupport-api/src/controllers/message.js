@@ -15,6 +15,8 @@ const { validateParams, validateBody, validateQuery, idSchema } = require("../mi
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
+const { inspectAttachment } = require("../utils/attachments");
+const { isKnownThreadParticipant } = require("../utils/ticketParticipants");
 
 router.use(agentGuard);
 
@@ -45,6 +47,10 @@ router.post(
     let ticket = await TicketModel.findById(ticketId);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
     if (!canAccessTicket(user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Avec messageHistory="all", la réponse emporte tout l'historique du ticket et ses pièces
+    // jointes déchiffrées : le destinataire doit appartenir au fil, pas être une adresse
+    // arbitraire passée en paramètre.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
     if (ticket.messageCount === 1) {
@@ -155,11 +161,16 @@ router.post(
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
+    const data = decrypt(file.Body);
+    // Le Content-Type stocké peut venir d'un expéditeur de mail : le resservir tel quel
+    // laissait un SVG ou un HTML s'exécuter dans l'onglet de l'agent. On repart des magic
+    // numbers, et un contenu non identifiable devient un binaire opaque.
+    const { mime } = await inspectAttachment(data);
     // decrypt and upload the file to a temp private folder (deleted after 1 day)
     const tempPath = req.cleanBody.path.replace("message", "temp");
-    await uploadAttachment(tempPath, { mimetype: file.ContentType, data: decrypt(file.Body) });
-    // get a temp public url
-    const url = await getSignedUrl(tempPath);
+    await uploadAttachment(tempPath, { mimetype: mime ?? "application/octet-stream", data });
+    // get a temp public url — en pièce jointe, jamais rendue dans la page
+    const url = await getSignedUrl(tempPath, { download: true });
     return res.status(200).send({ ok: true, data: url });
   }
 );
@@ -218,6 +229,9 @@ router.post(
     }
 
     const { message: messageHtml, copyRecipient, dest, messageHistory } = parsedBody;
+    // Même règle que POST /message : `dest` sort d'un JSON non validé par Joi, et la réponse
+    // peut emporter tout l'historique et les pièces jointes déchiffrées du ticket.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
     // If multiple file with same names are provided, file is an array. We just take the latest.
 
