@@ -25,6 +25,7 @@ import { STAR_EMAIL } from "../anonymization/utils/anonymise";
 import { buildUpdate, resolveOldCohorts, DEFAULT_OLD_COHORTS } from "../scripts/anonymizeOldCohorts.helpers";
 
 import getNewYoungFixture from "./fixtures/young";
+import { FIXTURE_PASSWORD } from "./fixtures/password";
 import { getNewApplicationFixture } from "./fixtures/application";
 import getNewContractFixture from "./fixtures/contract";
 
@@ -75,6 +76,7 @@ describe("anonymize (young) — invariant RGPD", () => {
     const young: any = getNewYoungFixture({
       phase3TutorEmail: "tuteur@example.com",
       mobilityNearRelativeName: "Mamie Jeanne",
+      password: FIXTURE_PASSWORD,
     } as any);
 
     // Snapshot AVANT : anonymize() mute l'objet et le renvoie.
