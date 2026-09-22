@@ -46,7 +46,7 @@ import { config } from "../../config";
 import { logger } from "../../logger";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
-import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
+import { canEditYoungConsent, notifyPreviousEmailOfChange, revokeAccessAfterEmailChange, updateYoungConsent } from "./youngEditionService";
 import { canEditYoungInScope } from "../youngScope";
 import { refreshParentInscriptionToken } from "../parentConsentToken";
 
@@ -162,8 +162,15 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
 
     await Promise.all(updatePromises);
 
+    // Le changement d'adresse email n'est pas une correction comme les autres : il déplace le
+    // point d'entrée du compte (constat M73).
+    const previousEmail = young.email;
+    const emailChanged = !!value.email && value.email !== previousEmail;
+
     young.set(value);
+    if (emailChanged) revokeAccessAfterEmailChange(young);
     await young.save({ fromUser: req.user });
+    if (emailChanged) await notifyPreviousEmailOfChange(young, previousEmail);
 
     // --- result
     return res.status(200).send({ ok: true, data: serializeYoung(young) });

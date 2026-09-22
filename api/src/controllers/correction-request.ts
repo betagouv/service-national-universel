@@ -51,6 +51,12 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // Contrôle de périmètre AVANT toute écriture : la boucle ci-dessous supprime les pièces
+    // d'identité sur S3 et bascule le dossier en WAITING_CORRECTION (constat H22).
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const requests = young.correctionRequests ? young.correctionRequests : ([] as NonNullable<typeof young.correctionRequests>);
 
     const sentAt = Date.now();
@@ -111,6 +117,10 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let found = false;
     let stillWaitingCorrection = false;
     const requests = young.correctionRequests ? young.correctionRequests : [];
@@ -159,6 +169,10 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let found = false;
     const requests = young.correctionRequests ? young.correctionRequests : [];
 
@@ -204,7 +218,9 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    // Même famille que L38 : la route envoie au parent un mail portant le lien de consentement.
+    // Sans ce contrôle, la route envoyait un email officiel aux parents de n'importe quel
+    // volontaire et renvoyait son dossier complet à l'appelant (constat H23). Même famille que
+    // L38 : le mail porte le lien de consentement du représentant légal.
     if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     young.set(refreshParentInscriptionToken(young, 1));

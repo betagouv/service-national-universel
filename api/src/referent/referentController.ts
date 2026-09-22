@@ -136,7 +136,8 @@ import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
-import { isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
+import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
+import { sanitizeEmailText } from "../email/emailInput";
 import {
   canEditYoungInScope,
   canViewYoungFileInScope,
@@ -1225,9 +1226,15 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
     const { tutorId, template, subject, message, app, missionName } = value;
     const tutor = await ReferentModel.findById(tutorId);
     if (!tutor) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
-    if (tutor.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
+    // L'autorisation passe avant le court-circuit sur les comptes inactifs, qui révélait sinon le
+    // statut d'un compte de référent à un appelant hors périmètre.
     if (!canSendTutorTemplate(req.user)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+    // `canSendTutorTemplate` ne porte que le rôle : sans lien entre l'appelant et le tuteur, la
+    // route écrit à n'importe quel référent du pays avec un texte libre (constat M67).
+    if (!(await canContactTutorInScope(req.user, tutor))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    if (tutor.status === ReferentStatus.INACTIVE) return res.status(200).send({ ok: true });
 
     if (
       [
@@ -1240,10 +1247,11 @@ router.post("/:tutorId/email/:template", passport.authenticate("referent", { ses
         emailTo: [{ name: `${tutor.firstName} ${tutor.lastName}`, email: tutor.email }],
         params: {
           cta: config.ADMIN_URL,
-          message,
-          missionName: missionName || app?.missionName,
-          youngFirstName: app?.youngFirstName,
-          youngLastName: app?.youngLastName,
+          // Texte libre recopié dans un mail officiel : on en retire tout balisage.
+          message: sanitizeEmailText(message),
+          missionName: sanitizeEmailText(missionName || app?.missionName),
+          youngFirstName: sanitizeEmailText(app?.youngFirstName),
+          youngLastName: sanitizeEmailText(app?.youngLastName),
         },
       });
     else {

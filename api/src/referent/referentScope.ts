@@ -1,6 +1,6 @@
 import { ROLES, UserDto, ReferentType, PERMISSION_RESOURCES, isAdmin, isResponsibleOrSupervisor, isWriteAuthorized, region2department, department2region } from "snu-lib";
 
-import { ClasseModel, CohesionCenterModel, EtablissementModel, SessionPhase1Model, StructureModel } from "../models";
+import { ApplicationModel, ClasseModel, CohesionCenterModel, EtablissementModel, MissionModel, SessionPhase1Model, StructureModel } from "../models";
 
 type Geography = { region?: string | null; departments: string[] };
 
@@ -175,6 +175,38 @@ export async function isReferentReadableByUser(user: UserDto, target: ReferentTy
     if (targetId && classes.some((classe) => (classe.referentClasseIds || []).map(String).includes(targetId))) return true;
 
     return target.role === ROLES.REFERENT_DEPARTMENT && !!etablissement.department && (target.department || []).includes(etablissement.department);
+  }
+
+  return false;
+}
+
+/**
+ * Périmètre d'envoi d'un email à un tuteur de mission (`POST /referent/:tutorId/email/:template`).
+ *
+ * `canSendTutorTemplate` (snu-lib) ne teste que le rôle de l'appelant : un responsable de structure
+ * ou un référent départemental pouvait écrire, depuis l'expéditeur officiel du SNU et avec un texte
+ * libre, à n'importe quel référent du pays (constat M67).
+ *
+ * Trois liens légitimes existent : le tuteur appartient au périmètre de l'appelant (sa structure pour
+ * un responsable, sa géographie pour un référent) ; il encadre une mission du territoire que
+ * l'appelant instruit — cas des modèles MISSION_REFUSED / MISSION_WAITING_CORRECTION, envoyés
+ * précisément depuis l'écran d'instruction de la mission ; ou il encadre une mission à laquelle a
+ * candidaté un volontaire du territoire.
+ */
+export async function canContactTutorInScope(user: UserDto, tutor: ReferentType): Promise<boolean> {
+  if (await isReferentInUserScope(user, tutor)) return true;
+
+  if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+    const tutorId = tutor._id?.toString();
+    const territoire = user.role === ROLES.REFERENT_REGION ? { region: user.region } : { department: { $in: (user.department as string[]) || [] } };
+    if (await MissionModel.exists({ tutorId, ...territoire })) return true;
+
+    // Le tuteur encadre une mission à laquelle a candidaté un volontaire du territoire : c'est le
+    // cas de MILITARY_PREPARATION_DOCS_VALIDATED, envoyé depuis le dossier du volontaire, dont la
+    // mission peut relever d'un autre département.
+    const departements = user.role === ROLES.REFERENT_REGION ? region2department[user.region!] || [] : (user.department as string[]) ?? [];
+    if (!departements.length) return false;
+    return !!(await ApplicationModel.exists({ tutorId, youngDepartment: { $in: departements } }));
   }
 
   return false;
