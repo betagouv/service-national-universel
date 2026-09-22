@@ -84,6 +84,9 @@ export const config = {
   API_ASSOCIATION_CELLAR_KEYSECRET: _env(envStr, "API_ASSOCIATION_CELLAR_KEYSECRET"),
   SLACK_BOT_TOKEN: _env(envStr, "SLACK_BOT_TOKEN"),
   SLACK_BOT_CHANNEL: _env(envStr, "SLACK_BOT_CHANNEL"),
+  // Canal dedie aux comptes responsables crees par la synchro JeVeuxAider et laisses inactifs.
+  // Non defini, les messages retombent sur SLACK_BOT_CHANNEL.
+  SLACK_JVA_CHANNEL: _env(envStr, "SLACK_JVA_CHANNEL"),
   JVA_TOKEN: _env(envStr, "JVA_TOKEN"),
   JVA_API_KEY: _env(envStr, "JVA_API_KEY"),
   REDIS_URL: _env(envStr, "REDIS_URL", "redis://127.0.0.1:6379"),

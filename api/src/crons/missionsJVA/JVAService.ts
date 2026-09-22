@@ -107,6 +107,7 @@ async function createReferentIfNotExists(resp, structureId: string): Promise<Ref
   const ref = new ReferentModel(formatResponsable(resp, structureId));
   const referent = await ref.save({ fromUser });
   await slack.info({
+    channel: config.SLACK_JVA_CHANNEL,
     title: "Compte responsable JVA a activer",
     text: `Le compte ${referent.email} (structure ${structureId}) a ete cree depuis JeVeuxAider et laisse INACTIF. Il doit etre active manuellement apres verification de la structure.`,
   });
