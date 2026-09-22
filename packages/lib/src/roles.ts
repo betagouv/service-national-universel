@@ -1109,27 +1109,8 @@ function canCreateClasse(actor) {
   return [ROLES.ADMIN, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
 }
 
-function canUpdateClasse(actor) {
-  return actor.role === ROLES.ADMINISTRATEUR_CLE || actor.role === ROLES.REFERENT_CLASSE || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateReferentClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateClasseStay(actor) {
-  return [ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
 function canViewClasse(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canUpdateEtablissement(actor) {
-  return (
-    (actor.role === ROLES.ADMINISTRATEUR_CLE && actor.subRole === SUB_ROLES.referent_etablissement) ||
-    [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role)
-  );
 }
 
 function canViewEtablissement(actor) {
@@ -1138,14 +1119,6 @@ function canViewEtablissement(actor) {
 
 function canSearchStudent(actor) {
   return [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN].includes(actor.role);
-}
-
-function canWithdrawClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN].includes(actor.role);
-}
-
-function canDeleteClasse(actor) {
-  return [ROLES.ADMIN].includes(actor.role);
 }
 
 function canAllowSNU(actor) {
@@ -1171,19 +1144,8 @@ function canEditTotalSeats(actor) {
   return [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(actor.role) && isNowBetweenDates(limitDatesEstimatedSeats, limitDatesTotalSeats);
 }
 
-function canNotifyAdminCleForVerif(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-function canVerifyClasse(actor) {
-  return [ROLES.ADMINISTRATEUR_CLE, ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
 function canManageMig(user: ReferentDto) {
   return ![ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(user.role);
-}
-
-function canCreateEtablissement(user: UserDto) {
-  return [ROLES.ADMIN].includes(user.role);
 }
 
 //CLE
@@ -1426,23 +1388,14 @@ export {
   canSeeDashboardSejourHeadCenter,
   canUpdateMyself,
   canCreateClasse,
-  canUpdateClasse,
-  canUpdateClasseStay,
   canViewClasse,
-  canUpdateEtablissement,
   canViewEtablissement,
   canSearchStudent,
-  canDeleteClasse,
-  canWithdrawClasse,
   canAllowSNU,
   canEditSanitaryEmailContact,
   canEditEstimatedSeats,
   canEditTotalSeats,
-  canNotifyAdminCleForVerif,
-  canVerifyClasse,
   canManageMig,
-  canUpdateReferentClasse,
-  canCreateEtablissement,
   canValidateMultipleYoungsInClass,
   getPhaseStatusOptions,
   canModifyDirectionCenterTeam,
