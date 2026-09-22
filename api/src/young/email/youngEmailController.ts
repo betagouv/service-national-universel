@@ -10,6 +10,7 @@ import { UserRequest } from "../../controllers/request";
 import { isReferent, isYoung } from "../../utils";
 import { YoungModel } from "../../models";
 import { canEditYoungInScope } from "../youngScope";
+import { isTrustedEmailLink, sanitizeEmailText } from "../../email/emailInput";
 
 import { sendEmailToYoung } from "./youngEmailService";
 
@@ -43,6 +44,12 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    // Le mail part de l'expéditeur officiel du SNU : seuls les liens du service y sont admis,
+    // faute de quoi la route est un hameçonnage clé en main (constat M74).
+    if (!isTrustedEmailLink(link) || !isTrustedEmailLink(cta)) {
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    }
+
     // The young must exist.
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -57,7 +64,16 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 
-    await sendEmailToYoung(template, young, { message, missionName, structureName, cta, type_document, object, link });
+    // Les textes libres sont recopiés dans le corps du mail : on en retire tout balisage.
+    await sendEmailToYoung(template, young, {
+      message: sanitizeEmailText(message),
+      missionName: sanitizeEmailText(missionName),
+      structureName: sanitizeEmailText(structureName),
+      cta,
+      type_document: sanitizeEmailText(type_document),
+      object: sanitizeEmailText(object),
+      link,
+    });
 
     return res.status(200).send({ ok: true });
   } catch (error) {

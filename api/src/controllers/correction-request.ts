@@ -22,6 +22,7 @@ import { ERRORS, deleteFile } from "../utils";
 import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
+import { canEditYoungInScope } from "../young/youngScope";
 
 const router = express.Router({ mergeParams: true });
 
@@ -48,6 +49,12 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Contrôle de périmètre AVANT toute écriture : la boucle ci-dessous supprime les pièces
+    // d'identité sur S3 et bascule le dossier en WAITING_CORRECTION (constat H22).
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const requests = young.correctionRequests ? young.correctionRequests : ([] as NonNullable<typeof young.correctionRequests>);
 
@@ -109,6 +116,10 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let found = false;
     let stillWaitingCorrection = false;
     const requests = young.correctionRequests ? young.correctionRequests : [];
@@ -157,6 +168,10 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     let found = false;
     const requests = young.correctionRequests ? young.correctionRequests : [];
 
@@ -201,6 +216,12 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Sans ce contrôle, la route envoyait un email officiel aux parents de n'importe quel
+    // volontaire et renvoyait son dossier complet à l'appelant (constat H23).
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],

@@ -4,8 +4,9 @@ import { canEditYoungInScope } from "../youngScope";
 import { config } from "../../config";
 
 import { capture } from "../../sentry";
-import { sendTemplate } from "../../brevo";
+import { sendEmail, sendTemplate } from "../../brevo";
 import { ClasseModel } from "../../models";
+import { sanitizeAll } from "../../utils";
 
 export function generateConsentChanges(value, young) {
   const changes = {};
@@ -88,5 +89,36 @@ export async function updateYoungConsent(young, user, updates) {
     } catch (e) {
       capture(e);
     }
+  }
+}
+
+/**
+ * Changement d'adresse email d'un volontaire à l'initiative d'un référent (constat M73).
+ *
+ * Contrairement au changement d'adresse en libre-service (`AuthObject.requestEmailUpdate`,
+ * api/src/auth.ts), qui exige le mot de passe puis un code envoyé à la nouvelle adresse, la section
+ * « identité » du dossier écrit `email` comme n'importe quel autre champ. La correction reste
+ * nécessaire au support — un volontaire qui s'est trompé d'adresse ne reçoit plus rien — mais elle
+ * ne doit ni passer inaperçue ni laisser survivre les accès associés à l'ancienne adresse :
+ * enchaînée avec « mot de passe oublié », elle donne sinon la main sur le compte sans que le
+ * titulaire puisse le constater.
+ */
+export function revokeAccessAfterEmailChange(young) {
+  young.set({ lastLogoutAt: Date.now(), forgotPasswordResetToken: "", forgotPasswordResetExpires: null });
+}
+
+/** Avertit l'ancienne adresse : c'est le seul signal dont dispose le titulaire du compte. */
+export async function notifyPreviousEmailOfChange(young, previousEmail: string) {
+  if (!previousEmail) return;
+  try {
+    await sendEmail(
+      { name: `${young.firstName} ${young.lastName}`, email: previousEmail } as any,
+      "Votre adresse email a été modifiée",
+      `<p>Bonjour ${sanitizeAll(young.firstName)},</p>
+       <p>L'adresse email associée à votre compte SNU vient d'être modifiée par un référent : les prochains messages seront envoyés à <b>${sanitizeAll(young.email)}</b>.</p>
+       <p>Si vous n'êtes pas à l'origine de cette demande, contactez sans attendre le support depuis <a href="${config.KNOWLEDGEBASE_URL}">${config.KNOWLEDGEBASE_URL}</a>.</p>`,
+    );
+  } catch (e) {
+    capture(e);
   }
 }
