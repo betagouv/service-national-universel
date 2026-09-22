@@ -10,10 +10,19 @@ const { uploadPublicPicture, diacriticSensitiveRegex } = require("../utils/index
 const { ERRORS } = require("../errors");
 const { revalidateSiteMap, formatSectionsIntoSitemap } = require("../utils/sitemap.utils");
 const { agentGuard } = require("../middlewares/authenticationGuards");
-const { requireRole } = require("../middlewares/userRoleGuards");
+const { logger } = require("../logger");
+const { canEditKnowledgeBase } = require("../utils/knowledgeBaseScope");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
+
+// Écriture de la base de connaissance publique : réservée au support central (voir
+// utils/knowledgeBaseScope). `agentGuard` seul laissait tout agent authentifié, y compris
+// les référents SNU synchronisés, publier ou supprimer le contenu de support.snu.gouv.fr.
+const knowledgeBaseEditorGuard = (req, res, next) => {
+  if (!canEditKnowledgeBase(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  next();
+};
 
 function search_regex(query) {
   return diacriticSensitiveRegex(escapeStringRegexp(query));
@@ -198,7 +207,7 @@ router.post(
   }
 );
 
-router.post("/picture", agentGuard, async (req, res) => {
+router.post("/picture", agentGuard, knowledgeBaseEditorGuard, async (req, res) => {
   const files = Object.keys(req.files || {}).map((e) => req.files[e]);
   let file = files[0];
   // If multiple file with same names are provided, file is an array. We just take the latest.
@@ -224,6 +233,7 @@ router.post("/picture", agentGuard, async (req, res) => {
 router.post(
   "/",
   agentGuard,
+  knowledgeBaseEditorGuard,
   validateBody(
     Joi.object({
       title: Joi.string().trim(),
@@ -264,7 +274,7 @@ router.post(
   }
 );
 
-router.post("/duplicate/:id", agentGuard, validateParams(idSchema), async (req, res) => {
+router.post("/duplicate/:id", agentGuard, knowledgeBaseEditorGuard, validateParams(idSchema), async (req, res) => {
   const oldKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
   if (!oldKb) {
     return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -294,6 +304,7 @@ router.post("/duplicate/:id", agentGuard, validateParams(idSchema), async (req, 
 router.put(
   "/reorder",
   agentGuard,
+  knowledgeBaseEditorGuard,
   validateBody(
     Joi.array()
       .items(
@@ -326,6 +337,7 @@ router.put(
 router.patch(
   "/:id",
   agentGuard,
+  knowledgeBaseEditorGuard,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -402,6 +414,7 @@ router.patch(
 router.put(
   "/:id/content",
   agentGuard,
+  knowledgeBaseEditorGuard,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -597,7 +610,7 @@ router.get(
   }
 );
 
-router.delete("/:id", validateParams(idSchema), agentGuard, async (req, res) => {
+router.delete("/:id", validateParams(idSchema), agentGuard, knowledgeBaseEditorGuard, async (req, res) => {
   const kb = await KnowledgeBaseModel.findById(req.cleanParams.id);
   if (!kb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
@@ -625,6 +638,7 @@ router.delete("/:id", validateParams(idSchema), agentGuard, async (req, res) => 
   }
 
   // delete items
+  logger.info(`knowledge-base: suppression de ${kb.slug} (${kb._id}) et de ${childrenToDelete.length} élément(s) enfant(s) par l'agent ${req.user._id}`);
   for (const child of [kb, ...childrenToDelete]) {
     await KnowledgeBaseModel.findByIdAndDelete(child._id);
   }
