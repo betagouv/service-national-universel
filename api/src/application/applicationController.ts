@@ -132,6 +132,10 @@ router.post(
       }
 
       value.isJvaMission = mission.isJvaMission;
+      // La candidature est rattachée à la structure de SA mission : sans cela, le `structureId` du body
+      // (jamais rapproché de la mission) permet de rattacher à sa propre structure une candidature
+      // portant sur la mission d'une autre structure, et de contourner les contrôles ci-dessous.
+      value.structureId = mission.structureId;
 
       const young = await YoungModel.findById(value.youngId);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -144,6 +148,8 @@ router.post(
         if (!canApply) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED, message });
         }
+        // La durée est celle de la mission : sinon un volontaire peut se créditer des heures de phase 2.
+        value.missionDuration = mission.duration;
       }
 
       // A young can only create their own applications.
@@ -154,16 +160,17 @@ router.post(
       // - referent can create applications of their department/region
       // - responsible and supervisor can create applications of their structures
       if (isReferent(req.user)) {
+        // Le périmètre se juge sur la structure de la mission, pas sur le `structureId` fourni par l'appelant.
         if (req.user.role === ROLES.RESPONSIBLE) {
           if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          if (value.structureId.toString() !== req.user.structureId.toString()) {
+          if (!mission.structureId || String(mission.structureId) !== String(req.user.structureId)) {
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
         if (req.user.role === ROLES.SUPERVISOR) {
           if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
           const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-          if (!structures.map((e) => e._id.toString()).includes(value.structureId.toString())) {
+          if (!mission.structureId || !structures.map((e) => e._id.toString()).includes(String(mission.structureId))) {
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
@@ -337,29 +344,30 @@ router.post(
         }
       }
 
-      await Promise.all(
-        value.ids.map(async (id: string) => {
-          const application = await ApplicationModel.findById(id);
-          if (!application) return;
+      // Séquentiel : plusieurs candidatures d'un même volontaire recalculent son statut de phase 2
+      // (`updateYoungPhase2StatusAndHours`) à partir du document en mémoire — en parallèle, les
+      // écritures concurrentes sur le jeune s'écrasent entre elles.
+      for (const id of value.ids) {
+        const application = await ApplicationModel.findById(id);
+        if (!application) continue;
 
-          const young = await YoungModel.findById(application.youngId);
+        const young = await YoungModel.findById(application.youngId);
 
-          application.set({ status: valueKey.key });
-          await application.save({ fromUser: req.user });
+        application.set({ status: valueKey.key });
+        await application.save({ fromUser: req.user });
 
-          if (application.apiEngagementId) {
-            await apiEngagement.update(application);
-          }
+        if (application.apiEngagementId) {
+          await apiEngagement.update(application);
+        }
 
-          await updateYoungPhase2StatusAndHours(young, req.user);
-          await updateYoungStatusPhase2Contract(young, req.user);
-          await updateMission(application, req.user);
+        await updateYoungPhase2StatusAndHours(young, req.user);
+        await updateYoungStatusPhase2Contract(young, req.user);
+        await updateMission(application, req.user);
 
-          if (young) {
-            await sendNotificationsByStatus(application, young, valueKey.key);
-          }
-        }),
-      );
+        if (young) {
+          await sendNotificationsByStatus(application, young, valueKey.key);
+        }
+      }
       res.status(200).send({ ok: true });
     } catch (error) {
       capture(error);
@@ -480,7 +488,11 @@ router.put(
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       // A young can only update his own application.
-      if (isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
+      // La condition était inversée : seules les candidatures des AUTRES volontaires étaient modifiables.
+      if (application.youngId?.toString() !== req.user._id.toString()) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      if (!isWriteAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON(), application: application.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -552,6 +564,12 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
+      // `CANDIDATURE_READ` est seedée sans policy (responsable, superviseur, référents dep/région,
+      // chefs de centre) : `isReadAuthorized` répond vrai pour n'importe quelle candidature.
+      if (!(await isApplicationInUserScope(req.user, data.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       return res.status(200).send({ ok: true, data: serializeApplication(data) });
     } catch (error) {
       capture(error);
@@ -616,7 +634,8 @@ router.post(
       const { error, value } = Joi.object({
         id: Joi.string().required(),
         template: Joi.string().required(),
-        message: Joi.string().optional(),
+        // Seul texte libre repris dans un email (motif de refus) : on le borne en longueur.
+        message: Joi.string().max(2000).optional(),
         type: Joi.string().optional(),
         multipleDocument: Joi.string().optional(),
       })
@@ -849,6 +868,16 @@ router.post(
       const application = await ApplicationModel.findById(req.params.id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
+      // Sans ce contrôle, n'importe quel volontaire ou référent dépose des fichiers sur n'importe
+      // quelle candidature (l'ancienne vérification avait été laissée en commentaire plus bas).
+      if (isYoung(req.user)) {
+        if (application.youngId?.toString() !== req.user._id.toString()) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+      } else if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const rootKeys = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
       const { error: keyError, value: key } = Joi.string()
         .required()
@@ -890,8 +919,6 @@ router.post(
           { stripUnknown: true },
         );
       if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      //const application = await ApplicationModel.find({ youngId: req.user._id });
-      if (!application) return res.status(404).send({ ok: false, code: ERRORS.APPLICATION_NOT_FOUND });
 
       for (let i = 0; i < files.length; i++) {
         let currentFile = files[i];
@@ -959,7 +986,13 @@ router.get("/:id/file/:key/:name", passport.authenticate(["referent", "young"], 
     const young = await YoungModel.findById(application.youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (isYoung(req.user) && req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (isYoung(req.user)) {
+      if (req.user._id.toString() !== young?._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    } else if (!(await isApplicationInUserScope(req.user, application.toJSON()))) {
+      // Côté référent il n'y avait aucun contrôle : tout rôle, y compris visiteur ou transporteur,
+      // téléchargeait les pièces jointes de n'importe quelle candidature.
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
 
     const downloaded = await getFile(`app/young/${young._id}/application/${key}/${name}`);
     const decryptedBuffer = decrypt(downloaded.Body);

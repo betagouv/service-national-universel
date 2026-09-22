@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD, APPLICATION_STATUS } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -229,23 +229,57 @@ const applicationKeys = {
   statusComment: Joi.string().allow(null, ""),
 };
 
+/**
+ * Transitions de statut qu'un volontaire peut déclencher lui-même sur sa candidature :
+ * accepter une proposition (WAITING_VALIDATION / WAITING_VERIFICATION pour une PM),
+ * annuler, abandonner. Cf. `app/src/scenes/missions`.
+ *
+ * Sans cette restriction, `status` est une chaîne libre : un volontaire peut passer sa
+ * candidature en DONE et, avec `missionDuration`, déclencher la validation de sa phase 2
+ * (cf. `updateYoungPhase2StatusAndHours`).
+ */
+const YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS = [
+  APPLICATION_STATUS.WAITING_VALIDATION,
+  APPLICATION_STATUS.WAITING_VERIFICATION,
+  APPLICATION_STATUS.CANCEL,
+  APPLICATION_STATUS.ABANDON,
+];
+
+/** À la création, un volontaire ne peut candidater qu'en attente de validation / de vérification (PM). */
+const YOUNG_ALLOWED_NEW_APPLICATION_STATUS = [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION];
+
 export function validateUpdateApplication(application, user) {
+  const young = isYoung(user);
   return Joi.object()
     .keys({
       ...applicationKeys,
       // A young can only update a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      youngId: young ? Joi.string().equal(user._id.toString()).allow(null, "") : Joi.string().allow(null, ""),
+      status: young
+        ? Joi.string()
+            .valid(...YOUNG_ALLOWED_UPDATE_APPLICATION_STATUS)
+            .allow(null, "")
+        : Joi.string().allow(null, ""),
+      // Le front ne remonte `missionDuration` que pour remettre le compteur à zéro lors d'un abandon :
+      // toute autre valeur permettrait de gonfler les heures de phase 2.
+      missionDuration: young ? Joi.string().valid("0").allow(null, "") : Joi.string().allow(null, ""),
       _id: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
 }
 
 export function validateNewApplication(application, user) {
+  const young = isYoung(user);
   return Joi.object()
     .keys({
       ...applicationKeys,
       // A young can only apply to a mission for him/herself.
-      youngId: isYoung(user) ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
+      youngId: young ? Joi.string().equal(user._id.toString()).required() : Joi.string().required(),
+      status: young
+        ? Joi.string()
+            .valid(...YOUNG_ALLOWED_NEW_APPLICATION_STATUS)
+            .allow(null, "")
+        : Joi.string().allow(null, ""),
       missionId: Joi.string().required(),
     })
     .validate(application, { stripUnknown: true });
