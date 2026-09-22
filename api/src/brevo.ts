@@ -7,6 +7,7 @@ import { logger } from "./logger";
 import { SENDINBLUE_TEMPLATES, YOUNG_STATUS, ROLES } from "snu-lib";
 
 import { capture, captureMessage } from "./sentry";
+import { isSensitiveKey } from "./utils/logRedaction";
 import { rateLimiterContactSIB } from "./rateLimiters";
 import { sendMailCatcher } from "./mailcatcher";
 
@@ -77,7 +78,8 @@ const api = async (path, options: any = {}, force?: boolean) => {
     // Sometimes, sendinblue returns a 204 with an empty body
     return true;
   } catch (e) {
-    capture(e, { extra: { path, options } });
+    // `options.body` porte le contact complet (attributs = document métier) : ne jamais l'envoyer à Sentry
+    capture(e, { extra: { path, method: options.method } });
   }
 };
 
@@ -370,7 +372,8 @@ export async function sync(obj, type, { force } = { force: false }) {
     if (!user) throw new Error("NO USER TO SYNC");
 
     const email = user.email;
-    let parents: Contact[] = [];
+    const id = user._id;
+    let parents: { slot: "parent1" | "parent2"; contact: Contact }[] = [];
     const attributes: Partial<ContactAttribute> = {};
     for (let i = 0; i < Object.keys(user).length; i++) {
       const key = Object.keys(user)[i];
@@ -391,10 +394,10 @@ export async function sync(obj, type, { force } = { force: false }) {
     if (attributes.TYPE === "YOUNG") {
       if (user.status === YOUNG_STATUS.DELETED) return;
       if (user.parent1Email) {
-        parents.push({ email: user.parent1Email, attributes, listIds: [1447] });
+        parents.push({ slot: "parent1", contact: { email: user.parent1Email, attributes, listIds: [1447] } });
       }
       if (user.parent2Email) {
-        parents.push({ email: user.parent2Email, attributes, listIds: [1447] });
+        parents.push({ slot: "parent2", contact: { email: user.parent2Email, attributes, listIds: [1447] } });
       }
       listIds.push(1446);
     }
@@ -409,22 +412,38 @@ export async function sync(obj, type, { force } = { force: false }) {
     delete attributes.LASTNAME;
     delete attributes.FIRSTNAME;
 
-    syncContact(email, attributes, listIds);
+    // Les attributs sont construits en recopiant tout le document : ne pas transmettre à Brevo (ni, en cas
+    // d'erreur, à nos journaux et à Sentry) les tokens d'invitation, de reset, de 2FA et de validation d'email.
+    for (const key of Object.keys(attributes)) {
+      if (isSensitiveKey(key)) delete attributes[key];
+    }
+
+    syncContact(email, attributes, listIds, { id, type: attributes.TYPE, contact: "self" });
     for (const parent of parents) {
-      syncContact(parent.email, parent.attributes, parent.listIds!);
+      syncContact(parent.contact.email, parent.contact.attributes, parent.contact.listIds!, { id, type: attributes.TYPE, contact: parent.slot });
     }
   } catch (e) {
     capture(e);
   }
 }
 
-export async function syncContact(email: string, attributes, listIds: number[]) {
+/** Identifie le contact synchronisé sans donnée personnelle : _id du document, type et emplacement (self / parent1 / parent2) */
+export type SyncContactContext = { id?: string; type?: string; contact?: "self" | "parent1" | "parent2" };
+
+export async function syncContact(email: string, attributes, listIds: number[], context: SyncContactContext = {}) {
+  let res;
   try {
-    const res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
-    if (!res || res?.code) throw new Error(JSON.stringify({ res, email, attributes, listIds }));
+    res = await rateLimiterContactSIB.call(() => createContact({ email, attributes, listIds, updateEnabled: true }));
+    if (!res || res?.code) {
+      // Ne jamais inclure `email` ni `attributes` ici : attributes contient le document complet (tokens, PII)
+      // et ce message finit dans les logs applicatifs.
+      const brevoError = res ? `${res.code} - ${res.message ?? ""}` : "no response";
+      const who = `type=${context.type ?? "?"} id=${context.id ?? "?"} contact=${context.contact ?? "?"}`;
+      throw new Error(`Brevo contact sync failed (${who}, listIds=[${listIds.join(",")}]): ${brevoError}`);
+    }
     return;
   } catch (e) {
-    capture(e);
+    capture(e, { extra: { ...context, listIds, brevoResponse: res } });
   }
 }
 

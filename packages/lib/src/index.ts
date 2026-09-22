@@ -8,6 +8,7 @@ export * from "./constants/cohesionCenter";
 export * from "./constants/cohort";
 export * from "./constants/colors";
 export * from "./constants/constants";
+export * from "./constants/elasticsearch";
 export * from "./constants/email";
 export * from "./constants/errors";
 export * from "./constants/featureFlags";

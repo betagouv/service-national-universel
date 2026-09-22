@@ -30,32 +30,23 @@ import {
 
 import dayjs from "@/utils/dayjs.utils";
 import UserHeader from "../composants/UserHeader";
-import { Session, CohortSelect, AddButton, SubRoleAndRegionOrDep } from "../composants";
+import { SubRoleAndRegionOrDep } from "../composants";
 import Field from "../../phase0/components/Field";
 import { RoundButton, PlainButton, BorderButton } from "../../phase0/components/Buttons";
 import ConfirmationModal from "../../phase0/components/ConfirmationModal";
 import CustomSelect from "../composants/CustomSelect";
-import { roleOptions, MODE_DEFAULT, MODE_EDITION, formatSessionOptions, getSubRoleOptions, MODE_READONLY } from "../utils";
+import { roleOptions, MODE_DEFAULT, MODE_EDITION, getSubRoleOptions, MODE_READONLY } from "../utils";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import { Container, Button, Badge, Label, InputText, Tooltip } from "@snu/ds/admin";
-import { isResponsableDeCentre } from "snu-lib";
 import RenewInvitation from "./partials/RenewInvitation";
 
 export default function Details({ user, setUser, currentUser }) {
   const [structures, setStructures] = useState([]);
-  const [sessionOptions, setSessionOptions] = useState([]);
-  const [sessionsWhereUserIsHeadCenter, setSessionsWhereUserIsHeadCenter] = useState([]);
   const [mode, setMode] = useState(MODE_DEFAULT);
   const [isSaving, setSaving] = useState(false);
   const [errors, setErrors] = useState({});
-  const [areCentersLoading, setCentersLoading] = useState(true);
   const [data, setData] = useState({ ...user });
-  const [newCenter, setNewCenter] = useState(undefined);
-  const [isHeadOfCenterDeleteConfirmModalOpen, setHeadOfCenterDeleteConfirmModalOpen] = useState(false);
-  const [deletedHeadOfCenterSessionId, setDeletedHeadOfCenterSessionId] = useState(undefined);
-  const [isCohortChangeConfirmModalOpen, setCohortChangeConfirmModalOpen] = useState(false);
-  const [cohortChangeSessionIds, setCohortChangeSessionIds] = useState(undefined);
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
   const [modalTutor, setModalTutor] = useState({ isOpen: false, onConfirm: null });
   const [modalUniqueResponsable, setModalUniqueResponsable] = useState({ isOpen: false });
@@ -70,101 +61,10 @@ export default function Details({ user, setUser, currentUser }) {
     setData({ ...user });
   }, [user]);
 
-  useEffect(() => {
-    if (isResponsableDeCentre(user)) {
-      loadHeadCenterSessions();
-    } else {
-      setCentersLoading(false);
-    }
-  }, [user]);
-
-  const loadHeadCenterSessions = async () => {
-    try {
-      setCentersLoading(true);
-      const { ok, data } = await api.get(`/session-phase1`);
-      if (!ok) {
-        return toastr.error("Une erreur s'est produite lors du chargement des sessions", "");
-      }
-      const responseReferentSessions = await api.get(`/referent/${user?._id}/session-phase1`);
-      if (!responseReferentSessions.ok) {
-        return toastr.error("Une erreur s'est produite lors du chargement des sessions", "");
-      }
-      const formattedSessionOptions = formatSessionOptions(data, responseReferentSessions.data);
-      setSessionOptions(formattedSessionOptions);
-      let sessionsWithCenterWhereUserIsHeadCenter = [];
-      for (let session of responseReferentSessions.data) {
-        const responseCenter = await api.get(`/cohesion-center/${session.cohesionCenterId}`);
-        const availableCohorts = formattedSessionOptions.find((option) => option.cohesionCenterId === session.cohesionCenterId);
-        sessionsWithCenterWhereUserIsHeadCenter.push({
-          ...session,
-          center: responseCenter.data,
-          cohorts: [{ cohort: session.cohort, sessionPhase1Id: session._id }, ...(availableCohorts ? availableCohorts.cohorts : [])],
-        });
-      }
-      setSessionsWhereUserIsHeadCenter(sessionsWithCenterWhereUserIsHeadCenter);
-    } catch (e) {
-      return toastr.error("Une erreur s'est produite lors du chargement des sessions", "");
-    } finally {
-      setCentersLoading(false);
-    }
-  };
-
   const loadStructures = async () => {
     const structureResponse = await api.get("/structure");
     if (structureResponse.ok) {
       setStructures(structureResponse.data);
-    }
-  };
-
-  const addNewCenter = () => {
-    setNewCenter({});
-  };
-
-  const setCenterHeadOfCenter = async () => {
-    try {
-      const { ok, code } = await api.put(`/session-phase1/${newCenter.cohort.sessionPhase1Id}/headCenter`, { id: user._id });
-      if (!ok) {
-        return toastr.error("Une erreur s'est produite lors de l'ajout du chef de centre ", translate(code));
-      }
-      setNewCenter(undefined);
-      await loadHeadCenterSessions();
-      return toastr.success("Le chef de centre a bien été ajouté", "");
-    } catch (e) {
-      return toastr.error("Une erreur s'est produite lors de l'ajout du chef de centre ", "");
-    }
-  };
-
-  const deleteCenterHeadOfCenter = async () => {
-    try {
-      const { ok, code } = await api.remove(`/session-phase1/${deletedHeadOfCenterSessionId}/headCenter`);
-      if (!ok) {
-        return toastr.error("Une erreur s'est produite lors de la suppression du chef de centre ", translate(code));
-      }
-      setHeadOfCenterDeleteConfirmModalOpen(false);
-      setDeletedHeadOfCenterSessionId(undefined);
-      await loadHeadCenterSessions();
-      return toastr.success("Le chef de centre a bien été supprimé du centre", "");
-    } catch (e) {
-      return toastr.error("Une erreur s'est produite lors de la suppression du chef de centre ", "");
-    }
-  };
-
-  const changeCohort = async () => {
-    try {
-      const newCohortReponse = await api.put(`/session-phase1/${cohortChangeSessionIds?.newSessionId}/headCenter`, { id: user._id });
-      if (!newCohortReponse.ok) {
-        return toastr.error("Une erreur s'est produite lors du changement de cohort", translate(newCohortReponse.code));
-      }
-      const oldCohortReponse = await api.remove(`/session-phase1/${cohortChangeSessionIds.oldSessionId}/headCenter`);
-      if (!oldCohortReponse.ok) {
-        return toastr.error("Une erreur s'est produite lors du changement de cohort", translate(newCohortReponse.code));
-      }
-      setCohortChangeConfirmModalOpen(false);
-      setCohortChangeSessionIds(undefined);
-      await loadHeadCenterSessions();
-      return toastr.success("Le cohort a bien été changé", "");
-    } catch (e) {
-      return toastr.error("Une erreur s'est produite lors du changement de cohort", "");
     }
   };
 
@@ -193,7 +93,6 @@ export default function Details({ user, setUser, currentUser }) {
   const stopEdit = () => {
     setMode(MODE_DEFAULT);
     setData({ ...user });
-    setNewCenter(undefined);
     setErrors({});
   };
 
@@ -235,14 +134,6 @@ export default function Details({ user, setUser, currentUser }) {
       setSaving(true);
       if (validate()) {
         plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
-        if (isResponsableDeCentre(user) && ![ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role)) {
-          for (let index = 0; index < sessionsWhereUserIsHeadCenter.length; index++) {
-            const { ok, code } = await api.remove(`/session-phase1/${sessionsWhereUserIsHeadCenter[index]._id}/headCenter`);
-            if (!ok) {
-              return toastr.error("Une erreur s'est produite lors de la suppression du chef de centre ", translate(code));
-            }
-          }
-        }
         const updatedData = { ...data };
         if (trimmedPhone) updatedData.phone = trimmedPhone;
         if (trimmedMobile) updatedData.mobile = trimmedMobile;
@@ -269,26 +160,6 @@ export default function Details({ user, setUser, currentUser }) {
     } finally {
       setSaving(false);
     }
-  };
-
-  const openHeadOfCenterDeleteConfirmModal = (session) => () => {
-    setDeletedHeadOfCenterSessionId(session._id);
-    setHeadOfCenterDeleteConfirmModalOpen(true);
-  };
-
-  const closeHeadOfCenterDeleteConfirmModal = () => {
-    setDeletedHeadOfCenterSessionId(undefined);
-    setHeadOfCenterDeleteConfirmModalOpen(false);
-  };
-
-  const openCohortChangeConfirmModal = (oldSessionId) => (newSessionId) => {
-    setCohortChangeSessionIds({ oldSessionId, newSessionId });
-    setCohortChangeConfirmModalOpen(true);
-  };
-
-  const closeCohortChangeConfirmModal = () => {
-    setCohortChangeSessionIds(undefined);
-    setCohortChangeConfirmModalOpen(false);
   };
 
   const onClickDelete = () => {
@@ -368,18 +239,6 @@ export default function Details({ user, setUser, currentUser }) {
 
   return (
     <>
-      <ConfirmationModal
-        title="Êtes-vous sûr(e) de vouloir supprimer le chef de centre ?"
-        isOpen={isHeadOfCenterDeleteConfirmModalOpen}
-        onCancel={closeHeadOfCenterDeleteConfirmModal}
-        onConfirm={deleteCenterHeadOfCenter}
-      />
-      <ConfirmationModal
-        title="Êtes-vous sûr(e) de vouloir changer le cohort ?"
-        isOpen={isCohortChangeConfirmModalOpen}
-        onCancel={closeCohortChangeConfirmModal}
-        onConfirm={changeCohort}
-      />
       <UserHeader user={user} tab="profile" currentUser={currentUser} onUserUpdate={setUser} />
       <div className="p-8">
         <Box className="p-6">
@@ -392,7 +251,7 @@ export default function Details({ user, setUser, currentUser }) {
                     <RoundButton onClick={stopEdit} mode="grey">
                       Annuler
                     </RoundButton>
-                    <RoundButton className="ml-[8px]" onClick={onSave} disabled={!!newCenter}>
+                    <RoundButton className="ml-[8px]" onClick={onSave}>
                       <Pencil stroke="#2563EB" className="mr-[6px] h-[12px] w-[12px]" />
                       Enregistrer les changements
                     </RoundButton>
@@ -453,84 +312,6 @@ export default function Details({ user, setUser, currentUser }) {
                   disabled={user.status === ReferentStatus.INACTIVE}
                   regionOrDepOptions={regionList.map((r) => ({ value: r, label: r }))}
                 />
-              )}
-              {!isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
-                <div className="mt-4 text-gray-500">Enregistrer les changement pour accéder au choix des centres.</div>
-              )}
-              {isResponsableDeCentre(user) && [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(data.role) && (
-                <div className="flex flex-col">
-                  {sessionsWhereUserIsHeadCenter?.length > 0 && <div className={`mt-4 ${sessionsWhereUserIsHeadCenter?.length > 0 ? "-mb-3" : ""}`}>Centres</div>}
-                  {areCentersLoading && <Loader />}
-                  {!areCentersLoading && (
-                    <>
-                      {sessionsWhereUserIsHeadCenter?.length > 0 &&
-                        sessionsWhereUserIsHeadCenter.map((session) => (
-                          <Session
-                            mode={[ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) ? mode : MODE_DEFAULT}
-                            session={session}
-                            key={session._id}
-                            onClickView={session?.center?._id ? () => window.open(`/centre/${session.center._id}?cohorte=${session.cohort}`) : undefined}
-                            onDelete={openHeadOfCenterDeleteConfirmModal(session)}
-                            onCohortChange={openCohortChangeConfirmModal(session._id)}
-                          />
-                        ))}
-                      {newCenter && (
-                        <div className="flex flex-col border-b border-gray-200 pb-4">
-                          <CustomSelect
-                            className="mt-4"
-                            key={newCenter?.cohesionCenterId || "newCenter"}
-                            isClearable
-                            label="Centre"
-                            options={sessionOptions.map(({ cohesionCenterId, nameCentre }) => ({ value: cohesionCenterId, label: nameCentre }))}
-                            placeholder="Choisir un centre"
-                            onChange={(option) => {
-                              if (!option?.value) {
-                                setNewCenter({});
-                              } else {
-                                const centerToSet = sessionOptions.find((currentSession) => currentSession.cohesionCenterId === option.value);
-                                if (centerToSet.cohorts.length === 1) {
-                                  centerToSet.cohort = centerToSet.cohorts[0];
-                                }
-                                setNewCenter(centerToSet);
-                              }
-                            }}
-                            value={newCenter?.cohesionCenterId || ""}
-                          />
-                          {newCenter.cohesionCenterId && (
-                            <CohortSelect
-                              className="mt-4 self-start"
-                              value={newCenter.cohort?.cohort || ""}
-                              options={newCenter.cohorts.map((c) => c.cohort)}
-                              onChange={(cohort) => {
-                                setNewCenter({ ...newCenter, cohort: newCenter.cohorts.find((c) => c.cohort === cohort) });
-                              }}
-                            />
-                          )}
-                        </div>
-                      )}
-                      {roleMode === MODE_EDITION && [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(currentUser.role) && !newCenter && (
-                        <Tooltip title="Vous ne pouvez pas ajouter un centre à un utilisateur désactivé" disabled={user.status !== ReferentStatus.INACTIVE} className="justify-end">
-                          <AddButton
-                            onClick={addNewCenter}
-                            className={`mt-4 self-end ${sessionsWhereUserIsHeadCenter?.length > 0 ? "" : "mt-4"}`}
-                            disabled={user.status === ReferentStatus.INACTIVE}>
-                            Ajouter un centre
-                          </AddButton>
-                        </Tooltip>
-                      )}
-                      {roleMode === MODE_EDITION && newCenter && (
-                        <div className="mt-4 flex justify-end">
-                          <PlainButton mode="white" className="mr-2" onClick={() => setNewCenter(undefined)}>
-                            Annuler
-                          </PlainButton>
-                          <PlainButton onClick={setCenterHeadOfCenter} disabled={!newCenter.cohort}>
-                            Enregistrer le centre
-                          </PlainButton>
-                        </div>
-                      )}
-                    </>
-                  )}
-                </div>
               )}
               {(data.role === ROLES.RESPONSIBLE || data.role === ROLES.SUPERVISOR) && (
                 <>

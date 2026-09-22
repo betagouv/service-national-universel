@@ -75,7 +75,6 @@ import {
   canViewYoungMilitaryPreparationFile,
   canSigninAs,
   canGetReferentByEmail,
-  canEditYoung,
   canViewYoungFile,
   canRefuseMilitaryPreparation,
   canChangeYoungCohort,
@@ -113,7 +112,12 @@ import {
   ROLE_JEUNE,
   PERMISSION_RESOURCES,
   isWriteAuthorized,
-  PERMISSION_ACTIONS, ReferentStatus,
+  PERMISSION_ACTIONS,
+  ReferentStatus,
+  isSubRoleAllowedForRole,
+  SUB_ROLE_GOD,
+  SUB_ROLES_LIST,
+  VISITOR_SUB_ROLES_LIST,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -131,9 +135,23 @@ import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { isInvitationInUserScope, isReferentInUserScope } from "./referentScope";
+import { canEditYoungInScope, isYoungInReferentGeography } from "../young/youngScope";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
+
+/**
+ * Un sous-rôle ne peut être posé que s'il appartient au rôle visé (et jamais `god`, qui vaut
+ * superadmin). Un sous-rôle inchangé passe toujours : les formulaires renvoient l'objet complet,
+ * et d'anciens comptes portent des couples rôle/sous-rôle incohérents.
+ */
+function isSubRoleChangeAllowed(target: { role?: string | null; subRole?: string | null }, submittedSubRole?: string | null): boolean {
+  const submitted = submittedSubRole || "";
+  if (submitted === (target.subRole || "")) return true;
+  if (submitted === SUB_ROLE_GOD) return false;
+  return isSubRoleAllowedForRole(target.role, submitted);
+}
 
 async function updateTutorNameInMissionsAndApplications(tutor, fromUser) {
   if (!tutor || !tutor.firstName || !tutor.lastName) return;
@@ -296,14 +314,22 @@ router.post(
   async (req: UserRequest, res: Response) => {
     try {
       const { error, value } = Joi.object({
-        template: Joi.string().required(),
+        // Le template n'est pas libre : sinon n'importe quel template transactionnel Brevo du compte
+        // SNU peut être envoyé, avec des paramètres partiellement contrôlés par l'appelant.
+        template: Joi.string()
+          .valid(...Object.values(SENDINBLUE_TEMPLATES.invitationReferent))
+          .required(),
         email: Joi.string().lowercase().trim().email().required(),
         firstName: Joi.string().required(),
         lastName: Joi.string().required(),
         role: Joi.string()
           .valid(...ROLES_LIST)
           .required(),
-        subRole: Joi.string().allow(null, ""),
+        // `roles` est construit à partir de `subRole` : un sous-rôle d'un autre rôle (ou `god`)
+        // donnerait l'ACL de ce rôle au compte créé.
+        subRole: Joi.string()
+          .allow(null, "")
+          .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
         region: Joi.string().allow(null, ""),
         department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
         structureId: Joi.string().allow(null, ""),
@@ -321,7 +347,11 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
+      if (!isSubRoleAllowedForRole(value.role, value.subRole)) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
       if (!canInviteUser(req.user.role, value.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      if (!(await isInvitationInUserScope(req.user, value))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
       const referentProperties: Partial<ReferentType> = { roles: [] };
@@ -536,7 +566,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     const young = await YoungModel.findById(id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (!canEditYoung(req.user, young)) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
+    if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
@@ -718,7 +748,7 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
     }
     await mightAddInProgressStatus(young, req.user);
 
-    res.status(200).send({ ok: true, data: young });
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
 
@@ -1587,10 +1617,25 @@ router.put(
       const referent = await ReferentModel.findById(req.params.id);
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const structure = await StructureModel.findById(value.structureId);
+      // Le rattachement à une structure se fait par PUT /:id/structure/:structureId, qui applique la
+      // policy STRUCTURE : ici, seul un admin peut déplacer la cible.
+      if (!isAdmin(req.user) && value.structureId && value.structureId !== referent.structureId) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      // La structure servant de repli géographique est celle de la cible, jamais un id fourni dans la requête.
+      const structure = referent.structureId ? await StructureModel.findById(referent.structureId) : null;
 
       if (!canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: value, structure })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      if (!(await isReferentInUserScope(req.user, referent))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+      // `roles` est recalculé ci-dessous à partir de `subRole` : un sous-rôle étranger au rôle de la
+      // cible lui donnerait les permissions de ce sous-rôle.
+      if (!isSubRoleChangeAllowed({ role: value.role || referent.role, subRole: referent.subRole }, value.subRole)) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
       referent.set(value);
@@ -1599,7 +1644,7 @@ router.put(
 
       await referent.save({ fromUser: req.user });
       await updateTutorNameInMissionsAndApplications(referent, req.user);
-      res.status(200).send({ ok: true, data: referent });
+      res.status(200).send({ ok: true, data: serializeReferent(referent) });
     } catch (error) {
       capture(error);
       if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
@@ -1619,6 +1664,12 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     if (!user) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     if (!canUpdateMyself({ actor: user, modifiedTarget: req.user })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // Un référent ne s'attribue pas un sous-rôle : `god` vaut superadmin (suppression de comptes,
+    // usurpation d'identité) et un sous-rôle d'un autre rôle rend le compte incohérent.
+    // Renvoyer son sous-rôle courant reste sans effet (le formulaire de profil poste l'objet complet).
+    if (!isSubRoleChangeAllowed(user, value.subRole)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1657,12 +1708,17 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // La policy STRUCTURE ci-dessus ne borne que la structure d'ACCUEIL : la cible déplacée doit elle
+    // aussi appartenir au périmètre de l'utilisateur.
+    if (!(await isReferentInUserScope(req.user, referent))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const missions = await MissionModel.find({ tutorId: referent._id });
     if (missions.length > 0) return res.status(405).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     referent.set({ structureId: structure._id, role: ROLES.RESPONSIBLE });
     await referent.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: referent });
+    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1820,6 +1876,10 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
 
     if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // `canCreateOrUpdateSessionPhase1` n'applique aucun périmètre aux référents dép./rég. : on le fait ici.
+    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && !isYoungInReferentGeography(req.user, young)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES, canSearchInElasticSearch } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, getEsSensitiveFields } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS, isYoung, isReferent } from "../../utils";
 import { StructureModel } from "../../models";
@@ -94,13 +94,44 @@ function unsafeStrucuredClone(obj: any) {
   return JSON.parse(JSON.stringify(obj));
 }
 
+/**
+ * Ajoute l'exclusion des champs secrets de l'index au `_source` d'une requête ES.
+ * C'est la défense principale : quoi que demande l'appelant (`_source: "*"`, liste
+ * de champs choisie par le client), le cluster ne renvoie jamais ces champs.
+ */
+function applySourceExcludes(index: string | undefined, query: any): any {
+  const excludes = getEsSensitiveFields(index);
+  if (!excludes.length || !query || typeof query !== "object" || Array.isArray(query)) return query;
+  const current = query._source;
+  let includes: string[];
+  if (!current || current === "*") includes = ["*"];
+  else if (Array.isArray(current)) includes = current;
+  else includes = current.includes || ["*"];
+  return { ...query, _source: { includes, excludes } };
+}
+
 function buildNdJson(header: any, hitsQuery: any, aggsQuery: any = null): string {
-  if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hitsQuery)].join("\n") + "\n";
-  return [JSON.stringify(header), JSON.stringify(hitsQuery), JSON.stringify(header), JSON.stringify(aggsQuery)].join("\n") + "\n";
+  const index = header?.index;
+  const hits = applySourceExcludes(index, hitsQuery);
+  if (!aggsQuery) return [JSON.stringify(header), JSON.stringify(hits)].join("\n") + "\n";
+  return [JSON.stringify(header), JSON.stringify(hits), JSON.stringify(header), JSON.stringify(applySourceExcludes(index, aggsQuery))].join("\n") + "\n";
 }
 
 function buildArbitratyNdJson(...args: any[]): string {
-  return args.map((e) => JSON.stringify(e)).join("\n") + "\n";
+  // Les arguments alternent en-tête / corps de requête : on applique l'exclusion
+  // aux corps, en s'appuyant sur l'index déclaré par l'en-tête qui les précède.
+  let currentIndex: string | undefined;
+  return (
+    args
+      .map((arg, position) => {
+        if (position % 2 === 0) {
+          currentIndex = arg?.index;
+          return JSON.stringify(arg);
+        }
+        return JSON.stringify(applySourceExcludes(currentIndex, arg));
+      })
+      .join("\n") + "\n"
+  );
 }
 
 interface RequestBodyParams {
@@ -298,6 +329,7 @@ function getResponsibleCenterField(role: string | undefined): string | null {
 }
 
 export {
+  applySourceExcludes,
   buildNdJson,
   buildArbitratyNdJson,
   buildRequestBody,

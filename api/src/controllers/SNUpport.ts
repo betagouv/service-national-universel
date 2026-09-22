@@ -25,6 +25,28 @@ import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 
+const KNOWLEDGE_BASE_PUBLIC_RESTRICTION = "public";
+
+// Doit rester aligné sur l'énumération SCHEMA_ROLE de snupport-api (src/controllers/knowledgeBase.js).
+const KNOWLEDGE_BASE_RESTRICTIONS = [
+  KNOWLEDGE_BASE_PUBLIC_RESTRICTION,
+  "young",
+  "young_cle",
+  "structure",
+  "referent",
+  "referent_sanitaire",
+  "head_center",
+  "head_center_adjoint",
+  "visitor",
+  "transporter",
+  "referent_classe",
+  "admin",
+  "administrateur_cle",
+  "administrateur_cle_coordinateur_cle",
+  "administrateur_cle_referent_etablissement",
+  "responsible",
+];
+
 interface File {
   name: string;
   url: string;
@@ -126,7 +148,12 @@ router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: Us
 
 router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
-    const { ok, data, token } = await SNUpport.api(`/v0/sso/signin?email=${encodeURIComponent(req.user.email)}`, { method: "GET", credentials: "include" });
+    // On transmet l'identifiant SNU du référent : c'est lui qui désigne le compte agent côté
+    // support, l'email seul ne suffit pas à prouver qu'il s'agit bien du même utilisateur.
+    const { ok, data, token } = await SNUpport.api(
+      `/v0/sso/signin?email=${encodeURIComponent(req.user.email)}&snuReferentId=${encodeURIComponent(req.user._id.toString())}`,
+      { method: "GET", credentials: "include" },
+    );
     if (!ok) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     const options: CookieOptions = {
@@ -141,9 +168,23 @@ router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) 
   }
 });
 
-router.get("/knowledgeBase/search", async (req: UserRequest, res) => {
+router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) => {
   try {
-    const { ok, data } = await SNUpport.api(`/knowledge-base/${req.query.restriction}/search?search=${req.query.search}&status=PUBLISHED`, {
+    const { error, value } = Joi.object({
+      restriction: Joi.string()
+        .valid(...KNOWLEDGE_BASE_RESTRICTIONS)
+        .required(),
+      search: Joi.string().allow("").required(),
+    })
+      .prefs({ stripUnknown: true })
+      .validate(req.query);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { restriction, search } = value;
+
+    // Hors base publique, la restriction donne accès à la documentation interne d'un rôle : réservée aux utilisateurs connectés.
+    if (restriction !== KNOWLEDGE_BASE_PUBLIC_RESTRICTION && !req.user) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { ok, data } = await SNUpport.api(`/knowledge-base/${encodeURIComponent(restriction)}/search?search=${encodeURIComponent(search)}&status=PUBLISHED`, {
       method: "GET",
       credentials: "include",
     });

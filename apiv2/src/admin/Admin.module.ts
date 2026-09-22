@@ -11,9 +11,7 @@ import { TaskGateway } from "@task/core/Task.gateway";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
 import { TaskModule } from "@task/Task.module";
 import { ClsMiddleware, ClsModule } from "nestjs-cls";
-import { SigninReferent } from "./core/iam/useCase/SigninReferent";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
-import { AuthController } from "./infra/iam/api/Auth.controller";
 import { AddUserToRequestMiddleware } from "./infra/iam/auth/AddUserToRequest.middleware";
 import { AuthProvider } from "./infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "./infra/iam/auth/JwtToken.service";
@@ -117,7 +115,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         BasculeJeuneValidesController,
         BasculeJeuneNonValidesController,
         Phase1Controller,
-        AuthController,
         AdminTaskController,
         HistoryController,
         ReferentController,
@@ -157,7 +154,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         ...historyProvider,
         ...structureMongoProviders,
         Logger,
-        SigninReferent,
         { provide: FileGateway, useClass: FileProvider },
         { provide: FeatureFlagGateway, useClass: FeatureFlagMongoRepository },
         { provide: NotificationGateway, useClass: NotificationProducer },
@@ -195,7 +191,6 @@ export class AdminModule {
         consumer.apply(ClsMiddleware).forRoutes("{*cls}");
         consumer
             .apply(AddUserToRequestMiddleware)
-            .exclude({ path: "/referent/signin", method: RequestMethod.POST })
             .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })

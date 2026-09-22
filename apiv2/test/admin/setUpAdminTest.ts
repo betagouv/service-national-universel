@@ -8,7 +8,6 @@ import { ClsModule } from "nestjs-cls";
 
 import { QueueName } from "@shared/infra/Queue";
 
-import { SigninReferent } from "@admin/core/iam/useCase/SigninReferent";
 import { ClasseService } from "@admin/core/sejours/cle/classe/Classe.service";
 import { AffectationService } from "@admin/core/sejours/phase1/affectation/Affectation.service";
 import { SimulationAffectationCLEService } from "@admin/core/sejours/phase1/affectation/SimulationAffectationCLE.service";
@@ -16,7 +15,6 @@ import { SimulationAffectationHTSService } from "@admin/core/sejours/phase1/affe
 import { InscriptionService } from "@admin/core/sejours/phase1/inscription/Inscription.service";
 import { ValiderBasculeJeunesService } from "@admin/core/sejours/phase1/inscription/ValiderBasculeJeunes.service";
 import { historyProvider } from "@admin/infra/history/historyProvider";
-import { AuthController } from "@admin/infra/iam/api/Auth.controller";
 import { AuthProvider } from "@admin/infra/iam/auth/Auth.provider";
 import { JwtTokenService } from "@admin/infra/iam/auth/JwtToken.service";
 import { referentMongoProviders } from "@admin/infra/iam/provider/ReferentMongo.provider";
@@ -114,7 +112,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             BasculeJeuneNonValidesController,
             DesistementController,
             Phase1Controller,
-            AuthController,
         ],
         providers: [
             ClasseService,
@@ -145,7 +142,6 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
             testDatabaseProviders(setupOptions.newContainer),
             Logger,
             ...guardProviders,
-            SigninReferent,
             { provide: FileGateway, useClass: FileProvider },
             { provide: AuthProvider, useClass: JwtTokenService },
             { provide: TaskGateway, useClass: AdminTaskRepository },

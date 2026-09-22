@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, UserDto, YoungDto, SUB_ROLE_GOD } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -141,17 +141,9 @@ export function validateContract(program) {
       tutorFirstName: Joi.string().allow(null, ""),
       tutorLastName: Joi.string().allow(null, ""),
       isYoungAdult: Joi.string().allow(null, ""),
-      parent1Token: Joi.string().allow(null, ""),
-      projectManagerToken: Joi.string().allow(null, ""),
-      structureManagerToken: Joi.string().allow(null, ""),
-      parent2Token: Joi.string().allow(null, ""),
-      youngContractToken: Joi.string().allow(null, ""),
-      parent1Status: Joi.string().allow(null, ""),
-      projectManagerStatus: Joi.string().allow(null, ""),
-      structureManagerStatus: Joi.string().allow(null, ""),
-      parent2Status: Joi.string().allow(null, ""),
-      youngContractStatus: Joi.string().allow(null, ""),
-      invitationSent: Joi.string().allow(null, ""),
+      // Les jetons de signature, les statuts de signature et `invitationSent` sont pilotés
+      // exclusivement par le serveur : les accepter depuis le client permettrait de marquer
+      // un contrat comme signé sans aucune signature. `stripUnknown` les retire silencieusement.
       youngFirstName: Joi.string().allow(null, ""),
       youngLastName: Joi.string().allow(null, ""),
       youngBirthdate: Joi.string().allow(null, ""),
@@ -312,7 +304,7 @@ export function validateSessionPhase1(session) {
   return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
 }
 
-export function validateYoung(young: YoungDto, user?: UserDto) {
+export function validateYoung(young: YoungDto) {
   const keys = {
     firstName: Joi.string().allow(null, ""),
     lastName: Joi.string().allow(null, ""),
@@ -355,10 +347,8 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     cohesion2020Step: Joi.string().allow(null, ""),
     historic: Joi.array().items(Joi.any().allow(null, "")),
     lastLoginAt: Joi.string().allow(null, ""),
-    forgotPasswordResetToken: Joi.string().allow(null, ""),
-    forgotPasswordResetExpires: Joi.string().allow(null, ""),
-    invitationToken: Joi.string().allow(null, ""),
-    invitationExpires: Joi.string().allow(null, ""),
+    // Les jetons d'authentification (reset de mot de passe, invitation, phase 3) ne sont jamais
+    // inscriptibles depuis une requête : ils sont générés par les flux dédiés côté serveur.
     cniFiles: Joi.array().items(Joi.string().allow(null, "")),
     acceptCGU: Joi.string().allow(null, ""),
     acceptRI: Joi.string().allow(null, ""),
@@ -389,7 +379,6 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     phase3TutorEmail: Joi.string().allow(null, ""),
     phase3TutorPhone: Joi.string().allow(null, ""),
     phase3TutorNote: Joi.string().allow(null, ""),
-    phase3Token: Joi.string().allow(null, ""),
     address: Joi.string().allow(null, ""),
     complementAddress: Joi.string().allow(null, ""),
     addressVerified: Joi.string().allow(null, ""),
@@ -581,12 +570,9 @@ export function validateYoung(young: YoungDto, user?: UserDto) {
     classeId: Joi.string().allow(null, ""),
     psc1Info: Joi.string().allow(null, ""),
     roadCodeRefund: Joi.string().valid("true", "false").allow(null, ""),
+    // `password` n'est volontairement pas listé : le mot de passe d'un volontaire ne se change que
+    // par les flux self-service (reset / première connexion), jamais depuis une édition référent.
   };
-
-  if (!isYoung(user)) {
-    // @ts-ignore
-    keys.password = Joi.string().allow(null, "");
-  }
 
   return Joi.object().keys(keys).validate(young, { stripUnknown: true });
 }
@@ -624,9 +610,9 @@ export function validateReferent(referent) {
       firstName: validateFirstName().allow(null, ""),
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
-      password: Joi.string().allow(null, ""),
-      forgotPasswordResetToken: Joi.string().allow(null, ""),
-      invitationToken: Joi.string().allow(null, ""),
+      // `password`, `forgotPasswordResetToken` et `invitationToken` ne sont volontairement pas
+      // acceptés ici : ils ne relèvent que des flux self-service (reset, invitation), sans quoi
+      // un référent habilité peut prendre le contrôle du compte d'un autre référent.
       role: Joi.string()
         .allow(null)
         .valid(...ROLES_LIST),
@@ -643,7 +629,9 @@ export function validateReferent(referent) {
       structureId: Joi.string().allow(null, ""),
       acceptCGU: Joi.string().allow(null, ""),
       cohorts: Joi.array().items(Joi.string().allow(null, "")),
-      status: Joi.string().allow(null, ""),
+      status: Joi.string()
+        .allow(null, "")
+        .valid(...Object.values(ReferentStatus)),
     })
     .validate(referent, { stripUnknown: true });
 }
@@ -666,9 +654,11 @@ export function validateSelf(referent) {
       lastName: Joi.string().uppercase().allow(null, ""),
       email: Joi.string().lowercase().trim().email().allow(null, ""),
       password: Joi.string().allow(null, ""),
+      // `god` reste accepté ici car un superadmin renvoie son propre sous-rôle en sauvegardant son
+      // profil ; c'est le handler (PUT /referent) qui interdit de *changer* de sous-rôle.
       subRole: Joi.string()
         .allow(null, "")
-        .valid(...[...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD]),
+        .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST, SUB_ROLE_GOD),
       phone: Joi.string().allow(null, ""),
       mobile: Joi.string().allow(null, ""),
     })

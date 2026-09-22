@@ -6,7 +6,6 @@ import { logger } from "../logger";
 import { StructureModel, MissionModel, ReferentModel, ApplicationModel } from "../models";
 import { ERRORS } from "../utils";
 import {
-  ROLES,
   canDeleteStructure,
   canViewStructureChildren,
   isSupervisor,
@@ -18,7 +17,6 @@ import {
   PERMISSION_ACTIONS,
   isReadAuthorized,
   isWriteAuthorized,
-  isResponsible,
   getPolicyMongoFilter,
 } from "snu-lib";
 import patches from "./patches";
@@ -39,6 +37,9 @@ const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserD
 
 // Listes d'identification (affiliation, antennes) : aucune coordonnée du représentant, ni adresse, ni SIRET.
 const STRUCTURE_LIGHT_PROJECTION = "_id name networkName isNetwork region department";
+
+/** Normalise le drapeau « tête de réseau » (absent en base sur d'anciennes structures) pour comparer deux états. */
+const isNetworkFlag = (value?: string | null): "true" | "false" => (value === "true" ? "true" : "false");
 
 /** Applique la policy STRUCTURE (lecture ou écriture) de l'utilisateur à une structure chargée. */
 function isStructureAuthorized(user: UserDto, structure: { toJSON: () => any }, action: typeof PERMISSION_ACTIONS.READ | typeof PERMISSION_ACTIONS.WRITE): boolean {
@@ -100,19 +101,6 @@ async function updateMissionStructureName(structure: StructureType, fromUser?: U
   }
 }
 
-async function updateResponsibleAndSupervisorRole(structure: StructureType, fromUser?: UserDto): Promise<void> {
-  try {
-    const referents = await ReferentModel.find({ structureId: structure._id, role: { $in: [ROLES.RESPONSIBLE, ROLES.SUPERVISOR] } });
-    if (!referents?.length) {
-      logger.debug(`no referents edited for structure ${structure._id}`);
-      return;
-    }
-    for (const referent of referents) await setAndSave(referent, { role: structure.isNetwork === "true" ? ROLES.SUPERVISOR : ROLES.RESPONSIBLE }, fromUser);
-  } catch (error) {
-    capture(error);
-  }
-}
-
 const router = express.Router();
 
 router.post(
@@ -134,7 +122,6 @@ router.post(
 
       const data = await StructureModel.create(checkedStructure);
       await updateNetworkName(data, req.user);
-      await updateResponsibleAndSupervisorRole(data, req.user);
       sendTemplate(SENDINBLUE_TEMPLATES.referent.STRUCTURE_REGISTERED, {
         emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: `${req.user.email}` }],
       });
@@ -164,12 +151,12 @@ router.put(
       const { error: errorStructure, value: checkedStructure } = validateStructure(req.body);
       if (errorStructure) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-      // un responsable ne peux pas passer en tête de réseau la structure
-      if (isResponsible(req.user) && checkedStructure && structure.isNetwork !== "true" && checkedStructure.isNetwork === "true") {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-      // Only admin user can change the networkId of a structure
+      // Le rattachement réseau (tête de réseau, structure mère) ouvre un périmètre d'accès : seul un ADMIN peut le modifier.
       if (!isAdmin(req.user)) {
+        if (checkedStructure.isNetwork !== undefined && isNetworkFlag(checkedStructure.isNetwork) !== isNetworkFlag(structure.isNetwork)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+        delete checkedStructure.isNetwork;
         delete checkedStructure.networkId;
       }
 
@@ -177,7 +164,6 @@ router.put(
       await structure.save({ fromUser: req.user });
       await updateNetworkName(structure, req.user);
       await updateMissionStructureName(structure, req.user);
-      await updateResponsibleAndSupervisorRole(structure, req.user);
       return res.status(200).send({ ok: true, data: serializeStructure(structure, req.user) });
     } catch (error) {
       capture(error);

@@ -1,16 +1,13 @@
 import React, { useState } from "react";
-import { useHistory, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { FiFolderPlus } from "react-icons/fi";
-import { GoPlus } from "react-icons/go";
 
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
-import { ROLES } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { Container } from "@snu/ds/admin";
 import ArrowUp from "@/assets/ArrowUp";
 import Comment from "@/assets/comment";
-import { PlainButton } from "../components/Buttons";
 import ListPanel from "./modificationPanel/List";
 import { getTransportIcon, getFilterArray } from "../util";
 
@@ -23,7 +20,6 @@ interface Props {
 }
 
 export default function List({ hasValue, cohort, currentTab, selectedFilters, setSelectedFilters }: Props) {
-  const history = useHistory();
   const { user } = useSelector((state: AuthState) => state.Auth);
   const [data, setData] = React.useState<any[]>([]);
   const pageId = "plandetransport";
@@ -107,15 +103,6 @@ export default function List({ hasValue, cohort, currentTab, selectedFilters, se
           <div className="m-auto flex w-full flex-col items-center justify-center gap-4 pt-12 bg-gray-50 pb-5">
             <FiFolderPlus size={36} className="text-gray-400" />
             <div className="text-lg leading-6 font-medium">Aucun document importé</div>
-            {[ROLES.ADMIN, ROLES.TRANSPORTER].includes(user.role) && (
-              <>
-                <div className="text-center text-sm leading-5 text-gray-800">Importez votre plan de transport au format .xls (fichier Excel) afin de le voir apparaître ici.</div>
-                <PlainButton className="mt-2" onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}`)}>
-                  <GoPlus size={20} className="mr-2 mt-0.5" />
-                  Importer mon fichier
-                </PlainButton>
-              </>
-            )}
           </div>
         </Container>
       )}

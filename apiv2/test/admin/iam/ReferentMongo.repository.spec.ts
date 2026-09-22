@@ -10,6 +10,7 @@ import { ClsService } from "nestjs-cls";
 import { CLASSE_MONGOOSE_ENTITY, ClasseDocument } from "@admin/infra/sejours/cle/classe/provider/ClasseMongo.provider";
 import { createEtablissement } from "../sejour/cle/EtablissementHelper";
 import { ROLES } from "snu-lib";
+import { FunctionalException } from "@shared/core/FunctionalException";
 import { createClasse } from "../sejour/cle/classe/ClasseHelper";
 
 describe("ReferentGateway", () => {
@@ -179,6 +180,7 @@ describe("ReferentGateway", () => {
         });
 
         it("should return an array of referents based on search", async () => {
+            const etablissement = await createEtablissement({ nom: "Etablissement Test" });
             const referent1 = await createReferent({
                 nom: "Referent Test 1",
                 email: "referent1@example.com",
@@ -191,9 +193,14 @@ describe("ReferentGateway", () => {
                 email: "referent2@example.com",
                 role: ROLES.REFERENT_CLASSE,
             });
+            await createClasse({
+                nom: "Classe Test",
+                etablissementId: etablissement.id,
+                referentClasseIds: [referent1.id, referent2.id],
+            });
             const searchResults = await referentGateway.findByRoleAndEtablissement(
                 ROLES.REFERENT_CLASSE,
-                undefined,
+                etablissement.id,
                 "ent1",
             );
 
@@ -218,6 +225,70 @@ describe("ReferentGateway", () => {
                     }),
                 ]),
             );
+        });
+
+        // --- C25 ---
+
+        it("should refuse to query without an etablissementId (C25)", async () => {
+            await expect(
+                referentGateway.findByRoleAndEtablissement(ROLES.REFERENT_CLASSE, "" as unknown as string),
+            ).rejects.toThrow(FunctionalException);
+        });
+
+        it("should escape the search parameter instead of running it as a Mongo regex (C25)", async () => {
+            const etablissement = await createEtablissement({ nom: "Etablissement Test" });
+            const dg = await createReferent({
+                email: "dg.snu@interieur.gouv.fr",
+                role: ROLES.REFERENT_CLASSE,
+                prenom: "Dg",
+            });
+            const agent = await createReferent({
+                email: "agent@education.gouv.fr",
+                role: ROLES.REFERENT_CLASSE,
+                prenom: "Agent",
+            });
+            await createClasse({
+                nom: "Classe Test",
+                etablissementId: etablissement.id,
+                referentClasseIds: [dg.id, agent.id],
+            });
+
+            // Une alternation ancrée : interprétée comme regex elle renverrait les deux référents.
+            const parAlternation = await referentGateway.findByRoleAndEtablissement(
+                ROLES.REFERENT_CLASSE,
+                etablissement.id,
+                "^(dg|agent)",
+            );
+            expect(parAlternation).toHaveLength(0);
+
+            // Une recherche littérale continue de fonctionner.
+            const litteral = await referentGateway.findByRoleAndEtablissement(
+                ROLES.REFERENT_CLASSE,
+                etablissement.id,
+                "dg.snu",
+            );
+            expect(litteral).toHaveLength(1);
+            expect(litteral[0].email).toEqual("dg.snu@interieur.gouv.fr");
+        });
+
+        it("should not return deleted referents (C25)", async () => {
+            const etablissement = await createEtablissement({ nom: "Etablissement Test" });
+            const parti = await createReferent({
+                email: "parti@interieur.gouv.fr",
+                role: ROLES.REFERENT_CLASSE,
+                prenom: "Jean",
+                nom: "Parti",
+            });
+            await createClasse({
+                nom: "Classe Test",
+                etablissementId: etablissement.id,
+                referentClasseIds: [parti.id],
+            });
+            jest.spyOn(cls, "get").mockImplementation(() => {});
+            await referentGateway.delete(parti.id);
+
+            const referents = await referentGateway.findByRoleAndEtablissement(ROLES.REFERENT_CLASSE, etablissement.id);
+            expect(referents).toHaveLength(0);
         });
     });
 });

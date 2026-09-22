@@ -3,12 +3,11 @@ import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
-import { GoPlus } from "react-icons/go";
 
 import { isSuperAdmin } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
-import { Button, Header, Navbar } from "@snu/ds/admin";
+import { Header, Navbar } from "@snu/ds/admin";
 import plausibleEvent from "@/services/plausible";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
@@ -37,18 +36,6 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
 
   const getActions = () => {
     const buttons: JSX.Element[] = [];
-
-    if (!isResonsableDeCentre) {
-      buttons.push(
-        <Button
-          title="Importer des lignes supplémentaires"
-          leftIcon={<GoPlus size={20} className="mt-0.5" />}
-          key="btn-2"
-          type="wired"
-          onClick={() => history.push(`/ligne-de-bus/import?cohort=${cohort}&add=true`)}
-        />,
-      );
-    }
 
     buttons.push(<HeaderExport cohort={cohort} key="export" selectedFilters={selectedFilters} user={user} />);
     return buttons;

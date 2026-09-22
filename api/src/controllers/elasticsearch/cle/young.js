@@ -118,7 +118,7 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         // Mettre à jour et envoyer la réponse
         response.body.responses[0].hits.hits = youngs;
       }
-      return res.status(200).send(response.body);
+      return res.status(200).send(serializeYoungs(response.body));
     }
   } catch (error) {
     capture(error);

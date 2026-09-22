@@ -1,5 +1,7 @@
 const { capture } = require("../sentry");
 const { logger } = require("../logger");
+const { config } = require("../config");
+const { redactValue, redactUrl } = require("../utils/logRedaction");
 
 const loggingMiddleware = async (req, res, next) => {
   const startTime = new Date();
@@ -8,24 +10,23 @@ const loggingMiddleware = async (req, res, next) => {
       const responseTimeMs = new Date() - startTime;
       req.responseTimeMs = responseTimeMs;
 
-      if (req.body?.password) req.body.password = "**********";
-      if (req.body?.newPassword) req.body.newPassword = "**********"
-      if (req.body?.verifyPassword) req.body.verifyPassword = "**********";
-      if (req.body?.repassword) req.body.repassword = "**********";
-
       const ip = req.ipInfo;
 
       const log = {
         method: req.method,
-        url: req.originalUrl,
+        // les secrets voyagent aussi en segment de chemin (/contract/token/:token) et en query string
+        url: redactUrl(req.originalUrl, req.params),
         status: res.statusCode,
         responseTime: req.responseTimeMs,
         ip,
       };
 
-      const hasPayload = req.body && Object.keys(req.body).length > 0;
+      // Le body d'une requête porte des données personnelles (identité, adresse, santé) qu'aucune redaction
+      // par nom de clé ne peut reconnaître : on ne le journalise jamais en production.
+      const hasPayload = config.ENVIRONMENT !== "production" && req.body && Object.keys(req.body).length > 0;
       if (hasPayload) {
-        log.payload = req.body;
+        // Copie redactée du body : mots de passe et tokens masqués, emails tronqués (voir utils/logRedaction)
+        log.payload = redactValue(req.body);
       }
 
       if (req.user) {

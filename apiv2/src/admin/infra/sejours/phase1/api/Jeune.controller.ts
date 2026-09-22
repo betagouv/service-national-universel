@@ -75,12 +75,12 @@ export class JeuneController {
     }
 
     @Post("/export/scolarises")
-    @UseAnyGuard(AdminGuard, ReferentRegionalGuard, ReferentDepartementalGuard, ResponsableGuard, SupervisorGuard)
+    @UseAnyGuard(AdminGuard, ReferentRegionalGuard, ReferentDepartementalGuard)
     async exportJeunesScolarise(
         @Request() request: CustomRequest,
         @Body() payload: PostJeunesExportScolarisesPayloadDto,
     ): Promise<JeuneRoutes["PostJeunesScolariseExport"]["response"]> {
-        if (this.exporterJeuneService.isExportScolariseAllowed(request.user, payload.departement, payload.region)) {
+        if (!this.exporterJeuneService.isExportScolariseAllowed(request.user, payload.departement, payload.region)) {
             throw new FunctionalException(
                 FunctionalExceptionCode.NOT_ENOUGH_DATA,
                 "Vous n'avez pas les droits pour exporter les inscriptions de cette localisation",

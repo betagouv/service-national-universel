@@ -1,3 +1,5 @@
+const { getEsSensitiveFields } = require("snu-lib");
+
 const esClient = require("../es");
 
 // Variables should be renamed to avoid confusion.
@@ -34,12 +36,21 @@ async function* scrollSearch(params, client) {
 
 // Can get more than 10k results.
 // The es param is given to scroll function
+/**
+ * @param {string} index
+ * @param {any} query
+ * @param {any} [client]
+ * @param {string | string[]} [fieldsToExport]
+ * @returns {Promise<any[]>}
+ */
 async function allRecords(index, query, client = esClient, fieldsToExport = "*") {
   const params = {
     index,
     scroll: "1m",
     size: 1000,
-    body: { query, _source: fieldsToExport },
+    // Les champs secrets sont exclus côté cluster : un `fieldsToExport` piloté par
+    // le client ne peut pas les faire ressortir.
+    body: { query, _source: buildSourceFilter(index, fieldsToExport) },
   };
 
   const result = [];
@@ -50,6 +61,18 @@ async function allRecords(index, query, client = esClient, fieldsToExport = "*")
   return result;
 }
 
+/**
+ * Construit le filtre `_source` d'une requête ES : les champs demandés par
+ * l'appelant en inclusion, les champs secrets de l'index en exclusion.
+ */
+function buildSourceFilter(index, fieldsToExport = "*") {
+  const excludes = getEsSensitiveFields(index);
+  const includes = !fieldsToExport || fieldsToExport === "*" ? ["*"] : [].concat(fieldsToExport);
+  if (!excludes.length) return includes;
+  return { includes, excludes };
+}
+
 module.exports = {
   allRecords,
+  buildSourceFilter,
 };
