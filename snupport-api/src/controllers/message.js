@@ -15,6 +15,7 @@ const { validateParams, validateBody, validateQuery, idSchema } = require("../mi
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
+const { inspectAttachment } = require("../utils/attachments");
 
 router.use(agentGuard);
 
@@ -155,11 +156,16 @@ router.post(
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const file = await getFile(req.cleanBody.path);
+    const data = decrypt(file.Body);
+    // Le Content-Type stocké peut venir d'un expéditeur de mail : le resservir tel quel
+    // laissait un SVG ou un HTML s'exécuter dans l'onglet de l'agent. On repart des magic
+    // numbers, et un contenu non identifiable devient un binaire opaque.
+    const { mime } = await inspectAttachment(data);
     // decrypt and upload the file to a temp private folder (deleted after 1 day)
     const tempPath = req.cleanBody.path.replace("message", "temp");
-    await uploadAttachment(tempPath, { mimetype: file.ContentType, data: decrypt(file.Body) });
-    // get a temp public url
-    const url = await getSignedUrl(tempPath);
+    await uploadAttachment(tempPath, { mimetype: mime ?? "application/octet-stream", data });
+    // get a temp public url — en pièce jointe, jamais rendue dans la page
+    const url = await getSignedUrl(tempPath, { download: true });
     return res.status(200).send({ ok: true, data: url });
   }
 );
