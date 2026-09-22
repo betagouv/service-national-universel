@@ -213,6 +213,10 @@ const router = express.Router();
 router.post(
   "/team/:action(search|export)",
   authMiddleware(["referent"]),
+  // `ignorePolicy` est volontaire : sur une route de recherche il n'y a pas de document à soumettre
+  // à la policy, et l'évaluer sans contexte refuserait en fail-closed les responsables et superviseurs
+  // (leur seule permission REFERENT est `USER_SAME_STRUCTURE_FULL`, qui porte une policy). Le
+  // cloisonnement est assuré plus bas, par le périmètre poussé dans la requête Elasticsearch.
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.REFERENT, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
@@ -243,6 +247,17 @@ router.post(
         user.role === ROLES.REFERENT_DEPARTMENT ? { terms: { "region.keyword": (user.department as string[]).map((depart) => department2region[depart]) } } : null,
         user.role === ROLES.REFERENT_REGION ? { terms: { "region.keyword": [user.region] } } : null,
       ].filter(Boolean);
+
+      // Les deux bornes ci-dessus ne couvrent que les référents départementaux et régionaux.
+      // Tous les autres rôles admis par `canSearchInElasticSearch` (responsable, superviseur, chef
+      // de centre, administrateur CLE, référent de classe) interrogeaient l'index sans aucune borne :
+      // l'onglet Équipe leur restituait l'annuaire national des référents. L'administrateur, lui,
+      // ne reçoit aucune clause : `buildReferentContext` n'en produit pas pour ce rôle.
+      if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+        const { referentContextFilters, referentContextError } = await buildReferentContext(user);
+        if (referentContextError) return res.status(referentContextError.status).send(referentContextError.body);
+        contextFilters.push(...(referentContextFilters || []));
+      }
 
       if (query.tab) {
         if (query.tab === "region") {
