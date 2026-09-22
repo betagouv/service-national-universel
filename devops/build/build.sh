@@ -28,13 +28,11 @@ fi
 
 front=0
 back=0
-use_packages=0
 use_patches=0
 copy_tsconfig=0
 
 if [[ $application == "api" || $application == "apiv2" ]]; then
     back=1;
-    use_packages=1;
     use_patches=1;
 fi
 if [[ $application == "app" || $application == "admin" ]]; then
@@ -47,6 +45,8 @@ fi
 if [[ $application == "snupport-app" ]]; then
     front=1;
 fi
+
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
 
 cd "$(dirname $0)/../.."
 
@@ -79,10 +79,7 @@ if (( $front )); then
 fi
 
 if (( $back )); then
-    if (( $use_packages )); then
-        mkdir -p $destination/packages/lib/
-        mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
-    fi
+    copy_workspace_packages $destination
     mv out/node_modules $destination/
 fi
 

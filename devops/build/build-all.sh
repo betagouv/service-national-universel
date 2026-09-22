@@ -15,6 +15,8 @@ if [[ $destination == "" ]]; then
     exit 1
 fi
 
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+
 cd "$(dirname $0)/../.."
 
 turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
@@ -38,8 +40,7 @@ mv out/admin/build $destination/admin
 mv out/app/build $destination/app
 
 # back
-mkdir -p $destination/packages/lib/
-mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
+copy_workspace_packages $destination
 mv out/node_modules $destination/
 
 # api
