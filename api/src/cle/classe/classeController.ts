@@ -24,14 +24,8 @@ import { accessControlMiddleware } from "../../middlewares/accessControlMiddlewa
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { isEtablissementInUserScope } from "../etablissement/etablissementScope";
-
-/**
- * Champs des référents de classe exposés au front (création de classe, exports).
- *
- * Projection explicite : un document référent brut contient `invitationToken`,
- * `forgotPasswordResetToken` et `token2FA`, c'est-à-dire de quoi prendre le contrôle du compte.
- */
-const REFERENT_CLASSE_PUBLIC_FIELDS = "_id firstName lastName email phone role status";
+import { isClasseInUserScope } from "./classeScope";
+import { REFERENT_CLE_PUBLIC_FIELDS } from "../referentProjection";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -79,7 +73,7 @@ router.post("/export", async (req: UserRequest, res: Response) => {
       })
       .populate({
         path: "referents",
-        select: REFERENT_CLASSE_PUBLIC_FIELDS,
+        select: REFERENT_CLE_PUBLIC_FIELDS,
       })
       .lean();
 
@@ -131,8 +125,10 @@ router.get(
       const { validatedParams, validatedQuery } = req;
 
       const data = await getClasseById(validatedParams.id, validatedQuery?.withDetails);
+      if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      return res.status(200).json({ ok: true, data: data?.toJSON() });
+      return res.status(200).json({ ok: true, data: data.toJSON() });
     } catch (error) {
       capture(error);
       if (error.message === "Classe not found") {
@@ -188,7 +184,7 @@ router.get("/from-etablissement/:id", async (req: UserRequest, res) => {
     const findReferentsById = async (referentClasseIds) => {
       const uniqueReferentIds = [...new Set(referentClasseIds)];
       const referentsPromises = uniqueReferentIds.map((referentId) => {
-        return ReferentModel.findById(referentId).select(REFERENT_CLASSE_PUBLIC_FIELDS).lean();
+        return ReferentModel.findById(referentId).select(REFERENT_CLE_PUBLIC_FIELDS).lean();
       });
       return Promise.all(referentsPromises);
     };
@@ -218,8 +214,9 @@ router.get(
 
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      let classePatches = await patches.get(req, ClasseModel);
+      let classePatches = await patches.get(req, ClasseModel, classe);
       if (!classePatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       const pathsToIgnore = ["/seatsTaken", "/cohortId", "/uniqueKey", "/uniqueId", "/comments", "/trimester", "/metadata", "/id", "/updatedAt", "/referents"];

@@ -14,6 +14,7 @@ import patches from "../../controllers/patches";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { isClasseInUserScope } from "../classe/classeScope";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -86,6 +87,7 @@ router.get(
 
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const youngs = await YoungModel.find({ classeId: classe._id });
 
@@ -145,6 +147,7 @@ router.get(
 
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       let youngPatches = await patches.getOldStudentPatches({ classeId: id, user: req.user });
 
