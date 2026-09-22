@@ -11,8 +11,10 @@ export class ClasseDepartementGuard implements CanActivate {
         const request = context.switchToHttp().getRequest();
 
         request.classe = await this.classeGuardService.findClasse(request);
-        const utilisateurDepartement = request.user.departement;
-        const hasAccess = request.classe.departement === utilisateurDepartement;
+        // `user.departement` est un tableau (`department: [String]`) : comparer par égalité
+        // stricte avec la chaîne `classe.departement` renvoyait toujours faux.
+        const utilisateurDepartement: string[] = request.user.departement ?? [];
+        const hasAccess = utilisateurDepartement.includes(request.classe.departement);
         if (!hasAccess) {
             this.logger.log(
                 `User ${request.user?.id} tried to access classe ${request.classe?.id} but is not in the same department, user department is ${utilisateurDepartement} and classe department is ${request.classe.departement}`,

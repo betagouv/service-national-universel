@@ -3,7 +3,7 @@ import { Body, Controller, Logger, Post, UseGuards } from "@nestjs/common";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
 import { IsNotEmpty, IsString } from "class-validator";
 import { ImporterEtCreerListeDiffusion } from "../../core/useCase/ImporterEtCreerListeDiffusion";
-import { BrevoIpGuard } from "../guard/BrevoIpGuard";
+import { BrevoWebhookGuard } from "../guard/BrevoWebhook.guard";
 
 class ImporterContactsEtCreerListeDiffusionDto {
     @IsString()
@@ -35,7 +35,7 @@ export class PlanMarketingController {
     }
 
     @Post("import/webhook")
-    @UseGuards(BrevoIpGuard)
+    @UseGuards(BrevoWebhookGuard)
     async webhook(@Body("proc_success") processId: string) {
         this.logger.log(`Webhook received from Brevo for processId: ${processId}`);
         await this.planMarketingActionSelectorService.selectAction(Number(processId));

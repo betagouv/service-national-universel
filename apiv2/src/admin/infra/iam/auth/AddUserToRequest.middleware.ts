@@ -1,12 +1,26 @@
 import { NextFunction, Response } from "express";
 import { ClsService } from "nestjs-cls";
 import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
+import { ReferentStatus } from "snu-lib";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
-import { AuthProvider } from "./Auth.provider";
+import { AuthProvider, AuthTokenPayload } from "./Auth.provider";
 import { PermissionService } from "@auth/core/Permission.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { ReferentMapper } from "../repository/mongo/Referent.mapper";
+
+/**
+ * Version de signature des JWT de session émis par la v1.
+ * Doit rester alignée sur `JWT_SIGNIN_VERSION` (api/src/jwt-options.js) : la faire évoluer
+ * côté v1 invalide toutes les sessions, y compris ici.
+ */
+const JWT_SIGNIN_VERSION = "0";
+
+const memeInstant = (gauche?: Date | string | null, droite?: Date | string | null): boolean => {
+    const a = gauche ? new Date(gauche).getTime() : undefined;
+    const b = droite ? new Date(droite).getTime() : undefined;
+    return a === b;
+};
 
 @Injectable()
 export class AddUserToRequestMiddleware implements NestMiddleware {
@@ -23,9 +37,15 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             throw new UnauthorizedException();
         }
 
-        const userId = await this.authProvider.parseToken(token);
-        const user = await this.referentGateway.findById(userId);
+        const payload = await this.authProvider.parseToken(token);
+        const user = await this.referentGateway.findById(payload.id);
         if (!user) {
+            throw new UnauthorizedException();
+        }
+        // Signature et expiration ne suffisent pas : un jeton capturé restait sinon valide sur
+        // /v2 après un logout, un changement de mot de passe ou la désactivation du compte,
+        // alors que la passport v1 (api/src/passport.ts) le rejette.
+        if (!this.estSessionValide(payload, user)) {
             throw new UnauthorizedException();
         }
         const acl = await this.permissionService.getAcl(ReferentMapper.toEntity(user as ReferentModel));
@@ -43,5 +63,18 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             acl,
         });
         next();
+    }
+
+    private estSessionValide(payload: AuthTokenPayload, user: ReferentModel): boolean {
+        if (payload.__v !== JWT_SIGNIN_VERSION) {
+            return false;
+        }
+        if (user.deletedAt || user.status === ReferentStatus.INACTIVE) {
+            return false;
+        }
+        return (
+            memeInstant(payload.lastLogoutAt, user.lastLogoutAt) &&
+            memeInstant(payload.passwordChangedAt, user.passwordChangedAt)
+        );
     }
 }

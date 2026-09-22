@@ -14,9 +14,13 @@ import { FeatureFlagService } from "./core/featureFlag/FeatureFlag.service";
 import { featureFlagMongoProviders } from "./infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagGateway } from "./core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "./infra/featureFlag/FeatureFlagMongo.repository";
+import { FileAccessService } from "./infra/FileAccess.service";
+import { TaskModule } from "@task/Task.module";
+import { TaskGateway } from "@task/core/Task.gateway";
+import { TaskRepository } from "@task/infra/TaskMongo.repository";
 @Global()
 @Module({
-    imports: [DatabaseModule, ConfigModule],
+    imports: [DatabaseModule, ConfigModule, TaskModule],
     providers: [
         AllExceptionsFilter,
         Logger,
@@ -40,6 +44,12 @@ import { FeatureFlagMongoRepository } from "./infra/featureFlag/FeatureFlagMongo
         },
         FeatureFlagService,
         ...featureFlagMongoProviders,
+        // Rattachement d'une clé S3 à la tâche qui l'a produite (voir FileAccessService).
+        {
+            provide: TaskGateway,
+            useExisting: TaskRepository,
+        },
+        FileAccessService,
     ],
     controllers: [FileController],
     exports: [AllExceptionsFilter, ClockGateway, CryptoGateway],

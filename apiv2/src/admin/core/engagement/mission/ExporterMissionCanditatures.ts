@@ -74,7 +74,10 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
 
         this.logger.log(`missions count: ${missions.hits.length}`, ExporterMissionCanditatures.name);
 
-        const excelData = await this.generateRapport(missions.hits, fields, filters, auteur);
+        // Le périmètre est rejoué ici, côté worker : les filtres du client ne peuvent pas l'élargir.
+        const perimetreCandidatures = this.exportMissionService.perimetreCandidatures(auteur, referent);
+
+        const excelData = await this.generateRapport(missions.hits, fields, filters, auteur, perimetreCandidatures);
 
         this.logger.log(`Generate excel`, ExporterMissionCanditatures.name);
         // création du fichier excel de rapport
@@ -115,6 +118,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         selectedFields: string[],
         filters: Record<string, string | string[]>,
         auteur: ExportMissionCandidaturesTaskParameters["auteur"],
+        perimetreCandidatures: { youngDepartment?: string[] } = {},
     ) {
         if (missions.length === 0) {
             return {
@@ -142,7 +146,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
             ];
 
             const candidatures = await this.searchApplicationGateway.searchApplication({
-                filters: { missionId: missionIds, status: filters.applicationStatus },
+                filters: { missionId: missionIds, status: filters.applicationStatus, ...perimetreCandidatures },
                 sourceFields: missionCandidatureExportFields.find((f) => f.id === "application")?.fields,
                 full: true,
             });

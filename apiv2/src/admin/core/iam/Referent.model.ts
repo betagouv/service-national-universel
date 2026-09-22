@@ -1,5 +1,5 @@
 import { Role, SousRole } from "@shared/core/Role";
-import { InvitationType } from "snu-lib";
+import { InvitationType, ReferentStatus } from "snu-lib";
 
 export interface ReferentModel {
     id: string;
@@ -27,6 +27,7 @@ export interface ReferentModel {
     acceptCGU?: boolean;
     lastLogoutAt?: Date;
     passwordChangedAt?: Date; // required by jwt_token v1
+    status?: ReferentStatus; // un compte INACTIVE ne doit plus ouvrir de session
 
     // used by usecase or frontend ?
     // lastLoginAt?: Date;

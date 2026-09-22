@@ -7,6 +7,7 @@ import { TaskName, TaskStatus } from "snu-lib";
 import { PlanMarketingCreateTaskModel } from "../PlanMarketing.model";
 import { PlanMarketingGateway } from "../gateway/PlanMarketing.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
+import { PlanMarketingWebhookService } from "../service/PlanMarketingWebhook.service";
 
 @Injectable()
 export class ImporterEtCreerListeDiffusion implements UseCase<void> {
@@ -17,6 +18,7 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
         @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
         @Inject(FileGateway) private readonly fileGateway: FileGateway,
         private readonly config: ConfigService,
+        private readonly planMarketingWebhookService: PlanMarketingWebhookService,
     ) {}
 
     /**
@@ -39,7 +41,7 @@ export class ImporterEtCreerListeDiffusion implements UseCase<void> {
             nomListe,
             contacts,
             this.config.get("marketing.folderId")!,
-            `${this.config.get("urls.apiv2")}/plan-marketing/import/webhook`,
+            this.planMarketingWebhookService.construireUrlWebhook(),
         );
 
         const planMarketingTaskModel: PlanMarketingCreateTaskModel = {
