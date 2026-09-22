@@ -17,6 +17,7 @@
 - Aucune donnée n'est supprimée ni modifiée, hors le champ `status` des comptes référents CLE (tâche 6).
 - Les constantes `ROLES.ADMINISTRATEUR_CLE` et `ROLES.REFERENT_CLASSE` **restent définies** dans `packages/lib/src/roles.ts` : 27 fichiers de `admin`/`app` et 26 fichiers de `api` hors `api/src/cle` les importent.
 - Les routes de consultation listées au §4.1 de la spec **ne sont pas touchées** par ce plan.
+- **Un 404 ne suffit pas à prouver qu'une route est démontée.** Plusieurs gestionnaires CLE renvoient eux-mêmes 404 quand la ressource est introuvable, ce qui est indiscernable du 404 d'Express sur une route absente — un test qui se contente de `expect(status).toBe(404)` reste vert même si la suppression n'a pas eu lieu. Toute assertion de suppression passe donc par le helper `expectRouteRemoved(method, path)` du fichier de test partagé, qui exige en plus l'absence du corps JSON de l'API (`{ ok: false, code: … }`). Les gardes-fous de consultation, eux, interrogent avec un identifiant **invalide** : 400 sur une route vivante, 404 si elle a disparu.
 - **Node 20 obligatoire** (`.nvmrc` : 20.17, `engines` : `^20.17`). Préfixer chaque commande par `export PATH="/opt/homebrew/opt/node@20/bin:$PATH"` : le Node par défaut de la machine est en v26 et ne correspond pas à ce que le projet attend.
 - **Avant la première commande de test**, construire `snu-lib` : `cd packages/lib && npm run build`. Le worktree hérite d'un `dist` périmé, et l'API ne compile pas sans ça.
 - Tests api : `cd api && npx jest <chemin> --silent --testTimeout=60000 --maxWorkers=1`.
@@ -86,9 +87,8 @@ describe("Routes CLE supprimées — chaîne d'inscription référent (H19, H20)
     ["post", "/cle/referent-signup/"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 });
 ```
@@ -205,9 +205,8 @@ describe("Routes CLE supprimées — administration des classes (H8, H10-H13)", 
     ["get", "/cle/classe/5f1c5b0a0000000000000000/notifyRef"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 });
 
@@ -320,9 +319,8 @@ describe("Routes CLE supprimées — administration des établissements (H15, H1
     ["delete", "/cle/etablissement/5f1c5b0a0000000000000000/referents"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 
   // Identifiant invalide, même raison qu'en tâche 2 : 400 sur une route vivante, 404 si supprimée.
@@ -408,9 +406,8 @@ describe("Routes CLE supprimées — invitations et mises à jour de référents
     ["put", "/cle/classes/update-referents-by-csv"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 
   it("POST /cle/referent/getMany ne répond pas 404", async () => {
@@ -511,9 +508,8 @@ describe("Routes CLE supprimées — appel à projet", () => {
     ["post", "/cle/appel-a-projet/real"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 });
 ```
