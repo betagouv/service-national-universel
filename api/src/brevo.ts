@@ -61,8 +61,7 @@ const api = async (path, options: any = {}, force?: boolean) => {
 
     if (!config.SENDINBLUEKEY) {
       captureMessage("NO SENDINBLUE KEY");
-      logger.debug(options);
-      logger.debug("Mail was not sent.");
+      logger.debug(`Mail was not sent (${options.method || "GET"} ${path}).`);
       return;
     }
 
@@ -83,6 +82,29 @@ const api = async (path, options: any = {}, force?: boolean) => {
   }
 };
 
+// Le corps transmis à Brevo porte le contenu des messages : identité du jeune et de ses représentants
+// légaux, liens à jeton, textes libres. `redactSentryEvent` (src/sentry.js) masque les secrets
+// reconnaissables à leur clé, mais pas une identité ni un code en clair au milieu d'un texte : on ne
+// remonte donc jamais le corps, seulement de quoi diagnostiquer l'échec d'envoi.
+type BrevoResponse = { code?: string; message?: string };
+type MailBody = { templateId?: number; to?: unknown[]; cc?: unknown[]; bcc?: unknown[]; attachment?: unknown[] };
+
+function mailDiagnostic(body: MailBody = {}, mail?: BrevoResponse) {
+  return {
+    templateId: body.templateId,
+    recipientCount: body.to?.length ?? 0,
+    ccCount: body.cc?.length ?? 0,
+    bccCount: body.bcc?.length ?? 0,
+    attachmentCount: body.attachment?.length ?? 0,
+    brevoCode: mail?.code,
+    brevoMessage: mail?.message,
+  };
+}
+
+function smsDiagnostic(body: { tag?: string } = {}, sms?: BrevoResponse) {
+  return { tag: body.tag, brevoCode: sms?.code, brevoMessage: sms?.message };
+}
+
 // https://developers.sendinblue.com/reference/sendtransacsms
 export async function sendSMS(phoneNumber, content, tag) {
   try {
@@ -101,9 +123,10 @@ export async function sendSMS(phoneNumber, content, tag) {
 
     const sms = await api("/transactionalSMS/sms", { method: "POST", body: JSON.stringify(body) });
     if (!sms || sms?.code) {
-      captureMessage("Error sending an SMS", { extra: { sms, body } });
+      captureMessage("Error sending an SMS", { extra: smsDiagnostic(body, sms) });
     }
-    if (config.ENVIRONMENT !== "production") {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, sms });
     }
   } catch (e) {
@@ -135,9 +158,10 @@ export async function sendEmail(to: Email[], subject: string, htmlContent, { par
     if (attachment) body.attachment = attachment;
     const mail = await api("/smtp/email", { method: "POST", body: JSON.stringify(body) });
     if (!mail || mail?.code) {
-      captureMessage("Error sending an email", { extra: { mail, body } });
+      captureMessage("Error sending an email", { extra: mailDiagnostic(body, mail) });
     }
-    if (config.ENVIRONMENT !== "production") {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
   } catch (e) {
@@ -275,15 +299,16 @@ export async function sendTemplate(id: string, { params, emailTo, cc, bcc, attac
     // * To delete once we put the email of the parent in the template
     const isParentTemplate = Object.values(SENDINBLUE_TEMPLATES.parent).some((value) => value == body?.templateId);
     if (mail?.message == "email is missing in to" && isParentTemplate) {
-      captureMessage("Parent sans email", { extra: { mail, body } });
+      captureMessage("Parent sans email", { extra: mailDiagnostic(body, mail) });
       return;
     }
 
     if (!mail || mail?.code) {
-      captureMessage("Error sending a template", { extra: { mail, body } });
+      captureMessage("Error sending a template", { extra: mailDiagnostic(body, mail) });
       return;
     }
-    if (config.ENVIRONMENT !== "production" || options.force) {
+    // le contenu complet reste visible en local uniquement, jamais sur un environnement déployé
+    if (config.ENVIRONMENT === "development") {
       logger.debug("", { body, mail });
     }
     return mail;
