@@ -344,14 +344,52 @@ describe("Application", () => {
       // Failed update (not allowed)
       res = await request(await getAppHelperWithAcl(young, "young"))
         .put("/application")
-        .send({ priority: "1", status: "DONE", _id: secondApplication._id.toString() });
+        .send({ priority: "1", status: APPLICATION_STATUS.ABANDON, _id: secondApplication._id.toString() });
       expect(res.status).toBe(403);
 
       // Failed update (wrong young id)
       res = await request(await getAppHelperWithAcl(young, "young"))
         .put("/application")
-        .send({ priority: "1", status: "DONE", _id: application._id.toString(), youngId: secondYoung._id });
+        .send({ priority: "1", status: APPLICATION_STATUS.ABANDON, _id: application._id.toString(), youngId: secondYoung._id });
       expect(res.status).toBe(400);
+    });
+
+    // H2 : `status` était une chaîne libre pour le volontaire, qui pouvait valider sa propre phase 2.
+    it("ne devrait pas laisser un volontaire passer sa candidature en DONE", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id, missionDuration: "100" });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.DONE });
+      expect(res.status).toBe(400);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
+    });
+
+    it("ne devrait pas laisser un volontaire gonfler la durée de sa mission", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id, status: APPLICATION_STATUS.DONE });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), missionDuration: "1000" });
+      expect(res.status).toBe(400);
+    });
+
+    it("devrait laisser un volontaire abandonner sa candidature", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id, missionId: mission._id });
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.ABANDON, missionDuration: "0" });
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(APPLICATION_STATUS.ABANDON);
     });
 
     it("should update young phase2NumberHoursEstimated and phase2NumberHoursDone", async () => {
