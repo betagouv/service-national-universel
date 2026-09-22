@@ -16,6 +16,7 @@ const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
 const { canAccessTicket } = require("../utils/ticketScope");
 const { inspectAttachment } = require("../utils/attachments");
+const { isKnownThreadParticipant } = require("../utils/ticketParticipants");
 
 router.use(agentGuard);
 
@@ -46,6 +47,10 @@ router.post(
     let ticket = await TicketModel.findById(ticketId);
     if (!ticket) return res.status(400).send({ ok: false, code: ERRORS.WRONG_REQUEST });
     if (!canAccessTicket(user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Avec messageHistory="all", la réponse emporte tout l'historique du ticket et ses pièces
+    // jointes déchiffrées : le destinataire doit appartenir au fil, pas être une adresse
+    // arbitraire passée en paramètre.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     const messageCount = await MessageModel.find({ ticketId: ticket._id }).countDocuments();
     if (ticket.messageCount === 1) {
@@ -224,6 +229,9 @@ router.post(
     }
 
     const { message: messageHtml, copyRecipient, dest, messageHistory } = parsedBody;
+    // Même règle que POST /message : `dest` sort d'un JSON non validé par Joi, et la réponse
+    // peut emporter tout l'historique et les pièces jointes déchiffrées du ticket.
+    if (dest && !isKnownThreadParticipant(ticket, dest)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     const files = Object.keys(req.files || {}).map((e) => req.files[e]);
     // If multiple file with same names are provided, file is an array. We just take the latest.
 
