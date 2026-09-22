@@ -1,4 +1,4 @@
-// AGENT/ADMIN/DG are central support staff without geographic scoping, matching the
+// AGENT/DG are central support staff without geographic scoping, matching the
 // existing filter logic in ticket.ts's buildContextFilter. REFERENT_DEPARTMENT and
 // REFERENT_REGION are restricted to their own department(s)/region, and fail closed
 // (deny) when the ticket carries no contact department/region to compare against.

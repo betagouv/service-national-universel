@@ -59,7 +59,7 @@ const Schema = new mongoose.Schema({
   role: {
     type: String,
     required: true,
-    enum: ["AGENT", "ADMIN", "REFERENT_DEPARTMENT", "REFERENT_REGION", "DG"],
+    enum: ["AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION", "DG"],
     documentation: {
       description: "Rôle de l'agent",
     },

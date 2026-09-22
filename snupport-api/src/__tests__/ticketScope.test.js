@@ -1,8 +1,8 @@
 const { canAccessTicket, scopeTicketQuery } = require("../utils/ticketScope");
 
 describe("canAccessTicket", () => {
-  describe("AGENT, ADMIN and DG roles", () => {
-    it.each(["AGENT", "ADMIN", "DG"])("allows %s to access a ticket outside any department or region", (role) => {
+  describe("AGENT and DG roles", () => {
+    it.each(["AGENT", "DG"])("allows %s to access a ticket outside any department or region", (role) => {
       const user = { role };
       const ticket = { contactDepartment: "Paris", contactRegion: "Ile-de-France" };
       expect(canAccessTicket(user, ticket)).toBe(true);
@@ -51,8 +51,8 @@ describe("canAccessTicket", () => {
 });
 
 describe("scopeTicketQuery", () => {
-  describe("AGENT, ADMIN and DG roles", () => {
-    it.each(["AGENT", "ADMIN", "DG"])("leaves the base query untouched for %s", (role) => {
+  describe("AGENT and DG roles", () => {
+    it.each(["AGENT", "DG"])("leaves the base query untouched for %s", (role) => {
       const user = { role };
       expect(scopeTicketQuery(user, { contactId: "abc" })).toEqual({ contactId: "abc" });
     });
