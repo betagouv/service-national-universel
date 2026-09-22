@@ -65,6 +65,8 @@
     "eslint-plugin-prettier": "^4.2.1",
     "jest": "^29.7.0",
     "prettier": "^2.8.8",
+    "supertest": "6.3.4",
+    "ts-jest": "^29.2.5",
     "tsx": "^4.7.1",
     "typescript": "^5.4.3",
     "typescript-eslint": "^7.4.0",
@@ -73,6 +75,6 @@
   "engines": {
     "node": "^20.17",
     "npm": "^10.8",
-    "yarn": "🍎 This project uses NPM, please do not use YARN. 🍎"
+    "yarn": "\ud83c\udf4e This project uses NPM, please do not use YARN. \ud83c\udf4e"
   }
 }

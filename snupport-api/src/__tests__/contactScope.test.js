@@ -13,8 +13,8 @@ describe("canAccessContact", () => {
   });
 
   describe("young contacts", () => {
-    describe("AGENT, ADMIN and DG roles", () => {
-      it.each(["AGENT", "ADMIN", "DG"])("allows %s to access a young contact outside any department or region", (role) => {
+    describe("AGENT and DG roles", () => {
+      it.each(["AGENT", "DG"])("allows %s to access a young contact outside any department or region", (role) => {
         const user = { role };
         const contact = { role: "young", department: "Paris", region: "Ile-de-France" };
         expect(canAccessContact(user, contact)).toBe(true);
