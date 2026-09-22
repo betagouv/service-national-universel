@@ -38,6 +38,7 @@ import {
 } from "snu-lib";
 
 import { serializeYoung, serializeReferent } from "./utils/serializer";
+import { consumeLoginAttempt, resetLoginAttempts, consume2FAAttempt, consumeEmailValidationAttempt, isLoginLocked } from "./services/auth/attemptCounters";
 import { validateFirstName } from "./utils/validator";
 import { getFilteredSessions } from "./utils/cohort";
 
@@ -438,24 +439,30 @@ class Auth {
       const now = new Date();
       const user = await this.model.findOne({ email, deletedAt: { $exists: false } });
       if (!user || user.status === "DELETED") return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
-      if (user.loginAttempts > 12) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS" });
-      if (user.nextLoginAttemptIn > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+      // Pré-filtrage : un compte déjà verrouillé est refusé sans consommer de
+      // tentative, pour qu'un attaquant qui persiste ne repousse pas lui-même
+      // indéfiniment la date de déblocage du compte visé.
+      if (isLoginLocked(user, now)) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+
+      // La tentative est consommée AVANT bcrypt : sinon N requêtes concurrentes
+      // franchissent toutes le contrôle de plafond pendant le hachage (M4).
+      const attempt = await consumeLoginAttempt(this.model, user._id, now);
+      if (attempt.blocked) {
+        return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
 
       const match = await user.comparePassword(password);
 
       if (!match) {
-        const loginAttempts = (user.loginAttempts || 0) + 1;
-
-        let date = now;
-        if (loginAttempts > 5) {
-          date = new Date(now.getTime() + 60 * 1000);
-        }
-
-        user.set({ loginAttempts, nextLoginAttemptIn: date });
-        await user.save();
-        if (date > now) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
+        if (attempt.delayed) return res.status(401).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
         return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       }
+
+      // Mot de passe bon : le compteur est purgé tout de suite, y compris quand
+      // le parcours se poursuit en 2FA, pour qu'un utilisateur qui relance
+      // plusieurs fois sa connexion ne se verrouille pas lui-même.
+      await resetLoginAttempts(this.model, user._id);
+      user.set({ loginAttempts: 0, nextLoginAttemptIn: null });
 
       if (user?.status === ReferentStatus.INACTIVE) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
@@ -508,7 +515,6 @@ class Auth {
         });
       }
 
-      user.set({ loginAttempts: 0 });
       user.set({ lastLoginAt: Date.now(), lastActivityAt: Date.now() });
       await user.save();
 
@@ -549,17 +555,13 @@ class Auth {
         .validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { email, token_2fa, rememberMe } = value;
-      const user = await this.model.findOne({
-        email,
-        attempts2FA: { $lt: 3 },
-        token2FAExpires: { $gt: Date.now() },
-      });
+      // L'essai est consommé dans la même opération que le contrôle de plafond :
+      // au-delà de 3, plus aucune requête ne matche, même en concurrence (M5).
+      const user = await consume2FAAttempt(this.model, email);
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.status === "DELETED" || (user as any).anonymized) return res.status(401).send({ ok: false, code: ERRORS.EMAIL_OR_PASSWORD_INVALID });
       if (user.token2FA !== token_2fa) {
-        user.set({ attempts2FA: (user.attempts2FA || 0) + 1 });
-        await user.save();
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
@@ -660,14 +662,17 @@ class Auth {
 
       if (req.user.email === email) return res.status(400).send({ ok: false, code: ERRORS.EMAIL_UNCHANGED });
 
+      // Le mot de passe est vérifié AVANT toute recherche sur l'email visé :
+      // sinon la route sert d'oracle d'existence de compte à tout jeune
+      // authentifié, sans qu'il ait à connaître son propre mot de passe (M6).
+      const match = await req.user.comparePassword(password);
+      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
+
       // is new email already used?
       const existingUser = await this.model.findOne({
         email,
       });
       if (existingUser) return res.status(409).send({ ok: false, code: ERRORS.EMAIL_ALREADY_USED });
-
-      const match = await req.user.comparePassword(password);
-      if (!match) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
 
       const currentUser = await this.model.findOne({
         email: req.user.email,
@@ -699,17 +704,11 @@ class Auth {
       const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { token_email_validation } = value;
-      const user = await this.model.findOne({
-        email: req.user.email,
-        attemptsEmailValidation: { $lt: 3 },
-        tokenEmailValidationExpires: { $gt: Date.now() },
-      });
+      const user = await consumeEmailValidationAttempt(this.model, { email: req.user.email });
 
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (!user.newEmail) return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       if (user.tokenEmailValidation !== token_email_validation) {
-        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
-        await user.save();
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
@@ -740,16 +739,9 @@ class Auth {
       const { error, value } = Joi.object({ token_email_validation: Joi.string().required() }).unknown().validate(req.body);
       if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       const { token_email_validation } = value;
-      const user = await this.model.findOne({
-        email: req.user.email,
-        attemptsEmailValidation: { $lt: 3 },
-        tokenEmailValidationExpires: { $gt: Date.now() },
-        emailVerified: "false",
-      });
+      const user = await consumeEmailValidationAttempt(this.model, { email: req.user.email, emailVerified: "false" });
       if (!user) return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       if (user.tokenEmailValidation !== token_email_validation) {
-        user.set({ attemptsEmailValidation: (user.attemptsEmailValidation || 0) + 1 });
-        await user.save();
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
       }
 
@@ -931,25 +923,21 @@ class Auth {
       const now = new Date();
       const user = await this.model.findById(req.user._id);
 
-      if (user.loginAttempts > 12) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS" });
-      if (user.nextLoginAttemptIn > now) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+      // Même défaut que signin : le compteur doit être consommé atomiquement,
+      // et avant la comparaison bcrypt.
+      if (isLoginLocked(user, now)) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: user.nextLoginAttemptIn } });
+
+      const attempt = await consumeLoginAttempt(this.model, user._id, now);
+      if (attempt.blocked) {
+        return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
+      }
 
       const match = await req.user.comparePassword(password);
       if (!match) {
-        const loginAttempts = (user.loginAttempts || 0) + 1;
-
-        let date = now;
-        if (loginAttempts > 5) {
-          date = new Date(now.getTime() + 60 * 1000);
-        }
-
-        user.set({ loginAttempts, nextLoginAttemptIn: date });
-        await user.save();
-        if (date > now) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: date } });
+        if (attempt.delayed) return res.status(400).send({ ok: false, code: "TOO_MANY_REQUESTS", data: { nextLoginAttemptIn: attempt.nextLoginAttemptIn } });
         return res.status(400).send({ ok: false, code: ERRORS.PASSWORD_INVALID });
       }
-      user.set({ loginAttempts: 0 });
-      await user.save();
+      await resetLoginAttempts(this.model, user._id);
 
       return res.status(200).send({ ok: true });
     } catch (error) {

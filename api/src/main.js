@@ -52,6 +52,10 @@ async function runAPI() {
   initQueues();
 
   const app = express();
+  // Requis pour que req.ip désigne le client réel et non le reverse proxy :
+  // sans cela, le rate limiting des routes d'auth compterait toutes les
+  // requêtes sur une seule et même IP (ou se contournerait via X-Forwarded-For).
+  app.set("trust proxy", config.TRUST_PROXY_HOPS);
   app.use(helmet());
 
   if (["production", "staging", "ci", "custom"].includes(config.ENVIRONMENT)) {

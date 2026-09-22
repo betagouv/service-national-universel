@@ -16,6 +16,7 @@ import { logger } from "../../logger";
 import { capture, captureMessage } from "../../sentry";
 import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
 import AuthObject from "../../auth";
+import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
 import {
   uploadFile,
   validatePassword,
@@ -89,18 +90,44 @@ import { permissionAccessControlMiddleware } from "../../middlewares/permissionA
 const router = express.Router();
 const YoungAuth = new AuthObject(YoungModel);
 
-router.post("/signup", (req, res) => YoungAuth.signUp(req, res));
-router.post("/signup/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.changeEmailDuringSignUp(req, res));
-router.post("/signin", (req, res) => YoungAuth.signin(req, res));
-router.post("/signin-2fa", (req, res) => YoungAuth.signin2FA(req, res));
-router.post("/email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestEmailUpdate(req, res));
+// Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth,
+// que les compteurs par compte ne couvrent pas (énumération, password spraying,
+// abus des routes qui envoient un email ou réécrivent un token).
+const youngSigninLimiter = signinRateLimiter();
+
+// M3 de l'audit du 21/09/2026 : l'inscription en ligne est fermée
+// (`/preinscription` redirige vers snu.gouv.fr/inscriptions-cloturees et plus
+// aucun appelant de cette route ne subsiste dans le dépôt). Tant qu'elle
+// répondait, elle restait un oracle d'énumération : le triplet prénom / nom /
+// date de naissance permettait de savoir anonymement si une personne est
+// inscrite. Un code d'erreur uniformisé n'y aurait rien changé — « compte
+// créé » contre « compte pas créé » reste discriminant sur une route
+// d'inscription publique. Même fermeture que POST /referent/signup.
+// À rouvrir explicitement — avec un rate limiter — quand les inscriptions
+// reprennent ; la porte de cohorte de signupVolontaire reste en place.
+router.post("/signup", (_req, res) => {
+  return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+});
+router.post("/signup/email", emailSendingRateLimiter("young-signup-email"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
+  YoungAuth.changeEmailDuringSignUp(req, res),
+);
+router.post("/signin", youngSigninLimiter, (req, res) => YoungAuth.signin(req, res));
+router.post("/signin-2fa", youngSigninLimiter, (req, res) => YoungAuth.signin2FA(req, res));
+router.post("/email", emailSendingRateLimiter("young-email-update"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
+  YoungAuth.requestEmailUpdate(req, res),
+);
 router.post("/email-validation/new-email", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmailUpdate(req, res));
 router.post("/email-validation", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.validateEmail(req, res));
-router.get("/email-validation/token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.requestNewEmailValidationToken(req, res));
+router.get(
+  "/email-validation/token",
+  emailSendingRateLimiter("young-email-validation-token"),
+  passport.authenticate("young", { session: false, failWithError: true }),
+  (req, res) => YoungAuth.requestNewEmailValidationToken(req, res),
+);
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
-router.post("/forgot_password", async (req: UserRequest, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
-router.post("/forgot_password_reset", async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
+router.post("/forgot_password", emailSendingRateLimiter("young-forgot-password"), async (req: UserRequest, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
+router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
 
