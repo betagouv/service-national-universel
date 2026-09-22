@@ -21,6 +21,7 @@ import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { addPermissionHelper } from "./helpers/permissions";
 import { getNewReferentFixture } from "./fixtures/referent";
+import { FIXTURE_PASSWORD } from "./fixtures/password";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
@@ -192,7 +193,7 @@ describe("Sécurité référent — audit 2026-09-21", () => {
   describe("C21 — PUT /referent/:id", () => {
     it("n'écrit pas le mot de passe d'un autre référent", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
-      const victime = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      const victime = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), password: FIXTURE_PASSWORD }));
       const hashAvant = (await ReferentModel.findById(victime._id).select("+password"))!.password;
       const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
 
@@ -351,7 +352,7 @@ describe("Sécurité référent — audit 2026-09-21", () => {
     });
 
     it("n'écrit pas le mot de passe d'un jeune", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ password: FIXTURE_PASSWORD } as any));
       const hashAvant = (await YoungModel.findById(young._id).select("+password"))!.password;
 
       await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
