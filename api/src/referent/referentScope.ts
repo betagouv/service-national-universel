@@ -1,6 +1,6 @@
-import { ROLES, UserDto, ReferentType, PERMISSION_RESOURCES, isAdmin, isResponsibleOrSupervisor, isWriteAuthorized, region2department } from "snu-lib";
+import { ROLES, UserDto, ReferentType, PERMISSION_RESOURCES, isAdmin, isResponsibleOrSupervisor, isWriteAuthorized, region2department, department2region } from "snu-lib";
 
-import { CohesionCenterModel, SessionPhase1Model, StructureModel } from "../models";
+import { ClasseModel, CohesionCenterModel, EtablissementModel, SessionPhase1Model, StructureModel } from "../models";
 
 type Geography = { region?: string | null; departments: string[] };
 
@@ -110,6 +110,71 @@ export async function isReferentInUserScope(user: UserDto, target: ReferentType)
       return departments.some((department) => (region2department[user.region!] || []).includes(department));
     }
     return departments.some((department) => ((user.department as string[]) || []).includes(department));
+  }
+
+  return false;
+}
+
+/** Deux périmètres géographiques se recouvrent s'ils partagent une région ou un département. */
+function geographiesOverlap(actor: Geography, target: Geography): boolean {
+  if (actor.region && target.region && actor.region === target.region) return true;
+  const actorDepartments = new Set([...actor.departments, ...(actor.region ? region2department[actor.region] || [] : [])]);
+  if (target.departments.some((department) => actorDepartments.has(department))) return true;
+  // La cible ne porte qu'une région, l'acteur qu'un département (ou l'inverse).
+  if (target.region && actor.departments.some((department) => department2region[department] === target.region)) return true;
+  return false;
+}
+
+/** Établissement de rattachement d'un acteur CLE : coordinateur/référent d'établissement, ou référent d'une de ses classes. */
+async function getActorEtablissement(user: UserDto) {
+  const direct = await EtablissementModel.findOne({ $or: [{ coordinateurIds: user._id }, { referentEtablissementIds: user._id }] });
+  if (direct) return direct;
+
+  const classe = await ClasseModel.findOne({ referentClasseIds: user._id });
+  if (!classe?.etablissementId) return null;
+  return EtablissementModel.findById(classe.etablissementId);
+}
+
+/**
+ * Périmètre de lecture d'un compte référent.
+ *
+ * `canViewReferent` (snu-lib) ne porte que la matrice des rôles : il autorise par exemple tout
+ * responsable à lire tout responsable de France. Ce contrôle-ci ajoute l'appartenance, en reprenant
+ * la règle métier de référence — celle de l'annuaire Elasticsearch (`buildReferentContext`) — pour
+ * que la fiche d'un référent ne soit jamais lisible en dehors de la liste où il apparaît.
+ *
+ * Il est volontairement distinct de `isReferentInUserScope` (écriture) : la matrice d'écriture
+ * n'ouvre qu'aux admins, responsables/superviseurs, référents dép./rég. et à soi-même, alors que la
+ * lecture couvre aussi la famille chef de centre et les rôles CLE.
+ */
+export async function isReferentReadableByUser(user: UserDto, target: ReferentType): Promise<boolean> {
+  if (isAdmin(user)) return true;
+  if (user._id?.toString() === target._id?.toString()) return true;
+
+  // Même périmètre qu'en écriture : structure (et réseau) pour les responsables, géographie pour les référents.
+  if (isResponsibleOrSupervisor(user) || [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
+    return isReferentInUserScope(user, target);
+  }
+
+  // Chef de centre, adjoint, référent sanitaire : le périmètre de leur centre.
+  if ([ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(user.role)) {
+    const [actorGeography, targetGeography] = await Promise.all([getReferentGeography(user as any), getReferentGeography(target)]);
+    return geographiesOverlap(actorGeography, targetGeography);
+  }
+
+  // Administrateur CLE, référent de classe : leur établissement, plus les référents départementaux de son département.
+  if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(user.role)) {
+    const etablissement = await getActorEtablissement(user);
+    if (!etablissement) return false;
+
+    const targetId = target._id?.toString();
+    const membresEtablissement = [...(etablissement.referentEtablissementIds || []), ...(etablissement.coordinateurIds || [])].map(String);
+    if (targetId && membresEtablissement.includes(targetId)) return true;
+
+    const classes = await ClasseModel.find({ etablissementId: etablissement._id }).select({ referentClasseIds: 1 });
+    if (targetId && classes.some((classe) => (classe.referentClasseIds || []).map(String).includes(targetId))) return true;
+
+    return target.role === ROLES.REFERENT_DEPARTMENT && !!etablissement.department && (target.department || []).includes(etablissement.department);
   }
 
   return false;
