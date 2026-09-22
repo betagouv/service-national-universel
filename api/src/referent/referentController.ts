@@ -136,7 +136,14 @@ import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
-import { canEditYoungInScope, canViewYoungFileInScope, isYoungInReferentGeography, isYoungInUserScope } from "../young/youngScope";
+import {
+  canEditYoungInScope,
+  canViewYoungFileInScope,
+  isYoungInReferentGeography,
+  isYoungInUserScope,
+  isYoungInStructureScope,
+  isYoungInMilitaryPreparationStructureScope,
+} from "../young/youngScope";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -1278,20 +1285,12 @@ router.get("/youngFile/:youngId/:key/:fileName", passport.authenticate("referent
       }
       case ROLES.SUPERVISOR:
       case ROLES.RESPONSIBLE: {
-        if (!req.user.structureId) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        const structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
-        if (!structures) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-        if (!structures.reduce((acc, curr) => acc || canViewYoungFile(req.user, young, curr), false))
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-        // ? Use better check link between structure and young ! + Check for tutorId as well ?
-        // const test = await new Promise().any(
-        //   structures.eachAsync(async (structure) => {
-        //     const applications = await ApplicationModel.find({ structureId: structure._id.toString(), youngId: youngId });
-        //     return applications.length > 0 ? true : false;
-        //   }),
-        // );
-        // if (!test) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        // `canViewYoungFile(acteur, jeune, saPropreStructure)` ne comparait que l'acteur à SA PROPRE
+        // structure (`actor.region === structure.region`, `actor.department === structure.department`) :
+        // le volontaire n'intervenait jamais, et deux `undefined` suffisaient à valider. Seul le
+        // rattachement réel fait foi (constat H65, audit 2026-09-21).
+        if (!req.user.structureId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        if (!(await isYoungInStructureScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         break;
       }
       case ROLES.ADMIN:
@@ -1347,10 +1346,13 @@ router.get(
       const { youngId, key, fileName } = value;
 
       const young = await YoungModel.findById(youngId);
-      // if they are not admin nor referent, it is not allowed to access this route unless they are from a military preparation structure
-      if (!canViewYoungMilitaryPreparationFile(req.user, young)) {
-        const structure = await StructureModel.findById(req.user.structureId);
-        if (!structure || structure?.isMilitaryPreparation !== "true") return res.status(400).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Hors admin / référent territorial, l'accès suppose une structure de préparation militaire ET
+      // une candidature du volontaire dans cette structure. Le repli ne testait que
+      // `isMilitaryPreparation` sur la structure de l'acteur (constat H66, audit 2026-09-21).
+      if (!canViewYoungMilitaryPreparationFile(req.user, young) && !(await isYoungInMilitaryPreparationStructureScope(req.user, young))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       const downloaded = await getFile(`app/young/${youngId}/military-preparation/${key}/${fileName}`);

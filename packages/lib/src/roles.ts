@@ -413,14 +413,23 @@ function canRefuseMilitaryPreparation(actor, young) {
   return canViewYoungMilitaryPreparationFile(actor, young);
 }
 
+/**
+ * Les branches `targetCenter` comparaient directement `actor.department` / `actor.region` aux champs
+ * du centre : deux `undefined` suffisaient à autoriser (tout compte dont `cleanReferentData` a retiré
+ * la géographie, appelé sans `targetCenter`). Elles exigent désormais une valeur des deux côtés.
+ *
+ * Ce prédicat reste une matrice géographique : il n'exprime aucun rattachement entre l'acteur et le
+ * volontaire. Pour un responsable / superviseur de structure, utiliser `isYoungInStructureScope`
+ * (api/src/young/youngScope.ts) — audit 2026-09-21, H65.
+ */
 function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
   // @ts-ignore
-  const isReferentCenterFromSameDepartmentTargetCenter = actor.department === targetCenter?.department;
+  const isReferentCenterFromSameDepartmentTargetCenter = !!targetCenter?.department && actor.department === targetCenter.department;
   // @ts-ignore
-  const isReferentCenterFromSameRegionTargetCenter = actor.region === targetCenter?.region;
+  const isReferentCenterFromSameRegionTargetCenter = !!targetCenter?.region && actor.region === targetCenter.region;
   const authorized =
     isAdmin ||
     isReferentDepartmentFromTargetDepartment ||
