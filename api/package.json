@@ -40,6 +40,7 @@
     "@sentry/node": "^8.25.0",
     "@sentry/profiling-node": "^8.25.0",
     "@sentry/utils": "^8.25.0",
+    "@snu/log-redaction": "*",
     "@tanstack/react-query": "^5.29.0",
     "archiver": "^7.0.1",
     "aws-sdk": "^2.1248.0",
