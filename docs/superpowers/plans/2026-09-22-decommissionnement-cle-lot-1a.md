@@ -710,14 +710,27 @@ Périmètre volontairement restreint, cf. « Écart assumé » en tête de plan 
 - [ ] **Step 1: Établir la liste des helpers devenus non référencés**
 
 ```bash
-cd /Users/pam/Sites/betagouv/service-national-universel
-for fn in $(grep -oE "^export (const|function) can[A-Za-z0-9_]+" packages/lib/src/roles.ts | awk '{print $3}'); do
-  count=$(grep -rn "\b$fn\b" api/src apiv2/src admin/src app/src packages/lib/src --exclude=roles.ts --exclude=roles.spec.ts | wc -l)
-  if [ "$count" -eq 0 ]; then echo "ORPHELIN: $fn"; fi
-done
+python3 - <<'PY'
+import re, subprocess
+src = open('packages/lib/src/roles.ts').read()
+# La plupart des helpers sont déclarés en `function canX(...)` puis exportés en bloc
+# en fin de fichier : filtrer sur `export` n'en capterait que 7 sur 117.
+names = sorted(set(re.findall(r'^(?:export )?(?:const|function) (can[A-Za-z0-9_]+)', src, re.M)))
+for n in names:
+    r = subprocess.run(['grep','-rln',r'\b%s\b' % n,
+                        'api/src','apiv2/src','admin/src','app/src','packages/lib/src'],
+                       capture_output=True, text=True)
+    files = [f for f in r.stdout.split() if not f.endswith(('roles.ts','roles.spec.ts','roles.d.ts'))]
+    if not files:
+        print("ORPHELIN:", n)
+PY
 ```
 
-Noter la liste obtenue. Elle constitue le périmètre exact de cette tâche — ni plus, ni moins.
+Ce relevé donne 23 candidats. **Il ne constitue pas le périmètre de la tâche** : le commit #5312 (séjours et transport), arrivé sur `main` pendant ce chantier, en a rendu une partie orphelins sans que ce lot y soit pour rien. Pour chaque candidat, établir s'il était **encore référencé sur `origin/main`** : si oui, c'est ce lot qui l'a orphelin, il entre dans le périmètre ; si non, il était déjà mort avant, on n'y touche pas.
+
+Candidats manifestement liés au décommissionnement CLE, à confirmer un par un : `canCreateEtablissement`, `canUpdateEtablissement`, `canDeleteClasse`, `canUpdateClasse`, `canUpdateClasseStay`, `canVerifyClasse`, `canWithdrawClasse`, `canNotifyAdminCleForVerif`, `canUpdateReferentClasse`.
+
+Candidats liés aux séjours et au transport, a priori hors périmètre : `canCreateLigneBus`, `canDeleteLigneBus`, `canUpdateLigneBus`, `canEditLigneBusCenter`, `canSendPlanDeTransport`, `canAssignMeetingPoint`, `canSearchMeetingPoints`, `canViewMeetingPointId`, `canAssignCohesionCenter`, `canCreateStructure`, `canCreateOrModifyMission`, `canEditSanitaryEmailContact`, `canSeeYoungInfo`, `canViewTicketTags`.
 
 - [ ] **Step 2: Écrire le test qui échoue**
 
