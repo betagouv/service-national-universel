@@ -31,6 +31,10 @@ export default function GeneralInfos({ etablissement, user }: Props) {
           <InputText name="name" className="mb-4" value={etablissement.name} disabled />
           <Label name="address" title="Adresse postale" />
           <InputText name="address" className="mb-4" value={etablissement.address || ""} disabled />
+          <div className="flex gap-4 mb-4">
+            <InputText name="city" className="w-full" label="Ville" value={etablissement.city || ""} disabled />
+            <InputText name="zip" className="w-full" label="Code postal" value={etablissement.zip || ""} disabled />
+          </div>
           <div className="flex gap-4 mt-3">
             <Input label="Département" value={etablissement.department} disabled className="w-full" />
             <Input label="Région" value={etablissement.region} disabled className="w-full" />
