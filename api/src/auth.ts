@@ -13,6 +13,7 @@ import {
   JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC,
   JWT_SIGNIN_VERSION,
   JWT_TRUST_TOKEN_VERSION,
+  JWT_TRUST_TOKEN_TYPE,
   checkJwtTrustTokenVersion,
 } from "./jwt-options";
 import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } from "./cookie-options";
@@ -43,6 +44,47 @@ import { getFilteredSessions } from "./utils/cohort";
 import { ClasseModel, EtablissementModel, CohortModel } from "./models";
 import { getFeatureFlagsAvailable } from "./featureFlag/featureFlagService";
 import { getAcl } from "./services/iam/Permission.service";
+
+// Le trust token ("cet appareil a déjà passé le 2FA") est lié au compte qui l'a obtenu :
+// sans cette liaison, le nom du cookie (`trust_token-<_id>`) est la seule chose qui porte
+// l'identité, et il est choisi par le client — n'importe quel trust token valide (ou même
+// un JWT de session, signé avec le même secret) rejouait alors le 2FA de n'importe qui.
+function signTrustToken(user, maxAgeSec: number): string {
+  return jwt.sign(
+    {
+      __v: JWT_TRUST_TOKEN_VERSION,
+      type: JWT_TRUST_TOKEN_TYPE,
+      _id: user._id.toString(),
+      passwordChangedAt: user.passwordChangedAt ?? null,
+    },
+    config.JWT_SECRET,
+    { expiresIn: maxAgeSec },
+  );
+}
+
+function isTrustTokenValidForUser(trustToken: string, user): boolean {
+  let jwtPayload;
+  try {
+    jwtPayload = jwt.verify(trustToken, config.JWT_SECRET);
+  } catch (e) {
+    return false;
+  }
+
+  const { error, value } = Joi.object({
+    __v: Joi.string().required(),
+    type: Joi.string().valid(JWT_TRUST_TOKEN_TYPE).required(),
+    _id: Joi.string().required(),
+    passwordChangedAt: Joi.date().allow(null).required(),
+  }).validate(jwtPayload, { stripUnknown: true });
+
+  if (error) return false;
+  if (!checkJwtTrustTokenVersion(value)) return false;
+  if (value._id !== user._id.toString()) return false;
+  // Un changement de mot de passe révoque les appareils de confiance.
+  if (user.passwordChangedAt?.getTime() !== value.passwordChangedAt?.getTime()) return false;
+
+  return true;
+}
 
 class Auth {
   model: any;
@@ -434,14 +476,7 @@ class Auth {
           const trustToken = req.cookies[`trust_token-${user._id}`];
           if (!trustToken) return true;
 
-          let jwtPayload;
-          try {
-            jwtPayload = await jwt.verify(trustToken, config.JWT_SECRET);
-          } catch (e) {
-            return true;
-          }
-          const { error, value } = Joi.object({ __v: Joi.string().required() }).validate(jwtPayload, { stripUnknown: true });
-          return error || !checkJwtTrustTokenVersion(value);
+          return !isTrustTokenValidForUser(trustToken, user);
         } catch (e) {
           capture(e);
           return true; // Handle JWT verification errors or other exceptions
@@ -544,13 +579,13 @@ class Auth {
       });
       if (isYoung(user)) {
         if (rememberMe) {
-          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
+          const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
           res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
         }
         res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       } else if (isReferent(user)) {
         if (rememberMe) {
-          const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
+          const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
           res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
         }
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
@@ -737,11 +772,11 @@ class Auth {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
       });
       if (isYoung(user)) {
-        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC });
+        const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC);
         res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS));
         res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       } else if (isReferent(user)) {
-        const trustToken = jwt.sign({ __v: JWT_TRUST_TOKEN_VERSION }, config.JWT_SECRET, { expiresIn: JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC });
+        const trustToken = signTrustToken(user, JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC);
         res.cookie(`trust_token-${user._id}`, trustToken, cookieOptions(COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS));
         res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       }
