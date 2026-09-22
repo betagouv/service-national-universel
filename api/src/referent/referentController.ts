@@ -246,9 +246,17 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       return res.status(404).send({ code: ERRORS.USER_NOT_FOUND, ok: false });
     }
 
-    // On ne doit pas pouvoir prendre la place d'un compte supprimé/anonymisé.
+    // On ne doit pas pouvoir prendre la place d'un compte supprimé/anonymisé/désactivé.
     if (type === "young" && (user as YoungDocument).status === YOUNG_STATUS.DELETED) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    // Côté référent, aucun statut n'était vérifié avant de forger le jeton (audit 2026-09-21, L35) :
+    // passport rejette ensuite les comptes supprimés, mais pas les comptes désactivés.
+    if (type === "referent") {
+      const targetReferent = user as ReferentDocument;
+      if (targetReferent.status === ReferentStatus.INACTIVE || targetReferent.deletedAt) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     if (!canSigninAs(req.user, user, type)) {
@@ -412,6 +420,32 @@ router.post(
   },
 );
 
+/**
+ * Délai minimal entre deux renvois d'invitation pour un même compte. `invitationExpires` vaut
+ * toujours `inSevenDays()` au moment de l'envoi : la date du dernier envoi s'en déduit, sans
+ * ajouter de champ au modèle.
+ */
+const INVITATION_RESEND_DELAY_MS = 15 * 60 * 1000;
+
+function shouldResendInvitation(referent: ReferentDocument): boolean {
+  // Un compte déjà activé n'a plus d'invitation à recevoir : lui en régénérer une écrasait le jeton
+  // d'une invitation légitime en cours et permettait d'inonder sa boîte mail (audit 2026-09-21, M66).
+  if (referent.registredAt) return false;
+  if (referent.status === ReferentStatus.INACTIVE) return false;
+  if (referent.deletedAt) return false;
+
+  if (referent.invitationExpires) {
+    const lastSentAt = new Date(referent.invitationExpires).getTime() - 7 * 86400000;
+    if (Date.now() - lastSentAt < INVITATION_RESEND_DELAY_MS) return false;
+  }
+  return true;
+}
+
+/**
+ * Renvoi d'une invitation expirée. Route non authentifiée : la réponse est identique quel que soit
+ * le sort de la demande. Un 404 sur adresse inconnue en faisait un oracle d'existence de compte
+ * référent, interrogeable par n'importe qui (audit 2026-09-21, M66).
+ */
 router.post("/signup_retry", async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body, { stripUnknown: true });
@@ -421,7 +455,7 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
     }
 
     const referent = await ReferentModel.findOne({ email: value.email });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_FOUND });
+    if (!referent || !shouldResendInvitation(referent)) return res.status(200).send({ ok: true });
 
     const invitationToken = crypto.randomBytes(20).toString("hex");
     referent.set({ invitationToken });
@@ -459,8 +493,11 @@ router.post("/signup_verify", async (req: UserRequest, res: Response) => {
     const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeReferent(referent) });
+    // Cette route ne sert qu'à pré-remplir le formulaire d'activation : elle n'ouvre pas de session.
+    // Elle délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de passe
+    // ni 2FA (audit 2026-09-21, H62). C'est `signup_invite` qui authentifie, et cette route-là ne lit
+    // pas le JWT : elle revérifie le couple (email, invitationToken) puis pose le cookie de session.
+    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1685,6 +1722,19 @@ router.put("/", passport.authenticate("referent", { session: false, failWithErro
     // Renvoyer son sous-rôle courant reste sans effet (le formulaire de profil poste l'objet complet).
     if (!isSubRoleChangeAllowed(user, value.subRole)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // Sous impersonation (`signin_as`), l'acteur n'est pas le titulaire du compte : lui laisser poser
+    // un email ou un mot de passe lui donnait une prise de contrôle définitive, sans autre trace que
+    // `fromUser` (audit 2026-09-21, H61). `reset_password` exige déjà le mot de passe courant ; cette
+    // route s'aligne. Renvoyer l'email courant reste sans effet (le formulaire de profil poste
+    // l'objet complet), mais l'effacer (`null`/`""`) est bien un changement et reste refusé.
+    if (req.user.impersonateId) {
+      const emailChanged = "email" in value && value.email !== user.email;
+      const passwordSubmitted = "password" in value && !!value.password;
+      if (emailChanged || passwordSubmitted) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
     }
 
     user.set(value);
