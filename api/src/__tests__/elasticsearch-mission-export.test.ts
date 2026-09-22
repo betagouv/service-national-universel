@@ -10,6 +10,18 @@ import { PermissionModel } from "../models/permissions/permission";
 
 const mockEsSearchCalls: any[] = [];
 
+type EsSourceFilter = string | string[] | { includes?: string | string[]; excludes?: string | string[] };
+
+/** Émule le `_source filtering` d'Elasticsearch sur un document du mock. */
+const applySourceFilter = (source: EsSourceFilter | undefined, doc: Record<string, any>): Record<string, any> => {
+  if (!source) return doc;
+  const isFieldList = typeof source === "string" || Array.isArray(source);
+  const includes: string[] = isFieldList ? ([] as string[]).concat(source as string | string[]) : ([] as string[]).concat(source.includes ?? "*");
+  const excludes: string[] = isFieldList ? [] : ([] as string[]).concat(source.excludes ?? []);
+  const keepAll = includes.includes("*");
+  return Object.fromEntries(Object.entries(doc).filter(([key]) => (keepAll || includes.includes(key)) && !excludes.includes(key)));
+};
+
 const TUTOR_ID = "6500000000000000000000aa";
 const STRUCTURE_ID = "6500000000000000000000bb";
 
@@ -45,11 +57,10 @@ jest.mock("../es", () => ({
       ],
       structure: [{ _id: STRUCTURE_ID, _source: { name: "Structure test", city: "Vannes", department: "Morbihan" } }],
     }[params.index as string];
-    // Applique la projection _source comme le ferait Elasticsearch.
+    // Applique la projection _source comme le ferait Elasticsearch : chaîne,
+    // tableau d'inclusions (`["*"]` = tous les champs) ou objet `{ includes, excludes }`.
     const source = params.body?._source;
-    const projected = (hits || []).map((hit) =>
-      !source || source === "*" ? hit : { ...hit, _source: Object.fromEntries(Object.entries(hit._source).filter(([key]) => (source as string[]).includes(key))) },
-    );
+    const projected = (hits || []).map((hit) => ({ ...hit, _source: applySourceFilter(source, hit._source) }));
     return { body: { hits: { total: { value: projected.length, relation: "eq" }, hits: projected }, aggregations: {} } };
   },
   scroll: async () => ({ body: { _scroll_id: null, hits: { total: { value: 0 }, hits: [] } } }),
@@ -111,6 +122,10 @@ describe("POST /elasticsearch/mission/export", () => {
     const tutor = res.body.data[0].tutor;
     expect(tutor).toMatchObject({ firstName: "Tuteur", lastName: "Test", email: "tuteur@example.org" });
     expect(Object.keys(tutor).sort()).toEqual(["_id", "email", "firstName", "lastName", "mobile", "phone"]);
-    expect(mockEsSearchCalls.find((call) => call.index === "referent")?._source).not.toEqual("*");
+    // La requête ES sur l'index `referent` est projetée sur les seuls champs d'export (C6)
+    // et exclut les secrets répliqués par Monstache (#5310).
+    const referentSource = mockEsSearchCalls.find((call) => call.index === "referent")?._source;
+    expect(referentSource.includes).toEqual(["firstName", "lastName", "email", "mobile", "phone"]);
+    expect(referentSource.excludes).toContain("password");
   });
 });
