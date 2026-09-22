@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
-import { HiPlus } from "react-icons/hi";
 import { useSelector } from "react-redux";
-import { Link } from "react-router-dom";
 
 import { AuthState } from "@/redux/auth/reducer";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "@/components/filters-system-v2";
@@ -144,12 +142,7 @@ export default function List() {
       {!isClasses && (
         <Container className="!p-8">
           <div className="py-6 bg-gray-50">
-            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Vous n’avez pas encore créé de classe engagée</div>
-            <div className="flex items-start justify-center h-[136px]">
-              <Link to="/classes/create">
-                <Button type="wired" leftIcon={<HiPlus />} title="Créer une première classe engagée" />
-              </Link>
-            </div>
+            <div className="flex items-center justify-center h-[136px] mb-4 text-lg text-gray-500 text-center">Aucune classe engagée</div>
           </div>
         </Container>
       )}

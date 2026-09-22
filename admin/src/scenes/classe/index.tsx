@@ -3,7 +3,6 @@ import { Switch } from "react-router-dom";
 import useDocumentTitle from "../../hooks/useDocumentTitle";
 import { SentryRoute } from "../../sentry";
 
-import Create from "./create";
 import List from "./list";
 import View from "./view";
 import InscriptionEnMasse from "./inscriptionEnMasse/InscriptionEnMassePage";
@@ -20,7 +19,6 @@ export default function Index() {
 
   return (
     <Switch>
-
       <SentryRoute
         path="/classes/:id/inscription-masse"
         render={({ match }) => {

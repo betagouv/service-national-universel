@@ -1,6 +1,6 @@
 import { ROLES, UserDto, YoungType, canEditYoung } from "snu-lib";
 
-import { ClasseModel, SessionPhase1Model } from "../models";
+import { ApplicationModel, ClasseModel, SessionPhase1Model, StructureModel } from "../models";
 import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
 
 const HEAD_CENTER_ROLES: string[] = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
@@ -87,5 +87,36 @@ export async function isYoungInUserScope(user: UserDto, young: Pick<YoungType, "
   if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, young);
   if (CLE_ROLES.includes(user.role)) return isYoungInCleScope(user, young);
   if (GEO_ROLES.includes(user.role)) return isYoungInReferentTerritory(user, young);
+  return false;
+}
+
+/**
+ * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
+ * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
+ * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
+ */
+export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
+  if (!user.structureId) return false;
+  const structureIds = [user.structureId];
+  if (user.role === ROLES.SUPERVISOR) {
+    const networkStructures = await StructureModel.find({ networkId: user.structureId }, { _id: 1 });
+    structureIds.push(...networkStructures.map((structure) => structure._id.toString()));
+  }
+  return !!(await ApplicationModel.exists({ youngId: young._id!.toString(), structureId: { $in: structureIds } }));
+}
+
+/**
+ * Autorisation d'accès aux pièces d'un volontaire (liste, téléchargement, génération d'attestation),
+ * périmètre compris.
+ *
+ * Remplace `canDownloadYoungDocuments` (snu-lib), qui autorisait tout RESPONSIBLE / SUPERVISOR sur
+ * n'importe quel volontaire — le rapprochement avec les candidatures y était commenté (constat C15).
+ */
+export async function canAccessYoungDocumentsInScope(
+  user: UserDto,
+  young: Pick<YoungType, "_id" | "sessionPhase1Id" | "classeId" | "region" | "department" | "source">,
+): Promise<boolean> {
+  if (await canEditYoungInScope(user, young)) return true;
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return isYoungInStructureScope(user, young);
   return false;
 }

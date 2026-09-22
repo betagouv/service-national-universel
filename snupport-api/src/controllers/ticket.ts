@@ -12,6 +12,7 @@ import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "
 import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDINBLUE_TEMPLATES, diacriticSensitiveRegex } from "../utils";
 import { matchVentilationRule } from "../utils/ventilation";
 import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
+import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -768,8 +769,12 @@ router.patch(
     let ticket = await TicketModel.findOne({ _id: id });
     if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (getForbiddenTicketUpdateFields(req.user, req.cleanBody).length) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-    ticket.set(req.cleanBody);
+    const update = { ...req.cleanBody };
+    if (update.notes) update.notes = reconcileTicketNotes({ user: req.user, storedNotes: ticket.notes, submittedNotes: update.notes });
+
+    ticket.set(update);
 
     if (req.cleanBody.status === "CLOSED") {
       ticket.closedAt = new Date();

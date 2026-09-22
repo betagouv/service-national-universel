@@ -56,6 +56,9 @@ function serializeYoung(young, user) {
       delete ret.invitationToken;
       delete ret.invitationExpires;
       delete ret.phase3Token;
+      // Seule authentification de /representants-legaux/* : ne doit jamais sortir du flux email parent.
+      delete ret.parent1Inscription2023Token;
+      delete ret.parent2Inscription2023Token;
       delete ret.loginAttempts;
       delete ret.__v;
       if (isYoung(user)) {

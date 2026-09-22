@@ -15,10 +15,10 @@ export function urlify(text) {
 }
 
 export const TRANSLATE_ROLE = {
-  ADMIN: "Admin",
   AGENT: "Agent",
   REFERENT_REGION: "Référent régional",
   REFERENT_DEPARTMENT: "Référent départemental",
+  DG: "DG",
 };
 
 export const getDocumentTitle = () => {

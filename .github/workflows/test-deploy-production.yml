@@ -29,6 +29,10 @@ jobs:
         id: config
         run: |
           # TEST MATRIX
+          # Matrice complète, sans filtrage par chemins : c'est le seul endroit où
+          # la totalité du code partant en production est vérifiée d'un bloc. Les
+          # runs sur main sont sélectifs et ne couvrent pas les cassages croisés
+          # (un changement dans api qui casse admin n'y est jamais vu).
           echo "[]" \
           | jq  '. + [{name:"api"}]' \
           | jq  '. + [{name:"apiv2"}]' \
@@ -39,6 +43,35 @@ jobs:
           echo "Test matrix"
           cat test.json
           echo "test=$(jq -c < test.json)" >> $GITHUB_OUTPUT
+
+  test:
+    needs: prepare
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    strategy:
+      matrix:
+        app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+
+      - name: Run tests
+        uses: jenseng/dynamic-uses@v1
+        with:
+          uses: ./.github/actions/run-tests-${{matrix.app.name}}
+          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+
+  changelog:
+    # Après les tests : annoncer le contenu d'une release qui ne partira pas
+    # induit le canal en erreur.
+    needs: test
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
 
       - name: Changelog
         id: changelog
@@ -63,7 +96,7 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
 
   deploy_production:
-    needs: prepare
+    needs: [test, changelog]
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:

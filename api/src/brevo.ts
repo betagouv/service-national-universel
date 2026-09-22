@@ -362,6 +362,108 @@ export async function updateContact(id, { attributes, emailBlacklisted, smsBlack
   return await api(`/contacts/${identifier}`, { method: "PUT", body: JSON.stringify(body) });
 }
 
+/**
+ * Attributs de contact synchronisés vers Brevo.
+ *
+ * Liste explicite (allowlist) et non liste d'exclusion : le document jeune porte plus de 300 champs, dont
+ * des données de santé (handicap, allergies, PAI/PPS, structure médico-sociale, aménagements spécifiques,
+ * PSC1, dossier médical), l'adresse précise, le téléphone, la date de naissance, les pièces d'identité et
+ * les coordonnées des deux représentants légaux. Brevo est un sous-traitant marketing : il ne doit recevoir
+ * que ce qui sert au ciblage et à la personnalisation des campagnes.
+ *
+ * Une liste d'exclusion laissait passer par défaut tout nouveau champ du schéma. Ici, un champ non listé
+ * n'est jamais transmis : l'ajout doit être délibéré et vérifié au regard de la finalité marketing.
+ */
+const YOUNG_SYNC_FIELDS = [
+  "cohort",
+  "cohortId",
+  "originalCohort",
+  "source",
+  "status",
+  "accountStatus",
+  "phase",
+  "statusPhase1",
+  "statusPhase2",
+  "statusPhase3",
+  "phase2ApplicationStatus",
+  "phase2NumberHoursDone",
+  "inscriptionStep",
+  "inscriptionStep2023",
+  "hasStartedReinscription",
+  "withdrawnReason",
+  "grade",
+  "situation",
+  "schooled",
+  "academy",
+  "department",
+  "region",
+  "country",
+  "qpv",
+  "isRegionRural",
+  "populationDensity",
+  "createdAt",
+  "updatedAt",
+  "lastStatusAt",
+  "inscriptionDoneDate",
+  "statusPhase2ValidatedAt",
+  "statusPhase3ValidatedAt",
+  "lastLoginAt",
+  "lastActivityAt",
+] as const;
+
+const REFERENT_SYNC_FIELDS = [
+  "role",
+  "subRole",
+  "invitationType",
+  "status",
+  "region",
+  "department",
+  "cohesionCenterName",
+  "acceptCGU",
+  "registredAt",
+  "createdAt",
+  "updatedAt",
+  "lastLoginAt",
+  "lastActivityAt",
+] as const;
+
+/**
+ * Attributs transmis au contact d'un représentant légal : uniquement le contexte de campagne du jeune.
+ * Le parent ne reçoit ni les données de santé du jeune, ni son adresse, son téléphone ou sa date de
+ * naissance, ni les coordonnées de l'autre représentant légal.
+ */
+const PARENT_SYNC_FIELDS = [
+  "cohort",
+  "cohortId",
+  "source",
+  "status",
+  "phase",
+  "statusPhase1",
+  "statusPhase2",
+  "statusPhase3",
+  "inscriptionStep2023",
+  "grade",
+  "academy",
+  "department",
+  "region",
+  "createdAt",
+  "updatedAt",
+  "lastStatusAt",
+] as const;
+
+function buildAttributes(user, fields: readonly string[]): Partial<ContactAttribute> {
+  const attributes: Partial<ContactAttribute> = {};
+  for (const field of fields) {
+    // filet de sécurité : une clé sensible ne peut pas entrer dans Brevo par une entrée erronée de la liste
+    if (isSensitiveKey(field)) continue;
+    const value = user[field];
+    if (value === undefined || value === null || value === "") continue;
+    // si c'est une date, on ne garde que le jour
+    attributes[field.toUpperCase()] = field.endsWith("At") && typeof value === "string" ? value.slice(0, 10) : value;
+  }
+  return attributes;
+}
+
 export async function sync(obj, type, { force } = { force: false }) {
   if (config.ENVIRONMENT !== "production" && !force) {
     logger.debug("no sync brevo");
@@ -373,54 +475,39 @@ export async function sync(obj, type, { force } = { force: false }) {
 
     const email = user.email;
     const id = user._id;
-    let parents: { slot: "parent1" | "parent2"; contact: Contact }[] = [];
-    const attributes: Partial<ContactAttribute> = {};
-    for (let i = 0; i < Object.keys(user).length; i++) {
-      const key = Object.keys(user)[i];
-      if (key.endsWith("At")) {
-        // if its a date
-        if (user[key]) attributes[key.toUpperCase()] = user[key].slice(0, 10);
-      } else {
-        attributes[key.toUpperCase()] = user[key];
-      }
-    }
+    const contactType = String(type).toUpperCase();
 
-    attributes.FIRSTNAME && (attributes.PRENOM = attributes.FIRSTNAME);
-    attributes.LASTNAME && (attributes.NOM = attributes.LASTNAME);
-    attributes.TYPE = type.toUpperCase();
+    const attributes = buildAttributes(user, contactType === "YOUNG" ? YOUNG_SYNC_FIELDS : REFERENT_SYNC_FIELDS);
+    user.firstName && (attributes.PRENOM = user.firstName);
+    user.lastName && (attributes.NOM = user.lastName);
+    attributes.TYPE = contactType;
     attributes.REGISTRED = !!attributes.REGISTRED_AT;
 
+    let parents: { slot: "parent1" | "parent2"; contact: Contact }[] = [];
     let listIds: number[] = [];
-    if (attributes.TYPE === "YOUNG") {
+    if (contactType === "YOUNG") {
       if (user.status === YOUNG_STATUS.DELETED) return;
+      // le contact parent est identifié par le jeune (prénom, nom, cohorte) : les campagnes parents s'y appuient
+      const parentAttributes = buildAttributes(user, PARENT_SYNC_FIELDS);
+      parentAttributes.PRENOM = attributes.PRENOM;
+      parentAttributes.NOM = attributes.NOM;
+      parentAttributes.TYPE = attributes.TYPE;
+      parentAttributes.REGISTRED = attributes.REGISTRED;
       if (user.parent1Email) {
-        parents.push({ slot: "parent1", contact: { email: user.parent1Email, attributes, listIds: [1447] } });
+        parents.push({ slot: "parent1", contact: { email: user.parent1Email, attributes: parentAttributes, listIds: [1447] } });
       }
       if (user.parent2Email) {
-        parents.push({ slot: "parent2", contact: { email: user.parent2Email, attributes, listIds: [1447] } });
+        parents.push({ slot: "parent2", contact: { email: user.parent2Email, attributes: parentAttributes, listIds: [1447] } });
       }
       listIds.push(1446);
     }
-    if (attributes.TYPE === "REFERENT") listIds.push(1448);
+    if (contactType === "REFERENT") listIds.push(1448);
     [ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) && listIds.push(1243, 2225);
     [ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role) && listIds.push(1449);
 
-    delete attributes.EMAIL;
-    delete attributes.PASSWORD;
-    delete attributes.__V;
-    delete attributes._ID;
-    delete attributes.LASTNAME;
-    delete attributes.FIRSTNAME;
-
-    // Les attributs sont construits en recopiant tout le document : ne pas transmettre à Brevo (ni, en cas
-    // d'erreur, à nos journaux et à Sentry) les tokens d'invitation, de reset, de 2FA et de validation d'email.
-    for (const key of Object.keys(attributes)) {
-      if (isSensitiveKey(key)) delete attributes[key];
-    }
-
-    syncContact(email, attributes, listIds, { id, type: attributes.TYPE, contact: "self" });
+    syncContact(email, attributes, listIds, { id, type: contactType, contact: "self" });
     for (const parent of parents) {
-      syncContact(parent.contact.email, parent.contact.attributes, parent.contact.listIds!, { id, type: attributes.TYPE, contact: parent.slot });
+      syncContact(parent.contact.email, parent.contact.attributes, parent.contact.listIds!, { id, type: contactType, contact: parent.slot });
     }
   } catch (e) {
     capture(e);

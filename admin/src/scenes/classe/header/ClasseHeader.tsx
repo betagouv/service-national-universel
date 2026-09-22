@@ -10,7 +10,6 @@ import { Header, Badge } from "@snu/ds/admin";
 import { TStatus } from "@/types";
 import { AuthState } from "@/redux/auth/reducer";
 import { CohortState } from "@/redux/cohorts/reducer";
-import { appURL } from "@/config";
 import InfoMessage from "@/scenes/dashboardV2/components/ui/InfoMessage";
 import { ClasseService } from "@/services/classeService";
 
@@ -53,7 +52,6 @@ export default function ClasseHeader({ classe, setClasse, isLoading, setIsLoadin
   }, [cohorts, classe, user]);
 
   const id = classe._id;
-  const url = `${appURL}/je-rejoins-ma-classe-engagee?id=${id.toString()}`;
 
   return (
     <>
@@ -79,7 +77,7 @@ export default function ClasseHeader({ classe, setClasse, isLoading, setIsLoadin
           },
           { title: page },
         ]}
-        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, url, id, studentStatus, canPerformManualInscriptionActions })}
+        actions={getHeaderActionList({ user, classe, setClasse, isLoading, setIsLoading, id, studentStatus, canPerformManualInscriptionActions })}
       />
       <NavbarClasse classeId={id} />
     </>

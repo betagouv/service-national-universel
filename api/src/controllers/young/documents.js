@@ -14,7 +14,9 @@ const { serializeYoung } = require("../../utils/serializer");
 const mime = require("mime-types");
 const { scanFile } = require("../../utils/virusScanner");
 const { generatePdfIntoStream } = require("../../utils/pdf-renderer");
-const { getMimeFromFile } = require("../../utils/file");
+const { getMimeFromFile, getMimeFromBuffer } = require("../../utils/file");
+
+const ALLOWED_DOCUMENT_MIME_TYPES = ["image/jpeg", "image/png", "application/pdf"];
 const { sendDocumentEmailTask } = require("../../queues/sendMailQueue");
 
 router.post("/:type/:template", passport.authenticate(["young", "referent"], { session: false, failWithError: true }), async (req, res) => {
@@ -28,18 +30,8 @@ router.post("/:type/:template", passport.authenticate(["young", "referent"], { s
     }
     const { id, type, template } = value;
 
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // A young can only download their own documents.
-    if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
-
-    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
-    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, type, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
+    const young = req.targetYoung;
 
     await generatePdfIntoStream(res, { type, template, young });
   } catch (e) {
@@ -167,9 +159,10 @@ router.post(
           currentFile = currentFile[currentFile.length - 1];
         }
         const { name, tempFilePath, mimetype, size } = currentFile;
-        const filetype = await getMimeFromFile(tempFilePath);
-        const mimeFromContent = filetype || "application/pdf";
-        const validTypes = ["image/jpeg", "image/png", "application/pdf"];
+        // Pas de valeur par défaut : `file-type` ne reconnaît pas le HTML/texte et renvoie null, ce qui
+        // faisait passer un fichier HTML pour un PDF (constat H42).
+        const mimeFromContent = await getMimeFromFile(tempFilePath);
+        const validTypes = ALLOWED_DOCUMENT_MIME_TYPES;
         if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromContent))) {
           capture(`File ${name} of user(${req.user.id})is not a valid type: ${mimetype} ${mimeFromContent}`);
           fs.unlinkSync(tempFilePath);
@@ -307,15 +300,9 @@ router.get("/:key", passport.authenticate(["young", "referent"], { session: fals
 
     // Check permissions
 
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
+    const young = req.targetYoung;
 
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
-    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
-    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
     // Send response
 
     return res.status(200).send({ data: young.files[key], ok: true });
@@ -345,15 +332,9 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     }
     const { id, key, fileId } = value;
 
-    const young = await YoungModel.findById(id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/documents).
+    const young = req.targetYoung;
 
-    if (isYoung(req.user) && req.user.id !== id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
-    const applications = await ApplicationModel.find({ youngId: young._id.toString(), structureId: req?.user?.structureId?.toString() });
-    if (isReferent(req.user) && !canDownloadYoungDocuments(req.user, young, applications)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-    }
     // Download from s3
 
     let downloaded = null;
@@ -372,10 +353,16 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     // * Recalculate mimetype for reupload
     const decryptedBuffer = decrypt(downloaded.Body);
 
+    // Le mimeType doit venir du contenu réel : `mime.lookup(name)` renvoyait `text/html` pour un
+    // fichier nommé `piece.html`, exécuté ensuite en blob dans l'origine de l'admin (constat H42).
+    const detectedMime = await getMimeFromBuffer(decryptedBuffer);
+    const storedMime = young.files[key].id(fileId).mimetype;
+    const mimeType = ALLOWED_DOCUMENT_MIME_TYPES.includes(detectedMime) ? detectedMime : ALLOWED_DOCUMENT_MIME_TYPES.includes(storedMime) ? storedMime : "application/octet-stream";
+
     // Send to app
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
-      mimeType: mime.lookup(young.files[key].id(fileId).name),
+      mimeType,
       fileName: young.files[key].id(fileId).name,
       ok: true,
     });

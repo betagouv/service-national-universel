@@ -6,7 +6,7 @@ const Joi = require("joi");
 const OrganisationModel = require("../models/organisation");
 const { agentGuard } = require("../middlewares/authenticationGuards");
 const { ERRORS } = require("../errors");
-const { requireRole } = require("../middlewares/userRoleGuards");
+const { canAdministerAgents, canAssignRole, canManageAgent, ROLE_RANKS } = require("../utils/agentAdminScope");
 const { validateParams, validateBody, idSchema } = require("../middlewares/validation");
 const { SCHEMA_EMAIL, SCHEMA_ROLE } = require("../schemas");
 
@@ -65,10 +65,15 @@ router.post("/logout", agentGuard, async (req, res) => {
   return res.status(200).send({ ok: true });
 });
 
+const requireAgentAdmin = (req, res, next) => {
+  if (!canAdministerAgents(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  next();
+};
+
 router.post(
   "/",
   agentGuard,
-  requireRole("AGENT"),
+  requireAgentAdmin,
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,
@@ -78,17 +83,17 @@ router.post(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    if (!canAssignRole(req.user, req.cleanBody.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const password = crypto.randomBytes(16).toString("hex");
 
     if (!validatePassword(password)) return res.status(200).send({ ok: false, code: ERRORS.PASSWORD_NOT_VALIDATED });
-
-    const organisation = await OrganisationModel.findOne({ name: "SNU" });
 
     try {
       await AgentModel.create({
         ...req.cleanBody,
         password,
-        organisationId: organisation._id,
+        organisationId: req.user.organisationId,
       });
       return res.status(200).send({ ok: true });
     } catch (error) {
@@ -100,12 +105,13 @@ router.post(
   }
 );
 
-router.delete("/:id", agentGuard, requireRole("AGENT"), validateParams(idSchema), async (req, res) => {
+router.delete("/:id", agentGuard, requireAgentAdmin, validateParams(idSchema), async (req, res) => {
   const { id } = req.cleanParams;
   const agent = await AgentModel.findById(id);
   if (!agent) {
     return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
   }
+  if (!canManageAgent(req.user, agent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   await AgentModel.findByIdAndDelete(id);
   return res.status(200).send({ ok: true });
 });
@@ -113,7 +119,7 @@ router.delete("/:id", agentGuard, requireRole("AGENT"), validateParams(idSchema)
 router.patch(
   "/:id",
   agentGuard,
-  requireRole("AGENT"),
+  requireAgentAdmin,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -123,7 +129,11 @@ router.patch(
     }).min(1)
   ),
   async (req, res) => {
-    await AgentModel.findOneAndUpdate({ _id: req.cleanParams.id, organisationId: req.user.organisationId }, req.cleanBody);
+    const agent = await AgentModel.findById(req.cleanParams.id);
+    if (!agent) return res.status(404).send({ ok: false, code: ERRORS.USER_NOT_EXISTS });
+    if (!canManageAgent(req.user, agent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    await AgentModel.findOneAndUpdate({ _id: agent._id, organisationId: req.user.organisationId }, req.cleanBody);
     return res.status(200).send({ ok: true });
   }
 );
@@ -139,8 +149,8 @@ router.get("/me", agentGuard, async (req, res) => {
 
 router.get("/", agentGuard, async (req, res) => {
   const agents = await AgentModel.find({});
-  const obj = { AGENT: [], REFERENT_DEPARTMENT: [], REFERENT_REGION: [], DG: [] };
-  agents.map((a) => obj[a.role].push(a));
+  const obj = Object.keys(ROLE_RANKS).reduce((acc, role) => ({ ...acc, [role]: [] }), {});
+  agents.forEach((a) => obj[a.role] && obj[a.role].push(a));
   return res.status(200).send({ ok: true, data: obj });
 });
 

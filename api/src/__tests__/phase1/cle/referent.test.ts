@@ -1,8 +1,6 @@
 import request from "supertest";
-import passport from "passport";
-import { fakerFR as faker } from "@faker-js/faker";
 
-import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLE_GOD, SUB_ROLES, UserDto } from "snu-lib";
+import { ClasseSchoolYear, InvitationType, ROLES, STATUS_CLASSE, SUB_ROLES, UserDto } from "snu-lib";
 
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import {
@@ -18,10 +16,8 @@ import { dbClose, dbConnect } from "../helpers/db";
 import getAppHelper from "../helpers/app";
 import { createReferentHelper } from "../helpers/referent";
 import getNewReferentFixture, { getNewSignupReferentFixture } from "../fixtures/referent";
-import { createEtablissement } from "../helpers/etablissement";
 import { createFixtureEtablissement } from "../fixtures/etablissement";
 import { createFixtureClasse } from "../fixtures/classe";
-import * as featureService from "../../featureFlag/featureFlagService";
 import * as referentService from "../../cle/referent/referentService";
 import { ERRORS } from "../../utils";
 
@@ -339,193 +335,70 @@ describe("Cle Referent", () => {
   });
 });
 
-describe("POST /cle/referent/send-invitation-chef-etablissement", () => {
+// Les routes /cle/referent/send-invitation-chef-etablissement, /send-invitation-referent-classe-verifiee
+// et /invite-coordonnateur sont supprimées (H17, cf. api/src/__tests__/cle-routes-supprimees.test.ts).
+// Seul /getMany reste montée.
+describe("POST /cle/referent/getMany", () => {
   beforeEach(async () => {
-    jest.clearAllMocks();
-    // @ts-ignore
-    passport.user.subRole = null;
-    jest.mock("../../services/cle/referent", () => ({
-      ...jest.requireActual("../../services/cle/referent"),
-      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve([])),
-    }));
-    jest.mock("../../utils", () => ({
-      ...jest.requireActual("../../utils"),
-      uploadFile: () => Promise.resolve(),
-    }));
-  });
-
-  it("should return 200 OK and the list of sent invitations", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user.subRole = SUB_ROLE_GOD;
-
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
-
-    expect(res.statusCode).toEqual(200);
-  });
-
-  it("should return 403 Forbidden if the user is not a super admin", async () => {
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-chef-etablissement").send();
-
-    expect(res.statusCode).toEqual(403);
-    expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
-  });
-});
-
-describe("POST /cle/referent/send-invitation-referent-classe", () => {
-  beforeEach(async () => {
-    jest.clearAllMocks();
-    // @ts-ignore
-    passport.user.subRole = null;
-    jest.mock("../../services/cle/referent", () => ({
-      ...jest.requireActual("../../services/cle/referent"),
-      doInviteMultipleChefsEtablissements: jest.fn(() => Promise.resolve([])),
-    }));
-    jest.mock("../../utils", () => ({
-      ...jest.requireActual("../../utils"),
-      uploadFile: () => Promise.resolve(),
-    }));
     await ReferentModel.deleteMany();
-    await EtablissementModel.deleteMany();
-    await ClasseModel.deleteMany();
+    jest.clearAllMocks();
   });
 
-  jest.spyOn(featureService, "isFeatureAvailable").mockResolvedValueOnce(true);
+  it("should return 200 OK and the list of referents", async () => {
+    const referent1 = await createReferentHelper(getNewSignupReferentFixture());
+    const referent2 = await createReferentHelper(getNewSignupReferentFixture());
 
-  it("should return 200 OK and the list of sent invitations", async () => {
-    // @ts-ignore
-    passport.user.role = ROLES.ADMIN;
-    // @ts-ignore
-    passport.user.subRole = SUB_ROLE_GOD;
+    jest.spyOn(referentService, "getReferentsByIds").mockResolvedValue([referent1, referent2]);
 
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
-
-    expect(res.statusCode).toEqual(200);
-  });
-
-  it("should return 403 Forbidden if the user is not a super admin", async () => {
-    const res = await request(getAppHelper()).post("/cle/referent/send-invitation-referent-classe-verifiee").send();
-
-    expect(res.statusCode).toEqual(403);
-    expect(res.body).toEqual({ ok: false, code: "OPERATION_UNAUTHORIZED" });
-  });
-});
-
-describe("POST /cle/referent/invite-coordonnateur", () => {
-  it("should return 200 OK when invite is successful (chef etablissement)", async () => {
-    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
-    await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
-    const res = await request(getAppHelper({ _id: referent._id, role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }))
-      .post("/cle/referent/invite-coordonnateur")
+    const res = await request(getAppHelper())
+      .post("/cle/referent/getMany")
       .send({
-        email: faker.internet.email().toLowerCase(),
-        firstName: "Chef",
-        lastName: "Etab",
+        ids: [referent1._id.toString(), referent2._id.toString()],
       });
 
     expect(res.statusCode).toEqual(200);
     expect(res.body).toHaveProperty("ok", true);
-  });
-
-  it("should return 200 OK when invite is successful (admin)", async () => {
-    const referent = await createReferentHelper(getNewSignupReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE, subRole: SUB_ROLES.referent_etablissement }));
-    const etablissement = await createEtablissement(createFixtureEtablissement({ referentEtablissementIds: [referent._id] }));
-    const res = await request(getAppHelper({ role: ROLES.ADMIN }))
-      .post("/cle/referent/invite-coordonnateur")
-      .send({
-        email: faker.internet.email().toLowerCase(),
-        firstName: "Admin",
-        lastName: "Admin",
-        etablissementId: etablissement._id,
-      });
-
-    expect(res.statusCode).toEqual(200);
-    expect(res.body).toHaveProperty("ok", true);
+    expect(res.body.data).toHaveLength(2);
+    expect(res.body.data[0]._id).toEqual(referent1._id.toString());
+    expect(res.body.data[1]._id).toEqual(referent2._id.toString());
   });
 
   it("should return 400 Bad Request when request body is invalid", async () => {
-    let res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
+    const res = await request(getAppHelper()).post("/cle/referent/getMany").send({
       invalid: "invalid",
     });
-    expect(res.statusCode).toEqual(400);
 
-    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
-      firstName: "firstName",
-      lastName: "lastName",
-      email: "invalid-email",
-    });
     expect(res.statusCode).toEqual(400);
-
-    res = await request(getAppHelper()).post("/cle/referent/invite-coordonnateur").send({
-      lastName: "lastName",
-      email: faker.internet.email().toLowerCase(),
-    });
-    expect(res.statusCode).toEqual(400);
+    expect(res.body).toHaveProperty("ok", false);
+    const validErrorCodes = [ERRORS.INVALID_PARAMS, ERRORS.INVALID_QUERY, ERRORS.INVALID_BODY];
+    expect(validErrorCodes).toContain(res.body.code);
   });
 
-  describe("POST /cle/referent/getMany", () => {
-    beforeEach(async () => {
-      await ReferentModel.deleteMany();
-      jest.clearAllMocks();
-    });
+  it("should return 404 Not Found when referents are not found", async () => {
+    jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Referents not found"));
 
-    it("should return 200 OK and the list of referents", async () => {
-      const referent1 = await createReferentHelper(getNewSignupReferentFixture());
-      const referent2 = await createReferentHelper(getNewSignupReferentFixture());
-
-      jest.spyOn(referentService, "getReferentsByIds").mockResolvedValue([referent1, referent2]);
-
-      const res = await request(getAppHelper())
-        .post("/cle/referent/getMany")
-        .send({
-          ids: [referent1._id.toString(), referent2._id.toString()],
-        });
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("ok", true);
-      expect(res.body.data).toHaveLength(2);
-      expect(res.body.data[0]._id).toEqual(referent1._id.toString());
-      expect(res.body.data[1]._id).toEqual(referent2._id.toString());
-    });
-
-    it("should return 400 Bad Request when request body is invalid", async () => {
-      const res = await request(getAppHelper()).post("/cle/referent/getMany").send({
-        invalid: "invalid",
+    const res = await request(getAppHelper())
+      .post("/cle/referent/getMany")
+      .send({
+        ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
       });
 
-      expect(res.statusCode).toEqual(400);
-      expect(res.body).toHaveProperty("ok", false);
-      const validErrorCodes = [ERRORS.INVALID_PARAMS, ERRORS.INVALID_QUERY, ERRORS.INVALID_BODY];
-      expect(validErrorCodes).toContain(res.body.code);
-    });
+    expect(res.statusCode).toEqual(404);
+    expect(res.body).toHaveProperty("ok", false);
+    expect(res.body).toHaveProperty("code", "NOT_FOUND");
+  });
 
-    it("should return 404 Not Found when referents are not found", async () => {
-      jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Referents not found"));
+  it("should return 500 Internal Server Error when an unexpected error occurs", async () => {
+    jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Unexpected error"));
 
-      const res = await request(getAppHelper())
-        .post("/cle/referent/getMany")
-        .send({
-          ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
-        });
+    const res = await request(getAppHelper())
+      .post("/cle/referent/getMany")
+      .send({
+        ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
+      });
 
-      expect(res.statusCode).toEqual(404);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", "NOT_FOUND");
-    });
-
-    it("should return 500 Internal Server Error when an unexpected error occurs", async () => {
-      jest.spyOn(referentService, "getReferentsByIds").mockRejectedValue(new Error("Unexpected error"));
-
-      const res = await request(getAppHelper())
-        .post("/cle/referent/getMany")
-        .send({
-          ids: ["5f1fe63706afd056cb1e50c9", "5f1fe63706afd056cb1e50ca"],
-        });
-
-      expect(res.statusCode).toEqual(500);
-      expect(res.body).toHaveProperty("ok", false);
-      expect(res.body).toHaveProperty("code", "Unexpected error");
-    });
+    expect(res.statusCode).toEqual(500);
+    expect(res.body).toHaveProperty("ok", false);
+    expect(res.body).toHaveProperty("code", "Unexpected error");
   });
 });
