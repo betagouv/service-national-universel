@@ -1,7 +1,6 @@
 import express from "express";
 const router = express.Router();
 
-router.use("/appel-a-projet", require("./appelAProjetCle/appelAProjetController").default);
 router.use("/classe", require("./classe/classeController").default);
 router.use("/etablissement", require("./etablissement/etablissementController").default);
 router.use("/referent", require("./referent/referentController").default);

@@ -111,3 +111,14 @@ describe("Routes CLE supprimées — invitations et mises à jour de référents
     expect(response.status).not.toBe(404);
   });
 });
+
+describe("Routes CLE supprimées — appel à projet", () => {
+  const routes: [Method, string][] = [
+    ["post", "/cle/appel-a-projet/simulate"],
+    ["post", "/cle/appel-a-projet/real"],
+  ];
+
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
+  });
+});
