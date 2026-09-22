@@ -5,6 +5,7 @@
  * H63 PUT /referent/youngs                                     : validation/refus en masse sans contrôle de classe
  * H64 POST /referent/young/:id/refuse-military-preparation-files : tout RESPONSIBLE et tout REFERENT_REGION,
  *     sans lien avec le volontaire, peuvent refuser (et supprimer) ses pièces de préparation militaire
+ * H67 GET /referent/young/:id                                  : périmètre limité au rôle, document brut (tokens)
  * L23 PUT /young/update_phase3/:young                          : `canEditYoung` seul, sans rattachement réel
  */
 import request from "supertest";
@@ -35,6 +36,37 @@ jest.mock("../brevo", () => ({
   sendEmail: jest.fn().mockResolvedValue(true),
   sendSMS: jest.fn().mockResolvedValue(true),
 }));
+
+const SECRET_FIELDS = [
+  "password",
+  "token2FA",
+  "token2FAExpires",
+  "forgotPasswordResetToken",
+  "forgotPasswordResetExpires",
+  "invitationToken",
+  "invitationExpires",
+  "phase3Token",
+  "tokenEmailValidation",
+  "parent1Inscription2023Token",
+  "parent2Inscription2023Token",
+];
+
+/** Valeurs de secrets posées sur la fixture pour rendre une fuite visible. */
+const youngSecrets = {
+  token2FA: "2fa-young", // gitleaks:allow
+  forgotPasswordResetToken: "reset-young", // gitleaks:allow
+  invitationToken: "invite-young", // gitleaks:allow
+  phase3Token: "phase3-young", // gitleaks:allow
+  tokenEmailValidation: "email-young", // gitleaks:allow
+  parent1Inscription2023Token: "parent1-young", // gitleaks:allow
+  parent2Inscription2023Token: "parent2-young", // gitleaks:allow
+};
+
+/** Vérifie qu'aucun secret de session / réinitialisation / invitation ne sort dans la réponse. */
+function expectNoSecret(payload: any) {
+  const leaked = SECRET_FIELDS.filter((field) => payload?.[field] !== undefined && payload?.[field] !== null);
+  expect(leaked).toEqual([]);
+}
 
 const TERRITOIRE = { department: "Ain", region: "Auvergne-Rhône-Alpes" };
 const AUTRE_TERRITOIRE = { department: "Doubs", region: "Bourgogne-Franche-Comté" };
@@ -74,6 +106,61 @@ beforeEach(async () => {
 afterEach(resetAppAuth);
 
 describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (lot A1)", () => {
+  describe("H67 — GET /referent/young/:id", () => {
+    it("refuse le dossier d'un volontaire qui n'a pas candidaté à une mission de la structure", async () => {
+      const victime = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, ...TERRITOIRE } as any));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const attaquant = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+
+      const res = await request(await getAppHelperWithAcl(attaquant, "referent")).get(`/referent/young/${victime._id}`);
+
+      expect(res.status).toBe(403);
+    }, 30000);
+
+    it("refuse le dossier d'un volontaire hors du territoire d'un référent départemental", async () => {
+      const victime = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, ...TERRITOIRE } as any));
+      const attaquant = await createReferentHelper(
+        getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: [AUTRE_TERRITOIRE.department], region: AUTRE_TERRITOIRE.region }),
+      );
+
+      const res = await request(await getAppHelperWithAcl(attaquant, "referent")).get(`/referent/young/${victime._id}`);
+
+      expect(res.status).toBe(403);
+    }, 30000);
+
+    it("refuse le dossier d'un volontaire d'une autre classe à un référent de classe", async () => {
+      const { young: victime } = await createYoungInClasse([new ObjectId().toString()], youngSecrets);
+      const attaquant = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE }));
+
+      const res = await request(await getAppHelperWithAcl(attaquant, "referent")).get(`/referent/young/${victime._id}`);
+
+      expect(res.status).toBe(403);
+    }, 30000);
+
+    it("autorise le responsable dont la structure porte une candidature du volontaire, sans renvoyer de secret", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, ...TERRITOIRE } as any));
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      await ApplicationModel.create({ youngId: young._id.toString(), structureId: structure._id.toString(), missionId: new ObjectId().toString() });
+
+      const res = await request(await getAppHelperWithAcl(responsable, "referent")).get(`/referent/young/${young._id}`);
+
+      expect(res.status).toBe(200);
+      expectNoSecret(res.body.data);
+    }, 30000);
+
+    it("ne renvoie aucun secret au référent départemental du territoire", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, ...TERRITOIRE } as any));
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: [TERRITOIRE.department], region: TERRITOIRE.region }));
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent")).get(`/referent/young/${young._id}`);
+
+      expect(res.status).toBe(200);
+      expect(res.body.data.firstName).toBe(young.firstName);
+      expectNoSecret(res.body.data);
+    }, 30000);
+  });
+
   describe("H64 — POST /referent/young/:id/refuse-military-preparation-files", () => {
     it("refuse à un responsable de structure le rejet des pièces de préparation militaire", async () => {
       const victime = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, statusMilitaryPreparationFiles: "WAITING_VERIFICATION" } as any));

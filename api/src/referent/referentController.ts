@@ -136,7 +136,7 @@ import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
-import { canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../young/youngScope";
+import { canEditYoungInScope, canViewYoungFileInScope, isYoungInReferentGeography, isYoungInUserScope } from "../young/youngScope";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -1442,6 +1442,9 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     if (!canViewYoung(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const data = await YoungModel.findById(value);
     if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // `canViewYoung` ne contrôle que le rôle : sans ce périmètre, tout responsable de structure ou
+    // référent hors de son territoire lit le dossier de n'importe quel volontaire (constat H67).
+    if (!(await canViewYoungFileInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
     let applications: any[] = [];
     for (let application of applicationsFromDb) {
@@ -1459,7 +1462,9 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
       if (!etablissement || !classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    return res.status(200).send({ ok: true, data: { ...data._doc, applications, etablissement, classe } });
+    // Le document brut porte le mot de passe et tous les jetons (invitation, réinitialisation, 2FA,
+    // phase 3, représentants légaux) : la réponse doit passer par le sérialiseur.
+    return res.status(200).send({ ok: true, data: { ...serializeYoung(data, req.user), applications, etablissement, classe } });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
