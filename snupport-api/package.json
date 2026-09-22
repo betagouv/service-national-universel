@@ -24,6 +24,7 @@
     "@sentry/integrations": "^7.74.1",
     "@sentry/node": "^7.74.1",
     "@sentry/tracing": "^7.74.1",
+    "@snu/log-redaction": "*",
     "aws-sdk": "^2.1476.0",
     "bcryptjs": "^2.4.3",
     "body-parser": "^1.20.2",

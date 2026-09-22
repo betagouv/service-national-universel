@@ -13,7 +13,7 @@
     "outDir": "./src",
     "rootDir": "./src"
   },
-  "references": [],
+  "references": [{ "path": "../packages/log-redaction" }],
   "include": ["src/**/*.ts"],
   "exclude": ["**/node_modules/*", "src/__tests__/*"],
   "typeRoots": [

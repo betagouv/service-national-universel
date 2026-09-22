@@ -1,4 +1,4 @@
-import { REDACTED, isSensitiveKey, maskEmail, redactValue, redactString, redactUrl, redactLogInfo } from "../utils/logRedaction";
+import { REDACTED, isSensitiveKey, maskEmail, redactValue, redactString, redactUrl, redactLogInfo } from "../index";
 
 const TOKEN_40 = "a".repeat(40);
 const OTHER_TOKEN_40 = "b".repeat(40);
@@ -33,6 +33,11 @@ describe("logRedaction", () => {
         "youngContractToken",
         "authorization",
         "cookie",
+        // cookies de session, une valeur par application
+        "jwt",
+        "jwt_ref",
+        "jwt_young",
+        "jwtzamoud",
         "apiKey",
         "api-key",
         "SENDINBLUEKEY",

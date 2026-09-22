@@ -9,6 +9,8 @@ const {
 } = require("@sentry/node");
 const { Integrations: TracingIntegrations } = require("@sentry/tracing");
 const { config } = require("./config");
+const { logger } = require("./logger");
+const { redactSentryEvent } = require("@snu/log-redaction");
 
 const SENTRY_DSN = "https://787fecd515b1c56eda166634937df903@sentry.incubateur.net/245";
 
@@ -33,6 +35,9 @@ function initSentry(app) {
       environment: config.ENVIRONMENT,
       release: config.RELEASE,
       normalizeDepth: 16,
+      // `Handlers.requestHandler()` joint à l'événement le corps de la requête, les en-têtes et les cookies :
+      // secrets et PII y sont masqués ici, ainsi que dans tout `extra`.
+      beforeSend: redactSentryEvent,
       integrations: [
         new ExtraErrorData({ depth: 16 }),
         new RewriteFrames({ root: process.cwd() }),
@@ -85,7 +90,8 @@ function initSentry(app) {
 }
 
 function capture(err, contexte) {
-  console.log("capture", err);
+  // `logger` et non `console` : le format winston masque secrets et PII, `console` écrit en clair sur stdout
+  logger.error(`capture: ${err}`);
   if (!err) {
     sentryCaptureMessage("Error not defined");
     return;
@@ -102,7 +108,7 @@ function capture(err, contexte) {
   }
 }
 function captureMessage(mess, contexte) {
-  console.log("captureMessage", mess);
+  logger.error(`capture message: ${mess}`);
   if (!mess) {
     sentryCaptureMessage("Error not defined");
     return;

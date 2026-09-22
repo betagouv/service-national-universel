@@ -74,6 +74,7 @@ runs:
           admin/node_modules
           packages/ds/node_modules
           packages/lib/node_modules
+          packages/log-redaction/node_modules
         key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nodemodules-
@@ -92,6 +93,11 @@ runs:
 
     - name: Build lib
       working-directory: packages/lib
+      shell: bash
+      run: npm run build
+
+    - name: Build log-redaction
+      working-directory: packages/log-redaction
       shell: bash
       run: npm run build
 
