@@ -8,6 +8,7 @@ import { validateId } from "../../utils/validator";
 import { ClasseModel, EtablissementModel, ReferentModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { buildUniqueClasseKey } from "../classe/classeService";
+import { isEtablissementInUserScope } from "./etablissementScope";
 
 const router = express.Router();
 
@@ -50,6 +51,7 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
     }
 
     if (!canViewEtablissement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!(await isEtablissementInUserScope(req.user, id))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const etablissement = await EtablissementModel.findById(id).lean();
     if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });

@@ -1,5 +1,6 @@
 import { LigneBusModel, ReferentModel, CohesionCenterModel, PointDeRassemblementModel, YoungModel, ReferentDocument, YoungDocument } from "../../../models";
-import { serializeReferent, serializeYoung } from "../../../utils/serializer";
+import { serializeYoung } from "../../../utils/serializer";
+import { REFERENT_CLE_PUBLIC_FIELDS } from "../../referentProjection";
 
 export const findCohesionCentersForClasses = async (classes) => {
   const cohesionCenterIds = classes.map(({ cohesionCenterId }) => cohesionCenterId).filter(Boolean);
@@ -35,8 +36,12 @@ export const findLigneInfoForClasses = async (classes) => {
   return await LigneBusModel.find({ _id: { $in: ligneIds } });
 };
 
+/**
+ * `serializeReferent` retire bien les jetons, mais laisse passer tout le reste du document
+ * (mobile, dernière connexion, territoire, métadonnées d'invitation, cohortes…). L'export n'a
+ * besoin que de l'identité et du contact du chef d'établissement : projection explicite.
+ */
 export const findChefEtablissementInfoForClasses = async (classes): Promise<ReferentDocument[]> => {
   const chefIds = classes.map(({ etablissement }) => etablissement.referentEtablissementIds).filter(Boolean);
-  const chefEtablissement = await ReferentModel.find({ _id: { $in: chefIds } });
-  return chefEtablissement.map(serializeReferent);
+  return ReferentModel.find({ _id: { $in: chefIds } }).select(REFERENT_CLE_PUBLIC_FIELDS);
 };

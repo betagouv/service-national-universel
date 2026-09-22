@@ -2,18 +2,19 @@ import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
 
-import { canSearchStudent, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
+import { canSearchStudent, PERMISSION_ACTIONS, PERMISSION_RESOURCES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YoungDto } from "snu-lib";
 
 import { validateId, idSchema } from "../../utils/validator";
 import { ERRORS } from "../../utils";
 import { capture } from "../../sentry";
-import { ClasseModel, YoungModel, EtablissementModel } from "../../models";
+import { ClasseModel, YoungModel } from "../../models";
 import { UserRequest } from "../../controllers/request";
 import { getValidatedYoungsWithSession, getYoungsImageRight, getYoungsParentAllowSNU } from "../../young/youngService";
 import patches from "../../controllers/patches";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { isClasseInUserScope } from "../classe/classeScope";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -31,15 +32,10 @@ router.get("/by-classe-stats/:idClasse", passport.authenticate("referent", { ses
     if (!classe) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (req.user.role === ROLES.REFERENT_CLASSE && !classe.referentClasseIds.includes(req.user._id.toString()))
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    if (req.user.role === ROLES.ADMINISTRATEUR_CLE) {
-      const etablissement = await EtablissementModel.findById(classe.etablissementId);
-      if (!etablissement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!etablissement.referentEtablissementIds.includes(req.user._id.toString()) && !etablissement.coordinateurIds.includes(req.user._id.toString())) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
-    }
+    // Le contrôle en place couvrait le référent de classe et l'administrateur CLE, mais laissait
+    // les référents départementaux et régionaux lire les effectifs de n'importe quelle classe.
+    // Cette route alimente la même page que GET /cle/classe/:id : même périmètre des deux côtés.
+    if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const students: YoungDto[] = await YoungModel.find({ classeId: value });
 
@@ -86,6 +82,7 @@ router.get(
 
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const youngs = await YoungModel.find({ classeId: classe._id });
 
@@ -145,6 +142,7 @@ router.get(
 
       const classe = await ClasseModel.findById(id);
       if (!classe) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isClasseInUserScope(req.user, classe))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       let youngPatches = await patches.getOldStudentPatches({ classeId: id, user: req.user });
 
