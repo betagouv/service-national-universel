@@ -141,6 +141,35 @@ describe("Referent", () => {
     });
   });
 
+  describe("POST /referent/signup_invite", () => {
+    // CLE décommissionné (H17) : cette route non authentifiée ne doit plus pouvoir activer un compte
+    // ADMINISTRATEUR_CLE ou REFERENT_CLASSE, même avec un jeton d'invitation valide.
+    it("should return 403 when activating an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
+      for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
+        const invitationToken = `${Date.now()}-${role}`;
+        const referentFixture = getNewReferentFixture({
+          role,
+          invitationToken,
+          invitationExpires: new Date(Date.now() + 1000 * 60 * 60 * 24 * 7),
+        });
+        const referent = await createReferentHelper(referentFixture);
+        const res = await request(await getAppHelperWithAcl())
+          .post("/referent/signup_invite")
+          .send({
+            email: referent.email,
+            invitationToken,
+            password: "Test1234567!",
+            acceptCGU: "true",
+          });
+        expect(res.statusCode).toEqual(403);
+        expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+        const referentAfter = await getReferentByIdHelper(referent._id);
+        expect(referentAfter?.registredAt).toBeFalsy();
+        await deleteReferentByIdHelper(referent._id);
+      }
+    });
+  });
+
   describe("PUT /referent/young/:id", () => {
     async function createYoungThenUpdate(
       updateYoungFields: Partial<YoungType>,
