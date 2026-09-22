@@ -11,6 +11,7 @@ const ShortcutModel = require("../models/shortcut");
 const MessageModel = require("../models/message");
 const { sendEmailWithConditions, getHoursDifference } = require("../utils");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { canAccessTicket } = require("../utils/ticketScope");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_TICKET_STATUS } = require("../schemas");
@@ -84,9 +85,20 @@ router.post(
     if (!agent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     const macros = await MacroModel.findById(req.cleanParams.id);
     if (!macros) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Load and authorize the whole batch before touching anything: a macro must never be
+    // applied to a ticket outside the caller's perimeter (same rule as ticket.ts/message.js),
+    // and must not be half-applied when one of the ids is out of reach.
+    const tickets = [];
+    for (const tickId of req.cleanBody.ticketsId) {
+      const ticket = await TicketModel.findById(tickId);
+      if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!canAccessTicket(req.user, ticket)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      tickets.push(ticket);
+    }
+
     let ticketId = "";
-    for (let tickId of req.cleanBody.ticketsId) {
-      let ticket = await TicketModel.findById(tickId);
+    for (let ticket of tickets) {
       if (ticket._id === ticketId) return res.status(200).send({ ok: true });
       ticketId = JSON.parse(JSON.stringify(ticket._id));
       // set default agent
