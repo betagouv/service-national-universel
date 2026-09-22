@@ -91,6 +91,21 @@ export async function isYoungInUserScope(user: UserDto, young: Pick<YoungType, "
 }
 
 /**
+ * Périmètre de LECTURE du dossier d'un volontaire côté référent (`GET /referent/young/:id`).
+ *
+ * `isYoungInUserScope` refuse par construction les responsables et superviseurs de structure, qui
+ * n'ont pas de rattachement territorial ; ils consultent pourtant légitimement le dossier des
+ * volontaires ayant candidaté à une de leurs missions. C'est le seul élargissement autorisé ici :
+ * `canViewYoung` (snu-lib) ne contrôlait que le rôle, ouvrant le dossier de n'importe quel
+ * volontaire à tout responsable, superviseur ou référent hors de son territoire (constat H67).
+ */
+export async function canViewYoungFileInScope(user: UserDto, young: Pick<YoungType, "_id" | "region" | "department" | "classeId" | "sessionPhase1Id">): Promise<boolean> {
+  if (await isYoungInUserScope(user, young)) return true;
+  if ([ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return isYoungInStructureScope(user, young);
+  return false;
+}
+
+/**
  * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
  * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
  * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.

@@ -36,7 +36,7 @@ import { validateYoung, validateId, validatePhase1Document, idSchema } from "../
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -81,7 +81,6 @@ import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMi
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
-import { canEditYoungInScope } from "../../young/youngScope";
 import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
@@ -113,8 +112,11 @@ router.post("/signup_verify", async (req: UserRequest, res) => {
 
     const young = await YoungModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
-    const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: young._id, passwordChangedAt: null, lastLogoutAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    return res.status(200).send({ ok: true, token, data: serializeYoung(young, young) });
+    // Pré-remplissage du formulaire d'activation uniquement : aucune session n'est ouverte ici.
+    // Cette route délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de
+    // passe (audit 2026-09-21, M43) ; c'est `signup_invite` qui authentifie, à partir du couple
+    // (email, invitationToken) et sans lire de JWT.
+    return res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -420,12 +422,15 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
+    // `canEditYoung` n'est qu'une matrice de rôles : elle autorise tout référent CLE sur tout
+    // volontaire `source: CLE`, sans vérifier sa classe (constat L23).
     if (!(await canEditYoungInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     delete value.young;
     data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

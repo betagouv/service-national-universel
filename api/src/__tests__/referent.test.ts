@@ -447,7 +447,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -475,7 +475,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(403);
@@ -503,7 +503,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.VALIDATED });
       expect(res.statusCode).toEqual(200);
@@ -535,7 +535,7 @@ describe("Referent", () => {
       const young: any = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id, cohort: classe.cohort, cohortId: cohort._id }));
 
       const youngIds = [young._id.toString()];
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMINISTRATEUR_CLE }))
+      const res = await request(await getAppHelperWithAcl({ _id: userId, role: ROLES.ADMINISTRATEUR_CLE } as any))
         .put(`/referent/youngs`)
         .send({ youngIds, status: YOUNG_STATUS.REFUSED });
       expect(res.statusCode).toEqual(200);
