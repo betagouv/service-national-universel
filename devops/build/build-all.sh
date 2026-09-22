@@ -38,8 +38,13 @@ mv out/admin/build $destination/admin
 mv out/app/build $destination/app
 
 # back
+# Les paquets du workspace doivent être recopiés : node_modules ne contient que des liens
+# symboliques vers packages/<nom>, qui pendent si la cible n'est pas là (MODULE_NOT_FOUND au boot).
 mkdir -p $destination/packages/lib/
 mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
+# Pas de dépendance de runtime : npm ci --omit dev ne crée pas de node_modules ici.
+mkdir -p $destination/packages/log-redaction/
+mv out/packages/log-redaction/dist/* $destination/packages/log-redaction/
 mv out/node_modules $destination/
 
 # api
