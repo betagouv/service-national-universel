@@ -7,7 +7,7 @@ on:
 jobs:
   destroy:
     if: github.event.ref != 'production' && github.event.ref != 'main'
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: actions/checkout@v4
 

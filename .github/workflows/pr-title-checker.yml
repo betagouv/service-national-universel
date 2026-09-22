@@ -10,7 +10,7 @@ on:
 
 jobs:
   check:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - uses: thehanimo/pr-title-checker@v1.4.1
         with:
