@@ -687,21 +687,25 @@ describe("Young Inscription", () => {
     it("Should return 200 otherwise", async () => {
       const user = await createYoungHelper(getNewYoungFixture());
 
+      // `validateFirstName` capitalise CHAQUE mot, et chaque partie séparée par un tiret. Un prénom
+      // tiré au hasard rendait ce cas non déterministe : il ne passait que sur un prénom en un seul
+      // mot, et échouait dès que faker tirait « jeanne d'arc » ou « jean-luc ».
       const profilObj = {
-        firstName: faker.person.firstName().toLowerCase(),
+        firstName: "jean-luc de la tour",
         lastName: faker.person.lastName().toUpperCase(),
         email: faker.internet.email().toLowerCase(),
         phone: "600000000",
         phoneZone: "FRANCE",
       };
+      const expectedFirstName = "Jean-Luc De La Tour";
 
       let res = await request(getAppHelper(user)).put("/young/inscription2023/profil").send(profilObj);
       const responseData = res.body.data;
       const updatedYoung = await getYoungByIdHelper(user._id);
 
       expect(res.status).toBe(200);
-      expect(responseData).toMatchObject({ ...profilObj, firstName: profilObj.firstName.charAt(0).toUpperCase() + profilObj.firstName.slice(1) });
-      expect(updatedYoung).toMatchObject({ ...profilObj, firstName: profilObj.firstName.charAt(0).toUpperCase() + profilObj.firstName.slice(1) });
+      expect(responseData).toMatchObject({ ...profilObj, firstName: expectedFirstName });
+      expect(updatedYoung).toMatchObject({ ...profilObj, firstName: expectedFirstName });
     });
   });
 });
