@@ -452,14 +452,14 @@ const Middle = ({
       )}
       <div className="mb-4 flex flex-row items-center border-b border-gray-200 pb-4">
         <div className="w-1/3">
-          <label className="mb-1 inline-block text-sm font-medium text-gray-700"> {user.role === "AGENT " ? "Nom ou sujet du ticket*" : "Objet du message"}</label>
+          <label className="mb-1 inline-block text-sm font-medium text-gray-700"> {user.role === "AGENT" ? "Nom ou sujet du ticket*" : "Objet du message"}</label>
         </div>
         <div className="w-2/3">
           <input
             key={key}
             type="text"
             className="w-full rounded border border-gray-300 bg-white py-2.5 px-3.5 text-sm text-black-dark shadow-sm transition-colors placeholder:text-gray-500 focus:border-gray-400"
-            placeholder={user.role === "AGENT " ? "Nom ou sujet du ticket*" : "Objet du message"}
+            placeholder={user.role === "AGENT" ? "Nom ou sujet du ticket*" : "Objet du message"}
             value={subject}
             onChange={(e) => setSubject(e.target.value)}
           />
