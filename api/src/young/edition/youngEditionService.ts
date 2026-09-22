@@ -1,4 +1,6 @@
-import { YOUNG_STATUS, SENDINBLUE_TEMPLATES, canEditYoung } from "snu-lib";
+import { YOUNG_STATUS, SENDINBLUE_TEMPLATES } from "snu-lib";
+
+import { canEditYoungInScope } from "../youngScope";
 import { config } from "../../config";
 
 import { capture } from "../../sentry";
@@ -45,7 +47,7 @@ export function generateConsentChanges(value, young) {
 }
 
 export async function canEditYoungConsent(young, user) {
-  if (!canEditYoung(user, young)) {
+  if (!(await canEditYoungInScope(user, young))) {
     return false;
   }
   const classe = await ClasseModel.findById(young.classeId).populate({

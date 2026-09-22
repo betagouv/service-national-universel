@@ -33,7 +33,6 @@ import {
   SENDINBLUE_TEMPLATES,
   canUserUpdateYoungStatus,
   YOUNG_STATUS,
-  canEditYoung,
   canAllowSNU,
   YoungType,
   getPhaseStatusOptions,
@@ -48,6 +47,7 @@ import { logger } from "../../logger";
 import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { canEditYoungConsent, updateYoungConsent } from "./youngEditionService";
+import { canEditYoungInScope } from "../youngScope";
 
 const router = express.Router({ mergeParams: true });
 
@@ -115,7 +115,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -259,7 +259,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -310,7 +310,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -417,7 +417,7 @@ router.put("/:id/parent-allow-snu", passport.authenticate("referent", { session:
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -628,7 +628,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -673,7 +673,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -737,7 +737,7 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
       return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
     }
 
-    if (!canEditYoung(req.user, young)) {
+    if (!(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
