@@ -382,6 +382,7 @@ Ferme H17 (invitation d'un coordinateur dans n'importe quel établissement). `PO
 **Files:**
 - Modify: `api/src/__tests__/cle-routes-supprimees.test.ts`
 - Modify: `api/src/cle/referent/referentController.ts` (retrait de 4 routes)
+- Modify: `api/src/referent/referentController.ts` (~l.397) — endpoint **générique** d'invitation de référent, hors `api/src/cle`. Il construit encore un lien `/creer-mon-compte?token=` pour les rôles CLE, vers une route front supprimée en tâche 1, et peut créer un compte CLE **actif** après la migration de la tâche 6. Retirer la branche CLE de la construction du CTA, et refuser les rôles CLE dans ce parcours d'invitation.
 - Modify: `api/src/cle/index.ts` (démontage de `/classes`)
 - Modify: `api/src/__tests__/phase1/cle/referent.test.ts`
 - Delete: `api/src/cle/classes/classesController.ts`, `api/src/cle/classes/classesController.d.ts`, `api/src/cle/classes/classesService.ts`, `api/src/cle/classes/classesService.test.ts`, `api/src/cle/classes/classesValidator.ts`, `api/src/cle/classes/classesValidator.d.ts`
@@ -784,7 +785,7 @@ Les écrans `Classes` et `Établissement` restent accessibles en consultation au
 - Delete: `admin/src/scenes/classe/create.tsx`, `admin/src/scenes/classe/components/WithdrawButton.tsx`, `admin/src/scenes/classe/header/DeleteButton.tsx`, `admin/src/scenes/classe/header/VerifClassButton.tsx`, `admin/src/scenes/classe/header/ButtonRelanceVerif.tsx`, `admin/src/scenes/classe/header/ButtonCertificateDownload.tsx`, `admin/src/scenes/classe/header/ButtonLinkInvite.tsx`, `admin/src/scenes/classe/components/ReferentInfosModifierModal.tsx`, `admin/src/scenes/classe/components/ReferentInfosConfirmerModal.tsx`
 - Delete: `admin/src/scenes/etablissement/Create/` (dossier complet), `admin/src/scenes/etablissement/components/ButtonAddCoordinator.tsx`, `admin/src/scenes/etablissement/components/ButtonDeleteCoordinator.tsx`, `admin/src/scenes/etablissement/components/ButtonEditChefEtablissement.tsx`
 - Modify: `admin/src/scenes/classe/header/index.tsx`, `admin/src/scenes/classe/header/ClasseHeader.tsx`, `admin/src/scenes/classe/components/ReferentInfos.tsx`, `admin/src/scenes/classe/index.tsx`, `admin/src/scenes/classe/view/index.tsx`
-- Modify: `admin/src/scenes/etablissement/view.tsx`, `admin/src/scenes/etablissement/index.jsx`, `admin/src/scenes/etablissement/components/Contact.tsx`
+- Modify: `admin/src/scenes/etablissement/view.tsx`, `admin/src/scenes/etablissement/index.jsx`, `admin/src/scenes/etablissement/components/Contact.tsx`, `admin/src/scenes/etablissement/components/GeneralInfos.tsx` (appelle `PUT /cle/etablissement/:id` à la ligne 67 — route supprimée en tâche 3 ; retirer la commande d'édition, garder l'affichage)
 
 **Interfaces:**
 - Consumes: les routes supprimées aux tâches 2 à 4 — aucune ne doit plus être appelée.
