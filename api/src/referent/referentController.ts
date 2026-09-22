@@ -9,6 +9,7 @@ import fs from "fs";
 import fileUpload from "express-fileupload";
 
 import AuthObject from "../auth";
+import { signinRateLimiter, emailSendingRateLimiter } from "../middlewares/rateLimit";
 import patches from "../controllers/patches";
 import ClasseStateManager from "../cle/classe/stateManager";
 
@@ -212,16 +213,21 @@ function cleanReferentData(referent) {
   return referent;
 }
 
-router.post("/signin", (req, res) => ReferentAuth.signin(req, res));
-router.post("/signin-2fa", (req, res) => ReferentAuth.signin2FA(req, res));
+// Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth.
+const referentSigninLimiter = signinRateLimiter();
+
+router.post("/signin", referentSigninLimiter, (req, res) => ReferentAuth.signin(req, res));
+router.post("/signin-2fa", referentSigninLimiter, (req, res) => ReferentAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", (_req, res) => {
   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 });
 router.get("/signin_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.signinToken(req, res));
 router.get("/refresh_token", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.refreshToken(req, res));
-router.post("/forgot_password", async (req: UserRequest, res: Response) => ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`));
-router.post("/forgot_password_reset", async (req: UserRequest, res: Response) => ReferentAuth.forgotPasswordReset(req, res));
+router.post("/forgot_password", emailSendingRateLimiter("referent-forgot-password"), async (req: UserRequest, res: Response) =>
+  ReferentAuth.forgotPassword(req, res, `${config.ADMIN_URL}/auth/reset`),
+);
+router.post("/forgot_password_reset", referentSigninLimiter, async (req: UserRequest, res: Response) => ReferentAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) =>
   ReferentAuth.resetPassword(req, res),
 );
@@ -453,7 +459,7 @@ function shouldResendInvitation(referent: ReferentDocument): boolean {
  * le sort de la demande. Un 404 sur adresse inconnue en faisait un oracle d'existence de compte
  * référent, interrogeable par n'importe qui (audit 2026-09-21, M66).
  */
-router.post("/signup_retry", async (req: UserRequest, res: Response) => {
+router.post("/signup_retry", emailSendingRateLimiter("referent-signup-retry"), async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ email: Joi.string().lowercase().trim().email().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {
@@ -489,7 +495,7 @@ router.post("/signup_retry", async (req: UserRequest, res: Response) => {
   }
 });
 
-router.post("/signup_verify", async (req: UserRequest, res: Response) => {
+router.post("/signup_verify", referentSigninLimiter, async (req: UserRequest, res: Response) => {
   try {
     const { error, value } = Joi.object({ invitationToken: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
     if (error) {

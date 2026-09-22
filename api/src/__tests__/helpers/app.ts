@@ -13,8 +13,13 @@ import { isReferent, isYoung } from "../../utils";
 import { ReferentDocument, YoungDocument } from "../../models";
 import { getAcl } from "../../services/iam/Permission.service";
 import { ROLE_JEUNE, ROLES } from "snu-lib";
+import { resetRateLimiters } from "../../middlewares/rateLimit";
 
 export function resetAppAuth() {
+  // Les limiteurs de débit des routes d'auth vivent au niveau du module, donc
+  // sont partagés par tous les getAppHelper() d'un même process : sans remise à
+  // zéro, un cas de test épuiserait le quota des suivants.
+  resetRateLimiters();
   // @ts-ignore
   passport.user = getNewReferentFixture();
   // @ts-ignore

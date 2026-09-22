@@ -63,8 +63,14 @@ router.get("/token", async (req, res) => {
 
     const { _id, passwordChangedAt, lastLogoutAt } = value;
 
+    // Un compte supprimé ou anonymisé ne doit plus rendre de profil, même avec
+    // un jeton encore valide : passport.ts applique déjà ce contrôle, cette
+    // route était la seule à le manquer (L21 de l'audit du 21/09/2026).
+    const isRevoked = (account) => account.status === "DELETED" || account.anonymized === "true" || account.anonymized === true || Boolean(account.deletedAt);
+
     // First, check in the YoungModel
     let user = await YoungModel.findById(_id);
+    if (user && isRevoked(user)) return res.status(401).send({ ok: false, user: { restriction: "public" } });
     if (user) {
       if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
         user.set({ lastActivityAt: Date.now() });
@@ -75,6 +81,7 @@ router.get("/token", async (req, res) => {
 
     // If not found in YoungModel, check in ReferentModel
     user = await ReferentModel.findById(_id);
+    if (user && isRevoked(user)) return res.status(401).send({ ok: false, user: { restriction: "public" } });
     if (user) {
       if (passwordChangedAt?.getTime() === user.passwordChangedAt?.getTime() && lastLogoutAt?.getTime() === user.lastLogoutAt?.getTime()) {
         user.set({ lastActivityAt: Date.now() });

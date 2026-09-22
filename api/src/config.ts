@@ -90,6 +90,13 @@ export const config = {
   JVA_TOKEN: _env(envStr, "JVA_TOKEN"),
   JVA_API_KEY: _env(envStr, "JVA_API_KEY"),
   REDIS_URL: _env(envStr, "REDIS_URL", "redis://127.0.0.1:6379"),
+  /**
+   * Nombre de reverse proxies devant l'API. Express ne retient alors que le
+   * dernier saut non fiable de X-Forwarded-For : sans ce réglage, le rate
+   * limiting se contourne en forgeant l'en-tête. À ajuster si la chaîne de
+   * proxies change.
+   */
+  TRUST_PROXY_HOPS: _env(envInt, "TRUST_PROXY_HOPS", ["production", "staging", "ci", "custom"].includes(environment) ? 1 : 0),
   API_DEMARCHE_SIMPLIFIEE_TOKEN: _env(envStr, "API_DEMARCHE_SIMPLIFIEE_TOKEN"),
   PM2_SLACK_URL: _env(envStr, "PM2_SLACK_URL"),
   TASK_QUEUE_PREFIX: _env(envStr, "TASK_QUEUE_PREFIX", environment),
