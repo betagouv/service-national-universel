@@ -1,6 +1,6 @@
 // GET /v0/sso/signin délivre une session agent complète. Il ne recevait que l'adresse email du
 // référent SNU et prenait n'importe quel compte agent la portant — y compris les comptes du
-// support (AGENT, ADMIN, DG), qui ne viennent d'aucune synchronisation et ne doivent jamais être
+// support (AGENT, DG), qui ne viennent d'aucune synchronisation et ne doivent jamais être
 // joignables par SSO.
 //
 // L'identité est donc `snuReferentId`, l'identifiant du référent sur la plateforme SNU, posé par
