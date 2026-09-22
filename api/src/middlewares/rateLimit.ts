@@ -48,10 +48,20 @@ function buildStore(prefix: string): Store {
   return store;
 }
 
-/** Vide tous les compteurs. Réservé aux tests. */
+/**
+ * Vide tous les compteurs. Réservé aux tests.
+ *
+ * `shutdown()` coupe aussi l'intervalle de rotation de fenêtre du MemoryStore.
+ * Cet intervalle est `unref`é — il n'empêche pas le process de sortir — mais il
+ * garde une référence forte sur le store et ses tables de hits, qui survivraient
+ * donc à la réinitialisation du registre de modules entre fichiers de test. Les
+ * compteurs restent exploitables ensuite : c'est cette fonction qui les remet à
+ * zéro, pas la rotation automatique.
+ */
 export function resetRateLimiters(): void {
   for (const store of stores) {
     store.resetAll?.();
+    store.shutdown?.();
   }
 }
 

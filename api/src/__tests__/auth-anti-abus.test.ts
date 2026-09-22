@@ -56,16 +56,21 @@ async function createYoung(fields: Record<string, any> = {}) {
   return createYoungHelper({ ...getNewYoungFixture(), password: PASSWORD, ...fields } as any);
 }
 
-function signin(email: string, password: string) {
-  return request(getAppHelper()).post("/young/signin").send({ email, password });
+// getAppHelper() monte l'intégralité des routes : une app par requête ferait de
+// cette suite la plus gourmande du dépôt, or la suite api tient déjà tout juste
+// dans les 4 Go de heap de la CI. Une rafale concurrente vise de toute façon un
+// seul serveur — une app par cas de test est aussi plus fidèle.
+function signin(app, email: string, password: string) {
+  return request(app).post("/young/signin").send({ email, password });
 }
 
 describe("M4 — brute force du mot de passe par requêtes concurrentes", () => {
   it("compte chaque tentative échouée, même lancées en parallèle", async () => {
     const young = await createYoung();
+    const app = getAppHelper();
     const BURST = 10;
 
-    await Promise.all(Array.from({ length: BURST }, () => signin(young.email, WRONG_PASSWORD)));
+    await Promise.all(Array.from({ length: BURST }, () => signin(app, young.email, WRONG_PASSWORD)));
 
     const after = await YoungModel.findById(young._id);
     // Avec un « lire, incrémenter, sauver » non atomique, les N requêtes lisent
@@ -75,12 +80,13 @@ describe("M4 — brute force du mot de passe par requêtes concurrentes", () => 
 
   it("verrouille le compte après la rafale au lieu de laisser réessayer", async () => {
     const young = await createYoung();
+    const app = getAppHelper();
 
-    await Promise.all(Array.from({ length: 10 }, () => signin(young.email, WRONG_PASSWORD)));
+    await Promise.all(Array.from({ length: 10 }, () => signin(app, young.email, WRONG_PASSWORD)));
 
     // Le plafond de 5 essais doit être atteint : la tentative suivante est refusée
     // pour dépassement, pas pour mot de passe invalide.
-    const next = await signin(young.email, WRONG_PASSWORD);
+    const next = await signin(app, young.email, WRONG_PASSWORD);
     expect(next.body.code).toBe("TOO_MANY_REQUESTS");
   });
 });
@@ -93,10 +99,11 @@ describe("M5 — plafond de 3 essais 2FA", () => {
       attempts2FA: 0,
       token2FAExpires: new Date(Date.now() + 10 * 60 * 1000),
     });
+    const app = getAppHelper();
     const BURST = 10;
 
     await Promise.all(
-      Array.from({ length: BURST }, () => request(getAppHelper()).post("/young/signin-2fa").send({ email: young.email, token_2fa: "000000", rememberMe: false })),
+      Array.from({ length: BURST }, () => request(app).post("/young/signin-2fa").send({ email: young.email, token_2fa: "000000", rememberMe: false })),
     );
 
     const after = await YoungModel.findById(young._id);
@@ -228,11 +235,12 @@ describe("M3 — oracle à l'inscription", () => {
 
   it("répond la même chose pour une personne inscrite et une inconnue", async () => {
     const existing = await createYoung({ firstName: "Camille", lastName: "DURAND" });
+    const app = getAppHelper();
 
-    const known = await request(getAppHelper())
+    const known = await request(app)
       .post("/young/signup")
       .send({ ...payload, firstName: existing.firstName, lastName: existing.lastName, birthdateAt: existing.birthdateAt });
-    const unknown = await request(getAppHelper())
+    const unknown = await request(app)
       .post("/young/signup")
       .send({ ...payload, firstName: "Inconnu", lastName: "PERSONNE", birthdateAt: "2008-01-01" });
 
