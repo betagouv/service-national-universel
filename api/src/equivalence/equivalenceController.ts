@@ -22,8 +22,27 @@ import { notifyReferentsEquivalenceSubmitted, notifyYoungChangementStatutEquival
 import { decrypt } from "../cryptoUtils";
 import { getMimeFromBuffer } from "../utils/file";
 import { createEquivalenceValidator, updateEquivalenceValidator } from "./equivalenceValidator";
+import { YoungPerimeterRequest } from "../controllers/young/youngPerimeterMiddleware";
 
 const router = express.Router({ mergeParams: true });
+
+/**
+ * Seuls ces rôles instruisent une équivalence (création directement VALIDATED, changement de statut).
+ * Auparavant tout référent authentifié — responsable de structure, visiteur, chef de centre — pouvait
+ * valider la phase 2 de n'importe quel volontaire en un appel (constats H51 à H54).
+ */
+const EQUIVALENCE_INSTRUCTOR_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+
+/**
+ * La durée déclarée par un volontaire (type « Autre ») alimente directement le compteur d'heures de
+ * phase 2 : elle est bornée côté serveur, le validateur ne posant aucune limite.
+ */
+function boundMissionDuration(duration: string | number | undefined | null, isYoung: boolean) {
+  if (!isYoung) return duration;
+  const parsed = Number(duration);
+  if (!Number.isFinite(parsed) || parsed < 0) return 0;
+  return Math.min(parsed, PHASE2_TOTAL_HOURS);
+}
 
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -32,9 +51,6 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
-
-    const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id }).sort({ createdAt: -1 });
     res.status(200).send({ ok: true, data: equivalences });
@@ -82,11 +98,9 @@ router.get("/:idEquivalence", passport.authenticate("young", { session: false, f
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
 
-    const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (equivalence.youngId?.toString() !== value.id) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     res.status(200).send({ ok: true, data: equivalence });
   } catch (error) {
     capture(error);
@@ -94,7 +108,7 @@ router.get("/:idEquivalence", passport.authenticate("young", { session: false, f
   }
 });
 
-router.post("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.post("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
     const { error, value } = createEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
@@ -102,15 +116,15 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
-    const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    const young = req.targetYoung!;
 
     const isYoung = isYoungFn(req.user);
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
     if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    
+
     if (isReferent(req.user)) {
+      if (!EQUIVALENCE_INSTRUCTOR_ROLES.includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       if (isAdmin(req.user)) {
         const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
         if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -126,7 +140,7 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
       youngId,
       status: isYoung ? "WAITING_VERIFICATION" : "VALIDATED",
       // ajoute 84h à l'équivalence si c'est autre chose q'un type autre (ex: BAFA, etc..)
-      missionDuration: value.missionDuration || PHASE2_TOTAL_HOURS,
+      missionDuration: boundMissionDuration(value.missionDuration || PHASE2_TOTAL_HOURS, isYoung),
     }); // Si c'est un jeune, on met à jour le statut d'équivalence
     if (isYoung) {
       young.set({ status_equivalence: "WAITING_VERIFICATION" });
@@ -150,7 +164,7 @@ router.post("/", passport.authenticate(["referent", "young"], { session: false, 
   }
 });
 
-router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
+router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req: YoungPerimeterRequest, res) => {
   try {
     const { error, value } = updateEquivalenceValidator.validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (!["Certification Union Nationale du Sport scolaire (UNSS)", "Engagements lycéens"].includes(value.type)) {
@@ -161,8 +175,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
     }
 
-    const young = await YoungModel.findById(value.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
+    const young = req.targetYoung!;
 
     const cohort = await CohortModel.findOne({ name: young.cohort });
 
@@ -170,6 +183,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
 
     if (isYoung && !canCreateEquivalences(young, cohort || undefined)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     if (isReferent(req.user)) {
+      if (!EQUIVALENCE_INSTRUCTOR_ROLES.includes(req.user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       if (isAdmin(req.user)) {
         const hasValidatedOrExemptedPhase1 = [YOUNG_STATUS_PHASE1.DONE, YOUNG_STATUS_PHASE1.EXEMPTED].includes(young.statusPhase1 as any);
         if (!hasValidatedOrExemptedPhase1) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
@@ -180,6 +194,16 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
     if (!equivalence) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // L'équivalence doit bien appartenir au volontaire de l'URL : sinon un jeune écrasait le
+    // `status_equivalence` d'un tiers depuis sa propre URL (constat H54).
+    if (equivalence.youngId?.toString() !== young._id.toString()) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    // Un jeune ne pilote ni le statut d'instruction ni le message du référent : sa mise à jour est une
+    // correction, qui repart systématiquement en vérification (constats H53 / H54).
+    if (isYoung) {
+      delete value.message;
+      value.status = EQUIVALENCE_STATUS.WAITING_VERIFICATION;
+    }
 
     let missionDuration: string | number;
     if (value?.type === "Autre" || equivalence.type === "Autre") {
@@ -194,7 +218,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
     delete value.idEquivalence;
     equivalence.set({
       ...value,
-      missionDuration: missionDuration,
+      missionDuration: boundMissionDuration(missionDuration, isYoung),
     });
     const data = await equivalence.save({ fromUser: req.user });
 
