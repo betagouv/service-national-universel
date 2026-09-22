@@ -439,6 +439,13 @@ export const YoungSchema = {
     },
   },
 
+  parentConsentRelanceSentAt: {
+    type: Date,
+    documentation: {
+      description: "Date du dernier mail de relance de consentement déclenché par le jeune (anti-abus)",
+    },
+  },
+
   // keep track of the current cohesion inscription step for 2020 users
   cohesion2020Step: {
     type: String,
@@ -1204,6 +1211,12 @@ export const YoungSchema = {
       description: "Token d'inscription 2023 du parent 1",
     },
   },
+  parent1Inscription2023TokenExpiresAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du token d'inscription 2023 du parent 1. Absente sur les jetons émis avant la mise en place de l'expiration.",
+    },
+  },
   parent1DataVerified: {
     type: String,
     enum: ["true", "false"],
@@ -1353,7 +1366,13 @@ export const YoungSchema = {
   parent2Inscription2023Token: {
     type: String,
     documentation: {
-      description: "Token d'inscription 2023 du parent 1",
+      description: "Token d'inscription 2023 du parent 2",
+    },
+  },
+  parent2Inscription2023TokenExpiresAt: {
+    type: Date,
+    documentation: {
+      description: "Date d'expiration du token d'inscription 2023 du parent 2. Absente sur les jetons émis avant la mise en place de l'expiration.",
     },
   },
   parent2AllowImageRights: {

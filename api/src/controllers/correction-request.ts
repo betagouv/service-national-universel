@@ -22,6 +22,8 @@ import { ERRORS, deleteFile } from "../utils";
 import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
+import { canEditYoungInScope } from "../young/youngScope";
+import { refreshParentInscriptionToken } from "../young/parentConsentToken";
 
 const router = express.Router({ mergeParams: true });
 
@@ -201,6 +203,12 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
 
     const young = await YoungModel.findById(youngId);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Même famille que L38 : la route envoie au parent un mail portant le lien de consentement.
+    if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(refreshParentInscriptionToken(young, 1));
+    await young.save({ fromUser: req.user });
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],

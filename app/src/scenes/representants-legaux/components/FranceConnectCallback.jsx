@@ -9,14 +9,11 @@ function getFranceConnectCallback(parent, token) {
 export default function FranceConnectCallback() {
   // Update from France Connect.
   async function fetchData(code, id, token, state) {
-    const { data, tokenId } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id, token), state });
-    if (data && data["email"]) {
-      await api.put(`/representants-legaux/representant-fromFranceConnect/${id}?parent=${id}&token=${token}`, {
-        [`parent${id}FirstName`]: data["given_name"],
-        [`parent${id}LastName`]: data["family_name"],
-        [`parent${id}Email`]: data["email"],
-        [`parent${id}FromFranceConnect`]: "true",
-      });
+    // L'identité vérifiée n'est pas renvoyée par le client : l'API la conserve et nous remet un ticket
+    // à usage unique, seul accepté par la route d'enregistrement.
+    const { data, tokenId, franceConnectTicket } = await api.post("/young/france-connect/user-info", { code, callback: getFranceConnectCallback(id, token), state });
+    if (data && data["email"] && franceConnectTicket) {
+      await api.put(`/representants-legaux/representant-fromFranceConnect/${id}?parent=${id}&token=${token}`, { franceConnectTicket });
       const params = new URLSearchParams({
         id_token_hint: tokenId,
         state: Math.round(Math.random() * 1000000),
