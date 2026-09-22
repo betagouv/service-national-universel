@@ -135,7 +135,7 @@ import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
-import { isInvitationInUserScope, isReferentInUserScope } from "./referentScope";
+import { isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
 import { canEditYoungInScope, isYoungInReferentGeography } from "../young/youngScope";
 
 const router = express.Router();
@@ -1475,7 +1475,14 @@ router.get(
       const referent = await ReferentModel.findById(id);
       if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const referentPatches = await patches.get(req, ReferentModel);
+      // `USER_HISTORY` est seedée sans policy et la route passe `ignorePolicy` : sans ce contrôle,
+      // l'historique (anciens emails, téléphones, changements de rôle et de structure, auteurs) de
+      // n'importe quel référent est lisible par tout responsable ou superviseur (H68).
+      if (!(await isReferentReadableByUser(req.user, referent))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+
+      const referentPatches = await patches.get(req, ReferentModel, referent);
       if (!referentPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data: referentPatches });
     } catch (error) {
@@ -1525,7 +1532,12 @@ router.get("/:id", passport.authenticate("referent", { session: false, failWithE
 
     let referent = await ReferentModel.findById(checkedId);
     if (!referent) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // `canViewReferent` n'est qu'une matrice de rôles (tout responsable lit tout responsable de
+    // France) : le périmètre est porté par `isReferentReadableByUser`, côté serveur uniquement (H69).
     if (!canViewReferent(req.user, referent)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!(await isReferentReadableByUser(req.user, referent))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     referent = serializeReferent(referent);
 
     await populateReferent(referent);

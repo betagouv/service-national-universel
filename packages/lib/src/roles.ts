@@ -694,8 +694,12 @@ function canViewCohesionCenter(actor: UserDto) {
   ].includes(actor.role);
 }
 
+// Annuaire par email : seuls les rôles qui composent l'équipe de direction d'un centre
+// (`admin/src/scenes/centersV2/view/Team.tsx`, réservé aux admins et référents dép./rég.) en ont
+// l'usage. La famille chef de centre y avait accès sans jamais en avoir besoin : c'était un oracle
+// national d'existence d'adresse, nom, rôle et territoire (M68).
 function canGetReferentByEmail(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
 
 function canViewMeetingPoints(actor) {

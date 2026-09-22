@@ -6,6 +6,9 @@
  * C22 PUT  /referent/young/:id               : mass-assignment auth + canEditYoung sans périmètre + document brut
  * H72 PUT  /referent/                        : auto-attribution du sous-rôle `god`
  * M69 PUT  /referent/young/:id/phase1Status/:document : référents dép./rég. sans périmètre
+ * H69 GET  /referent/:id                     : canViewReferent sans périmètre (profil complet de tout référent)
+ * H68 GET  /referent/:id/patches             : USER_HISTORY ignorePolicy (historique de tout référent)
+ * M68 GET  /referent?email=                  : annuaire par email ouvert à la famille chef de centre
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -58,6 +61,12 @@ async function seedPermissions() {
   await addPermissionHelper([ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.WRITE, {
     where: [{ field: "department", source: "department" }],
   } as any);
+  // USER_HISTORY est seedée sans policy en production (migrations 20250624122150 / 20250801060707).
+  await addPermissionHelper(
+    [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE],
+    PERMISSION_RESOURCES.USER_HISTORY,
+    PERMISSION_ACTIONS.READ,
+  );
 }
 
 beforeAll(async () => {
@@ -486,6 +495,221 @@ describe("Sécurité référent — audit 2026-09-21", () => {
         .send({ rulesYoung: "true" });
 
       expect(res.statusCode).toEqual(200);
+    });
+  });
+  describe("H69 — GET /referent/:id", () => {
+    it("refuse un responsable lisant un responsable d'une autre structure", async () => {
+      const actorStructure = await createStructureHelper(getNewStructureFixture());
+      const otherStructure = await createStructureHelper(getNewStructureFixture());
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: otherStructure._id.toString() }));
+      const actor = { role: ROLES.RESPONSIBLE, structureId: actorStructure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+      expect(JSON.stringify(res.body)).not.toContain(cible.email);
+    });
+
+    it("autorise un responsable lisant un membre de sa propre structure", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const collegue = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${collegue._id}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.email).toEqual(collegue.email);
+    });
+
+    it("autorise un superviseur lisant un responsable d'une structure de son réseau", async () => {
+      const teteDeReseau = await createStructureHelper(getNewStructureFixture());
+      const structureDuReseau = await createStructureHelper({ ...getNewStructureFixture(), networkId: teteDeReseau._id.toString() } as any);
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structureDuReseau._id.toString() }));
+      const actor = { role: ROLES.SUPERVISOR, structureId: teteDeReseau._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("refuse un superviseur lisant un responsable hors de son réseau", async () => {
+      const teteDeReseau = await createStructureHelper(getNewStructureFixture());
+      const structureEtrangere = await createStructureHelper(getNewStructureFixture());
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structureEtrangere._id.toString() }));
+      const actor = { role: ROLES.SUPERVISOR, structureId: teteDeReseau._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse un référent départemental lisant un référent d'un autre département", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Paris"], region: "Ile-de-France" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("autorise un référent départemental lisant un référent de son département", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("autorise la lecture de son propre profil", async () => {
+      const moi = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }));
+
+      const res = await request(await getAppHelperWithAcl(moi as any)).get(`/referent/${moi._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("autorise un chef de centre lisant un référent départemental de son département", async () => {
+      const centre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
+      const actor = { role: ROLES.HEAD_CENTER, cohesionCenterId: centre._id.toString(), department: undefined, region: undefined };
+
+      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("refuse un chef de centre lisant un chef de centre d'un autre département", async () => {
+      const monCentre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
+      const autreCentre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Paris", region: "Ile-de-France" }));
+      const cible = await createReferentHelper(
+        getNewReferentFixture({ role: ROLES.HEAD_CENTER, cohesionCenterId: autreCentre._id.toString(), department: undefined, region: undefined }),
+      );
+      const actor = { role: ROLES.HEAD_CENTER, cohesionCenterId: monCentre._id.toString(), department: undefined, region: undefined };
+
+      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("autorise un administrateur CLE lisant un référent de classe de son établissement", async () => {
+      const actorId = new ObjectId();
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE, department: ["Sarthe"], region: "Pays de la Loire" }));
+      const etablissement = await EtablissementModel.create(
+        createFixtureEtablissement({ coordinateurIds: [actorId.toString()], referentEtablissementIds: [], department: "Sarthe" }),
+      );
+      await ClasseModel.create(createFixtureClasse({ etablissementId: etablissement._id.toString(), referentClasseIds: [cible._id.toString()] }));
+      const actor = { _id: actorId, role: ROLES.ADMINISTRATEUR_CLE, department: undefined, region: undefined };
+
+      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("refuse un administrateur CLE lisant un référent de classe d'un autre établissement", async () => {
+      const actorId = new ObjectId();
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_CLASSE, department: ["Paris"], region: "Ile-de-France" }));
+      const monEtablissement = await EtablissementModel.create(
+        createFixtureEtablissement({ coordinateurIds: [actorId.toString()], referentEtablissementIds: [], department: "Sarthe" }),
+      );
+      const autreEtablissement = await EtablissementModel.create(createFixtureEtablissement({ department: "Paris" }));
+      await ClasseModel.create(createFixtureClasse({ etablissementId: monEtablissement._id.toString(), referentClasseIds: [] }));
+      await ClasseModel.create(createFixtureClasse({ etablissementId: autreEtablissement._id.toString(), referentClasseIds: [cible._id.toString()] }));
+      const actor = { _id: actorId, role: ROLES.ADMINISTRATEUR_CLE, department: undefined, region: undefined };
+
+      const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("ne renvoie jamais les jetons d'authentification de la cible", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const collegue = await createReferentHelper(
+        getNewReferentFixture({
+          role: ROLES.RESPONSIBLE,
+          structureId: structure._id.toString(),
+          invitationToken: "SECRET_INVITATION",
+          forgotPasswordResetToken: "SECRET_RESET",
+          token2FA: "SECRET_2FA",
+        } as any),
+      );
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${collegue._id}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(JSON.stringify(res.body)).not.toContain("SECRET_");
+    });
+  });
+
+  describe("H68 — GET /referent/:id/patches", () => {
+    it("refuse un responsable lisant l'historique d'un référent d'une autre structure", async () => {
+      const actorStructure = await createStructureHelper(getNewStructureFixture());
+      const otherStructure = await createStructureHelper(getNewStructureFixture());
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: otherStructure._id.toString() }));
+      const actor = { role: ROLES.RESPONSIBLE, structureId: actorStructure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}/patches`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse un référent départemental lisant l'historique d'un référent d'un autre département", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Paris"], region: "Ile-de-France" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}/patches`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("autorise un responsable lisant l'historique d'un membre de sa structure", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const collegue = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${collegue._id}/patches`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(Array.isArray(res.body.data)).toBe(true);
+    });
+
+    it("ne renvoie aucun jeton dans l'historique", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const collegue = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      const doc = await ReferentModel.findById(collegue._id);
+      doc!.set({ invitationToken: "SECRET_INVITATION", firstName: "NOUVEAU" });
+      await doc!.save();
+      const actor = { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${collegue._id}/patches`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(JSON.stringify(res.body)).not.toContain("SECRET_");
+      expect(JSON.stringify(res.body)).not.toContain("invitationToken");
+    });
+  });
+
+  describe("M68 — GET /referent?email=", () => {
+    it("refuse la famille chef de centre", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, email: "cible-m68@example.org" }));
+      const centre = await CohesionCenterModel.create(getNewCohesionCenterFixture({ department: "Sarthe", region: "Pays de la Loire" }));
+
+      for (const role of [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE]) {
+        const actor = { role, cohesionCenterId: centre._id.toString(), department: undefined, region: undefined };
+        const res = await request(await getAppHelperWithAcl(actor as any)).get(`/referent?email=${encodeURIComponent(cible.email!)}`);
+        expect(res.statusCode).toEqual(403);
+      }
+    });
+
+    it("laisse passer un référent départemental (flux équipe de direction)", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER, email: "cible-m68-ok@example.org" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent?email=${encodeURIComponent(cible.email!)}`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.email).toEqual("cible-m68-ok@example.org");
     });
   });
 });
