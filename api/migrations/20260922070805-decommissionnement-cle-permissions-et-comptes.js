@@ -5,13 +5,19 @@ const { ROLES, ReferentStatus, PERMISSION_CODES, PERMISSION_RESOURCES, PERMISSIO
 
 const CLE_ROLES = [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE];
 
-// Relevé sur l'état des migrations de seed de permissions au moment de l'écriture de cette migration
-// (grep de ADMINISTRATEUR_CLE / REFERENT_CLASSE sur un tableau `roles` de PermissionModel dans
-// api/migrations/*.js) :
-//   - api/migrations/20250624122150-seed-responsable-permissions.js
+// Relevé sur l'état des migrations de seed de permissions au moment de l'écriture de cette migration :
+// pour chaque `PermissionModel.create` de api/migrations/*.js, examen du champ `roles`, qu'il énumère
+// des rôles littéralement (ROLES.ADMINISTRATEUR_CLE / ROLES.REFERENT_CLASSE) ou qu'il soit une liste de
+// rôles calculée (ROLES_LIST, REFERENT_AND_JEUNE_ROLES_LIST, cf. packages/lib/src/roles.ts:150-151, qui
+// contiennent toutes deux les rôles CLE) :
+//   - api/migrations/20250424085300-seed-injep-permissions.js (PROFILE: ROLES_LIST, SUPPORT_WRITE: REFERENT_AND_JEUNE_ROLES_LIST)
+//   - api/migrations/20250624122150-seed-responsable-permissions.js (dont COHORT_READ: ROLES_LIST)
 //   - api/migrations/20250716091433-763-seed-supervisor-permissions.js
 //   - api/migrations/20250723094011-980-permissions-export-read.js
 //   - api/migrations/20250801060707-916-permissions-supervisor.js
+// Aucune autre migration ne crée de PermissionModel avec une liste de rôles dérivée (spread/filter/concat)
+// et aucune permission n'est créée ailleurs que par PermissionModel.create dans une migration (pas
+// d'insertMany, pas d'upsert, pas de seed applicatif hors migrations : cf. rapport de tâche 6, ronde 2).
 // Ces deux constantes sont la trace opérationnelle du retour arrière : down() ne devine rien depuis
 // l'état de la base au moment où il tourne, il rejoue l'inverse de ce qui est figé ici.
 
@@ -30,6 +36,8 @@ const AMPUTATED_PERMISSION_CODES = [
   PERMISSION_CODES.COHORT_READ, // roles: ROLES_LIST (tous les rôles, dont les deux rôles CLE)
   PERMISSION_CODES.EXPORT_READ,
   PERMISSION_CODES.PATCHES_READ,
+  PERMISSION_CODES.PROFILE, // roles: ROLES_LIST (tous les rôles, dont les deux rôles CLE)
+  PERMISSION_CODES.SUPPORT_WRITE, // roles: REFERENT_AND_JEUNE_ROLES_LIST (idem + ROLE_JEUNE)
 ];
 
 // Permissions dont le tableau `roles` ne contient QUE des rôles CLE : up() les supprime entièrement
