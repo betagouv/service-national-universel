@@ -16,6 +16,7 @@ const { capture } = require("./sentry");
 const { sendNotif, SENDINBLUE_TEMPLATES } = require("./utils/");
 const { encrypt } = require("./utils/crypto");
 const { getS3Path } = require("./utils/file");
+const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 
 const regex = /\[#(\w+)\]/i;
 
@@ -55,6 +56,14 @@ async function addMessage(mail) {
     //check if ticket exists with subject regex
     if (mail.ticketNumber && !ticket) {
       ticket = await TicketModel.findOne({ number: mail.ticketNumber });
+    }
+
+    // Le numéro de ticket et l'en-tête References sont fournis par l'expéditeur : on ne rejoint
+    // un fil existant que si l'expéditeur en fait déjà partie, sinon n'importe qui pourrait
+    // s'insérer dans le ticket d'un autre. À défaut, un nouveau ticket est créé plus bas.
+    if (ticket && !canSenderJoinTicket(ticket, mail.fromAddress)) {
+      console.log(`imap: mail ${mail.messageId} non rattaché au ticket ${ticket.number} (expéditeur hors du fil)`);
+      ticket = null;
     }
 
     if (ticket) ticket.status = "OPEN";
@@ -295,3 +304,5 @@ function readMails(imapConfig, box, searchs = []) {
   }
 }
 module.exports = Module;
+// Exporté pour les tests : addMessage porte la logique de rattachement d'un mail entrant à un ticket.
+module.exports.addMessage = addMessage;
