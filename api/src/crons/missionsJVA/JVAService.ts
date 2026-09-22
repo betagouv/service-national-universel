@@ -50,6 +50,14 @@ function formatResponsable(resp, structureId: string): Partial<ReferentType> {
     phone: resp?.phone !== "null" ? resp?.phone : undefined,
     mobile: resp?.mobile !== "null" ? resp?.mobile : undefined,
     role: ROLES.RESPONSIBLE,
+    // Le compte est cree a partir de donnees externes (les `responsables` d'une organisation
+    // moderee cote jeveuxaider.gouv.fr) : il ne doit pas etre utilisable sans validation SNU.
+    // Le schema referent vaut `ACTIVE` par defaut, et un compte ACTIVE sans mot de passe
+    // s'active en self-service par le titulaire de l'adresse (POST /referent/forgot_password,
+    // /forgot_password_reset puis /signin), ce qui contournerait la fermeture de
+    // POST /referent/signup. `INACTIVE` bloque ces trois routes ; un agent SNU active le compte
+    // depuis la fiche utilisateur de l'espace admin une fois la structure verifiee.
+    status: ReferentStatus.INACTIVE,
     structureId,
   };
 }
@@ -97,7 +105,12 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
 async function createReferentIfNotExists(resp, structureId: string): Promise<ReferentDocument | null> {
   if (await ReferentModel.exists({ email: resp.email })) return null;
   const ref = new ReferentModel(formatResponsable(resp, structureId));
-  return await ref.save({ fromUser });
+  const referent = await ref.save({ fromUser });
+  await slack.info({
+    title: "Compte responsable JVA a activer",
+    text: `Le compte ${referent.email} (structure ${structureId}) a ete cree depuis JeVeuxAider et laisse INACTIF. Il doit etre active manuellement apres verification de la structure.`,
+  });
+  return referent;
 }
 
 async function createStructure(mission: JeVeuxAiderMission): Promise<StructureDocument | undefined> {
