@@ -106,18 +106,48 @@ export async function canViewYoungFileInScope(user: UserDto, young: Pick<YoungTy
 }
 
 /**
- * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
- * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
- * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
+ * Structures sur lesquelles un responsable / superviseur a autorité : la sienne, plus celles de son
+ * réseau pour un superviseur (même découpage que les policies `structureId` / `networkId`).
  */
-export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
-  if (!user.structureId) return false;
+async function getActorStructureIds(user: UserDto): Promise<string[]> {
+  if (!user.structureId) return [];
   const structureIds = [user.structureId];
   if (user.role === ROLES.SUPERVISOR) {
     const networkStructures = await StructureModel.find({ networkId: user.structureId }, { _id: 1 });
     structureIds.push(...networkStructures.map((structure) => structure._id.toString()));
   }
+  return structureIds;
+}
+
+/**
+ * Périmètre d'un responsable / superviseur de structure : le volontaire doit avoir candidaté à une
+ * mission portée par la structure de l'utilisateur (ou, pour un superviseur, par une structure de
+ * son réseau). C'est le contrôle que `canDownloadYoungDocuments` laissait en commentaire.
+ */
+export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
+  const structureIds = await getActorStructureIds(user);
+  if (!structureIds.length) return false;
   return !!(await ApplicationModel.exists({ youngId: young._id!.toString(), structureId: { $in: structureIds } }));
+}
+
+/**
+ * Périmètre d'un responsable / superviseur sur les pièces de préparation militaire : le volontaire
+ * doit avoir candidaté à une mission portée par une structure de préparation militaire de son
+ * périmètre.
+ *
+ * Le repli historique ne testait que `isMilitaryPreparation` sur la structure de l'acteur, sans
+ * aucun lien avec le volontaire : tout responsable d'une structure PM pouvait télécharger les pièces
+ * PM de n'importe quel volontaire (constat H66, audit 2026-09-21).
+ */
+export async function isYoungInMilitaryPreparationStructureScope(user: UserDto, young: Pick<YoungType, "_id">): Promise<boolean> {
+  const structureIds = await getActorStructureIds(user);
+  if (!structureIds.length) return false;
+  const militaryStructures = await StructureModel.find({ _id: { $in: structureIds }, isMilitaryPreparation: "true" }, { _id: 1 });
+  if (!militaryStructures.length) return false;
+  return !!(await ApplicationModel.exists({
+    youngId: young._id!.toString(),
+    structureId: { $in: militaryStructures.map((structure) => structure._id.toString()) },
+  }));
 }
 
 /**

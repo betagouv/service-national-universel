@@ -23,6 +23,7 @@ import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
 import { canEditYoungInScope } from "../young/youngScope";
+import { refreshParentInscriptionToken } from "../young/parentConsentToken";
 
 const router = express.Router({ mergeParams: true });
 
@@ -218,10 +219,12 @@ router.post("/:youngId/remind-cni", passport.authenticate("referent", { session:
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     // Sans ce contrôle, la route envoyait un email officiel aux parents de n'importe quel
-    // volontaire et renvoyait son dossier complet à l'appelant (constat H23).
-    if (!(await canEditYoungInScope(req.user, young))) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
+    // volontaire et renvoyait son dossier complet à l'appelant (constat H23). Même famille que
+    // L38 : le mail porte le lien de consentement du représentant légal.
+    if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(refreshParentInscriptionToken(young, 1));
+    await young.save({ fromUser: req.user });
 
     await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
       emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],

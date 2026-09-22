@@ -420,14 +420,23 @@ function canRefuseMilitaryPreparation(actor, young) {
   return canViewYoungMilitaryPreparationFile(actor, young);
 }
 
+/**
+ * Les branches `targetCenter` comparaient directement `actor.department` / `actor.region` aux champs
+ * du centre : deux `undefined` suffisaient à autoriser (tout compte dont `cleanReferentData` a retiré
+ * la géographie, appelé sans `targetCenter`). Elles exigent désormais une valeur des deux côtés.
+ *
+ * Ce prédicat reste une matrice géographique : il n'exprime aucun rattachement entre l'acteur et le
+ * volontaire. Pour un responsable / superviseur de structure, utiliser `isYoungInStructureScope`
+ * (api/src/young/youngScope.ts) — audit 2026-09-21, H65.
+ */
 function canViewYoungFile(actor, target, targetCenter?) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(target.department);
   const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === target.region;
   // @ts-ignore
-  const isReferentCenterFromSameDepartmentTargetCenter = actor.department === targetCenter?.department;
+  const isReferentCenterFromSameDepartmentTargetCenter = !!targetCenter?.department && actor.department === targetCenter.department;
   // @ts-ignore
-  const isReferentCenterFromSameRegionTargetCenter = actor.region === targetCenter?.region;
+  const isReferentCenterFromSameRegionTargetCenter = !!targetCenter?.region && actor.region === targetCenter.region;
   const authorized =
     isAdmin ||
     isReferentDepartmentFromTargetDepartment ||
@@ -561,12 +570,24 @@ function canCreateOrModifyMission(user: UserDto, mission: MissionType, structure
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(user.role) || (user.role === ROLES.RESPONSIBLE && user.structureId === mission.structureId);
 }
 
+/**
+ * Visibilités qu'un rôle peut poser sur un programme, à l'image de ce que propose l'écran
+ * d'administration : une visibilité nationale engage tout le territoire, une visibilité régionale
+ * toute une région. Un rôle absent de cette table ne peut poser aucune visibilité.
+ */
+const PROGRAM_VISIBILITY_BY_ROLE: Record<string, string[]> = {
+  [ROLES.REFERENT_DEPARTMENT]: ["DEPARTMENT", "HEAD_CENTER"],
+  [ROLES.REFERENT_REGION]: ["DEPARTMENT", "REGION", "HEAD_CENTER"],
+};
+
 function canCreateOrUpdateProgram(user, program) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role);
-  return (
-    isAdminOrReferent &&
-    !((user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) || (user.role === ROLES.REFERENT_REGION && user.region !== program.region))
-  );
+  if (user.role === ROLES.ADMIN) return true;
+  if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
+  if (user.role === ROLES.REFERENT_DEPARTMENT && !user.department?.includes(program.department)) return false;
+  if (user.role === ROLES.REFERENT_REGION && user.region !== program.region) return false;
+  // Une visibilité vide (programme historique) reste dans le périmètre géographique déjà vérifié.
+  if (program.visibility && !PROGRAM_VISIBILITY_BY_ROLE[user.role].includes(program.visibility)) return false;
+  return true;
 }
 
 function canCreateStructure(user) {

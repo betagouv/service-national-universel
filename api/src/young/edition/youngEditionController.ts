@@ -48,6 +48,7 @@ import { validateId, idSchema } from "../../utils/validator";
 import { UserRequest } from "../../controllers/request";
 import { canEditYoungConsent, notifyPreviousEmailOfChange, revokeAccessAfterEmailChange, updateYoungConsent } from "./youngEditionService";
 import { canEditYoungInScope } from "../youngScope";
+import { refreshParentInscriptionToken } from "../parentConsentToken";
 
 const router = express.Router({ mergeParams: true });
 
@@ -565,6 +566,14 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
     if (!young) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    // La route déclenche l'envoi d'un mail portant le lien de consentement : elle est réservée aux
+    // référents qui ont ce volontaire dans leur périmètre (constat L38). `canEditYoungConsent` n'est
+    // pas utilisable ici : il exige une classe et lève une erreur sur un volontaire hors CLE.
+    if (!(await canEditYoungInScope(req.user, young))) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     if (!young.inscriptionDoneDate) {
       return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
     }
@@ -574,6 +583,8 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       if (young.parent1AllowSNU || young.parentAllowSNU) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
+      young.set(refreshParentInscriptionToken(young, 1));
+      await young.save({ fromUser: req.user });
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
         emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
         params: {
@@ -595,6 +606,8 @@ router.get("/:id/remider/:idParent", passport.authenticate("referent", { session
       ) {
         return res.status(400).send({ ok: false, code: ERRORS.BAD_REQUEST });
       }
+      young.set(refreshParentInscriptionToken(young, 2));
+      await young.save({ fromUser: req.user });
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
         emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! }],
         params: {
@@ -644,6 +657,7 @@ router.put("/:id/parent-image-rights-reset", passport.authenticate("referent", {
     if (parentId === 2) {
       young.set({ parent2AllowImageRightsReset: "true" });
     }
+    young.set(refreshParentInscriptionToken(young, parentId));
     await young.save({ fromUser: req.user });
 
     // --- send notification
@@ -686,6 +700,7 @@ router.put("/:id/parent-allow-snu-reset", passport.authenticate("referent", { se
 
     // --- reset parent allow snu
     young.set({ parentAllowSNU: undefined, parent1AllowSNU: undefined, status: YOUNG_STATUS.IN_PROGRESS, parent1ValidationDate: undefined });
+    young.set(refreshParentInscriptionToken(young, 1));
     // FIXME: parent2Id: legacy
     // if (young.parent2Id) young.set({ parent2AllowSnu: undefined, parent2ValidationDate: undefined });
     await young.save({ fromUser: req.user });
@@ -754,6 +769,8 @@ router.put("/:id/reminder-parent-image-rights", passport.authenticate("referent"
     }
 
     // --- send notification
+    young.set(refreshParentInscriptionToken(young, parentId));
+    await young.save({ fromUser: req.user });
     await sendTemplate(SENDINBLUE_TEMPLATES.parent[`PARENT${parentId}_RESEND_IMAGERIGHT`], {
       emailTo: [{ name: young[`parent${parentId}FirstName`] + " " + young[`parent${parentId}LastName`], email: young[`parent${parentId}Email`] }],
       params: {

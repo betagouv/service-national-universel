@@ -34,6 +34,8 @@ export const ES_YOUNG_SENSITIVE_FIELDS = [
   "phase3Token",
   "parent1Inscription2023Token",
   "parent2Inscription2023Token",
+  "parent1Inscription2023TokenExpiresAt",
+  "parent2Inscription2023TokenExpiresAt",
 ];
 
 export const ES_REFERENT_SENSITIVE_FIELDS = [...ES_SENSITIVE_FIELDS_SHARED];

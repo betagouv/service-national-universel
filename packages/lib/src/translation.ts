@@ -223,6 +223,8 @@ const translate = (value) => {
       return "Utilisateur déjà inscrit";
     case "OPERATION_NOT_ALLOWED":
       return "Opération non autorisée";
+    case "TOO_MANY_REQUESTS":
+      return "Vous avez effectué cette action trop récemment. Merci de patienter avant de réessayer.";
     case "BIKE":
       return "Vélo";
     case "MOTOR":

@@ -123,9 +123,11 @@ schema.plugin(patchHistory, {
     "/userIps",
     "/token2FA",
     "/token2FAExpires",
-    // Jetons bearer non expirants : leur valeur ne doit jamais entrer dans l'historique (lisible via /young/:id/patches).
+    // Jetons de consentement parental : leur valeur ne doit jamais entrer dans l'historique (lisible via /young/:id/patches).
     "/parent1Inscription2023Token",
     "/parent2Inscription2023Token",
+    "/parent1Inscription2023TokenExpiresAt",
+    "/parent2Inscription2023TokenExpiresAt",
     "/tokenEmailValidation",
     "/tokenEmailValidationExpires",
     "/attempts2FA",

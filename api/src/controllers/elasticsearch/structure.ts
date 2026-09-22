@@ -11,6 +11,11 @@ import { UserRequest } from "../request";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
+// Seuls champs de l'équipe consommés par le front : le compte de responsables
+// dans la liste des structures et les colonnes nom/prénom/email de l'export.
+// `structureId` sert au rattachement structure <-> membre.
+const TEAM_FIELDS = ["firstName", "lastName", "email", "role", "structureId"];
+
 interface StructureContext {
   structureContextFilters?: any[];
   structureContextError?: {
@@ -160,14 +165,21 @@ router.post(
       const structureIds = [...new Set(structures.map((item) => item._id).filter((e) => e))];
       if (structureIds.length > 0) {
         // --- fill team
-        const referents = await allRecords("referent", {
-          bool: {
-            must: {
-              match_all: {},
+        // La projection est demandée à Elasticsearch : le document referent complet
+        // (téléphone, mobile, horodatages de connexion, metadata) ne transite pas.
+        const referents = await allRecords(
+          "referent",
+          {
+            bool: {
+              must: {
+                match_all: {},
+              },
+              filter: [{ terms: { "structureId.keyword": structureIds } }],
             },
-            filter: [{ terms: { "structureId.keyword": structureIds } }],
           },
-        });
+          esClient,
+          TEAM_FIELDS,
+        );
         if (referents.length > 0) {
           // Les documents de l'index `referent` sont recopiés dans la réponse : ils passent par le
           // sérialiseur de leur propre index, sans quoi rien ne les filtrerait ici.
