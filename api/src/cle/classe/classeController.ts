@@ -23,6 +23,15 @@ import {
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
+import { isEtablissementInUserScope } from "../etablissement/etablissementScope";
+
+/**
+ * Champs des référents de classe exposés au front (création de classe, exports).
+ *
+ * Projection explicite : un document référent brut contient `invitationToken`,
+ * `forgotPasswordResetToken` et `token2FA`, c'est-à-dire de quoi prendre le contrôle du compte.
+ */
+const REFERENT_CLASSE_PUBLIC_FIELDS = "_id firstName lastName email phone role status";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -70,6 +79,7 @@ router.post("/export", async (req: UserRequest, res: Response) => {
       })
       .populate({
         path: "referents",
+        select: REFERENT_CLASSE_PUBLIC_FIELDS,
       })
       .lean();
 
@@ -168,6 +178,7 @@ router.get("/from-etablissement/:id", async (req: UserRequest, res) => {
     }
 
     if (!canViewClasse(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!(await isEtablissementInUserScope(req.user, value))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const classes: ClasseDocument<{ referent: Array<ReferentType | null> }>[] = await ClasseModel.find({ etablissementId: value })?.lean();
     if (!classes) {
@@ -177,7 +188,7 @@ router.get("/from-etablissement/:id", async (req: UserRequest, res) => {
     const findReferentsById = async (referentClasseIds) => {
       const uniqueReferentIds = [...new Set(referentClasseIds)];
       const referentsPromises = uniqueReferentIds.map((referentId) => {
-        return ReferentModel.findById(referentId).lean();
+        return ReferentModel.findById(referentId).select(REFERENT_CLASSE_PUBLIC_FIELDS).lean();
       });
       return Promise.all(referentsPromises);
     };
