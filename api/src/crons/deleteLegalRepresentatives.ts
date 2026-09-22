@@ -29,6 +29,7 @@ const getParentFields = (): string[] => {
       `parent${i}Location`,
       `parent${i}FromFranceConnect`,
       `parent${i}Inscription2023Token`,
+      `parent${i}Inscription2023TokenExpiresAt`,
       `parent${i}DataVerified`,
       `parent${i}AddressVerified`,
       `parent${i}AllowCovidAutotest`,

@@ -14,9 +14,9 @@ export default function RiConsentement({ parentId }) {
   const { young, token } = useContext(RepresentantsLegauxContext);
 
   const handleAcceptRI = async () => {
-    const body = { _id: young._id };
     try {
-      const { ok, code } = await api.post(API_RI + `?token=${token}&parent=${parentId}`, body);
+      // Le volontaire concerné est déterminé côté API par le jeton parent.
+      const { ok, code } = await api.post(API_RI + `?token=${token}&parent=${parentId}`, {});
       if (!ok) {
         throw new Error(`Erreur lors de l'envoi de la requête : ${code}`);
       }

@@ -238,6 +238,36 @@ describe("H88/H89 — périmètre de canEditYoung sur les routes d'édition du v
     });
   });
 
+  /** L38 : la relance de consentement envoie au parent un mail portant le lien de consentement. */
+  describe("GET /young-edition/:id/remider/:idParent", () => {
+    it("refuse un chef de centre sur un jeune d'une autre session", async () => {
+      const { chefDeCentre, young } = await chefDeCentreEtJeuneHorsPerimetre();
+      await YoungModel.updateOne({ _id: young._id }, { $set: { inscriptionDoneDate: new Date() } });
+
+      const res = await request(await getAppHelperWithAcl(chefDeCentre)).get(`/young-edition/${young._id}/remider/1`).send();
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse un référent de classe sur un jeune CLE d'une autre classe", async () => {
+      const { referent, young } = await referentCleEtJeuneHorsPerimetre();
+      await YoungModel.updateOne({ _id: young._id }, { $set: { inscriptionDoneDate: new Date() } });
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/young-edition/${young._id}/remider/1`).send();
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("autorise un chef de centre sur un jeune de sa session", async () => {
+      const { chefDeCentre, young } = await chefDeCentreEtJeuneDansPerimetre();
+      await YoungModel.updateOne({ _id: young._id }, { $set: { inscriptionDoneDate: new Date(), parentAllowSNU: undefined, parent1AllowSNU: undefined } });
+
+      const res = await request(await getAppHelperWithAcl(chefDeCentre)).get(`/young-edition/${young._id}/remider/1`).send();
+
+      expect(res.statusCode).not.toEqual(403);
+    });
+  });
+
   describe("POST /young/:id/email/:template", () => {
     it("refuse un chef de centre sur un jeune d'une autre session", async () => {
       const { chefDeCentre, young } = await chefDeCentreEtJeuneHorsPerimetre();

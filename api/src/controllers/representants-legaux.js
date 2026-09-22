@@ -13,25 +13,31 @@ const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
 
 const { YoungModel, CohortModel } = require("../models");
-const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS, REGLEMENT_INTERIEUR_VERSION } = require("snu-lib");
+const { canUpdateYoungStatus, SENDINBLUE_TEMPLATES, YOUNG_STATUS } = require("snu-lib");
 const { capture } = require("../sentry");
 const { serializeYoung } = require("../utils/serializer");
 
 const { ERRORS } = require("../utils");
 
-const { validateFirstName, validateString, validateId } = require("../utils/validator");
+const { validateFirstName, validateString } = require("../utils/validator");
 const { sendTemplate } = require("../brevo");
 const { config } = require("../config");
+const { isParentInscriptionTokenExpired, refreshParentInscriptionToken } = require("../young/parentConsentToken");
+const { consumeFranceConnectIdentity } = require("../young/franceConnectIdentity");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
   if (error || !token) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-  const field = req.query.parent === "2" ? "parent2Inscription2023Token" : "parent1Inscription2023Token";
+  const parentId = req.query.parent === "2" ? 2 : 1;
+  const field = `parent${parentId}Inscription2023Token`;
   YoungModel.findOne({ [field]: token })
     .then((young) => {
       if (!young) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      // Jeton expiré : même réponse qu'un jeton inconnu, pour ne pas distinguer les deux cas.
+      if (isParentInscriptionTokenExpired(young, parentId)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       req.young = young;
+      req.parentId = parentId;
       next();
     })
     .catch((e) => res.status(500).send(e));
@@ -61,23 +67,33 @@ router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, as
     const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
     if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { error, value } = Joi.object({
-      [`parent${id}FirstName`]: validateFirstName().trim().required(),
-      [`parent${id}LastName`]: Joi.string().uppercase().trim().required(),
-      [`parent${id}Email`]: Joi.string().lowercase().trim().email().required(),
-      [`parent${id}FromFranceConnect`]: Joi.string().trim().required().valid("true"),
-    }).validate(req.body, { stripUnknown: true });
+    // Le parent écrit par cette route est celui que le jeton authentifie : un parent 2 ne réécrit pas
+    // l'identité du parent 1 (et inversement).
+    if (parseInt(id, 10) !== req.parentId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // L'identité n'est jamais fournie par le client : elle est relue côté serveur depuis l'échange
+    // FranceConnect, via un ticket à usage unique. Sans cela, `parentXFromFranceConnect` est déclaratif.
+    const { error, value } = Joi.object({ franceConnectTicket: Joi.string().trim().required() }).validate(req.body, { stripUnknown: true });
     if (error) {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
+    const identity = await consumeFranceConnectIdentity(value.franceConnectTicket);
+    if (!identity) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const young = req.young;
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canUpdateYoungStatus({ body: value, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const update = {
+      [`parent${id}FirstName`]: identity.firstName,
+      [`parent${id}LastName`]: identity.lastName.toUpperCase(),
+      [`parent${id}Email`]: identity.email.toLowerCase(),
+      [`parent${id}FromFranceConnect`]: "true",
+    };
 
-    young.set(value);
+    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    young.set(update);
     await young.save({ fromUser: req.user });
 
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
@@ -112,16 +128,13 @@ router.post("/data-verification", tokenParentValidMiddleware, async (req, res) =
 
 router.post("/accept-ri", tokenParentValidMiddleware, async (req, res) => {
   try {
-    const { error, value: id } = validateId(req.body._id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const young = await YoungModel.findById(id);
+    // Le volontaire concerné est celui que le jeton parent authentifie. `req.body._id`, qui servait
+    // auparavant de cible, permettait de valider le règlement intérieur de n'importe quel volontaire.
+    const young = req.young;
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
     young.set({ parent1ValidationDate: new Date() });
-    await young.save({ fromUser: { firstName: `Parent of young : ${id}` } });
+    await young.save({ fromUser: { firstName: `Parent of young : ${young._id}` } });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
@@ -239,6 +252,10 @@ router.post("/consent", tokenParentValidMiddleware, async (req, res) => {
     if (shouldSendToParent2) {
       if (young.parent2Email == null || young.parent2Email.trim().length === 0) value.imageRight = "true";
       else {
+        // Le lien envoyé au parent 2 doit rester valide le temps du TTL du jeton.
+        const parent2Token = refreshParentInscriptionToken(young, 2);
+        Object.assign(value, parent2Token);
+        young.set(parent2Token);
         await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_CONSENT, {
           emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
           params: {
@@ -334,20 +351,31 @@ router.post("/consent-image-rights", tokenParentValidMiddleware, async (req, res
     if (id === 2) {
       young.set({ parent2AllowImageRightsReset: "false" });
     }
-    await young.save(fromUser(young, id));
 
     // --- envoi notification parent 2 ?
-    if (id === 1 && value.parent1AllowImageRights === "true" && young.parent2AllowImageRights !== "true" && young.parent2AllowImageRights !== "false") {
-      if (young.parent2Email !== null && young.parent2Email !== undefined && young.parent2Email.trim().length > 0) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_RESEND_IMAGERIGHT, {
-          emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
+    const notifieParent2 =
+      id === 1 &&
+      value.parent1AllowImageRights === "true" &&
+      young.parent2AllowImageRights !== "true" &&
+      young.parent2AllowImageRights !== "false" &&
+      young.parent2Email !== null &&
+      young.parent2Email !== undefined &&
+      young.parent2Email.trim().length > 0;
+
+    // Le lien envoyé au parent 2 doit rester valide le temps du TTL du jeton.
+    if (notifieParent2) young.set(refreshParentInscriptionToken(young, 2));
+
+    await young.save(fromUser(young, id));
+
+    if (notifieParent2) {
+      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT2_RESEND_IMAGERIGHT, {
+        emailTo: [{ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email }],
+        params: {
+          cta: `${config.APP_URL}/representants-legaux/droits-image2?token=${young.parent2Inscription2023Token}`,
+          youngFirstName: young.firstName,
+          youngName: young.lastName,
+        },
+      });
     }
 
     // --- result

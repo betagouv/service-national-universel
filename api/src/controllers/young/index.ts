@@ -37,6 +37,8 @@ import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
 import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import { issueParentInscriptionToken } from "../../young/parentConsentToken";
+import { storeFranceConnectIdentity } from "../../young/franceConnectIdentity";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -280,8 +282,8 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent2ContactPreference = "email";
     obj.status = YOUNG_STATUS.IN_PROGRESS;
 
-    obj.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
-    if (obj.parent2Email) obj.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+    Object.assign(obj, issueParentInscriptionToken(1));
+    if (obj.parent2Email) Object.assign(obj, issueParentInscriptionToken(2));
     obj.inscriptionDoneDate = new Date();
     if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
@@ -855,7 +857,19 @@ router.post("/france-connect/user-info", async (req: UserRequest, res) => {
 
     const userInfo = await userInfoResponse.json();
 
-    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"] });
+    // L'identité vérifiée ne transite pas par le client : elle est conservée côté serveur et rendue
+    // au client sous forme de ticket à usage unique, seul accepté par
+    // `PUT /representants-legaux/representant-fromFranceConnect/:id` (constat M29).
+    let franceConnectTicket;
+    if (userInfo?.given_name && userInfo?.family_name && userInfo?.email) {
+      franceConnectTicket = await storeFranceConnectIdentity({
+        firstName: userInfo.given_name,
+        lastName: userInfo.family_name,
+        email: userInfo.email,
+      });
+    }
+
+    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"], franceConnectTicket });
   } catch (e) {
     capture(e);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

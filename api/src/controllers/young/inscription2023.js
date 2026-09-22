@@ -2,7 +2,6 @@ const express = require("express");
 const passport = require("passport");
 const router = express.Router({ mergeParams: true });
 const Joi = require("joi");
-const crypto = require("crypto");
 
 const { YoungModel, CohortModel } = require("../../models");
 const { capture } = require("../../sentry");
@@ -23,8 +22,12 @@ const {
 } = require("snu-lib");
 const { sendTemplate } = require("./../../brevo");
 const { config } = require("../../config");
+const { issueParentInscriptionToken, refreshParentInscriptionToken } = require("../../young/parentConsentToken");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessionsForInscription } = require("../../cohort/cohortService");
+
+/** Délai minimal entre deux relances de consentement déclenchées par le jeune. */
+const RELANCE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -340,7 +343,12 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2Phone = "";
       value.parent2PhoneZone = undefined;
       value.parent2Inscription2023Token = "";
+      value.parent2Inscription2023TokenExpiresAt = undefined;
     }
+
+    // Un changement d'adresse invalide le lien de consentement déjà envoyé à l'ancienne adresse (H40).
+    if (value.parent1Email && value.parent1Email !== young.parent1Email) Object.assign(value, issueParentInscriptionToken(1));
+    if (value.parent2 && value.parent2Email && value.parent2Email !== young.parent2Email) Object.assign(value, issueParentInscriptionToken(2));
 
     if (type === "next") {
       if (isYoungInReinscription(young)) {
@@ -349,8 +357,8 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
         value.inscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       }
 
-      if (!young?.parent1Inscription2023Token) value.parent1Inscription2023Token = crypto.randomBytes(20).toString("hex");
-      if (!young?.parent2Inscription2023Token && value.parent2) value.parent2Inscription2023Token = crypto.randomBytes(20).toString("hex");
+      if (!young?.parent1Inscription2023Token && !value.parent1Inscription2023Token) Object.assign(value, issueParentInscriptionToken(1));
+      if (!young?.parent2Inscription2023Token && !value.parent2Inscription2023Token && value.parent2) Object.assign(value, issueParentInscriptionToken(2));
     }
     if (type === "correction") {
       const keyList = Object.keys(representantSchema(false));
@@ -528,11 +536,25 @@ router.put("/relance", passport.authenticate("young", { session: false, failWith
     const young = await YoungModel.findById(req.user._id);
     if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    // L'adresse du parent est déclarée par le jeune et n'est pas vérifiée : sans délai entre deux
+    // relances, la route sert d'expéditeur de mails arbitraire vers cette adresse (constat M54).
+    if (young.parentConsentRelanceSentAt && Date.now() - new Date(young.parentConsentRelanceSentAt).getTime() < RELANCE_COOLDOWN_MS) {
+      return res.status(429).send({ ok: false, code: ERRORS.TOO_MANY_REQUESTS });
+    }
+
     // If latest ID proof has an invalid date, notify parent 1.
     const cohort = await CohortModel.findById(young.cohortId);
     const notifyExpirationDate = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
     const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
     const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
+
+    // Le lien qui part dans le mail doit rester valide le temps du TTL du jeton, et la date de relance
+    // doit être posée avant l'envoi pour que deux appels concurrents ne partent pas tous les deux.
+    if ((notifyExpirationDate && needCniRelance) || needParent1Relance) {
+      young.set(refreshParentInscriptionToken(young, 1));
+      young.set({ parentConsentRelanceSentAt: new Date() });
+      await young.save({ fromUser: req.user });
+    }
 
     if (notifyExpirationDate && needCniRelance) {
       await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
