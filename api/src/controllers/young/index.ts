@@ -36,12 +36,11 @@ import { validateYoung, validateId, validatePhase1Document, idSchema } from "../
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
   canInviteYoung,
-  canEditYoung,
   canEditPresenceYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
@@ -415,17 +414,20 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
 
     const data = await YoungModel.findOne({ _id: value.young });
 
-    if (!canEditYoung(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     if (!data) {
       capture(`Young not found ${value.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    // `canEditYoung` n'est qu'une matrice de rôles : elle autorise tout référent CLE sur tout
+    // volontaire `source: CLE`, sans vérifier sa classe (constat L23).
+    if (!(await canEditYoungInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+
     delete value.young;
     data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -136,7 +136,7 @@ import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
-import { canEditYoungInScope, isYoungInReferentGeography } from "../young/youngScope";
+import { canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../young/youngScope";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -785,6 +785,13 @@ router.put("/youngs", passport.authenticate("referent", { session: false, failWi
     const youngs = await YoungModel.find({ _id: { $in: payload.youngIds }, source: "CLE" });
     if (!youngs) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     if (youngs.length !== payload.youngIds.length) return res.status(404).send({ ok: false, code: ERRORS.BAD_REQUEST });
+
+    // `canValidateMultipleYoungsInClass` ne contrôle que le rôle : sans ce périmètre, un référent de
+    // classe valide ou refuse les volontaires de n'importe quelle classe (constat H63).
+    const inScope = await Promise.all(youngs.map((young) => isYoungInUserScope(req.user, young)));
+    if (inScope.some((allowed) => !allowed)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const classeIds = youngs.map((y) => y.classeId);
 

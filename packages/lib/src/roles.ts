@@ -396,14 +396,21 @@ function canUpdateReferent({ actor, originalTarget, modifiedTarget = null, struc
 
 function canViewYoungMilitaryPreparationFile(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
-  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && actor.department.includes(young.department);
-  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && actor.region === young.region;
+  // fail-closed : un acteur ou un volontaire sans territoire ne peut jamais matcher.
+  const isReferentDepartmentFromTargetDepartment = actor.role === ROLES.REFERENT_DEPARTMENT && !!young?.department && (actor.department || []).includes(young.department);
+  const isReferentRegionFromTargetRegion = actor.role === ROLES.REFERENT_REGION && !!young?.region && actor.region === young.region;
   const authorized = isAdmin || isReferentDepartmentFromTargetDepartment || isReferentRegionFromTargetRegion;
   return authorized;
 }
 
+/**
+ * Refuser les pièces de préparation militaire les SUPPRIME du stockage : l'autorisation doit être
+ * exactement celle de leur consultation. La clause historique `[RESPONSIBLE, REFERENT_REGION]`
+ * autorisait tout responsable de structure et tout référent régional, hors de son territoire, à
+ * détruire les pièces de n'importe quel volontaire (constat H64).
+ */
 function canRefuseMilitaryPreparation(actor, young) {
-  return canViewYoungMilitaryPreparationFile(actor, young) || [ROLES.RESPONSIBLE, ROLES.REFERENT_REGION].includes(actor.role);
+  return canViewYoungMilitaryPreparationFile(actor, young);
 }
 
 function canViewYoungFile(actor, target, targetCenter?) {
