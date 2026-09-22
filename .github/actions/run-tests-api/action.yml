@@ -42,8 +42,25 @@ runs:
         mongodb-version: "7.0"
         mongodb-replica-set: "rs0"
 
+    # Les runners self-hosted sont persistants : node_modules survit d'un job a l'autre.
+    # Quand il correspond deja au package-lock courant, restaurer l'archive depuis le cache
+    # GitHub (~305 Mo, plusieurs minutes) ne fait que reecrire a l'identique ce qui est
+    # deja sur le disque. Sur ubuntu-latest le temoin n'existe jamais, donc rien ne change.
+    - name: Detect usable node_modules
+      id: nm
+      shell: bash
+      run: |
+        H="${{ hashFiles('**/package-lock.json') }}"
+        if [ -f node_modules/.snu-lock ] && [ "$(cat node_modules/.snu-lock)" = "$H" ]; then
+          echo "fresh=true" >> "$GITHUB_OUTPUT"
+          echo "node_modules deja aligne sur package-lock : cache et npm ci ignores."
+        else
+          echo "fresh=false" >> "$GITHUB_OUTPUT"
+        fi
+
     - uses: actions/cache@v4
       id: cache-npm
+      if: steps.nm.outputs.fresh != 'true'
       with:
         path: |
           apiv2/node_modules
@@ -58,9 +75,16 @@ runs:
           ${{ runner.os }}-nodemodules-
 
     - name: Install packages
-      if: steps.cache-npm.outputs.cache-hit != 'true'
+      if: steps.nm.outputs.fresh != 'true' && steps.cache-npm.outputs.cache-hit != 'true'
       shell: bash
       run: npm ci
+
+    # Le temoin permet au prochain job de ce runner de sauter cache et installation.
+    - name: Mark node_modules as matching package-lock
+      shell: bash
+      run: |
+        mkdir -p node_modules
+        echo "${{ hashFiles('**/package-lock.json') }}" > node_modules/.snu-lock
 
     - name: Build lib
       working-directory: packages/lib
