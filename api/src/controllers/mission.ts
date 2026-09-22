@@ -24,6 +24,7 @@ import {
   ReferentStatus,
 } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
+import { checkMissionPayload, isMissionInUserScope, isTutorAllowedForMission } from "../services/missionAccess";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
@@ -75,6 +76,9 @@ router.post(
       ) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+
+      const payloadError = await checkMissionPayload({ user: req.user, payload: checkedMission, storedMission: null });
+      if (payloadError) return res.status(403).send({ ok: false, code: payloadError });
 
       if (checkedMission.mainDomain) {
         if (!checkedMission.domains) checkedMission.domains = [];
@@ -155,15 +159,20 @@ router.put(
       const { error: errorMission, value: checkedMission } = validateMission(req.body);
       if (errorMission) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
+      // L'autorisation porte sur la mission STOCKÉE : l'évaluer sur le corps de la requête laissait
+      // n'importe quel responsable s'approprier une mission en y déclarant sa propre structure.
       if (
         !isWriteAuthorized({
           resource: PERMISSION_RESOURCES.MISSION,
           user: req.user,
-          context: { mission: checkedMission, structure: structure ? structure.toJSON() : null },
+          context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
         })
       ) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+
+      const payloadError = await checkMissionPayload({ user: req.user, payload: checkedMission, storedMission: mission });
+      if (payloadError) return res.status(403).send({ ok: false, code: payloadError });
 
       if (checkedMission.mainDomain) {
         if (!checkedMission.domains) checkedMission.domains = [];
@@ -300,29 +309,33 @@ router.post(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
-      const { tutorId, tutorName, ids } = value;
+      const { tutorId, ids } = value;
 
       const missions = await MissionModel.find({ _id: { $in: ids } });
       if (missions?.length !== ids.length) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      let isAuthorized = false;
+      // CHAQUE mission du lot doit être autorisée : une seule mission légitime suffisait auparavant
+      // à faire écrire tout le lot, y compris des missions d'autres structures.
       for (const mission of missions) {
         let structure: StructureDocument | null = null;
         if (mission.structureId) structure = await StructureModel.findById(mission.structureId);
         if (
-          isWriteAuthorized({
+          !isWriteAuthorized({
             resource: PERMISSION_RESOURCES.MISSION,
             user: req.user,
             context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
           })
         ) {
-          isAuthorized = true;
-          break;
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        }
+        if (!(await isTutorAllowedForMission(tutorId, mission))) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
       }
-      if (!isAuthorized) {
-        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-      }
+
+      // Le nom du tuteur est recalculé, jamais repris du corps de la requête.
+      const tutor = await ReferentModel.findById(tutorId);
+      const tutorName = getTutorName(tutor);
 
       for (let mission of missions) {
         mission.set({ tutorId, tutorName });
@@ -411,7 +424,11 @@ router.get(
       const mission = await MissionModel.findById(req.validatedParams.id);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const missionPatches = await patches.get(req, MissionModel);
+      // La permission MISSION:READ est seedée sans policy pour le superviseur : le périmètre
+      // structure / réseau doit être vérifié explicitement.
+      if (!(await isMissionInUserScope(req.user, mission))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const missionPatches = await patches.get(req, MissionModel, mission);
       if (!missionPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
       return res.status(200).send({ ok: true, data: missionPatches });
@@ -429,11 +446,17 @@ router.get(
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.MISSION, action: PERMISSION_ACTIONS.READ, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
-      const { error, value: id } = Joi.string().required().validate(req.params.id);
+      const { error, value: id } = idSchema().required().validate(req.params.id);
       if (error) {
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+
+      // Les candidatures portent l'identité et les coordonnées des volontaires : la mission doit
+      // relever du périmètre de l'acteur, ce qu'aucun rapprochement ne vérifiait.
+      const mission = await MissionModel.findById(id);
+      if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      if (!(await isMissionInUserScope(req.user, mission))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const where: any = { missionId: id };
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
