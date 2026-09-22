@@ -15,6 +15,8 @@ if [[ $destination == "" ]]; then
     exit 1
 fi
 
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+
 cd "$(dirname $0)/../.."
 
 turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
@@ -38,13 +40,7 @@ mv out/admin/build $destination/admin
 mv out/app/build $destination/app
 
 # back
-# Les paquets du workspace doivent être recopiés : node_modules ne contient que des liens
-# symboliques vers packages/<nom>, qui pendent si la cible n'est pas là (MODULE_NOT_FOUND au boot).
-mkdir -p $destination/packages/lib/
-mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
-# Pas de dépendance de runtime : npm ci --omit dev ne crée pas de node_modules ici.
-mkdir -p $destination/packages/log-redaction/
-mv out/packages/log-redaction/dist/* $destination/packages/log-redaction/
+copy_workspace_packages $destination
 mv out/node_modules $destination/
 
 # api

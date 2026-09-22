@@ -28,20 +28,11 @@ fi
 
 front=0
 back=0
-use_lib=0
-use_log_redaction=0
 use_patches=0
 copy_tsconfig=0
 
-if [[ $application == "api" ]]; then
+if [[ $application == "api" || $application == "apiv2" ]]; then
     back=1;
-    use_lib=1;
-    use_log_redaction=1;
-    use_patches=1;
-fi
-if [[ $application == "apiv2" ]]; then
-    back=1;
-    use_lib=1;
     use_patches=1;
 fi
 if [[ $application == "app" || $application == "admin" ]]; then
@@ -50,11 +41,12 @@ if [[ $application == "app" || $application == "admin" ]]; then
 fi
 if [[ $application == "snupport-api" ]]; then
     back=1;
-    use_log_redaction=1;
 fi
 if [[ $application == "snupport-app" ]]; then
     front=1;
 fi
+
+source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
 
 cd "$(dirname $0)/../.."
 
@@ -87,17 +79,7 @@ if (( $front )); then
 fi
 
 if (( $back )); then
-    # Les paquets du workspace doivent être recopiés : node_modules ne contient que des liens
-    # symboliques vers packages/<nom>, qui pendent si la cible n'est pas là (MODULE_NOT_FOUND au boot).
-    if (( $use_lib )); then
-        mkdir -p $destination/packages/lib/
-        mv out/packages/lib/{dist/*,node_modules} $destination/packages/lib/
-    fi
-    if (( $use_log_redaction )); then
-        # Pas de dépendance de runtime : npm ci --omit dev ne crée pas de node_modules ici.
-        mkdir -p $destination/packages/log-redaction/
-        mv out/packages/log-redaction/dist/* $destination/packages/log-redaction/
-    fi
+    copy_workspace_packages $destination
     mv out/node_modules $destination/
 fi
 
