@@ -12,6 +12,7 @@ import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import getNewContractFixture from "./fixtures/contract";
 import { createContractHelper } from "./helpers/contract";
 import { sendDocumentEmailTask } from "../queues/sendMailQueue";
+import { getAllPdfTemplates } from "../utils/pdf-renderer";
 
 // We mock node-fetch for PDF generation.
 jest.mock("node-fetch", () =>
@@ -32,6 +33,21 @@ jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
   sendEmail: () => Promise.resolve(),
   sendTemplate: () => Promise.resolve(),
+  // Les hooks `post("save")` des modèles synchronisent le contact chez Brevo : sans bouchon, chaque
+  // création de volontaire part en HTTP réel, échoue et rejoue avec backoff (plusieurs dizaines de
+  // secondes par test, jusqu'au dépassement du timeout).
+  sync: () => Promise.resolve(),
+  unsync: () => Promise.resolve(),
+}));
+
+// Les gabarits d'attestation ne sont pas versionnés : `getAllPdfTemplates()` les télécharge au
+// démarrage de l'API (`main.js`). En test, on bouchonne la récupération par un PNG minimal valide,
+// que pdfkit sait redimensionner au format de la page.
+const PNG_1x1 = Buffer.from("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==", "base64");
+
+jest.mock("../utils", () => ({
+  ...jest.requireActual("../utils"),
+  getFile: () => Promise.resolve({ Body: PNG_1x1 }),
 }));
 
 jest.mock("../queues/sendMailQueue", () => ({
@@ -39,7 +55,10 @@ jest.mock("../queues/sendMailQueue", () => ({
   sendDocumentEmailTask: jest.fn(() => Promise.resolve({ id: "job" })),
 }));
 
-beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
+beforeAll(async () => {
+  await dbConnect(__filename.slice(__dirname.length + 1, -3));
+  await getAllPdfTemplates();
+});
 beforeEach(() => jest.clearAllMocks());
 afterAll(dbClose);
 
