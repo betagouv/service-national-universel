@@ -64,8 +64,8 @@ Créer `api/src/__tests__/cle-routes-supprimees.test.ts` :
 ```ts
 import request from "supertest";
 
-import { dbConnect, dbClose } from "../helpers/db";
-import getAppHelper from "../helpers/app";
+import { dbConnect, dbClose } from "./helpers/db";
+import getAppHelper from "./helpers/app";
 
 beforeAll(() => dbConnect(__filename.slice(__dirname.length + 1, -3)));
 afterAll(dbClose);
