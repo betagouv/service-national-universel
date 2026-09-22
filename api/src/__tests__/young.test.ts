@@ -536,8 +536,10 @@ describe("Young", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body).toHaveProperty("young");
-      expect(res.body.young).toHaveProperty("invitationToken");
-      expect(res.body.young).toHaveProperty("invitationExpires");
+      // Le token d'invitation ne doit jamais sortir de l'email d'invitation : il délivre un JWT jeune
+      // via POST /young/signup_verify (constat H43 de l'audit du 21/09/2026).
+      expect(res.body.young).not.toHaveProperty("invitationToken");
+      expect(res.body.young).not.toHaveProperty("invitationExpires");
       expect(res.body.young).toHaveProperty("status", "WAITING_VALIDATION");
       expect(res.body.young).toHaveProperty("cohort", cohort.name);
       expect(res.body.young).toHaveProperty("cohortId", cohort._id.toString());

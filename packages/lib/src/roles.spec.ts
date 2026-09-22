@@ -38,3 +38,18 @@ describe("canSigninAs function", () => {
     expect(canSigninAs(actor, target, "young")).toBe(false);
   });
 });
+
+describe("helpers d'administration CLE devenus inutilisés", () => {
+  it("n'exporte plus les helpers d'administration CLE dont les seuls appelants ont été supprimés", async () => {
+    const roles = await import("./roles");
+    expect(roles).not.toHaveProperty("canCreateEtablissement");
+    expect(roles).not.toHaveProperty("canUpdateEtablissement");
+    expect(roles).not.toHaveProperty("canDeleteClasse");
+    expect(roles).not.toHaveProperty("canUpdateClasse");
+    expect(roles).not.toHaveProperty("canUpdateClasseStay");
+    expect(roles).not.toHaveProperty("canVerifyClasse");
+    expect(roles).not.toHaveProperty("canWithdrawClasse");
+    expect(roles).not.toHaveProperty("canNotifyAdminCleForVerif");
+    expect(roles).not.toHaveProperty("canUpdateReferentClasse");
+  });
+});

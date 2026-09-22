@@ -10,60 +10,63 @@ import { PermissionModel } from "../models/permissions/permission";
 
 const mockEsSearchCalls: any[] = [];
 
+type EsSourceFilter = string | string[] | { includes?: string | string[]; excludes?: string | string[] };
+
+/** Émule le `_source filtering` d'Elasticsearch sur un document du mock. */
+const applySourceFilter = (source: EsSourceFilter | undefined, doc: Record<string, any>): Record<string, any> => {
+  if (!source) return doc;
+  const isFieldList = typeof source === "string" || Array.isArray(source);
+  const includes: string[] = isFieldList ? ([] as string[]).concat(source as string | string[]) : ([] as string[]).concat(source.includes ?? "*");
+  const excludes: string[] = isFieldList ? [] : ([] as string[]).concat(source.excludes ?? []);
+  const keepAll = includes.includes("*");
+  return Object.fromEntries(Object.entries(doc).filter(([key]) => (keepAll || includes.includes(key)) && !excludes.includes(key)));
+};
+
 const TUTOR_ID = "6500000000000000000000aa";
 const STRUCTURE_ID = "6500000000000000000000bb";
 
-jest.mock("../es", () => {
-  // Applique la projection `_source` comme le ferait Elasticsearch. Trois formes possibles :
-  // "*", une liste de champs, ou { includes, excludes } — cf. `buildSourceFilter` (#5310).
-  const projectSource = (source: any, doc: Record<string, any>): Record<string, any> => {
-    if (!source || source === "*") return doc;
-    const includes: string[] = Array.isArray(source) ? source : source.includes ?? ["*"];
-    const excludes: string[] = Array.isArray(source) ? [] : source.excludes ?? [];
-    const keepAll = includes.includes("*");
-    return Object.fromEntries(Object.entries(doc).filter(([key]) => (keepAll || includes.includes(key)) && !excludes.includes(key)));
-  };
-
-  return {
-    search: async (params: any) => {
-      mockEsSearchCalls.push({ index: params.index, _source: params.body?._source });
-      const hits = {
-        mission: [
-          {
-            _id: "6500000000000000000000cc",
-            _source: { name: "Mission validée", status: "VALIDATED", tutorId: TUTOR_ID, structureId: STRUCTURE_ID },
+jest.mock("../es", () => ({
+  search: async (params: any) => {
+    mockEsSearchCalls.push({ index: params.index, _source: params.body?._source });
+    const hits = {
+      mission: [
+        {
+          _id: "6500000000000000000000cc",
+          _source: { name: "Mission validée", status: "VALIDATED", tutorId: TUTOR_ID, structureId: STRUCTURE_ID },
+        },
+      ],
+      referent: [
+        {
+          _id: TUTOR_ID,
+          // champs réellement présents dans l'index ES `referent`
+          _source: {
+            firstName: "Tuteur",
+            lastName: "Test",
+            email: "tuteur@example.org",
+            phone: "0102030405",
+            mobile: "0601020304",
+            role: ROLES.RESPONSIBLE,
+            subRole: "",
+            status: "VALIDATED",
+            structureId: STRUCTURE_ID,
+            region: "Bretagne",
+            department: "Morbihan",
+            lastLoginAt: "2026-09-01T00:00:00.000Z",
           },
-        ],
-        referent: [
-          {
-            _id: TUTOR_ID,
-            // champs réellement présents dans l'index ES `referent`
-            _source: {
-              firstName: "Tuteur",
-              lastName: "Test",
-              email: "tuteur@example.org",
-              phone: "0102030405",
-              mobile: "0601020304",
-              role: ROLES.RESPONSIBLE,
-              subRole: "",
-              status: "VALIDATED",
-              structureId: STRUCTURE_ID,
-              region: "Bretagne",
-              department: "Morbihan",
-              lastLoginAt: "2026-09-01T00:00:00.000Z",
-            },
-          },
-        ],
-        structure: [{ _id: STRUCTURE_ID, _source: { name: "Structure test", city: "Vannes", department: "Morbihan" } }],
-      }[params.index as string];
-      const projected = (hits || []).map((hit) => ({ ...hit, _source: projectSource(params.body?._source, hit._source) }));
-      return { body: { hits: { total: { value: projected.length, relation: "eq" }, hits: projected }, aggregations: {} } };
-    },
-    scroll: async () => ({ body: { _scroll_id: null, hits: { total: { value: 0 }, hits: [] } } }),
-    clearScroll: async () => ({}),
-    msearch: async () => ({ body: { responses: [] } }),
-  };
-});
+        },
+      ],
+      structure: [{ _id: STRUCTURE_ID, _source: { name: "Structure test", city: "Vannes", department: "Morbihan" } }],
+    }[params.index as string];
+    // Applique la projection _source comme le ferait Elasticsearch : chaîne,
+    // tableau d'inclusions (`["*"]` = tous les champs) ou objet `{ includes, excludes }`.
+    const source = params.body?._source;
+    const projected = (hits || []).map((hit) => ({ ...hit, _source: applySourceFilter(source, hit._source) }));
+    return { body: { hits: { total: { value: projected.length, relation: "eq" }, hits: projected }, aggregations: {} } };
+  },
+  scroll: async () => ({ body: { _scroll_id: null, hits: { total: { value: 0 }, hits: [] } } }),
+  clearScroll: async () => ({}),
+  msearch: async () => ({ body: { responses: [] } }),
+}));
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -119,6 +122,10 @@ describe("POST /elasticsearch/mission/export", () => {
     const tutor = res.body.data[0].tutor;
     expect(tutor).toMatchObject({ firstName: "Tuteur", lastName: "Test", email: "tuteur@example.org" });
     expect(Object.keys(tutor).sort()).toEqual(["_id", "email", "firstName", "lastName", "mobile", "phone"]);
-    expect(mockEsSearchCalls.find((call) => call.index === "referent")?._source).not.toEqual("*");
+    // La requête ES sur l'index `referent` est projetée sur les seuls champs d'export (C6)
+    // et exclut les secrets répliqués par Monstache (#5310).
+    const referentSource = mockEsSearchCalls.find((call) => call.index === "referent")?._source;
+    expect(referentSource.includes).toEqual(["firstName", "lastName", "email", "mobile", "phone"]);
+    expect(referentSource.excludes).toContain("password");
   });
 });

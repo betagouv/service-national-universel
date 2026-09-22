@@ -200,3 +200,116 @@ describe("brevo contact attributes", () => {
     expect(sent.email).toBe("jean.dupont@example.org");
   });
 });
+
+const youngWithHealthData = {
+  _id: YOUNG_ID,
+  email: "eleve@example.org",
+  firstName: "Léa",
+  lastName: "Martin",
+  status: "VALIDATED",
+  registredAt: "2024-01-01T00:00:00.000Z",
+  cohort: "Juillet 2024",
+  department: "Finistère",
+  region: "Bretagne",
+  // données de santé
+  handicap: "true",
+  allergies: "Allergie aux arachides",
+  ppsBeneficiary: "true",
+  paiBeneficiary: "true",
+  medicosocialStructureName: "IME Les Tilleuls",
+  medicosocialStructureAddress: "3 rue des Lilas",
+  specificAmenagment: "true",
+  specificAmenagmentType: "Besoin d'un accompagnant permanent",
+  psc1Info: "true",
+  // identité / contact
+  birthdateAt: "2008-04-12T00:00:00.000Z",
+  address: "12 rue de la Paix",
+  zip: "29200",
+  city: "Brest",
+  phone: "0612345678",
+  parent1Email: "parent1@example.org",
+  parent1FirstName: "Claude",
+  parent1LastName: "Martin",
+  parent1Phone: "0698765432",
+  parent2Email: "parent2@example.org",
+  parent2FirstName: "Dominique",
+  parent2LastName: "Martin",
+  parent2Phone: "0687654321",
+};
+
+describe("H7 - fuite du document métier vers Brevo", () => {
+  it("n'envoie pas les données de santé du jeune à Brevo", async () => {
+    mockBrevoResponse({ id: 1 });
+
+    await sync(youngWithHealthData, "young", { force: true });
+    await flush();
+
+    const selfBody = brevoRequestBodies()[0];
+    const attributes = JSON.parse(selfBody).attributes;
+
+    expect(attributes.ALLERGIES).toBeUndefined();
+    expect(attributes.HANDICAP).toBeUndefined();
+    expect(attributes.PPSBENEFICIARY).toBeUndefined();
+    expect(attributes.PAIBENEFICIARY).toBeUndefined();
+    expect(attributes.MEDICOSOCIALSTRUCTURENAME).toBeUndefined();
+    expect(attributes.SPECIFICAMENAGMENTTYPE).toBeUndefined();
+    expect(attributes.PSC1INFO).toBeUndefined();
+    expect(selfBody).not.toContain("arachides");
+    expect(selfBody).not.toContain("Les Tilleuls");
+  });
+
+  it("n'envoie pas au contact parent les données du jeune ni celles de l'autre parent", async () => {
+    mockBrevoResponse({ id: 1 });
+
+    await sync(youngWithHealthData, "young", { force: true });
+    await flush();
+
+    const bodies = brevoRequestBodies().map((body) => JSON.parse(body));
+    const parent1 = bodies.find((body) => body.email === "parent1@example.org");
+    expect(parent1).toBeDefined();
+
+    // santé du jeune
+    expect(JSON.stringify(parent1.attributes)).not.toContain("arachides");
+    expect(parent1.attributes.HANDICAP).toBeUndefined();
+    // coordonnées de l'autre parent
+    expect(parent1.attributes.PARENT2EMAIL).toBeUndefined();
+    expect(parent1.attributes.PARENT2PHONE).toBeUndefined();
+    // adresse et téléphone du jeune
+    expect(parent1.attributes.ADDRESS).toBeUndefined();
+    expect(parent1.attributes.PHONE).toBeUndefined();
+    expect(parent1.attributes.BIRTHDATEAT).toBeUndefined();
+    expect(parent1.attributes.BIRTHDATEAT).toBeUndefined();
+  });
+
+  it("conserve les attributs de ciblage marketing", async () => {
+    mockBrevoResponse({ id: 1 });
+
+    await sync(youngWithHealthData, "young", { force: true });
+    await flush();
+
+    const bodies = brevoRequestBodies().map((body) => JSON.parse(body));
+    const self = bodies.find((body) => body.email === "eleve@example.org");
+    expect(self.attributes).toEqual({
+      COHORT: "Juillet 2024",
+      DEPARTMENT: "Finistère",
+      REGION: "Bretagne",
+      STATUS: "VALIDATED",
+      PRENOM: "Léa",
+      NOM: "Martin",
+      TYPE: "YOUNG",
+      REGISTRED: false,
+    });
+
+    const parent1 = bodies.find((body) => body.email === "parent1@example.org");
+    expect(parent1.attributes).toEqual({
+      COHORT: "Juillet 2024",
+      DEPARTMENT: "Finistère",
+      REGION: "Bretagne",
+      STATUS: "VALIDATED",
+      PRENOM: "Léa",
+      NOM: "Martin",
+      TYPE: "YOUNG",
+      REGISTRED: false,
+    });
+  });
+});

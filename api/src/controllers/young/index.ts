@@ -34,7 +34,9 @@ import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
 import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
 import patches from "../patches";
-import { serializeYoung, serializeApplication } from "../../utils/serializer";
+import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
+import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
+import { canAccessYoungDocumentsInScope, isYoungInReferentGeography } from "../../young/youngScope";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -323,7 +325,7 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
       params: { toName, cta, fromName },
     });
 
-    return res.status(200).send({ young: young, ok: true });
+    return res.status(200).send({ young: serializeYoung(young, req.user), ok: true });
   } catch (error) {
     if (error.code === 11000) return res.status(409).send({ ok: false, code: ERRORS.USER_ALREADY_REGISTERED });
     capture(error);
@@ -737,13 +739,20 @@ router.get(
         data = data.filter((a) => a.mission?.isMilitaryPreparation);
       }
 
-      for (let application of data) {
+      // La sérialisation doit produire un nouveau tableau : réassigner la variable de boucle ne modifiait
+      // rien et laissait sortir le tuteur (référent) et le contrat en documents bruts, tokens compris.
+      const serialized = data.map((application) => {
         if (application.mission?.tutorId && !application.tutorId) application.tutorId = application.mission.tutorId;
         if (application.mission?.structureId && !application.structureId) application.structureId = application.mission.structureId;
-        application = { ...serializeApplication(application), mission: application.mission, tutor: application.tutor, contract: application.contract };
-      }
+        return {
+          ...serializeApplication(application),
+          mission: application.mission ? serializeMission(application.mission as any) : application.mission,
+          tutor: application.tutor ? serializeReferent(application.tutor as any) : application.tutor,
+          contract: application.contract ? serializeContract(application.contract as any, req.user, false) : application.contract,
+        };
+      });
 
-      return res.status(200).send({ ok: true, data });
+      return res.status(200).send({ ok: true, data: serialized });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1047,8 +1056,14 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
     if (!canGetYoungByEmail(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    let data = await YoungModel.findOne({ email: value });
-    return res.status(200).send({ ok: true, data });
+    const data = await YoungModel.findOne({ email: value });
+    if (!data) return res.status(200).send({ ok: true, data: null });
+    // `canGetYoungByEmail` n'est qu'une matrice de rôles : sans périmètre, un référent départemental
+    // lisait le dossier (et les tokens) de n'importe quel volontaire du pays.
+    if (req.user.role !== ROLES.ADMIN && !isYoungInReferentGeography(req.user, data)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    return res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1274,15 +1289,19 @@ async function getStatusAfterChangementSejour(currentStatus: string, department:
   return currentStatus;
 }
 
-router.use("/:id/documents", require("./documents"));
-router.use("/:id/meeting-point", require("./meeting-point"));
-router.use("/:id/session", require("./session"));
-router.use("/:id/phase1", require("./phase1").default);
-router.use("/:id/phase2", require("./phase2"));
+// Tous les sous-routeurs /young/:id/* passent par le contrôle d'appartenance commun : un jeune n'accède
+// qu'à son propre dossier, un référent à ceux de son périmètre réel (audit 2026-09-21, lot 3).
+// Les préfixes statiques doivent être montés avant les routes paramétrées : sinon `/young/inscription2023/documents/...`
+// est capté par `/:id/documents` avec `id = "inscription2023"`.
 router.use("/reinscription", require("./reinscription"));
 router.use("/inscription2023", require("./inscription2023"));
-router.use("/note", require("./note").default);
-router.use("/:id/point-de-rassemblement", require("./point-de-rassemblement"));
 router.use("/account", require("./account").default);
+router.use("/note/:youngId", youngPerimeterMiddleware({ paramName: "youngId" }), require("./note").default);
+router.use("/:id/documents", youngPerimeterMiddleware({ referentAccess: canAccessYoungDocumentsInScope }), require("./documents"));
+router.use("/:id/meeting-point", youngPerimeterMiddleware(), require("./meeting-point"));
+router.use("/:id/session", youngPerimeterMiddleware(), require("./session"));
+router.use("/:id/phase1", youngPerimeterMiddleware(), require("./phase1").default);
+router.use("/:id/phase2", youngPerimeterMiddleware(), require("./phase2"));
+router.use("/:id/point-de-rassemblement", youngPerimeterMiddleware(), require("./point-de-rassemblement"));
 
 export default router;

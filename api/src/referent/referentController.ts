@@ -353,6 +353,11 @@ router.post(
 
       if (!(await isInvitationInUserScope(req.user, value))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+      // CLE (H17) : ce parcours générique ne doit plus créer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(value.role)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+
       const { template, email, firstName, lastName, role, subRole, region, department, structureId, structureName, cohesionCenterName, cohesionCenterId, phone, cohorts } = value;
       const referentProperties: Partial<ReferentType> = { roles: [] };
       if (email) referentProperties.email = email.trim().toLowerCase();
@@ -385,20 +390,11 @@ router.post(
       // @ts-ignore
       referentProperties.invitationExpires = inSevenDays();
 
-      if (referentProperties.role === ROLES.ADMINISTRATEUR_CLE) {
-        referentProperties.subRole = SUB_ROLES.referent_etablissement;
-        referentProperties.roles = [...referentProperties.roles!.filter((role) => role !== subRole), SUB_ROLES.referent_etablissement];
-      }
-
       const referent = await ReferentModel.create(referentProperties);
       if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
       await updateTutorNameInMissionsAndApplications(referent, req.user);
 
-      let cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
-      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referentProperties.role || "")) {
-        // fixme: update url
-        cta = `${config.ADMIN_URL}/creer-mon-compte?token=${invitation_token}`;
-      }
+      const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitation_token}`;
       const fromName = `${req.user.firstName} ${req.user.lastName}`;
       const toName = `${referent.firstName} ${referent.lastName}`;
 
@@ -491,6 +487,12 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
 
     const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+
+    // CLE (H17) : cette route non authentifiée ne doit plus pouvoir activer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
+    if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     if (referent.registredAt) return res.status(400).send({ ok: false, data: null, code: ERRORS.USER_ALREADY_REGISTERED });
     if (!validatePassword(password)) return res.status(400).send({ ok: false, prescriber: null, code: ERRORS.PASSWORD_NOT_VALIDATED });
 
