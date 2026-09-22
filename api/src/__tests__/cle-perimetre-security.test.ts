@@ -9,6 +9,11 @@
  * M8  GET  /cle/classe/:id/patches                    : aucun périmètre.
  * M9  GET  /cle/young/by-classe-historic/:id/patches  : aucun rapprochement classe ↔ acteur.
  * L4  GET  /cle/classe/public/:id                     : projection publique minimale (régression).
+ *
+ * Route adjacente, relevée pendant la vérification et non inventoriée par l'audit :
+ * GET /cle/young/by-classe-stats/:idClasse cloisonnait le référent de classe et l'administrateur
+ * CLE, mais pas le territoire des référents départementaux et régionaux. Elle alimente la même
+ * page que GET /cle/classe/:id : les deux périmètres doivent coïncider.
  */
 import request from "supertest";
 
@@ -319,6 +324,29 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       const res = await request(await getAppHelperWithAcl(referentClasse)).get(`/cle/young/by-classe-historic/${classe._id}/patches`);
 
       expect(res.statusCode).toEqual(200);
+    }, 30000);
+  });
+
+  describe("Adjacent — GET /cle/young/by-classe-stats/:idClasse", () => {
+    it("refuse une classe hors du périmètre (6 rôles)", async () => {
+      const { classe } = await createEtablissementComplet();
+      await YoungModel.create(getNewYoungFixture({ classeId: classe._id.toString() }));
+      const attaquants = await createAttaquants();
+
+      const observes = await verdicts(attaquants, async (user) => request(await getAppHelperWithAcl(user)).get(`/cle/young/by-classe-stats/${classe._id}`));
+
+      expect(observes).toEqual(tousRefuses(attaquants));
+    }, 60000);
+
+    it("autorise le référent de la classe, le chef d'établissement et le référent départemental du territoire", async () => {
+      const { classe, chef, referentClasse } = await createEtablissementComplet();
+      await YoungModel.create(getNewYoungFixture({ classeId: classe._id.toString() }));
+      const referentDep = await ReferentModel.create(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
+
+      for (const user of [referentClasse, chef, referentDep]) {
+        const res = await request(await getAppHelperWithAcl(user)).get(`/cle/young/by-classe-stats/${classe._id}`);
+        expect([user.role, res.statusCode]).toEqual([user.role, 200]);
+      }
     }, 30000);
   });
 
