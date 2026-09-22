@@ -36,7 +36,7 @@ import { validateYoung, validateId, validatePhase1Document, idSchema } from "../
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, isYoungInReferentGeography } from "../../young/youngScope";
+import { canAccessYoungDocumentsInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -448,7 +448,10 @@ router.get(
       const young = await YoungModel.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const youngPatches = await patches.get(req, YoungModel);
+      // `patches.get` lit USER_HISTORY/PATCH avec `ignorePolicy` : le périmètre doit être vérifié ici.
+      if (!(await isYoungInUserScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const youngPatches = await patches.get(req, YoungModel, young);
       if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data: youngPatches });
     } catch (error) {

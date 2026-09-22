@@ -5,6 +5,7 @@ import { getResponsibleCenterField } from "../controllers/elasticsearch/utils";
 
 const HEAD_CENTER_ROLES: string[] = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
 const CLE_ROLES: string[] = [ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE];
+const GEO_ROLES: string[] = [ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
 
 /**
  * Périmètre d'un chef de centre (ou de ses adjoints) : le volontaire doit être affecté à une session
@@ -57,6 +58,35 @@ export async function canEditYoungInScope(user: UserDto, young: Pick<YoungType, 
 export function isYoungInReferentGeography(user: UserDto, young: Pick<YoungType, "region" | "department">): boolean {
   if (user.role === ROLES.REFERENT_REGION) return !!young.region && young.region === user.region;
   if (user.role === ROLES.REFERENT_DEPARTMENT) return !!young.department && ((user.department as string[]) || []).includes(young.department);
+  return false;
+}
+
+/**
+ * Périmètre d'un référent départemental / régional : le volontaire est de son territoire, ou affecté à
+ * une session phase 1 de son territoire — mêmes deux cas que la recherche ES (buildYoungContext), pour
+ * ne pas refuser en lecture un volontaire que le référent voit déjà dans ses listes.
+ */
+async function isYoungInReferentTerritory(user: UserDto, young: Pick<YoungType, "region" | "department" | "sessionPhase1Id">): Promise<boolean> {
+  if (isYoungInReferentGeography(user, young)) return true;
+  if (!young.sessionPhase1Id) return false;
+  const territoire = user.role === ROLES.REFERENT_REGION ? { region: user.region } : { department: { $in: (user.department as string[]) || [] } };
+  return !!(await SessionPhase1Model.exists({ _id: young.sessionPhase1Id, ...territoire }));
+}
+
+/**
+ * Périmètre de LECTURE d'un volontaire (dossier, historique).
+ *
+ * Miroir en lecture de `canEditYoungInScope` : les rôles dont la matrice de permissions est nationale
+ * (chef de centre, référent CLE) doivent être rattachés au volontaire en base, les référents
+ * géographiques à son territoire. Tout rôle non listé est refusé : un rôle sans périmètre défini
+ * (transporter, responsable de structure, comptes résiduels) n'a rien à faire dans le dossier d'un
+ * volontaire, et l'ajouter doit être un choix explicite.
+ */
+export async function isYoungInUserScope(user: UserDto, young: Pick<YoungType, "region" | "department" | "classeId" | "sessionPhase1Id">): Promise<boolean> {
+  if (user.role === ROLES.ADMIN) return true;
+  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, young);
+  if (CLE_ROLES.includes(user.role)) return isYoungInCleScope(user, young);
+  if (GEO_ROLES.includes(user.role)) return isYoungInReferentTerritory(user, young);
   return false;
 }
 

@@ -5,9 +5,33 @@ import { isReadAuthorized, PERMISSION_ACTIONS, PERMISSION_RESOURCES, RouteRespon
 
 import { capture } from "../sentry";
 import { ERRORS } from "../utils";
+import { isSensitiveKey } from "../utils/logRedaction";
 import { validateId } from "../utils/validator";
 import { ClasseModel } from "../models";
 import { RouteRequest, UserRequest } from "./request";
+
+/**
+ * Un historique ne doit jamais rendre un secret lisible. Les plugins `patchHistory` excluent les champs
+ * d'authentification à l'écriture (`excludes`), mais les patches écrits avant l'ajout d'une exclusion
+ * portent encore la valeur en clair (jetons parents, validation d'email, réinitialisation…).
+ *
+ * Filet générique appliqué à la lecture, quel que soit le modèle : toute opération dont un segment de
+ * chemin porte un nom de secret (`isSensitiveKey`) est retirée, et les patches qui n'ont plus d'opération
+ * disparaissent de l'historique.
+ */
+export const stripSensitiveOps = <T extends { ops?: { path?: string }[] }>(patches: T[]): T[] => {
+  const kept: T[] = [];
+  for (const patch of patches) {
+    patch.ops = (patch.ops || []).filter(
+      (op) =>
+        !String(op.path)
+          .split("/")
+          .some((segment) => isSensitiveKey(segment)),
+    );
+    if (patch.ops.length > 0) kept.push(patch);
+  }
+  return kept;
+};
 
 /**
  * Historique d'un document. `preloaded` permet de réutiliser un document déjà chargé par l'appelant
@@ -43,7 +67,7 @@ export const get = async (req: Partial<RouteRequest<any>> | UserRequest, model: 
         return !(isAddOperation && (!hasValue || !isNotEmptyArray));
       });
     });
-    return data;
+    return stripSensitiveOps(data);
   } catch (error) {
     capture(error);
     throw error;
@@ -94,7 +118,7 @@ export const getOldStudentPatches = async ({ classeId, user }: GetOldStudentPatc
       ])
       .toArray();
 
-    return data;
+    return stripSensitiveOps(data);
   } catch (error) {
     capture(error);
     throw error;
@@ -168,4 +192,4 @@ export const deletePatches = async ({ id, model }: DeletePatchesParams): Promise
   }
 };
 
-export default { get, getOldStudentPatches, deletePatches };
+export default { get, getOldStudentPatches, deletePatches, stripSensitiveOps };
