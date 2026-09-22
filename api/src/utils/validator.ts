@@ -615,7 +615,9 @@ export function validateDepartmentService(departmentService) {
   return Joi.object()
     .keys({
       contacts: Joi.array().items(Joi.any().allow(null, "")),
-      department: Joi.string().allow(null, ""),
+      // Le département identifie le service visé (`findOne({ department })`) et porte le contrôle de
+      // périmètre : absent, la requête écraserait le premier service venu.
+      department: Joi.string().required(),
       region: Joi.string().allow(null, ""),
       directionName: Joi.string().allow(null, ""),
       serviceName: Joi.string().allow(null, ""),
