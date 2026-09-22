@@ -895,7 +895,14 @@ function canSearchInElasticSearch(actor, index) {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
   } else if (index === "cohesionyoung") {
     return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-  } else if (/* legacy and new name */ index === "sessionphase1young" || index === "sessionphase1") {
+  } else if (index === "sessionphase1young") {
+    // Les jeunes d'une session (PII, santé, parents). Seuls les rôles dont
+    // l'appartenance à la session est vérifiée côté route y ont accès :
+    // transporter, administrateur_cle et referent_classe ne l'étaient pas et
+    // lisaient donc n'importe quelle session (cf. H27). Ils restent autorisés
+    // sur l'index `sessionphase1`, qui ne porte que les métadonnées de session.
+    return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
+  } else if (index === "sessionphase1") {
     return [
       ROLES.ADMIN,
       ROLES.REFERENT_REGION,

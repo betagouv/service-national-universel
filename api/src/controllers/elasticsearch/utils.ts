@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES, canSearchInElasticSearch, getEsSensitiveFields } from "snu-lib";
+import { ROLES, canSearchInElasticSearch, getEsSensitiveFields, region2department } from "snu-lib";
 import { capture } from "../../sentry";
 import { ERRORS, isYoung, isReferent } from "../../utils";
 import { StructureModel } from "../../models";
@@ -279,10 +279,36 @@ interface ApplicationContextResult {
   };
 }
 
+/**
+ * Rôles pour lesquels `buildApplicationContext` sait construire un périmètre.
+ * Un rôle absent de cette liste n'obtiendrait AUCUN filtre : il verrait l'index
+ * `application` national, et via `exportFields` les fiches jeunes peuplées.
+ * La fonction refuse donc par défaut (cf. H26).
+ * ADMIN est national par conception.
+ */
+const APPLICATION_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
 async function buildApplicationContext(user: UserDto): Promise<ApplicationContextResult> {
   const contextFilters: ContextFilters = [];
 
   if (!canSearchInElasticSearch(user, "application")) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+  if (!APPLICATION_CONTEXT_SCOPED_ROLES.includes(user.role)) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Périmètre géographique des référents, aligné sur les policies
+  // CANDIDATURE_DEPARTMENT_* / CANDIDATURE_REGION_* (young.department / young.region).
+  // L'index `application` ne porte pas `youngRegion` : la région est traduite en
+  // liste de départements.
+  if (user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = user.department || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
+
+  if (user.role === ROLES.REFERENT_REGION) {
+    const departments = region2department[user.region as string] || [];
+    if (!departments.length) return { applicationContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "youngDepartment.keyword": departments } });
+  }
 
   // A responsible can only see their structure's applications.
   if (user.role === ROLES.RESPONSIBLE) {
