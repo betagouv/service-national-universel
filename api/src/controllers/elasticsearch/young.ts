@@ -178,6 +178,12 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
   return { youngContextFilters: contextFilters };
 }
 
+/**
+ * Rôles dont l'appartenance à la session est vérifiée dans la route
+ * `/by-session/:sessionId/:action`. ADMIN est national par conception.
+ */
+const BY_SESSION_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE];
+
 const router: Router = express.Router();
 
 router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
@@ -392,6 +398,10 @@ router.post(
       const sortFields: string[] = [];
 
       if (!canSearchInElasticSearch(user, "sessionphase1young")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      // L'appartenance à la session n'est vérifiée que pour les rôles ci-dessous
+      // (blocs dédiés plus bas). Tout autre rôle lirait n'importe quelle session,
+      // les identifiants étant énumérables via /elasticsearch/sessionphase1 (cf. H27).
+      if (!BY_SESSION_SCOPED_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       // Context filters
       const contextFilters = [

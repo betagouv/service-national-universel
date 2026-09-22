@@ -5,7 +5,7 @@ const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { buildNdJson, joiElasticSearch, buildRequestBody } = require("./utils");
-const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canSearchInElasticSearch } = require("snu-lib");
+const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canExportLigneBus } = require("snu-lib");
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const logger = require("../../logger");
@@ -166,7 +166,12 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "lignebus")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // `canSearchInElasticSearch(user, "lignebus")` autorise aussi les comptes
+    // d'établissement (administrateur_cle, referent_classe), qui n'ont aucun
+    // périmètre dans populateWithYoungInfo : cet export leur livrait tous les
+    // jeunes VALIDATED affectés à un bus (cf. C5). On s'aligne sur le front, qui
+    // ne propose le bouton qu'aux rôles de canExportLigneBus.
+    if (!canExportLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });
@@ -227,8 +232,20 @@ const prepareSharedData = async (ligneBus) => {
   return { meetingPoints, centers };
 };
 
+/**
+ * Rôles autorisés à voir les jeunes d'une ligne, et périmètre appliqué :
+ * national pour l'admin et le transporteur, points de rassemblement de leur
+ * territoire pour les référents. Tout autre rôle repart sans aucun jeune —
+ * défense en profondeur si canExportLigneBus s'élargit un jour (cf. C5).
+ */
+const LIGNEBUS_YOUNG_SCOPED_ROLES = [ROLES.ADMIN, ROLES.TRANSPORTER, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
+
 const populateWithYoungInfo = async (ligneBus, user, sharedData) => {
   try {
+    if (!LIGNEBUS_YOUNG_SCOPED_ROLES.includes(user.role)) {
+      return ligneBus.map((item) => ({ ...item, youngs: [] }));
+    }
+
     const ligneIds = [...new Set(ligneBus.map((item) => item._id).filter(Boolean))];
     const pointDeRassemblements = sharedData.meetingPoints || [];
 
