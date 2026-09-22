@@ -22,6 +22,20 @@ runs:
       with:
         node-version: "20.17"
 
+    # Les runners sont auto-hébergés et réutilisés d'un job à l'autre. Un job tué en cours
+    # de route — runner qui perd la communication, annulation — laisse derrière lui un
+    # conteneur nommé "mongodb", et tous les jobs suivants sur cette machine échouent alors
+    # au démarrage de MongoDB ("Conflict. The container name /mongodb is already in use"),
+    # sans jamais exécuter un test. On retire donc le résidu avant de démarrer.
+    - name: Remove stale MongoDB container
+      shell: bash
+      run: |
+        if [ -n "$(docker ps -q --filter 'name=^/mongodb$')" ]; then
+          echo "Un conteneur mongodb tourne encore sur ce runner : on n'y touche pas."
+        else
+          docker rm -f mongodb 2>/dev/null || true
+        fi
+
     - name: Start MongoDB 7.0
       uses: supercharge/mongodb-github-action@1.12.1
       with:
