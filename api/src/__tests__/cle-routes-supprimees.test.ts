@@ -72,3 +72,22 @@ describe("Routes CLE de consultation — conservées pour le lot 1b", () => {
     expect(response.status).not.toBe(404);
   });
 });
+
+describe("Routes CLE supprimées — administration des établissements (H15, H16)", () => {
+  const routes: [Method, string][] = [
+    ["post", "/cle/etablissement"],
+    ["put", "/cle/etablissement/5f1c5b0a0000000000000000"],
+    ["put", "/cle/etablissement/5f1c5b0a0000000000000000/referents"],
+    ["delete", "/cle/etablissement/5f1c5b0a0000000000000000/referents"],
+  ];
+
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
+  });
+
+  // Identifiant invalide, même raison qu'en tâche 2 : 400 sur une route vivante, 404 si supprimée.
+  it("GET /cle/etablissement/:id est toujours montée", async () => {
+    const response = await callRoute("get", "/cle/etablissement/identifiant-invalide");
+    expect(response.status).toBe(400);
+  });
+});
