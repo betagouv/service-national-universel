@@ -41,7 +41,6 @@ import {
   canDeleteYoung,
   canGetYoungByEmail,
   canInviteYoung,
-  canEditYoung,
   canEditPresenceYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
@@ -82,6 +81,7 @@ import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMi
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
+import { canEditYoungInScope } from "../../young/youngScope";
 import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
@@ -415,12 +415,12 @@ router.put("/update_phase3/:young", passport.authenticate("referent", { session:
 
     const data = await YoungModel.findOne({ _id: value.young });
 
-    if (!canEditYoung(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
-
     if (!data) {
       capture(`Young not found ${value.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
+
+    if (!(await canEditYoungInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     delete value.young;
     data.set({ ...value, statusPhase3UpdatedAt: Date.now() });
     await data.save({ fromUser: req.user });

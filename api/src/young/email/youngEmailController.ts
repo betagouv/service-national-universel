@@ -2,13 +2,14 @@ import express, { Response } from "express";
 import passport from "passport";
 import Joi from "joi";
 
-import { SENDINBLUE_TEMPLATES, ERRORS, canSendTemplateToYoung } from "snu-lib";
+import { SENDINBLUE_TEMPLATES, ERRORS } from "snu-lib";
 
 import { capture } from "../../sentry";
 import { UserRequest } from "../../controllers/request";
 
 import { isReferent, isYoung } from "../../utils";
 import { YoungModel } from "../../models";
+import { canEditYoungInScope } from "../youngScope";
 
 import { sendEmailToYoung } from "./youngEmailService";
 
@@ -52,7 +53,7 @@ router.post("/:id/email/:template", passport.authenticate(["young", "referent"],
     }
 
     // If actor is a referent it must be allowed to send template.
-    if (isReferent(req.user) && !canSendTemplateToYoung(req.user, young)) {
+    if (isReferent(req.user) && !(await canEditYoungInScope(req.user, young))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
 

@@ -20,6 +20,8 @@ import { createReferentHelper } from "./helpers/referent";
 import { getNewReferentFixture } from "./fixtures/referent";
 import { createClasse } from "./helpers/classe";
 import { createFixtureClasse } from "./fixtures/classe";
+import { createEtablissement } from "./helpers/etablissement";
+import { createFixtureEtablissement } from "./fixtures/etablissement";
 import { ClasseModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
@@ -730,7 +732,11 @@ describe("Young", () => {
       // @ts-ignore
       sendTemplate.mockClear();
       const tutor = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMINISTRATEUR_CLE }));
-      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE" }));
+      // le jeune doit être rattaché à l'établissement de l'administrateur CLE : le périmètre est
+      // désormais vérifié en base (canEditYoungInScope), plus seulement par le rôle
+      const etablissement = await createEtablissement(createFixtureEtablissement({ coordinateurIds: [tutor._id.toString()] }));
+      const classe = await createClasse(createFixtureClasse({ etablissementId: etablissement._id.toString() }));
+      const young = await createYoungHelper(getNewYoungFixture({ source: "CLE", classeId: classe._id.toString(), etablissementId: etablissement._id.toString() }));
       const res = await request(await getAppHelperWithAcl(tutor))
         .post(`/young/${young._id}/email/${SENDINBLUE_TEMPLATES.young.INSCRIPTION_VALIDATED_CLE}`)
         .send({ status: "VALIDATED" });

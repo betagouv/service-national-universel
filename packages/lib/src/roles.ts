@@ -253,6 +253,13 @@ const canDeleteYoung = (actor) => {
   return isAdmin(actor);
 };
 
+/**
+ * Matrice de RÔLES uniquement : `isHeadCenter` et `referentCLEAuthorized` n'expriment aucun périmètre
+ * (le rattachement session / classe / établissement ne se vérifie qu'en base). Côté API, ne jamais
+ * l'appeler seule sur une route d'écriture : utiliser `canEditYoungInScope` (api/src/young/youngScope.ts),
+ * qui compose cette matrice avec le contrôle du rattachement réel (audit 2026-09-21, H88 et H89).
+ * Côté front, elle reste utilisable pour afficher / masquer une action.
+ */
 function canEditYoung(actor, young) {
   const isAdmin = actor.role === ROLES.ADMIN;
   const isHeadCenter = [ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(actor.role);
@@ -838,6 +845,7 @@ function canInviteYoung(actor: UserDto, cohort?: CohortDto | null) {
   }
 }
 
+/** Même réserve que `canEditYoung` : matrice de rôles sans périmètre, à composer avec `canEditYoungInScope` côté API. */
 function canSendTemplateToYoung(actor, young) {
   return canEditYoung(actor, young);
 }
