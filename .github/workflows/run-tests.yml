@@ -9,7 +9,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     outputs:
       test_matrix: ${{ steps.config.outputs.test }}
 
@@ -38,7 +38,7 @@ jobs:
 
   test:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     strategy:
       matrix:
         app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
