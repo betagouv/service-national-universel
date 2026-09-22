@@ -91,3 +91,23 @@ describe("Routes CLE supprimées — administration des établissements (H15, H1
     expect(response.status).toBe(400);
   });
 });
+
+describe("Routes CLE supprimées — invitations et mises à jour de référents (H17)", () => {
+  const routes: [Method, string][] = [
+    ["post", "/cle/referent/invite-coordonnateur"],
+    ["post", "/cle/referent/send-invitation-chef-etablissement"],
+    ["post", "/cle/referent/send-invitation-referent-classe-verifiee"],
+    ["post", "/cle/referent/delete-old-referent-classe"],
+    ["put", "/cle/classes/update-referents"],
+    ["put", "/cle/classes/update-referents-by-csv"],
+  ];
+
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
+  });
+
+  it("POST /cle/referent/getMany ne répond pas 404", async () => {
+    const response = await callRoute("post", "/cle/referent/getMany");
+    expect(response.status).not.toBe(404);
+  });
+});

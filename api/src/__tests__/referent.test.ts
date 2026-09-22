@@ -127,6 +127,18 @@ describe("Referent", () => {
         .send(fixture);
       expect(res.status).toBe(409);
     });
+    // CLE décommissionné (H17) : ce parcours générique ne doit plus permettre de créer un compte
+    // ADMINISTRATEUR_CLE ou REFERENT_CLASSE actif, y compris pour un admin qui peut inviter tout rôle.
+    it("should return 403 when inviting an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
+      for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
+        const referentFixture = { ...getNewReferentFixture(), role };
+        const res = await request(await getAppHelperWithAcl())
+          .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
+          .send(referentFixture);
+        expect(res.statusCode).toEqual(403);
+        expect(res.body).toEqual({ ok: false, code: "OPERATION_NOT_ALLOWED" });
+      }
+    });
   });
 
   describe("PUT /referent/young/:id", () => {
