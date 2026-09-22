@@ -30,11 +30,12 @@ runs:
     - name: Remove stale MongoDB container
       shell: bash
       run: |
-        if [ -n "$(docker ps -q --filter 'name=^/mongodb$')" ]; then
-          echo "Un conteneur mongodb tourne encore sur ce runner : on n'y touche pas."
-        else
-          docker rm -f mongodb 2>/dev/null || true
-        fi
+        # Chaque runner a son propre demon Docker (dind) et n'execute qu'un job a la
+        # fois : un conteneur "mongodb" present ici est forcement un residu du job
+        # precedent, jamais la base d'un job concurrent. On le supprime donc sans
+        # condition, qu'il tourne ou non -- l'action --rm ne le retire qu'a sa sortie,
+        # et il reste vivant apres la fin du job.
+        docker rm -f mongodb 2>/dev/null || true
 
     - name: Start MongoDB 7.0
       uses: supercharge/mongodb-github-action@1.12.1
@@ -60,7 +61,10 @@ runs:
 
     - uses: actions/cache@v4
       id: cache-npm
-      if: steps.nm.outputs.fresh != 'true'
+      # Sur runner self-hosted on n'utilise jamais le cache : ni restauration ni
+      # sauvegarde. node_modules persiste sur le disque entre les jobs, et le
+      # televersement de l'archive (~305 Mo) depasse la duree des tests eux-memes.
+      if: runner.environment == 'github-hosted' && steps.nm.outputs.fresh != 'true'
       with:
         path: |
           apiv2/node_modules

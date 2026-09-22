@@ -20,16 +20,6 @@ const ClasseService = {
     return classe;
   },
 
-  modifierReferentClasse: async (id: ClassesRoutes["ModifierReferentClasse"]["params"]["id"], modifierReferentDto: ClassesRoutes["ModifierReferentClasse"]["payload"]) => {
-    return await buildRequest<ClassesRoutes["ModifierReferentClasse"]>({
-      path: "/classe/{id}/referent/modifier-ou-creer",
-      method: "POST",
-      params: { id },
-      payload: modifierReferentDto,
-      target: "API_V2",
-    })();
-  },
-
   inscrireEleveManuellement: async (id: ClassesRoutes["InscriptionManuelle"]["params"]["id"], payload: ClassesRoutes["InscriptionManuelle"]["payload"]) => {
     return buildRequest<ClassesRoutes["InscriptionManuelle"]>({
       path: "/classe/{id}/inscription-manuelle",

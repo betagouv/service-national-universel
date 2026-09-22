@@ -106,9 +106,6 @@ const VolontaireCle = lazy(() => import("./scenes/volontaire-cle"));
 // @ts-ignore
 const Contact = lazy(() => import("./scenes/contact"));
 // @ts-ignore
-const Signup = lazy(() => import("./scenes/signup"));
-// @ts-ignore
-// @ts-ignore
 const PlanMarketing = lazy(() => import("./scenes/planMarketing"));
 
 //DashboardV2
@@ -145,8 +142,6 @@ class App extends React.Component {
                   <SentryRoute path="/validate" component={Validate} />
                   <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                   <SentryRoute path="/public-besoin-d-aide" component={PublicSupport} />
-                  <SentryRoute path="/creer-mon-compte" component={Signup} />
-                  <SentryRoute path="/verifier-mon-compte" component={Signup} />
                   {/* Authentification accessoire */}
                   <SentryRoute path="/auth" component={Auth} />
                   {/* Page par default (404 et Home) */}

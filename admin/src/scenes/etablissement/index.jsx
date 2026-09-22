@@ -5,7 +5,6 @@ import { SentryRoute } from "../../sentry";
 
 import View from "./view";
 import List from "./List";
-import Create from "./Create/Create";
 import NotFound from "@/components/layout/NotFound";
 import { toastr } from "react-redux-toastr";
 
@@ -14,7 +13,6 @@ export default function Index() {
 
   return (
     <Switch>
-
       <SentryRoute
         path="/etablissement/:id"
         render={({ match }) => {
