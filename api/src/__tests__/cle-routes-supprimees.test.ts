@@ -13,6 +13,16 @@ async function callRoute(method: Method, path: string) {
   return agent[method](path).send({});
 }
 
+async function expectRouteRemoved(method: Method, path: string) {
+  const response = await callRoute(method, path);
+  expect(response.status).toBe(404);
+  // Une route démontée est prise en charge par le 404 par défaut d'Express : pas de corps JSON
+  // de l'API. Un gestionnaire encore monté qui ne trouve pas la ressource répond, lui,
+  // { ok: false, code: "NOT_FOUND" } — même statut, mais corps applicatif.
+  expect(response.body?.ok).toBeUndefined();
+  expect(response.body?.code).toBeUndefined();
+}
+
 describe("Routes CLE supprimées — chaîne d'inscription référent (H19, H20)", () => {
   const routes: [Method, string][] = [
     ["get", "/cle/referent-signup/token/abcdef"],
@@ -22,9 +32,8 @@ describe("Routes CLE supprimées — chaîne d'inscription référent (H19, H20)
     ["post", "/cle/referent-signup/"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 });
 
@@ -39,9 +48,8 @@ describe("Routes CLE supprimées — administration des classes (H8, H10-H13)", 
     ["get", "/cle/classe/5f1c5b0a0000000000000000/notifyRef"],
   ];
 
-  it.each(routes)("%s %s répond 404", async (method, path) => {
-    const response = await callRoute(method, path);
-    expect(response.status).toBe(404);
+  it.each(routes)("%s %s n'est plus montée", async (method, path) => {
+    await expectRouteRemoved(method, path);
   });
 });
 
