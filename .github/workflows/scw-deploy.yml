@@ -5,7 +5,7 @@ on:
 
 jobs:
   prepare:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     outputs:
       deploy_matrix: ${{ steps.config.outputs.deploy }}
 
@@ -26,7 +26,7 @@ jobs:
 
   deploy:
     needs: prepare
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     strategy:
       matrix:
         app: ${{ fromJSON(needs.prepare.outputs.deploy_matrix) }}

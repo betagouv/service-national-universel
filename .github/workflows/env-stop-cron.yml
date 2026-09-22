@@ -6,7 +6,7 @@ on:
     - cron: "0 15 * * 5" # Every friday at 15:00
 jobs:
   stop:
-    runs-on: ubuntu-latest
+    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Unlabel open PRs with deploy label
         env:
