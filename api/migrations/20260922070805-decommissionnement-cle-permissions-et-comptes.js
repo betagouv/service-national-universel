@@ -98,9 +98,11 @@ module.exports = {
     const pullResult = await PermissionModel.updateMany({ roles: { $in: CLE_ROLES } }, { $pull: { roles: { $in: CLE_ROLES } } });
     logger.info(`Décommissionnement CLE - ${pullResult.modifiedCount} permission(s) mise(s) à jour`);
 
-    const emptied = await PermissionModel.find({ roles: { $size: 0 } });
+    // Restreint au périmètre relevé plus haut (toBeEmptied) : un document déjà roles: [] pour une
+    // raison étrangère à cette migration ne doit pas être supprimé, down() ne saurait pas le recréer.
+    const emptied = await PermissionModel.find({ code: { $in: toBeEmptied }, roles: { $size: 0 } });
     logger.info(`Décommissionnement CLE - ${emptied.length} permission(s) sans rôle restant : ${emptied.map((p) => p.code).join(", ") || "aucune"}`);
-    await PermissionModel.deleteMany({ roles: { $size: 0 } });
+    await PermissionModel.deleteMany({ code: { $in: toBeEmptied }, roles: { $size: 0 } });
 
     logger.info("Décommissionnement CLE - désactivation des comptes CLE restants");
     const stillActive = await ReferentModel.find({
