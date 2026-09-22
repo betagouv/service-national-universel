@@ -80,6 +80,7 @@ import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMi
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
+import { isYoungInUserScope } from "../../young/youngScope";
 import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
@@ -446,7 +447,10 @@ router.get(
       const young = await YoungModel.findById(id);
       if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-      const youngPatches = await patches.get(req, YoungModel);
+      // `patches.get` lit USER_HISTORY/PATCH avec `ignorePolicy` : le périmètre doit être vérifié ici.
+      if (!(await isYoungInUserScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+      const youngPatches = await patches.get(req, YoungModel, young);
       if (!youngPatches) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       return res.status(200).send({ ok: true, data: youngPatches });
     } catch (error) {
