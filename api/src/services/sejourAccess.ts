@@ -71,6 +71,20 @@ export function isSessionPhase1InUserScope(user: UserDto, session: GeoScope): bo
   return isInGeoScope(user, { department: session?.department, region: session?.region });
 }
 
+/** Filtre Mongo des sessions du périmètre de l'utilisateur ; `null` = aucun accès. */
+export function getSessionPhase1ScopeFilter(user: UserDto): Record<string, unknown> | null {
+  switch (user?.role) {
+    case ROLES.ADMIN:
+      return {};
+    case ROLES.REFERENT_DEPARTMENT:
+      return { department: { $in: user.department || [] } };
+    case ROLES.REFERENT_REGION:
+      return user.region ? { region: user.region } : null;
+    default:
+      return null;
+  }
+}
+
 export function isPointDeRassemblementInUserScope(user: UserDto, pdr: GeoScope): boolean {
   return isInGeoScope(user, { department: pdr?.department, region: pdr?.region });
 }

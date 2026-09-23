@@ -89,7 +89,7 @@ export default function InviteHeader({ setOpen, open, label = "Inviter un réfé
                 const { data: referent } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[obj.role]}`, obj);
 
                 if (values.sessionPhase1Id) {
-                  await api.put(`/session-phase1/${values.sessionPhase1Id}`, { headCenterId: referent._id });
+                  await api.put(`/session-phase1/${values.sessionPhase1Id}/directionTeam`, { referentId: referent._id, role: obj.role });
                 }
                 toastr.success("Invitation envoyée");
                 setOpen();

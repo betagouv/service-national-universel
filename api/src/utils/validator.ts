@@ -334,8 +334,36 @@ const sessionPhase1Keys = {
   sanitaryContactEmail: Joi.string().allow(null, ""),
 };
 
-export function validateSessionPhase1(session) {
-  return Joi.object().keys(sessionPhase1Keys).validate(session, { stripUnknown: true });
+/**
+ * Champs modifiables par `PUT /session-phase1/:id`. Le centre, la cohorte, le chef de centre,
+ * la liste d'attente et l'équipe passent par leurs routes dédiées ; `placesLeft` est recalculé.
+ */
+export function validateSessionPhase1Update(session) {
+  return Joi.object()
+    .keys({
+      placesTotal: sessionPhase1Keys.placesTotal,
+      dateStart: sessionPhase1Keys.dateStart,
+      dateEnd: sessionPhase1Keys.dateEnd,
+      sanitaryContactEmail: sessionPhase1Keys.sanitaryContactEmail,
+    })
+    .validate(session, { stripUnknown: true });
+}
+
+const sessionPhase1TeamMemberKeys = {
+  firstName: Joi.string().trim().max(100).allow(null, ""),
+  lastName: Joi.string().trim().max(100).allow(null, ""),
+  role: Joi.string().trim().max(100).allow(null, ""),
+  // Pas de `.email()` : des équipes existantes portent des adresses mal formées, qu'un
+  // réenregistrement de l'équipe ne doit pas rendre impossible.
+  email: Joi.string().trim().max(200).allow(null, ""),
+  phone: Joi.string().trim().max(30).allow(null, ""),
+};
+
+/** `team` : membres typés, les clés inconnues (dont `_id`) sont retirées. */
+export function validateSessionPhase1Team(body) {
+  return Joi.object({
+    team: Joi.array().items(Joi.object(sessionPhase1TeamMemberKeys)).max(200).required(),
+  }).validate(body, { stripUnknown: true });
 }
 
 export function validateYoung(young: YoungDto) {
