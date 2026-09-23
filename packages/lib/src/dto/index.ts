@@ -1,6 +1,5 @@
 export * from "./alerteMessageDto";
 export * from "./classeDto";
-export * from "./classeImportEnMasseValidationDto";
 export * from "./cohortDto";
 export * from "./contactDto";
 export * from "./contractDto";

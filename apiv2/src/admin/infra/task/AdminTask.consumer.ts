@@ -12,8 +12,6 @@ import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/Refer
 import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
 import { AdminTaskAffectationSelectorService } from "./AdminTaskAffectationSelector.service";
 import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelector.service";
-import { ImportClasseEnMasseTaskModel } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.model";
-import { ImporterClasseEnMasse } from "@admin/core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
 import { AdminTaskEngagementSelectorService } from "./AdminTaskEngagementSelector";
 import { SentryExceptionCaptured } from "@sentry/nestjs";
 
@@ -26,7 +24,6 @@ export class AdminTaskConsumer extends WorkerHost {
         private readonly adminTaskInscriptionSelectorService: AdminTaskInscriptionSelectorService,
         private readonly adminTaskEngagementSelectorService: AdminTaskEngagementSelectorService,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
-        private readonly importerClasseEnMasse: ImporterClasseEnMasse,
         private readonly cls: ClsService,
     ) {
         super();
@@ -72,19 +69,6 @@ export class AdminTaskConsumer extends WorkerHost {
                             AdminTaskConsumer.name,
                         );
                         results = await this.referentielTaskService.handleImporterReferentiel(importTask);
-                        break;
-                    case TaskName.IMPORT_CLASSE_EN_MASSE:
-                        this.cls.set("user", {
-                            id: task.metadata?.parameters?.auteur.id,
-                            firstName: task.metadata?.parameters?.auteur.prenom,
-                            lastName: task.metadata?.parameters?.auteur.nom,
-                            email: task.metadata?.parameters?.auteur.email,
-                            role: task.metadata?.parameters?.auteur.role,
-                            sousRole: task.metadata?.parameters?.auteur.sousRole,
-                        });
-                        const importTaskClassesEnMasse: ImportClasseEnMasseTaskModel = task;
-                        this.logger.log(`Processing task "${TaskName.IMPORT_CLASSE_EN_MASSE}"`, AdminTaskConsumer.name);
-                        await this.importerClasseEnMasse.execute(importTaskClassesEnMasse.metadata?.parameters);
                         break;
                     case TaskName.MISSION_EXPORT_CANDIDATURES:
                     case TaskName.MISSION_EXPORT:

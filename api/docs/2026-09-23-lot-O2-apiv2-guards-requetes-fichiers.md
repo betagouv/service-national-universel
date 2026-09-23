@@ -24,12 +24,11 @@ l'injection d'opérateur n'est pas exploitable aujourd'hui. Le nom de tâche, lu
 |---|---|---|---|
 | M77 | `GET /v2/referentiel/import` | paramètres libres | DTO `GetImportsQueryDto` : `name` ∈ tâches du référentiel, `type` ∈ `ReferentielTaskType`, `status` ∈ `TaskStatus`, `sort` ∈ ASC/DESC, `limit` entier 1-100 ; clé hors DTO → 400 (`StrictQueryPipe`) |
 | M77 | `GET /v2/phase1/:sessionId/simulations`, `/traitements` | `name` et `status` libres | `name` borné à la famille listée (simulations ou traitements), `status` ∈ `TaskStatus` ; clé hors DTO → 400 |
-| M75 | `POST /v2/classe/:id/inscription-en-masse/importer` | toute `fileKey` existante | la clé doit être dans le dossier S3 de la classe (`file/admin/sejours/cle/classe/<id>/inscription-en-masse/`, sans `..`) ; une clé déjà importée est refusée (usage unique) |
-| M75 | tâche `IMPORT_CLASSE_EN_MASSE` | import direct du fichier | la validation (`ValidationInscriptionEnMasseClasse.validerFichier` : classe ouverte, capacité, format, UAI, doublons, jeunes déjà inscrits) est rejouée sur le fichier ; au moindre écart, rien n'est importé |
+| M75 | `POST /v2/classe/:id/inscription-en-masse/valider`, `/importer`, `GET /v2/classe/:id/inscription-en-masse` | import en masse d'élèves CLE, derrière feature flag | **supprimé** : la fonctionnalité n'est plus utilisée. Routes, use cases, traitement de la tâche `IMPORT_CLASSE_EN_MASSE`, page admin `/classes/:id/inscription-masse`, bandeau d'état et contrats snu-lib retirés |
 | L39 | `POST /v2/mission/export`, `/mission/candidatures/export` | `filters` : objet libre | clés limitées aux filtres de la liste des missions de l'admin (`MISSION_EXPORT_FILTER_KEYS`), valeurs chaîne ou liste de chaînes ; sinon 400. Au plus 3 exports non terminés par utilisateur sur 24 h (422 `TOO_MANY_PENDING_EXPORTS`) |
 | L39 | tâches d'export missions / candidatures | filtres relus tels quels | seules les clés autorisées sont relues (couvre les tâches déjà en file) |
 | L39 | `ElasticsearchQueryBuilder.setSearchTerm` (toutes les recherches apiv2) | `*` et `?` du terme saisi interprétés | échappés : la recherche reste préfixe / suffixe littérale |
-| L40 | `POST /v2/referentiel/import/:name`, `POST /v2/classe/:id/inscription-en-masse/valider` | taille illimitée en mémoire, type déclaré par le client | 20 Mo maximum, un fichier ; contenu vérifié (signature ZIP pour un xlsx, pas d'octet nul pour un CSV) ; sinon 422 `INVALID_FILE_FORMAT` (413 au-delà de la taille) |
+| L40 | `POST /v2/referentiel/import/:name` | taille illimitée en mémoire, type déclaré par le client | 20 Mo maximum, un fichier ; contenu vérifié (signature ZIP pour un xlsx, pas d'octet nul pour un CSV) ; sinon 422 `INVALID_FILE_FORMAT` (413 au-delà de la taille) |
 
 Pour la liste des exports, une clé inconnue est **refusée** à la création et non ignorée : l'ignorer
 élargirait silencieusement l'export.
@@ -41,16 +40,14 @@ Pour la liste des exports, une clé inconnue est **refusée** à la création et
   acceptée, filtre vide traité comme absent ; faux xlsx et fichier vide → 422.
 - `apiv2/test/admin/sejour/phase1/Phase1.controller.query.spec.ts` — nom hors famille, nom de
   simulation sur les traitements, opérateur, clé répétée, statut inconnu → 400 ; requêtes du front → 200.
-- `apiv2/src/admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service.spec.ts` —
-  fichier d'une autre classe, clé arbitraire, traversée `..`, fichier déjà importé → refusés.
-- `.../useCase/ImporterClasseEnMasse.spec.ts` — validation rejouée à l'exécution : erreurs ou
-  classe fermée entre-temps → aucun jeune créé.
+- `apiv2/test/admin/sejour/cle/classe/Classe.controller.spec.ts` — les trois routes d'inscription
+  en masse répondent 404.
 - `apiv2/test/admin/engagement/Mission.controller.export.spec.ts` et
   `apiv2/src/admin/core/engagement/mission/ExportMission.service.filtres.spec.ts` — clés et valeurs
   refusées, borne des exports en attente, structure imposée au responsable.
 - `apiv2/src/shared/infra/UploadFile.spec.ts`, `apiv2/src/analytics/infra/ElasticQuery.builder.spec.ts`.
 
-Suite apiv2 complète en local : 558 tests passent, 0 en échec. 26 suites ne se chargent pas, pour
+Suite apiv2 complète en local : 532 tests passent, 0 en échec ; snu-lib : 281 tests passent. 26 suites ne se chargent pas, pour
 des raisons d'environnement déjà présentes avant ce lot (`@bull-board/nestjs` absent, `mongoose`
 indéfini).
 
@@ -58,11 +55,12 @@ indéfini).
 
 - Tout nouveau filtre de la liste des missions de l'admin (`admin/src/scenes/missions/list.tsx`)
   doit être reporté dans `MISSION_EXPORT_FILTER_KEYS`, sinon l'export répondra 400.
-- La vérification d'usage unique de l'import CLE n'est pas atomique : deux appels simultanés sur la
-  même clé peuvent créer deux tâches. La route est derrière un feature flag désactivé et retirée de
-  l'admin. Un index unique sur `metadata.parameters.fileKey` fermerait ce cas.
-- `/importer` vérifie encore l'existence de la clé S3 (`remoteFileExists`) avant le contrôle de
-  rattachement à la classe : c'est un oracle d'existence de clé, réservé aux administrateurs CLE de la classe.
+- `TaskName.IMPORT_CLASSE_EN_MASSE` est conservé : l'enum du schéma Mongo des tâches doit relire les
+  tâches historiques. Une tâche de ce type encore en file tomberait dans le `default` du consumer et
+  serait marquée FAILED.
+- Les fichiers déjà validés restent dans le bucket sous `file/admin/sejours/cle/classe/*/inscription-en-masse/`
+  (listes d'élèves) : à purger si la politique de conservation l'exige.
+- L'inscription manuelle d'élèves (même feature flag) est conservée.
 - À vérifier : `searchMissions` n'impose un périmètre qu'aux responsables et superviseurs. Pour un
   référent départemental ou régional, le département de l'export des missions (hors candidatures)
   vient du filtre par défaut du front.

@@ -194,8 +194,7 @@ describe("ClasseController", () => {
         });
     });
 
-    // FM10 : l'inscription d'élèves a été retirée de l'admin ; seule la validation du fichier
-    // vérifiait le feature flag, l'import et l'inscription manuelle restaient appelables.
+    // FM10 : l'inscription manuelle a été retirée de l'admin mais restait appelable sans le feature flag.
     describe("inscription d'élèves sans le feature flag INSCRIPTION_EN_MASSE_CLASSE", () => {
         it("/POST classe/:id/inscription-manuelle est refusé", async () => {
             const etablissement = await createEtablissement();
@@ -211,17 +210,21 @@ describe("ClasseController", () => {
             expect(response.status).toBe(422);
             expect(response.body.message).toBe("FEATURE_FLAG_NOT_ENABLED");
         });
+    });
 
-        it("/POST classe/:id/inscription-en-masse/importer est refusé", async () => {
+    // M75 (lot O2) : l'inscription en masse est supprimée, ses routes n'existent plus.
+    describe("inscription en masse supprimée", () => {
+        it.each([
+            ["post", "inscription-en-masse/valider"],
+            ["post", "inscription-en-masse/importer"],
+            ["get", "inscription-en-masse"],
+        ])("%s classe/:id/%s répond 404", async (method, path) => {
             const etablissement = await createEtablissement();
             const classe = await createClasse({ statut: STATUS_CLASSE.OPEN, etablissementId: etablissement.id });
 
-            const response = await request(app.getHttpServer())
-                .post(`/classe/${classe.id}/inscription-en-masse/importer`)
-                .send({ fileKey: "file-key" });
+            const response = await request(app.getHttpServer())[method](`/classe/${classe.id}/${path}`);
 
-            expect(response.status).toBe(422);
-            expect(response.body.message).toBe("FEATURE_FLAG_NOT_ENABLED");
+            expect(response.status).toBe(404);
         });
     });
 
