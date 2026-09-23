@@ -10,7 +10,7 @@ const AgentModel = require("../../models/agent");
 const { matchVentilationRule } = require("../../utils/ventilation");
 const { weekday, sendNotif, SENDINBLUE_TEMPLATES } = require("../../utils");
 const { weekendRanges, isDateInRange } = require("../../utils/email");
-const { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_SOURCE } = require("../../schemas");
+const { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_SOURCE, SCHEMA_ATTACHMENT_PATH } = require("../../schemas");
 
 const { sendTemplate } = require("../../brevo");
 
@@ -37,7 +37,9 @@ router.post(
           Joi.object({
             name: Joi.string(),
             url: Joi.string(),
-            path: Joi.string(),
+            // Le chemin est contraint au préfixe des pièces jointes de message : l'api v1 vérifie déjà
+            // que l'objet vient d'un upload support, ce filtre est la seconde barrière côté support.
+            path: SCHEMA_ATTACHMENT_PATH,
           })
         )
         .optional(),
