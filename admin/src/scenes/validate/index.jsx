@@ -16,6 +16,7 @@ import { colors } from "../../utils";
 export default function Index() {
   const [young, setYoung] = useState(null);
   const [done, setDone] = useState(false);
+  const [invalidLink, setInvalidLink] = useState(false);
   const params = queryString.parse(location.search);
   const { token, young_id } = params;
 
@@ -27,13 +28,15 @@ export default function Index() {
     (async () => {
       try {
         const { ok, data } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
-        if (!ok) return;
+        if (!ok) return setInvalidLink(true);
         setYoung(data);
       } catch (e) {
         console.log(e);
       }
     })();
   }, []);
+  // Le lien est à usage unique : une fois la mission validée, il n'est plus reconnu.
+  if (invalidLink) return <InvalidLink>Ce lien de validation n&apos;est plus valide. La mission a peut-être déjà été validée.</InvalidLink>;
   if (!young) return <Loader />;
   if (done) return <Done />;
   else
@@ -101,6 +104,12 @@ export default function Index() {
       </Container>
     );
 }
+
+const InvalidLink = styled.div`
+  margin: 4rem auto;
+  text-align: center;
+  color: ${colors.grey};
+`;
 
 const Bold = ({ children }) => <span style={{ fontWeight: "500" }}>{children}</span>;
 

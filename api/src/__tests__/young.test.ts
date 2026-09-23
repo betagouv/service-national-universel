@@ -185,7 +185,8 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(404);
     });
     it("should return 200 if young found", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      // La fixture a une phase 3 validée, désormais figée.
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
 
       const res = await request(await getAppHelperWithAcl(young))
         .put(`/young/${young._id}/validate-mission-phase3`)
@@ -193,7 +194,7 @@ describe("Young", () => {
       expect(res.statusCode).toEqual(200);
     });
     it("should be only accessible by young", async () => {
-      const young = await createYoungHelper(getNewYoungFixture());
+      const young = await createYoungHelper(getNewYoungFixture({ statusPhase3: "WAITING_REALISATION" }));
       const passport = require("passport");
       const res = await request(await getAppHelperWithAcl())
         .put(`/young/${young._id}/validate-mission-phase3`)

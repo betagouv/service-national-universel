@@ -11,7 +11,19 @@ import { decrypt, encrypt } from "../../cryptoUtils";
 import { config } from "../../config";
 import { logger } from "../../logger";
 import { capture } from "../../sentry";
-import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
+import {
+  ReferentModel,
+  YoungModel,
+  ApplicationModel,
+  SessionPhase1Model,
+  LigneBusModel,
+  ClasseModel,
+  EtablissementModel,
+  CohortModel,
+  ApplicationDocument,
+  MissionEquivalenceModel,
+  YoungDocument,
+} from "../../models";
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
@@ -22,7 +34,7 @@ import { validateYoung, validateId, validatePhase1Document, idSchema } from "../
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import { canAccessYoungDocumentsInScope, canEditYoungInScope, isSessionPhase1InUserScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
@@ -35,6 +47,7 @@ import {
   YOUNG_STATUS,
   ROLES,
   YOUNG_STATUS_PHASE2,
+  YOUNG_STATUS_PHASE3,
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanWithdraw,
@@ -346,6 +359,32 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
   }
 });
 
+// Le lien de validation phase 3 est envoyé au tuteur, à une adresse saisie par le jeune : son porteur
+// ne reçoit que ce dont la page de validation a besoin, pas le dossier du volontaire (santé, parents,
+// adresse, jetons) qu'exposait `serializeYoung(data, data)` (audit 2026-09-21, M44).
+const PHASE3_TUTOR_VIEW_FIELDS = [
+  "_id",
+  "firstName",
+  "lastName",
+  "cohort",
+  "statusPhase3",
+  "phase3StructureName",
+  "phase3MissionDomain",
+  "phase3MissionDescription",
+  "phase3MissionStartAt",
+  "phase3MissionEndAt",
+  "phase3TutorFirstName",
+  "phase3TutorLastName",
+  "phase3TutorEmail",
+  "phase3TutorPhone",
+  "phase3TutorNote",
+] as const;
+
+function serializeYoungForPhase3Tutor(young: YoungDocument) {
+  const data = young.toObject();
+  return Object.fromEntries(PHASE3_TUTOR_VIEW_FIELDS.map((field) => [field, data[field]]));
+}
+
 router.get("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
@@ -364,7 +403,7 @@ router.get("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       capture(`Young not found ${req.params.young}`);
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoungForPhase3Tutor(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -377,9 +416,7 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       young: Joi.string().required(),
       token: Joi.string().required(),
       phase3TutorNote: Joi.string().optional(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -392,7 +429,15 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    data.set({ statusPhase3: "VALIDATED", statusPhase3UpdatedAt: Date.now(), statusPhase3ValidatedAt: Date.now(), phase3TutorNote: value.phase3TutorNote });
+    // Le lien du tuteur est à usage unique : le jeton est effacé à la validation, pour qu'un lien transféré
+    // ou retrouvé dans une boîte mail ne permette plus ni de relire la mission ni de la revalider.
+    data.set({
+      statusPhase3: "VALIDATED",
+      statusPhase3UpdatedAt: Date.now(),
+      statusPhase3ValidatedAt: Date.now(),
+      phase3TutorNote: value.phase3TutorNote,
+      phase3Token: "",
+    });
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
@@ -403,7 +448,7 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       cc,
     });
 
-    return res.status(200).send({ ok: true, data: serializeYoung(data, data) });
+    return res.status(200).send({ ok: true, data: serializeYoungForPhase3Tutor(data) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -488,12 +533,11 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
       phase3MissionEndAt: Joi.string().optional().allow(null, ""),
       phase3TutorFirstName: Joi.string().optional().allow(null, ""),
       phase3TutorLastName: Joi.string().optional().allow(null, ""),
-      phase3TutorEmail: Joi.string().optional().allow(null, ""),
+      phase3TutorEmail: Joi.string().lowercase().trim().email().optional().allow(null, ""),
       phase3TutorPhone: Joi.string().optional().allow(null, ""),
-      statusPhase3: Joi.string().optional().allow(null, ""),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
+      // Pas de `statusPhase3` ni de `.unknown()` : avec `.unknown()`, `stripUnknown` ne retire rien et
+      // tout champ du body finissait dans `young.set` (audit 2026-09-21, M45).
+    }).validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
@@ -506,11 +550,17 @@ router.put("/:id/validate-mission-phase3", passport.authenticate("young", { sess
     if (isYoung(req.user) && young._id.toString() !== req.user._id.toString()) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // Une mission validée par le tuteur ne se réécrit plus : le jeune ne peut pas substituer une autre
+    // mission à celle qui a été attestée.
+    if (young.statusPhase3 === YOUNG_STATUS_PHASE3.VALIDATED) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
     // eslint-disable-next-line no-unused-vars
     const { id, ...values } = value;
     values.phase3Token = crypto.randomBytes(20).toString("hex");
 
-    young.set({ ...values, statusPhase3UpdatedAt: Date.now() });
+    // Le statut est fixé par le serveur : la soumission ouvre l'attente de validation par le tuteur.
+    young.set({ ...values, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION, statusPhase3UpdatedAt: Date.now() });
     await young.save({ fromUser: req.user });
 
     const youngName = `${young.firstName} ${young.lastName}`;
@@ -689,7 +739,8 @@ router.put("/change-cohort", passport.authenticate("young", { session: false, fa
       message: value.message,
     });
 
-    res.status(200).send({ ok: true, data: young });
+    // Jamais le document brut : il porte les jetons du compte (audit 2026-09-21, L24).
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -970,8 +1021,10 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
-    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "rules" | "agreement" | "convocation">()
+    // `rules` n'est plus accepté : l'acceptation du règlement intérieur n'est plus demandée au jeune et aucun
+    // écran n'appelait plus cette route pour elle (audit 2026-09-21, M49).
+    const keys = ["cohesionStayMedical", "imageRight", "agreement", "convocation"];
+    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "agreement" | "convocation">()
       .required()
       .valid(...keys)
       .validate(req.params.document, { stripUnknown: true });
@@ -983,6 +1036,9 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     const { error: bodyError, value } = validatePhase1Document(req.body, document);
     if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
 
+    // Droit à l'image : le jeune ne dépose qu'une demande (pièces + statut à vérifier). Le drapeau effectif
+    // `imageRight`, consommé par les exports et attestations, n'est écrit que par un référent
+    // (audit 2026-09-21, M49) ; `validatePhase1Document` ne l'accepte plus.
     if (["imageRight"].includes(document)) {
       value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
       value[`${document}FilesComment`] = undefined;
@@ -991,7 +1047,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    if (["imageRight", "rules"].includes(document)) {
+    if (document === "imageRight") {
       let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
       let cc = getCcOfYoung({ template, young });
       await sendTemplate(template, {
@@ -1046,11 +1102,17 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
     const youngs = await YoungModel.find({ _id: { $in: ids } });
     if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
 
-    if (youngs.some((young) => !canEditPresenceYoung(req.user))) {
+    if (!canEditPresenceYoung(req.user)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
     if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    // `canEditPresenceYoung` n'est qu'une matrice de rôles : la session du lot doit être rattachée à
+    // l'acteur (audit 2026-09-21, M50).
+    if (!(await isSessionPhase1InUserScope(req.user, youngs[0].sessionPhase1Id))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -1099,6 +1161,10 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
     }
 
     if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    if (!(await isSessionPhase1InUserScope(req.user, youngs[0].sessionPhase1Id))) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 

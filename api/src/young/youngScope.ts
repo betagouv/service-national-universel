@@ -68,9 +68,27 @@ export function isYoungInReferentGeography(user: UserDto, young: Pick<YoungType,
  */
 async function isYoungInReferentTerritory(user: UserDto, young: Pick<YoungType, "region" | "department" | "sessionPhase1Id">): Promise<boolean> {
   if (isYoungInReferentGeography(user, young)) return true;
-  if (!young.sessionPhase1Id) return false;
+  return isSessionInReferentTerritory(user, young.sessionPhase1Id);
+}
+
+async function isSessionInReferentTerritory(user: UserDto, sessionPhase1Id: string | undefined): Promise<boolean> {
+  if (!sessionPhase1Id) return false;
+  if (user.role === ROLES.REFERENT_REGION && !user.region) return false;
   const territoire = user.role === ROLES.REFERENT_REGION ? { region: user.region } : { department: { $in: (user.department as string[]) || [] } };
-  return !!(await SessionPhase1Model.exists({ _id: young.sessionPhase1Id, ...territoire }));
+  return !!(await SessionPhase1Model.exists({ _id: sessionPhase1Id, ...territoire }));
+}
+
+/**
+ * Rattachement d'une session phase 1 à l'acteur, pour les actions de masse sur les volontaires qui y
+ * sont affectés (pointage, JDM, fiche sanitaire, départ) : chef de centre ou adjoint de la session,
+ * référent départemental / régional du territoire de la session, admin. Tout autre rôle est refusé,
+ * de même qu'un lot sans session pour qui n'est pas admin.
+ */
+export async function isSessionPhase1InUserScope(user: UserDto, sessionPhase1Id: string | undefined): Promise<boolean> {
+  if (user.role === ROLES.ADMIN) return true;
+  if (HEAD_CENTER_ROLES.includes(user.role)) return isYoungInHeadCenterScope(user, { sessionPhase1Id });
+  if (GEO_ROLES.includes(user.role)) return isSessionInReferentTerritory(user, sessionPhase1Id);
+  return false;
 }
 
 /**

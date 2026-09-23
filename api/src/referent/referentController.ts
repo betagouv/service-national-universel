@@ -1922,7 +1922,8 @@ router.get(
 
 router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    const keys = ["cohesionStayMedical", "imageRight", "rules"];
+    // `rules` n'est plus accepté : aucun écran de l'admin ne l'appelait plus.
+    const keys = ["cohesionStayMedical", "imageRight"];
     const { error: documentError, value: document } = Joi.string()
       .required()
       .valid(...keys)
@@ -1955,12 +1956,6 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
       }).validate(req.body);
       if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
       value = tempValue;
-    } else if (document === "rules") {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        rulesYoung: Joi.string().trim().required().valid("true", "false"),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      value = tempValue;
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
@@ -1978,7 +1973,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    if (["imageRight", "rules"].includes(document)) {
+    if (document === "imageRight") {
       if ([FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED].includes(value[`${document}FilesStatus`])) {
         const statusToMail = {
           WAITING_VERIFICATION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION,
