@@ -24,6 +24,7 @@ import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { claimAttachments, consumeUploadQuota, MAX_FILES_PER_UPLOAD, rememberAttachment, SupportAttachment } from "../services/supportAttachments";
 
 const KNOWLEDGE_BASE_PUBLIC_RESTRICTION = "public";
 
@@ -107,12 +108,47 @@ const router = express.Router();
 // l'utilisateur côté SNUpport), qui est aussi la seule d'où le front tire les identifiants qu'il envoie ici.
 // Cette liste est exhaustive : GET /v0/ticket (snupport-api/src/controllers/v0/ticket.js) renvoie tous les
 // tickets du contact, sans limite ni pagination. En cas de doute (support injoignable, réponse inattendue), on refuse.
-const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
-  if (!user?.email) return false;
+const listOwnTickets = async (user: UserRequest["user"]): Promise<Ticket[]> => {
+  if (!user?.email) return [];
   const { ok, data } = await SNUpport.api(`/v0/ticket?email=${encodeURIComponent(user.email)}`, { method: "GET", credentials: "include" });
-  if (!ok || !Array.isArray(data)) return false;
+  if (!ok || !Array.isArray(data)) return [];
+  return data;
+};
+
+const isTicketOwner = async (user: UserRequest["user"], ticketId: string): Promise<boolean> => {
+  const tickets = await listOwnTickets(user);
   // validateId accepte l'hexadécimal en majuscules : on compare sans tenir compte de la casse.
-  return data.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
+  return tickets.some((ticket: Ticket) => String(ticket._id).toLowerCase() === ticketId.toLowerCase());
+};
+
+// Une pièce jointe n'est lisible que si un message d'un des tickets de l'utilisateur la référence (M39).
+const isAttachmentOwner = async (user: UserRequest["user"], path: string): Promise<boolean> => {
+  const tickets = await listOwnTickets(user);
+  const referenced = await Promise.all(
+    tickets.map(async (ticket) => {
+      const { ok, data } = await SNUpport.api(`/v0/ticket/withMessages?ticketId=${encodeURIComponent(String(ticket._id))}`, { method: "GET", credentials: "include" });
+      if (!ok || !Array.isArray(data?.messages)) return false;
+      return data.messages.some((message: { files?: File[]; attachments?: File[] }) =>
+        [...(message.files || []), ...(message.attachments || [])].some((file) => file?.path === path),
+      );
+    }),
+  );
+  return referenced.some(Boolean);
+};
+
+// Les pièces jointes d'un message sont désignées par le chemin renvoyé par POST /upload. Le nom et
+// l'URL éventuellement renvoyés par le client sont ignorés : on relaie l'enregistrement serveur (M36).
+const attachmentsSchema = Joi.array()
+  .max(MAX_FILES_PER_UPLOAD)
+  .items(Joi.object({ path: Joi.string().required() }).unknown());
+
+/** `undefined` si le message n'a pas de pièce jointe, `null` si l'une d'elles n'est pas un dépôt de l'utilisateur. */
+const resolveAttachments = async (user: UserRequest["user"], files?: Array<{ path: string }>): Promise<SupportAttachment[] | undefined | null> => {
+  if (!files?.length) return undefined;
+  return claimAttachments(
+    user._id.toString(),
+    files.map(({ path }) => path),
+  );
 };
 
 router.get(
@@ -198,10 +234,21 @@ router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) 
 
 router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, res) => {
   try {
+    // Schéma fermé : seuls les champs du formulaire de la base de connaissance sont relayés (L22).
+    // L'email du contact, lui, ne peut venir que de la session.
+    const { error, value } = Joi.object({
+      isPositive: Joi.boolean().required(),
+      knowledgeBaseArticle: Joi.string().hex().length(24).required(),
+      comment: Joi.string().trim().allow("").max(5000),
+    }).validate(req.body);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+    const { isPositive, knowledgeBaseArticle, comment } = value;
+
     const { ok, data } = await SNUpport.api(`/feedback`, {
       method: "POST",
       credentials: "include",
-      body: JSON.stringify({ ...req.body, contactEmail: req.user?.email }),
+      // Un commentaire vide est omis : snupport-api le refuserait.
+      body: JSON.stringify({ isPositive, knowledgeBaseArticle, comment: comment || undefined, contactEmail: req.user?.email }),
     });
     if (!ok) return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
 
@@ -297,13 +344,7 @@ router.post(
         author: Joi.string(),
         formSubjectStep1: Joi.string(),
         formSubjectStep2: Joi.string(),
-        files: Joi.array().items(
-          Joi.object().keys({
-            name: Joi.string().required(),
-            url: Joi.string().required(),
-            path: Joi.string().required(),
-          }),
-        ),
+        files: attachmentsSchema,
       })
         .unknown()
         .validate(obj);
@@ -311,7 +352,9 @@ router.post(
         capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      const { subject, message, author, formSubjectStep1, formSubjectStep2, files, parcours } = value;
+      const { subject, message, author, formSubjectStep1, formSubjectStep2, parcours } = value;
+      const files = await resolveAttachments(req.user, value.files);
+      if (files === null) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       const userAttributes = await getUserAttributes(req.user);
       const response: ResponsePostTicket = await SNUpport.api("/v0/message", {
         method: "POST",
@@ -394,13 +437,9 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       formSubjectStep2: Joi.string().required(),
       role: Joi.string().required(),
       fromPage: Joi.string().allow(null),
-      files: Joi.array().items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-          path: Joi.string().required(),
-        }),
-      ),
+      // Le dépôt de fichiers exige une session (M38) : un visiteur anonyme ne peut donc joindre
+      // aucun fichier qui soit le sien (M36).
+      files: Joi.array().max(0),
     })
       .unknown()
       .validate(obj);
@@ -408,7 +447,7 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, files, parcours, classeId } = value;
+    const { subject, message, firstName, lastName, email, department, region, formSubjectStep1, formSubjectStep2, role, fromPage, parcours, classeId } = value;
 
     const userAttributes = [
       { name: "departement", value: department },
@@ -428,7 +467,6 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       attributes: userAttributes,
       formSubjectStep1,
       formSubjectStep2,
-      files,
       author,
     };
 
@@ -443,8 +481,14 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       credentials: "include",
       body: JSON.stringify(body),
     });
-    if (!response.ok) return res.status(400).send({ ok: false, code: response });
-    return res.status(200).send({ ok: true, data: response });
+    // Le ticket créé porte le groupe de contact dérivé de l'existence de l'email en base (« young exterior »,
+    // « admin exterior » ou « unknown ») : le renvoyer à un visiteur anonyme en ferait un oracle (M37).
+    // La réponse est donc la même quel que soit l'email, et ne contient rien du ticket.
+    if (!response.ok) {
+      slack.error({ title: "Create ticket via public form SNUpport", text: JSON.stringify(response.code) });
+      return res.status(400).send({ ok: false, code: ERRORS.SERVER_ERROR });
+    }
+    return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -463,16 +507,12 @@ router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async 
 
     const { error: validationError, value } = Joi.object({
       message: Joi.string().allow(null, ""),
-      files: Joi.array().items(
-        Joi.object().keys({
-          name: Joi.string().required(),
-          url: Joi.string().required(),
-          path: Joi.string().required(),
-        }),
-      ),
+      files: attachmentsSchema,
     }).validate(req.body, { stripUnknown: true });
     if (validationError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    const { message, files } = value;
+    const { message } = value;
+    const files = await resolveAttachments(req.user, value.files);
+    if (files === null) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const userAttributes = await getUserAttributes(req.user);
     const response = await SNUpport.api("/v0/message", {
@@ -496,89 +536,128 @@ router.post("/ticket/:id/message", authMiddleware(["referent", "young"]), async 
   }
 });
 
-router.post("/upload", fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }), async (req: UserRequest, res) => {
-  try {
-    const { error: filesError, value: files } = Joi.array()
-      .items(
-        Joi.alternatives().try(
-          Joi.object<UploadedFile>({
-            name: Joi.string().required(),
-            data: Joi.binary().required(),
-            tempFilePath: Joi.string().allow("").optional(),
-            mimetype: Joi.string(),
-          }).unknown(),
-          Joi.array().items(
+// Types acceptés, avec l'extension donnée à l'objet stocké : elle vient du type détecté, pas du nom fourni par le client.
+const UPLOAD_EXTENSIONS = new Map<string, string>([
+  ["image/jpeg", "jpg"],
+  ["image/png", "png"],
+  ["application/pdf", "pdf"],
+  ["application/vnd.openxmlformats-officedocument.wordprocessingml.document", "docx"],
+  ["application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", "xlsx"],
+]);
+
+const removeTempFiles = (req: UserRequest) => {
+  for (const entry of Object.values(req.files || {})) {
+    for (const file of Array.isArray(entry) ? entry : [entry]) {
+      if (file?.tempFilePath && fs.existsSync(file.tempFilePath)) fs.unlinkSync(file.tempFilePath);
+    }
+  }
+};
+
+// Dépôt réservé aux jeunes et référents connectés, plafonné par requête et par utilisateur (M38). Chaque fichier
+// déposé est enregistré pour son auteur : c'est la seule source des pièces jointes acceptées ensuite (M36).
+router.post(
+  "/upload",
+  authMiddleware(["referent", "young"]),
+  fileUpload({ limits: { fileSize: 10 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
+  async (req: UserRequest, res) => {
+    try {
+      const { error: filesError, value: files } = Joi.array()
+        .items(
+          Joi.alternatives().try(
             Joi.object<UploadedFile>({
               name: Joi.string().required(),
               data: Joi.binary().required(),
               tempFilePath: Joi.string().allow("").optional(),
               mimetype: Joi.string(),
             }).unknown(),
+            Joi.array().items(
+              Joi.object<UploadedFile>({
+                name: Joi.string().required(),
+                data: Joi.binary().required(),
+                tempFilePath: Joi.string().allow("").optional(),
+                mimetype: Joi.string(),
+              }).unknown(),
+            ),
           ),
-        ),
-      )
-      .validate(
-        Object.keys(req.files || {}).map((e) => req.files[e]),
-        { stripUnknown: true },
-      );
-    if (filesError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-
-    const responseData: File[] = [];
-
-    for (let currentFile of files) {
-      if (Array.isArray(currentFile)) {
-        currentFile = currentFile[currentFile.length - 1];
+        )
+        .validate(
+          Object.keys(req.files || {}).map((e) => req.files[e]),
+          { stripUnknown: true },
+        );
+      if (filesError) {
+        removeTempFiles(req);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
-      const { name, tempFilePath, mimetype } = currentFile;
-      const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
-      const validTypes = [
-        "image/jpeg",
-        "image/png",
-        "application/pdf",
-        "application/vnd.openxmlformats-officedocument.wordprocessingml.document",
-        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-      ];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers!))) {
+      if (files.length > MAX_FILES_PER_UPLOAD) {
+        removeTempFiles(req);
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+      if (!(await consumeUploadQuota(req.user._id.toString(), files.length))) {
+        removeTempFiles(req);
+        return res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" });
+      }
+
+      const responseData: File[] = [];
+
+      for (let currentFile of files) {
+        if (Array.isArray(currentFile)) {
+          currentFile = currentFile[currentFile.length - 1];
+        }
+        const { name, tempFilePath, mimetype } = currentFile;
+        const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
+        const extension = mimeFromMagicNumbers ? UPLOAD_EXTENSIONS.get(mimeFromMagicNumbers) : undefined;
+        if (!(UPLOAD_EXTENSIONS.has(mimetype) && extension)) {
+          removeTempFiles(req);
+          return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
+        }
+
+        const scanResult = await scanFile(tempFilePath, name);
+        if (scanResult.infected) {
+          removeTempFiles(req);
+          return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
+        }
+
+        const data = fs.readFileSync(tempFilePath);
+        const path = `message/${uuid()}.${extension}`;
+        const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
+        const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
+        const attachment = { name, url: response.Location, path: response.key };
+        await rememberAttachment(req.user._id.toString(), attachment);
+        responseData.push(attachment);
         fs.unlinkSync(tempFilePath);
-        return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
+      removeTempFiles(req);
 
-      const scanResult = await scanFile(tempFilePath, name);
-      if (scanResult.infected) {
-        return res.status(403).send({ ok: false, code: ERRORS.FILE_INFECTED });
-      }
-
-      const data = fs.readFileSync(tempFilePath);
-      const path = getS3Path(name);
-      const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
-      const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
-      responseData.push({ name, url: response.Location, path: response.key });
-      fs.unlinkSync(tempFilePath);
+      return res.status(200).send({ data: responseData, ok: true });
+    } catch (error) {
+      removeTempFiles(req);
+      capture(error);
+      if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
-
-    return res.status(200).send({ data: responseData, ok: true });
-  } catch (error) {
-    capture(error);
-    if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+  },
+);
 
 router.get("/s3file/:id", authMiddleware(["referent", "young"]), async (req: UserRequest, res) => {
   try {
-    const file = await getFile(`message/${req.params.id}`, SUPPORT_BUCKET_CONFIG);
+    const { error, value: id } = Joi.string()
+      .pattern(/^[^/\\]+$/)
+      .max(255)
+      .required()
+      .validate(req.params.id);
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const path = `message/${id}`;
+    if (!(await isAttachmentOwner(req.user, path))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const file = await getFile(path, SUPPORT_BUCKET_CONFIG);
     const buffer = decrypt(file.Body, config.FILE_ENCRYPTION_SECRET_SUPPORT);
     return res.status(200).send({ ok: true, data: buffer });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
-
-const getS3Path = (fileName: string): string => {
-  const extension = fileName.substring(fileName.lastIndexOf(".") + 1);
-  return `message/${uuid()}.${extension}`;
-};
 
 const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean> => {
   if (!ticket) return false;

@@ -3,6 +3,10 @@ const Joi = require("joi");
 export const SCHEMA_ID = Joi.string().alphanum().length(24);
 export const SCHEMA_EMAIL = Joi.string().email().lowercase();
 export const SCHEMA_PATH = Joi.string().pattern(/^[0-9a-zA-Z/.-]+$/);
+// Chemin S3 d'une pièce jointe de message. Seuls les objets déposés sous `message/` par l'upload
+// support en sont : contraindre le préfixe empêche qu'un appelant rattache à son message un objet
+// d'un autre domaine (`temp/`, pièces jointes jeunes) que les agents déchiffreraient ensuite.
+export const SCHEMA_ATTACHMENT_PATH = Joi.string().pattern(/^message\/[0-9a-zA-Z.-]+$/);
 export const SCHEMA_ROLE = Joi.string().valid("AGENT", "REFERENT_DEPARTMENT", "REFERENT_REGION", "DG");
 export const SCHEMA_PARCOURS = Joi.string().valid("VOLONTAIRE", "CLE");
 export const SCHEMA_SOURCE = Joi.string().valid("CHAT", "MAIL", "PLATFORM", "FORM");
