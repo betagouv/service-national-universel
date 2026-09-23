@@ -167,6 +167,7 @@ export class AffectationController {
         return await this.simulationAffectationHTSService.extractPdfAnalyticsFromRapport(simulation);
     }
 
+    @UseGuards(AdminGuard)
     @Post("/:sessionId/simulation/hts-dromcom")
     async simulateHtsDromCom(
         @Request() request: CustomRequest,
@@ -254,7 +255,7 @@ export class AffectationController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider/hts")
     async validerSimulationHTS(
         @Request() request: CustomRequest,
@@ -299,7 +300,7 @@ export class AffectationController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider/hts-dromcom")
     async validerSimulationHTSDromCom(
         @Request() request: CustomRequest,
@@ -342,7 +343,7 @@ export class AffectationController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider/cle")
     async validerSimulationCLE(
         @Request() request: CustomRequest,
@@ -385,7 +386,7 @@ export class AffectationController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider/cle-dromcom")
     async validerSimulationCLEDromCom(
         @Request() request: CustomRequest,

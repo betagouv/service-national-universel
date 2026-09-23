@@ -2,9 +2,9 @@ import express from "express";
 import passport from "passport";
 import Joi from "joi";
 import { capture } from "../../sentry";
-import { ERRORS } from "../../utils";
+import { ERRORS, isYoung } from "../../utils";
 import { validatePhase2Preference } from "../../utils/validator";
-import { MILITARY_PREPARATION_FILES_STATUS } from "snu-lib";
+import { MILITARY_PREPARATION_FILES_STATUS, canViewYoungMilitaryPreparationFile } from "snu-lib";
 import { serializeYoung } from "../../utils/serializer";
 import { YoungPerimeterRequest } from "./youngPerimeterMiddleware";
 import { notifyReferentMilitaryPreparationFilesSubmitted } from "../../application/applicationNotificationService";
@@ -39,6 +39,15 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     // L'appartenance (jeune = lui-même, référent = son périmètre) est contrôlée par le middleware monté
     // sur /young/:id/phase2 ; la route ne faisait auparavant aucune vérification (constat C18).
     const young = req.targetYoung!;
+
+    // Le volontaire dépose son dossier ; il ne peut pas le valider, le refuser ni le renvoyer en
+    // correction. Ces décisions reviennent aux référents qui peuvent consulter les pièces du
+    // dossier (cf. FM1 : la restriction n'existait que dans l'app volontaire).
+    if (value.statusMilitaryPreparationFiles !== MILITARY_PREPARATION_FILES_STATUS.WAITING_VERIFICATION) {
+      if (isYoung(req.user) || !canViewYoungMilitaryPreparationFile(req.user, young)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     young.set({ statusMilitaryPreparationFiles: value.statusMilitaryPreparationFiles });
 
