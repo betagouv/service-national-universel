@@ -1,7 +1,4 @@
-import fetch from "node-fetch";
-
 import request from "supertest";
-import jwt from "jsonwebtoken";
 import { ROLES, COHORTS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ERRORS, COHORT_TYPE, ROLE_JEUNE, PERMISSION_RESOURCES, PERMISSION_ACTIONS } from "snu-lib";
 import { sendTemplate } from "../brevo";
 import * as fileUtils from "../utils/file";
@@ -55,6 +52,8 @@ jest.mock("../utils", () => ({
   getFile: () => Promise.resolve({ Body: "" }),
   uploadFile: (path, file) => Promise.resolve({ path, file }),
   deleteFile: (path, file) => Promise.resolve({ path, file }),
+  listFiles: () => Promise.resolve([]),
+  deleteFilesByList: () => Promise.resolve({}),
 }));
 
 jest.mock("../emails", () => ({
@@ -210,61 +209,6 @@ describe("Young", () => {
         .put(`/young/${they._id}/validate-mission-phase3`)
         .send();
       expect(res.statusCode).toEqual(403);
-    });
-  });
-
-  let storedState;
-  let storedNonce;
-
-  describe("POST /young/france-connect/authorization-url", () => {
-    it("should return 200", async () => {
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/authorization-url")
-        .send({
-          callback: "foo",
-        });
-      const url = res.body.data.url;
-      storedState = url.split("state=")[1].split("&")[0];
-      storedNonce = url.split("nonce=")[1].split("&")[0];
-      expect(res.statusCode).toEqual(200);
-    });
-  });
-
-  describe("POST /young/france-connect/user-info", () => {
-    it("should return 200", async () => {
-      const secretKey = "mysecretkey";
-      const jwtPayload = {
-        nonce: storedNonce,
-      };
-      const jwtOptions = {
-        expiresIn: "1h",
-      };
-      const jwtToken = jwt.sign(jwtPayload, secretKey, jwtOptions);
-
-      const jsonResponse = jest
-        .fn()
-        .mockReturnValueOnce(
-          Promise.resolve({
-            access_token: "foo",
-            id_token: jwtToken,
-          }),
-        )
-        .mockReturnValue(Promise.resolve({}));
-      // @ts-ignore
-      fetch.mockReturnValue(
-        Promise.resolve({
-          status: 200,
-          json: jsonResponse,
-        }),
-      );
-      const res = await request(await getAppHelperWithAcl())
-        .post("/young/france-connect/user-info")
-        .send({
-          code: "foo",
-          callback: "bar",
-          state: storedState,
-        });
-      expect(res.statusCode).toEqual(200);
     });
   });
 

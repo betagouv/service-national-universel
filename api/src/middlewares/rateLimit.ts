@@ -94,3 +94,10 @@ export const signinRateLimiter = () => authRateLimiter({ prefix: "signin", windo
 
 /** Routes qui envoient un email ou réécrivent un token : quota plus serré. */
 export const emailSendingRateLimiter = (prefix: string) => authRateLimiter({ prefix, windowMs: HOUR, limit: 10 });
+
+/**
+ * Flux FranceConnect (M46) : routes publiques, chacune écrit ou consomme une clé Redis. Le quota
+ * reste large — un parent relance rarement le flux plus de quelques fois — mais borne le remplissage
+ * de Redis, partagé avec les files BullMQ, par un appelant unique.
+ */
+export const franceConnectRateLimiter = (prefix: string) => authRateLimiter({ prefix, windowMs: 15 * MINUTE, limit: 60 });
