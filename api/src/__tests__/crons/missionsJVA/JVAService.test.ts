@@ -305,10 +305,12 @@ describe("syncMission — décisions SNU préservées", () => {
 
     await syncMission({ ...SYNCABLE_MISSION, snuPlaces: 2 } as any);
     expect(mission.placesLeft).toBe(0);
+    expect(mission.placesStatus).toBe("FULL");
 
     (ApplicationModel.countDocuments as any).mockResolvedValue(1);
     await syncMission({ ...SYNCABLE_MISSION, snuPlaces: 6 } as any);
     expect(mission.placesLeft).toBe(5);
+    expect(mission.placesStatus).toBe("ONE_OR_MORE");
   });
 });
 

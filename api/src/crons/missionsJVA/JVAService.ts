@@ -203,9 +203,11 @@ async function updateMission(mission: MissionDocument, updatedMission: Partial<M
   const placesTotal = updatedMission.placesTotal ?? mission.placesTotal;
   const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: APPLICATION_STATUSES_TAKING_PLACE } });
   const placesLeft = Math.max(0, placesTotal - placesTaken);
+  const placesStatus = placesLeft === 0 ? "FULL" : placesLeft === placesTotal ? "EMPTY" : "ONE_OR_MORE";
   mission.set({
     ...updatedMission,
     placesLeft,
+    placesStatus,
   });
   if (CLOSED_MISSION_STATUSES.includes(mission.status)) {
     logger.info(`Mission ${mission.jvaMissionId} is ${mission.status} on SNU side, status kept.`);
