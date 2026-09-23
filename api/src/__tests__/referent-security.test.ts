@@ -14,7 +14,7 @@ import request from "supertest";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
 
-import { ROLES, SUB_ROLE_GOD, SUB_ROLES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES } from "snu-lib";
+import { ROLES, SUB_ROLE_GOD, SUB_ROLES, PERMISSION_RESOURCES, PERMISSION_ACTIONS, YOUNG_SOURCE, SENDINBLUE_TEMPLATES, ReferentStatus } from "snu-lib";
 
 import { PermissionModel } from "../models/permissions/permission";
 import { RoleModel } from "../models/permissions/role";
@@ -346,6 +346,199 @@ describe("Sécurité référent — audit 2026-09-21", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data).not.toHaveProperty("invitationToken");
+    });
+  });
+
+  describe("GOO-5 — valeurs demandées sur PUT /referent/:id", () => {
+    const sarthe = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
+
+    it("refuse à un référent départemental de s'attribuer d'autres départements (FH9)", async () => {
+      const soi = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl(soi))
+        .put(`/referent/${soi._id}`)
+        .send({ department: ["Sarthe", "Paris"], region: "Pays de la Loire" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(soi._id))?.department).toEqual(["Sarthe"]);
+    });
+
+    it("refuse à un référent régional de changer sa propre région", async () => {
+      const soi = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: "Pays de la Loire", department: [] }));
+
+      const res = await request(await getAppHelperWithAcl(soi))
+        .put(`/referent/${soi._id}`)
+        .send({ region: "Ile-de-France" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(soi._id))?.region).toEqual("Pays de la Loire");
+    });
+
+    it("accepte le formulaire complet renvoyé sans changement de géographie", async () => {
+      const soi = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl(soi))
+        .put(`/referent/${soi._id}`)
+        .send({ firstName: "NOUVEAU", email: soi.email, department: ["Sarthe"], region: "Pays de la Loire", status: soi.status });
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getReferentByIdHelper(soi._id))?.firstName).toEqual("Nouveau");
+    });
+
+    it("refuse de placer un pair hors du territoire de l'acteur", async () => {
+      const pair = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl(sarthe))
+        .put(`/referent/${pair._id}`)
+        .send({ department: ["Paris"], region: "Ile-de-France" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(pair._id))?.department).toEqual(["Sarthe"]);
+    });
+
+    it("autorise un référent régional à répartir un pair entre les départements de sa région", async () => {
+      const pair = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Pays de la Loire", department: [] }))
+        .put(`/referent/${pair._id}`)
+        .send({ department: ["Mayenne"], region: "Pays de la Loire" });
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getReferentByIdHelper(pair._id))?.department).toEqual(["Mayenne"]);
+    });
+
+    it("refuse de changer son propre sous-rôle", async () => {
+      const soi = await createReferentHelper(getNewReferentFixture({ ...sarthe, subRole: SUB_ROLES.assistant_manager_department }));
+
+      const res = await request(await getAppHelperWithAcl(soi))
+        .put(`/referent/${soi._id}`)
+        .send({ subRole: SUB_ROLES.manager_department });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(soi._id))?.subRole).toEqual(SUB_ROLES.assistant_manager_department);
+    });
+
+    it("refuse à un responsable de réactiver un coéquipier (FH5)", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const coequipier = await createReferentHelper(
+        getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString(), status: ReferentStatus.INACTIVE } as any),
+      );
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .put(`/referent/${coequipier._id}`)
+        .send({ status: ReferentStatus.ACTIVE });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(coequipier._id))?.status).toEqual(ReferentStatus.INACTIVE);
+    });
+
+    it("refuse à un titulaire de désactiver ou réactiver son propre compte", async () => {
+      const soi = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl(soi))
+        .put(`/referent/${soi._id}`)
+        .send({ status: ReferentStatus.INACTIVE });
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse de changer l'email d'un collègue du périmètre", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }));
+      const pair = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const acteurs = [
+        { actor: { role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }, cible: responsable },
+        { actor: { role: ROLES.SUPERVISOR, structureId: structure._id.toString() }, cible: responsable },
+        { actor: sarthe, cible: pair },
+        { actor: { role: ROLES.REFERENT_REGION, region: "Pays de la Loire", department: [] }, cible: pair },
+      ];
+      for (const { actor, cible } of acteurs) {
+        const res = await request(await getAppHelperWithAcl(actor))
+          .put(`/referent/${cible._id}`)
+          .send({ email: "attaquant@example.org" });
+
+        expect(res.statusCode).toEqual(403);
+        expect((await getReferentByIdHelper(cible._id))?.email).toEqual(cible.email);
+      }
+    });
+
+    it("laisse l'admin changer l'email, le statut et la géographie", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture(sarthe));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .put(`/referent/${cible._id}`)
+        .send({ email: "nouvel-email@example.org", status: ReferentStatus.INACTIVE, department: ["Paris"], region: "Ile-de-France" });
+
+      expect(res.statusCode).toEqual(200);
+      const apres = await getReferentByIdHelper(cible._id);
+      expect(apres?.email).toEqual("nouvel-email@example.org");
+      expect(apres?.status).toEqual(ReferentStatus.INACTIVE);
+      expect(apres?.department).toEqual(["Paris"]);
+    });
+  });
+
+  describe("GOO-5 — PUT /referent/:id/structure/:structureId", () => {
+    it("refuse à un référent départemental de rétrograder un pair en responsable", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+      const pair = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }))
+        .put(`/referent/${pair._id}/structure/${structure._id}`)
+        .send();
+
+      expect(res.statusCode).toEqual(403);
+      const apres = await getReferentByIdHelper(pair._id);
+      expect(apres?.role).toEqual(ROLES.REFERENT_DEPARTMENT);
+      expect(apres?.structureId).toBeFalsy();
+    });
+
+    it("laisse un référent départemental rattacher un responsable de son territoire", async () => {
+      const origine = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+      const accueil = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: origine._id.toString(), department: [], region: "" }));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }))
+        .put(`/referent/${responsable._id}/structure/${accueil._id}`)
+        .send();
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getReferentByIdHelper(responsable._id))?.structureId).toEqual(accueil._id.toString());
+    });
+  });
+
+  describe("GOO-5 — PUT /structure/:id", () => {
+    it("refuse à un responsable de déplacer sa structure dans un autre département", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .put(`/structure/${structure._id}`)
+        .send({ department: "Paris", region: "Ile-de-France" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await StructureModel.findById(structure._id))?.department).toEqual("Sarthe");
+    });
+
+    it("laisse un responsable modifier sa structure sans en changer la géographie", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
+        .put(`/structure/${structure._id}`)
+        .send({ name: "Nouveau nom", department: "Sarthe", region: "Pays de la Loire" });
+
+      expect(res.statusCode).toEqual(200);
+      expect((await StructureModel.findById(structure._id))?.name).toEqual("Nouveau nom");
+    });
+
+    it("refuse à un référent départemental de sortir une structure de son département", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), department: "Sarthe", region: "Pays de la Loire" });
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" }))
+        .put(`/structure/${structure._id}`)
+        .send({ department: "Paris", region: "Ile-de-France" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await StructureModel.findById(structure._id))?.department).toEqual("Sarthe");
     });
   });
 

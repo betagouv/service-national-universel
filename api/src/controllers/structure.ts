@@ -10,6 +10,7 @@ import {
   canViewStructureChildren,
   isSupervisor,
   isAdmin,
+  isResponsibleOrSupervisor,
   SENDINBLUE_TEMPLATES,
   StructureType,
   UserDto,
@@ -158,6 +159,15 @@ router.put(
         }
         delete checkedStructure.isNetwork;
         delete checkedStructure.networkId;
+      }
+
+      // La géographie de la structure fixe le périmètre des référents qui l'instruisent (GOO-5) : un
+      // responsable ne la déplace pas hors de leur territoire, un référent la garde dans le sien.
+      const geographyChanged = (["department", "region"] as const).some((key) => key in checkedStructure && (checkedStructure[key] || "") !== (structure[key] || ""));
+      if (!isAdmin(req.user) && geographyChanged) {
+        if (isResponsibleOrSupervisor(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        const moved = new StructureModel({ ...structure.toJSON(), ...checkedStructure });
+        if (!isStructureAuthorized(req.user, moved, PERMISSION_ACTIONS.WRITE)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
       structure.set(checkedStructure);
