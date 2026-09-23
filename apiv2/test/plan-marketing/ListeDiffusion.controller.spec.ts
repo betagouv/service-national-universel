@@ -6,7 +6,7 @@
  * listes qui définissent le ciblage des campagnes emailing. Le contrôleur doit être réservé
  * aux super-administrateurs, comme `CampagneController`.
  */
-import { INestApplication } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 import { ROLES, SUB_ROLE_GOD, SUB_ROLES } from "snu-lib";
@@ -42,6 +42,7 @@ describe("ListeDiffusionController - habilitation", () => {
             req.user = utilisateurCourant;
             next();
         });
+        app.useGlobalPipes(new ValidationPipe());
         await app.init();
     });
 
@@ -101,6 +102,48 @@ describe("ListeDiffusionController - habilitation", () => {
         it("garde l'accès aux listes de diffusion", async () => {
             await request(app.getHttpServer()).get("/liste-diffusion").expect(200);
             expect(listeDiffusionService.searchListesDiffusion).toHaveBeenCalled();
+        });
+    });
+
+    /**
+     * M81 : les filtres sont relus tels quels au moment de l'envoi des campagnes programmées
+     * (requête ES sur l'index young). Seules les clés proposées par l'admin sont acceptées.
+     */
+    describe("validation des filtres de ciblage", () => {
+        beforeEach(() => {
+            utilisateurCourant = { role: ROLES.ADMIN, sousRole: SUB_ROLE_GOD };
+        });
+
+        const listeValide = { nom: "Liste", type: "Volontaires" };
+
+        it("accepte les filtres proposés par l'admin", async () => {
+            await request(app.getHttpServer())
+                .post("/liste-diffusion")
+                .send({ ...listeValide, filters: { region: ["Bretagne"], status: ["VALIDATED"], isRegionRural: ["N/A"] } })
+                .expect(201);
+            expect(listeDiffusionService.creerListeDiffusion).toHaveBeenCalled();
+        });
+
+        it.each([
+            ["une clé inconnue", { password: ["x"] }],
+            ["un champ ES arbitraire", { "email.keyword": ["cible@example.com"] }],
+            ["une valeur qui n'est pas une liste", { region: "Bretagne" }],
+            ["une valeur non textuelle", { region: [{ $ne: null }] }],
+            ["un tableau à la place d'un objet", [["region", "Bretagne"]]],
+        ])("refuse %s à la création", async (_label, filters) => {
+            await request(app.getHttpServer())
+                .post("/liste-diffusion")
+                .send({ ...listeValide, filters })
+                .expect(400);
+            expect(listeDiffusionService.creerListeDiffusion).not.toHaveBeenCalled();
+        });
+
+        it("refuse une clé inconnue à la modification", async () => {
+            await request(app.getHttpServer())
+                .put("/liste-diffusion/liste-1")
+                .send({ id: "liste-1", nom: "Liste", filters: { password: ["x"] } })
+                .expect(400);
+            expect(listeDiffusionService.updateListeDiffusion).not.toHaveBeenCalled();
         });
     });
 });
