@@ -15,10 +15,6 @@ const SENDER_NAME = "Service National Universel";
 const SENDER_NAME_SMS = "SNU";
 const SENDER_EMAIL = "no_reply-mailauto@snu.gouv.fr";
 
-export const MAILING_LISTS = {
-  INSCRIPTION: 1712,
-};
-
 //https://my.sendinblue.com/lists/add-attributes
 
 type ContactAttribute = {

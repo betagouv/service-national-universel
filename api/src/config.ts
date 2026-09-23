@@ -16,6 +16,9 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
 
 const staticConfig = {
   IMAGES_ROOTDIR: `${__dirname}/../public/images`,
+  // Fonds des attestations et convocations (signatures des ministres), téléchargés depuis le bucket au démarrage.
+  // Hors de `public/`, que `express.static` sert sans authentification (M72 de l'audit du 21/09/2026).
+  PDF_TEMPLATES_ROOTDIR: `${__dirname}/../pdf-templates`,
   FONT_ROOTDIR: `${__dirname}/assets/fonts`,
 };
 

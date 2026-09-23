@@ -16,7 +16,6 @@ export function injectRoutes(app) {
   app.use("/email", require("./controllers/email").default);
   app.use("/event", require("./controllers/event"));
   app.use("/filters", require("./controllers/filters").default);
-  app.use("/gouv.fr", require("./controllers/gouv.fr"));
   app.use("/inscription-goal", require("./controllers/inscription-goal").default);
   app.use("/ligne-de-bus", require("./planDeTransport/ligneDeBus/ligneDeBusController"));
   app.use("/ligne-to-point", require("./controllers/planDeTransport/ligne-to-point").default);
@@ -29,13 +28,11 @@ export function injectRoutes(app) {
   app.use("/signin", require("./controllers/signin"));
   app.use("/structure", require("./controllers/structure").default);
   app.use("/tags", require("./controllers/tags"));
-  app.use("/waiting-list", require("./controllers/waiting-list"));
   app.use("/young", require("./controllers/young/index").default);
   app.use("/young", require("./young/youngController").default);
   app.use("/young-edition", require("./young/edition/youngEditionController").default);
   app.use("/SNUpport", require("./controllers/SNUpport").default);
   app.use("/cle", require("./cle").default);
-  app.use("/preinscription", require("./preinscription/preinscriptionController"));
   app.use("/filter-label", require("./filterLabel/filterLabelController"));
   app.use("/email-preview", require("./controllers/emailPreview").default);
 

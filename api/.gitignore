@@ -4,8 +4,7 @@
 /src/scripts/
 *scripts*
 /coverage
-/public/images/certificates/
-/public/images/convocation/
+/pdf-templates/
 /dist
 *.tsbuildinfo
 !/src/scripts

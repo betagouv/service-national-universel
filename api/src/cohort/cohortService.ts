@@ -53,25 +53,6 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
 
-type YoungInfo = Pick<YoungType, "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">;
-
-export async function getFilteredSessionsForInscription(young: YoungInfo, timeZoneOffset?: string | number | null) {
-  if (!young.birthdateAt) throw new Error("Missing birthdate");
-  if (!young.grade) throw new Error("Missing grade");
-
-  const department = getDepartmentForEligibility(young);
-  if (!department) throw new Error("Unable to determine department");
-
-  const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt),
-    schoolLevel: young.grade,
-    department,
-  });
-
-  const cohorts = await CohortModel.find(query);
-  return cohorts.filter((session) => isCohortInscriptionOpenWithTimezone(session, timeZoneOffset, young.status));
-}
-
 export async function getFilteredSessionsForChangementSejour(young: YoungType, timeZoneOffset?: string | number | null) {
   const currentCohort = await CohortModel.findById(young.cohortId);
   if (!currentCohort) throw new Error("Current cohort not found");
@@ -91,4 +72,3 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
   const cohorts = await CohortModel.find(query);
   return cohorts.filter((session) => isCohortInscriptionOpenWithTimezone(session, timeZoneOffset, young.status));
 }
-

@@ -42,6 +42,7 @@ jest.mock("../../../models", () => {
 
   return {
     __esModule: true,
+    ApplicationModel: { countDocuments: jest.fn() },
     MissionModel: { findOne: jest.fn(), create: jest.fn() },
     ReferentModel,
     StructureModel,
