@@ -38,7 +38,7 @@ const DEP_CIBLE = "Yvelines";
 const REGION_CIBLE = "Île-de-France";
 
 const referentRegionHorsPerimetre = () => ({
-  _id: new ObjectId(),
+  _id: new ObjectId().toString(),
   role: ROLES.REFERENT_REGION,
   region: "Bretagne",
   department: [] as string[],
@@ -46,7 +46,7 @@ const referentRegionHorsPerimetre = () => ({
   lastName: "Region",
 });
 const referentDepHorsPerimetre = () => ({
-  _id: new ObjectId(),
+  _id: new ObjectId().toString(),
   role: ROLES.REFERENT_DEPARTMENT,
   department: ["Nord"],
   region: "Hauts-de-France",
@@ -54,15 +54,15 @@ const referentDepHorsPerimetre = () => ({
   lastName: "Dep",
 });
 const referentRegionDuPerimetre = () => ({
-  _id: new ObjectId(),
+  _id: new ObjectId().toString(),
   role: ROLES.REFERENT_REGION,
   region: REGION_CIBLE,
   department: [] as string[],
   firstName: "Dans",
   lastName: "Region",
 });
-const referentDepDuPerimetre = () => ({ _id: new ObjectId(), role: ROLES.REFERENT_DEPARTMENT, department: [DEP_CIBLE], region: REGION_CIBLE, firstName: "Dans", lastName: "Dep" });
-const responsable = () => ({ _id: new ObjectId(), role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() });
+const referentDepDuPerimetre = () => ({ _id: new ObjectId().toString(), role: ROLES.REFERENT_DEPARTMENT, department: [DEP_CIBLE], region: REGION_CIBLE, firstName: "Dans", lastName: "Dep" });
+const responsable = () => ({ _id: new ObjectId().toString(), role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() });
 
 let seq = 0;
 async function createLigne(cohortOverrides: Record<string, unknown> = {}) {
@@ -125,7 +125,7 @@ describe("Plan de transport — périmètre (lot L1)", () => {
       const member = bus.team[0];
       const res = await request(await getAppHelper(referentDepHorsPerimetre()))
         .put(`/ligne-de-bus/${bus._id}/teamDelete`)
-        .send({ ...teamBody, idTeam: member._id.toString() });
+        .send({ ...teamBody, idTeam: member._id!.toString() });
       expect(res.status).toBe(403);
       const after = await LigneBusModel.findById(bus._id);
       expect(after!.team.length).toBe(1);
