@@ -119,6 +119,18 @@ export async function isLigneBusInUserScope(user: UserDto, ligneBus?: { centerId
   return isCohesionCenterInUserScope(user, ligneBus.centerId);
 }
 
+/**
+ * Écriture sur une ligne de bus (équipe, points de rassemblement, demandes de modification).
+ * Le transporteur est un acteur national : il garde l'accès à toutes les lignes, sous
+ * réserve des fenêtres d'édition vérifiées par chaque route. Les référents restent
+ * dans leur périmètre ; tout autre rôle est refusé.
+ */
+export async function canActOnLigneBus(user: UserDto, ligneBus?: { centerId?: string | null } | null): Promise<boolean> {
+  if (!ligneBus) return false;
+  if (user?.role === ROLES.TRANSPORTER) return true;
+  return isLigneBusInUserScope(user, ligneBus);
+}
+
 /** Identifiants des centres du périmètre de l'utilisateur, pour filtrer une liste. */
 export async function getCenterIdsInUserScope(user: UserDto): Promise<string[] | null> {
   if (user?.role === ROLES.ADMIN) return null; // null = pas de filtre

@@ -354,6 +354,11 @@ router.put("/delete/cohort/:id", passport.authenticate("referent", { session: fa
 
     const pointDeRassemblement = await PointDeRassemblementModel.findById(id);
     if (!pointDeRassemblement) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    // Mêmes gardes que l'ajout d'une cohorte (PUT /cohort/:id) : périmètre du PDR et fenêtre d'édition.
+    if (!canUpdateMeetingPoint(req.user, pointDeRassemblement)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const cohortData = await CohortModel.findOne({ name: cohort });
+    if (!cohortData) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!isPdrEditionOpen(req.user, cohortData)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const youngs = await YoungModel.find({ meetingPointId: id, cohort: cohort });
     if (youngs.length > 0) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

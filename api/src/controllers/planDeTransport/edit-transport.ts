@@ -8,7 +8,6 @@ import { CohesionCenterModel } from "../../models";
 import { YoungModel } from "../../models";
 import { ERRORS, updateSeatsTakenInBusLine } from "../../utils";
 import { UserRequest } from "../request";
-import { YoungDto } from "snu-lib";
 
 const router = express.Router();
 
@@ -46,28 +45,50 @@ router.post("/saveYoungs", passport.authenticate("referent", { session: false, f
   try {
     if (req.user.role !== "admin") return res.status(401).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
+    // Seuls les champs d'affectation au transport sont modifiables : le corps était
+    // auparavant recopié tel quel sur le document Young (tout champ du modèle).
     const schema = Joi.object({
-      busFrom: Joi.string().required(),
-      busTo: Joi.string().required(),
-      data: Joi.array().items(Joi.object()).required(),
+      busFrom: Joi.string().hex().length(24).required(),
+      busTo: Joi.string().hex().length(24).required(),
+      data: Joi.array()
+        .items(
+          Joi.object({
+            _id: Joi.string().hex().length(24).required(),
+            ligneId: Joi.string().hex().length(24).required(),
+            meetingPointId: Joi.string().hex().length(24).required(),
+            sessionPhase1Id: Joi.string().allow(null, ""),
+          }),
+        )
+        .required(),
     });
-    const { error } = schema.validate(req.body);
+    const { error, value } = schema.validate(req.body, { stripUnknown: true });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
 
-    const youngs = req.body.data;
-    const ids = youngs.map((e: YoungDto) => e._id);
-    const busFrom = await LigneBusModel.findById(req.body.busFrom);
-    const busTo = await LigneBusModel.findById(req.body.busTo);
-    const youngsDb = await YoungModel.find({ _id: { $in: [...ids] } });
-    if (!youngsDb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-    const promise = youngs.map(async (e: YoungDto) => {
-      const index = youngsDb.findIndex((y) => y._id.toString() === e._id);
-      if (index >= 0) {
-        Object.keys(e).forEach((key) => (youngsDb[index][key] = e[key]));
-        await youngsDb[index].save({ fromUser: req.user });
-      }
-    });
-    await Promise.all(promise);
+    const busFrom = await LigneBusModel.findById(value.busFrom);
+    const busTo = await LigneBusModel.findById(value.busTo);
+    if (!busFrom || !busTo) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    // Chaque jeune doit être transféré vers busTo, sur l'un de ses points de rassemblement
+    // et sur sa session : on n'écrit jamais une affectation arbitraire.
+    const busToId = busTo._id.toString();
+    const busToMeetingPointIds = (busTo.meetingPointsIds || []).map(String);
+    const youngs = value.data;
+    const isValidTransfer = youngs.every(
+      (young) =>
+        young.ligneId === busToId && busToMeetingPointIds.includes(young.meetingPointId) && (young.sessionPhase1Id || null) === (busTo.sessionId ? String(busTo.sessionId) : null),
+    );
+    if (!isValidTransfer) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+
+    // Seuls les jeunes effectivement rattachés à busFrom peuvent être déplacés.
+    const ids = [...new Set(youngs.map((young) => young._id))];
+    const youngsDb = await YoungModel.find({ _id: { $in: ids }, ligneId: busFrom._id.toString() });
+    if (youngsDb.length !== ids.length) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    for (const youngDb of youngsDb) {
+      const young = youngs.find((y) => y._id === youngDb._id.toString());
+      youngDb.set({ ligneId: young.ligneId, meetingPointId: young.meetingPointId, sessionPhase1Id: young.sessionPhase1Id });
+      await youngDb.save({ fromUser: req.user });
+    }
     await updateSeatsTakenInBusLine(busFrom);
     await updateSeatsTakenInBusLine(busTo);
     res.status(200).send({ ok: true, data: youngs });
