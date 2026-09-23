@@ -11,17 +11,17 @@ L'admin suivait ensuite la valeur avec `window.location.href`.
 
 | Où | Avant | Après |
 |---|---|---|
-| `snu-lib` `isValidRedirectUrl` | regex sur le préfixe de la chaîne | analyse par `URL` (même parseur que le navigateur) : chemin relatif qui reste sur le site, ou URL `https` sans identifiants ni port dont l'hôte est `snu.gouv.fr`, `beta-snu.dev` ou l'un de leurs sous-domaines ; caractères de contrôle, espaces et `\` refusés d'emblée ; valeur absente ou non textuelle refusée |
-| `snu-lib` `isInternalRedirectUrl` (nouveau) | — | vrai pour un chemin relatif qui reste sur le site |
-| admin `signin`, `signin2FA` | `window.location.href = redirect` ; `FORCE_REDIRECT` (connexion) et `environment === "development"` (2FA) acceptaient n'importe quelle valeur | `redirectAfterSignin` : chemin relatif → `history.push` ; URL SNU `https` → navigation ; en développement seulement (`FORCE_REDIRECT`), `http://localhost:…` en plus (base de connaissance locale) ; sinon retour à l'accueil |
+| `snu-lib` `isValidRedirectUrl` | regex sur le préfixe de la chaîne | analyse par `URL` (même parseur que le navigateur) : chemin relatif qui reste sur le site, ou URL sans identifiants dont l'origine figure dans une liste fermée (fronts SNU et base de connaissance, production et staging) ; caractères de contrôle, espaces et `\` refusés d'emblée ; valeur absente ou non textuelle refusée |
+| `snu-lib` `isInternalRedirectUrl`, `getSafeExternalRedirectUrl` (nouveaux) | — | chemin relatif qui reste sur le site ; URL externe **reconstruite** depuis l'origine autorisée (constante) et le chemin, jamais recopiée |
+| admin `signin`, `signin2FA` | `window.location.href = redirect` ; `FORCE_REDIRECT` (connexion) et `environment === "development"` (2FA) acceptaient n'importe quelle valeur | `redirectAfterSignin` : chemin relatif → `history.push` ; URL d'un front SNU → navigation vers l'URL reconstruite ; sinon retour à l'accueil. `FORCE_REDIRECT` et l'exception de développement ne sont plus consultés |
 | admin `signin`, `signin2FA` (déjà connecté) | `<Redirect to={redirect}>` sans contrôle | seulement si le chemin est interne |
-| app `signin`, `signin2FA` | `history.push(redirect)` même pour une URL absolue (lien depuis la base de connaissance cassé) ; `isValidRedirectUrl(undefined)` renvoyait vrai | même `redirectAfterSignin` que l'admin, sans exception de développement |
+| app `signin`, `signin2FA` | `history.push(redirect)` même pour une URL absolue (lien depuis la base de connaissance cassé) ; `isValidRedirectUrl(undefined)` renvoyait vrai | même `redirectAfterSignin` que l'admin |
 
 Le message d'erreur n'affiche plus la valeur reçue (texte contrôlé par l'auteur du lien).
 
 ## Démonstration
 
-`packages/lib/src/utils/request.spec.ts` (41 cas) : sur l'ancienne implémentation, 22 cas d'attaque
+`packages/lib/src/utils/request.spec.ts` : sur l'ancienne implémentation, 22 cas d'attaque
 sont acceptés (`javascript:`, `java<TAB>script:`, `data:`, `/\evil.tld`, `https:evil.tld`,
 `https://snu.gouv.fr@evil.tld`, `https://snu.gouv.fr.evil.tld`, port explicite…).
 
@@ -29,15 +29,18 @@ sont acceptés (`javascript:`, `java<TAB>script:`, `data:`, `/\evil.tld`, `https
 
 | Contrôle | Résultat |
 |---|---|
-| `packages/lib` — `jest src/utils` | 3 suites, 73/73 |
+| `packages/lib` — `jest src/utils` | 3 suites, 81/81 |
 | `packages/lib` — `tsc --noEmit`, eslint des fichiers modifiés | 0 erreur |
 | `admin`, `app` — `tsc -p tsconfig.ci.json --noEmit` | 0 erreur |
-| `admin`, `app` — eslint `src/scenes/auth` | 0 erreur (2 avertissements préexistants dans app) |
+| `admin`, `app` — eslint `src/scenes/auth` | 0 erreur (avertissements préexistants dans app) |
 
 ## Points d'attention
 
-- `FORCE_REDIRECT` est désactivé en production, staging, custom et CI (`packages/lib/src/features.ts`) ;
-  il ne reste actif qu'en développement et en test, et n'y élargit plus qu'à `http://localhost`.
-- La base de connaissance en staging renvoie vers `http://localhost:8084` (`knowledge-base-public/src/config.js`) :
-  cette redirection est désormais refusée en staging, ce qui ne change rien en pratique (elle ne menait nulle part).
+- La liste d'origines est fermée : un nouveau front vers lequel rediriger après connexion doit y être ajouté
+  (`ALLOWED_REDIRECT_ORIGINS`, `packages/lib/src/utils/request.ts`). Les recettes `env-*` n'y figurent pas.
+- `FORCE_REDIRECT` était déjà désactivé en production, staging, custom et CI (`packages/lib/src/features.ts`) ;
+  la connexion ne le consulte plus. En développement local, un lien vers la base de connaissance
+  (`http://localhost:8084`) ramène donc à l'accueil après connexion.
+- CodeQL (« Client-side URL redirect / XSS ») ne reconnaît pas un validateur maison : c'est pourquoi l'URL
+  suivie est reconstruite à partir d'une constante plutôt que recopiée.
 - Défense en profondeur : CSP de l'admin interdisant les navigations `javascript:` — GOO-17.
