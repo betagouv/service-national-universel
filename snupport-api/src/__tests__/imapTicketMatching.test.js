@@ -176,3 +176,19 @@ describe("H86 — rattachement d'un mail entrant à un ticket", () => {
     expect(victimTicket.status).toBe("OPEN");
   });
 });
+
+describe("M97 — HTML d'un mail entrant", () => {
+  it("est assaini avant d'être stocké", async () => {
+    seedVictimTicket();
+    await addMessage(
+      attackerMail({
+        messageId: "<xss@evil.tld>",
+        html: '<p onclick="steal()">Bonjour</p><script>alert(1)</script><a href="javascript:alert(1)">lien</a><img src="x" onerror="alert(1)">',
+      })
+    );
+
+    const stored = mockDb.messages.find((m) => m.messageId === "<xss@evil.tld>");
+    expect(stored.text).toContain("Bonjour");
+    expect(stored.text).not.toMatch(/script|onclick|onerror|javascript:/i);
+  });
+});

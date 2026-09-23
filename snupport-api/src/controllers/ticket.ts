@@ -14,6 +14,7 @@ import { matchVentilationRule } from "../utils/ventilation";
 import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
 import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
 import { sanitizeUserHtml } from "../utils/userContent";
+const { sanitizeMessageHtml } = require("../utils/messageHtml");
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
 
@@ -96,6 +97,9 @@ router.post(
       createdHourAt: new Date().getHours(),
       createdDayAt: weekday[new Date().getDay()],
       createdBy: req.user.role,
+      // Les destinataires en copie choisis à la création font partie du fil : les réponses suivantes
+      // (dont l'envoi avec pièces jointes) ne peuvent mettre en copie que ceux-là ou des comptes du support.
+      copyRecipient: copyRecipients,
     };
 
     if (user.role === "AGENT") {
@@ -133,7 +137,7 @@ router.post(
     if (files.length === 0) {
       let newMessage = await MessageModel.create({
         ticketId: newTicket._id,
-        text: message,
+        text: sanitizeMessageHtml(message),
         authorId: user._id,
         authorFirstName: user.firstName,
         authorLastName: user.lastName,

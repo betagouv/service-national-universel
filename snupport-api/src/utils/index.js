@@ -6,6 +6,7 @@ const ContactModel = require("../models/contact");
 const TicketModel = require("../models/ticket");
 const cron = require("node-cron");
 const { decrypt } = require("../utils/crypto");
+const { sanitizeMessageHtml } = require("./messageHtml");
 
 const { sendEmail, sendTemplate } = require("../brevo");
 
@@ -95,7 +96,9 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
       return { email: recipient };
     });
 
-    await sendEmail([{ email: dest }], ticket.subject + " [#" + ticket.number + "]", formatMessageForReading(mailTicket), {
+    // L'historique concatène des messages stockés avant l'assainissement à l'entrée, et des noms
+    // d'auteurs non échappés : on assainit le HTML final juste avant l'envoi (M92).
+    await sendEmail([{ email: dest }], ticket.subject + " [#" + ticket.number + "]", sanitizeMessageHtml(formatMessageForReading(mailTicket)), {
       cc: copyDest ?? [],
       attachment: attachmentsEmail.length > 0 ? attachmentsEmail : undefined,
     });
@@ -113,11 +116,12 @@ const sendNotif = async ({ ticket, templateId, message, attachment }) => {
       : `https://admin.snu.gouv.fr/besoin-d-aide/ticket/${ticket._id}`;
 
     const params = { cta: ticketUrl };
+    // Le message est injecté dans le template Brevo officiel : il est assaini avant l'envoi (M92).
     if (templateId === SENDINBLUE_TEMPLATES.MESSAGE_RECEIVED) {
-      params.message = message;
+      params.message = sanitizeMessageHtml(message);
     }
     if (templateId === SENDINBLUE_TEMPLATES.ANSWER_RECEIVED) {
-      params.message = message;
+      params.message = sanitizeMessageHtml(message);
     }
     await sendTemplate(templateId, {
       emailTo: [{ email: ticket.contactEmail }],

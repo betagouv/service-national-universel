@@ -4,7 +4,6 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
-const fileUpload = require("express-fileupload");
 const helmet = require("helmet");
 const logger = require("morgan");
 const passport = require("passport");
@@ -41,7 +40,8 @@ app.use(bodyParser.text({ type: "application/x-ndjson" }));
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(cookieParser());
-app.use(fileUpload({ limits: { fileSize: 10 * 1024 * 1024 } })); // 10 Mo
+// Pas de parseur multipart global : il est monté sur les seules routes qui reçoivent des fichiers
+// (middlewares/attachmentUpload.js).
 app.use(express.static(__dirname + "/../public"));
 
 app.use(passport.initialize());

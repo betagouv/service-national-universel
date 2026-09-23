@@ -78,8 +78,8 @@ describe("POST /macro/:id perimeter enforcement", () => {
 
     mockCurrentUser = { _id: ATTACKER_AGENT_ID, role: "REFERENT_DEPARTMENT", departments: ["Paris"], firstName: "Ref", lastName: "Paris" };
 
-    foreignTicket = buildTicket({ _id: FOREIGN_TICKET_ID, contactDepartment: "Rhône", contactRegion: "Auvergne-Rhône-Alpes", contactEmail: "usager@example.com" });
-    ownTicket = buildTicket({ _id: OWN_TICKET_ID, contactDepartment: "Paris", contactRegion: "Ile-de-France", contactEmail: "usager-paris@example.com" });
+    foreignTicket = buildTicket({ _id: FOREIGN_TICKET_ID, contactDepartment: "Rhône", contactRegion: "Auvergne-Rhône-Alpes", formSubjectStep1: "QUESTION", contactEmail: "usager@example.com" });
+    ownTicket = buildTicket({ _id: OWN_TICKET_ID, contactDepartment: "Paris", contactRegion: "Ile-de-France", formSubjectStep1: "QUESTION", contactEmail: "usager-paris@example.com" });
 
     TicketModel.findById.mockImplementation(async (id) => {
       if (id === FOREIGN_TICKET_ID) return foreignTicket;

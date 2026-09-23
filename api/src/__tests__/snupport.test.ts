@@ -382,6 +382,13 @@ describe("POST /SNUpport/ticket/form (M36, M37)", () => {
       expect(calledPaths().includes("/v0/message")).toBe(false);
     }
   });
+
+  it("should cap the anonymous form per IP (M91)", async () => {
+    for (let i = 0; i < 20; i++) expect((await form()).status).toBe(200);
+    const res = await form();
+    expect(res.status).toBe(429);
+    expect(calledPaths().filter((path: string) => path === "/v0/message")).toHaveLength(20);
+  });
 });
 
 describe("GET /SNUpport/s3file/:id (M39)", () => {
