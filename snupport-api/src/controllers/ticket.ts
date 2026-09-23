@@ -13,6 +13,7 @@ import { sendEmailWithConditions, weekday, getHoursDifference, sendNotif, SENDIN
 import { matchVentilationRule } from "../utils/ventilation";
 import { canAccessTicket, scopeTicketQuery } from "../utils/ticketScope";
 import { getForbiddenTicketUpdateFields, reconcileTicketNotes } from "../utils/ticketUpdate";
+import { sanitizeUserHtml } from "../utils/userContent";
 const { sanitizeMessageHtml } = require("../utils/messageHtml");
 import { UserRequest } from "./request";
 const escapeStringRegexp = require("escape-string-regexp");
@@ -734,7 +735,11 @@ router.patch(
       copyRecipients: Joi.array().items(SCHEMA_EMAIL),
       files: Joi.array().items(Joi.object()),
       status: SCHEMA_TICKET_STATUS,
-      messageDraft: Joi.string().allow(""),
+      // Brouillon et notes sont rendus chez les autres comptes du ticket (référents → agents) : le HTML
+      // est assaini à l'écriture, en plus du filtre au rendu de snupport-app (GOO-6).
+      messageDraft: Joi.string()
+        .allow("")
+        .custom((value) => sanitizeUserHtml(value)),
       feedback: Joi.string().trim(),
       contactGroup: SCHEMA_CONTACT_GROUP,
       contactDepartment: Joi.string().trim(),
@@ -749,7 +754,7 @@ router.patch(
         Joi.object({
           authorName: Joi.string().trim(),
           createdAt: Joi.date(),
-          content: Joi.string(),
+          content: Joi.string().custom((value) => sanitizeUserHtml(value)),
         })
       ),
       agentId: SCHEMA_ID.allow(""),

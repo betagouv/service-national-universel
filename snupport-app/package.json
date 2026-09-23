@@ -6,6 +6,7 @@
     "start": "vite",
     "build": "vite build --mode \"$VITE_ENVIRONMENT\"",
     "check-types": "tsc -p tsconfig.ci.json --emitDeclarationOnly",
+    "test": "node --experimental-default-type=module --test src/utils/__tests__/",
     "lint": "eslint src --ext .js,.jsx",
     "lint:fix": "eslint --ext .js --fix src",
     "clean": "rm -fr node_modules .turbo build .swc"
