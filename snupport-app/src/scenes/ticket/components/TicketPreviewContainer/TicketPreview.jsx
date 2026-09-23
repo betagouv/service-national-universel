@@ -7,7 +7,7 @@ import TagsEditor from "../../../../components/TagEditor";
 import Thread from "../Thread";
 import { useDispatch, useSelector } from "react-redux";
 import { updateTicket } from "../../../../redux/ticketPreview/actions";
-import { getStatusColor, roleInitial, sourceToIcon, translateState } from "../../../../utils";
+import { getStatusColor, roleInitial, sanitizeHttpsUrl, sourceToIcon, translateState } from "../../../../utils";
 import { STATUS } from "../../../../constants";
 import { capture } from "../../../../sentry";
 import { serializeTicketUpdate } from "../../service";
@@ -85,7 +85,8 @@ const TicketPreview = ({ isOpen, openInNewTab, toggleOpen, onClose, ticketId, us
               className="cursor-pointer truncate text-sm font-semibold text-white underline"
               onClick={(e) => {
                 e.stopPropagation();
-                window.open(`${contactProfile[0].value}`, "_blank");
+                const profileUrl = sanitizeHttpsUrl(contactProfile[0].value);
+                if (profileUrl) window.open(profileUrl, "_blank", "noopener,noreferrer");
               }}
             >
               {contactFirstName && contactLastName ? `${contactFirstName} ${contactLastName.toUpperCase()}` : contactEmail}

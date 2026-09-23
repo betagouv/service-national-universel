@@ -56,7 +56,8 @@ router.post(
     res.cookie("jwtzamoud", token, cookieOptions());
     const organisation = await OrganisationModel.findById(user.organisationId);
 
-    return res.status(200).send({ ok: true, user, organisation: serializeOrganisation(organisation), token });
+    // Le jeton ne vit que dans le cookie httpOnly : le renvoyer dans le corps le rendait lisible par un script injecté (L48).
+    return res.status(200).send({ ok: true, user, organisation: serializeOrganisation(organisation) });
   }
 );
 
@@ -144,7 +145,8 @@ router.get("/me", agentGuard, async (req, res) => {
   const organisation = await OrganisationModel.findOne({ _id: user.organisationId });
   await user.save();
 
-  res.send({ user, organisation: serializeOrganisation(organisation), ok: true, token: req.cookies.jwtzamoud });
+  // Pas de jeton dans le corps : une XSS le lisait ici pour voler la session de l'agent (L48).
+  res.send({ user, organisation: serializeOrganisation(organisation), ok: true });
 });
 
 router.get("/", agentGuard, async (req, res) => {

@@ -1,6 +1,7 @@
 const express = require("express");
 const router = express.Router();
 const Joi = require("joi");
+const { sanitizeUserHtml } = require("../utils/userContent");
 const { capture } = require("../sentry");
 const TicketModel = require("../models/ticket");
 const MacroModel = require("../models/macro");
@@ -200,7 +201,7 @@ const setField = async (ticket, macroAction) => {
 
     if (macroAction.field === "notes.content") {
       if (!ticket.notes) ticket.notes = [];
-      ticket.notes.push({ content: macroAction.value, authorName: "supi-bot" });
+      ticket.notes.push({ content: sanitizeUserHtml(macroAction.value), authorName: "supi-bot" });
     } else {
       Array.isArray(ticket[macroAction.field]) ? ticket[macroAction.field].push(macroAction.value) : ticket.set({ [macroAction.field]: macroAction.value });
     }

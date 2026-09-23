@@ -54,7 +54,6 @@ export default function App() {
           API.setToken("");
           return setLoading(false);
         }
-        if (res.token) API.setToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         if (res.organisation) dispatch(setOrganisation(res.organisation));
       } catch (e) {
