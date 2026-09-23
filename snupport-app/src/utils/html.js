@@ -2,7 +2,12 @@ import sanitizeHtml from "sanitize-html";
 
 // Seul rempart avant les `dangerouslySetInnerHTML` de snupport-app : les contenus rendus (messages,
 // notes) viennent de contacts externes et de référents. Pas d'attribut `style` (CSS arbitraire :
-// superposition, exfiltration par url()) ni de schéma `data:` (FM23).
+// superposition, exfiltration par url()) ni de schéma `data:` dans les liens (FM23).
+// Exception : les images collées dans le corps d'un e-mail arrivent en `data:` (mailparser remplace
+// les `cid:`). Une image ne peut pas exécuter de script ; seuls les formats matriciels courants en
+// base64 sont admis, jamais dans un href.
+const DATA_IMAGE_URL = /^data:image\/(?:png|jpe?g|gif|webp|bmp);base64,[a-z0-9+/=\s]+$/i;
+
 const CLEANER_OPTIONS = {
   allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "br", "div", "blockquote", "img"],
   allowedAttributes: {
@@ -10,9 +15,16 @@ const CLEANER_OPTIONS = {
     img: ["src", "alt", "width", "height", "iwc-no-src"],
   },
   allowedSchemes: ["http", "https", "mailto"],
+  allowedSchemesByTag: { img: ["http", "https", "data"] },
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
   transformTags: {
+    img: (tagName, attribs) => {
+      if (!/^\s*data:/i.test(attribs.src || "") || DATA_IMAGE_URL.test(attribs.src.trim())) return { tagName, attribs };
+      // eslint-disable-next-line no-unused-vars
+      const { src, ...rest } = attribs;
+      return { tagName, attribs: rest };
+    },
     a: (tagName, attribs) => {
       if (attribs.target !== "_blank") return { tagName, attribs };
       return { tagName, attribs: { ...attribs, rel: "noopener noreferrer" } };

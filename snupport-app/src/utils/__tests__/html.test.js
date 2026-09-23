@@ -23,8 +23,17 @@ const parseTags = (html) => {
 test("htmlCleaner retire scripts, gestionnaires d'événements et schémas dangereux", () => {
   assert.equal(htmlCleaner('<p onclick="alert(1)">a</p><script>alert(1)</script>'), "<p>a</p>");
   assert.equal(htmlCleaner('<a href="javascript:alert(1)">x</a>'), "<a>x</a>");
-  assert.equal(htmlCleaner('<img src="data:image/png;base64,AAAA" />'), "<img />");
+  assert.equal(htmlCleaner('<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>'), "<a>x</a>");
+  assert.equal(htmlCleaner('<a href="data:image/png;base64,AAAA">x</a>'), "<a>x</a>");
   assert.equal(htmlCleaner('<a href="//evil.example">x</a>'), "<a>x</a>");
+});
+
+test("htmlCleaner garde les images collées dans un e-mail (data:image en base64) et elles seules", () => {
+  assert.equal(htmlCleaner('<img src="data:image/png;base64,iVBORw0KGgo=" alt="capture" />'), '<img src="data:image/png;base64,iVBORw0KGgo=" alt="capture" />');
+  assert.equal(htmlCleaner('<img src="data:image/jpeg;base64,/9j/4AAQ" />'), '<img src="data:image/jpeg;base64,/9j/4AAQ" />');
+  for (const src of ["data:image/svg+xml;base64,PHN2Zz4=", "data:text/html;base64,PHNjcmlwdD4=", "data:image/png,<svg onload=alert(1)>", "javascript:alert(1)"]) {
+    assert.equal(htmlCleaner(`<img src="${src}" />`), "<img />", src);
+  }
 });
 
 test("htmlCleaner retire l'attribut style (FM23)", () => {

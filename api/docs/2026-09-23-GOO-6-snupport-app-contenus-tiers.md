@@ -17,7 +17,7 @@ Les constats ont été relus sur le code courant avant correction. FH14 a été 
 | FH12 | `snupport-api` `POST` et `PATCH /shortcut` | `content: Joi.array()` libre, `text` brut | `content` : URL neutralisées par type de nœud (lien refusé → son texte, image ou vidéo refusée → retirée, `url`/`href`/`src` retirés des autres nœuds) ; `text` assaini |
 | FH15 | fiche ticket, attributs de contact | lien émis dès que la valeur contient `https://` ou que le format est `link` | lien émis seulement pour une URL `https` analysée, pour tous les attributs ; idem pour « lien vers profil » |
 | FH15 | `api` `POST /SNUpport/ticket` et `/ticket/form` | `fromPage`, `department`, `region`, `role` libres | `fromPage` ramené à un chemin relatif ou une URL https, sinon `null` (la demande n'est pas bloquée) ; `department`/`region` dans `departmentList`/`regionList` et `role` dans les rôles requalifiés, sinon 400 |
-| FM23 | `htmlCleaner` (snupport-app) | attribut `style` et schéma `data:` admis | retirés ; `rel="noopener noreferrer"` forcé sur `target="_blank"` ; URL protocole-relatives refusées |
+| FM23 | `htmlCleaner` (snupport-app) | attribut `style` et schéma `data:` admis partout | `style` retiré ; `data:` refusé dans les liens et admis seulement dans `<img src>` pour une image png, jpeg, gif, webp ou bmp en base64 (les images collées dans un e-mail arrivent ainsi : mailparser remplace les `cid:`) ; `rel="noopener noreferrer"` forcé sur `target="_blank"` ; URL protocole-relatives refusées |
 | L48 | `snupport-api` `GET /agent/me`, `POST /agent/signin` | jeton `jwtzamoud` renvoyé dans le corps | plus de jeton dans le corps ; la session ne vit que dans le cookie httpOnly (le front n'utilisait déjà que le cookie : l'en-tête `JWT …` n'était pas reconnu par `getToken`) |
 | — | `snupport-api` notes, `messageDraft`, notes des macros | stockés tels quels | assainis à l'écriture (`sanitizeUserHtml`, idempotent) |
 
@@ -31,7 +31,7 @@ Le filtre au rendu suffit déjà à neutraliser une charge en cache.
 
 | Contrôle | Résultat |
 |---|---|
-| `snupport-app` — `npm test` (nouveau, `node --test`) : `safeUrl`, `htmlCleaner`, `urlify` | 12/12 |
+| `snupport-app` — `npm test` (nouveau, `node --test`) : `safeUrl`, `htmlCleaner`, `urlify` | 13/13 |
 | `snupport-api` — suite complète | 26 suites, 231/231 (dont 33 nouveaux tests : `userContent`, `shortcutScope`, routes `/shortcut`) |
 | `api` — `snupport.test.ts` | 34/34 ; les 3 nouveaux tests FH15 échouent sur l'ancien contrôleur |
 | `snupport-app` — `vite build` | OK |
@@ -40,6 +40,8 @@ Le filtre au rendu suffit déjà à neutraliser une charge en cache.
 ## Points d'attention
 
 - `sanitize-html` devient une dépendance directe de `snupport-api` (même version que celle déjà hissée).
+- Impact agents : les citations d'e-mails perdent leur mise en forme d'origine (`style`) ; les images
+  collées dans les e-mails restent affichées.
 - Un lien de contenu Slate sans schéma (`snu.gouv.fr`, chemin relatif) n'est plus rendu comme lien.
 - Les modules de texte créés par les référents départementaux n'ont jamais eu de `userDepartment` : ils
   restent modifiables par tout référent départemental (jamais par un autre rôle).
