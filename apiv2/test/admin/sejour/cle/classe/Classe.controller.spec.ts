@@ -194,6 +194,37 @@ describe("ClasseController", () => {
         });
     });
 
+    // FM10 : l'inscription d'élèves a été retirée de l'admin ; seule la validation du fichier
+    // vérifiait le feature flag, l'import et l'inscription manuelle restaient appelables.
+    describe("inscription d'élèves sans le feature flag INSCRIPTION_EN_MASSE_CLASSE", () => {
+        it("/POST classe/:id/inscription-manuelle est refusé", async () => {
+            const etablissement = await createEtablissement();
+            const classe = await createClasse({ statut: STATUS_CLASSE.OPEN, etablissementId: etablissement.id });
+
+            const response = await request(app.getHttpServer()).post(`/classe/${classe.id}/inscription-manuelle`).send({
+                prenom: "Jeanne",
+                nom: "Martin",
+                dateDeNaissance: "2009-01-01",
+                sexe: "female",
+            });
+
+            expect(response.status).toBe(422);
+            expect(response.body.message).toBe("FEATURE_FLAG_NOT_ENABLED");
+        });
+
+        it("/POST classe/:id/inscription-en-masse/importer est refusé", async () => {
+            const etablissement = await createEtablissement();
+            const classe = await createClasse({ statut: STATUS_CLASSE.OPEN, etablissementId: etablissement.id });
+
+            const response = await request(app.getHttpServer())
+                .post(`/classe/${classe.id}/inscription-en-masse/importer`)
+                .send({ fileKey: "file-key" });
+
+            expect(response.status).toBe(422);
+            expect(response.body.message).toBe("FEATURE_FLAG_NOT_ENABLED");
+        });
+    });
+
     afterAll(async () => {
         await app.close();
         mongoose.disconnect();

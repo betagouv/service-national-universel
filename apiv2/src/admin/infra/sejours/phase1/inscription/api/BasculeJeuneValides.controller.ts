@@ -10,6 +10,7 @@ import {
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
@@ -73,7 +74,7 @@ export class BasculeJeuneValidesController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/bascule-jeunes-valides/valider")
     async basuleJeunesValidesValider(
         @Request() request: CustomRequest,

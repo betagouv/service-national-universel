@@ -182,25 +182,82 @@ beforeEach(() => {
 // Ces rôles n'existent plus sur la plateforme, mais des comptes résiduels peuvent
 // encore les porter en base : ils doivent être refusés, pas simplement inutilisés.
 describe("C9 — POST /elasticsearch/young/:action sans contrôle de rôle", () => {
-  it.each([ROLES.DSNJ, ROLES.INJEP, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE])(
-    "refuse la recherche au rôle %s",
-    async (role) => {
-      const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
-        .post("/elasticsearch/young/search")
-        .send({ filters: {} });
-      expect(res.status).toBe(403);
-    },
-  );
+  it.each([
+    ROLES.DSNJ,
+    ROLES.INJEP,
+    ROLES.TRANSPORTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.VISITOR,
+  ])("refuse la recherche au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
 
-  it.each([ROLES.DSNJ, ROLES.INJEP, ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE])(
-    "refuse l'export au rôle %s",
-    async (role) => {
-      const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
-        .post("/elasticsearch/young/export")
-        .send({ filters: {} });
-      expect(res.status).toBe(403);
-    },
-  );
+  it.each([
+    ROLES.DSNJ,
+    ROLES.INJEP,
+    ROLES.TRANSPORTER,
+    ROLES.ADMINISTRATEUR_CLE,
+    ROLES.REFERENT_CLASSE,
+    ROLES.HEAD_CENTER,
+    ROLES.HEAD_CENTER_ADJOINT,
+    ROLES.REFERENT_SANITAIRE,
+    ROLES.VISITOR,
+  ])("refuse l'export au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/young/export")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+});
+
+describe("FH8 — le visiteur n'accède plus aux dossiers des volontaires", () => {
+  it.each(["search", "export"])("refuse /elasticsearch/young/%s au rôle visitor, même dans sa région", async (action) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.VISITOR, region: "Auvergne-Rhône-Alpes" } as any))
+      .post(`/elasticsearch/young/${action}`)
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.msearch).toHaveLength(0);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+});
+
+describe("FH4 — export ES des classes CLE", () => {
+  it.each([ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE])("refuse l'export des classes au rôle %s", async (role) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))
+      .post("/elasticsearch/cle/classe/export?type=export-des-classes")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+
+  it("refuse le schéma de répartition au transporteur, avant toute lecture", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
+      .post("/elasticsearch/cle/classe/export?type=schema-de-repartition")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+    expect(mockEsCalls.search).toHaveLength(0);
+  });
+
+  it("refuse le schéma de répartition au référent départemental", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT } as any))
+      .post("/elasticsearch/cle/classe/export?type=schema-de-repartition")
+      .send({ filters: {} });
+    expect(res.status).toBe(403);
+  });
+
+  it("laisse la recherche des classes au transporteur", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.TRANSPORTER } as any))
+      .post("/elasticsearch/cle/classe/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+  });
 });
 
 describe("C10/H70 — les hits young sortent bruts", () => {

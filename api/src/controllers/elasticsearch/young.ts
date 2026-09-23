@@ -80,8 +80,13 @@ function getYoungsFilters(user: UserDto): string[] {
  * `head_center`, `head_center_adjoint` et `referent_sanitaire`, qui n'existent
  * plus sur la plateforme. Des comptes résiduels peuvent encore porter ces rôles
  * en base : ils doivent être refusés, pas tolérés.
+ *
+ * `visitor` est aussi absent : l'admin ne lui ouvre que le tableau de bord et
+ * l'annuaire des établissements, et le modèle de permissions (`canSearchInElasticSearch`)
+ * lui refuse l'index `young`. Il exportait pourtant les dossiers complets des
+ * volontaires de sa région par `/elasticsearch/young/export` (cf. FH8).
  */
-const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR, ROLES.VISITOR];
+const YOUNG_CONTEXT_SCOPED_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
 
 interface YoungContextOptions {
   showAffectedToRegionOrDep?: boolean;
@@ -171,10 +176,6 @@ async function buildYoungContext(user: UserDto, options: YoungContextOptions = {
     }
   }
 
-  // Visitors are limited to their region.
-  if (user.role === ROLES.VISITOR) {
-    contextFilters.push({ term: { "region.keyword": user.region } });
-  }
   return { youngContextFilters: contextFilters };
 }
 

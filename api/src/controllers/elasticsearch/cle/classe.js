@@ -8,9 +8,11 @@ const esClient = require("../../../es");
 const { ERRORS } = require("../../../utils");
 const { allRecords } = require("../../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("../utils");
-const { EtablissementModel, CohortModel } = require("../../../models");
+const { EtablissementModel } = require("../../../models");
 const { serializeReferents } = require("../../../utils/es-serializer");
 const { isFeatureAvailable } = require("../../../featureFlag/featureFlagService");
+
+const CLASSE_EXPORT_ROLES = [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT];
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -39,6 +41,15 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     // Authorization
     if (!canSearchInElasticSearch(user, "classe")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (req.params.action === "export") {
+      // L'export porte les coordonnées des référents de classe, chefs d'établissement et
+      // coordinateurs : seuls les rôles à qui l'admin propose le bouton y ont accès. Le
+      // transporteur, qui n'a que la recherche, obtenait l'export national (cf. FH4).
+      if (!CLASSE_EXPORT_ROLES.includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (req.query?.type === "schema-de-repartition" && ![ROLES.ADMIN, ROLES.REFERENT_REGION].includes(user.role)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
 
     const { classeContextFilters, classeContextError } = await buildClasseContext(user);
     if (classeContextError) {
@@ -70,18 +81,6 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
       response = await populateWithAllReferentsInfo(response);
 
       if (req.query?.type === "schema-de-repartition") {
-        if (![ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(user.role)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-        if (user.role === ROLES.TRANSPORTER) {
-          const cohort = [...new Set(response.map((item) => item.cohort).filter(Boolean))];
-          if (cohort.length !== 1) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-          const IsSchemaDownloadIsTrue = await CohortModel.findOne({ name: cohort });
-          if (!IsSchemaDownloadIsTrue) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-          if (IsSchemaDownloadIsTrue.repartitionSchemaDownloadAvailibility === false && user.role === ROLES.TRANSPORTER) {
-            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-          }
-        }
-
         response = await populateWithCohesionCenterInfo(response);
         response = await populateWithPdrInfo(response);
         response = await populateWithLigneInfo(response);

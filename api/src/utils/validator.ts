@@ -407,7 +407,8 @@ export function validateYoung(young: YoungDto) {
     inscriptionRefusedMessage: Joi.string().allow(null, ""),
     inscriptionStep: Joi.string().allow(null, ""),
     cohesion2020Step: Joi.string().allow(null, ""),
-    historic: Joi.array().items(Joi.any().allow(null, "")),
+    // `historic` n'est jamais inscriptible depuis une requête : il est reconstruit côté serveur à
+    // chaque changement de statut (cf. FM13).
     lastLoginAt: Joi.string().allow(null, ""),
     // Les jetons d'authentification (reset de mot de passe, invitation, phase 3) ne sont jamais
     // inscriptibles depuis une requête : ils sont générés par les flux dédiés côté serveur.

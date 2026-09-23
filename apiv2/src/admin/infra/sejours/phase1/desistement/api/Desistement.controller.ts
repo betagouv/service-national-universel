@@ -8,6 +8,7 @@ import {
 } from "snu-lib";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { TaskMapper } from "@task/infra/Task.mapper";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 import { Phase1Service, StatusSimulation, StatusValidation } from "@admin/core/sejours/phase1/Phase1.service";
@@ -93,7 +94,7 @@ export class DesistementController {
         return TaskMapper.toDto(task);
     }
 
-    @UseGuards(AdminGuard)
+    @UseGuards(SuperAdminGuard)
     @Post("/:sessionId/simulation/:taskId/valider")
     async validerionDesister(
         @Request() request: CustomRequest,

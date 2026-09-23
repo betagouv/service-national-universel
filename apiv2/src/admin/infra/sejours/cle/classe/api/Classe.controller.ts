@@ -77,15 +77,7 @@ export class ClasseController {
         @Body("data") data: InscriptionEnMasseValidationPayloadDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ClassesRoutes["InscriptionEnMasseValider"]["response"]> {
-        const isInscriptionEnMasseEnabled = await this.featureFlagService.isFeatureFlagEnabled(
-            FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE,
-        );
-        if (!isInscriptionEnMasseEnabled) {
-            throw new FunctionalException(
-                FunctionalExceptionCode.FEATURE_FLAG_NOT_ENABLED,
-                "Inscription en masse is not enabled",
-            );
-        }
+        await this.assertInscriptionElevesEnabled();
         if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
@@ -114,6 +106,7 @@ export class ClasseController {
         @Param("id") classeId: string,
         @Body() data: InscriptionEnMasseImportPayloadDto,
     ): Promise<ClassesRoutes["InscriptionEnMasseImporter"]["response"]> {
+        await this.assertInscriptionElevesEnabled();
         if (data?.mapping) {
             this.classeService.checkImportMapping(data.mapping);
         }
@@ -161,6 +154,7 @@ export class ClasseController {
         @Param("id") classeId: string,
         @Body() data: InscriptionManuellePayloadDto,
     ): Promise<ClassesRoutes["InscriptionManuelle"]["response"]> {
+        await this.assertInscriptionElevesEnabled();
         const jeune: JeuneWithMinimalDataModel = {
             prenom: data.prenom.trim(),
             nom: data.nom.trim(),
@@ -168,5 +162,20 @@ export class ClasseController {
             genre: data.sexe,
         };
         return this.inscrireEleveManuellement.execute(jeune, classeId);
+    }
+
+    // L'inscription d'élèves (en masse ou manuelle) a été retirée de l'admin avec le
+    // décommissionnement CLE. Seule la validation du fichier vérifiait le feature flag :
+    // l'import et l'inscription manuelle restaient appelables directement (cf. FM10).
+    private async assertInscriptionElevesEnabled(): Promise<void> {
+        const isEnabled = await this.featureFlagService.isFeatureFlagEnabled(
+            FeatureFlagName.INSCRIPTION_EN_MASSE_CLASSE,
+        );
+        if (!isEnabled) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.FEATURE_FLAG_NOT_ENABLED,
+                "Inscription en masse is not enabled",
+            );
+        }
     }
 }

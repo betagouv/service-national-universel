@@ -253,10 +253,39 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
 
       const res = await request(await getAppHelperWithAcl(young, "young"))
         .put(`/young/${young._id}/phase2/militaryPreparation/status`)
-        .send({ statusMilitaryPreparationFiles: "REFUSED" });
+        .send({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" });
 
       expect(res.status).toBe(200);
       expectNoSecret(res.body.data);
+    });
+  });
+
+  describe("FM1 — décision sur le dossier de préparation militaire", () => {
+    it.each(["VALIDATED", "REFUSED", "WAITING_CORRECTION"])("refuse au volontaire de passer son propre dossier en %s", async (status) => {
+      const young = await createYoungHelper(getNewYoungFixture({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION" } as any));
+
+      const res = await request(await getAppHelperWithAcl(young, "young"))
+        .put(`/young/${young._id}/phase2/militaryPreparation/status`)
+        .send({ statusMilitaryPreparationFiles: status });
+
+      expect(res.status).toBe(403);
+      const untouched = await YoungModel.findById(young._id);
+      expect(untouched?.statusMilitaryPreparationFiles).toBe("WAITING_VERIFICATION");
+    });
+
+    it("laisse un référent régional valider le dossier d'un volontaire de sa région", async () => {
+      const young = await createYoungHelper(
+        getNewYoungFixture({ statusMilitaryPreparationFiles: "WAITING_VERIFICATION", department: "Ain", region: "Auvergne-Rhône-Alpes" } as any),
+      );
+      const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, region: "Auvergne-Rhône-Alpes" }));
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/young/${young._id}/phase2/militaryPreparation/status`)
+        .send({ statusMilitaryPreparationFiles: "VALIDATED" });
+
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      expect(updated?.statusMilitaryPreparationFiles).toBe("VALIDATED");
     });
   });
 
