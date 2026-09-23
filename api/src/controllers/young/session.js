@@ -20,7 +20,9 @@ router.get("/", passport.authenticate(["young"], { session: false, failWithError
     const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    return res.status(200).send({ ok: true, data: serializeSessionPhase1(session) });
+    // Sans `req.user`, le sérialiseur ne sait pas qu'il répond à un jeune et laisse passer la liste
+    // d'attente du séjour (identifiants d'autres volontaires) — constat M59, audit 2026-09-21.
+    return res.status(200).send({ ok: true, data: serializeSessionPhase1(session, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
