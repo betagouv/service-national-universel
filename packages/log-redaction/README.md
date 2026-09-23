@@ -2,7 +2,7 @@
 
 Redaction des secrets et des données personnelles avant écriture dans les logs et avant envoi à Sentry.
 
-Partagé entre `api` et `snupport-api`. Aucune dépendance runtime : le module est du TypeScript pur.
+Partagé entre `api`, `snupport-api` et les fronts `admin`, `app` et `snupport-app`. Aucune dépendance runtime : le module est du TypeScript pur.
 
 ## Usage
 
@@ -15,6 +15,25 @@ format.combine(format(redactLogInfo)(), format.simple());
 // Sentry : body, en-têtes, cookies, extra, URL et query string
 init({ beforeSend: redactSentryEvent });
 ```
+
+## Fronts (admin, app, snupport-app)
+
+Les fronts consomment la sortie ESM (`dist/esm`, champ `module`) et branchent les hooks dédiés, plus stricts :
+
+```js
+import { redactFrontBreadcrumb, redactFrontSentryEvent } from "@snu/log-redaction";
+
+init({
+  sendDefaultPii: false,
+  beforeSend: redactFrontSentryEvent,
+  beforeSendTransaction: redactFrontSentryEvent,
+  beforeBreadcrumb: redactFrontBreadcrumb,
+});
+```
+
+En plus de la redaction par nom de clé, ils **retirent** : corps de requête et de réponse (`body`, `data`,
+`response`, `responseText`, contexte `AxiosError`), query string et fragment de toute URL, state Redux
+(contexte `state`), cookies, et les breadcrumbs `console`. Un événement dont la redaction échoue est abandonné.
 
 ## Ce que le module couvre
 

@@ -57,7 +57,7 @@ export default function FicheSanitaire({ updateFilter, focusedSession, filterArr
 
   const handleClick = async (young) => {
     if (!young?._id) {
-      captureMessage("Error with young :", { extra: { young } });
+      captureMessage("Error with young : missing _id");
       return;
     }
     const { ok, data } = await api.get(`/referent/young/${young._id}`);

@@ -22,7 +22,7 @@ export default function SNUpportBox({ newTickets, openedTickets, sideBarOpen }) 
     try {
       const { ok, data, code } = await api.get(`/SNUpport/signin`);
       if (!ok) {
-        captureMessage("Failed to sign in to SNUpport", { extra: { ok, data, code } });
+        captureMessage("Failed to sign in to SNUpport", { extra: { code } });
         return toastr.error("Oups, une erreur est survenue. Veuillez contacter le support", translate(code));
       }
       window.open(data, "_blank", "noopener,noreferrer");
