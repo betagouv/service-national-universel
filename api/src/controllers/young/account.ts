@@ -11,7 +11,6 @@ import { capture } from "../../sentry";
 import { formatPhoneNumberFromPhoneZone, isPhoneNumberWellFormated, SENDINBLUE_TEMPLATES, YOUNG_STATUS_PHASE1, YOUNG_STATUS } from "snu-lib";
 import validator from "validator";
 import { validateParents } from "../../utils/validator";
-import { issueParentInscriptionToken } from "../../young/parentConsentToken";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 
 const router = express.Router({ mergeParams: true });
@@ -184,8 +183,6 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       if (value.parent2Email && !validator.isEmail(value.parent2Email)) {
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
-      // Un changement d'adresse invalide le lien de consentement envoyé à l'ancienne adresse.
-      if (value.parent2Email && value.parent2Email !== young.parent2Email) Object.assign(value, issueParentInscriptionToken(2));
     } else {
       young.parent2Status = "";
       young.parent2LastName = "";
@@ -194,13 +191,7 @@ router.put("/parents", passport.authenticate("young", { session: false, failWith
       // @ts-expect-error nullable field
       young.parent2PhoneZone = null;
       young.parent2Email = "";
-      young.parent2Inscription2023Token = "";
-      young.parent2Inscription2023TokenExpiresAt = undefined;
     }
-
-    // Symétrique du parent 2 : sans rotation, le lien de consentement déjà émis pour le parent 1 reste
-    // valide alors qu'il vient d'être redirigé vers une autre adresse (constat H40).
-    if (value.parent1Email && value.parent1Email !== young.parent1Email) Object.assign(value, issueParentInscriptionToken(1));
 
     young.set(value);
     await young.save({ fromUser: req.user });

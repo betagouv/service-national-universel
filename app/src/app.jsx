@@ -40,7 +40,6 @@ const Maintenance = lazy(() => import("./scenes/maintenance"));
 const NonEligible = lazy(() => import("./scenes/noneligible"));
 const OnBoarding = lazy(() => import("./scenes/cle/OnBoarding"));
 const ReInscription = lazy(() => import("./scenes/reinscription"));
-const RepresentantsLegaux = lazy(() => import("./scenes/representants-legaux"));
 const Thanks = lazy(() => import("./scenes/contact/Thanks"));
 const ViewMessage = lazy(() => import("./scenes/echanges/View"));
 const ExternalRedirect = lazy(() => import("./components/ExternalRedirect"));
@@ -91,7 +90,6 @@ function App() {
                 <SentryRoute path="/validate-contract" component={Contract} />
                 <SentryRoute path="/conditions-generales-utilisation" component={CGU} />
                 <SentryRoute path="/noneligible" component={NonEligible} />
-                <SentryRoute path="/representants-legaux" component={RepresentantsLegaux} />
                 <SentryRoute path="/je-rejoins-ma-classe-engagee" component={OnBoarding} />
                 <SentryRoute path="/je-suis-deja-inscrit" component={AccountAlreadyExists} />
                 <SentryRoute path="/besoin-d-aide/ticket/:id" component={ViewMessage} />

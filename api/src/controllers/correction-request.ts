@@ -23,7 +23,6 @@ import { sendTemplate } from "../brevo";
 import { UserRequest } from "./request";
 import { validateId } from "../utils/validator";
 import { canEditYoungInScope } from "../young/youngScope";
-import { refreshParentInscriptionToken } from "../young/parentConsentToken";
 
 const router = express.Router({ mergeParams: true });
 
@@ -204,38 +203,6 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/:youngId/remind-cni", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error: error_youngid, value: youngId } = Joi.string().required().validate(req.params.youngId, { stripUnknown: true });
-    if (error_youngid) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS, field: "youngId" });
-
-    const young = await YoungModel.findById(youngId);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // Sans ce contrôle, la route envoyait un email officiel aux parents de n'importe quel
-    // volontaire et renvoyait son dossier complet à l'appelant (constat H23). Même famille que
-    // L38 : le mail porte le lien de consentement du représentant légal.
-    if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    young.set(refreshParentInscriptionToken(young, 1));
-    await young.save({ fromUser: req.user });
-
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

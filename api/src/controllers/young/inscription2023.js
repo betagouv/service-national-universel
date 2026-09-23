@@ -22,12 +22,8 @@ const {
 } = require("snu-lib");
 const { sendTemplate } = require("./../../brevo");
 const { config } = require("../../config");
-const { issueParentInscriptionToken, refreshParentInscriptionToken } = require("../../young/parentConsentToken");
 const { getQPV, getDensity } = require("../../geo");
 const { getFilteredSessionsForInscription } = require("../../cohort/cohortService");
-
-/** Délai minimal entre deux relances de consentement déclenchées par le jeune. */
-const RELANCE_COOLDOWN_MS = 24 * 60 * 60 * 1000;
 
 const youngSchooledSituationOptions = [
   YOUNG_SITUATIONS.GENERAL_SCHOOL,
@@ -342,13 +338,7 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       value.parent2Email = "";
       value.parent2Phone = "";
       value.parent2PhoneZone = undefined;
-      value.parent2Inscription2023Token = "";
-      value.parent2Inscription2023TokenExpiresAt = undefined;
     }
-
-    // Un changement d'adresse invalide le lien de consentement déjà envoyé à l'ancienne adresse (H40).
-    if (value.parent1Email && value.parent1Email !== young.parent1Email) Object.assign(value, issueParentInscriptionToken(1));
-    if (value.parent2 && value.parent2Email && value.parent2Email !== young.parent2Email) Object.assign(value, issueParentInscriptionToken(2));
 
     if (type === "next") {
       if (isYoungInReinscription(young)) {
@@ -356,9 +346,6 @@ router.put("/representants/:type", passport.authenticate("young", { session: fal
       } else {
         value.inscriptionStep2023 = isCle(young) ? STEPS2023.CONFIRM : STEPS2023.DOCUMENTS;
       }
-
-      if (!young?.parent1Inscription2023Token && !value.parent1Inscription2023Token) Object.assign(value, issueParentInscriptionToken(1));
-      if (!young?.parent2Inscription2023Token && !value.parent2Inscription2023Token && value.parent2) Object.assign(value, issueParentInscriptionToken(2));
     }
     if (type === "correction") {
       const keyList = Object.keys(representantSchema(false));
@@ -388,28 +375,6 @@ router.put("/confirm", passport.authenticate("young", { session: false, failWith
     }
 
     if ([YOUNG_STATUS.IN_PROGRESS, YOUNG_STATUS.REINSCRIPTION].includes(young.status) && !young?.inscriptionDoneDate) {
-      const cohort = await CohortModel.findById(young.cohortId);
-      // If latest ID proof has an invalid date, notify parent 1.
-      if (young.latestCNIFileExpirationDate < new Date(cohort.dateStart)) {
-        await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-          emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-          params: {
-            cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-            youngFirstName: young.firstName,
-            youngName: young.lastName,
-          },
-        });
-      }
-
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-
       await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_WAITING_CONSENT, {
         emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
         params: {
@@ -524,62 +489,6 @@ router.put("/documents/:type", passport.authenticate("young", { session: false, 
       young.set({ ...data, CNIFileNotValidOnStart });
     }
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/relance", passport.authenticate("young", { session: false, failWithError: true }), async (req, res) => {
-  try {
-    const young = await YoungModel.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    // L'adresse du parent est déclarée par le jeune et n'est pas vérifiée : sans délai entre deux
-    // relances, la route sert d'expéditeur de mails arbitraire vers cette adresse (constat M54).
-    if (young.parentConsentRelanceSentAt && Date.now() - new Date(young.parentConsentRelanceSentAt).getTime() < RELANCE_COOLDOWN_MS) {
-      return res.status(429).send({ ok: false, code: ERRORS.TOO_MANY_REQUESTS });
-    }
-
-    // If latest ID proof has an invalid date, notify parent 1.
-    const cohort = await CohortModel.findById(young.cohortId);
-    const notifyExpirationDate = young.latestCNIFileExpirationDate < new Date(cohort.dateStart);
-    const needCniRelance = young?.parentStatementOfHonorInvalidId !== "true";
-    const needParent1Relance = !["true", "false"].includes(young?.parentAllowSNU);
-
-    // Le lien qui part dans le mail doit rester valide le temps du TTL du jeton, et la date de relance
-    // doit être posée avant l'envoi pour que deux appels concurrents ne partent pas tous les deux.
-    if ((notifyExpirationDate && needCniRelance) || needParent1Relance) {
-      young.set(refreshParentInscriptionToken(young, 1));
-      young.set({ parentConsentRelanceSentAt: new Date() });
-      await young.save({ fromUser: req.user });
-    }
-
-    if (notifyExpirationDate && needCniRelance) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.OUTDATED_ID_PROOF, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/cni-invalide?token=${young.parent1Inscription2023Token}&utm_campaign=transactionnel+replegal+ID+perimee&utm_source=notifauto&utm_medium=mail+610+effectuer`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-    if (needParent1Relance) {
-      await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_CONSENT, {
-        emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email }],
-        params: {
-          cta: `${config.APP_URL}/representants-legaux/presentation?token=${young.parent1Inscription2023Token}&parent=1?utm_campaign=transactionnel+replegal1+donner+consentement&utm_source=notifauto&utm_medium=mail+605+donner`,
-          youngFirstName: young.firstName,
-          youngName: young.lastName,
-        },
-      });
-    }
-
-    young.set({ inscriptionDoneDate: new Date() });
-    await young.save({ fromUser: req.user });
-
     return res.status(200).send({ ok: true, data: serializeYoung(young) });
   } catch (error) {
     capture(error);

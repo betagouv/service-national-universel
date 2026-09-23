@@ -6,47 +6,23 @@ import ErrorPic from "../assets/error.png";
 import { capture } from "../../../sentry";
 import api from "../../../services/api";
 import { translate } from "snu-lib";
-import { toastr } from "react-redux-toastr";
 import { setYoung } from "../../../redux/auth/actions";
 import { RiEditFill } from "react-icons/ri";
 import ConsentDone from "../../../assets/icons/ConsentDone";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
-import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import JDMA from "@/components/JDMA";
 import { FaClock } from "react-icons/fa6";
-import { Button, SignupButtons } from "@snu/ds/dsfr";
+import { SignupButtons } from "@snu/ds/dsfr";
 import EmailSend from "@/assets/pictograms/MailSend";
 
 export default function StepWaitingConsent() {
   const { young, logout, isCLE } = useAuth();
-  const [disabled, setDisabled] = React.useState(false);
+  const [, setDisabled] = React.useState(false);
   const [error, setError] = React.useState({});
   const notAuthorised = young?.parentAllowSNU === "false";
   const dispatch = useDispatch();
-
-  const handleClick = async () => {
-    setDisabled(true);
-    try {
-      const { ok, code } = await api.put(`/young/inscription2023/relance`);
-      if (!ok) {
-        setError({ text: `Une erreur s'est produite`, subText: code ? translate(code) : "" });
-        setDisabled(false);
-        return;
-      }
-      const eventName = isCLE ? "CLE/CTA inscription - relancer rep leg" : "Phase0/CTA inscription - relancer rep leg";
-      plausibleEvent(eventName);
-      toastr.success("Succès", "Votre relance a bien été prise en compte.");
-    } catch (e) {
-      capture(e);
-      setError({
-        text: `Une erreur s'est produite`,
-        subText: e?.code ? translate(e.code) : "",
-      });
-      setDisabled(false);
-    }
-  };
 
   const handleDone = async () => {
     setDisabled(true);
@@ -105,11 +81,6 @@ export default function StepWaitingConsent() {
               <p className="mt-1 mb-0 text-[16px] text-[#666666]">
                 Un email à été envoyé à <strong className="text-black">{young?.parent1Email}</strong>
               </p>
-              <div className="mt-3 flex justify-between">
-                <Button className="h-10 w-32 bg-[#000091] text-base text-white disabled:bg-[#E5E5E5]  disabled:text-[#929292] " disabled={disabled} onClick={handleClick}>
-                  Renvoyer l'email
-                </Button>
-              </div>
             </div>
             <span className="flex items-center justify-end">
               <Link className="mt-8 flex items-center justify-end text-blue-france-sun-113" to="/inscription/confirm">

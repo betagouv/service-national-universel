@@ -601,21 +601,6 @@ describe("Young Inscription", () => {
     });
   });
 
-  describe("PUT /young/inscription2023/relance", () => {
-    it("Should return 404 when young is not found", async () => {
-      let res = await request(getAppHelper({})).put("/young/inscription2023/relance");
-      expect(res.status).toBe(404);
-    });
-
-    it("Should return 200 otherwise", async () => {
-      const cohort = await createCohortHelper(getNewCohortFixture());
-      const user = await createYoungHelper(getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id }));
-
-      let res = await request(getAppHelper(user)).put("/young/inscription2023/relance");
-      expect(res.status).toBe(200);
-    });
-  });
-
   describe("PUT /young/inscription2023/done", () => {
     it("Should return 404 when young is not found", async () => {
       let res = await request(getAppHelper({})).put("/young/inscription2023/done");

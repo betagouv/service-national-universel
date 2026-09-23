@@ -25,6 +25,9 @@ const SENTRY_ON_ERROR_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_ON_ERROR_SAMPLE_
 const SENTRY_DEBUG_MODE = _env(envBool, "SENTRY_DEBUG_MODE", false);
 const API_ENGAGEMENT_URL = _env(envStr, "VITE_API_ENGAGEMENT_URL", "https://api.api-engagement.beta.gouv.fr");
 const API_ENGAGEMENT_SNU_ID = _env(envStr, "VITE_API_ENGAGEMENT_SNU_ID");
+// Documents publics (règlement intérieur, fiche sanitaire…) servis depuis le stockage objet.
+const CDN_BASE_URL =
+  environment === "production" ? "https://cellar-c2.services.clever-cloud.com/cni-bucket-prod" : "https://cellar-c2.services.clever-cloud.com/cni-bucket-staging";
 
 export {
   apiURL,
@@ -42,4 +45,5 @@ export {
   supportURL,
   knowledgebaseURL,
   maintenance,
+  CDN_BASE_URL,
 };

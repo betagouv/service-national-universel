@@ -23,7 +23,6 @@ import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
 import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
-import { issueParentInscriptionToken } from "../../young/parentConsentToken";
 import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
@@ -294,8 +293,6 @@ router.post("/invite", passport.authenticate("referent", { session: false, failW
     obj.parent2ContactPreference = "email";
     obj.status = YOUNG_STATUS.IN_PROGRESS;
 
-    Object.assign(obj, issueParentInscriptionToken(1));
-    if (obj.parent2Email) Object.assign(obj, issueParentInscriptionToken(2));
     obj.inscriptionDoneDate = new Date();
     if (obj.classeId) {
       obj.source = YOUNG_SOURCE.CLE;
@@ -544,30 +541,6 @@ router.put("/accept-cgu", passport.authenticate("young", { session: false, failW
 
     young.set({ acceptCGU: "true" });
     await young.save({ fromUser: req.user });
-
-    res.status(200).send({ ok: true, data: serializeYoung(young, young) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.put("/accept-ri", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const young = await YoungModel.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    young.set({ acceptRI: REGLEMENT_INTERIEUR_VERSION });
-    await young.save({ fromUser: req.user });
-
-    await sendTemplate(SENDINBLUE_TEMPLATES.parent.PARENT1_REVALIDATE_RI, {
-      emailTo: [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }],
-      params: {
-        cta: `${config.APP_URL}/representants-legaux/ri-consentement?token=${young.parent1Inscription2023Token}`,
-        youngFirstName: young.firstName,
-        youngName: young.lastName,
-      },
-    });
 
     res.status(200).send({ ok: true, data: serializeYoung(young, young) });
   } catch (error) {
