@@ -7,15 +7,14 @@ import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { UseCase } from "@shared/core/UseCase";
 import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_STATUS } from "snu-lib";
-import { ClasseService } from "../../Classe.service";
-import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
+import { ImportClasseEnMasseTaskParameters, isInscriptionEnMasseFileKeyOfClasse } from "../ClasseImportEnMasse.model";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { ValidationInscriptionEnMasseClasse } from "./ValidationInscriptionEnMasseClasse";
 
 @Injectable()
 export class ImporterClasseEnMasse implements UseCase<void> {
     private readonly logger: Logger = new Logger(ImporterClasseEnMasse.name);
     constructor(
-        private readonly classeService: ClasseService,
         @Inject(FileGateway)
         private readonly fileGateway: FileGateway,
         @Inject(ClockGateway)
@@ -23,6 +22,7 @@ export class ImporterClasseEnMasse implements UseCase<void> {
         @Inject(CryptoGateway)
         private readonly cryptoGateway: CryptoGateway,
         private readonly jeuneService: JeuneService,
+        private readonly validationInscriptionEnMasseClasse: ValidationInscriptionEnMasseClasse,
     ) {}
     async execute(parameters: ImportClasseEnMasseTaskParameters | undefined): Promise<void> {
         this.logger.log(
@@ -31,21 +31,27 @@ export class ImporterClasseEnMasse implements UseCase<void> {
         if (!parameters) {
             throw new FunctionalException(FunctionalExceptionCode.IMPORT_NOT_VALID);
         }
-        const classe = await this.classeService.findById(parameters.classeId);
+        // La clé doit désigner un fichier validé pour cette classe : un fichier validé pour une
+        // autre classe ne peut pas être importé ici.
+        if (!isInscriptionEnMasseFileKeyOfClasse(parameters.fileKey, parameters.classeId)) {
+            throw new FunctionalException(FunctionalExceptionCode.IMPORT_NOT_VALID, "fichier non rattaché à la classe");
+        }
         const file = await this.fileGateway.downloadFile(parameters.fileKey);
         if (!file) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND);
         }
-        let jeunes = await this.fileGateway.parseXLS<Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, any>>(file.Body, {
-            sheetIndex: 0,
-        });
-        if (parameters.mapping) {
-            this.logger.log(`Mapping des champs: ${JSON.stringify(parameters.mapping)}`);
-            const jeunesNotMapped = await this.fileGateway.parseXLS<Record<string, string>>(file.Body, {
-                sheetIndex: 0,
-            });
-            jeunes = this.mapJeunes(jeunesNotMapped, parameters.mapping);
+        // Les règles de la validation (statut de la classe, capacité, doublons, jeunes déjà inscrits)
+        // sont rejouées sur le fichier au moment de l'import.
+        const { classe, dataToImport, errors } = await this.validationInscriptionEnMasseClasse.validerFichier(
+            parameters.classeId,
+            parameters.mapping,
+            file.Body,
+        );
+        if (errors.length > 0) {
+            this.logger.warn(`Import refusé pour la classe ${parameters.classeId}: ${errors.length} erreur(s)`);
+            throw new FunctionalException(FunctionalExceptionCode.IMPORT_NOT_VALID, JSON.stringify(errors));
         }
+        const jeunes = dataToImport as Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, any>[];
 
         for (const jeune of jeunes) {
             const dateNaissance = this.clockGateway.parseDateNaissance(
@@ -75,21 +81,5 @@ export class ImporterClasseEnMasse implements UseCase<void> {
                 statut: YOUNG_STATUS.VALIDATED,
             });
         }
-    }
-
-    private mapJeunes(
-        jeunes: Record<string, string>[],
-        mapping: Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>,
-    ): Record<CLASSE_IMPORT_EN_MASSE_COLUMNS, string>[] {
-        return jeunes.map((jeune) => {
-            return {
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]:
-                    jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]],
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: jeune[mapping[CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]],
-            };
-        });
     }
 }

@@ -16,6 +16,7 @@ import { ClasseModel } from "../../Classe.model";
 import { EtablissementGateway } from "../../../etablissement/Etablissement.gateway";
 import { EtablissementModel } from "../../../etablissement/Etablissement.model";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
+import { getInscriptionEnMasseFileKeyPrefix } from "../ClasseImportEnMasse.model";
 
 @Injectable()
 export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportEnMasseValidationDto> {
@@ -32,6 +33,43 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         mapping: Record<string, string> | null,
         file: { fileName: string; buffer: Buffer; mimetype: string },
     ): Promise<ClasseImportEnMasseValidationDto> {
+        const { dataToImport, errors } = await this.validerFichier(classeId, mapping, file.buffer);
+        const isValid = errors.length === 0;
+
+        let fileKey: string | undefined = undefined;
+        if (isValid) {
+            // Save file to s3
+            const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
+            const fileName = `inscription_en_masse_${classeId}_${timestamp}.xlsx`;
+            const fileS3 = await this.fileGateway.uploadFile(
+                `${getInscriptionEnMasseFileKeyPrefix(classeId)}${fileName}`,
+                {
+                    data: file.buffer,
+                    mimetype: file.mimetype,
+                },
+            );
+            fileKey = fileS3.Key;
+        }
+
+        return {
+            isValid,
+            validRowsCount: this.countValidRows(dataToImport, errors),
+            errors,
+            fileKey,
+        };
+    }
+
+    // Règles de validation, rejouées à l'exécution de l'import (ImporterClasseEnMasse) : entre la
+    // validation et l'import, la classe a pu fermer, se remplir ou recevoir les mêmes jeunes.
+    async validerFichier(
+        classeId: string,
+        mapping: Record<string, string> | null,
+        buffer: Buffer,
+    ): Promise<{
+        classe: ClasseModel;
+        dataToImport: Record<string, string>[];
+        errors: ClasseImportEnMasseValidationDto["errors"];
+    }> {
         const classe = await this.classeGateway.findById(classeId);
         if (!classe) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Classe non trouvée");
@@ -46,28 +84,20 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         if (!etablissement) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, "Etablissement non trouvé");
         }
-        let dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(file.buffer, {
+        let dataToImport = await this.fileGateway.parseXLS<Record<string, string>>(buffer, {
             defval: "",
         });
 
         this.logger.log(`Nombre de jeunes à inscrire: ${dataToImport.length}`);
 
         if (dataToImport.length === 0) {
-            return {
-                isValid: false,
-                validRowsCount: 0,
-                errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE }],
-            };
+            return { classe, dataToImport, errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.EMPTY_FILE }] };
         }
 
         // Lorsque l'effectif ajusté est renseigné, vérifier que le nb d'élèves inscrits après l'import est inférieur ou égal à l'effectif ajusté.
         const maxJeune = classe.placesTotal || 100;
         if (dataToImport.length + classe.placesPrises > maxJeune) {
-            return {
-                isValid: false,
-                validRowsCount: 0,
-                errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES }],
-            };
+            return { classe, dataToImport: [], errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES }] };
         }
 
         if (mapping) {
@@ -85,30 +115,7 @@ export class ValidationInscriptionEnMasseClasse implements UseCase<ClasseImportE
         const errorsCoherence = await this.validateCoherence(dataToImport, classe, etablissement, errorsFormat);
         this.logger.log(`Erreurs de cohérence: ${errorsCoherence.length}`);
 
-        const errors = [...errorsFormat, ...errorsCoherence];
-        const isValid = errors.length === 0;
-
-        let fileKey: string | undefined = undefined;
-        if (isValid) {
-            // Save file to s3
-            const timestamp = this.clockGateway.formatSafeDateTime(this.clockGateway.now({ timeZone: "Europe/Paris" }));
-            const fileName = `inscription_en_masse_${classeId}_${timestamp}.xlsx`;
-            const fileS3 = await this.fileGateway.uploadFile(
-                `file/admin/sejours/cle/classe/${classeId}/inscription-en-masse/${fileName}`,
-                {
-                    data: file.buffer,
-                    mimetype: file.mimetype,
-                },
-            );
-            fileKey = fileS3.Key;
-        }
-
-        return {
-            isValid,
-            validRowsCount: this.countValidRows(dataToImport, errors),
-            errors,
-            fileKey,
-        };
+        return { classe, dataToImport, errors: [...errorsFormat, ...errorsCoherence] };
     }
 
     async validateFormat(dataToImport: Record<string, string>[]) {

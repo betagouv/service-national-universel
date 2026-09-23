@@ -28,6 +28,7 @@ import { FileInterceptor } from "@nestjs/platform-express";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
 import { ClasseImportService } from "@admin/core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { CustomRequest } from "@shared/infra/CustomRequest";
+import { isFileContentMatchingMimetype, MAX_IMPORT_FILE_SIZE } from "@shared/infra/UploadFile";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { FileGateway } from "@shared/core/File.gateway";
 import { TaskMapper } from "@task/infra/Task.mapper";
@@ -71,14 +72,14 @@ export class ClasseController {
 
     @Post(":id/inscription-en-masse/valider")
     @UseGuards(ClasseAdminCleGuard)
-    @UseInterceptors(FileInterceptor("file"))
+    @UseInterceptors(FileInterceptor("file", { limits: { fileSize: MAX_IMPORT_FILE_SIZE, files: 1 } }))
     async inscriptionEnMasseValidate(
         @Param("id") classeId: string,
         @Body("data") data: InscriptionEnMasseValidationPayloadDto,
         @UploadedFile() file: Express.Multer.File,
     ): Promise<ClassesRoutes["InscriptionEnMasseValider"]["response"]> {
         await this.assertInscriptionElevesEnabled();
-        if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL) {
+        if (!file || !file.originalname || file.mimetype !== MIME_TYPES.EXCEL || !isFileContentMatchingMimetype(file)) {
             throw new FunctionalException(FunctionalExceptionCode.INVALID_FILE_FORMAT, "cannot read input file");
         }
         let decodedMapping;

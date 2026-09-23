@@ -15,3 +15,13 @@ export type ImportClasseEnMasseTaskResults = {};
 export type ImportClasseEnMasseTaskModel = TaskModel<ImportClasseEnMasseTaskParameters, ImportClasseEnMasseTaskResults>;
 
 export type JeuneImportEnMasse = Pick<JeuneModel, "nom" | "prenom" | "dateNaissance" | "genre">;
+
+// Dossier S3 des fichiers validés d'une classe : rattache une clé de fichier à la classe
+// pour laquelle elle a été validée.
+export function getInscriptionEnMasseFileKeyPrefix(classeId: string): string {
+    return `file/admin/sejours/cle/classe/${classeId}/inscription-en-masse/`;
+}
+
+export function isInscriptionEnMasseFileKeyOfClasse(fileKey: string | undefined, classeId: string): boolean {
+    return !!fileKey?.startsWith(getInscriptionEnMasseFileKeyPrefix(classeId)) && !fileKey.includes("..");
+}

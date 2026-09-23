@@ -1,6 +1,6 @@
 import { Controller, Delete, Get, Inject, Param, Query, UseGuards } from "@nestjs/common";
 
-import { Phase1Routes, TaskName, TaskStatus } from "snu-lib";
+import { Phase1Routes, TaskName } from "snu-lib";
 
 import { TaskGateway } from "@task/core/Task.gateway";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
@@ -9,26 +9,14 @@ import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation
 import { SupprimerLigneDeBus } from "@admin/core/sejours/phase1/affectation/SupprimerLigneDeBus";
 import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { SimulationAffectationHTSTaskModel } from "@admin/core/sejours/phase1/affectation/SimulationAffectationHTSTask.model";
-import { DeleteLigneDeBusParamsDto } from "./Phase1.validation";
-
-const PHASE1_SIMULATIONS_TASK_NAMES = [
-    TaskName.AFFECTATION_HTS_SIMULATION,
-    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
-    TaskName.AFFECTATION_CLE_SIMULATION,
-    TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
-    TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
-    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
-    TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION,
-];
-const PHASE1_TRAITEMENTS_TASK_NAMES = [
-    TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
-    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
-    TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
-    TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
-    TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
-    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
-    TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER,
-];
+import { StrictQueryPipe } from "@shared/infra/StrictQuery.pipe";
+import {
+    DeleteLigneDeBusParamsDto,
+    GetSimulationsQueryDto,
+    GetTraitementsQueryDto,
+    PHASE1_SIMULATIONS_TASK_NAMES,
+    PHASE1_TRAITEMENTS_TASK_NAMES,
+} from "./Phase1.validation";
 
 @Controller("phase1")
 export class Phase1Controller {
@@ -53,14 +41,9 @@ export class Phase1Controller {
     async getSimulations(
         @Param("sessionId")
         sessionId: string,
-        @Query("name")
-        name?: TaskName,
-        @Query("status")
-        status?: TaskStatus,
-        @Query("sort")
-        sort?: "ASC" | "DESC",
+        @Query(StrictQueryPipe) { name, status, sort }: GetSimulationsQueryDto,
     ): Promise<Phase1Routes["GetSimulationsRoute"]["response"]> {
-        const filter: any = {
+        const filter: { [key: string]: string } = {
             "metadata.parameters.sessionId": sessionId,
         };
         if (status) {
@@ -69,7 +52,7 @@ export class Phase1Controller {
         const simulations = await this.taskGateway.findByNames(
             name ? [name] : PHASE1_SIMULATIONS_TASK_NAMES,
             filter,
-            sort,
+            sort || undefined,
         );
 
         return simulations.map((simulation) => {
@@ -95,14 +78,9 @@ export class Phase1Controller {
     async getTraitements(
         @Param("sessionId")
         sessionId: string,
-        @Query("name")
-        name?: TaskName,
-        @Query("status")
-        status?: TaskStatus,
-        @Query("sort")
-        sort?: "ASC" | "DESC",
+        @Query(StrictQueryPipe) { name, status, sort }: GetTraitementsQueryDto,
     ): Promise<Phase1Routes["GetSimulationsRoute"]["response"]> {
-        const filter: any = {
+        const filter: { [key: string]: string } = {
             "metadata.parameters.sessionId": sessionId,
         };
         if (status) {
@@ -111,7 +89,7 @@ export class Phase1Controller {
         const simulations = await this.taskGateway.findByNames(
             name ? [name] : PHASE1_TRAITEMENTS_TASK_NAMES,
             filter,
-            sort,
+            sort || undefined,
         );
         return simulations.map(TaskMapper.toDto);
     }

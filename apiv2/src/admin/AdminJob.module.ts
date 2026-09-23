@@ -69,6 +69,7 @@ import { ValiderAffectationHTSService } from "./core/sejours/phase1/affectation/
 import { ValiderAffectationHTSDromCom } from "./core/sejours/phase1/affectation/ValiderAffectationHTSDromCom";
 import { SimulationDesisterPostAffectation } from "./core/sejours/phase1/desistement/SimulationDesisterPostAffectation";
 import { ImporterClasseEnMasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ImporterClasseEnMasse";
+import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { ClasseService } from "./core/sejours/cle/classe/Classe.service";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { AuthModule } from "@auth/Auth.module";
@@ -216,6 +217,7 @@ import { SearchSejourElasticRepository } from "@analytics/infra/SearchSejourElas
         AdminTaskImportReferentielSelectorService,
         AdminTaskEngagementSelectorService,
         ImporterClasseEnMasse,
+        ValidationInscriptionEnMasseClasse,
         ClasseService,
         JeuneService,
         ExportMissionService,

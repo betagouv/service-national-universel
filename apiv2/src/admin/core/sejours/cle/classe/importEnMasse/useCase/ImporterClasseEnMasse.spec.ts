@@ -4,13 +4,19 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 import { CryptoGateway } from "@shared/core/Crypto.gateway";
 import { FileGateway } from "@shared/core/File.gateway";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { CLASSE_IMPORT_EN_MASSE_COLUMNS, YOUNG_SOURCE, YOUNG_STATUS, YOUNG_STATUS_PHASE1 } from "snu-lib";
-import { ClasseService } from "../../Classe.service";
-import { ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
+import {
+    CLASSE_IMPORT_EN_MASSE_COLUMNS,
+    CLASSE_IMPORT_EN_MASSE_ERRORS,
+    YOUNG_SOURCE,
+    YOUNG_STATUS,
+    YOUNG_STATUS_PHASE1,
+} from "snu-lib";
+import { getInscriptionEnMasseFileKeyPrefix, ImportClasseEnMasseTaskParameters } from "../ClasseImportEnMasse.model";
 import { ImporterClasseEnMasse } from "./ImporterClasseEnMasse";
 import { Logger } from "@nestjs/common";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 import { JeuneGenre } from "@admin/core/sejours/jeune/Jeune.model";
+import { ValidationInscriptionEnMasseClasse } from "./ValidationInscriptionEnMasseClasse";
 
 describe("ImporterClasseEnMasse", () => {
     let importerClasseEnMasse: ImporterClasseEnMasse;
@@ -18,12 +24,14 @@ describe("ImporterClasseEnMasse", () => {
     let clockGateway: ClockGateway;
     let cryptoGateway: CryptoGateway;
     let jeuneService: JeuneService;
+    let validation: { validerFichier: jest.Mock };
 
     const mockFileBody = Buffer.from("mock file content");
+    const fileKeyValide = `${getInscriptionEnMasseFileKeyPrefix("class-001")}inscription_en_masse_class-001.xlsx`;
 
     const mockParameters: ImportClasseEnMasseTaskParameters = {
         classeId: "class-001",
-        fileKey: "file-key-001",
+        fileKey: fileKeyValide,
         mapping: null,
         auteur: {
             id: "ref-001",
@@ -59,23 +67,11 @@ describe("ImporterClasseEnMasse", () => {
         },
     ];
 
-    const mockMappedXlsData = [
-        {
-            "Nom Eleve": "Doe",
-            "Prenom Eleve": "John",
-            Naissance: "01/01/2006",
-            Sexe: "M",
-            "Code Etablissement": "12345678",
-        },
-    ];
-
-    const mockMapping = {
-        [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Nom Eleve",
-        [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "Prenom Eleve",
-        [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "Naissance",
-        [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "Sexe",
-        [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "Code Etablissement",
-    };
+    const validationOk = (dataToImport: Record<string, string>[]) => ({
+        classe: mockClasseData,
+        dataToImport,
+        errors: [],
+    });
 
     beforeEach(async () => {
         const mockJeuneService = {
@@ -125,9 +121,7 @@ describe("ImporterClasseEnMasse", () => {
             getUuid: jest.fn().mockReturnValue("12345678-1234-1234-1234-123456789012"),
         };
 
-        const mockClasseService = {
-            findById: jest.fn().mockResolvedValue(mockClasseData),
-        };
+        validation = { validerFichier: jest.fn().mockResolvedValue(validationOk(mockXlsData)) };
 
         const module: TestingModule = await Test.createTestingModule({
             providers: [
@@ -136,7 +130,7 @@ describe("ImporterClasseEnMasse", () => {
                 { provide: FileGateway, useValue: mockFileGateway },
                 { provide: ClockGateway, useValue: mockClockGateway },
                 { provide: CryptoGateway, useValue: mockCryptoGateway },
-                { provide: ClasseService, useValue: mockClasseService },
+                { provide: ValidationInscriptionEnMasseClasse, useValue: validation },
                 { provide: Logger, useValue: { log: jest.fn() } },
             ],
         }).compile();
@@ -154,6 +148,27 @@ describe("ImporterClasseEnMasse", () => {
         );
     });
 
+    it("refuse un fichier validé pour une autre classe", async () => {
+        const parameters = {
+            ...mockParameters,
+            fileKey: `${getInscriptionEnMasseFileKeyPrefix("class-002")}inscription_en_masse_class-002.xlsx`,
+        };
+
+        await expect(importerClasseEnMasse.execute(parameters)).rejects.toThrow(FunctionalException);
+        expect(fileGateway.downloadFile).not.toHaveBeenCalled();
+        expect(jeuneService.create).not.toHaveBeenCalled();
+    });
+
+    it("refuse une clé qui sort du dossier de la classe", async () => {
+        const parameters = {
+            ...mockParameters,
+            fileKey: `${getInscriptionEnMasseFileKeyPrefix("class-001")}../../class-002/inscription-en-masse/f.xlsx`,
+        };
+
+        await expect(importerClasseEnMasse.execute(parameters)).rejects.toThrow(FunctionalException);
+        expect(fileGateway.downloadFile).not.toHaveBeenCalled();
+    });
+
     it("should throw exception when file is not found", async () => {
         (fileGateway.downloadFile as jest.Mock).mockImplementationOnce(() => Promise.resolve(null));
 
@@ -162,9 +177,28 @@ describe("ImporterClasseEnMasse", () => {
         );
     });
 
-    it("should successfully import jeunes without mapping", async () => {
-        jest.spyOn(fileGateway, "parseXLS").mockResolvedValueOnce(mockXlsData);
+    it("rejoue la validation à l'exécution et n'importe rien si elle échoue", async () => {
+        validation.validerFichier.mockResolvedValueOnce({
+            classe: mockClasseData,
+            dataToImport: [],
+            errors: [{ code: CLASSE_IMPORT_EN_MASSE_ERRORS.TOO_MANY_JEUNES }],
+        });
 
+        await expect(importerClasseEnMasse.execute(mockParameters)).rejects.toThrow(FunctionalException);
+        expect(validation.validerFichier).toHaveBeenCalledWith("class-001", null, mockFileBody);
+        expect(jeuneService.create).not.toHaveBeenCalled();
+    });
+
+    it("propage le refus de la validation (classe fermée entre-temps)", async () => {
+        validation.validerFichier.mockRejectedValueOnce(
+            new FunctionalException(FunctionalExceptionCode.CLASSE_STATUT_INVALIDE_IMPORT_EN_MASSE),
+        );
+
+        await expect(importerClasseEnMasse.execute(mockParameters)).rejects.toThrow(FunctionalException);
+        expect(jeuneService.create).not.toHaveBeenCalled();
+    });
+
+    it("should successfully import jeunes without mapping", async () => {
         await importerClasseEnMasse.execute(mockParameters);
 
         expect(jeuneService.create).toHaveBeenCalledTimes(2);
@@ -192,54 +226,25 @@ describe("ImporterClasseEnMasse", () => {
         );
     });
 
-    it("should successfully import jeunes with mapping", async () => {
-        const parametersWithMapping = {
-            ...mockParameters,
-            mapping: mockMapping,
+    it("importe les lignes validées avec le mapping de la tâche", async () => {
+        const mapping = {
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Nom Eleve",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "Prenom Eleve",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "Naissance",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "Sexe",
+            [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "Code Etablissement",
         };
+        validation.validerFichier.mockResolvedValueOnce(validationOk([mockXlsData[0]]));
 
-        jest.spyOn(fileGateway, "parseXLS").mockResolvedValueOnce([]).mockResolvedValueOnce(mockMappedXlsData);
+        await importerClasseEnMasse.execute({ ...mockParameters, mapping });
 
-        await importerClasseEnMasse.execute(parametersWithMapping);
-
+        expect(validation.validerFichier).toHaveBeenCalledWith("class-001", mapping, mockFileBody);
         expect(jeuneService.create).toHaveBeenCalledTimes(1);
-        expect(jeuneService.update).toHaveBeenCalledTimes(1);
-
-        expect(clockGateway.parseDateNaissance).toHaveBeenCalledWith("01/01/2006");
-
-        expect(jeuneService.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-                nom: "Doe",
-                prenom: "John",
-                genre: JeuneGenre.MALE,
-                classeId: "class-001",
-            }),
-        );
-    });
-
-    it("should correctly map jeunes from non-standard column names", async () => {
-        const parametersWithMapping = {
-            ...mockParameters,
-            mapping: mockMapping,
-        };
-
-        jest.spyOn(fileGateway, "parseXLS").mockResolvedValueOnce([]).mockResolvedValueOnce(mockMappedXlsData);
-
-        await importerClasseEnMasse.execute(parametersWithMapping);
-
-        expect(jeuneService.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-                nom: "Doe",
-                prenom: "John",
-                genre: JeuneGenre.MALE,
-            }),
-        );
-
         expect(clockGateway.parseDateNaissance).toHaveBeenCalledWith("01/01/2006");
     });
 
     it("should generate email with UUID and lowercase formatting", async () => {
-        jest.spyOn(fileGateway, "parseXLS").mockResolvedValueOnce([mockXlsData[0]]);
+        validation.validerFichier.mockResolvedValueOnce(validationOk([mockXlsData[0]]));
         jest.spyOn(cryptoGateway, "getUuid").mockReturnValue("abcdef12-3456-7890-abcd-ef1234567890");
 
         await importerClasseEnMasse.execute(mockParameters);
@@ -249,56 +254,5 @@ describe("ImporterClasseEnMasse", () => {
                 email: "john.doe@localhost-abcdef",
             }),
         );
-    });
-
-    it("should handle spaces in name when generating email", async () => {
-        const jeuneWithSpaces = {
-            ...mockXlsData[0],
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Doe Smith",
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "John Paul",
-        };
-
-        jest.spyOn(fileGateway, "parseXLS").mockResolvedValueOnce([jeuneWithSpaces]);
-        jest.spyOn(cryptoGateway, "getUuid").mockReturnValue("abcdef12-3456-7890-abcd-ef1234567890");
-
-        await importerClasseEnMasse.execute(mockParameters);
-
-        expect(jeuneService.create).toHaveBeenCalledWith(
-            expect.objectContaining({
-                email: "johnpaul.doesmith@localhost-abcdef",
-            }),
-        );
-    });
-});
-
-describe("mapJeunes", () => {
-    it("should map jeunes according to mapping", () => {
-        const importer = new ImporterClasseEnMasse({} as any, {} as any, {} as any, {} as any, {} as any);
-        const input = [
-            {
-                "Nom Eleve": "Doe",
-                "Prenom Eleve": "John",
-                Naissance: "01/01/2006",
-                Sexe: "M",
-                "Code Etablissement": "12345678",
-            },
-        ];
-        const mapping = {
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Nom Eleve",
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "Prenom Eleve",
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "Naissance",
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "Sexe",
-            [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "Code Etablissement",
-        };
-        const result = importer["mapJeunes"](input, mapping);
-        expect(result).toEqual([
-            {
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.NOM]: "Doe",
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.PRENOM]: "John",
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.DATE_DE_NAISSANCE]: "01/01/2006",
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.GENRE]: "M",
-                [CLASSE_IMPORT_EN_MASSE_COLUMNS.UAI]: "12345678",
-            },
-        ]);
     });
 });
