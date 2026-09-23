@@ -26,29 +26,12 @@ import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { authRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { KNOWLEDGE_BASE_PUBLIC_RESTRICTION, KNOWLEDGE_BASE_RESTRICTIONS, knowledgeBaseReadableRoles } from "../services/knowledgeBaseReader";
 import { claimAttachments, consumeUploadQuota, MAX_FILES_PER_UPLOAD, rememberAttachment, SupportAttachment } from "../services/supportAttachments";
 
-const KNOWLEDGE_BASE_PUBLIC_RESTRICTION = "public";
-
-// Doit rester aligné sur l'énumération SCHEMA_ROLE de snupport-api (src/controllers/knowledgeBase.js).
-const KNOWLEDGE_BASE_RESTRICTIONS = [
-  KNOWLEDGE_BASE_PUBLIC_RESTRICTION,
-  "young",
-  "young_cle",
-  "structure",
-  "referent",
-  "referent_sanitaire",
-  "head_center",
-  "head_center_adjoint",
-  "visitor",
-  "transporter",
-  "referent_classe",
-  "admin",
-  "administrateur_cle",
-  "administrateur_cle_coordinateur_cle",
-  "administrateur_cle_referent_etablissement",
-  "responsible",
-];
+// Feedback sur un article de la base de connaissance : route publique, chaque appel écrit en base (M83).
+const knowledgeBaseFeedbackRateLimiter = authRateLimiter({ prefix: "kb-feedback", windowMs: 10 * 60 * 1000, limit: 10 });
+const KNOWLEDGE_BASE_FEEDBACK_COMMENT_MAX_LENGTH = 2000;
 
 interface File {
   name: string;
@@ -219,8 +202,11 @@ router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { restriction, search } = value;
 
-    // Hors base publique, la restriction donne accès à la documentation interne d'un rôle : réservée aux utilisateurs connectés.
-    if (restriction !== KNOWLEDGE_BASE_PUBLIC_RESTRICTION && !req.user) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    // Hors base publique, la restriction donne accès à la documentation interne d'un rôle : réservée
+    // aux comptes de ce rôle, pas à tout utilisateur connecté (M86).
+    if (restriction !== KNOWLEDGE_BASE_PUBLIC_RESTRICTION && !knowledgeBaseReadableRoles(req.user, isYoung(req.user)).includes(restriction)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const { ok, data } = await SNUpport.api(`/knowledge-base/${encodeURIComponent(restriction)}/search?search=${encodeURIComponent(search)}&status=PUBLISHED`, {
       method: "GET",
@@ -234,14 +220,14 @@ router.get("/knowledgeBase/search", optionalAuth, async (req: UserRequest, res) 
   }
 });
 
-router.post("/knowledgeBase/feedback", optionalAuth, async (req: UserRequest, res) => {
+router.post("/knowledgeBase/feedback", knowledgeBaseFeedbackRateLimiter, optionalAuth, async (req: UserRequest, res) => {
   try {
     // Schéma fermé : seuls les champs du formulaire de la base de connaissance sont relayés (L22).
     // L'email du contact, lui, ne peut venir que de la session.
     const { error, value } = Joi.object({
       isPositive: Joi.boolean().required(),
       knowledgeBaseArticle: Joi.string().hex().length(24).required(),
-      comment: Joi.string().trim().allow("").max(5000),
+      comment: Joi.string().trim().allow("").max(KNOWLEDGE_BASE_FEEDBACK_COMMENT_MAX_LENGTH),
     }).validate(req.body);
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     const { isPositive, knowledgeBaseArticle, comment } = value;

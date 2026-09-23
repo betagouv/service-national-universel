@@ -20,6 +20,12 @@ import { ReferentModel } from "../models";
 import { config } from "../config";
 import { getToken } from "../passport";
 import { JWT_SIGNIN_VERSION, JWT_SIGNIN_MAX_AGE_SEC } from "../jwt-options";
+import SNUpport from "../SNUpport";
+
+// snupport-api n'est pas joignable en test : chaque cas pilote la délivrance du jeton de lecture.
+jest.mock("../SNUpport", () => ({ api: jest.fn().mockResolvedValue({ ok: false }), getCustomerIdByEmail: jest.fn() }));
+// Sentry n'est pas initialisé en test : sa capture bloque la réponse HTTP.
+jest.mock("../sentry", () => ({ initSentry: jest.fn(), capture: jest.fn(), captureMessage: jest.fn() }));
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -66,6 +72,34 @@ describe("GET /signin/token depuis la base de connaissance", () => {
 
     expect(res.status).toBe(200);
     expect(res.body.user).toEqual({ role: "referent_department", initials: "JM", allowedRole: "referent" });
+  });
+
+  it("remet le jeton de lecture signé par snupport-api pour les rôles du compte (M86)", async () => {
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "responsible" } as any);
+    const supportApi = jest.mocked(SNUpport.api).mockResolvedValueOnce({ ok: true, data: { token: "jeton-de-lecture" } });
+
+    const res = await request(getAppHelper())
+      .get("/signin/token")
+      .set("Origin", config.KNOWLEDGEBASE_URL)
+      .set("Cookie", `jwt_ref=${signSession(referent)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.knowledgeBaseToken).toBe("jeton-de-lecture");
+    expect(supportApi).toHaveBeenCalledWith("/v0/knowledge-base/reader-token", expect.objectContaining({ method: "POST" }));
+    expect(JSON.parse((supportApi.mock.calls.at(-1)![1] as any).body)).toEqual({ roles: ["structure"] });
+  });
+
+  it("répond sans jeton de lecture si snupport-api est injoignable", async () => {
+    const referent = await createReferentHelper({ ...getNewReferentFixture(), role: "responsible" } as any);
+    jest.mocked(SNUpport.api).mockRejectedValueOnce(new Error("ECONNREFUSED"));
+
+    const res = await request(getAppHelper())
+      .get("/signin/token")
+      .set("Origin", config.KNOWLEDGEBASE_URL)
+      .set("Cookie", `jwt_ref=${signSession(referent)}`);
+
+    expect(res.status).toBe(200);
+    expect(res.body.knowledgeBaseToken).toBeNull();
   });
 
   it("ne renvoie ni santé, ni représentants légaux, ni coordonnées d'un volontaire", async () => {

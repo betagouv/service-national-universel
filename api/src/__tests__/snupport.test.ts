@@ -8,6 +8,7 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper } from "./helpers/young";
+import { YoungModel } from "../models";
 
 // Redis en mémoire : les pièces jointes déposées et le quota de dépôt y sont conservés.
 const mockRedisStore: Record<string, string> = {};
@@ -206,6 +207,37 @@ describe("GET /SNUpport/knowledgeBase/search", () => {
     const res = await search("search=mot&restriction=referent");
     expect(res.status).toBe(200);
     expect(calledPaths()).toEqual(["/knowledge-base/referent/search?search=mot&status=PUBLISHED"]);
+  });
+
+  // M86 : être connecté ne suffit pas, la restriction doit être un rôle de lecture du compte.
+  it.each([
+    ["responsible", "admin"],
+    ["responsible", "referent"],
+    ["referent_department", "admin"],
+    ["visitor", "structure"],
+  ])("should reject a restriction outside the roles of a %s (%s)", async (role, restriction) => {
+    mockOptionalAuthUser = { ...user, role };
+    const res = await search(`search=mot&restriction=${restriction}`);
+    expect(res.status).toBe(403);
+    expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  it("should reject the admin restriction for a young", async () => {
+    mockOptionalAuthUser = new YoungModel(getNewYoungFixture());
+    const res = await search("search=mot&restriction=admin");
+    expect(res.status).toBe(403);
+    const ok = await search("search=mot&restriction=young");
+    expect(ok.status).toBe(200);
+  });
+
+  it.each([
+    ["responsible", "structure"],
+    ["referent_region", "head_center"],
+    ["administrateur_cle", "administrateur_cle_coordinateur_cle"],
+  ])("should accept a restriction within the roles of a %s (%s)", async (role, restriction) => {
+    mockOptionalAuthUser = { ...user, role, subRole: role === "administrateur_cle" ? "coordinateur_cle" : undefined };
+    const res = await search(`search=mot&restriction=${restriction}`);
+    expect(res.status).toBe(200);
   });
 
   it("should encode the search terms instead of letting them forge the query string", async () => {
@@ -425,6 +457,21 @@ describe("POST /SNUpport/knowledgeBase/feedback (L22)", () => {
     const res = await feedback({ isPositive: true });
     expect(res.status).toBe(400);
     expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  it("should reject a comment over 2000 characters", async () => {
+    const res = await feedback({ isPositive: false, knowledgeBaseArticle: ARTICLE_ID, comment: "x".repeat(2001) });
+    expect(res.status).toBe(400);
+    expect(SNUpport.api).not.toHaveBeenCalled();
+  });
+
+  // M83 : la route est publique et chaque appel écrit un feedback.
+  it("should rate limit feedbacks by IP", async () => {
+    const statuses: number[] = [];
+    for (let i = 0; i < 20; i++) statuses.push((await feedback({ isPositive: true, knowledgeBaseArticle: ARTICLE_ID })).status);
+    expect(statuses.slice(0, 10).every((status) => status === 200)).toBe(true);
+    expect(statuses.slice(10).every((status) => status === 429)).toBe(true);
+    expect(SNUpport.api).toHaveBeenCalledTimes(10);
   });
 
   it("should take the contact email from the session only", async () => {
