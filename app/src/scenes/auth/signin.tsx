@@ -5,13 +5,14 @@ import React, { useState, useEffect } from "react";
 import useAuth from "@/services/useAuth";
 import { toastr } from "react-redux-toastr";
 import { useHistory } from "react-router-dom";
-import { formatToActualTime, isValidRedirectUrl } from "snu-lib";
+import { formatToActualTime } from "snu-lib";
 import RightArrow from "../../assets/icons/RightArrow";
 import Error from "../../components/error";
-import { capture, captureMessage } from "../../sentry";
+import { capture } from "../../sentry";
 import api from "../../services/api";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import UnavailabilityNotice from "./components/UnavailabilityNotice";
+import { redirectAfterSignin } from "./utils/redirectAfterSignin";
 import { Input, InputPassword, Button } from "@snu/ds/dsfr";
 
 interface ErrorState {
@@ -49,20 +50,7 @@ const Signin: React.FC = () => {
       plausibleEvent("Connexion réussie");
       await login(young);
 
-      if (!redirect) {
-        history.push("/");
-        return;
-      }
-
-      const redirectionApproved = isValidRedirectUrl(redirect);
-
-      if (!redirectionApproved) {
-        captureMessage("Invalid redirect url", { extra: { redirect } });
-        toastr.error("Erreur", "Url de redirection invalide : " + redirect);
-        return history.push("/");
-      }
-
-      history.push(redirect);
+      redirectAfterSignin(history, redirect);
     } catch (e) {
       setPassword("");
       if (e.code === "TOO_MANY_REQUESTS") {
