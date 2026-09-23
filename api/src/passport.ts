@@ -24,14 +24,13 @@ function getToken(req: Request): string | null {
   let token = ExtractJwt.fromAuthHeaderWithScheme("JWT")(req);
 
   // * On first call after refresh, the token is only in the cookie
+  // La base de connaissance publique n'a pas accès à la session : une XSS sur support.snu.gouv.fr
+  // agirait sinon avec le compte de chaque lecteur connecté (FH16). Seules /signin/token et
+  // /signin/logout lisent le cookie pour elle (controllers/signin.js).
   if (!token) {
     const origin = req.get("Origin");
     if (origin === config.APP_URL) token = req.cookies.jwt_young;
     else if (origin === config.ADMIN_URL) token = req.cookies.jwt_ref;
-    else if (origin === config.KNOWLEDGEBASE_URL) {
-      token = req.cookies.jwt_ref;
-      if (!token) token = req.cookies.jwt_young;
-    }
   }
   return token;
 }

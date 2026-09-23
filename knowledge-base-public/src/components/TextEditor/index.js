@@ -2,6 +2,7 @@ import React, { useCallback, useRef } from "react";
 import { Editable, withReact, Slate, useSlateStatic, useSelected, ReactEditor, useFocused } from "slate-react";
 import { Transforms, createEditor } from "slate";
 import { withHistory } from "slate-history";
+import { sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../../utils/safeUrl";
 
 const TextEditor = ({ content, readOnly, _id }) => {
   const renderElement = useCallback((props) => <Element {...props} readOnly={readOnly} />, []);
@@ -35,7 +36,7 @@ const InlineChromiumBugfix = () => (
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
   return (
-    <a {...attributes} href={element.url} className={`${selected ? "border-2" : ""} text-blue-600 underline`}>
+    <a {...attributes} href={sanitizeLinkUrl(element.url) ?? undefined} className={`${selected ? "border-2" : ""} text-blue-600 underline`}>
       <InlineChromiumBugfix />
       {children}
       <InlineChromiumBugfix />
@@ -97,7 +98,7 @@ const Image = ({ attributes, children, element }) => {
   return (
     <div {...attributes}>
       <div contentEditable={false} className="relative" style={{ userSelect: "none" }}>
-        <img src={element.url} alt={element.alt} className={`block max-h-80 max-w-full ${selected && focused ? "shadow-lg" : ""}`} />
+        <img src={sanitizeImageUrl(element.url) ?? undefined} alt={element.alt} className={`block max-h-80 max-w-full ${selected && focused ? "shadow-lg" : ""}`} />
       </div>
       {children}
     </div>
@@ -107,12 +108,16 @@ const Image = ({ attributes, children, element }) => {
 const VideoElement = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
   const { url } = element;
+  // Une iframe s'exécute sans clic : seul le lecteur Vimeo est rendu (FH17).
+  const videoUrl = sanitizeVideoUrl(url);
   return (
     <div {...attributes}>
       <div contentEditable={false}>
-        <div className="relative h-0 pb-[56.25%]">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
-        </div>
+        {videoUrl && (
+          <div className="relative h-0 pb-[56.25%]">
+            <iframe src={`${videoUrl}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          </div>
+        )}
         {!readOnly && (
           <MetaDataInput
             initValue={url}

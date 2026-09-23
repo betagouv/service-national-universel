@@ -11,9 +11,15 @@ const { config } = require("./config");
 const { checkJwtVersion } = require("./jwt-options");
 const { capture } = require("./sentry");
 
+// Origines de la base de connaissance publique : elles restent autorisées par le CORS (lecture
+// des articles) mais n'ont jamais besoin de la session agent. Sans ce refus, une XSS sur
+// support.snu.gouv.fr agirait avec le cookie `jwtzamoud` de tout agent qui la consulte (FH16).
+// Une origine partagée avec l'interface agent n'est jamais exclue, sous peine de couper la connexion.
+const KNOWLEDGE_BASE_ORIGINS = [config.SNUPPORT_URL_KB, config.KNOWLEDGE_BASE_PUBLIC_URL].filter((origin) => origin && origin !== config.SNUPPORT_URL_ADMIN);
+
 function getToken(req) {
   let token = ExtractJwt.fromAuthHeaderWithScheme("jwtzamoud")(req);
-  if (!token) token = req.cookies.jwtzamoud;
+  if (!token && !KNOWLEDGE_BASE_ORIGINS.includes(req.get("Origin"))) token = req.cookies.jwtzamoud;
   return token;
 }
 

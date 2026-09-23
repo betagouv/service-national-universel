@@ -1,5 +1,10 @@
 import URI from "urijs";
-import { supportApiUrl } from "../config";
+import { snuApiUrl, supportApiUrl } from "../config";
+
+// Les cookies ne partent que vers l'API v1, pour /signin/token et /signin/logout. La KB ne lit que
+// des contenus publics sur l'API du support : y joindre la session d'un agent qui la consulte ne
+// servirait qu'à une XSS (FH16).
+const credentialsFor = (url) => (new URI(url).origin() === new URI(snuApiUrl).origin() ? "include" : "omit");
 
 /**
  * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe
@@ -34,7 +39,7 @@ class ApiService {
 
   async swrFetcher(url) {
     const response = await fetch(url, {
-      credentials: "include",
+      credentials: credentialsFor(url),
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -45,9 +50,10 @@ class ApiService {
 
   async execute({ origin = supportApiUrl, method, path = "", body = null, query = {}, headers = {}, credentials = null } = {}) {
     try {
+      const url = this.getUrl({ origin, path, query });
       const options = {
         method,
-        credentials: "include",
+        credentials: credentialsFor(url),
         headers: {
           ...headers,
           "Content-Type": "application/json",
@@ -58,7 +64,6 @@ class ApiService {
       if (body) options.body = JSON.stringify(body);
       if (credentials) options.credentials = credentials;
 
-      const url = this.getUrl({ origin, path, query });
       const response = await fetch(url, options);
 
       if (!response.ok && response.status === 401) {
@@ -104,7 +109,7 @@ class ApiService {
           retryOn: [502, 503, 504],
           mode: "cors",
           method: "POST",
-          credentials: "include",
+          credentials: credentialsFor(this.getUrl({ path })),
           body: formData,
         })
           .then((res) => res.json())
