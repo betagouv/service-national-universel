@@ -346,3 +346,6 @@ function redactInfo<T extends object>(info: T): T {
   }
   return out as T;
 }
+
+// Hooks Sentry des fronts (admin, app, snupport-app)
+export * from "./sentryFront";

@@ -2,7 +2,7 @@ import passport from "passport";
 import express, { Response } from "express";
 import Joi from "joi";
 
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, UserDto } from "snu-lib";
 
 import { capture } from "../../sentry";
 import esClient from "../../es";
@@ -17,13 +17,13 @@ import { UserRequest } from "../request";
 
 const router = express.Router();
 
-async function populateApplications(applications: any[], exportFields: string[]): Promise<any[]> {
+async function populateApplications(applications: any[], exportFields: string[], user: UserDto): Promise<any[]> {
   if (!applications || !applications.length) return applications;
 
   if (exportFields.includes("youngId")) {
     const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
     const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
-    const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
+    const serializedYoungs = youngs.length ? serializeYoungs(youngs, user) : [];
     applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
   }
 
@@ -50,7 +50,7 @@ async function populateApplications(applications: any[], exportFields: string[])
   if (exportFields.includes("youngId")) {
     const youngIds = [...new Set(applications.map((item) => item.youngId))].filter(Boolean);
     const youngs = await allRecords("young", { bool: { must: { ids: { values: youngIds } } } });
-    const serializedYoungs = youngs.length ? serializeYoungs(youngs) : [];
+    const serializedYoungs = youngs.length ? serializeYoungs(youngs, user) : [];
     applications = applications.map((item) => ({ ...item, young: serializedYoungs.find((e) => e._id === item.youngId) || {} }));
   }
 
@@ -103,7 +103,7 @@ router.post("/by-mission/:id/:action(search|export)", passport.authenticate(["re
       const fieldsToExport = exportFields === null || Array.isArray(exportFields) ? undefined : exportFields;
       const response = await allRecords("application", hitsRequestBody.query, esClient, fieldsToExport);
       let data = serializeApplications(response);
-      data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : []);
+      data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : [], user);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
@@ -174,7 +174,7 @@ router.post(
         const fieldsToExport = exportFields === null || Array.isArray(exportFields) ? undefined : exportFields;
         const response = await allRecords("application", hitsRequestBody.query, esClient, fieldsToExport);
         let data = serializeApplications(response);
-        data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : []);
+        data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : [], user);
         return res.status(200).send({ ok: true, data });
       } else {
         const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
@@ -227,7 +227,7 @@ router.post("/by-young/:id/:action(search|export)", passport.authenticate(["refe
         exportFields === null ? undefined : exportFields === "*" ? "*" : (exportFields as string[]),
       );
       let data = serializeApplications(response);
-      data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : []);
+      data = await populateApplications(data, Array.isArray(exportFields) ? exportFields : [], user);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "application", body: buildNdJson({ index: "application", type: "_doc" }, hitsRequestBody, aggsRequestBody) });

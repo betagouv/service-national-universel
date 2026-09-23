@@ -1,6 +1,7 @@
 import { ExtraErrorData, Offline, ReportingObserver } from "@sentry/integrations";
 import { init, reactRouterV5Instrumentation, withSentryRouting, captureException as sentryCaptureException, captureMessage as sentryCaptureMessage } from "@sentry/react";
 import { BrowserTracing } from "@sentry/tracing";
+import { redactFrontBreadcrumb, redactFrontSentryEvent } from "@snu/log-redaction";
 import { RELEASE, ENVIRONMENT, SNUPPORT_URL_API, SENTRY_DEBUG_MODE } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
@@ -19,6 +20,10 @@ function initSentry() {
       environment: ENVIRONMENT,
       release: RELEASE,
       normalizeDepth: 16,
+      // Corps de requête/réponse, query strings, state Redux et console retirés (FH7, FM4).
+      beforeSend: redactFrontSentryEvent,
+      beforeSendTransaction: redactFrontSentryEvent,
+      beforeBreadcrumb: redactFrontBreadcrumb,
       integrations: [
         new ExtraErrorData({ depth: 16 }),
         new BrowserTracing({
@@ -31,8 +36,6 @@ function initSentry() {
           types: ["crash", "deprecation", "intervention"],
         }),
       ],
-      replaysSessionSampleRate: 0.005,
-      replaysOnErrorSampleRate: 1,
       tracesSampleRate: 0.01,
       ignoreErrors: [
         /^No error$/,

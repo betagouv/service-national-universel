@@ -57,19 +57,18 @@ class ApiService {
           window.location.href = "/auth";
         }
       }
-      const clonedResponse = response.clone();
       try {
         const res = await response.json();
         return res;
       } catch (e) {
-        capture(e, { extra: { path: path, responseText: await clonedResponse.text() } });
+        capture(e, { extra: { path: path, status: response.status } });
         return { ok: false, code: "SERVER_ERROR" };
       }
     } catch (errorExecuteApi) {
       if (errorExecuteApi.name === "AbortError") {
         console.log("Fetch request was manually reloaded, ignoring error.");
       } else {
-        capture(errorExecuteApi, { extra: { response, headers, query, method, path, body } });
+        capture(errorExecuteApi, { extra: { method, path, status: response?.status } });
         console.log({ errorExecuteApi });
       }
     } finally {
@@ -119,7 +118,7 @@ class ApiService {
       if (e.name === "AbortError") {
         console.log("Fetch request was manually reloaded, ignoring error.");
       } else {
-        capture(e, { extra: { path, files, properties } });
+        capture(e, { extra: { path } });
       }
     } finally {
       window.removeEventListener("beforeunload", handleBeforeUnload);

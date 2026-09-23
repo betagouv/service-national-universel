@@ -5,14 +5,13 @@ import {
   reactRouterV5BrowserTracingIntegration,
   withSentryRouting,
   moduleMetadataIntegration,
-  httpClientIntegration,
   captureException as sentryCaptureException,
   captureMessage as sentryCaptureMessage,
   makeBrowserOfflineTransport,
   makeFetchTransport,
-  replayIntegration,
 } from "@sentry/react";
-import { RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_ON_ERROR_SAMPLE_RATE, SENTRY_SESSION_SAMPLE_RATE, SENTRY_DEBUG_MODE, environment } from "./config";
+import { redactFrontBreadcrumb, redactFrontSentryEvent } from "@snu/log-redaction";
+import { RELEASE, SENTRY_TRACING_SAMPLE_RATE, apiURL, SENTRY_DEBUG_MODE, environment } from "./config";
 import { Route } from "react-router-dom";
 import { createBrowserHistory } from "history";
 
@@ -34,20 +33,21 @@ function initSentry() {
       transportOptions: {
         maxQueueSize: 50,
       },
-      sendDefaultPii: true,
+      // Pas d'en-têtes, de cookies ni d'IP : le JWT de session voyage dans l'en-tête Authorization.
+      sendDefaultPii: false,
+      // Corps de requête/réponse, query strings, state Redux et console retirés (FH7, FM4, FM5, FM6).
+      beforeSend: redactFrontSentryEvent,
+      beforeSendTransaction: redactFrontSentryEvent,
+      beforeBreadcrumb: redactFrontBreadcrumb,
       tracePropagationTargets: ["localhost", apiURL],
       integrations: [
         extraErrorDataIntegration({ depth: 16 }),
         reactRouterV5BrowserTracingIntegration({ history }),
-        httpClientIntegration(),
         moduleMetadataIntegration(),
         reportingObserverIntegration({
           types: ["crash", "deprecation", "intervention"],
         }),
-        replayIntegration(),
       ],
-      replaysSessionSampleRate: SENTRY_SESSION_SAMPLE_RATE,
-      replaysOnErrorSampleRate: SENTRY_ON_ERROR_SAMPLE_RATE,
       tracesSampleRate: Number(SENTRY_TRACING_SAMPLE_RATE),
       ignoreErrors: [
         /^No error$/,

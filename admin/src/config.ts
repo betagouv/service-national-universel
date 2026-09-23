@@ -20,8 +20,6 @@ const supportURL = _env(envStr, "VITE_SUPPORT_URL", "http://localhost:8083");
 const knowledgebaseURL = _env(envStr, "VITE_KNOWLEDGEBASE_URL", "http://localhost:8084");
 const maintenance = _env(envBool, "VITE_MAINTENANCE", false);
 const SENTRY_TRACING_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_TRACING_SAMPLE_RATE", 0.1);
-const SENTRY_SESSION_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_SESSION_SAMPLE_RATE", 0.1);
-const SENTRY_ON_ERROR_SAMPLE_RATE = _env(envFloat, "VITE_SENTRY_ON_ERROR_SAMPLE_RATE", 1.0);
 const SENTRY_DEBUG_MODE = _env(envBool, "SENTRY_DEBUG_MODE", false);
 
 export {
@@ -30,8 +28,6 @@ export {
   appURL,
   RELEASE,
   SENTRY_TRACING_SAMPLE_RATE,
-  SENTRY_SESSION_SAMPLE_RATE,
-  SENTRY_ON_ERROR_SAMPLE_RATE,
   SENTRY_DEBUG_MODE,
   environment,
   adminURL,

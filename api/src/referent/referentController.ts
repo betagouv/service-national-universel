@@ -119,6 +119,7 @@ import {
   SUB_ROLE_GOD,
   SUB_ROLES_LIST,
   VISITOR_SUB_ROLES_LIST,
+  WITHRAWN_REASONS,
 } from "snu-lib";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
 import { scanFile } from "../utils/virusScanner";
@@ -782,7 +783,23 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
       newYoung.roadCodeRefundDate = undefined;
     }
 
+    // L'historique des statuts est reconstruit ici, à partir de l'utilisateur authentifié. Il était
+    // auparavant accepté tel quel depuis le client, qui pouvait donc réécrire ou effacer tout le
+    // parcours du volontaire et s'attribuer une décision sous le nom d'un autre (cf. FM13).
+    const statusChanged = !!newYoung.status && newYoung.status !== young.status;
+
     young.set(newYoung);
+    if (statusChanged) {
+      const withdrawnLabel = WITHRAWN_REASONS.find((reason) => reason.value === newYoung.withdrawnReason)?.label;
+      young.historic.push({
+        phase: young.phase,
+        userName: `${req.user.firstName} ${req.user.lastName}`,
+        userId: req.user._id.toString(),
+        status: newYoung.status,
+        createdAt: new Date(),
+        note: newYoung.status === YOUNG_STATUS.WITHDRAWN ? [withdrawnLabel, newYoung.withdrawnMessage].filter(Boolean).join(" ") : "",
+      });
+    }
     await young.save({ fromUser: req.user });
 
     // if they had a cohesion center, we check if we need to update the places taken / left
@@ -1996,7 +2013,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
         });
       }
     }
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -2026,7 +2043,7 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
 
     young.set({ [value.key]: value.filesList });
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

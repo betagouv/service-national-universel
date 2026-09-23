@@ -37,6 +37,7 @@
     "@sentry/react": "^8.25.0",
     "@sentry/vite-plugin": "^2.22.1",
     "@snu/ds": "*",
+    "@snu/log-redaction": "*",
     "@tanstack/react-query": "^5.29.2",
     "@uidotdev/usehooks": "^2.4.1",
     "autoprefixer": "^10.4.13",

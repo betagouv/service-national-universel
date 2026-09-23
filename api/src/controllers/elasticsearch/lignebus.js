@@ -268,7 +268,7 @@ const populateWithYoungInfo = async (ligneBus, user, sharedData) => {
       },
     });
 
-    const youngData = serializeYoungs(youngs);
+    const youngData = serializeYoungs(youngs, user);
 
     return ligneBus.map((item) => ({
       ...item,
