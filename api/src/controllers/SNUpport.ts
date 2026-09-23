@@ -23,6 +23,7 @@ import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
 import { UserRequest } from "./request";
 import { authMiddleware } from "../middlewares/authMiddleware";
+import { authRateLimiter } from "../middlewares/rateLimit";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { claimAttachments, consumeUploadQuota, MAX_FILES_PER_UPLOAD, rememberAttachment, SupportAttachment } from "../services/supportAttachments";
 
@@ -388,7 +389,12 @@ router.post(
   },
 );
 
-router.post("/ticket/form", async (req: UserRequest, res) => {
+// Formulaire de contact public, sans authentification : chaque envoi crée un ticket et déclenche un
+// email officiel du support vers l'adresse saisie. Plafonné par IP (M91) ; le quota reste large pour
+// les établissements dont les élèves partagent une même IP de sortie.
+const publicTicketFormLimiter = authRateLimiter({ prefix: "support-ticket-form", windowMs: 60 * 60 * 1000, limit: 20 });
+
+router.post("/ticket/form", publicTicketFormLimiter, async (req: UserRequest, res) => {
   try {
     let author: string | undefined;
 

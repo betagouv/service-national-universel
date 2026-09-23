@@ -18,6 +18,7 @@ const { encrypt } = require("./utils/crypto");
 const { getS3Path } = require("./utils/file");
 const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
+const { sanitizeMessageHtml } = require("./utils/messageHtml");
 
 const regex = /\[#(\w+)\]/i;
 
@@ -100,13 +101,14 @@ async function addMessage(mail) {
     // create message
     const message = {};
     message.messageId = mail.messageId;
-    message.text = mail.html ?? "";
+    // Le HTML d'un mail entrant est choisi par l'expéditeur : il est assaini avant d'être stocké, rendu
+    // aux agents et renvoyé dans l'historique des réponses (M97).
+    message.text = sanitizeMessageHtml(mail.html ?? "");
     message.ticketId = ticket._id;
     message.authorFirstName = contact.firstName;
     message.authorLastName = contact.lastName;
     message.authorId = contact._id;
     message.rawText = mail.text;
-    message.rawHtml = mail.textHtml;
     message.fromEmail = contact.email;
     message.toEmail = mail.toAdress;
     message.subject = mail.subject;
@@ -124,7 +126,7 @@ async function addMessage(mail) {
           continue;
         }
         const encryptedBuffer = encrypt(attachment.content);
-        const path = getS3Path(attachment.filename);
+        const path = getS3Path(attachment.filename, mime);
         const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: mime, encoding: "7bit" });
         if (url) {
           createdMessage.files.push({ name: attachment.filename, path, url });

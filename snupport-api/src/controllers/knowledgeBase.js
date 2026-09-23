@@ -15,6 +15,7 @@ const { canEditKnowledgeBase } = require("../utils/knowledgeBaseScope");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
+const { pictureUpload } = require("../middlewares/attachmentUpload");
 
 // Écriture de la base de connaissance publique : réservée au support central (voir
 // utils/knowledgeBaseScope). `agentGuard` seul laissait tout agent authentifié, y compris
@@ -207,7 +208,7 @@ router.post(
   }
 );
 
-router.post("/picture", agentGuard, knowledgeBaseEditorGuard, async (req, res) => {
+router.post("/picture", agentGuard, knowledgeBaseEditorGuard, pictureUpload, async (req, res) => {
   const files = Object.keys(req.files || {}).map((e) => req.files[e]);
   let file = files[0];
   // If multiple file with same names are provided, file is an array. We just take the latest.

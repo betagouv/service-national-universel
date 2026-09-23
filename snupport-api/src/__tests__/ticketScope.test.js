@@ -12,13 +12,19 @@ describe("canAccessTicket", () => {
   describe("REFERENT_DEPARTMENT role", () => {
     it("allows access when the ticket's contact department is in the referent's departments", () => {
       const user = { role: "REFERENT_DEPARTMENT", departments: ["Paris", "Essonne"] };
-      const ticket = { contactDepartment: "Paris" };
+      const ticket = { contactDepartment: "Paris", formSubjectStep1: "QUESTION" };
       expect(canAccessTicket(user, ticket)).toBe(true);
+    });
+
+    it("denies access to a ticket of its department that is not a QUESTION, as the list filter does (M99)", () => {
+      const user = { role: "REFERENT_DEPARTMENT", departments: ["Paris"] };
+      expect(canAccessTicket(user, { contactDepartment: "Paris", formSubjectStep1: "TECHNICAL" })).toBe(false);
+      expect(canAccessTicket(user, { contactDepartment: "Paris" })).toBe(false);
     });
 
     it("denies access when the ticket's contact department is outside the referent's departments", () => {
       const user = { role: "REFERENT_DEPARTMENT", departments: ["Paris", "Essonne"] };
-      const ticket = { contactDepartment: "Rhône" };
+      const ticket = { contactDepartment: "Rhône", formSubjectStep1: "QUESTION" };
       expect(canAccessTicket(user, ticket)).toBe(false);
     });
 
@@ -32,13 +38,18 @@ describe("canAccessTicket", () => {
   describe("REFERENT_REGION role", () => {
     it("allows access when the ticket's contact region matches the referent's region", () => {
       const user = { role: "REFERENT_REGION", region: "Ile-de-France" };
-      const ticket = { contactRegion: "Ile-de-France" };
+      const ticket = { contactRegion: "Ile-de-France", formSubjectStep1: "QUESTION" };
       expect(canAccessTicket(user, ticket)).toBe(true);
+    });
+
+    it("denies access to a ticket of its region that is not a QUESTION (M99)", () => {
+      const user = { role: "REFERENT_REGION", region: "Ile-de-France" };
+      expect(canAccessTicket(user, { contactRegion: "Ile-de-France", formSubjectStep1: "TECHNICAL" })).toBe(false);
     });
 
     it("denies access when the ticket's contact region differs from the referent's region", () => {
       const user = { role: "REFERENT_REGION", region: "Ile-de-France" };
-      const ticket = { contactRegion: "Bretagne" };
+      const ticket = { contactRegion: "Bretagne", formSubjectStep1: "QUESTION" };
       expect(canAccessTicket(user, ticket)).toBe(false);
     });
 
