@@ -17,6 +17,8 @@ const { validateParams, validateBody, validateQuery, idSchema } = require("../mi
 const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
 const { pictureUpload } = require("../middlewares/attachmentUpload");
+const { resolveKnowledgeBaseReader, requireReadableRole } = require("../middlewares/knowledgeBaseReader");
+const { KNOWLEDGE_BASE_ROLES } = require("../utils/knowledgeBaseReader");
 
 // Écriture de la base de connaissance publique : réservée au support central (voir
 // utils/knowledgeBaseScope). `agentGuard` seul laissait tout agent authentifié, y compris
@@ -30,24 +32,7 @@ function search_regex(query) {
   return diacriticSensitiveRegex(escapeStringRegexp(query));
 }
 
-const SCHEMA_ROLE = Joi.string().valid(
-  "public",
-  "young",
-  "young_cle",
-  "structure",
-  "referent",
-  "referent_sanitaire",
-  "head_center",
-  "head_center_adjoint",
-  "visitor",
-  "transporter",
-  "referent_classe",
-  "admin",
-  "administrateur_cle",
-  "administrateur_cle_coordinateur_cle",
-  "administrateur_cle_referent_etablissement",
-  "responsible"
-);
+const SCHEMA_ROLE = Joi.string().valid(...KNOWLEDGE_BASE_ROLES);
 
 const findChildrenRecursive = async (section, allChildren, { findAll = false }) => {
   if (section.type !== "section") return;
@@ -197,13 +182,17 @@ router.post(
       allowedRole: SCHEMA_ROLE,
     }).prefs({ presence: "required" })
   ),
+  resolveKnowledgeBaseReader,
+  requireReadableRole,
   validateBody(
     Joi.object({
       parentId: SCHEMA_ID,
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
-    const siblings = await KnowledgeBaseModel.find({ ...req.cleanParams, ...req.cleanBody }).lean();
+    // Le filtre portait sur `allowedRole`, champ absent du modèle, et ignorait le statut : seuls les
+    // éléments publiés du rôle demandé sont renvoyés (M86).
+    const siblings = await KnowledgeBaseModel.find({ parentId: req.cleanBody.parentId, allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" }).lean();
 
     return res.status(200).send({ siblings: siblings, ok: true });
   }
@@ -491,6 +480,8 @@ router.get(
       status: Joi.string().valid("PUBLISHED", "DRAFT", "ARCHIVED").optional(),
     }).prefs({ presence: "required", stripUnknown: true })
   ),
+  resolveKnowledgeBaseReader,
+  requireReadableRole,
   async (req, res) => {
     if (req.cleanQuery.search.length < 3) {
       res.status(200).send({
@@ -509,7 +500,11 @@ router.get(
     if (req.cleanParams.allowedRole !== "admin") {
       query.allowedRoles = req.cleanParams.allowedRole;
     }
-    if (req.cleanQuery.status) {
+    // Brouillons et archives : réservés aux éditeurs de la base (liens entre articles dans
+    // l'éditeur du support) et à l'API v1. Pour tout autre lecteur, seul le publié (M86).
+    if (!req.knowledgeBaseReader.isTrusted) {
+      query.status = "PUBLISHED";
+    } else if (req.cleanQuery.status) {
       query.status = req.cleanQuery.status;
     }
     const results = await KnowledgeBaseModel.find(query).limit(20);
@@ -536,6 +531,8 @@ router.get(
       slug: Joi.string(),
     }).prefs({ presence: "required" })
   ),
+  resolveKnowledgeBaseReader,
+  requireReadableRole,
   async (req, res) => {
     const existingKb = await KnowledgeBaseModel.findOne({ slug: req.cleanParams.slug, allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" })
       .populate({
@@ -595,6 +592,8 @@ router.get(
       allowedRole: SCHEMA_ROLE,
     }).prefs({ presence: "required" })
   ),
+  resolveKnowledgeBaseReader,
+  requireReadableRole,
   async (req, res) => {
     const children = await KnowledgeBaseModel.find({ allowedRoles: req.cleanParams.allowedRole, status: "PUBLISHED" })
       .sort({ parentId: 1, type: -1, position: 1 })

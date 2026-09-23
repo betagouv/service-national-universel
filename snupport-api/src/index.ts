@@ -66,6 +66,7 @@ app.use("/v0/contact", require("./controllers/v0/contact"));
 app.use("/v0/ticket", require("./controllers/v0/ticket"));
 app.use("/v0/sso", require("./controllers/v0/sso"));
 app.use("/v0/referent", require("./controllers/v0/referent"));
+app.use("/v0/knowledge-base", require("./controllers/v0/knowledgeBase"));
 
 app.use(validationErrorHandler);
 registerSentryErrorHandler();

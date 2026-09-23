@@ -6,6 +6,12 @@ import { snuApiUrl, supportApiUrl } from "../config";
 // servirait qu'à une XSS (FH16).
 const credentialsFor = (url) => (new URI(url).origin() === new URI(snuApiUrl).origin() ? "include" : "omit");
 
+// Jeton de lecture remis par /signin/token : seule preuve, pour l'API du support, des rôles du
+// lecteur connecté. Sans lui, elle ne sert que les articles publics (M86).
+let knowledgeBaseToken = null;
+const readerHeadersFor = (url) =>
+  knowledgeBaseToken && new URI(url).origin() === new URI(supportApiUrl).origin() ? { Authorization: `KnowledgeBaseReader ${knowledgeBaseToken}` } : {};
+
 /**
  * Creates Formdata for file upload and sanitize file names to get past firewall strict validation rules e.g apostrophe
  * @param [File]
@@ -33,6 +39,10 @@ function createFormDataForFileUpload(arr, properties) {
 }
 
 class ApiService {
+  setKnowledgeBaseToken(token) {
+    knowledgeBaseToken = token || null;
+  }
+
   getUrl({ origin = supportApiUrl, path, query = {} }) {
     return new URI().origin(origin).path(path).setSearch(query).toString();
   }
@@ -41,6 +51,7 @@ class ApiService {
     const response = await fetch(url, {
       credentials: credentialsFor(url),
       headers: {
+        ...readerHeadersFor(url),
         "Content-Type": "application/json",
         Accept: "application/json",
       },
@@ -55,6 +66,7 @@ class ApiService {
         method,
         credentials: credentialsFor(url),
         headers: {
+          ...readerHeadersFor(url),
           ...headers,
           "Content-Type": "application/json",
           Accept: "application/json",

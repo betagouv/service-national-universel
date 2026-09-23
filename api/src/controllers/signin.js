@@ -11,6 +11,7 @@ const { ERRORS } = require("../utils");
 const { YoungModel, ReferentModel } = require("../models");
 const { capture } = require("../sentry");
 const { checkJwtSigninVersion } = require("../jwt-options");
+const { knowledgeBaseReadableRoles, requestKnowledgeBaseReaderToken } = require("../services/knowledgeBaseReader");
 
 const allowedRole = (user) => {
   switch (user?.role) {
@@ -103,7 +104,9 @@ router.get("/token", async (req, res) => {
     const { user, isYoung } = session;
     user.set({ lastActivityAt: Date.now() });
     await user.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, user: serializeKnowledgeBaseSession(user, isYoung) });
+    // Preuve des rôles lisibles, à présenter à snupport-api pour les articles non publics (M86).
+    const knowledgeBaseToken = await requestKnowledgeBaseReaderToken(knowledgeBaseReadableRoles(user, isYoung));
+    return res.status(200).send({ ok: true, user: serializeKnowledgeBaseSession(user, isYoung), knowledgeBaseToken });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, user: null });
