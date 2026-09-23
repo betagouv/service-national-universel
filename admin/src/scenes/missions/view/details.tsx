@@ -693,6 +693,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                   <Field
                     readOnly={!editing}
                     type="textarea"
+                    plainText
                     row={4}
                     onChange={(contraintes) => setValues({ ...values, contraintes })}
                     label="Précisez les informations complémentaires à préciser au volontaire."
@@ -845,6 +846,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                     bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
+                    plainText
                     row={4}
                     onChange={(frequence) => setValues({ ...values, frequence })}
                     label="Fréquence estimée de la mission"

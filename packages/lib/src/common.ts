@@ -196,13 +196,33 @@ const validateEmailAcademique = (email) => {
   return ACADEMIQUE_DOMAINS.includes(domain);
 };
 
+/**
+ * Liens : schémas web uniquement, jamais relatifs au protocole, et `rel` imposé pour qu'une page
+ * ouverte dans un nouvel onglet ne puisse pas rediriger l'onglet d'origine (reverse tabnabbing,
+ * audit fronts 2026-09-23 : FM12, FL7).
+ */
 const htmlCleaner = (text) => {
   return sanitizeHtml(text, {
     allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul"],
     allowedAttributes: {
       a: ["href", "target", "rel"],
     },
+    allowedSchemes: ["http", "https", "mailto", "tel"],
+    allowProtocolRelative: false,
+    transformTags: {
+      a: (tagName, attribs) => ({ tagName, attribs: { ...attribs, rel: "noopener noreferrer" } }),
+    },
   });
+};
+
+/**
+ * Assainit un texte stocké qui peut contenir du balisage (description de structure saisie dans
+ * l'admin ou reprise de JeVeuxAider). Un texte sans balise est rendu tel quel, pour ne pas
+ * transformer ses « & » en entités dans les champs de saisie.
+ */
+const sanitizeStoredHtml = <T extends string | null | undefined>(text: T): T => {
+  if (!text || !text.includes("<")) return text;
+  return htmlCleaner(text) as T;
 };
 
 const formatMessageForReadingInnerHTML = (content) => {
@@ -226,5 +246,6 @@ export {
   formatMessageForReadingInnerHTML,
   patternEmailAcademy,
   htmlCleaner,
+  sanitizeStoredHtml,
   validateEmailAcademique,
 };

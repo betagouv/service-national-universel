@@ -52,7 +52,7 @@ export default function Select({ options, value, renderOption, onChange, disable
                 renderOption(option)
               ) : (
                 <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                  <div dangerouslySetInnerHTML={{ __html: option.label }} />
+                  <div>{option.label}</div>
                   {option.value === value ? <BsCheck2 /> : null}
                 </div>
               )}

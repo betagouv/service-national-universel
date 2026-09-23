@@ -42,6 +42,7 @@ import { isLocalTransport } from "./youngCertificateService";
 import { logger } from "../logger";
 import { config } from "../config";
 import { capture } from "../sentry";
+import { sanitizeEmailText } from "../email/emailInput";
 
 export const generateConvocationsForMultipleYoungs = async (youngs: YoungDto[]): Promise<Buffer> => {
   const validatedYoungsWithSession = getValidatedYoungsWithSession(youngs);
@@ -355,7 +356,7 @@ export async function handleNotifForYoungWithdrawn(young: YoungType, cohort: Coh
       emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
       params: {
         message: WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label || "",
-        motifPersonnalise: withdrawnMessage || "",
+        motifPersonnalise: sanitizeEmailText(withdrawnMessage || ""),
       },
       cc: getCcOfYoung({ template, young }),
     });

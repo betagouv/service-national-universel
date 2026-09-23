@@ -20,14 +20,15 @@ export default function Index() {
   const params = queryString.parse(location.search);
   const { token, young_id } = params;
 
-  if (!token || !young_id) {
+  // Paramètres insérés dans des chemins d'API : format vérifié avant tout appel (FL5).
+  if (typeof young_id !== "string" || !/^[0-9a-fA-F]{24}$/.test(young_id) || typeof token !== "string" || !/^[A-Za-z0-9_-]+$/.test(token)) {
     return <Redirect to="/" />;
   }
 
   useEffect(() => {
     (async () => {
       try {
-        const { ok, data } = await api.get(`/young/validate_phase3/${young_id}/${token}`);
+        const { ok, data } = await api.get(`/young/validate_phase3/${encodeURIComponent(young_id)}/${encodeURIComponent(token)}`);
         if (!ok) return setInvalidLink(true);
         setYoung(data);
       } catch (e) {
@@ -46,7 +47,7 @@ export default function Index() {
           initialValues={young}
           onSubmit={async (values) => {
             try {
-              const { ok } = await api.put(`/young/validate_phase3/${young_id}/${token}`, values);
+              const { ok } = await api.put(`/young/validate_phase3/${encodeURIComponent(young_id)}/${encodeURIComponent(token)}`, values);
               if (!ok) return;
               setDone(true);
             } catch (e) {
