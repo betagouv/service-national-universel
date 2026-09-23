@@ -630,16 +630,6 @@ export function validateDepartmentService(departmentService) {
     })
     .validate(departmentService, { stripUnknown: true });
 }
-export function validateWaitingList(waitingList) {
-  return Joi.object()
-    .keys({
-      zip: Joi.string().allow(null, ""),
-      mail: Joi.string().allow(null, ""),
-      birthdateAt: Joi.string().allow(null, ""),
-    })
-    .validate(waitingList, { stripUnknown: true });
-}
-
 export function validateReferent(referent) {
   return Joi.object()
     .keys({

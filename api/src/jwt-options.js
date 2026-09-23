@@ -14,6 +14,13 @@ const JWT_TRUST_TOKEN_VERSION = "1";
 // signé avec le même secret passe la vérification du trust token (confusion de type).
 const JWT_TRUST_TOKEN_TYPE = "trust";
 
+// Jeton d'échange JeVeuxAider (GET /jeveuxaider/getToken → /jeveuxaider/signin). Sa version diffère de
+// JWT_SIGNIN_VERSION : passport et les autres validateurs de session le refusent, il ne s'échange que
+// sur /jeveuxaider/signin (M71 de l'audit du 21/09/2026).
+const JWT_JVA_TOKEN_VERSION = "jva-1";
+const JWT_JVA_TOKEN_TYPE = "jva_signin";
+const JWT_JVA_TOKEN_MAX_AGE_SEC = 60 * 5; // 5 min : le temps de suivre le lien depuis JeVeuxAider
+
 const checkJwtSigninVersion = (token) => token?.__v === JWT_SIGNIN_VERSION;
 const checkJwtTrustTokenVersion = (token) => token?.__v === JWT_TRUST_TOKEN_VERSION;
 
@@ -24,6 +31,9 @@ module.exports = {
   JWT_SIGNIN_VERSION,
   JWT_TRUST_TOKEN_VERSION,
   JWT_TRUST_TOKEN_TYPE,
+  JWT_JVA_TOKEN_VERSION,
+  JWT_JVA_TOKEN_TYPE,
+  JWT_JVA_TOKEN_MAX_AGE_SEC,
   checkJwtSigninVersion,
   checkJwtTrustTokenVersion,
 };

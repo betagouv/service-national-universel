@@ -74,13 +74,16 @@ type LimiterOptions = {
   prefix: string;
   /** Ne compter que les requêtes refusées (utile pour les routes de connexion). */
   skipSuccessfulRequests?: boolean;
+  /** Avec `skipSuccessfulRequests` : ce qui compte comme un succès (par défaut, un statut < 400). */
+  requestWasSuccessful?: Options["requestWasSuccessful"];
 };
 
-export function authRateLimiter({ windowMs, limit, prefix, skipSuccessfulRequests = false }: LimiterOptions): RateLimitRequestHandler {
+export function authRateLimiter({ windowMs, limit, prefix, skipSuccessfulRequests = false, requestWasSuccessful }: LimiterOptions): RateLimitRequestHandler {
   const options: Partial<Options> = {
     windowMs,
     limit,
     skipSuccessfulRequests,
+    ...(requestWasSuccessful ? { requestWasSuccessful } : {}),
     standardHeaders: "draft-7",
     legacyHeaders: false,
     handler: (_req, res) => res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" }),
