@@ -99,7 +99,7 @@ router.post("/:youngId", passport.authenticate("referent", { session: false, fai
       capture(e);
     }
 
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -150,7 +150,7 @@ router.delete("/:youngId/:field", passport.authenticate("referent", { session: f
       young.set({ correctionRequests: requests, status });
       await young.save({ fromUser: req.user });
 
-      return res.status(200).send({ ok: true, data: serializeYoung(young) });
+      return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
@@ -199,7 +199,7 @@ router.post("/:youngId/remind", passport.authenticate("referent", { session: fal
         capture(e);
       }
 
-      return res.status(200).send({ ok: true, data: serializeYoung(young) });
+      return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
     } else {
       return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
     }

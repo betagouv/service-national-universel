@@ -1,5 +1,5 @@
 import { UserDto } from "./dto";
-import { canSigninAs, ROLES, SUB_ROLE_GOD } from "./roles";
+import { canSigninAs, getYoungFieldsHiddenFrom, omitYoungFields, ROLES, SUB_ROLE_GOD, YOUNG_HEALTH_FIELDS, YOUNG_IDENTITY_FILE_FIELDS } from "./roles";
 
 describe("canSigninAs function", () => {
   it("should return true if actor is admin and target is not god", () => {
@@ -51,5 +51,35 @@ describe("helpers d'administration CLE devenus inutilisés", () => {
     expect(roles).not.toHaveProperty("canWithdrawClasse");
     expect(roles).not.toHaveProperty("canNotifyAdminCleForVerif");
     expect(roles).not.toHaveProperty("canUpdateReferentClasse");
+  });
+});
+
+describe("getYoungFieldsHiddenFrom / omitYoungFields", () => {
+  it("masque notes, santé et pièces d'identité aux structures d'accueil", () => {
+    for (const role of [ROLES.RESPONSIBLE, ROLES.SUPERVISOR]) {
+      const hidden = getYoungFieldsHiddenFrom({ role });
+      expect(hidden).toEqual(expect.arrayContaining(["notes", ...YOUNG_HEALTH_FIELDS, ...YOUNG_IDENTITY_FILE_FIELDS]));
+    }
+  });
+
+  it("ne masque que les notes au visiteur et au volontaire", () => {
+    expect(getYoungFieldsHiddenFrom({ role: ROLES.VISITOR })).toEqual(["notes"]);
+    expect(getYoungFieldsHiddenFrom({ _id: "young" })).toEqual(["notes"]);
+  });
+
+  it("ne masque rien aux référents habilités", () => {
+    expect(getYoungFieldsHiddenFrom({ role: ROLES.ADMIN })).toEqual([]);
+    expect(getYoungFieldsHiddenFrom({ role: ROLES.REFERENT_DEPARTMENT })).toEqual([]);
+  });
+
+  it("masque tout sans acteur", () => {
+    expect(getYoungFieldsHiddenFrom(undefined)).toEqual(["notes", ...YOUNG_HEALTH_FIELDS, ...YOUNG_IDENTITY_FILE_FIELDS]);
+  });
+
+  it("retire les chemins pointés sans muter l'objet imbriqué d'origine", () => {
+    const files = { cniFiles: [{ name: "cni.pdf" }], rulesFiles: [] };
+    const doc = omitYoungFields({ notes: [], handicap: "true", files }, ["notes", "files.cniFiles", "absent.path"]);
+    expect(doc).toEqual({ handicap: "true", files: { rulesFiles: [] } });
+    expect(files.cniFiles).toHaveLength(1);
   });
 });

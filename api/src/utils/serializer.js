@@ -1,3 +1,4 @@
+const { getYoungFieldsHiddenFrom, omitYoungFields } = require("snu-lib");
 const { isYoung } = require(".");
 
 function serializeApplication(application) {
@@ -64,7 +65,9 @@ function serializeYoung(young, user) {
       if (isYoung(user)) {
         delete ret.qpv;
       }
-      return ret;
+      // Notes internes, santé et pièces d'identité selon le rôle : l'interface les masquait
+      // déjà, l'API les renvoyait quand même (audit des fronts 2026-09-23, FH6/FH10).
+      return omitYoungFields(ret, getYoungFieldsHiddenFrom(user));
     },
   });
 }
