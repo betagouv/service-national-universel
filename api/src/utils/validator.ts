@@ -704,10 +704,12 @@ export function validateSelf(referent) {
 export function validatePhase1Document(phase1document, key) {
   switch (key) {
     case "imageRight":
+      // Pas de `imageRight` : le jeune ne dépose que les pièces ; le drapeau effectif est fixé par un
+      // référent à la vérification (audit 2026-09-21, M49). `stripUnknown` pour ne pas rejeter un
+      // client qui l'enverrait encore.
       return Joi.object({
-        imageRight: Joi.string().trim().required().valid("true", "false"),
         imageRightFiles: Joi.array().items(Joi.string().required()).required().min(1),
-      }).validate(phase1document);
+      }).validate(phase1document, { stripUnknown: true });
     case "rules":
       return Joi.object({
         rulesYoung: Joi.string().trim().required().valid("true"),
