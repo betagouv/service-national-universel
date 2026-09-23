@@ -3,7 +3,7 @@
 // canAccessTicket (ticketScope.js) only answers "may this user touch this ticket at all".
 // It says nothing about *which* fields may be written, so any agent reaching a ticket could
 // rewrite every field accepted by the route's Joi schema. AGENT/ADMIN/DG are central support
-// staff without geographic scoping and keep full write access. REFERENT_DEPARTMENT and
+// staff without geographic scoping; AGENT/ADMIN keep full write access, DG is read-only. REFERENT_DEPARTMENT and
 // REFERENT_REGION are scoped to their own department(s)/region through contactDepartment,
 // contactRegion and formSubjectStep1, and the agent UI only offers them the status, the tags,
 // the draft, the notes, the contact group and the referent assignment. Everything else
@@ -26,7 +26,9 @@ const REFERENT_WRITABLE_FIELDS = [
 ];
 
 // Only REFERENT_REGION gets the region assignment dropdown in the agent UI.
+// DG is read-only: an empty list rejects any field (the route also refuses the role upfront).
 const WRITABLE_FIELDS_BY_ROLE = {
+  DG: [],
   REFERENT_DEPARTMENT: REFERENT_WRITABLE_FIELDS,
   REFERENT_REGION: [...REFERENT_WRITABLE_FIELDS, "referentRegionId", "referentRegionFirstName", "referentRegionLastName", "referentRegionEmail"],
 };

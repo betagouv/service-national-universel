@@ -64,14 +64,29 @@ describe("PATCH /shortcut/:id", () => {
     expect(ShortcutModel.findByIdAndDelete).not.toHaveBeenCalled();
   });
 
-  it("lets a referent edit their own shortcut, with its links and HTML neutralized", async () => {
+  it("forbids a referent from editing even a shortcut of their own role and territory (GOO-13)", async () => {
     mockCurrentUser = REFERENT;
+    const res = await request(buildApp()).patch(`/shortcut/${REFERENT_SHORTCUT_ID}`).send({ text: "<p>x</p>" });
+    expect(res.status).toBe(403);
+    expect(ShortcutModel.findById).not.toHaveBeenCalled();
+    expect(ShortcutModel.findOneAndUpdate).not.toHaveBeenCalled();
+  });
+
+  it("forbids a referent from deleting a shortcut of their own role and territory (GOO-13)", async () => {
+    mockCurrentUser = REFERENT;
+    const res = await request(buildApp()).delete(`/shortcut/${REFERENT_SHORTCUT_ID}`);
+    expect(res.status).toBe(403);
+    expect(ShortcutModel.findByIdAndDelete).not.toHaveBeenCalled();
+  });
+
+  it("lets an agent edit an agent shortcut, with its links and HTML neutralized", async () => {
+    mockCurrentUser = AGENT;
     const res = await request(buildApp())
-      .patch(`/shortcut/${REFERENT_SHORTCUT_ID}`)
+      .patch(`/shortcut/${AGENT_SHORTCUT_ID}`)
       .send({ content: maliciousContent, text: '<p><a href="javascript:alert(1)" onclick="alert(1)">Cordialement</a></p>' });
     expect(res.status).toBe(200);
     expect(ShortcutModel.findOneAndUpdate).toHaveBeenCalledWith(
-      { _id: REFERENT_SHORTCUT_ID },
+      { _id: AGENT_SHORTCUT_ID },
       { content: [{ type: "paragraph", children: [{ text: "Cordialement" }] }], text: "<p><a>Cordialement</a></p>" }
     );
   });
@@ -84,6 +99,13 @@ describe("PATCH /shortcut/:id", () => {
 });
 
 describe("POST /shortcut", () => {
+  it("forbids a referent from creating a shortcut (GOO-13)", async () => {
+    mockCurrentUser = REFERENT;
+    const res = await request(buildApp()).post("/shortcut").send({ name: "x", text: "<p>x</p>", content: [], dest: ["young"], keyword: [] });
+    expect(res.status).toBe(403);
+    expect(ShortcutModel.create).not.toHaveBeenCalled();
+  });
+
   it("stores a signature with its content neutralized", async () => {
     mockCurrentUser = AGENT;
     const res = await request(buildApp())

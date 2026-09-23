@@ -5,6 +5,7 @@ import ContactModel from "../models/contact";
 import AgentModel from "../models/agent";
 import { diacriticSensitiveRegex } from "../utils";
 import { agentGuard } from "../middlewares/authenticationGuards";
+import { forbidReadOnlyRoles } from "../middlewares/userRoleGuards";
 import { validateParams, validateBody, validateQuery, idSchema } from "../middlewares/validation";
 import { ERRORS } from "../errors";
 import { SCHEMA_EMAIL } from "../schemas";
@@ -84,6 +85,7 @@ router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Respo
 // WARNING check if exist, if no create it, does not send error if already exists but return the contact
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       email: SCHEMA_EMAIL,

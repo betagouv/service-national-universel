@@ -11,6 +11,7 @@ const { getFile, deleteFile, uploadAttachment, getHoursDifference, getSignedUrl,
 const { decrypt, encrypt } = require("../utils/crypto");
 const { getS3Path } = require("../utils/file");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { forbidReadOnlyRoles } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { ERRORS } = require("../errors");
 const { SCHEMA_ID, SCHEMA_PATH, SCHEMA_EMAIL } = require("../schemas");
@@ -42,8 +43,10 @@ async function ticketForAttachmentPath(path) {
   return TicketModel.findById(message.ticketId);
 }
 
+// Le rôle DG est en lecture seule : il n'écrit ni ne supprime aucun message (FH11, GOO-13).
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       message: Joi.string(),
@@ -193,6 +196,7 @@ router.post(
 
 router.delete(
   "/s3file/:id",
+  forbidReadOnlyRoles,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -224,6 +228,7 @@ const SEND_EMAIL_FILE_SCHEMA = Joi.object({
 
 router.post(
   "/sendEmailFile/:id",
+  forbidReadOnlyRoles,
   attachmentUpload,
   validateParams(idSchema),
   validateBody(

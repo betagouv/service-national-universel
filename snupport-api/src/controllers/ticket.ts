@@ -6,6 +6,7 @@ import AgentModel from "../models/agent";
 import MessageModel from "../models/message";
 import TagModel from "../models/tag";
 import { agentGuard } from "../middlewares/authenticationGuards";
+import { requireRole, forbidReadOnlyRoles } from "../middlewares/userRoleGuards";
 import { validateParams, validateBody, validateQuery, idSchema } from "../middlewares/validation";
 import { ERRORS } from "../errors";
 import { SCHEMA_ID, SCHEMA_EMAIL, SCHEMA_PARCOURS, SCHEMA_TICKET_STATUS } from "../schemas";
@@ -54,6 +55,7 @@ const SCHEMA_DATERANGE = Joi.object({
 
 router.post(
   "/",
+  forbidReadOnlyRoles,
   validateBody(
     Joi.object({
       subject: Joi.string().trim(),
@@ -725,6 +727,7 @@ router.get("/linkTicket/:id", validateParams(idSchema), async (req: UserRequest,
 
 router.patch(
   "/:id",
+  forbidReadOnlyRoles,
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -814,7 +817,8 @@ router.patch(
   }
 );
 
-router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
+// Suppression et transfert ne sont proposés qu'au support central dans snupport-app (FH11, GOO-13).
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const id = req.cleanParams.id;
   const ticket = await TicketModel.findById(id);
   if (!ticket) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -825,6 +829,7 @@ router.delete("/:id", validateParams(idSchema), async (req: UserRequest, res: Re
 
 router.put(
   "/transfer/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({
