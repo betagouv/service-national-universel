@@ -5,9 +5,8 @@
  *   H34  POST /representants-legaux/accept-ri        — le jeune ciblé vient du body, pas du jeton parent
  *   H40  PUT  /young/account/parents                 — changer parent1Email ne fait pas tourner le jeton parent 1
  *   M27  middleware /representants-legaux/*          — jeton parent sans expiration
- *   M28  PUT  /representants-legaux/representant-fromFranceConnect/:id
- *                                                    — `:id` n'est jamais comparé à `?parent=`
- *   M29  même route                                  — `parentXFromFranceConnect` est un champ du body
+ *   M28, M29  PUT /representants-legaux/representant-fromFranceConnect/:id — route supprimée avec
+ *             FranceConnect (lot T3), cf. france-connect-routes-supprimees.test.ts
  *   M54  PUT  /young/inscription2023/relance         — relances illimitées vers l'adresse parent
  *
  * (L38, `GET /young-edition/:id/remider/:idParent`, est couvert dans young-edition-security.test.ts.)
@@ -261,75 +260,6 @@ describe("G2 — représentants légaux et consentement parental", () => {
       const apres = await getYoungByIdHelper(jeune._id);
       expect(apres!.parent1Inscription2023TokenExpiresAt).toBeTruthy();
       expect(new Date(apres!.parent1Inscription2023TokenExpiresAt as any).getTime()).toBeGreaterThan(Date.now());
-    });
-  });
-
-  describe("M28 — PUT /representants-legaux/representant-fromFranceConnect/:id", () => {
-    it("refuse que le parent 2 écrive l'identité du parent 1", async () => {
-      const jeune = await createYoungAvecJetonsParents();
-
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/representants-legaux/representant-fromFranceConnect/1?parent=2&token=${PARENT2_TOKEN}`)
-        .send({
-          parent1FirstName: "Intrus",
-          parent1LastName: "INTRUS",
-          parent1Email: "intrus@example.org",
-          parent1FromFranceConnect: "true",
-        });
-
-      expect(res.statusCode).toEqual(403);
-      const apres = await getYoungByIdHelper(jeune._id);
-      expect(apres!.parent1Email).toEqual("marie.dupont@example.org");
-      expect(apres!.parent1FirstName).toEqual("Marie");
-    });
-
-    it("refuse que le parent 1 écrive l'identité du parent 2", async () => {
-      const jeune = await createYoungAvecJetonsParents();
-
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/representants-legaux/representant-fromFranceConnect/2?parent=1&token=${PARENT1_TOKEN}`)
-        .send({
-          parent2FirstName: "Intrus",
-          parent2LastName: "INTRUS",
-          parent2Email: "intrus@example.org",
-          parent2FromFranceConnect: "true",
-        });
-
-      expect(res.statusCode).toEqual(403);
-      const apres = await getYoungByIdHelper(jeune._id);
-      expect(apres!.parent2Email).toEqual("paul.dupont@example.org");
-    });
-  });
-
-  describe("M29 — statut « vérifié FranceConnect » auto-déclaré", () => {
-    it("refuse une identité fournie par le client sans ticket FranceConnect", async () => {
-      const jeune = await createYoungAvecJetonsParents();
-
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/representants-legaux/representant-fromFranceConnect/1?parent=1&token=${PARENT1_TOKEN}`)
-        .send({
-          parent1FirstName: "Marie",
-          parent1LastName: "DUPONT",
-          parent1Email: "adresse.choisie@example.org",
-          parent1FromFranceConnect: "true",
-        });
-
-      expect(res.statusCode).toEqual(400);
-      const apres = await getYoungByIdHelper(jeune._id);
-      expect(apres!.parent1FromFranceConnect).toEqual("false");
-      expect(apres!.parent1Email).toEqual("marie.dupont@example.org");
-    });
-
-    it("refuse un ticket FranceConnect inconnu", async () => {
-      const jeune = await createYoungAvecJetonsParents();
-
-      const res = await request(await getAppHelperWithAcl())
-        .put(`/representants-legaux/representant-fromFranceConnect/1?parent=1&token=${PARENT1_TOKEN}`)
-        .send({ franceConnectTicket: "ticket-inexistant" });
-
-      expect(res.statusCode).toEqual(403);
-      const apres = await getYoungByIdHelper(jeune._id);
-      expect(apres!.parent1FromFranceConnect).toEqual("false");
     });
   });
 

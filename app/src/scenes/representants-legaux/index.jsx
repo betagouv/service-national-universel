@@ -14,7 +14,6 @@ import MobileImageRightsDone from "./mobile/image-rights-done";
 import RiConsentement from "./mobile/RiConsentement";
 
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
-import FranceConnectCallback from "./components/FranceConnectCallback";
 import RepresentantsLegauxContextProvider from "../../context/RepresentantsLegauxContextProvider";
 
 const STEPS = {
@@ -68,7 +67,6 @@ export default function Index() {
   return (
     <Switch>
       <SentryRoute path="/representants-legaux/token-invalide" component={() => <Step step={STEPS.TOKEN_INVALIDE} />} />
-      <SentryRoute path="/representants-legaux/france-connect-callback" component={() => <FranceConnectCallback />} />
 
       <SentryRoute
         path={[

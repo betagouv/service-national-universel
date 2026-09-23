@@ -1,7 +1,5 @@
 import express, { Response } from "express";
 import passport from "passport";
-import fetch from "node-fetch";
-import queryString from "querystring";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
@@ -10,26 +8,13 @@ import fs from "fs";
 import fileUpload from "express-fileupload";
 
 import { decrypt, encrypt } from "../../cryptoUtils";
-import { getRedisClient } from "../../redis";
 import { config } from "../../config";
 import { logger } from "../../logger";
-import { capture, captureMessage } from "../../sentry";
+import { capture } from "../../sentry";
 import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
-import {
-  uploadFile,
-  validatePassword,
-  ERRORS,
-  inSevenDays,
-  isYoung,
-  isReferent,
-  updatePlacesSessionPhase1,
-  getCcOfYoung,
-  getFile,
-  deleteFile,
-  updateSeatsTakenInBusLine,
-} from "../../utils";
+import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
@@ -39,7 +24,7 @@ import { serializeYoung, serializeApplication, serializeContract, serializeRefer
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
 import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import { issueParentInscriptionToken } from "../../young/parentConsentToken";
-import { storeFranceConnectIdentity } from "../../young/franceConnectIdentity";
+import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -797,112 +782,6 @@ router.get(
   },
 );
 
-// Get authorization from France Connect.
-router.post("/france-connect/authorization-url", async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const query = {
-      scope: `openid given_name family_name email`,
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      response_type: "code",
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      state: crypto.randomBytes(20).toString("hex"),
-      nonce: crypto.randomBytes(20).toString("hex"),
-      acr_values: "eidas1",
-    };
-    const redisClient = getRedisClient();
-    await redisClient.setEx(`franceConnectNonce:${query.nonce}`, 1800, query.nonce);
-    await redisClient.setEx(`franceConnectState:${query.state}`, 1800, query.state);
-
-    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
-    return res.status(200).send({ ok: true, data: { url } });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-// Get user information for authorized user on France Connect.
-router.post("/france-connect/user-info", async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    // Get token…
-    const body = {
-      grant_type: "authorization_code",
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
-      code: value.code,
-    };
-
-    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: queryString.stringify(body),
-    });
-
-    const token = await tokenResponse.json();
-
-    if (token["status"] === "fail") {
-      captureMessage(`France Connect User Information failed: ${JSON.stringify({ token })}`);
-      return res.sendStatus(403);
-    }
-
-    const franceConnectToken = token["id_token"];
-
-    const decodedToken = jwt.decode(franceConnectToken);
-
-    let storedState;
-    let storedNonce;
-
-    const redisClient = getRedisClient();
-    storedState = await redisClient.get(`franceConnectState:${value.state}`);
-    // @ts-ignore
-    storedNonce = await redisClient.get(`franceConnectNonce:${decodedToken.nonce}`);
-
-    if (!token["access_token"] || !token["id_token"] || !storedNonce || !storedState) {
-      capture(`France Connect User Information failed: ${JSON.stringify({ storedNonce, storedState, token })}`);
-      return res.sendStatus(403);
-    }
-
-    // … then get user info.
-    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token["access_token"]}` },
-    });
-
-    const userInfo = await userInfoResponse.json();
-
-    // L'identité vérifiée ne transite pas par le client : elle est conservée côté serveur et rendue
-    // au client sous forme de ticket à usage unique, seul accepté par
-    // `PUT /representants-legaux/representant-fromFranceConnect/:id` (constat M29).
-    let franceConnectTicket;
-    if (userInfo?.given_name && userInfo?.family_name && userInfo?.email) {
-      franceConnectTicket = await storeFranceConnectIdentity({
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        email: userInfo.email,
-      });
-    }
-
-    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"], franceConnectTicket });
-  } catch (e) {
-    capture(e);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 // Delete one user (only admin can delete user)
 router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
@@ -922,19 +801,16 @@ router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: fa
     // Tout le reste est effacé par la boucle ci-dessous. Aligné sur anonymizeOldCohorts.effect.
     const fieldToKeep = ["_id", "__v", "createdAt"];
 
-    for (const key in young.files) {
-      if (key.length) {
-        for (const file in key as any) {
-          try {
-            if (key.includes("military")) await deleteFile(`app/young/${id}/military-preparation/${key}/${(file as any)._id}`);
-            else await deleteFile(`app/young/${id}/${key}/${(file as any)._id}`);
-            young.set({ files: { [key]: undefined } });
-          } catch (e) {
-            capture(e);
-          }
-        }
-      }
+    // Fichiers S3 d'abord : si la purge échoue, rien n'est effacé en base et la suppression peut être
+    // relancée. Effacer le document avant laisserait des binaires sans plus aucune référence (M48).
+    let deletedFiles: number;
+    try {
+      deletedFiles = await purgeYoungFiles(id);
+    } catch (e) {
+      capture(e);
+      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
+    logger.info(`Soft-delete du volontaire ${id} : ${deletedFiles} fichier(s) S3 supprimé(s)`);
 
     // Brevo AVANT le wipe : la boucle ci-dessous efface les emails, donc unsync
     // doit lire les vrais emails maintenant (sinon il ne supprime aucun contact).
