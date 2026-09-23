@@ -4,28 +4,51 @@ on:
   workflow_dispatch:
   delete:
 
+permissions:
+  contents: read
+
+env:
+  # `delete` porte le nom court de la branche supprimée ; `workflow_dispatch`, la ref choisie.
+  BRANCH_NAME: ${{ github.event_name == 'delete' && github.event.ref || github.ref_name }}
+
 jobs:
   destroy:
-    if: github.event.ref != 'production' && github.event.ref != 'main'
+    if: |
+      (github.event_name == 'delete' && github.event.ref_type == 'branch' && github.event.ref != 'production' && github.event.ref != 'main') ||
+      (github.event_name == 'workflow_dispatch' && github.ref_name != 'production' && github.ref_name != 'main')
+    environment: recette
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
+      # Scripts lus sur la branche par défaut : voir env-deploy.yml.
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.repository.default_branch }}
+          persist-credentials: false
+
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
 
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
 
       - name: Get environment name
         id: env
         run: |
-          name=$(./devops/scripts/cc-environment-name.sh ${{ github.event.ref }})
+          name=$(./devops/scripts/cc-environment-name.sh "$BRANCH_NAME")
           echo "name: $name"
-          echo "name=$name" >> $GITHUB_OUTPUT
+          echo "name=$name" >> "$GITHUB_OUTPUT"
 
       - name: Destroy environment
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
+          CC_ORGANIZATION_ID: ${{ vars.CC_ORGANIZATION_ID }}
+          ENV_NAME: ${{ steps.env.outputs.name }}
+        # Correspondance exacte : `grep -w env-foo` retenait aussi env-foo-bar.
         run: |
-          ./devops/scripts/cc-list-environments.sh ${{ vars.CC_ORGANIZATION_ID }} \
-          | grep -w "${{ steps.env.outputs.name }}" \
+          [ -n "$ENV_NAME" ] || { echo "Nom d'environnement vide" >&2; exit 1; }
+          ./devops/scripts/cc-list-environments.sh "$CC_ORGANIZATION_ID" \
+          | { grep -Fx -- "$ENV_NAME" || true; } \
           | xargs -r -n 1 --verbose clever delete --yes --app

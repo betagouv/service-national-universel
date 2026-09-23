@@ -1,6 +1,8 @@
 name: "PR Title Checker"
+# `pull_request` et non `pull_request_target` : le contrôle ne demande ni secret ni
+# jeton en écriture, et n'importe quel compte GitHub peut ouvrir une PR sur ce dépôt.
 on:
-  pull_request_target:
+  pull_request:
     types:
       - opened
       - edited
@@ -8,13 +10,39 @@ on:
       - labeled
       - unlabeled
 
+permissions:
+  contents: read
+
 jobs:
   check:
-    runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
+    # Runner hébergé par GitHub, éphémère : ce job est déclenchable depuis un fork, il
+    # ne doit pas s'exécuter sur les runners persistants qui servent aux déploiements.
+    runs-on: ubuntu-latest
     steps:
-      - uses: thehanimo/pr-title-checker@v1.4.1
+      # Seul le fichier de configuration est lu, sur la branche de base : la PR contrôlée
+      # ne peut pas assouplir la règle qu'on lui applique.
+      - uses: actions/checkout@v4
         with:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          pass_on_octokit_error: false
-          configuration_path: .github/pr-title-checker-config.json #(optional. defaults to .github/pr-title-checker-config.json)
+          ref: ${{ github.event.pull_request.base.sha }}
+          sparse-checkout: .github/pr-title-checker-config.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
 
+      - name: Check title
+        env:
+          TITLE: ${{ github.event.pull_request.title }}
+          LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
+        run: |
+          config=.github/pr-title-checker-config.json
+          if jq -e --argjson labels "$LABELS" '.CHECKS.ignoreLabels | any(. as $l | $labels | index($l))' "$config" > /dev/null; then
+            echo "Contrôle ignoré (label d'exemption présent)."
+            exit 0
+          fi
+          regexp=$(jq -r '.CHECKS.regexp' "$config")
+          flags=$(jq -r '.CHECKS.regexpFlags // ""' "$config")
+          if jq -e -n --arg title "$TITLE" --arg re "$regexp" --arg flags "$flags" '$title | test($re; $flags)' > /dev/null; then
+            jq -r '.MESSAGES.success' "$config"
+          else
+            echo "::error::$(jq -r '.MESSAGES.failure' "$config")"
+            exit 1
+          fi

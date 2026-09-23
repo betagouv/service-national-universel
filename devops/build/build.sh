@@ -51,8 +51,10 @@ source "$(cd "$(dirname "$0")" && pwd)/csp-report.sh"
 
 cd "$(dirname $0)/../.."
 
-turbo_version=$(cat package-lock.json | grep turbo | head -n 1 | sed 's/"turbo": "\(.*\)"/\1/g')
-npm install --global "turbo@$turbo_version"
+# Version exacte résolue dans le lockfile (et non la plage de package.json, qui
+# installait la dernière 2.x publiée) ; turbo n'a pas besoin de script d'installation.
+turbo_version=$(node -p "require('./package-lock.json').packages['node_modules/turbo'].version")
+npm install --global --ignore-scripts "turbo@$turbo_version"
 
 rm -Rf out
 turbo prune $application
