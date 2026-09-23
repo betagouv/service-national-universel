@@ -4,6 +4,14 @@ const ShortcutModel = require("../models/shortcut");
 const { agentGuard } = require("../middlewares/authenticationGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
+const { ERRORS } = require("../errors");
+const { SCHEMA_SLATE_CONTENT, sanitizeUserHtml } = require("../utils/userContent");
+const { buildSignatureQuery, canManageShortcut } = require("../utils/shortcutScope");
+
+// Le HTML d'un module de texte est assaini à l'écriture : il est relu par l'éditeur d'autres comptes.
+const SCHEMA_SHORTCUT_HTML = Joi.string()
+  .trim()
+  .custom((value) => sanitizeUserHtml(value));
 
 router.use(agentGuard);
 
@@ -32,10 +40,7 @@ router.get(
     })
   ),
   async (req, res) => {
-    const query = {};
-    if (req.cleanQuery.signatureDest) {
-      query.dest = { $in: [req.cleanQuery.signatureDest] };
-    }
+    const query = buildSignatureQuery(req.user, req.cleanQuery.signatureDest);
     const data = await ShortcutModel.findOne(query);
     if (data) {
       data.content = await updateChildrenRecursive(data.content ? data.content : [], req.user);
@@ -162,11 +167,12 @@ router.post(
   "/",
   validateBody(
     Joi.object({
-      content: Joi.array(),
+      content: SCHEMA_SLATE_CONTENT,
       dest: Joi.array().items(Joi.string().trim()),
       keyword: Joi.array().items(Joi.string().trim()),
       name: Joi.string().trim(),
-      text: Joi.string().trim(),
+      text: SCHEMA_SHORTCUT_HTML,
+      isSignature: Joi.boolean().optional(),
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
@@ -183,23 +189,29 @@ router.patch(
   validateParams(idSchema),
   validateBody(
     Joi.object({
-      content: Joi.array(),
+      content: SCHEMA_SLATE_CONTENT,
       dest: Joi.array().items(Joi.string().trim()),
       keyword: Joi.array().items(Joi.string().trim()),
       name: Joi.string().trim(),
-      text: Joi.string().trim(),
+      text: SCHEMA_SHORTCUT_HTML,
       status: Joi.boolean(),
       userVisibility: Joi.string().valid("ALL", "AGENT"),
     }).min(1)
   ),
   async (req, res) => {
-    await ShortcutModel.findOneAndUpdate({ _id: req.cleanParams.id }, req.cleanBody);
+    const shortcut = await ShortcutModel.findById(req.cleanParams.id);
+    if (!shortcut) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!canManageShortcut(req.user, shortcut)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    await ShortcutModel.findOneAndUpdate({ _id: shortcut._id }, req.cleanBody);
     return res.status(200).send({ ok: true });
   }
 );
 
 router.delete("/:id", validateParams(idSchema), async (req, res) => {
-  await ShortcutModel.findByIdAndDelete(req.cleanParams.id);
+  const shortcut = await ShortcutModel.findById(req.cleanParams.id);
+  if (!shortcut) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+  if (!canManageShortcut(req.user, shortcut)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+  await ShortcutModel.findByIdAndDelete(shortcut._id);
 
   return res.status(200).send({ ok: true });
 });

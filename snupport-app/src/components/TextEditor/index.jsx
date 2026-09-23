@@ -11,6 +11,7 @@ import API from "../../services/api";
 import { Icon, Spacer, TextEditorButton, Toolbar } from "./components";
 import { deserialize, serialize } from "./importHtml";
 import { AddLinkButton, isLink, RemoveLinkButton, wrapLink } from "./links";
+import { sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../../utils/safeUrl";
 
 const HOTKEYS = {
   "mod+b": "bold",
@@ -357,7 +358,9 @@ const withPlugins = (editor) => {
   return editor;
 };
 
-const insertImage = (editor, url, alt) => {
+const insertImage = (editor, rawUrl, alt) => {
+  const url = sanitizeImageUrl(rawUrl);
+  if (!url) return;
   const text = { text: "" };
   const image = { type: "image", url, alt, children: [text] };
   Transforms.insertNodes(editor, image);
@@ -371,13 +374,19 @@ const InlineChromiumBugfix = () => (
   </span>
 );
 
+// Les nœuds viennent aussi de signatures, modules de texte et brouillons écrits par d'autres
+// comptes : l'URL est filtrée au rendu, et l'href réel est exposé pour être vérifiable au survol (FH12).
 const LinkComponent = ({ attributes, children, element }) => {
   const selected = useSelected();
+  const url = sanitizeLinkUrl(element.url);
   return (
     <a
+      href={url ?? undefined}
+      title={url ?? "Lien invalide"}
+      rel="noopener noreferrer"
       onClick={(e) => {
         e.preventDefault();
-        window.open(element.url, "_blank");
+        if (url) window.open(url, "_blank", "noopener,noreferrer");
       }}
       {...attributes}
       className={`${selected ? "border-2" : ""} inline text-blue-900 underline`}
@@ -497,7 +506,7 @@ const Image = ({ attributes, children, element, readOnly }) => {
     <div {...attributes}>
       <div contentEditable={false}>
         <img
-          src={element.url}
+          src={sanitizeImageUrl(element.url) ?? undefined}
           alt={element.alt}
           onMouseEnter={() => setShowDelete(true)}
           onMouseLeave={() => setShowDelete(false)}
@@ -543,11 +552,17 @@ const Image = ({ attributes, children, element, readOnly }) => {
 const VideoElement = ({ attributes, children, element, readOnly }) => {
   const editor = useSlateStatic();
   const { url } = element;
+  // Une iframe s'exécute sans clic : seul le lecteur Vimeo est rendu.
+  const videoUrl = sanitizeVideoUrl(url);
   return (
     <div {...attributes}>
       <div contentEditable={false}>
         <div className="relative h-0 pb-[56.25%]">
-          <iframe src={`${url}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          {videoUrl ? (
+            <iframe src={`${videoUrl}?title=0&byline=0&portrait=0`} frameBorder="0" className="absolute top-0 left-0 h-full w-full" />
+          ) : (
+            <p className="absolute top-0 left-0 text-sm text-gray-500">Vidéo non affichée : seules les vidéos player.vimeo.com sont autorisées.</p>
+          )}
         </div>
         {!readOnly && (
           <MetaDataInput

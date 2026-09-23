@@ -17,7 +17,7 @@ import { BsPeople } from "react-icons/bs";
 import { HiOutlineIdentification } from "react-icons/hi2";
 import { useSelector } from "react-redux";
 import API from "../../../services/api";
-import { translateAttributesSNU, translateRole, urlify, htmlCleaner, TRANSLATE_ROLE, translateParcours } from "../../../utils";
+import { translateAttributesSNU, translateRole, noteToSafeHtml, htmlToText, sanitizeHttpsUrl, TRANSLATE_ROLE, translateParcours } from "../../../utils";
 import Button from "../components/Button";
 import Textarea from "../components/Textarea";
 import TransferTicketModal from "../components/TransferTicketModal";
@@ -58,7 +58,13 @@ export default ({ ticket, setTicket, tags, setTags, agents }) => {
   return (
     <div className="flex w-[378px] flex-none flex-col border-r border-light-grey bg-gray-50 p-8 pt-5">
       <div className="">
-        <div className="flex" onClick={() => (contactProfile.length !== 0 ? window.open(`${contactProfile[0].value}`, "_blank") : 0)}>
+        <div
+          className="flex"
+          onClick={() => {
+            const profileUrl = sanitizeHttpsUrl(contactProfile[0]?.value);
+            if (profileUrl) window.open(profileUrl, "_blank", "noopener,noreferrer");
+          }}
+        >
           {contact && (
             <>
               <h6 className="mb-2 cursor-pointer text-lg font-bold text-gray-900">{`${contact.firstName ? contact.firstName + " " + contact.lastName : contact.email}`}</h6>
@@ -275,7 +281,7 @@ const Notes = ({ ticket, setTicket, agents }) => {
       {open && (
         <div className={`${!editedNote?._id && "max-h-64"} min-h-0 overflow-y-auto`} disabled={user.role !== "DG"}>
           {ticket.notes?.map((e, index) => {
-            const cleanContent = htmlCleaner(e.content);
+            const noteHtml = noteToSafeHtml(e.content);
             if (e._id === editedNote?._id) {
               return (
                 <div key={e._id} className="flex flex-col pr-3">
@@ -315,7 +321,7 @@ const Notes = ({ ticket, setTicket, agents }) => {
                   : <br />
                 </span>
                 <div className="flex items-center pr-2">
-                  <span className="mr-2 flex-1" dangerouslySetInnerHTML={{ __html: urlify(cleanContent) }}></span>
+                  <span className="mr-2 flex-1" dangerouslySetInnerHTML={{ __html: noteHtml }}></span>
                   {user.role === "AGENT" && (
                     <>
                       <button disabled={!!editedNote?._id} className={`flex h-6 w-6 items-center justify-center rounded-full hover:scale-125`}>
@@ -323,7 +329,8 @@ const Notes = ({ ticket, setTicket, agents }) => {
                           className="w-[100%]"
                           src={PenImg}
                           onClick={() => {
-                            setEditedNode(e);
+                            // La note est stockée assainie (entités HTML) : on édite son texte.
+                            setEditedNode({ ...e, content: htmlToText(e.content) });
                           }}
                         />
                       </button>
@@ -583,11 +590,14 @@ const Attribute = ({ attribute }) => {
         <br></br>
       </div>
     );
-  if (attribute?.format === "link" || attribute.value?.includes("https://"))
+  // Les attributs viennent en partie du formulaire public (page précédente, département, région) :
+  // un lien n'est émis que pour une URL https analysée, jamais sur la seule présence de « https:// » (FH15).
+  const linkUrl = attribute?.format === "link" || attribute?.value?.includes("https://") ? sanitizeHttpsUrl(attribute?.value) : null;
+  if (linkUrl)
     return (
       <div className="flex mb-2">
         <span className="text-xl text-[#C4C4C4]">{emoji}</span>
-        <a href={attribute.value} target="_blank" className="pl-1 text-sm font-medium text-gray-500 underline " rel="noreferrer">
+        <a href={linkUrl} target="_blank" className="pl-1 text-sm font-medium text-gray-500 underline " rel="noopener noreferrer">
           {attribute.name}
         </a>
       </div>

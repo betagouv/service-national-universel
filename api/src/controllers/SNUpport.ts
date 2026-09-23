@@ -18,6 +18,7 @@ import { YoungModel, ClasseModel, ReferentModel } from "../models";
 import { validateId } from "../utils/validator";
 import { encrypt, decrypt } from "../cryptoUtils";
 import { getUserAttributes } from "../services/support";
+import { normalizeFromPage, PUBLIC_FORM_ROLES, SCHEMA_SUPPORT_DEPARTMENT, SCHEMA_SUPPORT_REGION } from "../services/supportFormAttributes";
 import optionalAuth from "../middlewares/optionalAuth";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
@@ -370,7 +371,7 @@ router.post(
           author,
           formSubjectStep1,
           formSubjectStep2,
-          attributes: [...userAttributes, { name: "page précédente", value: value.fromPage }],
+          attributes: [...userAttributes, { name: "page précédente", value: normalizeFromPage(value.fromPage) }],
           files,
         }),
       });
@@ -431,11 +432,11 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       lastName: Joi.string().required(),
       parcours: Joi.string(),
       classeId: Joi.string().allow(null),
-      department: Joi.string().required(),
-      region: Joi.string().required(),
+      department: SCHEMA_SUPPORT_DEPARTMENT.required(),
+      region: SCHEMA_SUPPORT_REGION.required(),
       formSubjectStep1: Joi.string().required(),
       formSubjectStep2: Joi.string().required(),
-      role: Joi.string().required(),
+      role: Joi.string().valid(...PUBLIC_FORM_ROLES).required(),
       fromPage: Joi.string().allow(null),
       // Le dépôt de fichiers exige une session (M38) : un visiteur anonyme ne peut donc joindre
       // aucun fichier qui soit le sien (M36).
@@ -453,7 +454,7 @@ router.post("/ticket/form", async (req: UserRequest, res) => {
       { name: "departement", value: department },
       { name: "region", value: region },
       { name: "role", value: role },
-      { name: "page précédente", value: fromPage },
+      { name: "page précédente", value: normalizeFromPage(fromPage) },
     ];
 
     let body: Message = {
@@ -667,7 +668,8 @@ const notifyReferent = async (ticket: Ticket, message: string): Promise<boolean>
   const department = ticketCreator.department;
   const departmentReferents = await ReferentModel.find({
     role: ROLES.REFERENT_DEPARTMENT,
-    department, status: ReferentStatus.ACTIVE,
+    department,
+    status: ReferentStatus.ACTIVE,
   });
 
   for (let referent of departmentReferents) {

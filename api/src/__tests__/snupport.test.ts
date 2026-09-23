@@ -355,6 +355,33 @@ describe("POST /SNUpport/ticket/form (M36, M37)", () => {
     expect(res.status).toBe(400);
     expect(calledPaths().includes("/v0/message")).toBe(false);
   });
+
+  // FH15 : les attributs du formulaire anonyme s'affichent dans la fiche ticket des agents nationaux.
+  const relayedAttribute = (name: string) => relayedMessageBody().attributes.find((attribute: { name: string }) => attribute.name === name)?.value;
+
+  it("should drop a previous page that is neither a path nor an https URL", async () => {
+    for (const fromPage of ["javascript:alert(document.cookie)", "javascript:alert(1)//https://snu.gouv.fr", "//evil.example", "data:text/html,x"]) {
+      SNUpport.api.mockClear();
+      expect((await form({ fromPage })).status).toBe(200);
+      expect(relayedAttribute("page précédente")).toBeNull();
+    }
+  });
+
+  it("should keep a previous page given as a path or an https URL", async () => {
+    expect((await form({ fromPage: "/phase1" })).status).toBe(200);
+    expect(relayedAttribute("page précédente")).toBe("/phase1");
+    SNUpport.api.mockClear();
+    expect((await form({ fromPage: "https://moncompte.snu.gouv.fr/phase1" })).status).toBe(200);
+    expect(relayedAttribute("page précédente")).toBe("https://moncompte.snu.gouv.fr/phase1");
+  });
+
+  it("should refuse a department, a region or a role outside the known lists", async () => {
+    for (const fields of [{ department: "https://evil.example" }, { region: "javascript:alert(1)" }, { role: "https://evil.example" }]) {
+      SNUpport.api.mockClear();
+      expect((await form(fields)).status).toBe(400);
+      expect(calledPaths().includes("/v0/message")).toBe(false);
+    }
+  });
 });
 
 describe("GET /SNUpport/s3file/:id (M39)", () => {
