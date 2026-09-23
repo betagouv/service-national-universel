@@ -3,7 +3,6 @@ import { Redirect, useHistory } from "react-router-dom";
 import { RepresentantsLegauxContext } from "../../../context/RepresentantsLegauxContextProvider";
 import Loader from "../../../components/Loader";
 import Navbar from "../components/Navbar";
-import FranceConnectButton from "../../inscription2023/components/FranceConnectButton";
 import Input from "../../inscription2023/components/Input";
 import ResponsiveRadioButton from "../../../components/dsfr/ui/buttons/RadioButton";
 // TODO: mettre le Toggle dans les components génériques
@@ -41,10 +40,6 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
 
   // --- young
   const youngFullname = young.firstName + " " + young.lastName;
-
-  // --- France Connect
-  const isParentFromFranceConnect = young[`parent${parentId}FromFranceConnect`] === "true";
-  const franceConnectCallbackUrl = "representants-legaux/france-connect-callback?parent=" + parentId + "&token=" + token;
 
   // --- address
   const formattedAddress =
@@ -245,19 +240,8 @@ function ConsentementForm({ young, token, step, parentId, cohort, classe }) {
           {/* <h1 className="mb-1  text-[22px] font-bold text-[#21213F]">Apporter votre consentement</h1> */}
           <div className="mb-[24px] text-[14px] leading-[20px] text-[#666666]">
             <p>
-              En tant que représentant(e) légal(e), utilisez ce bouton pour vous identifier avec FranceConnect et <b>vérifier votre identité et vos données personnelles</b> (nom,
-              prénom, adresse email), ou complétez les informations <b>manuellement</b> ci-dessous.
+              En tant que représentant(e) légal(e), <b>vérifiez et complétez vos données personnelles</b> (nom, prénom, adresse email) ci-dessous.
             </p>
-          </div>
-
-          <div>
-            {isParentFromFranceConnect ? (
-              <div className="mx-auto mb-[32px] w-[400px] text-[14px] leading-[20px] text-[#666666]">
-                Les information en provenance de FranceConnect du représentant légal ont bien été enregistrées.
-              </div>
-            ) : (
-              <FranceConnectButton callback={franceConnectCallbackUrl} className="flex-column" />
-            )}
           </div>
 
           <div className="border-t-solid border-t-[1px] border-t-[#E5E5E5] pt-[16px]">

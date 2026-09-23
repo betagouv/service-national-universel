@@ -1,7 +1,5 @@
 import express, { Response } from "express";
 import passport from "passport";
-import fetch from "node-fetch";
-import queryString from "querystring";
 import crypto from "crypto";
 import jwt from "jsonwebtoken";
 import Joi from "joi";
@@ -12,10 +10,10 @@ import fileUpload from "express-fileupload";
 import { decrypt, encrypt } from "../../cryptoUtils";
 import { config } from "../../config";
 import { logger } from "../../logger";
-import { capture, captureMessage } from "../../sentry";
+import { capture } from "../../sentry";
 import { ReferentModel, YoungModel, ApplicationModel, SessionPhase1Model, LigneBusModel, ClasseModel, EtablissementModel, CohortModel, ApplicationDocument, MissionEquivalenceModel } from "../../models";
 import AuthObject from "../../auth";
-import { signinRateLimiter, emailSendingRateLimiter, franceConnectRateLimiter } from "../../middlewares/rateLimit";
+import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
@@ -26,17 +24,7 @@ import { serializeYoung, serializeApplication, serializeContract, serializeRefer
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
 import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import { issueParentInscriptionToken } from "../../young/parentConsentToken";
-import { storeFranceConnectIdentity } from "../../young/franceConnectIdentity";
 import { purgeYoungFiles } from "../../young/youngFilesPurge";
-import {
-  FRANCE_CONNECT_BINDING_COOKIE,
-  FRANCE_CONNECT_STATE_TTL_SECONDS,
-  FranceConnectVerificationError,
-  consumeFranceConnectAuthState,
-  createFranceConnectAuthState,
-  readFranceConnectUserInfo,
-  verifyFranceConnectIdToken,
-} from "../../young/franceConnectOidc";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
@@ -793,112 +781,6 @@ router.get(
     }
   },
 );
-
-// Get authorization from France Connect.
-// State et nonce : cf. young/franceConnectOidc (constats M46 / M47).
-router.post("/france-connect/authorization-url", franceConnectRateLimiter("france-connect-authorization-url"), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ callback: Joi.string().required() }).unknown().validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const { state, nonce, binding } = await createFranceConnectAuthState();
-    const query = {
-      scope: `openid given_name family_name email`,
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      response_type: "code",
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      state,
-      nonce,
-      acr_values: "eidas1",
-    };
-    // Lie le state au navigateur qui lance le flux : un lien FranceConnect généré par un tiers et
-    // ouvert par une autre personne ne pourra pas être échangé (login CSRF, M47).
-    res.cookie(FRANCE_CONNECT_BINDING_COOKIE, binding, cookieOptions(FRANCE_CONNECT_STATE_TTL_SECONDS * 1000) as any);
-
-    const url = `${config.FRANCE_CONNECT_URL}/authorize?${queryString.stringify(query)}`;
-    return res.status(200).send({ ok: true, data: { url } });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-// Get user information for authorized user on France Connect.
-router.post("/france-connect/user-info", franceConnectRateLimiter("france-connect-user-info"), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({ code: Joi.string().required(), callback: Joi.string().required(), state: Joi.string().required() })
-      .unknown()
-      .validate(req.body, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    // Le state est consommé avant tout appel à FranceConnect : inconnu, expiré, déjà utilisé ou
-    // émis pour un autre navigateur, la requête s'arrête là.
-    const expectedNonce = await consumeFranceConnectAuthState(value.state, req.cookies?.[FRANCE_CONNECT_BINDING_COOKIE]);
-    res.clearCookie(FRANCE_CONNECT_BINDING_COOKIE, cookieOptions() as any);
-    if (!expectedNonce) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // Get token…
-    const body = {
-      grant_type: "authorization_code",
-      redirect_uri: `${config.APP_URL}/${value.callback}`,
-      client_id: config.FRANCE_CONNECT_CLIENT_ID,
-      client_secret: config.FRANCE_CONNECT_CLIENT_SECRET,
-      code: value.code,
-    };
-
-    const tokenResponse = await fetch(`${config.FRANCE_CONNECT_URL}/token`, {
-      method: "POST",
-      headers: { "content-type": "application/x-www-form-urlencoded" },
-      body: queryString.stringify(body),
-    });
-
-    const token = await tokenResponse.json();
-
-    // Jamais de jeton dans les traces : seuls les champs d'erreur OAuth sont remontés.
-    if (!token?.["access_token"] || !token?.["id_token"]) {
-      captureMessage("France Connect token exchange failed", { extra: { status: tokenResponse.status, error: token?.error, error_description: token?.error_description } });
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // Signature, émetteur, audience, expiration, puis nonce du state consommé ci-dessus.
-    const idToken = await verifyFranceConnectIdToken(token["id_token"], expectedNonce);
-
-    // … then get user info.
-    const userInfoResponse = await fetch(`${config.FRANCE_CONNECT_URL}/userinfo`, {
-      method: "GET",
-      headers: { Authorization: `Bearer ${token["access_token"]}` },
-    });
-
-    const userInfo = await readFranceConnectUserInfo(userInfoResponse, idToken.sub!);
-
-    // L'identité vérifiée ne transite pas par le client : elle est conservée côté serveur et rendue
-    // au client sous forme de ticket à usage unique, seul accepté par
-    // `PUT /representants-legaux/representant-fromFranceConnect/:id` (constat M29).
-    let franceConnectTicket;
-    if (userInfo?.given_name && userInfo?.family_name && userInfo?.email) {
-      franceConnectTicket = await storeFranceConnectIdentity({
-        firstName: userInfo.given_name,
-        lastName: userInfo.family_name,
-        email: userInfo.email,
-      });
-    }
-
-    res.status(200).send({ ok: true, data: userInfo, tokenId: token["id_token"], franceConnectTicket });
-  } catch (e) {
-    if (e instanceof FranceConnectVerificationError) {
-      captureMessage("France Connect verification failed", { extra: { reason: e.message } });
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    capture(e);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
 // Delete one user (only admin can delete user)
 router.put("/:id/soft-delete", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res) => {

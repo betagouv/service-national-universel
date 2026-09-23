@@ -3,7 +3,6 @@
  *
  * ROUTES
  *   GET   /young
- *   PUT   /representant-fromFranceConnect/:id
  *   POST  /data-verification
  *   POST  /consent
  */
@@ -23,7 +22,6 @@ const { validateFirstName, validateString } = require("../utils/validator");
 const { sendTemplate } = require("../brevo");
 const { config } = require("../config");
 const { isParentInscriptionTokenExpired, refreshParentInscriptionToken } = require("../young/parentConsentToken");
-const { consumeFranceConnectIdentity } = require("../young/franceConnectIdentity");
 
 function tokenParentValidMiddleware(req, res, next) {
   const { error, value: token } = validateString(req.query.token);
@@ -59,47 +57,6 @@ router.get("/young", tokenParentValidMiddleware, async (req, res) => {
   } catch (e) {
     capture(e);
     return res.status(500).send(e);
-  }
-});
-
-router.put("/representant-fromFranceConnect/:id", tokenParentValidMiddleware, async (req, res) => {
-  try {
-    const { error: error_id, value: id } = Joi.string().valid("1", "2").required().validate(req.params.id, { stripUnknown: true });
-    if (error_id) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    // Le parent écrit par cette route est celui que le jeton authentifie : un parent 2 ne réécrit pas
-    // l'identité du parent 1 (et inversement).
-    if (parseInt(id, 10) !== req.parentId) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    // L'identité n'est jamais fournie par le client : elle est relue côté serveur depuis l'échange
-    // FranceConnect, via un ticket à usage unique. Sans cela, `parentXFromFranceConnect` est déclaratif.
-    const { error, value } = Joi.object({ franceConnectTicket: Joi.string().trim().required() }).validate(req.body, { stripUnknown: true });
-    if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const identity = await consumeFranceConnectIdentity(value.franceConnectTicket);
-    if (!identity) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const young = req.young;
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const update = {
-      [`parent${id}FirstName`]: identity.firstName,
-      [`parent${id}LastName`]: identity.lastName.toUpperCase(),
-      [`parent${id}Email`]: identity.email.toLowerCase(),
-      [`parent${id}FromFranceConnect`]: "true",
-    };
-
-    if (!canUpdateYoungStatus({ body: update, current: young })) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    young.set(update);
-    await young.save({ fromUser: req.user });
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
-  } catch (error) {
-    capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
