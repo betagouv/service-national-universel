@@ -71,7 +71,8 @@ snupport-api n'a toujours pas de job de test en CI : ces tests ne tournent qu'en
 - **Rendu** : les styles en ligne des mails entrants et de l'éditeur (couleurs, polices) sont retirés.
   La structure (paragraphes, listes, liens, tableaux, images http(s)) est conservée.
 - **Formulaire public** : si l'email saisi est déjà connu, le ticket est créé sur la fiche existante,
-  sans la mettre à jour ; nom et attributs saisis restent visibles sur le ticket lui-même.
+  sans la mettre à jour. Le ticket porte le nom de cette fiche ; le département, la région et le
+  rôle saisis ne sont conservés que sur le ticket.
 - **Synchro des référents** : une collision d'email n'efface plus rien. Elle remonte sur Slack et
   doit être résolue à la main.
 
