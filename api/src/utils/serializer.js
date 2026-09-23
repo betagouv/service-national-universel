@@ -113,20 +113,20 @@ function serializeEmail(email) {
   return email.toObject();
 }
 
-function serializeContract(contract, user, withTokens = true) {
-  if (!withTokens || isYoung(user)) {
-    return contract.toObject({
-      transform: (_doc, ret) => {
-        delete ret.parent1Token;
-        delete ret.projectManagerToken;
-        delete ret.structureManagerToken;
-        delete ret.parent2Token;
-        delete ret.youngContractToken;
-        return ret;
-      },
-    });
-  }
-  return contract.toObject();
+// Les jetons de signature ne sortent jamais de l'API : ils ne circulent que dans les emails
+// envoyés à chaque signataire. Un référent qui les lisait pouvait signer à la place des parents
+// ou de l'État.
+function serializeContract(contract) {
+  return contract.toObject({
+    transform: (_doc, ret) => {
+      delete ret.parent1Token;
+      delete ret.projectManagerToken;
+      delete ret.structureManagerToken;
+      delete ret.parent2Token;
+      delete ret.youngContractToken;
+      return ret;
+    },
+  });
 }
 
 function serializeArray(arr, user, serialize) {

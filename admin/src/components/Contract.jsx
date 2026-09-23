@@ -4,9 +4,9 @@ import { Row } from "reactstrap";
 import styled from "styled-components";
 import { Formik, Field } from "formik";
 import { useHistory, useParams } from "react-router-dom";
-import { appURL, environment } from "../config";
+import { environment } from "../config";
 import { useSelector } from "react-redux";
-import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, copyToClipboard, formatDateFR, translateModelFields } from "../utils";
+import { APPLICATION_STATUS_COLORS, dateForDatePicker, getAge, ROLES, translate, isReferentOrAdmin, formatDateFR, translateModelFields } from "../utils";
 import api from "../services/api";
 import DownloadAttestationButton from "./buttons/DownloadAttestationButton";
 import Loader from "./Loader";
@@ -288,7 +288,6 @@ export default function Contract({ young }) {
                 target="projectManager"
                 contract={contract}
                 status={contract?.projectManagerStatus}
-                token={contract?.projectManagerToken}
                 lastName={contract?.projectManagerLastName}
                 firstName={contract?.projectManagerFirstName}
                 validationDate={contract?.projectManagerValidationDate}
@@ -298,7 +297,6 @@ export default function Contract({ young }) {
                 target="structureManager"
                 contract={contract}
                 status={contract?.structureManagerStatus}
-                token={contract?.structureManagerToken}
                 lastName={contract?.structureManagerLastName}
                 firstName={contract?.structureManagerFirstName}
                 validationDate={contract?.structureManagerValidationDate}
@@ -310,7 +308,6 @@ export default function Contract({ young }) {
                     target="parent1"
                     contract={contract}
                     status={contract?.parent1Status}
-                    token={contract?.parent1Token}
                     lastName={contract?.parent1LastName}
                     firstName={contract?.parent1FirstName}
                     validationDate={contract?.parent1ValidationDate}
@@ -321,7 +318,6 @@ export default function Contract({ young }) {
                       target="parent2"
                       contract={contract}
                       status={contract?.parent2Status}
-                      token={contract?.parent2Token}
                       lastName={contract?.parent2LastName}
                       firstName={contract?.parent2FirstName}
                       validationDate={contract?.parent2ValidationDate}
@@ -334,7 +330,6 @@ export default function Contract({ young }) {
                   target="young"
                   contract={contract}
                   status={contract?.youngContractStatus}
-                  token={contract?.youngContractToken}
                   lastName={contract?.youngLastName}
                   firstName={contract?.youngFirstName}
                   validationDate={contract?.youngContractValidationDate}
@@ -998,31 +993,13 @@ function SendContractLink({ contract, target }) {
   );
 }
 
-function ContractStatusbadgeItem({ contract, status, token, target }) {
-  const user = useSelector((state) => state.Auth.user);
-
+// Les jetons de signature ne sont plus renvoyés au front : le lien ne part que par email, au signataire.
+function ContractStatusbadgeItem({ contract, status, target }) {
   if (contract?.invitationSent !== "true") return <Badge text="Pas encore envoyé" />;
   else if (status === "VALIDATED") return <Badge text="Validé" color={APPLICATION_STATUS_COLORS.VALIDATED} />;
-  else if (![ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) {
-    return (
-      <>
-        <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
-        <br />
-        <SendContractLink contract={contract} target={target} />
-      </>
-    );
-  }
   return (
     <>
       <Badge className="pb-2" text="En attente de validation" color={APPLICATION_STATUS_COLORS.WAITING_VALIDATION} />
-      <br />
-      <CopyLink
-        onClick={() => {
-          copyToClipboard(`${appURL}/validate-contract?token=${token}`);
-          toastr.success("Le lien a été copié dans le presse papier.");
-        }}>
-        Copier le lien de validation
-      </CopyLink>
       <br />
       <SendContractLink contract={contract} target={target} />
     </>

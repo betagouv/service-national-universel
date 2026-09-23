@@ -534,7 +534,7 @@ router.get(
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
       }
 
-      return res.status(200).send({ ok: true, data: serializeContract(contract, req.user) });
+      return res.status(200).send({ ok: true, data: serializeContract(contract) });
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

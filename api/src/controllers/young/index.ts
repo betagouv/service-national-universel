@@ -794,7 +794,7 @@ router.get(
           ...serializeApplication(application),
           mission: application.mission ? serializeMission(application.mission as any) : application.mission,
           tutor: application.tutor ? serializeReferent(application.tutor as any) : application.tutor,
-          contract: application.contract ? serializeContract(application.contract as any, req.user, false) : application.contract,
+          contract: application.contract ? serializeContract(application.contract as any) : application.contract,
         };
       });
 
