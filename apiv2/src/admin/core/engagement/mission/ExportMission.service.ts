@@ -3,7 +3,7 @@ import { SearchReferentGateway } from "@analytics/core/SearchReferent.gateway";
 import { SearchStructureGateway } from "@analytics/core/SearchStructure.gateway";
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { MissionType, ReferentType, ROLES, StructureType } from "snu-lib";
+import { MissionType, ReferentType, region2department, ROLES, StructureType } from "snu-lib";
 import { StructureGateway } from "../structure/Structure.gateway";
 import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
 
@@ -83,6 +83,35 @@ export class ExportMissionService {
         });
 
         return { missions, referent };
+    }
+
+    /**
+     * Périmètre des candidatures exportables, aligné sur les policies CANDIDATURE_DEPARTMENT_* /
+     * CANDIDATURE_REGION_* (et sur `buildApplicationContext` côté v1) : le département de
+     * résidence du jeune. Sans lui, un référent départemental exportait l'identité, les
+     * coordonnées et les représentants légaux de toutes les candidatures du pays.
+     *
+     * L'index `application` ne porte pas la région : elle est traduite en liste de départements.
+     */
+    perimetreCandidatures(auteur: { role?: string }, referent: { departement?: string[]; region?: string }) {
+        if (auteur.role === ROLES.REFERENT_DEPARTMENT) {
+            const departements = referent.departement ?? [];
+            if (!departements.length) {
+                throw new FunctionalException(
+                    FunctionalExceptionCode.NOT_ENOUGH_DATA,
+                    "Referent departement is required",
+                );
+            }
+            return { youngDepartment: departements };
+        }
+        if (auteur.role === ROLES.REFERENT_REGION) {
+            const departements = referent.region ? (region2department[referent.region] ?? []) : [];
+            if (!departements.length) {
+                throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "Referent region is required");
+            }
+            return { youngDepartment: departements };
+        }
+        return {};
     }
 
     async retrieveTutors(missions: MissionType[]) {

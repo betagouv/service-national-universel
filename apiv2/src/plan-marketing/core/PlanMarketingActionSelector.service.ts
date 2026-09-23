@@ -1,7 +1,7 @@
 import { Inject, Injectable, Logger } from "@nestjs/common";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { PlanMarketingTaskParameters, PlanMarketingTaskResults } from "./PlanMarketing.model";
-import { TaskName } from "snu-lib";
+import { TaskName, TaskStatus } from "snu-lib";
 import { AssocierListeDiffusionToCampagne } from "./useCase/AssocierListeDiffusionToCampagne";
 import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { EnvoyerCampagne } from "./useCase/EnvoyerCampagne";
@@ -30,6 +30,14 @@ export class PlanMarketingActionSelectorService {
             throw new FunctionalException(
                 FunctionalExceptionCode.TASK_NOT_FOUND,
                 `Task not found for processId ${processId}`,
+            );
+        }
+        // Sans condition de statut, le même appel pouvait être rejoué et relancer un envoi
+        // Brevo réel (`sendCampagneNow`) autant de fois que souhaité.
+        if (task.status !== TaskStatus.PENDING) {
+            throw new FunctionalException(
+                FunctionalExceptionCode.TASK_NOT_FOUND,
+                `Task ${task.id} already processed (status ${task.status})`,
             );
         }
         try {

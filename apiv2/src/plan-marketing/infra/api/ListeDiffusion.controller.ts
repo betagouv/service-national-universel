@@ -1,10 +1,14 @@
-import { Body, Controller, Delete, Get, Param, ParseBoolPipe, Post, Put, Query } from "@nestjs/common";
+import { Body, Controller, Delete, Get, Param, ParseBoolPipe, Post, Put, Query, UseGuards } from "@nestjs/common";
+import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
 import { ListeDiffusionModel } from "@plan-marketing/core/ListeDiffusion.model";
 import { ListeDiffusionService } from "@plan-marketing/core/service/ListeDiffusion.service";
 import { CreateListeDiffusionDto, UpdateListeDiffusionDto } from "./ListeDiffusion.validation";
 import { BasculerArchivageListeDiffusion } from "@plan-marketing/core/useCase/BasculerArchivageListeDiffusion";
 
+// Les listes de diffusion portent le ciblage des campagnes emailing : réservées aux
+// super-administrateurs, comme `CampagneController`.
 @Controller("liste-diffusion")
+@UseGuards(SuperAdminGuard)
 export class ListeDiffusionController {
     constructor(
         private readonly listeDiffusionService: ListeDiffusionService,

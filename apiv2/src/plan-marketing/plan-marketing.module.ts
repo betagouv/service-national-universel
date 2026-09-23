@@ -6,6 +6,8 @@ import { ConfigModule } from "@nestjs/config";
 import { TaskModule } from "@task/Task.module";
 import { AssocierListeDiffusionToCampagne } from "./core/useCase/AssocierListeDiffusionToCampagne";
 import { PlanMarketingActionSelectorService } from "./core/PlanMarketingActionSelector.service";
+import { PlanMarketingWebhookService } from "./core/service/PlanMarketingWebhook.service";
+import { BrevoWebhookGuard } from "./infra/guard/BrevoWebhook.guard";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { TaskRepository } from "@task/infra/TaskMongo.repository";
 import { taskMongoProviders } from "@task/infra/TaskMongo.provider";
@@ -51,6 +53,8 @@ import { NotificationModule } from "@notification/Notification.module";
         ImporterEtCreerListeDiffusion,
         AssocierListeDiffusionToCampagne,
         PlanMarketingActionSelectorService,
+        PlanMarketingWebhookService,
+        BrevoWebhookGuard,
         planMarketingFactory,
         CampagneService,
         ListeDiffusionService,

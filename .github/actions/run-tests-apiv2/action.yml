@@ -53,6 +53,7 @@ runs:
           admin/node_modules
           packages/ds/node_modules
           packages/lib/node_modules
+          packages/log-redaction/node_modules
         key: ${{ runner.os }}-nodemodules-${{ hashFiles('**/package-lock.json') }}
         restore-keys: |
           ${{ runner.os }}-nodemodules-
@@ -71,6 +72,13 @@ runs:
 
     - name: Build lib
       working-directory: packages/lib
+      shell: bash
+      run: npm run build
+
+    # apiv2 importe @snu/log-redaction (redaction avant envoi a Sentry) : sans son dist,
+    # toute suite qui charge le filtre d'exception ou le provider Sentry echoue en TS2307.
+    - name: Build log-redaction
+      working-directory: packages/log-redaction
       shell: bash
       run: npm run build
 
