@@ -1,4 +1,4 @@
-import { buildRequestPath, buildRequestQueryString, isInternalRedirectUrl, isValidRedirectUrl } from "./request";
+import { buildRequestPath, buildRequestQueryString, getSafeExternalRedirectUrl, isInternalRedirectUrl, isValidRedirectUrl } from "./request";
 
 describe("buildRequestPath", () => {
   it("should return the path with no params", () => {
@@ -103,6 +103,9 @@ describe("isValidRedirectUrl", () => {
     "https://evil.tld/snu.gouv.fr",
     "https://evil.tld?https://snu.gouv.fr",
     "https://beta-snu.dev.evil.tld",
+    // sous-domaine SNU qui n'est pas un front
+    "https://api.snu.gouv.fr/referent/signin",
+    "https://evil.snu.gouv.fr/",
   ])("refuse %p", (url) => {
     expect(isValidRedirectUrl(url)).toBe(false);
   });
@@ -115,5 +118,15 @@ describe("isInternalRedirectUrl", () => {
 
   it.each([undefined, "", "https://admin.snu.gouv.fr/", "//evil.tld", "/\\evil.tld", "javascript:alert(1)", "https:evil.tld"])("%p ne reste pas sur le site", (url) => {
     expect(isInternalRedirectUrl(url)).toBe(false);
+  });
+});
+
+describe("getSafeExternalRedirectUrl", () => {
+  it("reconstruit l'URL depuis l'origine autorisée", () => {
+    expect(getSafeExternalRedirectUrl("HTTPS://SUPPORT.SNU.GOUV.FR/base-de-connaissance/article?x=1#y")).toBe("https://support.snu.gouv.fr/base-de-connaissance/article?x=1#y");
+  });
+
+  it.each(["/volontaire", "javascript:alert(1)", "https://snu.gouv.fr@evil.tld", "https://admin.snu.gouv.fr:8443/", undefined])("renvoie null pour %p", (url) => {
+    expect(getSafeExternalRedirectUrl(url)).toBeNull();
   });
 });

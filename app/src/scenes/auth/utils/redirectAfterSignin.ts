@@ -1,16 +1,18 @@
 import { toastr } from "react-redux-toastr";
-import { isInternalRedirectUrl, isValidRedirectUrl } from "snu-lib";
+import { getSafeExternalRedirectUrl, isInternalRedirectUrl } from "snu-lib";
 import { captureMessage } from "@/sentry";
 
 // Redirection après connexion. Un chemin relatif est suivi dans l'application (history.push) ;
-// seule une URL https d'un domaine SNU (la base de connaissance) fait quitter l'application.
-// Tout le reste (javascript:, domaine tiers ou imité) renvoie à l'accueil.
+// seule une URL d'un front SNU (la base de connaissance), reconstruite depuis une origine
+// autorisée, fait quitter l'application. Tout le reste (javascript:, domaine tiers ou imité)
+// renvoie à l'accueil.
 export function redirectAfterSignin(history: { push: (path: string) => void }, redirect: unknown): void {
   if (!redirect) return history.push("/");
   if (isInternalRedirectUrl(redirect)) return history.push(redirect as string);
 
-  if (isValidRedirectUrl(redirect)) {
-    window.location.assign(redirect as string);
+  const externalUrl = getSafeExternalRedirectUrl(redirect);
+  if (externalUrl) {
+    window.location.assign(externalUrl);
     return;
   }
 

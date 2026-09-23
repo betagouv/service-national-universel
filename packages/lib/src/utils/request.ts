@@ -2,9 +2,21 @@ import qs from "query-string";
 
 import { BasicRoute } from "../routes";
 
-// Domaines vers lesquels une redirection absolue (après connexion notamment) est autorisée,
-// sous-domaines compris : admin, moncompte, support...
-const ALLOWED_REDIRECT_DOMAINS = ["snu.gouv.fr", "beta-snu.dev"];
+// Origines vers lesquelles une redirection absolue (après connexion notamment) est autorisée :
+// les fronts SNU et la base de connaissance, en production et en staging. L'URL de destination
+// est reconstruite à partir de l'une de ces constantes, jamais recopiée telle quelle.
+const ALLOWED_REDIRECT_ORIGINS = [
+  "https://snu.gouv.fr",
+  "https://www.snu.gouv.fr",
+  "https://admin.snu.gouv.fr",
+  "https://moncompte.snu.gouv.fr",
+  "https://support.snu.gouv.fr",
+  "https://admin-support.snu.gouv.fr",
+  "https://admin.beta-snu.dev",
+  "https://moncompte.beta-snu.dev",
+  "https://support.beta-snu.dev",
+  "https://admin-support.beta-snu.dev",
+];
 // Origine fictive servant à résoudre les chemins relatifs : un chemin qui reste sur le site
 // garde cette origine une fois résolu.
 const RELATIVE_BASE = "https://relative.invalid";
@@ -33,17 +45,23 @@ export function isInternalRedirectUrl(url: unknown): boolean {
   return parseRedirectUrl(url)?.isRelative === true;
 }
 
-// Vrai si `url` peut servir de cible de redirection : un chemin relatif qui reste sur le site,
-// ou une URL https sans identifiants ni port vers un domaine SNU (ou l'un de ses sous-domaines).
-// Tout autre schéma (javascript:, data:...) et tout hôte imité (snu.gouv.fr.evil.tld,
-// snu.gouv.fr@evil.tld) est refusé.
-export function isValidRedirectUrl(url: unknown): boolean {
+// URL absolue sûre vers un front SNU, reconstruite depuis l'origine autorisée, ou null.
+// Tout autre schéma (javascript:, data:...), tout hôte imité (snu.gouv.fr.evil.tld,
+// snu.gouv.fr@evil.tld), tout port ou identifiant donne null.
+export function getSafeExternalRedirectUrl(url: unknown): string | null {
   const parsed = parseRedirectUrl(url);
-  if (!parsed) return false;
-  if (parsed.isRelative) return true;
-  const { protocol, username, password, port, hostname } = parsed.url;
-  if (protocol !== "https:" || username || password || port) return false;
-  return ALLOWED_REDIRECT_DOMAINS.some((domain) => hostname === domain || hostname.endsWith(`.${domain}`));
+  if (!parsed || parsed.isRelative) return null;
+  const { origin, username, password, pathname, search, hash } = parsed.url;
+  if (username || password) return null;
+  const allowedOrigin = ALLOWED_REDIRECT_ORIGINS.find((allowed) => allowed === origin);
+  if (!allowedOrigin) return null;
+  return `${allowedOrigin}${pathname}${search}${hash}`;
+}
+
+// Vrai si `url` peut servir de cible de redirection : un chemin relatif qui reste sur le site,
+// ou une URL https vers l'un des fronts SNU.
+export function isValidRedirectUrl(url: unknown): boolean {
+  return isInternalRedirectUrl(url) || getSafeExternalRedirectUrl(url) !== null;
 }
 
 export function buildRequestPath(path: BasicRoute["path"], params: BasicRoute["params"]): string {
