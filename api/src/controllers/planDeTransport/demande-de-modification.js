@@ -23,6 +23,13 @@ const {
 const { ObjectId } = require("mongoose").Types;
 const { sendTemplate } = require("../../brevo");
 const { config } = require("../../config");
+const { canActOnLigneBus } = require("../../services/sejourAccess");
+
+// Une demande de modification relève du périmètre de sa ligne (centre de destination).
+const canActOnModification = async (user, modif) => {
+  const line = await LigneBusModel.findById(modif.lineId);
+  return canActOnLigneBus(user, line);
+};
 
 const updateModificationDependencies = async (modif, fromUser) => {
   const planDeTransport = await PlanTransportModel.findOne({ "modificationBuses._id": new ObjectId(modif._id) });
@@ -63,6 +70,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
 
     const line = await LigneBusModel.findById(lineId);
     if (!line) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnLigneBus(req.user, line))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const cohort = await CohortModel.findOne({ name: line.cohort });
     if (!cohort) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -122,6 +130,7 @@ router.put("/:id/status", passport.authenticate("referent", { session: false, fa
 
     const modif = await ModificationBusModel.findById(id);
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnModification(req.user, modif))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     modif.set({
       status,
@@ -173,6 +182,7 @@ router.put("/:id/opinion", passport.authenticate("referent", { session: false, f
 
     const modif = await ModificationBusModel.findById(id);
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnModification(req.user, modif))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     modif.set({
       opinion,
@@ -206,6 +216,7 @@ router.put("/:id/message", passport.authenticate("referent", { session: false, f
 
     const modif = await ModificationBusModel.findById(id);
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnModification(req.user, modif))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const messages = modif.messages || [];
 
@@ -236,6 +247,7 @@ router.put("/:id/tag/:tagId", passport.authenticate("referent", { session: false
 
     const modif = await ModificationBusModel.findById(id);
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnModification(req.user, modif))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const tags = modif.tagIds || [];
     //check if tag already exist
@@ -267,6 +279,7 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
 
     const modif = await ModificationBusModel.findById(id);
     if (!modif) return res.status(400).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnModification(req.user, modif))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const tags = modif.tagIds || [];
 
@@ -284,7 +297,7 @@ router.put("/:id/tag/:tagId/delete", passport.authenticate("referent", { session
 router.get("/ligne/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req, res) => {
   try {
     const { error, value } = Joi.object({
-      id: Joi.string().required(),
+      id: Joi.string().hex().length(24).required(),
     }).validate(req.params);
 
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -293,7 +306,11 @@ router.get("/ligne/:id", passport.authenticate("referent", { session: false, fai
 
     const { id } = value;
 
-    const lines = await ModificationBusModel.find({ lineId: id });
+    const line = await LigneBusModel.findById(id);
+    if (!line) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+    if (!(await canActOnLigneBus(req.user, line))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const lines = await ModificationBusModel.find({ lineId: line._id.toString() });
 
     return res.status(200).send({ ok: true, data: lines });
   } catch (error) {

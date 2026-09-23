@@ -12,6 +12,7 @@ import Joi from "joi";
 import { UserRequest } from "../request";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
+import { isPointDeRassemblementInUserScope } from "../../services/sejourAccess";
 
 const router = express.Router();
 
@@ -34,8 +35,10 @@ router.get(
 
       const meetingPoint = await PointDeRassemblementModel.findById(meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // LIGNE_BUS:READ est posée avec ignorePolicy : sans ce contrôle, toute liaison de France était lisible.
+      if (!isPointDeRassemblementInUserScope(req.user, meetingPoint)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
-      const data = { ...ligneToPoint._doc, meetingPoint };
+      const data = { ...ligneToPoint.toObject(), meetingPoint: meetingPoint.toObject() };
 
       return res.status(200).send({ ok: true, data });
     } catch (error) {

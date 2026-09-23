@@ -21,6 +21,7 @@ import {
   PERMISSION_RESOURCES,
   PERMISSION_ACTIONS,
   isReadAuthorized,
+  isPdrEditionOpen,
 } from "snu-lib";
 import {
   LigneBusModel,
@@ -42,7 +43,7 @@ import { getInfoBus, updatePDRForLine, updateSessionForLine } from "./ligneDeBus
 import { notifyTransporteurLineWasUpdated } from "./ligneDeBusNotificationService";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
-import { getCenterIdsInUserScope, isLigneBusInUserScope, serializeLigneBus, serializeLigneBusList, canViewConvoyeurTeam } from "../../services/sejourAccess";
+import { canActOnLigneBus, getCenterIdsInUserScope, isLigneBusInUserScope, serializeLigneBus, serializeLigneBusList, canViewConvoyeurTeam } from "../../services/sejourAccess";
 
 const router = express.Router();
 
@@ -219,6 +220,8 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     } else {
       if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // La fenêtre d'édition ne suffit pas : un référent n'agit que sur les lignes de son périmètre.
+    if (!(await canActOnLigneBus(req.user, ligne))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const NewMember = {
       role: value.role,
@@ -287,6 +290,8 @@ router.put("/:id/teamDelete", passport.authenticate("referent", { session: false
     } else {
       if (!canEditLigneBusTeam(req.user) && !isTeamLeaderOrSupervisorEditable(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    // La fenêtre d'édition ne suffit pas : un référent n'agit que sur les lignes de son périmètre.
+    if (!(await canActOnLigneBus(req.user, ligne))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const memberToDelete = ligne.team.id(value.idTeam);
     if (!memberToDelete) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -402,7 +407,9 @@ router.put("/:id/pointDeRassemblement", passport.authenticate("referent", { sess
       if (!isBusEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     } else {
       if (!canEditLigneBusPointDeRassemblement(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      if (!isPdrEditionOpen(req.user, cohort[0])) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
+    if (!(await canActOnLigneBus(req.user, ligne))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const ligneToPoint = await LigneToPointModel.findOne({ lineId: id, meetingPointId });
     if (!ligneToPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -854,26 +861,42 @@ const IGNORED_VALUES = [null, undefined, "", "Vide", "[]", false];
  */
 router.get("/patches/filter-options", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
+    // Même garde que /patches/:cohort : les auteurs (email, rôle, département) étaient
+    // lisibles par tout compte référent, et sur tout le territoire.
+    if (!isReadAuthorized({ resource: PERMISSION_RESOURCES.PATCH, action: PERMISSION_ACTIONS.READ, user: req.user! })) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    const scopedCenterIds = await getCenterIdsInUserScope(req.user);
+    if (scopedCenterIds !== null && scopedCenterIds.length === 0) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
+    let busLineFilter = {};
+    let lineToPointFilter = {};
+    if (scopedCenterIds !== null) {
+      const lines = await LigneBusModel.find({ centerId: { $in: scopedCenterIds } }, { _id: 1 });
+      const lineIds = lines.map((line) => line._id);
+      const lineToPoints = await LigneToPointModel.find({ lineId: { $in: lineIds.map((id) => id.toString()) } }, { _id: 1 });
+      busLineFilter = { ref: { $in: lineIds } };
+      lineToPointFilter = { ref: { $in: lineToPoints.map((ltp) => ltp._id) } };
+    }
+
     const db = mongoose.connection.db;
     const busline = {
-      op: await db.collection("lignebus_patches").distinct("ops.op"),
-      path: await db.collection("lignebus_patches").distinct("ops.path"),
-      user: await db.collection("lignebus_patches").distinct("user"),
+      op: await db.collection("lignebus_patches").distinct("ops.op", busLineFilter),
+      path: await db.collection("lignebus_patches").distinct("ops.path", busLineFilter),
+      user: await db.collection("lignebus_patches").distinct("user", busLineFilter),
     };
     const lineToPoint = {
-      op: await db.collection("lignetopoint_patches").distinct("ops.op"),
-      path: await db.collection("lignetopoint_patches").distinct("ops.path"),
-      user: await db.collection("lignetopoint_patches").distinct("user"),
+      op: await db.collection("lignetopoint_patches").distinct("ops.op", lineToPointFilter),
+      path: await db.collection("lignetopoint_patches").distinct("ops.path", lineToPointFilter),
+      user: await db.collection("lignetopoint_patches").distinct("user", lineToPointFilter),
     };
-    // const modifications = {
-    //   op: await db.collection("modificationbus_patches").distinct("ops.op"),
-    //   path: await db.collection("modificationbus_patches").distinct("ops.path"),
-    //   user: await db.collection("modificationbus_patches").distinct("user"),
-    // };
 
-    const op = mergeArrayItems([...busline.op, ...lineToPoint.op /*, ...modifications.op*/]);
-    const path = mergeArrayItems([...busline.path, ...lineToPoint.path /*, ...modifications.path*/]);
-    const user = mergeArrayItems([...busline.user, ...lineToPoint.user /*, ...modifications.user*/], "_id");
+    const op = mergeArrayItems([...busline.op, ...lineToPoint.op]);
+    const path = mergeArrayItems([...busline.path, ...lineToPoint.path]).filter((key) => canViewConvoyeurTeam(req.user) || key !== "team"); // clés sans « / » (pathToKey)
+    // Le filtre n'affiche que le nom de l'auteur : email, rôle et département ne sortent plus.
+    const user = mergeArrayItems([...busline.user, ...lineToPoint.user], "_id").map(({ _id, firstName, lastName }) => ({ _id, firstName, lastName }));
 
     return res.status(200).send({
       ok: true,
