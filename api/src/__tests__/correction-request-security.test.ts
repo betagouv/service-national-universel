@@ -12,6 +12,9 @@
  *     vérifie que la transition de statut elle-même.
  *   - H23 : les routes de relance renvoient `serializeYoung(young)`, soit le dossier complet de
  *     n'importe quel volontaire, et déclenchent l'envoi d'un email officiel à ses parents.
+ *
+ * `POST /:youngId/remind-cni` a depuis été supprimée avec le parcours des représentants légaux
+ * (cf. representants-legaux-routes-supprimees.test.ts).
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -145,20 +148,6 @@ describe("H22/H23 — périmètre des demandes de correction", () => {
 
       const res = await request(await getAppHelperWithAcl(referent))
         .post(`/correction-request/${young._id}/remind`)
-        .send({});
-
-      expect(res.statusCode).toEqual(403);
-      expect(res.body.data).toBeUndefined();
-      expect(mockSendTemplate).not.toHaveBeenCalled();
-    });
-  });
-
-  describe("POST /correction-request/:youngId/remind-cni", () => {
-    it("refuse un référent hors périmètre, sans email au parent ni fuite du dossier", async () => {
-      const { young, referent } = await jeuneEtReferentHorsPerimetre();
-
-      const res = await request(await getAppHelperWithAcl(referent))
-        .post(`/correction-request/${young._id}/remind-cni`)
         .send({});
 
       expect(res.statusCode).toEqual(403);

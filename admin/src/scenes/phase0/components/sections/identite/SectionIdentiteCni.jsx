@@ -1,15 +1,12 @@
 import React from "react";
 import { useSelector } from "react-redux";
-import { toastr } from "react-redux-toastr";
 
 import { translate, ROLES } from "snu-lib";
 
-import api from "@/services/api";
 import dayjs from "@/utils/dayjs.utils";
 
 import { getCorrectionRequest } from "../../../utils";
 
-import { BorderButton } from "../../Buttons";
 import { FieldsGroup } from "../../FieldsGroup";
 import Field from "../../Field";
 import { CniField } from "../../CniField";
@@ -94,15 +91,6 @@ function HonorCertificate({ young, cohort }) {
     }
   }
 
-  async function remind() {
-    try {
-      await api.post(`/correction-request/${young._id}/remind-cni`, {});
-      toastr.success("Le représentant légal a été relancé.");
-    } catch (err) {
-      toastr.error("Erreur !", "Nous n'avons pas pu envoyer la relance. Veuillez réessayer dans quelques instants.");
-    }
-  }
-
   if (cniExpired) {
     return (
       <div className="mt-[8px] flex items-center justify-between">
@@ -111,11 +99,6 @@ function HonorCertificate({ young, cohort }) {
           <div className="rounded-[100px] border-[1px] border-[#CECECE] bg-[#FFFFFF] py-[3px] px-[10px] text-[12px] font-normal">
             {young.parentStatementOfHonorInvalidId === "true" ? "Validée" : "En attente"}
           </div>
-          {young.parentStatementOfHonorInvalidId !== "true" && young.parent1Email && (
-            <BorderButton className="ml-[8px]" onClick={remind}>
-              Relancer
-            </BorderButton>
-          )}
         </div>
       </div>
     );

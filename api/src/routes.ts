@@ -25,7 +25,6 @@ export function injectRoutes(app) {
   app.use("/point-de-rassemblement", require("./planDeTransport/pointDeRassemblement").default);
   app.use("/program", require("./controllers/program").default);
   app.use("/referent", require("./referent/referentController").default);
-  app.use("/representants-legaux", require("./controllers/representants-legaux"));
   app.use("/session-phase1", require("./controllers/session-phase1"));
   app.use("/signin", require("./controllers/signin"));
   app.use("/structure", require("./controllers/structure").default);

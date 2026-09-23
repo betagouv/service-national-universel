@@ -2,7 +2,7 @@ import React, { lazy, Suspense, useEffect, useState } from "react";
 import useAuth from "./services/useAuth";
 import useCohort from "./services/useCohort";
 import API from "./services/api";
-import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled, shouldReAcceptRI } from "./utils";
+import { ENABLE_PM, FEATURES_NAME, YOUNG_STATUS, isFeatureEnabled } from "./utils";
 import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
@@ -12,7 +12,6 @@ import usePermissions from "./hooks/usePermissions";
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
 import ModalCGU from "./components/modals/ModalCGU";
-import ModalRI from "./components/modals/ModalRI";
 
 const Account = lazy(() => import("./scenes/account"));
 const AutresEngagements = lazy(() => import("./scenes/phase3/home/waitingRealisation"));
@@ -30,7 +29,6 @@ const Phase3 = lazy(() => import("./scenes/phase3"));
 
 const Espace = () => {
   const [isModalCGUOpen, setIsModalCGUOpen] = useState(false);
-  const [isModalRIOpen, setIsModalRIOpen] = useState(false);
   const { canViewPhase2 } = usePermissions();
   const { young } = useAuth();
   const { cohort } = useCohort();
@@ -45,23 +43,11 @@ const Espace = () => {
     return toastr.success("Vous avez bien accepté les conditions générales d'utilisation.");
   };
 
-  const handleModalRIConfirm = async () => {
-    setIsModalRIOpen(false);
-    const { ok, code } = await API.put(`/young/accept-ri`);
-    if (!ok) {
-      setIsModalRIOpen(true);
-      return toastr.error(`Une erreur est survenue : ${code}`);
-    }
-    return toastr.success("Vous avez bien accepté le nouveau règlement intérieur.");
-  };
-
   useEffect(() => {
     if (young && young.acceptCGU !== "true") {
       setIsModalCGUOpen(true);
-    } else if (shouldReAcceptRI(young, cohort)) {
-      setIsModalRIOpen(true);
     }
-  }, [young, cohort]);
+  }, [young]);
 
   if (!young || !cohort) return <PageLoader />;
 
@@ -92,7 +78,6 @@ const Espace = () => {
         </Switch>
       </Suspense>
       {isModalCGUOpen ? <ModalCGU isOpen={isModalCGUOpen} onAccept={handleModalCGUConfirm} /> : null}
-      {isModalRIOpen ? <ModalRI isOpen={isModalRIOpen} onAccept={handleModalRIConfirm} /> : null}
     </ClassicLayout>
   );
 };
