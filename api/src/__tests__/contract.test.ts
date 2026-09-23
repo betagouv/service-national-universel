@@ -126,24 +126,38 @@ describe("Contract", () => {
         expect(updatedYoung?.statusPhase2Contract[0]).toBe("SENT");
       });
 
-      it("should create tokens for young (not adult)", async () => {
+      const TOKEN_FIELDS = ["parent1Token", "projectManagerToken", "structureManagerToken", "parent2Token", "youngContractToken"];
+
+      it("should create tokens for young (not adult) without returning them", async () => {
         const { res } = await createContract({ sendMessage: true });
         expect(res.status).toBe(200);
-        expect(res.body.data.parent1Token).toBeTruthy();
-        expect(res.body.data.projectManagerToken).toBeTruthy();
-        expect(res.body.data.structureManagerToken).toBeTruthy();
-        expect(res.body.data.parent2Token).toBeTruthy();
-        expect(res.body.data.youngContractToken).toBeTruthy();
+        const stored = await getContractByIdHelper(res.body.data._id);
+        for (const field of TOKEN_FIELDS) {
+          expect(stored?.[field]).toBeTruthy();
+          expect(res.body.data[field]).toBeUndefined();
+        }
       });
 
-      it("should create tokens for young (adult)", async () => {
+      it("should create tokens for young (adult) without returning them", async () => {
         const { res } = await createContract({ sendMessage: true, isYoungAdult: "true" });
         expect(res.status).toBe(200);
-        expect(res.body.data.parent1Token).toBeTruthy();
-        expect(res.body.data.projectManagerToken).toBeTruthy();
-        expect(res.body.data.structureManagerToken).toBeTruthy();
-        expect(res.body.data.parent2Token).toBeTruthy();
-        expect(res.body.data.youngContractToken).toBeTruthy();
+        const stored = await getContractByIdHelper(res.body.data._id);
+        for (const field of TOKEN_FIELDS) {
+          expect(stored?.[field]).toBeTruthy();
+          expect(res.body.data[field]).toBeUndefined();
+        }
+      });
+
+      it("should keep existing tokens when a contract is saved back without them", async () => {
+        const { res } = await createContract({ sendMessage: true });
+        const before = await getContractByIdHelper(res.body.data._id);
+        const resAfter = await request(await getAppHelperWithAcl())
+          .post("/contract")
+          .send({ ...res.body.data, sendMessage: false });
+        expect(resAfter.status).toBe(200);
+        const after = await getContractByIdHelper(res.body.data._id);
+        expect(after?.parent1Token).toBe(before?.parent1Token);
+        expect(after?.projectManagerToken).toBe(before?.projectManagerToken);
       });
 
       it("should update young phase2NumberHoursEstimated, phase2NumberHoursDone and missionDuration", async () => {
@@ -192,6 +206,29 @@ describe("Contract", () => {
         .get(`/contract/${contract._id}`)
         .send();
       expect(res.status).toBe(200);
+    });
+    it("should not return tokens for referents", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
+      const contract = await createContractHelper({
+        ...getNewContractFixture(),
+        youngId: young._id,
+        applicationId: application._id,
+        projectManagerToken: "foo",
+        parent1Token: "bar",
+        parent2Token: "baz",
+        structureManagerToken: "qux",
+        youngContractToken: "quux",
+      });
+      const res = await request(await getAppHelperWithAcl())
+        .get(`/contract/${contract._id}`)
+        .send();
+      expect(res.status).toBe(200);
+      expect(res.body.data.projectManagerToken).toBeUndefined();
+      expect(res.body.data.structureManagerToken).toBeUndefined();
+      expect(res.body.data.parent1Token).toBeUndefined();
+      expect(res.body.data.parent2Token).toBeUndefined();
+      expect(res.body.data.youngContractToken).toBeUndefined();
     });
     it("should not return tokens for young", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

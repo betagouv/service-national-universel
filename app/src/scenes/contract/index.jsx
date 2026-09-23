@@ -9,7 +9,7 @@ import Loader from "../../components/Loader";
 import { Box } from "../../components/box";
 import { VioletButton } from "../../components/Content";
 import Badge from "../../components/Badge";
-import { APPLICATION_STATUS_COLORS, formatDateFRTimezoneUTC, htmlCleaner } from "../../utils";
+import { APPLICATION_STATUS_COLORS, formatDateFRTimezoneUTC } from "../../utils";
 
 export default function Index() {
   const [context, setContext] = useState(null);
@@ -987,7 +987,9 @@ const ContractField = ({ name, context, type }) => {
   return (
     <span>
       {" "}
-      <SuperSpan dangerouslySetInnerHTML={{ __html: htmlCleaner(context[name]) }} />{" "}
+      {/* Champs saisis en texte libre par la structure : affichés comme du texte, jamais comme du HTML
+          (un lien injecté serait présenté au signataire sur la page officielle de signature). */}
+      <SuperSpan>{context[name]}</SuperSpan>{" "}
     </span>
   );
 };
