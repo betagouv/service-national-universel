@@ -4,10 +4,7 @@ const ProfileButton = ({ children, className = "", onLogout, user }) => {
   return (
     <Popover className={`relative order-2 flex grow-0 justify-end ${className} md:flex-none`}>
       <Popover.Button className="flex items-start justify-center gap-3 rounded-none border-none bg-white p-0 text-left shadow-none">
-        <span className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-red-500 uppercase text-snu-purple-900">
-          {user.firstName?.[0]}
-          {user.lastName?.[0]}
-        </span>
+        <span className="flex h-10 w-10 items-center justify-center rounded-full border-4 border-red-500 uppercase text-snu-purple-900">{user.initials}</span>
         {/* showNameAndRole && (
           <div className="flex h-full flex-col justify-center">
             <span className="text-sm font-medium text-gray-700">{user.firstName}</span>

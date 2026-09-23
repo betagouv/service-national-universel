@@ -12,6 +12,7 @@ const { revalidateSiteMap, formatSectionsIntoSitemap } = require("../utils/sitem
 const { agentGuard } = require("../middlewares/authenticationGuards");
 const { logger } = require("../logger");
 const { canEditKnowledgeBase } = require("../utils/knowledgeBaseScope");
+const { findUnsafeUrl } = require("../utils/knowledgeBaseContent");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const { SCHEMA_ID } = require("../schemas");
 const escapeStringRegexp = require("escape-string-regexp");
@@ -354,7 +355,7 @@ router.patch(
       icon: Joi.string().token(),
       author: SCHEMA_ID, // required
       read: Joi.number().integer().min(0), // required
-      imageSrc: Joi.string().uri(),
+      imageSrc: Joi.string().uri({ scheme: ["http", "https"] }),
       imageAlt: Joi.string().token(),
       slug: Joi.string().pattern(/^[0-9a-z-]+$/), // required
     }).min(1)
@@ -422,6 +423,11 @@ router.put(
     }).prefs({ presence: "required" })
   ),
   async (req, res) => {
+    // Le contenu est rendu sur support.snu.gouv.fr : une URL `javascript:` y deviendrait une XSS
+    // stockée contre chaque lecteur (M85 / FH17).
+    const unsafeUrl = findUnsafeUrl(req.cleanBody.content);
+    if (unsafeUrl) return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, message: `URL non autorisée dans un élément « ${unsafeUrl.type || "lien"} »` });
+
     const existingKb = await KnowledgeBaseModel.findById(req.cleanParams.id);
     if (!existingKb) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
