@@ -10,16 +10,7 @@ import mongoose from "mongoose";
 import { generateBatchCertifPhase1 } from "../templates/certificate/phase1";
 import { generateBatchDroitImage } from "../templates/droitImage/droitImage";
 import { capture } from "../sentry";
-import {
-  SessionPhase1Model,
-  CohesionCenterModel,
-  CohortModel,
-  YoungModel,
-  ReferentModel,
-  LigneBusModel,
-  SchemaDeRepartitionModel,
-  SessionPhase1Document,
-} from "../models";
+import { SessionPhase1Model, CohesionCenterModel, CohortModel, YoungModel, ReferentModel, LigneBusModel, SessionPhase1Document } from "../models";
 import { ERRORS, updatePlacesSessionPhase1, isYoung, uploadFile, deleteFile, getFile, updateHeadCenter } from "../utils";
 import {
   ROLES,
@@ -64,27 +55,6 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     await updateHeadCenter(data.headCenterId, req.user);
 
     return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.get("/:id/schema-repartition", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    // if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const { error, value: id } = validateId(req.params.id);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const session = await SessionPhase1Model.findById(id);
-    if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const schema = await SchemaDeRepartitionModel.find({ sessionId: id });
-    return res.status(200).send({ ok: true, schema: schema });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
