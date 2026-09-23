@@ -10,8 +10,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   anonymize:
+    # Seul job à pousser : il force la branche anonymization.
+    permissions:
+      contents: write
+    environment: production
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
     steps:
       - name: Git checkout
@@ -19,8 +26,13 @@ jobs:
         with:
           ref: production
 
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
 
       - name: Merge production in anonymization
         run: git push --force origin HEAD:anonymization
@@ -29,4 +41,4 @@ jobs:
         env:
           CLEVER_TOKEN: ${{ secrets.CLEVER_TOKEN }}
           CLEVER_SECRET: ${{ secrets.CLEVER_SECRET }}
-        run: ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_PRODUCTION_ANONYMIZATION }} $(git rev-parse HEAD)
+        run: ./devops/scripts/cc-watch-deploy.sh ${{ vars.CC_ORGANIZATION_ID }} ${{ vars.CC_APP_ID_PRODUCTION_ANONYMIZATION }} "$(git rev-parse HEAD)"

@@ -9,6 +9,9 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   prepare:
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
@@ -20,6 +23,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
+          persist-credentials: false
 
       - name: Get matrices configuration
         id: config
@@ -73,24 +77,35 @@ jobs:
         app: ${{ fromJSON(needs.prepare.outputs.test_matrix) }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
 
       - name: Run tests
-        uses: jenseng/dynamic-uses@v1
+        uses: jenseng/dynamic-uses@8bc24f0360175e710da532c4d19eafdbed489a06 # v1
         with:
           uses: ./.github/actions/run-tests-${{matrix.app.name}}
-          with: '{"branch_name": "${{ github.ref_name }}", "CC_TEST_REPORTER_ID": "${{ secrets.CC_TEST_REPORTER_ID }}" }'
+          with: '{"branch_name": ${{ toJSON(github.ref_name) }}}'
 
   deploy:
     needs: [prepare, test]
     # "skipped" est un résultat acceptable (aucune app touchée), "failure" non.
     if: ${{ !cancelled() && needs.prepare.result == 'success' && (needs.test.result == 'success' || needs.test.result == 'skipped') }}
+    # Seul job à pousser : il force la branche deploy-ci.
+    permissions:
+      contents: write
+    environment: ci
     runs-on: ${{ vars.SNU_RUNNER || 'ubuntu-latest' }}
 
     steps:
       - uses: actions/checkout@v4
 
+      # clever-tools 5 exige Node 24+ : on ne dépend pas du Node (ou de son absence) du runner.
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+
       - name: Install clever-tools
-        run: npm install -g clever-tools
+        run: npm install --global --ignore-scripts clever-tools@5.0.2
 
       - name: Merge main in deploy-ci
         run: git push --force origin HEAD:deploy-ci
