@@ -1005,30 +1005,6 @@ function canShareSessionPhase1(actor) {
   );
 }
 
-function canEditTableDeRepartitionDepartment(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canEditTableDeRepartitionRegion(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION].includes(actor.role);
-}
-
-function canViewSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.TRANSPORTER].includes(actor.role);
-}
-
-function canCreateSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canEditSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
-function canDeleteSchemaDeRepartition(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
-}
-
 function canUpdateLigneBus(actor) {
   return [
     ROLES.ADMIN,
@@ -1399,12 +1375,6 @@ export {
   canSeeYoungInfo,
   canEditPresenceYoung,
   canShareSessionPhase1,
-  canEditTableDeRepartitionDepartment,
-  canEditTableDeRepartitionRegion,
-  canViewSchemaDeRepartition,
-  canCreateSchemaDeRepartition,
-  canEditSchemaDeRepartition,
-  canDeleteSchemaDeRepartition,
   canViewNotes,
   canUpdateLigneBus,
   canCreateLigneBus,
