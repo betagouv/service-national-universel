@@ -17,23 +17,17 @@ import {
   SENDINBLUE_TEMPLATES,
   getCohortStartDate,
   SESSION_FILE_KEYS,
-  canCreateOrUpdateSessionPhase1,
   canViewCohesionCenter,
-  canSearchSessionPhase1,
-  canViewSessionPhase1,
-  canCreateOrUpdateCohesionCenter,
   isSessionEditionOpen,
-  canSendTimeScheduleReminderForSessionPhase1,
   formatDateTimeZone,
   SessionPhase1Type,
-  canModifyDirectionCenterTeam,
   ReferentStatus,
 } from "snu-lib";
 import { serializeSessionPhase1, serializeCohesionCenter } from "../utils/serializer";
-import { validateSessionPhase1, validateId } from "../utils/validator";
+import { validateSessionPhase1Update, validateSessionPhase1Team, validateId } from "../utils/validator";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
-import { isSessionPhase1InUserScope } from "../services/sejourAccess";
+import { isSessionPhase1InUserScope, getSessionPhase1ScopeFilter } from "../services/sejourAccess";
 import { encrypt, decrypt } from "../cryptoUtils";
 import { scanFile } from "../utils/virusScanner";
 import { getMimeFromFile } from "../utils/file";
@@ -41,25 +35,15 @@ import { UserRequest } from "./request";
 
 const router = express.Router();
 
-router.post("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = validateSessionPhase1(req.body);
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
+// Toutes les routes de ce fichier passent par `isSessionPhase1InUserScope` : administrateur, ou
+// référent départemental / régional du territoire de la session. Les anciennes gardes
+// (`canViewSessionPhase1`, `canCreateOrUpdateSessionPhase1`, `canCreateOrUpdateCohesionCenter`…)
+// ne testaient que le rôle : un référent de Guyane lisait et modifiait les sessions des Yvelines,
+// et le transporteur, les rôles CLE et les chefs de centre atteignaient toutes les sessions.
+// `POST /` a été supprimée : aucun front ne l'appelait, les sessions se créent par
+// `PUT /cohesion-center/:id/session-phase1`.
 
-    if (!canCreateOrUpdateSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-
-    const data = await SessionPhase1Model.create(value);
-    await updateHeadCenter(data.headCenterId, req.user);
-
-    return res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
+const SESSION_FILE_TYPES = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
 
 router.use("/", require("../sessionPhase1/sessionPhase1Controller"));
 router.use("/import", require("../sessionPhase1/import/sessionPhase1ImportController").default);
@@ -102,7 +86,7 @@ router.get("/:id", passport.authenticate(["referent"], { session: false, failWit
     const session = await SessionPhase1Model.findById(id);
     if (!session) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canViewSessionPhase1(req.user)) {
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -149,8 +133,9 @@ const populateSessionPhase1 = async (session: SessionPhase1Document): Promise<Se
 
 router.get("/", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (!canSearchSessionPhase1(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const data = await SessionPhase1Model.find({});
+    const filter = getSessionPhase1ScopeFilter(req.user);
+    if (!filter) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    const data = await SessionPhase1Model.find(filter);
     return res.status(200).send({ ok: true, data: data.map(serializeSessionPhase1) });
   } catch (error) {
     capture(error);
@@ -160,20 +145,22 @@ router.get("/", passport.authenticate("referent", { session: false, failWithErro
 
 router.put("/:id", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.TRANSPORTER].includes(req.user.role)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
     const { error: errorId, value: checkedId } = validateId(req.params.id);
     if (errorId) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
+    if (!isSessionPhase1InUserScope(req.user, sessionPhase1)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+
     const cohort = await CohortModel.findById(sessionPhase1.cohortId);
     if (!cohort) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    const { error, value } = validateSessionPhase1(req.body);
+    // Seuls les champs éditables de la session : le centre, la cohorte, le chef de centre, la liste
+    // d'attente, les places restantes et l'équipe ont leurs routes dédiées ou sont calculés.
+    const { error, value } = validateSessionPhase1Update(req.body);
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
@@ -190,9 +177,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
       return res.status(200).send({ ok: true, data: serializeSessionPhase1(sessionPhase1) });
     }
 
-    let oldHeadCenterId = sessionPhase1.headCenterId;
-    const hasHeadCenterChanged = oldHeadCenterId !== value.oldHeadCenterId;
-
     if (!value.dateStart || !value.dateEnd) {
       value.dateStart = undefined;
       value.dateEnd = undefined;
@@ -203,10 +187,6 @@ router.put("/:id", passport.authenticate("referent", { session: false, failWithE
 
     sessionPhase1.set({ ...value });
     await sessionPhase1.save({ fromUser: req.user });
-    await updateHeadCenter(sessionPhase1.headCenterId, req.user);
-    if (hasHeadCenterChanged) {
-      await updateHeadCenter(oldHeadCenterId, req.user);
-    }
 
     const data = await updatePlacesSessionPhase1(sessionPhase1, req.user);
     res.status(200).send({ ok: true, data: serializeSessionPhase1(data) });
@@ -231,12 +211,12 @@ router.put("/:id/directionTeam", passport.authenticate("referent", { session: fa
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    if (!canModifyDirectionCenterTeam(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+    if (!isSessionPhase1InUserScope(req.user, sessionPhase1)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
 
     const referent = await ReferentModel.findById(payload.referentId);
     if (!referent) {
@@ -277,13 +257,11 @@ router.put("/:id/team", passport.authenticate("referent", { session: false, fail
     const sessionPhase1 = await SessionPhase1Model.findById(checkedId);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.ADMIN, ROLES.HEAD_CENTER, ROLES.HEAD_CENTER_ADJOINT, ROLES.REFERENT_SANITAIRE].includes(req.user.role)) {
+    if (!isSessionPhase1InUserScope(req.user, sessionPhase1)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
-    const { error, value } = Joi.object({
-      team: Joi.array().items(Joi.any().allow(null, "")),
-    }).validate(req.body, { stripUnknown: true });
+    const { error, value } = validateSessionPhase1Team(req.body);
 
     if (error) {
       capture(error);
@@ -349,7 +327,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
     const sessionPhase1 = await SessionPhase1Model.findById(id);
     if (!sessionPhase1) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
 
-    if (!canCreateOrUpdateCohesionCenter(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!isSessionPhase1InUserScope(req.user, sessionPhase1)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // check if youngs are registered to the session
     const youngs = await YoungModel.find({ sessionPhase1Id: sessionPhase1._id });
@@ -368,7 +346,7 @@ router.delete("/:id", passport.authenticate("referent", { session: false, failWi
       cohorts: cohesionCenter.cohorts.filter((c) => c !== sessionPhase1.cohort),
       cohortIds: cohesionCenter.cohortIds.filter((c) => c !== sessionPhase1.cohortId),
     });
-    cohesionCenter.save({ fromUser: req.user });
+    await cohesionCenter.save({ fromUser: req.user });
 
     await sessionPhase1.deleteOne();
     await updateHeadCenter(sessionPhase1.headCenterId, req.user);
@@ -406,7 +384,7 @@ router.post(
       if (!session) {
         return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       }
-      if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
+      if (!isSessionPhase1InUserScope(req.user, session)) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
 
@@ -417,10 +395,11 @@ router.post(
       const file = files[0];
 
       const { name, tempFilePath, mimetype, size } = file as any;
-      const filetype = await getMimeFromFile(tempFilePath);
-      const mimeFromMagicNumbers = filetype || "application/pdf";
-      const validTypes = ["image/jpeg", "image/png", "application/pdf", "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"];
-      if (!(validTypes.includes(mimetype) && validTypes.includes(mimeFromMagicNumbers))) {
+      // Le type retenu est celui des magic numbers : un fichier au type non reconnu est refusé
+      // (il était auparavant enregistré comme PDF), et le mimetype déclaré par le client n'est
+      // plus ni stocké ni renvoyé au téléchargement.
+      const mimeFromMagicNumbers = await getMimeFromFile(tempFilePath);
+      if (!mimeFromMagicNumbers || !SESSION_FILE_TYPES.includes(mimetype) || !SESSION_FILE_TYPES.includes(mimeFromMagicNumbers)) {
         fs.unlinkSync(tempFilePath);
         return res.status(500).send({ ok: false, code: "UNSUPPORTED_TYPE" });
       }
@@ -435,7 +414,7 @@ router.post(
         name,
         size,
         uploadedAt: new Date(),
-        mimetype,
+        mimetype: mimeFromMagicNumbers,
       };
       const data = fs.readFileSync(tempFilePath);
       const encryptedBuffer = encrypt(data);
@@ -488,7 +467,7 @@ router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { 
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -519,7 +498,7 @@ router.delete("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { 
 
     await session.save({ fromUser: req.user });
 
-    return res.status(200).send({ data: session, ok: true });
+    return res.status(200).send({ data: serializeSessionPhase1(session), ok: true });
   } catch (error) {
     capture(error);
     if (error === "FILE_CORRUPTED") return res.status(500).send({ ok: false, code: ERRORS.FILE_CORRUPTED });
@@ -551,7 +530,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (!canViewSessionPhase1(req.user)) {
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
@@ -570,7 +549,9 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
     // --- Send
     return res.status(200).send({
       data: Buffer.from(decrypt(downloaded.Body), "base64"),
-      mimeType: file.mimetype,
+      // Les fichiers antérieurs portent le mimetype déclaré par le client : il n'est renvoyé que s'il
+      // fait partie des types acceptés.
+      mimeType: file.mimetype && SESSION_FILE_TYPES.includes(file.mimetype) ? file.mimetype : "application/octet-stream",
       fileName: file.name,
       ok: true,
     });
@@ -600,7 +581,7 @@ router.post("/:sessionId/:key/send-reminder", passport.authenticate(["referent"]
     if (!session) {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
-    if (!canSendTimeScheduleReminderForSessionPhase1(req.user)) {
+    if (!isSessionPhase1InUserScope(req.user, session)) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }
 
