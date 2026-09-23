@@ -61,7 +61,14 @@ const referentRegionDuPerimetre = () => ({
   firstName: "Dans",
   lastName: "Region",
 });
-const referentDepDuPerimetre = () => ({ _id: new ObjectId().toString(), role: ROLES.REFERENT_DEPARTMENT, department: [DEP_CIBLE], region: REGION_CIBLE, firstName: "Dans", lastName: "Dep" });
+const referentDepDuPerimetre = () => ({
+  _id: new ObjectId().toString(),
+  role: ROLES.REFERENT_DEPARTMENT,
+  department: [DEP_CIBLE],
+  region: REGION_CIBLE,
+  firstName: "Dans",
+  lastName: "Dep",
+});
 const responsable = () => ({ _id: new ObjectId().toString(), role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() });
 
 let seq = 0;
