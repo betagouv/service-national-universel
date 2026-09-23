@@ -602,32 +602,6 @@ describe("Cohort Session Controller", () => {
     });
   });
 
-  describe("GET /api/cohort-session/isReInscriptionOpen", () => {
-    it("admin, should return 200 OK with data", async () => {
-      const currentCohortGroup = await createCohortGroupHelper(getNewCohortGroupFixture());
-      const currentCohort = await createCohortHelper(getNewCohortFixture({ cohortGroupId: currentCohortGroup._id }));
-      const young = await createYoungHelper(
-        getNewYoungFixture({
-          cohort: currentCohort.name,
-          cohortId: currentCohort._id,
-        }),
-      );
-      await createCohortHelper(
-        getNewCohortFixture({
-          type: COHORT_TYPE.VOLONTAIRE,
-          reInscriptionStartDate: faker.date.past(),
-          reInscriptionEndDate: faker.date.future(),
-        }),
-      );
-
-      const res = await request(getAppHelper(young)).get("/cohort-session/isReInscriptionOpen");
-
-      expect(res.statusCode).toEqual(200);
-      expect(res.body).toHaveProperty("ok", true);
-      expect(res.body).toHaveProperty("data", true);
-    });
-  });
-
   describe("GET /cohort-session/isInscriptionOpen", () => {
     it("should return 200 OK and inscription is open when one cohort available", async () => {
       await createCohortHelper(

@@ -4,8 +4,8 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
-import { alreadyHaveAnAccountModal } from "../preinscription/components/Modals";
-import AlreadyHaveAnAccountModal from "../preinscription/components/AlreadyHaveAnAccountModal";
+import { alreadyHaveAnAccountModal } from "@/components/modals/dsfrModals";
+import AlreadyHaveAnAccountModal from "./components/AlreadyHaveAnAccountModal";
 import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
@@ -34,7 +34,7 @@ const OnBoarding = () => {
   const id = params.get("id") || "";
   const { isError, isPending, data: classe } = useClass(id);
   if (isLoggedIn && !isCLE) logout({ redirect: false });
-  if (isLoggedIn && isCLE) return <Redirect to="/inscription" />;
+  if (isLoggedIn && isCLE) return <Redirect to="/" />;
   if (isPending) return <Loader />;
   if (isError)
     return <OnboardingError message="Impossible de joindre le service. Essayez de vérifier le lien d'inscription qui vous a été transmis. Sinon, veuillez réessayer plus tard." />;

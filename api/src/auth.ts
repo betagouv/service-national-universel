@@ -751,14 +751,7 @@ class Auth {
       }
       await user.save();
 
-      await sendTemplate(SENDINBLUE_TEMPLATES.young.INSCRIPTION_STARTED, {
-        emailTo: [{ name: `${user.firstName} ${user.lastName}`, email: user.email }],
-        params: {
-          firstName: user.firstName,
-          lastName: user.lastName,
-          cta: `${config.APP_URL}/inscription2023?utm_campaign=transactionnel+compte+créé&utm_source=notifauto&utm_medium=mail+219+accéder`,
-        },
-      });
+      // Plus d'e-mail « inscription commencée » : il renvoyait vers le tunnel d'inscription, supprimé (lot H1).
 
       const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
         expiresIn: JWT_SIGNIN_MAX_AGE_SEC,

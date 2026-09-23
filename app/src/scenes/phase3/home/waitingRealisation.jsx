@@ -7,7 +7,7 @@ import ArrowUpRight from "../../../assets/icons/ArrowUpRight";
 import MissionCard from "../components/missionCard";
 import api from "../../../services/api";
 import ButtonLinkPrimary from "@/components/ui/buttons/ButtonLinkPrimary";
-import EngagementCard from "@/scenes/preinscription/components/EngagementCard";
+import EngagementCard from "@/components/engagement/EngagementCard";
 import Breadcrumb from "@/components/layout/navbar/components/BreadCrumb";
 
 export default function WaitingRealisation() {

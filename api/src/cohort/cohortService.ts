@@ -1,7 +1,6 @@
-import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS, YOUNG_SOURCE } from "snu-lib";
-import { CohortDocument, CohortGroupModel, CohortModel } from "../models";
+import { COHORT_TYPE, ERRORS, CohortType, getZonedDate, YoungType, getDepartmentForEligibility, YOUNG_STATUS } from "snu-lib";
+import { CohortDocument, CohortModel } from "../models";
 import { buildCohortQuery } from "./cohortQueryBuilder";
-import { getCohortGroupsForYoung } from "../cohortGroup/cohortGroupService";
 
 const isInscriptionOpenOnSomeCohorts = async (): Promise<boolean> => {
   const cohorts = await CohortModel.find({ type: COHORT_TYPE.VOLONTAIRE });
@@ -15,27 +14,6 @@ export const isInscriptionOpen = async (cohortName: string | undefined): Promise
     return cohort.isInscriptionOpen;
   }
   return isInscriptionOpenOnSomeCohorts();
-};
-
-type ReinscriptionQuery = { type?: string; dateStart?: { $gte: Date }; cohortGroupId?: { $nin: string[] } };
-
-type ReinscriptionArgs = {
-  cohortGroupId?: string;
-  timeZoneOffset?: string | number;
-};
-
-export const isReInscriptionOpen = async ({ cohortGroupId, timeZoneOffset }: ReinscriptionArgs): Promise<boolean> => {
-  let query: ReinscriptionQuery = { type: COHORT_TYPE.VOLONTAIRE };
-  // On exclut les séjours appartenant à l'année du séjour actuel du volontaire ainsi que les séjours passés.
-  if (cohortGroupId) {
-    const cohortGroup = await CohortGroupModel.findById(cohortGroupId);
-    if (!cohortGroup) throw new Error("Cohort group not found");
-    const pastGroups = await CohortGroupModel.find({ year: { $lt: cohortGroup.year } });
-    const groupsToExclude = [...pastGroups.map((g) => g.id), cohortGroupId];
-    query = { ...query, cohortGroupId: { $nin: groupsToExclude } };
-  }
-  const cohorts = await CohortModel.find(query);
-  return cohorts.some((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
 };
 
 export const findCohortBySnuIdOrThrow = async (cohortName: string) => {
@@ -74,10 +52,6 @@ function isCohortInscriptionOpenWithTimezone(cohort: CohortType, timeZoneOffset:
   }
   return cohort.getIsInscriptionOpen(Number(timeZoneOffset));
 }
-
-export const isCohortReinscriptionOpen = (cohort: CohortType, timeZoneOffset?: string | number | null) => {
-  return cohort.getIsReInscriptionOpen(Number(timeZoneOffset)) || cohort.getIsInscriptionOpen(Number(timeZoneOffset));
-};
 
 type YoungInfo = Pick<YoungType, "birthdateAt" | "grade" | "status" | "schooled" | "schoolRegion" | "region" | "department" | "schoolDepartment" | "zip">;
 
@@ -118,26 +92,3 @@ export async function getFilteredSessionsForChangementSejour(young: YoungType, t
   return cohorts.filter((session) => isCohortInscriptionOpenWithTimezone(session, timeZoneOffset, young.status));
 }
 
-export async function getFilteredSessionsForReinscription(young: YoungType, timeZoneOffset?: string | number | null) {
-  const currentCohort = await CohortModel.findById(young.cohortId);
-  if (!currentCohort) throw new Error("Cohort not found");
-
-  const currentGroup = await CohortGroupModel.findById(currentCohort.cohortGroupId);
-  if (!currentGroup) throw new Error("Cohort group not found");
-
-  const groups = await getCohortGroupsForYoung(young);
-  const cohortGroupsToInclude = groups.map((g) => g.id);
-
-  const department = getDepartmentForEligibility(young);
-  if (!department) throw new Error("Unable to determine department");
-
-  const query = buildCohortQuery({
-    birthdate: new Date(young.birthdateAt!),
-    schoolLevel: young.grade!,
-    department,
-    cohortGroupsToInclude,
-  });
-
-  const cohorts = await CohortModel.find(query);
-  return cohorts.filter((cohort) => isCohortReinscriptionOpen(cohort, timeZoneOffset));
-}

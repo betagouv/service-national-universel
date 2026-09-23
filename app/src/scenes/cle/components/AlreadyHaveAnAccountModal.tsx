@@ -1,5 +1,5 @@
 import React from "react";
-import { alreadyHaveAnAccountModal } from "./Modals";
+import { alreadyHaveAnAccountModal } from "@/components/modals/dsfrModals";
 import Button from "@codegouvfr/react-dsfr/Button";
 import { Link } from "react-router-dom";
 

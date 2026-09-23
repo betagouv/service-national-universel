@@ -5,7 +5,7 @@ import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import PrimaryButton from "@/components/dsfr/ui/buttons/PrimaryButton";
 import { knowledgebaseURL } from "@/config";
-import AccountExistsImage from "../inscription2023/assets/error.png";
+import AccountExistsImage from "@/assets/error.png";
 
 const Title = ({ children }) => (
   <div className="flex items-center">
