@@ -429,7 +429,15 @@ router.put("/validate_phase3/:young/:token", async (req: UserRequest, res) => {
       return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
-    data.set({ statusPhase3: "VALIDATED", statusPhase3UpdatedAt: Date.now(), statusPhase3ValidatedAt: Date.now(), phase3TutorNote: value.phase3TutorNote });
+    // Le lien du tuteur est à usage unique : le jeton est effacé à la validation, pour qu'un lien transféré
+    // ou retrouvé dans une boîte mail ne permette plus ni de relire la mission ni de la revalider.
+    data.set({
+      statusPhase3: "VALIDATED",
+      statusPhase3UpdatedAt: Date.now(),
+      statusPhase3ValidatedAt: Date.now(),
+      phase3TutorNote: value.phase3TutorNote,
+      phase3Token: "",
+    });
     await data.save({ fromUser: req.user });
 
     let template = SENDINBLUE_TEMPLATES.young.VALIDATE_PHASE3;
@@ -1013,8 +1021,10 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
 
 router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
-    const keys = ["cohesionStayMedical", "imageRight", "rules", "agreement", "convocation"];
-    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "rules" | "agreement" | "convocation">()
+    // `rules` n'est plus accepté : l'acceptation du règlement intérieur n'est plus demandée au jeune et aucun
+    // écran n'appelait plus cette route pour elle (audit 2026-09-21, M49).
+    const keys = ["cohesionStayMedical", "imageRight", "agreement", "convocation"];
+    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "agreement" | "convocation">()
       .required()
       .valid(...keys)
       .validate(req.params.document, { stripUnknown: true });
@@ -1037,7 +1047,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
     young.set(value);
     await young.save({ fromUser: req.user });
 
-    if (["imageRight", "rules"].includes(document)) {
+    if (document === "imageRight") {
       let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
       let cc = getCcOfYoung({ template, young });
       await sendTemplate(template, {

@@ -160,6 +160,26 @@ describe("validation de la phase 3 par le tuteur (M44)", () => {
     expect(updated?.phase3MissionDescription).toBe(young.phase3MissionDescription);
     expect(updated?.status).toBe(YOUNG_STATUS.VALIDATED);
   });
+
+  it("efface le jeton à la validation : le lien du tuteur ne sert qu'une fois", async () => {
+    const token = `token-${Date.now()}`;
+    const young = await createYoungHelper(getNewYoungFixture({ phase3Token: token, statusPhase3: YOUNG_STATUS_PHASE3.WAITING_VALIDATION }));
+
+    const validation = await request(await getAppHelperWithAcl())
+      .put(`/young/validate_phase3/${young._id}/${token}`)
+      .send({ phase3TutorNote: "RAS" });
+    expect(validation.status).toBe(200);
+    expect((await getYoungByIdHelper(young._id))?.phase3Token).toBe("");
+
+    const relecture = await request(await getAppHelperWithAcl()).get(`/young/validate_phase3/${young._id}/${token}`);
+    expect(relecture.status).toBe(404);
+
+    const revalidation = await request(await getAppHelperWithAcl())
+      .put(`/young/validate_phase3/${young._id}/${token}`)
+      .send({ phase3TutorNote: "réécrite" });
+    expect(revalidation.status).toBe(404);
+    expect((await getYoungByIdHelper(young._id))?.phase3TutorNote).toBe("RAS");
+  });
 });
 
 describe("PUT /young/:id/validate-mission-phase3 (M45)", () => {
@@ -225,6 +245,19 @@ describe("PUT /young/phase1/imageRight (M49)", () => {
     expect(updated?.imageRight).toBe("false");
     expect(updated?.imageRightFilesStatus).toBe("WAITING_VERIFICATION");
     expect(updated?.imageRightFiles).toEqual(["droit-image.pdf"]);
+  });
+});
+
+describe("PUT /young/phase1/rules", () => {
+  it("n'est plus accepté : rulesYoung reste inchangé", async () => {
+    const young = await createYoungHelper(getNewYoungFixture({ rulesYoung: "false" }));
+
+    const res = await request(await getAppHelperWithAcl(young))
+      .put("/young/phase1/rules")
+      .send({ rulesYoung: "true" });
+
+    expect(res.status).toBe(400);
+    expect((await getYoungByIdHelper(young._id))?.rulesYoung).toBe("false");
   });
 });
 

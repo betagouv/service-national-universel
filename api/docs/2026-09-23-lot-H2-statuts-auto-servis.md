@@ -51,6 +51,14 @@ l'admin : `_id`, prénom, nom, cohorte, `statusPhase3` et les champs `phase3*` (
 dates, tuteur, note). `phase3Token` en est exclu. Le `PUT` n'écrivait déjà que `statusPhase3` (et ses
 dates) et `phase3TutorNote`. Son `.unknown()`, inerte mais trompeur, est retiré.
 
+Le lien du tuteur devient à usage unique : le `PUT` efface `phase3Token` (remis à `""`, sa valeur par
+défaut) en validant. Avant, le jeton n'expirait jamais : un lien transféré ou retrouvé dans une
+boîte mail permettait de relire la mission et de la revalider (note réécrite, email renvoyé au
+jeune). Après validation, le `GET` et le `PUT` répondent 404. La page `/validate` de l'admin affiche
+alors « Ce lien de validation n'est plus valide », au lieu du chargement sans fin qu'elle montrait
+sur un 404. Une nouvelle déclaration du jeune (`validate-mission-phase3`) génère un nouveau jeton,
+mais elle est refusée une fois la phase 3 validée.
+
 ### M45 — `validate-mission-phase3`
 
 - `statusPhase3` est retiré du schéma. La soumission fixe WAITING_VALIDATION côté serveur.
@@ -67,6 +75,21 @@ envoyé est ignoré (`stripUnknown`), pas rejeté. La route écrit les pièces e
 que par un référent : `PUT /young-edition/:id/ref-allow-snu` (`updateYoungConsent`) ou
 `PUT /referent/young/:id`. La validation des pièces reste sur `PUT /young-edition/:id/situationparents`
 (`imageRightFilesStatus`). Aucun front n'appelle cette route pour le droit à l'image.
+
+### Règlement intérieur — `rules` retiré des deux routes phase 1
+
+Constat connexe à M49 : `PUT /young/phase1/rules` laissait le jeune poser `rulesYoung: "true"` sans
+pièce. `rulesYoung` n'est lu que par les exports phase 1 (colonne « Règlement intérieur » des listes
+volontaires, CLE et jeunes d'un centre ; `ExporterJeunes` de l'apiv2) et par l'anonymisation. Aucun
+écran ni route de phase 2 ne s'en sert. Les deux routes qui l'écrivaient n'avaient plus d'appelant :
+
+- `PUT /young/phase1/rules` (jeune) : l'app n'appelle plus que `convocation`, `agreement` et
+  `cohesionStayMedical` ;
+- `PUT /referent/young/:id/phase1Status/rules` (référent) : aucun appel dans l'admin.
+
+`rules` est retiré des documents acceptés par les deux routes, qui répondent 400 (`INVALID_PARAMS`),
+ainsi que le cas `rules` de `validatePhase1Document`. Les valeurs en base restent lisibles dans les
+exports.
 
 ### L24 — `PUT /young/change-cohort`
 
@@ -100,13 +123,14 @@ un simple `!canEditPresenceYoung(req.user)` (même sémantique).
   `!isCle`). Leur séjour dépend de la classe, pas de l'adresse. Avant, un volontaire CLE en attente
   d'affectation qui changeait de département recevait en pratique un 403. Désormais son adresse est
   mise à jour, sans changement de statut.
-- **Validation phase 3 (admin)** : la page n'utilise que des champs de la projection.
+- **Validation phase 3 (admin)** : la page n'utilise que des champs de la projection. Un lien déjà
+  utilisé affiche un message au lieu d'un chargement sans fin.
 - **Multiactions (admin, centres)** : un chef de centre ou un référent sur une session hors de son
   périmètre reçoit 403.
 
 ## 4. Tests
 
-`__tests__/young-statuts-auto-servis.test.ts` : 14 cas. Ils créent les acteurs avec
+`__tests__/young-statuts-auto-servis.test.ts` : 15 cas pour les six constats, dont l'usage unique du lien tuteur. Ils créent les acteurs avec
 `createYoungHelper` et `createReferentHelper`, jamais des objets nus, et incluent des contrôles
 positifs pour que les refus ne soient pas verts par construction. Sur les sources d'`origin/main`,
 12 échouent (tous sauf les 2 contrôles positifs) :
@@ -120,15 +144,17 @@ positifs pour que les refus ne soient pas verts par construction. Sur les source
 - multiactions : référent départemental sur une session d'un autre département → 403, sur son
   département → 200 ; chef de centre non responsable → 403 sur le départ, responsable → 200.
 
+`rules` : un cas par route (jeune et référent) vérifie le 400 et que `rulesYoung` reste inchangé. Les
+deux cas M69 de `referent-security.test.ts`, qui passaient par `phase1Status/rules`, utilisent
+désormais `phase1Status/cohesionStayMedical`.
+
 `young.test.ts` : les deux cas `validate-mission-phase3` qui utilisaient la fixture par défaut
 (phase 3 VALIDATED) passent `statusPhase3: WAITING_REALISATION`.
 
 ## 5. Reste à faire
 
-- `phase3Token` n'expire pas et n'est pas invalidé après la validation du tuteur. Le lien reste
-  rejouable, mais il n'expose plus que la vue tuteur.
-- `PUT /young/phase1/rules` écrit toujours `rulesYoung` sans pièce vérifiée (mentionné dans M49,
-  hors du périmètre de ce lot).
+- `phase3Token` n'a pas de durée de validité : un lien jamais utilisé reste valable jusqu'à la
+  validation.
 - `canEditPresenceYoung` (snu-lib) reste une matrice de rôles. Ses autres appelants, les routes
   unitaires de `controllers/young/phase1.ts`, sont montés sous `/young/:id/phase1` derrière
   `youngPerimeterMiddleware` : le périmètre y est déjà contrôlé au montage.

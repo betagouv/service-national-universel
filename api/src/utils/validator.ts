@@ -710,10 +710,6 @@ export function validatePhase1Document(phase1document, key) {
       return Joi.object({
         imageRightFiles: Joi.array().items(Joi.string().required()).required().min(1),
       }).validate(phase1document, { stripUnknown: true });
-    case "rules":
-      return Joi.object({
-        rulesYoung: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
     case "agreement":
       return Joi.object({
         youngPhase1Agreement: Joi.string().trim().required().valid("true"),
