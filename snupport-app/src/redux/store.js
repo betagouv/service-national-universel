@@ -1,7 +1,6 @@
 import { createStore, combineReducers } from "redux";
 import { persistStore, persistReducer } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import * as Sentry from "@sentry/react";
 
 import reducers from "./reducers";
 
@@ -17,14 +16,11 @@ const persistConfig = {
   whitelist: ["TicketPreview"], // only TicketPreview will be persisted
 };
 
-const sentryReduxEnhancer = Sentry.createReduxEnhancer({
-  // Optionally pass options listed below
-});
-
 const persistedReducer = persistReducer(persistConfig, combineReducers({ ...reducers }));
 
 export default () => {
-  let store = createStore(persistedReducer, sentryReduxEnhancer);
+  // Pas de Sentry.createReduxEnhancer : il joignait le state complet (tickets, messages, notes internes) à chaque événement.
+  let store = createStore(persistedReducer);
   let persistor = persistStore(store);
   return { store, persistor };
 };

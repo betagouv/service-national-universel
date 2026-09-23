@@ -172,7 +172,7 @@ router.put("/:id/identite", passport.authenticate("referent", { session: false, 
     if (emailChanged) await notifyPreviousEmailOfChange(young, previousEmail);
 
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     if (err.code === 11000) {
@@ -278,7 +278,7 @@ router.put("/:id/situationparents", passport.authenticate("referent", { session:
     await young.save({ fromUser: req.user });
 
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -394,7 +394,7 @@ router.put("/:id/phasestatus", passport.authenticate("referent", { session: fals
     if (oldBus) await updateSeatsTakenInBusLine(oldBus);
 
     // --- result
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -468,7 +468,7 @@ router.put("/:id/ref-allow-snu", passport.authenticate("referent", { session: fa
     }
     await updateYoungConsent(young, req.user, value);
 
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

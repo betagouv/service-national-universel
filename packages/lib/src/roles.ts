@@ -287,8 +287,77 @@ function canDeletePatchesHistory(actor, target) {
 }
 
 function canViewNotes(actor) {
-  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor.role);
+  const isAdminOrReferent = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.REFERENT_CLASSE, ROLES.ADMINISTRATEUR_CLE].includes(actor?.role);
   return isAdminOrReferent;
+}
+
+/**
+ * Situations particulières du dossier jeune : santé, handicap et suivi médico-social.
+ * Une structure d'accueil de mission n'en a pas besoin pour instruire une candidature.
+ */
+export const YOUNG_HEALTH_FIELDS = [
+  "handicap",
+  "allergies",
+  "handicapInSameDepartment",
+  "reducedMobilityAccess",
+  "ppsBeneficiary",
+  "paiBeneficiary",
+  "medicosocialStructure",
+  "medicosocialStructureName",
+  "medicosocialStructureAddress",
+  "medicosocialStructureComplementAddress",
+  "medicosocialStructureZip",
+  "medicosocialStructureCity",
+  "medicosocialStructureDepartment",
+  "medicosocialStructureRegion",
+  "medicosocialStructureLocation",
+  "specificAmenagment",
+  "specificAmenagmentType",
+];
+
+/** Métadonnées des pièces d'identité (nom, date d'expiration, catégorie du fichier). */
+export const YOUNG_IDENTITY_FILE_FIELDS = ["cniFiles", "files.cniFiles", "latestCNIFileExpirationDate", "latestCNIFileCategory", "CNIFileNotValidOnStart"];
+
+const STRUCTURE_ROLES: string[] = [ROLES.RESPONSIBLE, ROLES.SUPERVISOR];
+
+/** Données de santé : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungHealthData(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/** Pièces d'identité : tout le monde sauf les structures d'accueil. Le jeune voit les siennes. */
+function canViewYoungIdentityFiles(actor) {
+  return !!actor && !STRUCTURE_ROLES.includes(actor.role);
+}
+
+/**
+ * Champs du dossier jeune que l'API ne doit pas renvoyer à `actor`. Chemins pointés
+ * (`files.cniFiles`) pour les champs imbriqués. Sans acteur connu, on masque tout.
+ */
+export function getYoungFieldsHiddenFrom(actor): string[] {
+  const hidden: string[] = [];
+  if (!canViewNotes(actor)) hidden.push("notes");
+  if (!canViewYoungHealthData(actor)) hidden.push(...YOUNG_HEALTH_FIELDS);
+  if (!canViewYoungIdentityFiles(actor)) hidden.push(...YOUNG_IDENTITY_FILE_FIELDS);
+  return hidden;
+}
+
+/** Retire de `doc` (en place) les champs de `paths`, pointés ou non. */
+export function omitYoungFields<T extends Record<string, any>>(doc: T, paths: string[]): T {
+  if (!doc || typeof doc !== "object") return doc;
+  for (const path of paths) {
+    const [head, ...rest] = path.split(".");
+    if (!rest.length) {
+      delete doc[head];
+      continue;
+    }
+    const child = doc[head];
+    if (child && typeof child === "object") {
+      // Copie de l'objet imbriqué : ne pas muter un sous-document partagé.
+      (doc as any)[head] = omitYoungFields({ ...child }, [rest.join(".")]);
+    }
+  }
+  return doc;
 }
 
 function canViewReferent(actor, target) {
@@ -444,10 +513,6 @@ function canViewYoungFile(actor, target, targetCenter?) {
     isReferentCenterFromSameDepartmentTargetCenter ||
     isReferentCenterFromSameRegionTargetCenter;
   return authorized;
-}
-
-function canCreateOrUpdateCohesionCenter(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
 }
 
 function canCreateEvent(actor) {
@@ -1325,7 +1390,6 @@ export {
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
-  canCreateOrUpdateCohesionCenter,
   canCreateOrUpdateSessionPhase1,
   canViewSessionPhase1,
   isSessionEditionOpen,
@@ -1376,6 +1440,8 @@ export {
   canEditPresenceYoung,
   canShareSessionPhase1,
   canViewNotes,
+  canViewYoungHealthData,
+  canViewYoungIdentityFiles,
   canUpdateLigneBus,
   canCreateLigneBus,
   canDeleteLigneBus,

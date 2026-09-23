@@ -239,47 +239,6 @@ export const placesTakenSessionPhase1 = async (sessionPhase1) => {
   return placesTaken;
 };
 
-export const updateCenterDependencies = async (center, fromUser) => {
-  const youngs = await YoungModel.find({ cohesionCenterId: center._id });
-  youngs.forEach(async (young) => {
-    young.set({
-      cohesionCenterName: center.name,
-      cohesionCenterZip: center.zip,
-      cohesionCenterCity: center.city,
-    });
-    await young.save({ fromUser });
-  });
-  const referents = await ReferentModel.find({ cohesionCenterId: center._id });
-  referents.forEach(async (referent) => {
-    referent.set({ cohesionCenterName: center.name });
-    await referent.save({ fromUser });
-  });
-  const sessions = await SessionPhase1Model.find({ cohesionCenterId: center._id });
-  for (let i = 0; i < sessions.length; i++) {
-    sessions[i].set({
-      department: center.department,
-      region: center.region,
-      codeCentre: center.code2022,
-      nameCentre: center.name,
-      zipCentre: center.zip,
-      cityCentre: center.city,
-    });
-    await sessions[i].save({ fromUser });
-  }
-  const plansDeTransport = await PlanTransportModel.find({ centerId: center._id });
-  plansDeTransport.forEach(async (planDeTransport) => {
-    planDeTransport.set({
-      centerDepartment: center.department,
-      centerRegion: center.region,
-      centerZip: center?.zip,
-      centerAddress: center?.address,
-      centerCode: center.code2022,
-      centerName: center.name,
-    });
-    await planDeTransport.save({ fromUser });
-  });
-};
-
 export const deleteCenterDependencies = async (center, fromUser) => {
   const youngs = await YoungModel.find({ cohesionCenterId: center._id });
   youngs.forEach(async (young) => {

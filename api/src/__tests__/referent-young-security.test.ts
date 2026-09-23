@@ -7,6 +7,7 @@
  *     sans lien avec le volontaire, peuvent refuser (et supprimer) ses pièces de préparation militaire
  * H67 GET /referent/young/:id                                  : périmètre limité au rôle, document brut (tokens)
  * L23 PUT /young/update_phase3/:young                          : `canEditYoung` seul, sans rattachement réel
+ * FM13 PUT /referent/young/:id                                 : historique des statuts accepté tel quel du client (GOO-12)
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -106,6 +107,43 @@ beforeEach(async () => {
 afterEach(resetAppAuth);
 
 describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (lot A1)", () => {
+  describe("FM13 — PUT /referent/young/:id : historique des statuts", () => {
+    const historiqueInitial = [{ phase: "INSCRIPTION", userName: "Référent d'origine", userId: "origine", status: YOUNG_STATUS.WAITING_VALIDATION, note: "" }];
+
+    it("ignore l'historique envoyé par le client et trace le changement de statut au nom de l'utilisateur authentifié", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.WAITING_VALIDATION, historic: historiqueInitial } as any));
+      const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN, firstName: "Alice", lastName: "Admin" }));
+
+      const res = await request(await getAppHelperWithAcl(admin, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({
+          status: YOUNG_STATUS.WAITING_CORRECTION,
+          historic: [{ phase: "INSCRIPTION", userName: "Quelqu'un d'autre", userId: "usurpe", status: YOUNG_STATUS.VALIDATED, note: "" }],
+        });
+
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      const historic = (updated?.historic || []).map(({ userName, userId, status }) => ({ userName, userId, status }));
+      expect(historic).toEqual([
+        { userName: "Référent d'origine", userId: "origine", status: YOUNG_STATUS.WAITING_VALIDATION },
+        { userName: "Alice Admin", userId: admin._id.toString(), status: YOUNG_STATUS.WAITING_CORRECTION },
+      ]);
+    }, 30000);
+
+    it("ne permet pas d'effacer l'historique", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.WAITING_VALIDATION, historic: historiqueInitial } as any));
+      const admin = await createReferentHelper(getNewReferentFixture({ role: ROLES.ADMIN }));
+
+      const res = await request(await getAppHelperWithAcl(admin, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ historic: [] });
+
+      expect(res.status).toBe(200);
+      const updated = await YoungModel.findById(young._id);
+      expect(updated?.historic).toHaveLength(1);
+    }, 30000);
+  });
+
   describe("H67 — GET /referent/young/:id", () => {
     it("refuse le dossier d'un volontaire qui n'a pas candidaté à une mission de la structure", async () => {
       const victime = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, ...TERRITOIRE } as any));

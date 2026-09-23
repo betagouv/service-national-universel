@@ -159,15 +159,12 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
   };
 
   async function changeStatus(status, withdrawnReason, withdrawnMessage) {
-    const note = status === YOUNG_STATUS.WITHDRAWN ? WITHRAWN_REASONS.find((r) => r.value === withdrawnReason)?.label + " " + withdrawnMessage : undefined;
-
     const payload = {
       status,
       lastStatusAt: new Date().toISOString(),
       withdrawnReason: status === YOUNG_STATUS.WITHDRAWN ? withdrawnReason : undefined,
       withdrawnMessage: status === YOUNG_STATUS.WITHDRAWN ? withdrawnMessage : undefined,
       phase: status === YOUNG_STATUS.VALIDATED && phase === YOUNG_PHASE.INTEREST_MISSION ? YOUNG_PHASE.CONTINUE : undefined,
-      historic: [...young.historic, { phase, userName: `${user.firstName} ${user.lastName}`, userId: user._id, status, note }],
     };
 
     mutate(payload, {

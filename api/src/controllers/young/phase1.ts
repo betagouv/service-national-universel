@@ -225,7 +225,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
 
     await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
 
-    res.status(200).send({ ok: true, data: serializeYoung(young) });
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -254,7 +254,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
 
     await autoValidationSessionPhase1Young({ young, user: req.user });
 
-    res.status(200).send({ ok: true, data: serializeYoung(young) });
+    res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -325,7 +325,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       await notifyJeuneConfirmationParticipationWasUpdated(young);
     }
 
-    res.status(200).send({ ok: true, data: serializeYoung(data) });
+    res.status(200).send({ ok: true, data: serializeYoung(data, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

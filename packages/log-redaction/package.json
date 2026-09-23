@@ -3,12 +3,13 @@
   "version": "1.0.0",
   "description": "Redaction des secrets et des données personnelles avant écriture dans les logs et l'envoi à Sentry",
   "main": "dist/index.js",
+  "module": "dist/esm/index.js",
   "types": "dist/index.d.ts",
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsc -b",
+    "build": "tsc -b && tsc -p tsconfig.esm.json",
     "check-types": "tsc -b",
     "test": "jest",
     "lint": "eslint ./src --ext .ts",
