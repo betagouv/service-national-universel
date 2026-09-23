@@ -2,6 +2,7 @@ const express = require("express");
 const router = express.Router();
 const ShortcutModel = require("../models/shortcut");
 const { agentGuard } = require("../middlewares/authenticationGuards");
+const { requireRole } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
 const Joi = require("joi");
 const { ERRORS } = require("../errors");
@@ -164,8 +165,12 @@ router.post(
   }
 );
 
+// Les modules de texte et signatures ne s'administrent que depuis les paramètres de snupport-app,
+// réservés au rôle AGENT. Le modèle n'a pas de propriétaire : sans cette garde, un référent modifiait
+// les modules de tous les référents de son rôle et de son territoire (FH11, GOO-13).
 router.post(
   "/",
+  requireRole("AGENT"),
   validateBody(
     Joi.object({
       content: SCHEMA_SLATE_CONTENT,
@@ -187,6 +192,7 @@ router.post(
 
 router.patch(
   "/:id",
+  requireRole("AGENT"),
   validateParams(idSchema),
   validateBody(
     Joi.object({
@@ -208,7 +214,7 @@ router.patch(
   }
 );
 
-router.delete("/:id", validateParams(idSchema), async (req, res) => {
+router.delete("/:id", requireRole("AGENT"), validateParams(idSchema), async (req, res) => {
   const shortcut = await ShortcutModel.findById(req.cleanParams.id);
   if (!shortcut) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   if (!canManageShortcut(req.user, shortcut)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });

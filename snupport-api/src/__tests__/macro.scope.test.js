@@ -130,13 +130,14 @@ describe("POST /macro/:id perimeter enforcement", () => {
     expect(ownTicket.save).not.toHaveBeenCalled();
   });
 
-  it("still applies a macro to a ticket inside the referent's department", async () => {
+  // GOO-13 : appliquer une macro est réservé au rôle AGENT, même sur un ticket du périmètre du référent.
+  it("refuses a macro to a referent even on a ticket inside their department", async () => {
     const res = await request(buildApp())
       .post(`/macro/${MACRO_ID}`)
       .send({ ticketsId: [OWN_TICKET_ID], agentId: ATTACKER_AGENT_ID });
 
-    expect(res.status).toBe(200);
-    expect(ownTicket.save).toHaveBeenCalled();
+    expect(res.status).toBe(403);
+    expect(ownTicket.save).not.toHaveBeenCalled();
   });
 
   it("still applies a macro to any ticket for a central AGENT", async () => {

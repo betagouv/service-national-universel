@@ -1,10 +1,16 @@
 const { getForbiddenTicketUpdateFields, getAgentSignature, reconcileTicketNotes } = require("../utils/ticketUpdate");
 
 describe("getForbiddenTicketUpdateFields", () => {
-  describe("AGENT, ADMIN and DG roles", () => {
-    it.each(["AGENT", "ADMIN", "DG"])("lets %s write every field of the route schema", (role) => {
+  describe("AGENT and ADMIN roles", () => {
+    it.each(["AGENT", "ADMIN"])("lets %s write every field of the route schema", (role) => {
       const body = { contactEmail: "a@b.fr", contactDepartment: "Rhône", formSubjectStep1: "TECHNICAL", subject: "x", agentId: "1", notes: [] };
       expect(getForbiddenTicketUpdateFields({ role }, body)).toEqual([]);
+    });
+  });
+
+  describe("DG role (read-only, GOO-13)", () => {
+    it("rejects every field, even those a referent may write", () => {
+      expect(getForbiddenTicketUpdateFields({ role: "DG" }, { status: "CLOSED", notes: [] })).toEqual(["status", "notes"]);
     });
   });
 
