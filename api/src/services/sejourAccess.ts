@@ -73,6 +73,20 @@ export function isSessionPhase1InUserScope(user: UserDto, session: GeoScope): bo
 
 /** Filtre Mongo des sessions du périmètre de l'utilisateur ; `null` = aucun accès. */
 export function getSessionPhase1ScopeFilter(user: UserDto): Record<string, unknown> | null {
+  return getGeoScopeFilter(user);
+}
+
+/** Filtre Mongo des centres de cohésion du périmètre de l'utilisateur ; `null` = aucun accès. */
+export function getCohesionCenterScopeFilter(user: UserDto): Record<string, unknown> | null {
+  return getGeoScopeFilter(user);
+}
+
+/** Variante synchrone de `isCohesionCenterInUserScope`, pour un centre déjà chargé. */
+export function isCohesionCenterDocInUserScope(user: UserDto, center: GeoScope): boolean {
+  return isInGeoScope(user, { department: center?.department, region: center?.region });
+}
+
+function getGeoScopeFilter(user: UserDto): Record<string, unknown> | null {
   switch (user?.role) {
     case ROLES.ADMIN:
       return {};
@@ -95,7 +109,7 @@ export async function isCohesionCenterInUserScope(user: UserDto, centerId?: stri
   if (!centerId) return false;
   const center = await CohesionCenterModel.findById(String(centerId)).select({ department: 1, region: 1 });
   if (!center) return false;
-  return isInGeoScope(user, { department: center.department, region: center.region });
+  return isCohesionCenterDocInUserScope(user, center);
 }
 
 /** Une ligne de bus est rattachée au périmètre de son centre de destination. */

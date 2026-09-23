@@ -446,10 +446,6 @@ function canViewYoungFile(actor, target, targetCenter?) {
   return authorized;
 }
 
-function canCreateOrUpdateCohesionCenter(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.TRANSPORTER].includes(actor.role);
-}
-
 function canCreateEvent(actor) {
   return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor.role);
 }
@@ -1325,7 +1321,6 @@ export {
   canViewReferent,
   canUpdateReferent,
   canViewYoungMilitaryPreparationFile,
-  canCreateOrUpdateCohesionCenter,
   canCreateOrUpdateSessionPhase1,
   canViewSessionPhase1,
   isSessionEditionOpen,
