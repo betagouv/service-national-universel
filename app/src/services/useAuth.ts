@@ -4,7 +4,6 @@ import { setYoung } from "../redux/auth/actions";
 import { toastr } from "react-redux-toastr";
 import { logoutYoung } from "./young.service";
 import { YOUNG_SOURCE, YoungType } from "snu-lib";
-import { displaySignupToast } from "@/utils";
 import { AuthState } from "@/redux/auth/reducer";
 
 export const useAuth = () => {
@@ -25,7 +24,6 @@ export const useAuth = () => {
   const login = async (user?: YoungType) => {
     if (!user) return history.push("/auth");
     await dispatch(setYoung(user));
-    displaySignupToast(user);
   };
 
   const isLoggedIn = !!young;

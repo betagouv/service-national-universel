@@ -1189,10 +1189,9 @@ async function getStatusAfterChangementSejour(currentStatus: string, department:
 
 // Tous les sous-routeurs /young/:id/* passent par le contrôle d'appartenance commun : un jeune n'accède
 // qu'à son propre dossier, un référent à ceux de son périmètre réel (audit 2026-09-21, lot 3).
-// Les préfixes statiques doivent être montés avant les routes paramétrées : sinon `/young/inscription2023/documents/...`
-// est capté par `/:id/documents` avec `id = "inscription2023"`.
-router.use("/reinscription", require("./reinscription"));
-router.use("/inscription2023", require("./inscription2023"));
+// Les préfixes statiques doivent être montés avant les routes paramétrées.
+// Le tunnel d'inscription (`/inscription2023`) et de réinscription (`/reinscription`) est supprimé :
+// les inscriptions sont fermées (lot H1 de l'audit du 21/09/2026, constats M51 à M58).
 router.use("/account", require("./account").default);
 router.use("/note/:youngId", youngPerimeterMiddleware({ paramName: "youngId" }), require("./note").default);
 router.use("/:id/documents", youngPerimeterMiddleware({ referentAccess: canAccessYoungDocumentsInScope }), require("./documents"));

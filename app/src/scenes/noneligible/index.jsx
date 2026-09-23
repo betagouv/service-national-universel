@@ -6,7 +6,7 @@ import { Redirect } from "react-router-dom";
 import { useHistory } from "react-router-dom";
 import DSFRLayout from "@/components/dsfr/layout/DSFRLayout";
 import DSFRContainer from "@/components/dsfr/layout/DSFRContainer";
-import EngagementPrograms from "@/scenes/preinscription/components/EngagementPrograms";
+import EngagementPrograms from "@/components/engagement/EngagementPrograms";
 import { YOUNG_STATUS } from "snu-lib";
 import API from "@/services/api";
 import dayjs from "dayjs";

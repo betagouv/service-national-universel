@@ -7,7 +7,6 @@ import { Redirect, Switch } from "react-router-dom";
 import { SentryRoute } from "./sentry";
 import { environment } from "./config";
 import { toastr } from "react-redux-toastr";
-import { shouldForceRedirectToInscription } from "./utils/navigation";
 import usePermissions from "./hooks/usePermissions";
 import ClassicLayout from "./components/layout";
 import PageLoader from "./components/PageLoader";
@@ -52,10 +51,6 @@ const Espace = () => {
   if (!young || !cohort) return <PageLoader />;
 
   if (young.status === YOUNG_STATUS.NOT_ELIGIBLE && location.pathname !== "/noneligible") return <Redirect to="/noneligible" />;
-
-  const isInscriptionModificationOpenForYoungs = new Date() < new Date(cohort.inscriptionModificationEndDate);
-
-  if (shouldForceRedirectToInscription(young, isInscriptionModificationOpenForYoungs)) return <Redirect to="/inscription" />;
 
   return (
     <ClassicLayout>

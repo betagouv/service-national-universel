@@ -5,14 +5,14 @@ import { CohortsRoutes, ROLES } from "snu-lib";
 
 import { capture } from "../sentry";
 import { ERRORS, isYoung } from "../utils";
-import { YoungModel, CohortModel } from "../models";
+import { YoungModel } from "../models";
 import { RouteRequest, RouteResponse } from "./request";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../middlewares/authMiddleware";
 
 import { CohortsRoutesSchema } from "../cohort/cohortValidator";
 import { getFilteredSessions, getAllSessions, getFilteredSessionsForCLE } from "../utils/cohort";
-import { isReInscriptionOpen, isInscriptionOpen } from "../cohort/cohortService";
+import { isInscriptionOpen } from "../cohort/cohortService";
 import { canViewYoungFileInScope } from "../young/youngScope";
 
 const router = express.Router();
@@ -74,32 +74,6 @@ router.post(
     } catch (error) {
       capture(error);
       res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
-
-router.get(
-  "/isReInscriptionOpen",
-  authMiddleware(["young"]),
-  async (req: RouteRequest<CohortsRoutes["GetIsReincriptionOpen"]>, res: RouteResponse<CohortsRoutes["GetIsReincriptionOpen"]>) => {
-    try {
-      const user = req.user;
-      const cohort = await CohortModel.findById(user.cohortId);
-      if (!cohort) {
-        return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      }
-      const isOpen = await isReInscriptionOpen({
-        cohortGroupId: cohort.cohortGroupId,
-        timeZoneOffset: req.headers["x-user-timezone"] as string,
-      });
-
-      return res.json({
-        ok: true,
-        data: isOpen,
-      });
-    } catch (error) {
-      capture(error);
-      return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
     }
   },
 );

@@ -13,8 +13,6 @@ import {
 } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
-import { toastr } from "react-redux-toastr";
-import { INSCRIPTION_STEPS, REINSCRIPTION_STEPS } from "./navigation";
 import { isPast } from "date-fns";
 
 function addOneDay(date) {
@@ -195,12 +193,6 @@ export const validateId = (id) => {
 
 export const desktopBreakpoint = 768;
 
-export function displaySignupToast(user) {
-  const shouldDisplaySignupToast =
-    (user.status === YOUNG_STATUS.IN_PROGRESS && user.inscriptionStep2023 !== INSCRIPTION_STEPS.EMAIL_WAITING_VALIDATION) ||
-    (user.status === YOUNG_STATUS.REINSCRIPTION && user.reInscriptionStep2023 !== REINSCRIPTION_STEPS.ELIGIBILITE);
-
-  if (shouldDisplaySignupToast) {
-    toastr.success("Connexion réussie", "Vous pouvez reprendre votre inscription là où vous l'avez laissée.", { timeOut: 3 });
-  }
+export function capitalizeFirstLetter(string) {
+  if (string) return string.charAt(0).toUpperCase() + string.slice(1);
 }

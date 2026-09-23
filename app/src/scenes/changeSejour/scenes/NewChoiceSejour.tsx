@@ -5,7 +5,7 @@ import ResponsiveModal from "@/components/modals/ResponsiveModal";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
 import useChangeSejour from "../lib/useChangeSejour";
 import { HiOutlineCheckCircle, HiOutlineXCircle } from "react-icons/hi2";
-import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
+import { capitalizeFirstLetter } from "@/utils";
 import useCohort from "@/services/useCohort";
 import useInscriptionGoal from "../lib/useInscriptionGoal";
 import Loader from "@/components/Loader";

@@ -176,10 +176,6 @@ const youngCanWithdraw = (young) => {
   return true;
 };
 
-const isYoungInReinscription = (young) => {
-  return young.hasStartedReinscription || false;
-};
-
 const formatPhoneNumberFR = (tel) => {
   if (!tel) return "";
   const regex = /^((?:(?:\+|00)33|0)\s*[1-9])((?:[\s.-]*\d{2}){4})$/;
@@ -226,7 +222,6 @@ export {
   canUserUpdateYoungStatus,
   youngCanChangeSession,
   youngCanWithdraw,
-  isYoungInReinscription,
   formatPhoneNumberFR,
   formatMessageForReadingInnerHTML,
   patternEmailAcademy,

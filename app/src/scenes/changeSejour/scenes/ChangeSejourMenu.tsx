@@ -2,21 +2,18 @@ import React from "react";
 import { Link } from "react-router-dom";
 import useCohort from "@/services/useCohort";
 import { HiArrowRight } from "react-icons/hi";
-import { CohortGroupType, CohortType, getCohortPeriod, getCohortYear } from "snu-lib";
-import plausibleEvent from "@/services/plausible";
+import { CohortType, getCohortPeriod, getCohortYear } from "snu-lib";
 import Loader from "@/components/Loader";
 import { knowledgebaseURL } from "@/config";
 import NoSejourSection from "../components/NoSejourSection";
-import useCohortGroups from "../lib/useCohortGroups";
 import useSejours from "../lib/useSejours";
 import ChangeSejourContainer from "../components/ChangeSejourContainer";
-import { capitalizeFirstLetter } from "@/scenes/inscription2023/steps/stepConfirm";
+import { capitalizeFirstLetter } from "@/utils";
 import usePermissions from "@/hooks/usePermissions";
 import { useLocation } from "react-router-dom";
 import ErrorNotice from "@/components/ui/alerts/ErrorNotice";
 
 export default function ChangeSejour() {
-  const groups = useCohortGroups();
   const cohorts = useSejours();
   const { hasAccessToAVenir, hasAccessToDesistement } = usePermissions();
   const location = useLocation<{ backlink?: string }>();
@@ -24,21 +21,18 @@ export default function ChangeSejour() {
 
   return (
     <ChangeSejourContainer title="Choisir un nouveau séjour" backlink={backlink}>
-      {groups.isError || cohorts.isError ? (
+      {cohorts.isError ? (
         <div className="mt-12">
           <ErrorNotice text="Impossible de charger les séjours. Merci de réessayer plus tard." />
         </div>
-      ) : groups.isPending || cohorts.isPending ? (
+      ) : cohorts.isPending ? (
         <div className="mt-12">
           <Loader />
         </div>
       ) : (
         <div className="mt-8 grid grid-cols-1 gap-8">
           {cohorts.data.length > 0 && <Sejours cohorts={cohorts.data} />}
-          {groups.data.map((group) => (
-            <Reinscription group={group} key={group._id} />
-          ))}
-          {(hasAccessToAVenir || hasAccessToDesistement) && <LinkToNextStep groups={groups} cohorts={cohorts} />}
+          {(hasAccessToAVenir || hasAccessToDesistement) && <LinkToNextStep cohorts={cohorts.data} />}
         </div>
       )}
     </ChangeSejourContainer>
@@ -76,25 +70,8 @@ function SejourLink({ cohort }: { cohort: CohortType }) {
   );
 }
 
-function Reinscription({ group }: { group: CohortGroupType }) {
-  return (
-    <section id={`reinscription_${group.year}`} key={group._id}>
-      <h2 className="text-base font-bold text-center md:text-2xl">S'inscrire pour {group.year}</h2>
-      <p className="text-sm leading-5 font-normal text-gray-500 mt-2 text-center">Mettez à jour vos informations et choisissez un séjour.</p>
-      <div className="flex w-full mt-4">
-        <Link
-          to="/reinscription"
-          className="w-full text-center rounded-md bg-blue-600 py-2.5 px-3 text-sm font-medium leading-5 text-white transition duration-300 ease-in-out hover:bg-blue-800"
-          onClick={() => plausibleEvent("Phase0/CTA reinscription - home page")}>
-          Vérifier mon éligibilité
-        </Link>
-      </div>
-    </section>
-  );
-}
-
-function LinkToNextStep({ groups, cohorts }: { groups: { data: CohortGroupType[] }; cohorts: { data: CohortType[] } }) {
-  if (groups.data.length > 0 || cohorts.data.length > 0) {
+function LinkToNextStep({ cohorts }: { cohorts: CohortType[] }) {
+  if (cohorts.length > 0) {
     return (
       <Link to="/changer-de-sejour/no-date" className="flex p-3 justify-between rounded-md border border-gray-500 w-full">
         <p className="text-sm leading-5 font-medium">Aucune date ne me convient</p>
