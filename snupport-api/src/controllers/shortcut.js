@@ -7,6 +7,7 @@ const Joi = require("joi");
 const { ERRORS } = require("../errors");
 const { SCHEMA_SLATE_CONTENT, sanitizeUserHtml } = require("../utils/userContent");
 const { buildSignatureQuery, canManageShortcut } = require("../utils/shortcutScope");
+const { autocompleteRegex } = require("../utils/searchRegex");
 
 // Le HTML d'un module de texte est assaini à l'écriture : il est relu par l'éditeur d'autres comptes.
 const SCHEMA_SHORTCUT_HTML = Joi.string()
@@ -54,7 +55,7 @@ router.get(
   "/search",
   validateQuery(
     Joi.object({
-      q: Joi.string().trim(),
+      q: Joi.string().trim().max(128),
     })
   ),
   async (req, res) => {
@@ -63,21 +64,21 @@ router.get(
     if (req.user.role === "REFERENT_DEPARTMENT") {
       query = {
         $or: [
-          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else if (req.user.role === "REFERENT_REGION") {
       query = {
         $or: [
-          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else {
       query = {
         userRole: req.user.role,
-        name: { $regex: q },
+        name: { $regex: autocompleteRegex(q) },
       };
     }
     const hits = await ShortcutModel.find(query);
@@ -101,7 +102,7 @@ router.post(
   "/search",
   validateBody(
     Joi.object({
-      q: Joi.string().trim(),
+      q: Joi.string().trim().max(128),
       isSignature: Joi.boolean(),
       contactGroup: Joi.array().items(Joi.string().trim()),
     })
@@ -112,21 +113,21 @@ router.post(
     if (req.user.role === "REFERENT_DEPARTMENT") {
       query = {
         $or: [
-          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userDepartment: req.user.departments, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else if (req.user.role === "REFERENT_REGION") {
       query = {
         $or: [
-          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: q } },
-          { userRole: "AGENT", name: { $regex: q }, userVisibility: "ALL" },
+          { userRole: req.user.role, userRegion: req.user.region, name: { $regex: autocompleteRegex(q) } },
+          { userRole: "AGENT", name: { $regex: autocompleteRegex(q) }, userVisibility: "ALL" },
         ],
       };
     } else {
       query = {
         userRole: req.user.role,
-        name: { $regex: q },
+        name: { $regex: autocompleteRegex(q) },
       };
     }
     if (req.cleanBody.contactGroup) {
