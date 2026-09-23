@@ -551,7 +551,7 @@ router.get("/:sessionId/:key/:fileId", passport.authenticate(["referent"], { ses
       data: Buffer.from(decrypt(downloaded.Body), "base64"),
       // Les fichiers antérieurs portent le mimetype déclaré par le client : il n'est renvoyé que s'il
       // fait partie des types acceptés.
-      mimeType: SESSION_FILE_TYPES.includes(file.mimetype) ? file.mimetype : "application/octet-stream",
+      mimeType: file.mimetype && SESSION_FILE_TYPES.includes(file.mimetype) ? file.mimetype : "application/octet-stream",
       fileName: file.name,
       ok: true,
     });
