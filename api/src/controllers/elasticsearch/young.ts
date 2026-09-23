@@ -238,10 +238,10 @@ router.post("/in-bus/:ligneId/:action(search|export)", passport.authenticate(["r
     });
     if (req.params.action === "export") {
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+      return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -284,7 +284,7 @@ router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"
     };
 
     const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, bodyQuery) });
-    return res.status(200).send(serializeYoungs(response.body));
+    return res.status(200).send(serializeYoungs(response.body, req.user));
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -347,10 +347,10 @@ router.post(
       });
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -472,10 +472,10 @@ router.post(
             all = data.map((item: any) => ({ ...item, esSchool: schools.find((e: any) => e._id === item.schoolId) }));
           }
 
-          response = { ok: true, data: serializeYoungs(all) };
+          response = { ok: true, data: serializeYoungs(all, req.user) };
         } else {
           const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-          return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+          return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
         }
       }
 
@@ -483,7 +483,7 @@ router.post(
         return res.status(200).send(response);
       } else {
         const esResponse = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        response = serializeYoungs(esResponse.body);
+        response = serializeYoungs(esResponse.body, req.user);
         return res.status(200).send(response);
       }
     } catch (error) {
@@ -535,12 +535,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
         exportFields.push("email");
       }
       const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-      let data = serializeYoungs(response);
+      let data = serializeYoungs(response, req.user);
       data = await populateYoungExport(data, exportFields);
       return res.status(200).send({ ok: true, data });
     } else {
       const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-      return res.status(200).send(serializeYoungs(response.body));
+      return res.status(200).send(serializeYoungs(response.body, req.user));
     }
   } catch (error) {
     capture(error);
@@ -594,7 +594,7 @@ router.post(
 
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        let data = serializeYoungs(response);
+        let data = serializeYoungs(response, req.user);
         //School
         if (exportFields?.includes("schoolId")) {
           const schoolIds = [...new Set(data.map((item: any) => item.schoolId).filter(Boolean))];
@@ -605,7 +605,7 @@ router.post(
         return res.status(200).send({ ok: true, data });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -693,10 +693,10 @@ router.post(
       }
       if (req.params.action === "export") {
         const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-        return res.status(200).send({ ok: true, data: serializeYoungs(response) });
+        return res.status(200).send({ ok: true, data: serializeYoungs(response, req.user) });
       } else {
         const response = await esClient.msearch({ index: "young", body: buildNdJson({ index: "young", type: "_doc" }, hitsRequestBody, aggsRequestBody) });
-        return res.status(200).send(serializeYoungs(response.body));
+        return res.status(200).send(serializeYoungs(response.body, req.user));
       }
     } catch (error) {
       capture(error);
@@ -772,7 +772,7 @@ router.post("/aggregate-status/:action(export)", passport.authenticate(["referen
     });
 
     const response = await allRecords("young", hitsRequestBody.query, esClient, exportFields);
-    const data = aggregateStatus(serializeYoungs(response));
+    const data = aggregateStatus(serializeYoungs(response, req.user));
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);

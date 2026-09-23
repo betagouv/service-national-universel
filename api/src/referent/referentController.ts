@@ -1996,7 +1996,7 @@ router.put("/young/:id/phase1Status/:document", passport.authenticate("referent"
         });
       }
     }
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -2026,7 +2026,7 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
 
     young.set({ [value.key]: value.filesList });
     await young.save({ fromUser: req.user });
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

@@ -1075,7 +1075,7 @@ router.put("/phase1/:document", passport.authenticate("young", { session: false,
       });
     }
 
-    return res.status(200).send({ ok: true, data: serializeYoung(young) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1126,7 +1126,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
     }
 
-    res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
+    res.status(200).send({ ok: true, data: youngs.map((young) => serializeYoung(young, req.user)) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -1191,7 +1191,7 @@ router.post("/phase1/multiaction/:key", passport.authenticate("referent", { sess
       }
     }
 
-    res.status(200).send({ ok: true, data: youngs.map(serializeYoung) });
+    res.status(200).send({ ok: true, data: youngs.map((young) => serializeYoung(young, req.user)) });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

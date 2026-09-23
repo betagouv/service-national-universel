@@ -1,4 +1,4 @@
-const { ES_YOUNG_SENSITIVE_FIELDS, ES_REFERENT_SENSITIVE_FIELDS } = require("snu-lib");
+const { ES_YOUNG_SENSITIVE_FIELDS, ES_REFERENT_SENSITIVE_FIELDS, getYoungFieldsHiddenFrom, omitYoungFields } = require("snu-lib");
 
 /**
  * Applique `callback` à tous les `_source` d'une réponse Elasticsearch, quelle
@@ -80,10 +80,15 @@ function serializeRamsesSchools(body) {
   });
 }
 
-function serializeYoungs(body) {
+/**
+ * `user` est obligatoire : les notes internes, les données de santé et les pièces d'identité
+ * sont retirées selon son rôle (sans utilisateur, elles le sont toutes).
+ */
+function serializeYoungs(body, user) {
   // ! Ces données ne devraient pas être dans ES : l'exclusion se fait aussi côté
   // requête (_source.excludes) et côté réplication Monstache.
-  return serializeHits(body, omit(ES_YOUNG_SENSITIVE_FIELDS));
+  const hiddenFields = getYoungFieldsHiddenFrom(user);
+  return serializeHits(body, (doc) => omitYoungFields(omit(ES_YOUNG_SENSITIVE_FIELDS)(doc), hiddenFields));
 }
 
 function serializeStructures(body) {

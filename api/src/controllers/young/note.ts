@@ -13,19 +13,11 @@
 import express, { Response } from "express";
 import Joi from "joi";
 import passport from "passport";
-import { canViewNotes } from "snu-lib";
 
 import { capture } from "../../sentry";
 import { serializeYoung } from "../../utils/serializer";
 import { ERRORS } from "../../utils";
 import { YoungPerimeterRequest } from "./youngPerimeterMiddleware";
-
-/** Les notes internes ne sont lisibles que par les rôles habilités (`canViewNotes`). */
-function serializeYoungWithNotes(young, user) {
-  const serialized = serializeYoung(young, user);
-  if (!canViewNotes(user)) delete serialized.notes;
-  return serialized;
-}
 
 const router = express.Router({ mergeParams: true });
 
@@ -69,7 +61,7 @@ router.post("/", passport.authenticate("referent", { session: false, failWithErr
     });
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoungWithNotes(young, req.user) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -119,7 +111,7 @@ router.put("/:noteId", passport.authenticate("referent", { session: false, failW
     young.set({ notes: updatedNotes });
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoungWithNotes(young, req.user) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -153,7 +145,7 @@ router.delete("/:noteId", passport.authenticate("referent", { session: false, fa
     });
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ ok: true, data: serializeYoungWithNotes(young, req.user) });
+    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (err) {
     capture(err);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
