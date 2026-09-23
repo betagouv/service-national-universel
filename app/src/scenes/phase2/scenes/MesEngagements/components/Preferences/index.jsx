@@ -67,8 +67,6 @@ export default function Index() {
     let validated = true;
     let errors = {};
 
-    console.log("validate data: ", data);
-
     if (data.domains.length < 3) {
       errors.domains = "Vous devez choisir 3 thématiques.";
       validated = false;

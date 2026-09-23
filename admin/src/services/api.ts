@@ -54,7 +54,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extra: { path: "CHECK TOKEN", token: getJwtToken() } });
+          capture(e, { extra: { path: "CHECK TOKEN" } });
           reject(e);
         }
       }
@@ -115,7 +115,7 @@ class api {
         console.log("Fetch request was manually reloaded, ignoring error.");
         return;
       } else {
-        capture(e, { extra: { path: path, body: body } });
+        capture(e, { extra: { path: path } });
       }
     }
     if (response?.status !== 200) {
@@ -124,7 +124,7 @@ class api {
     try {
       return response?.blob();
     } catch (e) {
-      capture(e, { extra: { path: path, body: body } });
+      capture(e, { extra: { path: path } });
     }
   }
 
@@ -204,7 +204,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extra: { path: path, body: body } });
+          capture(e, { extra: { path: path } });
           reject(e);
         }
       }
@@ -240,7 +240,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path, body: body } });
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -275,7 +275,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { path: path, body: body } });
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -335,7 +335,7 @@ class api {
         const res = await response.json();
         resolve(res);
       } catch (e) {
-        capture(e, { extra: { arr: arr, path: path, properties: properties } });
+        capture(e, { extra: { path: path } });
         reject(e);
       }
     });
@@ -378,7 +378,7 @@ class api {
           console.log("Fetch request was manually reloaded, ignoring error.");
           resolve({ ok: false, code: ERRORS.ABORT_ERROR });
         } else {
-          capture(e, { extra: { path: path, body: body } });
+          capture(e, { extra: { path: path } });
           reject(e);
         }
       }
