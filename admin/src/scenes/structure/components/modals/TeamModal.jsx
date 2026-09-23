@@ -268,7 +268,7 @@ const EditContact = ({ team, responsible, setResponsible, isLoading, handleSubmi
       <div className="grid grid-cols-2 gap-6">
         <Field readOnly={isLoading} label="Prénom" name="firstName" handleChange={handleChange} value={responsible.firstName} required={true} errors={errors} />
         <Field readOnly={isLoading} label="Nom" name="lastName" handleChange={handleChange} value={responsible.lastName} required={true} errors={errors} />
-        <Field readOnly={isLoading} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={true} errors={errors} />
+        <Field readOnly={isLoading || (!!responsible._id && user.role !== ROLES.ADMIN)} label="Email" name="email" handleChange={handleChange} value={responsible.email} required={true} errors={errors} />
         <Field readOnly={isLoading} label="Téléphone" name="phone" handleChange={handleChange} value={responsible.phone} type="tel" errors={errors} />
         {[ROLES.ADMIN, ROLES.SUPERVISOR].includes(user.role) && (
           <Select

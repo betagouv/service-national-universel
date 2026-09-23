@@ -136,7 +136,7 @@ import { handleNotifForYoungWithdrawn } from "../young/youngService";
 import { getAcl } from "../services/iam/Permission.service";
 import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
-import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser } from "./referentScope";
+import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser, isReferentUpdateInUserScope } from "./referentScope";
 import { sanitizeEmailText } from "../email/emailInput";
 import {
   canEditYoungInScope,
@@ -1711,6 +1711,11 @@ router.put(
       if (!(await isReferentInUserScope(req.user, referent))) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+      // Le périmètre ci-dessus porte sur la cible avant modification : les valeurs demandées
+      // (géographie, statut, email, sous-rôle de son propre compte) sont bornées à part.
+      if (!isReferentUpdateInUserScope(req.user, referent, value)) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
       // `roles` est recalculé ci-dessous à partir de `subRole` : un sous-rôle étranger au rôle de la
       // cible lui donnerait les permissions de ce sous-rôle.
       if (!isSubRoleChangeAllowed({ role: value.role || referent.role, subRole: referent.subRole }, value.subRole)) {
@@ -1796,7 +1801,9 @@ router.put("/:id/structure/:structureId", passport.authenticate("referent", { se
         resource: PERMISSION_RESOURCES.STRUCTURE,
         context: { structure: structure.toJSON() },
       }) ||
-      !canUpdateReferent({ actor: req.user, originalTarget: referent, structure })
+      // Le rattachement impose le rôle RESPONSIBLE : sans ce `modifiedTarget`, la matrice ne voyait pas le
+      // changement de rôle et un référent rétrogradait un pair départemental ou régional en responsable.
+      !canUpdateReferent({ actor: req.user, originalTarget: referent, modifiedTarget: { role: ROLES.RESPONSIBLE } as ReferentType, structure })
     ) {
       return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     }

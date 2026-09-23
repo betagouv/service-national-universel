@@ -115,6 +115,53 @@ export async function isReferentInUserScope(user: UserDto, target: ReferentType)
   return false;
 }
 
+type ReferentUpdate = Partial<Pick<ReferentType, "email" | "region" | "department" | "subRole" | "status">>;
+
+const normalizeDepartments = (department: unknown): string[] => {
+  const list = Array.isArray(department) ? department : [department];
+  return [...new Set(list.filter((value): value is string => typeof value === "string" && value !== ""))].sort();
+};
+
+const hasChanged = (update: ReferentUpdate, target: ReferentType, key: "email" | "region" | "subRole" | "status") => key in update && (update[key] || "") !== (target[key] || "");
+
+/**
+ * Champs d'un compte référent que seul un admin modifie librement (GOO-5, FH5/FH9).
+ *
+ * `isReferentInUserScope` borne la *cible* (état serveur avant modification), `canUpdateReferent` la
+ * matrice des rôles : aucun des deux ne regarde les *valeurs demandées*. Un référent départemental
+ * pouvait donc s'attribuer tous les départements de France via PUT /referent/<soi>, et tout acteur
+ * du périmètre réactiver un compte désactivé ou changer l'email d'un collègue (donc récupérer son
+ * compte par « mot de passe oublié »).
+ *
+ * Les formulaires postent l'objet complet : renvoyer la valeur courante reste sans effet, seul un
+ * changement est contrôlé.
+ * - `status` et `email` : admin uniquement ;
+ * - `subRole` : jamais sur son propre compte (le sous-rôle porte des permissions) ;
+ * - `region` / `department` : bornés au territoire de l'acteur, comme pour une invitation
+ *   (`isInvitationInUserScope`) ; un responsable/superviseur n'a pas de territoire, il ne les change pas.
+ */
+export function isReferentUpdateInUserScope(user: UserDto, target: ReferentType, update: ReferentUpdate): boolean {
+  if (isAdmin(user)) return true;
+
+  if (hasChanged(update, target, "status")) return false;
+  if ("email" in update && (update.email || "").toLowerCase().trim() !== (target.email || "").toLowerCase().trim()) return false;
+
+  const isSelf = user._id?.toString() === target._id?.toString();
+  if (isSelf && hasChanged(update, target, "subRole")) return false;
+
+  const regionChanged = hasChanged(update, target, "region");
+  const requestedDepartments = normalizeDepartments(update.department);
+  const departmentsChanged = "department" in update && requestedDepartments.join() !== normalizeDepartments(target.department).join();
+  if (!regionChanged && !departmentsChanged) return true;
+
+  if (![ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(user.role)) return false;
+
+  const allowedDepartments: string[] = user.role === ROLES.REFERENT_REGION ? region2department[user.region!] || [] : normalizeDepartments(user.department);
+  if (regionChanged && update.region && update.region !== user.region) return false;
+  if (departmentsChanged && requestedDepartments.some((department) => !allowedDepartments.includes(department))) return false;
+  return true;
+}
+
 /** Deux périmètres géographiques se recouvrent s'ils partagent une région ou un département. */
 function geographiesOverlap(actor: Geography, target: Geography): boolean {
   if (actor.region && target.region && actor.region === target.region) return true;
