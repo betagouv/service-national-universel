@@ -651,7 +651,7 @@ const InfoStructure = ({ title, structure }) => {
       <div className="text-sm font-normal leading-5">
         {rest ? (
           <div className="my-2">
-            <div dangerouslySetInnerHTML={{ __html: preview + (expandNote ? rest : " ...") + " " }} />
+            <div dangerouslySetInnerHTML={{ __html: htmlCleaner(preview + (expandNote ? rest : " ...")) + " " }} />
             <div className="see-more" onClick={toggleNote}>
               {expandNote ? "  VOIR MOINS" : "  VOIR PLUS"}
             </div>

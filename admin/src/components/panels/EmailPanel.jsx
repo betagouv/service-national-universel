@@ -96,7 +96,7 @@ export default function EmailPanel({ open, setOpen, email }) {
                 d&apos;invitation).
               </p>
             ) : (
-              <iframe srcDoc={emailData.body} className="flex-1 border-t" />
+              <iframe srcDoc={emailData.body} sandbox="allow-popups allow-popups-to-escape-sandbox" referrerPolicy="no-referrer" className="flex-1 border-t" />
             )}
           </div>
         )

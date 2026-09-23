@@ -1,5 +1,5 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD, APPLICATION_STATUS } from "snu-lib";
+import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD, APPLICATION_STATUS, sanitizeStoredHtml } from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -76,7 +76,8 @@ export function validateStructure(structure) {
     .keys({
       name: Joi.string().allow(null, ""),
       siret: Joi.string().allow(null, ""),
-      description: Joi.string().allow(null, ""),
+      // Texte libre rendu en HTML sur la fiche mission de moncompte (FH1).
+      description: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
       website: Joi.string().allow(null, ""),
       facebook: Joi.string().allow(null, ""),
       twitter: Joi.string().allow(null, ""),

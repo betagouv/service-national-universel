@@ -99,7 +99,7 @@ const From = ({ allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint
             const total = allLines.find((e) => e._id === option.value._id).youngCapacity;
             return (
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <div className="w-3/4" dangerouslySetInnerHTML={{ __html: option.label }} />
+                <div className="w-3/4">{option.label}</div>
                 <div className="flex w-1/4 justify-between items-center">
                   <p className="text-gray-400 text-xs">{`${numOfYoung} / ${total}`}</p>
                   <MdMan color={numOfYoung > total ? "#e6000c" : "#00e667"} />
@@ -127,7 +127,7 @@ const From = ({ allLines, isDirty, selectedMeetingPoint, setSelectedMeetingPoint
             const total = selectedLigne?.youngCapacity || 0;
             return (
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <div className="w-3/4" dangerouslySetInnerHTML={{ __html: option.label }} />
+                <div className="w-3/4">{option.label}</div>
                 <div className="flex w-1/4 justify-between items-center">
                   <p className="text-gray-400 text-xs">{`${numOfYoung} / ${total}`}</p>
                   <MdMan color={numOfYoung > total ? "#e6000c" : "#00e667"} />

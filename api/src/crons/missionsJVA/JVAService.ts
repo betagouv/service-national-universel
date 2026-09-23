@@ -11,6 +11,7 @@ import {
   ROLES,
   SENDINBLUE_TEMPLATES,
   StructureType,
+  sanitizeStoredHtml,
 } from "snu-lib";
 import { getTutorName } from "../../services/mission";
 import { ApplicationModel, MissionDocument, MissionModel, ReferentDocument, ReferentModel, StructureDocument, StructureModel } from "../../models";
@@ -31,7 +32,7 @@ const MISSION_END_DATE_LIMIT = new Date("2026-11-09T00:00:00.000Z");
 function formatStructure(jvaStructure): Partial<StructureType> {
   return {
     name: jvaStructure.name,
-    description: jvaStructure.description,
+    description: sanitizeStoredHtml(jvaStructure.description),
     website: jvaStructure.website,
     facebook: jvaStructure.facebook,
     twitter: jvaStructure.twitter,

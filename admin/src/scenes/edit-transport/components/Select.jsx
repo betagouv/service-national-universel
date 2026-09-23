@@ -36,7 +36,7 @@ export default function Select({ options, value, Icon = null, alignItems = "left
           }}>
           <div className="flex items-center gap-2">
             {Icon ? Icon : null}
-            <span className="whitespace-nowrap text-sm font-medium text-snu-purple-800" dangerouslySetInnerHTML={{ __html: options.find((o) => o.value === value)?.label }} />
+            <span className="whitespace-nowrap text-sm font-medium text-snu-purple-800">{options.find((o) => o.value === value)?.label}</span>
           </div>
           {!disabled && <ChevronDown className={`text-gray-400 ${open ? "rotate-180" : ""}`} />}
         </button>
@@ -54,7 +54,7 @@ export default function Select({ options, value, Icon = null, alignItems = "left
               }}
               className={`${option.value === value && "bg-gray font-bold"}`}>
               <div className="group flex cursor-pointer items-center justify-between gap-2 p-2 px-3 text-gray-700 hover:bg-gray-50">
-                <div dangerouslySetInnerHTML={{ __html: option.label }} />
+                <div>{option.label}</div>
                 {option.value === value ? <BsCheck2 /> : null}
               </div>
             </div>

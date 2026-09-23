@@ -14,6 +14,7 @@
  *  2. pour tous les autres, les valeurs des paramètres sensibles présentes dans le
  *     corps sont masquées, ce qui couvre la longue traîne des liens porteurs de token.
  */
+import sanitizeHtml from "sanitize-html";
 import { SENDINBLUE_TEMPLATES } from "snu-lib";
 
 /** Templates dont le contenu est un secret d'authentification à part entière. */
@@ -41,6 +42,36 @@ export function maskSecrets(body?: string | null): string | null {
   return body.replace(SENSITIVE_PARAM_REGEX, `$1${REDACTED}`);
 }
 
+/**
+ * Liste blanche du balisage d'un mail restitué dans l'admin (audit fronts 2026-09-23, FM9).
+ * Le corps vient de Brevo, mais les paramètres qui y sont injectés (message de désistement,
+ * nom de mission…) sont saisis par des volontaires et des responsables. On garde la mise en
+ * page d'un mail (tableaux, styles en ligne, images) et on retire scripts, gestionnaires
+ * d'événements, formulaires et cadres ; les liens ne gardent que des schémas web.
+ */
+const EMAIL_BODY_SANITIZE_OPTIONS: sanitizeHtml.IOptions = {
+  allowedTags: [...sanitizeHtml.defaults.allowedTags, "img", "center", "font", "span"],
+  allowedAttributes: {
+    "*": ["style", "class", "align", "valign", "width", "height", "bgcolor", "border", "cellpadding", "cellspacing", "color", "dir", "lang"],
+    a: ["href", "name", "title", "target", "rel"],
+    img: ["src", "alt", "title"],
+    font: ["face", "size"],
+    td: ["colspan", "rowspan"],
+    th: ["colspan", "rowspan"],
+  },
+  allowedSchemes: ["http", "https", "mailto", "tel"],
+  allowedSchemesByTag: { img: ["http", "https", "data"] },
+  allowProtocolRelative: false,
+  transformTags: {
+    a: sanitizeHtml.simpleTransform("a", { target: "_blank", rel: "noopener noreferrer" }),
+  },
+};
+
+export function sanitizeEmailBody(body?: string | null): string | null {
+  if (!body) return body ?? null;
+  return sanitizeHtml(body, EMAIL_BODY_SANITIZE_OPTIONS);
+}
+
 export interface SerializedEmailContent {
   subject?: string;
   date?: string;
@@ -52,7 +83,7 @@ export interface SerializedEmailContent {
 
 /**
  * Liste blanche des champs renvoyés au front (le front n'utilise que `events` et `body`),
- * plus masquage des secrets. On ne relaie jamais la réponse Brevo telle quelle.
+ * plus masquage des secrets et assainissement du balisage. On ne relaie jamais la réponse Brevo telle quelle.
  */
 export function serializeEmailContent(emailData: any, templateId?: string | null): SerializedEmailContent {
   const contentRedacted = isAuthTemplate(templateId);
@@ -60,7 +91,7 @@ export function serializeEmailContent(emailData: any, templateId?: string | null
     subject: emailData?.subject,
     date: emailData?.date,
     events: emailData?.events,
-    body: contentRedacted ? null : maskSecrets(emailData?.body),
+    body: contentRedacted ? null : sanitizeEmailBody(maskSecrets(emailData?.body)),
     contentRedacted,
   };
 }

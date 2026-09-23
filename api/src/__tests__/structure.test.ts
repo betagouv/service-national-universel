@@ -92,6 +92,26 @@ describe("Structure", () => {
       expect(res.status).toBe(200);
     });
 
+    it("assainit la description à l'écriture (GOO-14, FH1)", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "struct" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .put("/structure/" + structure._id)
+        .send({ ...structure.toJSON(), description: `<b>Asso</b><img src=x onerror="alert(1)"><a href="javascript:alert(1)">lien</a> & sport` });
+      expect(res.status).toBe(200);
+      const updated = await getStructureByIdHelper(structure._id);
+      expect(updated?.description).toBe("<b>Asso</b><a rel=\"noopener noreferrer\">lien</a> &amp; sport");
+    });
+
+    it("laisse intacte une description sans balise", async () => {
+      const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "struct" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .put("/structure/" + structure._id)
+        .send({ ...structure.toJSON(), description: "Sport & culture, âge > 16 ans" });
+      expect(res.status).toBe(200);
+      const updated = await getStructureByIdHelper(structure._id);
+      expect(updated?.description).toBe("Sport & culture, âge > 16 ans");
+    });
+
     it("should update networkName", async () => {
       const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
       const structure = await createStructureHelper({ ...getNewStructureFixture(), networkId: network._id, name: "child" });
