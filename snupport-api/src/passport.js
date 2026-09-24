@@ -2,13 +2,13 @@ const passport = require("passport");
 const JwtStrategy = require("passport-jwt").Strategy;
 const ExtractJwt = require("passport-jwt").ExtractJwt;
 const HeaderAPIKeyStrategy = require("passport-headerapikey").HeaderAPIKeyStrategy;
-const Joi = require("joi");
 
 const OrganisationModel = require("./models/organisation");
 const AgentModel = require("./models/agent");
 
 const { config } = require("./config");
 const { checkJwtVersion } = require("./jwt-options");
+const { validateAgentTokenPayload, isAgentTokenCurrent } = require("./utils/agentToken");
 const { capture } = require("./sentry");
 
 // Origines de la base de connaissance publique : elles restent autorisées par le CORS (lecture
@@ -23,15 +23,6 @@ function getToken(req) {
   return token;
 }
 
-function validateJwtPayload(jwtPayload) {
-  const schema = Joi.object({
-    __v: Joi.string().required(),
-    _id: Joi.string().required(),
-  });
-
-  return schema.validate(jwtPayload, { stripUnknown: true });
-}
-
 module.exports = function () {
   const opts = {};
   opts.jwtFromRequest = getToken;
@@ -41,18 +32,18 @@ module.exports = function () {
     "agent",
     new JwtStrategy(opts, async function (jwtPayload, done) {
       try {
-        const { error, value } = validateJwtPayload(jwtPayload);
+        const { error, value } = validateAgentTokenPayload(jwtPayload);
         if (error) return done(null, false);
         if (!checkJwtVersion(value)) return done(null, false);
-        delete value.__v;
 
         const agent = await AgentModel.findById(value._id);
-        if (agent) return done(null, agent);
+        // Un jeton émis avant la dernière déconnexion ou le dernier changement de mot de passe est refusé (M98).
+        if (agent && isAgentTokenCurrent(agent, value)) return done(null, agent);
       } catch (error) {
         capture(error);
       }
       return done(null, false);
-    })
+    }),
   );
 
   passport.use(
@@ -66,7 +57,7 @@ module.exports = function () {
         .catch((error) => {
           return done(error);
         });
-    })
+    }),
   );
 };
 

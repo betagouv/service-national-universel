@@ -10,6 +10,7 @@ import { validateParams, validateBody, validateQuery, idSchema } from "../middle
 import { ERRORS } from "../errors";
 import { SCHEMA_EMAIL } from "../schemas";
 import { canAccessContact } from "../utils/contactScope";
+import { PUBLIC_FIELDS as AGENT_PUBLIC_FIELDS } from "../utils/agentSerializer";
 import escapeStringRegexp from "escape-string-regexp";
 
 const router = express.Router();
@@ -76,7 +77,8 @@ router.get(
 router.get("/:id", validateParams(idSchema), async (req: UserRequest, res: Response) => {
   const id = req.cleanParams.id;
   let data = await ContactModel.findById(id);
-  if (!data) data = await AgentModel.findById(id);
+  // Repli sur un agent : seuls ses champs publics sortent, pas son identifiant SNU ni ses dates de session (L49).
+  if (!data) data = await AgentModel.findById(id).select(AGENT_PUBLIC_FIELDS.join(" "));
   if (!data) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
   if (!canAccessContact(req.user, data)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
   return res.status(200).send({ ok: true, data });

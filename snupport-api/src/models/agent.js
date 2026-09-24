@@ -43,15 +43,19 @@ const Schema = new mongoose.Schema({
     },
   },
 
+  // Jamais renvoyés par défaut : l'empreinte et l'expiration du jeton de réinitialisation sortaient dans
+  // le listing des agents et à la connexion (L49).
   forgotPasswordResetToken: {
     type: String,
     default: "",
+    select: false,
     documentation: {
       description: "Token servant à la réinitialisation du mot de passe",
     },
   },
   forgotPasswordResetExpires: {
     type: Date,
+    select: false,
     documentation: {
       description: "Date limite de validité du token pour réinitialiser le mot de passe",
     },
@@ -66,6 +70,9 @@ const Schema = new mongoose.Schema({
   },
 
   lastLoginAt: { type: Date, default: Date.now },
+  // Recopiées dans le jeton de session : les faire avancer invalide tous les jetons émis avant (M98).
+  lastLogoutAt: { type: Date, default: null },
+  passwordChangedAt: { type: Date, default: null },
   createdAt: { type: Date, default: Date.now },
   // an agent is used to regroup all referents (department + region)
   isReferent: {

@@ -1,5 +1,5 @@
 const AWS = require("aws-sdk");
-const passwordValidator = require("password-validator");
+const { validatePassword } = require("./password");
 const MessageModel = require("../models/message");
 const AgentModel = require("../models/agent");
 const ContactModel = require("../models/contact");
@@ -28,17 +28,6 @@ const SENDINBLUE_TEMPLATES = {
   TICKET_REPORT: "1386",
   SNUPPORT_CLOSED: "2416",
 };
-
-function validatePassword(password) {
-  const schema = new passwordValidator();
-  schema.is().min(6); // Minimum length 6
-  // .is()
-  // .max(100) // Maximum length 100
-  // .has()
-  // .letters() // Must have letters
-  // .digits(); // Must have digits
-  return schema.validate(password);
-}
 
 const sendResponseTicket = async ({ ticket, copyRecipient, dest, attachment, messageHistory, lastMessageId }) => {
   try {
@@ -82,7 +71,7 @@ const sendEmailWithConditions = async ({ ticket, copyRecipient, dest, attachment
             content: buffer.toString("base64"),
             name: attachment.name,
           });
-        })
+        }),
       );
     } else if (messageHistory !== null && messageHistory !== undefined) mailTicket = await getLastAndSpecificIdMessageFromTicket(lastMessageId, messageHistory);
     else mailTicket = await getLastMessageFromTicket(lastMessageId);
