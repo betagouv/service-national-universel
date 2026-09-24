@@ -62,6 +62,7 @@ import { logger } from "../logger";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
 import { toErrorCode } from "../utils/errorCode";
+import { canReferentChangeApplicationStatus } from "../young/youngStatusTransitions";
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -425,6 +426,14 @@ router.put(
       }
 
       const originalStatus = application.status;
+
+      // Transitions de statut par rôle, appliquées jusqu'ici seulement dans l'admin (GOO-12 : FL2).
+      if (isReferent(req.user) && value.status && value.status !== originalStatus) {
+        const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
+        if (!canReferentChangeApplicationStatus(req.user, originalStatus, value.status, cohort)) {
+          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+        }
+      }
 
       application.set(value);
 
