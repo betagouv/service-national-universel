@@ -62,11 +62,11 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
 
   // Mutation pour la création de la liste de diffusion
   const createDistributionListMutation = useMutation({
-    mutationFn: async ({ fileName, listData }: { fileName: string; listData: BrevoListData }) => {
+    mutationFn: async ({ pathFile, listData }: { pathFile: string; listData: BrevoListData }) => {
       return await BrevoRecipientsService.createDistributionList({
         nom: listData.name,
         campagneId: listData.campaignId,
-        pathFile: `${PLAN_MARKETING_FOLDER_PATH_EXPORT}/${fileName}`,
+        pathFile,
       });
     },
     onError: (error: unknown) => {
@@ -112,10 +112,13 @@ export const useBrevoExport = (tab: "volontaire" | "inscription") => {
 
         // 3. Create file and import recipients
         const file = new File([csvFile.buffer], csvFile.filename, { type: csvFile.mimetype });
-        await importRecipientsMutation.mutateAsync(file);
+        // L'API range le fichier sous un chemin qu'elle génère et le renvoie : c'est lui qu'apiv2 importe.
+        // Repli sur l'ancien chemin tant qu'une API antérieure au lot L3 peut répondre sans `data`.
+        const importedPath = await importRecipientsMutation.mutateAsync(file);
+        const pathFile = importedPath || `${PLAN_MARKETING_FOLDER_PATH_EXPORT}/${file.name}`;
 
         // 4. Create distribution list
-        await createDistributionListMutation.mutateAsync({ fileName: file.name, listData: formDataBrevoList });
+        await createDistributionListMutation.mutateAsync({ pathFile, listData: formDataBrevoList });
       } catch (error) {
         const exportError: ImportRecipientsError = {
           code: "IMPORT_ERROR",

@@ -6,11 +6,15 @@ import { authMiddleware } from "../../../middlewares/authMiddleware";
 import { capture } from "../../../sentry";
 import { generateCSVStream, getHeaders, streamToBuffer } from "../../../services/fileService";
 import { ERRORS, uploadFile } from "../../../utils";
+import { toErrorCode } from "../../../utils/errorCode";
+import { assertImportedFile, buildImportedFileKey, removeTempFile } from "../../../utils/importedFile";
 import { ImportPointDeRassemblementRoute } from "./pointDeRassemblementImport";
-import { importPointDeRassemblement } from "./pointDeRassemblementImportService";
+import { importPointDeRassemblement, PointDeRassemblementImportHeadersError } from "./pointDeRassemblementImportService";
 import fileUpload, { UploadedFile } from "express-fileupload";
 import { MIME_TYPES, SENDINBLUE_TEMPLATES } from "snu-lib";
 import { sendTemplate } from "../../../brevo";
+
+const IMPORT_FOLDER = "file/point-de-rassemblement";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -20,20 +24,17 @@ router.post(
   accessControlMiddleware([]),
   fileUpload({ limits: { fileSize: 5 * 1024 * 1024 }, useTempFiles: true, tempFileDir: "/tmp/" }),
   async (req: UserRequest, res: RouteResponse<ImportPointDeRassemblementRoute>) => {
-    const files = Object.values(req.files || {});
-    if (files.length === 0) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-    const file: UploadedFile = files[0];
-    if (file.mimetype !== MIME_TYPES.EXCEL) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    } else if (!file.name) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
+    const file: UploadedFile | undefined = Object.values(req.files || {})[0] as UploadedFile | undefined;
     try {
+      if (!file || file.mimetype !== MIME_TYPES.EXCEL || !file.name) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
+      }
+      await assertImportedFile(file, "xlsx", req.user._id?.toString());
+
       // read XLSX
       const data = fs.readFileSync(file.tempFilePath);
-      uploadFile(`file/point-de-rassemblement/${file.name}`, {
+      // Clé générée côté serveur : le nom du fichier client n'y entre pas (L33).
+      await uploadFile(buildImportedFileKey(IMPORT_FOLDER, "xlsx"), {
         data: data,
         encoding: "",
         mimetype: MIME_TYPES.EXCEL,
@@ -43,26 +44,31 @@ router.post(
 
       const timestamp = `${new Date().toISOString()?.replaceAll(":", "-")?.replace(".", "-")}`;
       const rapportHeaders = getHeaders(importedPointDeRassemblement);
-      const rapportDataStream = generateCSVStream(importedPointDeRassemblement, rapportHeaders);
+      // Un flux ne se lit qu'une fois : le rapport est matérialisé avant d'être stocké et envoyé.
+      const rapportData = Buffer.from(await streamToBuffer(generateCSVStream(importedPointDeRassemblement, rapportHeaders)));
       const rapportFileName = `${timestamp}-imported-pointderassemblement.csv`;
-      uploadFile(`file/point-de-rassemblement/${rapportFileName}`, {
-        data: rapportDataStream,
+      await uploadFile(`${IMPORT_FOLDER}/${rapportFileName}`, {
+        data: rapportData,
         encoding: "",
         mimetype: "text/csv",
       });
 
       // Send report to email
-      const attachmentData = Buffer.from(await streamToBuffer(rapportDataStream)).toString("base64");
       await sendTemplate(SENDINBLUE_TEMPLATES.IMPORT_AUTO, {
         emailTo: [{ name: `${req.user.firstName} ${req.user.lastName}`, email: req.user.email! }],
-        attachment: [{ content: attachmentData, name: rapportFileName }],
+        attachment: [{ content: rapportData.toString("base64"), name: rapportFileName }],
       });
 
       return res.status(200).json({ ok: true });
     } catch (error) {
+      if (error instanceof PointDeRassemblementImportHeadersError) {
+        return res.status(422).json({ ok: false, code: ERRORS.INVALID_BODY, message: error.message });
+      }
       capture(error);
-      console.log(error);
-      return res.status(422).json({ ok: false, code: ERRORS.FILE_CORRUPTED, message: error.message });
+      // Seul un code est renvoyé : le message d'une erreur technique décrit l'implémentation (L33).
+      return res.status(422).json({ ok: false, code: toErrorCode(error, ERRORS.FILE_CORRUPTED) });
+    } finally {
+      removeTempFile(file);
     }
   },
 );

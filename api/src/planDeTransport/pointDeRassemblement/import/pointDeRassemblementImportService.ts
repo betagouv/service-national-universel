@@ -157,9 +157,12 @@ const getPdrExtraInfos = async (pdr: PointDeRassemblementImportMapped, foundPdr?
   };
 };
 
+/** Erreur de forme du fichier, destinée à l'utilisateur : son message ne contient que des noms de colonnes attendues. */
+export class PointDeRassemblementImportHeadersError extends Error {}
+
 export const checkColumnHeaders = (fileHeaders: string[]) => {
   const missingHeaders = PDR_HEADERS.filter((header) => !fileHeaders.includes(header));
   if (missingHeaders.length > 0) {
-    throw new Error(`Un fichier d'import de PDR doit contenir les colonnes suivantes: ${missingHeaders.join(", ")}`);
+    throw new PointDeRassemblementImportHeadersError(`Un fichier d'import de PDR doit contenir les colonnes suivantes: ${missingHeaders.join(", ")}`);
   }
 };
