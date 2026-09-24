@@ -6,7 +6,7 @@
  * pouvait partir chez Brevo. La route est réservée aux super-administrateurs (comme l'upload
  * api v1 qui dépose le CSV) et le chemin est borné aux CSV de l'import marketing.
  */
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 import { ROLES, SUB_ROLE_GOD, SUB_ROLES } from "snu-lib";
@@ -15,6 +15,7 @@ import { PlanMarketingController } from "@plan-marketing/infra/api/PlanMarketing
 import { ImporterEtCreerListeDiffusion } from "@plan-marketing/core/useCase/ImporterEtCreerListeDiffusion";
 import { PlanMarketingActionSelectorService } from "@plan-marketing/core/PlanMarketingActionSelector.service";
 import { BrevoWebhookGuard } from "@plan-marketing/infra/guard/BrevoWebhook.guard";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 describe("PlanMarketingController - import de liste de diffusion", () => {
     let app: INestApplication;
@@ -44,7 +45,7 @@ describe("PlanMarketingController - import de liste de diffusion", () => {
             req.user = utilisateurCourant;
             next();
         });
-        app.useGlobalPipes(new ValidationPipe());
+        app.useGlobalPipes(...pipesGlobaux());
         await app.init();
     });
 

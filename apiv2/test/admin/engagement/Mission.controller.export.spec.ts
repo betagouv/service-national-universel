@@ -1,6 +1,6 @@
 import * as request from "supertest";
 
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
 import { ROLES, TaskName, TaskStatus } from "snu-lib";
@@ -12,6 +12,7 @@ import { ReferentRegionalGuard } from "@admin/infra/iam/guard/ReferentRegional.g
 import { ReferentDepartementalGuard } from "@admin/infra/iam/guard/ReferentDepartemental.guard";
 import { ResponsableGuard } from "@admin/infra/iam/guard/Responsable.guard";
 import { SupervisorGuard } from "@admin/infra/iam/guard/Superviseur.guard";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 // L39 : le nombre d'exports missions / candidatures non terminés est borné par utilisateur.
 describe("MissionController - exports en attente", () => {
@@ -46,7 +47,7 @@ describe("MissionController - exports en attente", () => {
         }).compile();
 
         app = module.createNestApplication();
-        app.useGlobalPipes(new ValidationPipe());
+        app.useGlobalPipes(...pipesGlobaux());
         app.use((req, _res, next) => {
             req.user = { id: "ref-1", role: ROLES.ADMIN };
             next();

@@ -1,6 +1,6 @@
 import * as request from "supertest";
 
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test } from "@nestjs/testing";
 
 import { TaskName, TaskStatus } from "snu-lib";
@@ -9,6 +9,7 @@ import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.control
 import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
 import { SupprimerLigneDeBus } from "@admin/core/sejours/phase1/affectation/SupprimerLigneDeBus";
 import { TaskGateway } from "@task/core/Task.gateway";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 // M77 : les listings de tâches bornent le nom et le statut, et refusent toute clé hors DTO.
 describe("Phase1Controller - validation de la query des listings de tâches", () => {
@@ -27,7 +28,7 @@ describe("Phase1Controller - validation de la query des listings de tâches", ()
         }).compile();
 
         app = module.createNestApplication();
-        app.useGlobalPipes(new ValidationPipe());
+        app.useGlobalPipes(...pipesGlobaux());
         app.use((req, _res, next) => {
             req.user = { role: "admin", sousRole: "god" };
             next();

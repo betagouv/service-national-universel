@@ -1,6 +1,6 @@
 import configuration from "@config/testConfiguration";
 import { getQueueToken } from "@nestjs/bullmq";
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsModule } from "nestjs-cls";
@@ -23,6 +23,7 @@ import { QueueName } from "@shared/infra/Queue";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { testDatabaseProviders } from "../testDatabaseProvider";
 import { SharedModule } from "@shared/Shared.module";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 export interface SetupOptions {
     newContainer: boolean;
 }
@@ -89,7 +90,7 @@ export const setUpPlanMarketingTest = async (setupOptions: SetupOptions = { newC
         .compile();
 
     const app = planMarketingTestModule.createNestApplication({ logger: false });
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
 
     return { app, testModule: planMarketingTestModule };
 };

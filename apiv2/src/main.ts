@@ -1,5 +1,5 @@
 import { ConfigService } from "@nestjs/config";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
+import { RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { NestExpressApplication } from "@nestjs/platform-express";
 import { Request } from "express";
@@ -8,10 +8,11 @@ import { AppModule } from "./App.module";
 import { AuthProvider } from "./admin/infra/iam/auth/Auth.provider";
 import { hostGuard, hotesAutorises } from "./infra/security/HostGuard";
 import { RATE_LIMITS, estRouteCouteuse, rateLimitStoreFactory, rateLimiter } from "./infra/security/RateLimit";
+import { pipesGlobaux } from "./shared/infra/ObjectIdParams.pipe";
 
 async function bootstrap() {
     const app = await NestFactory.create<NestExpressApplication>(AppModule);
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
     const config = app.get(ConfigService);
 
     // Avant les gardes : un 421 ou un 429 doit rester lisible par le navigateur.

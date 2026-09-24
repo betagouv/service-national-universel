@@ -1,4 +1,4 @@
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import * as request from "supertest";
 import mongoose from "mongoose";
 import { MIME_TYPES, ReferentielTaskType, ROLES, SUB_ROLE_GOD, TaskName, TaskStatus } from "snu-lib";
@@ -14,6 +14,7 @@ import { ClockGateway } from "@shared/core/Clock.gateway";
 import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
 import { ReferentielService } from "@admin/core/referentiel/Referentiel.service";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 describe("ImportReferentielController", () => {
     let app: INestApplication;
@@ -65,7 +66,7 @@ describe("ImportReferentielController", () => {
 
         app = module.createNestApplication();
         // Comme main.ts : la validation des DTO passe par le pipe global.
-        app.useGlobalPipes(new ValidationPipe());
+        app.useGlobalPipes(...pipesGlobaux());
         app.use(mockedAddUserToRequestMiddleware);
 
         await app.init();

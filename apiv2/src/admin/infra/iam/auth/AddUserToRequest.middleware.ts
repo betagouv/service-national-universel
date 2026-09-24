@@ -9,6 +9,7 @@ import { AuthProvider, AuthTokenPayload } from "./Auth.provider";
 import { PermissionService } from "@auth/core/Permission.service";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { ReferentMapper } from "../repository/mongo/Referent.mapper";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 /**
  * Version de signature des JWT de session émis par la v1.
@@ -62,7 +63,7 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         }
 
         const payload = await this.authProvider.parseToken(token);
-        const user = await this.referentGateway.findById(payload.id);
+        const user = await this.trouverTitulaire(payload.id);
         if (!user) {
             throw new UnauthorizedException();
         }
@@ -87,6 +88,25 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             acl,
         });
         next();
+    }
+
+    /**
+     * Le dépôt lève NOT_FOUND sur un compte absent (jeton d'un jeune, compte supprimé) et
+     * mongoose un CastError sur un identifiant mal formé : sans ce filet, un jeton signé mais
+     * sans titulaire référent répondait 422 ou 500 au lieu de 401.
+     */
+    private async trouverTitulaire(id: unknown): Promise<ReferentModel | null> {
+        if (typeof id !== "string" || !/^[0-9a-fA-F]{24}$/.test(id)) {
+            return null;
+        }
+        try {
+            return await this.referentGateway.findById(id);
+        } catch (error) {
+            if (error instanceof FunctionalException && error.message === FunctionalExceptionCode.NOT_FOUND) {
+                return null;
+            }
+            throw error;
+        }
     }
 
     /**
