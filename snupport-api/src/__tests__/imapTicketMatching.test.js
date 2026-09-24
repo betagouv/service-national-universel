@@ -13,7 +13,7 @@ jest.mock("../brevo", () => ({ sendTemplate: jest.fn() }));
 jest.mock("../utils/ventilation", () => ({ matchVentilationRule: async (t) => t }));
 jest.mock("../utils/email", () => ({ weekendRanges: [], isDateInRange: () => false }));
 jest.mock("../utils/crypto", () => ({ encrypt: (b) => b }));
-jest.mock("../utils/file", () => ({ getS3Path: (n) => `message/${n}` }));
+jest.mock("../utils/file", () => ({ getS3Path: (n) => `message/${n}`, getAttachmentFileName: (n) => n }));
 jest.mock("../utils", () => ({
   uploadAttachment: jest.fn(),
   weekday: ["dimanche", "lundi", "mardi", "mercredi", "jeudi", "vendredi", "samedi"],

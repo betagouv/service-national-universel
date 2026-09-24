@@ -60,7 +60,7 @@ import {
   cancelPendingApplications,
   cancelPendingEquivalence,
 } from "../utils";
-import { validateId, idSchema, validateSelf, validateYoung, validateReferent } from "../utils/validator";
+import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } from "../jwt-options";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
@@ -355,7 +355,7 @@ router.post(
           .allow(null, "")
           .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),
         region: Joi.string().allow(null, ""),
-        department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+        department: referentDepartmentSchema(),
         structureId: Joi.string().allow(null, ""),
         structureName: Joi.string().allow(null, ""),
         cohesionCenterName: Joi.string().allow(null, ""),
@@ -414,7 +414,8 @@ router.post(
       // @ts-ignore
       referentProperties.invitationExpires = inSevenDays();
 
-      const referent = await ReferentModel.create(referentProperties);
+      // Comme au PUT : un compte invité ne garde que les champs de périmètre propres à son rôle.
+      const referent = await ReferentModel.create(cleanReferentData(referentProperties));
       if (!referent) return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
       await updateTutorNameInMissionsAndApplications(referent, req.user);
 

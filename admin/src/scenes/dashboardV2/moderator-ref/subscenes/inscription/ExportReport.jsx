@@ -1,5 +1,6 @@
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
+import { safeAoaToSheet } from "@/utils/file";
 import { toastr } from "react-redux-toastr";
 import api from "../../../../../services/api";
 import { REFERENT_ROLES, YOUNG_STATUS, department2region, departmentLookUp, departmentToAcademy, region2department, translate, translateInscriptionStatus } from "snu-lib";
@@ -67,8 +68,8 @@ export default async function ExportReport({ filter, user, setLoading, setLoadin
   });
 
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
-  const sheetData = XLSX.utils.aoa_to_sheet(lines);
-  const sheetFilter = XLSX.utils.aoa_to_sheet(linesFilter);
+  const sheetData = safeAoaToSheet(lines);
+  const sheetFilter = safeAoaToSheet(linesFilter);
   const wb = { Sheets: { Données: sheetData, Filtres: sheetFilter }, SheetNames: ["Données", "Filtres"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const data = new Blob([excelBuffer], { type: fileType });

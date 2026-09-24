@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import * as XLSX from "xlsx";
+import { safeJsonToSheet } from "@/utils/file";
 import * as FileSaver from "file-saver";
 import { BsDownload } from "react-icons/bs";
 
@@ -136,7 +137,7 @@ export default function Historic() {
   async function exportExcel(fileName, data) {
     const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
     const fileExtension = ".xlsx";
-    const ws = XLSX.utils.json_to_sheet(data);
+    const ws = safeJsonToSheet(data);
     const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
     const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
     const resultData = new Blob([excelBuffer], { type: fileType });

@@ -1,4 +1,5 @@
 import * as FileSaver from "file-saver";
+import { getSafeDownloadFileName } from "snu-lib";
 import React, { useEffect, useRef, useState } from "react";
 import { toastr } from "react-redux-toastr";
 import { Modal } from "reactstrap";
@@ -67,7 +68,7 @@ export default function ModalFilesEquivalence({ isOpen, onCancel, initialValues,
     setLoading(true);
     try {
       const f = await api.get(`/referent/youngFile/${young._id}/${nameFiles}/${getFileName(file)}`);
-      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName.replace(/[^a-z0-9]/i, "-"));
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), getSafeDownloadFileName(f.fileName, f.mimeType));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }

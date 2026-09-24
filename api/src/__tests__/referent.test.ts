@@ -81,8 +81,10 @@ afterEach(resetAppAuth);
 
 describe("Referent", () => {
   describe("POST /referent/signup_invite/:template", () => {
+    // La fixture tire un département fictif (faker) : la route n'accepte que ceux de `departmentList`.
+    const getInvitationFixture = () => ({ ...getNewReferentFixture(), department: ["Ain"] });
     it("should invite and add referent (admin)", async () => {
-      const referentFixture = getNewReferentFixture();
+      const referentFixture = getInvitationFixture();
       const referentsBefore = await getReferentsHelper();
       const res = await request(await getAppHelperWithAcl())
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
@@ -94,21 +96,21 @@ describe("Referent", () => {
     });
     it("should invite and add referent (responsible)", async () => {
       const structure = await createStructureHelper(getNewStructureFixture());
-      const referentFixture = { ...getNewReferentFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
+      const referentFixture = { ...getInvitationFixture(), role: ROLES.RESPONSIBLE, structureId: structure._id.toString() };
       const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE, structureId: structure._id.toString() }))
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send(referentFixture);
       expect(res.statusCode).toEqual(200);
     });
     it("should return 400 if no templates given", async () => {
-      const referentFixture = getNewReferentFixture();
+      const referentFixture = getInvitationFixture();
       const res = await request(await getAppHelperWithAcl())
         .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
         .send({ ...referentFixture, structureId: 1 });
       expect(res.statusCode).toEqual(400);
     });
     it("should return 403 when responsible can not invite (all role except responsible)", async () => {
-      const referentFixture = { ...getNewReferentFixture(), role: ROLES.ADMIN };
+      const referentFixture = { ...getInvitationFixture(), role: ROLES.ADMIN };
       for (const role of ROLES_LIST) {
         if (role !== ROLES.RESPONSIBLE) {
           const res = await request(await getAppHelperWithAcl({ role: ROLES.RESPONSIBLE }))
@@ -119,7 +121,7 @@ describe("Referent", () => {
       }
     });
     it("should return 409 when user already exists", async () => {
-      const fixture = getNewReferentFixture();
+      const fixture = getInvitationFixture();
       const email = fixture.email?.toLowerCase();
       await createReferentHelper({ ...fixture, email });
       let res = await request(await getAppHelperWithAcl())
@@ -131,7 +133,7 @@ describe("Referent", () => {
     // ADMINISTRATEUR_CLE ou REFERENT_CLASSE actif, y compris pour un admin qui peut inviter tout rôle.
     it("should return 403 when inviting an ADMINISTRATEUR_CLE or REFERENT_CLASSE", async () => {
       for (const role of [ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE]) {
-        const referentFixture = { ...getNewReferentFixture(), role };
+        const referentFixture = { ...getInvitationFixture(), role };
         const res = await request(await getAppHelperWithAcl())
           .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE_MEMBER}`)
           .send(referentFixture);

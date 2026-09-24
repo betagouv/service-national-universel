@@ -1,5 +1,16 @@
 import Joi from "joi";
-import { ROLES_LIST, SUB_ROLES_LIST, VISITOR_SUB_ROLES_LIST, PHONE_ZONES_NAMES_ARR, YoungDto, ReferentStatus, SUB_ROLE_GOD, APPLICATION_STATUS, sanitizeStoredHtml } from "snu-lib";
+import {
+  ROLES_LIST,
+  SUB_ROLES_LIST,
+  VISITOR_SUB_ROLES_LIST,
+  PHONE_ZONES_NAMES_ARR,
+  YoungDto,
+  ReferentStatus,
+  SUB_ROLE_GOD,
+  APPLICATION_STATUS,
+  sanitizeStoredHtml,
+  departmentList,
+} from "snu-lib";
 import { isYoung } from "../utils";
 
 // Source: https://github.com/mkg20001/joi-objectid/blob/71b2a8c0ccd31153e4efd3e7c10602b4385242f6/index.js#L12
@@ -660,6 +671,17 @@ export function validateDepartmentService(departmentService) {
     })
     .validate(departmentService, { stripUnknown: true });
 }
+// Les départements d'un référent sont un tableau : sans liste fermée, un second élément libre
+// devenait une formule dans l'export Excel « Utilisateurs » (SheetJS lit `[valeur, formule]`).
+export const referentDepartmentSchema = () =>
+  Joi.array()
+    .items(
+      Joi.string()
+        .valid(...departmentList)
+        .allow(null, ""),
+    )
+    .allow(null, "");
+
 export function validateReferent(referent) {
   return Joi.object()
     .keys({
@@ -673,7 +695,7 @@ export function validateReferent(referent) {
         .allow(null)
         .valid(...ROLES_LIST),
       region: Joi.string().allow(null, ""),
-      department: Joi.array().items(Joi.string().allow(null, "")).allow(null, ""),
+      department: referentDepartmentSchema(),
       subRole: Joi.string()
         .allow(null, "")
         .valid(...SUB_ROLES_LIST, ...VISITOR_SUB_ROLES_LIST),

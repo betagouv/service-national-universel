@@ -9,6 +9,7 @@ import { Footer, ModalContainer } from "../../../components/modals/Modal";
 import ModalConfirm from "../../../components/modals/ModalConfirm";
 import api from "../../../services/api";
 import FileSaver from "file-saver";
+import { getSafeDownloadFileName } from "snu-lib";
 
 export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly = false }) {
   const [modal, setModal] = useState({ isOpen: false, onConfirm: null });
@@ -55,7 +56,7 @@ export default function ModalFilesPM({ isOpen, onCancel, path, title, readOnly =
     setLoading(true);
     try {
       const res = await api.get(`${path}/${fileId}`);
-      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }), res.fileName);
+      FileSaver.saveAs(new Blob([new Uint8Array(res.data.data)], { type: res.mimeType }), getSafeDownloadFileName(res.fileName, res.mimeType));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }

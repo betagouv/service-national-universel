@@ -2,6 +2,7 @@ import dayjs from "@/utils/dayjs.utils";
 import * as FileSaver from "file-saver";
 import React, { useEffect, useState } from "react";
 import * as XLSX from "xlsx";
+import { safeAoaToSheet } from "@/utils/file";
 import LoadingButton from "../../../buttons/LoadingButton";
 import LoadingButtonV2 from "../../../buttons/LoadingButtonV2";
 import ModalConfirm from "../../../modals/ModalConfirm";
@@ -204,7 +205,7 @@ async function getAllResults(route: string, selectedFilters: { [key: string]: Fi
 async function exportData(fileName: string, csv: any[][]): Promise<void> {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
-  const ws = XLSX.utils.aoa_to_sheet(csv);
+  const ws = safeAoaToSheet(csv);
   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const resultData = new Blob([excelBuffer], { type: fileType });

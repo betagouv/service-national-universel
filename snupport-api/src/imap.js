@@ -15,7 +15,7 @@ const { sendTemplate } = require("./brevo");
 const { capture } = require("./sentry");
 const { sendNotif, SENDINBLUE_TEMPLATES } = require("./utils/");
 const { encrypt } = require("./utils/crypto");
-const { getS3Path } = require("./utils/file");
+const { getS3Path, getAttachmentFileName } = require("./utils/file");
 const { canSenderJoinTicket } = require("./utils/imapTicketMatching");
 const { inspectAttachment } = require("./utils/attachments");
 const { sanitizeMessageHtml } = require("./utils/messageHtml");
@@ -129,7 +129,7 @@ async function addMessage(mail) {
         const path = getS3Path(attachment.filename, mime);
         const url = await uploadAttachment(path, { data: encryptedBuffer, mimetype: mime, encoding: "7bit" });
         if (url) {
-          createdMessage.files.push({ name: attachment.filename, path, url });
+          createdMessage.files.push({ name: getAttachmentFileName(attachment.filename, mime), path, url });
         }
       }
       await createdMessage.save();

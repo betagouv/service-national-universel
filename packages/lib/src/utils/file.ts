@@ -1,15 +1,112 @@
+// Extensions imposées par type MIME au téléchargement : la première est celle ajoutée, les autres
+// sont des variantes acceptées si le nom d'origine les porte déjà.
+const DOWNLOAD_EXTENSIONS_BY_MIME_TYPE: Record<string, string[]> = {
+  "application/pdf": ["pdf"],
+  "image/jpeg": ["jpg", "jpeg"],
+  "image/png": ["png"],
+  "image/gif": ["gif"],
+  "image/webp": ["webp"],
+  "text/csv": ["csv"],
+  "text/plain": ["txt"],
+  "application/zip": ["zip"],
+  "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": ["xlsx"],
+  "application/vnd.ms-excel": ["xls"],
+  "application/vnd.openxmlformats-officedocument.wordprocessingml.document": ["docx"],
+  "application/msword": ["doc"],
+  "application/vnd.oasis.opendocument.text": ["odt"],
+  "application/vnd.oasis.opendocument.spreadsheet": ["ods"],
+  "application/octet-stream": ["bin"],
+};
+
+const SAFE_DOWNLOAD_EXTENSIONS = new Set(Object.values(DOWNLOAD_EXTENSIONS_BY_MIME_TYPE).flat());
+
+const MAX_DOWNLOAD_BASE_NAME_LENGTH = 150;
+
+/**
+ * Nom de fichier proposé au navigateur pour un contenu de type `mimeType`.
+ *
+ * Le nom d'origine vient du déposant : sans contrôle, un polyglotte `%PDF` (accepté comme PDF)
+ * nommé `piece.hta` ou `piece.html` s'enregistrait avec cette extension et s'exécutait à
+ * l'ouverture. On garde la base assainie et on impose l'extension du type détecté ; si le type est
+ * inconnu ou générique (`image/*`, vide), seule une extension de la liste sûre est conservée, sinon
+ * `.bin`.
+ */
+export function getSafeDownloadFileName(fileName?: string | null, mimeType?: string | null, fallbackBaseName = "document"): string {
+  const rawName = String(fileName ?? "")
+    .split(/[\\/]/)
+    .pop()!
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  const lastDot = rawName.lastIndexOf(".");
+  const currentExtension = lastDot > 0 ? rawName.slice(lastDot + 1).toLowerCase() : "";
+  const rawBase = lastDot > 0 ? rawName.slice(0, lastDot) : rawName;
+
+  const baseName =
+    rawBase
+      .replace(/[<>:"|?*.]/g, "_")
+      .replace(/\s+/g, " ")
+      .replace(/^[\s_-]+|[\s_-]+$/g, "")
+      .slice(0, MAX_DOWNLOAD_BASE_NAME_LENGTH) || fallbackBaseName;
+
+  const normalizedMimeType = String(mimeType ?? "")
+    .split(";")[0]
+    .trim()
+    .toLowerCase();
+  const extensionsForMimeType = DOWNLOAD_EXTENSIONS_BY_MIME_TYPE[normalizedMimeType];
+  let extension: string;
+  if (extensionsForMimeType) {
+    extension = extensionsForMimeType.includes(currentExtension) ? currentExtension : extensionsForMimeType[0];
+  } else {
+    extension = SAFE_DOWNLOAD_EXTENSIONS.has(currentExtension) ? currentExtension : "bin";
+  }
+  return `${baseName}.${extension}`;
+}
+
+/**
+ * Type MIME déduit des premiers octets, pour les fichiers dont le serveur ne renvoie pas le type
+ * (pièces jointes du support servies en `image/*`). `undefined` si la signature est inconnue.
+ */
+export function detectMimeTypeFromBytes(bytes?: ArrayLike<number> | null): string | undefined {
+  if (!bytes || bytes.length < 4) return undefined;
+  const startsWith = (signature: number[], offset = 0) => signature.every((byte, index) => bytes[offset + index] === byte);
+  if (startsWith([0x25, 0x50, 0x44, 0x46, 0x2d])) return "application/pdf"; // %PDF-
+  if (startsWith([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a])) return "image/png";
+  if (startsWith([0xff, 0xd8, 0xff])) return "image/jpeg";
+  if (startsWith([0x47, 0x49, 0x46, 0x38])) return "image/gif"; // GIF8
+  if (startsWith([0x52, 0x49, 0x46, 0x46]) && startsWith([0x57, 0x45, 0x42, 0x50], 8)) return "image/webp"; // RIFF....WEBP
+  return undefined;
+}
+
+/**
+ * SheetJS interprète certaines valeurs au lieu de les écrire : un tableau `[valeur, formule]` passé à
+ * `aoa_to_sheet` devient une vraie formule, et un objet passé à `json_to_sheet` est recopié tel quel
+ * comme cellule (`{ f: "..." }` compris). Une donnée saisie par un tiers (ex. `department` d'un
+ * référent) produisait ainsi une formule dans l'export. Toute cellule est ramenée à un scalaire.
+ */
+export function toSheetCellValue(value: unknown): string | number | boolean | Date | null | undefined {
+  if (value === null || value === undefined) return value;
+  if (value instanceof Date) return value;
+  if (Array.isArray(value)) return value.map((item) => (item !== null && typeof item === "object" ? JSON.stringify(item) : String(item ?? ""))).join(", ");
+  if (typeof value === "object") return JSON.stringify(value);
+  if (typeof value === "string" || typeof value === "number" || typeof value === "boolean") return value;
+  return String(value);
+}
+
 export function download(file, fileName) {
+  // L'extension suit le type du contenu, jamais le seul nom fourni par le déposant.
+  const safeFileName = getSafeDownloadFileName(fileName, file?.type);
   // @ts-expect-error msSaveOrOpenBlob exists
   if (window.navigator.msSaveOrOpenBlob) {
     // IE11 & Edge
     // @ts-expect-error msSaveOrOpenBlob exists
-    window.navigator.msSaveOrOpenBlob(file, fileName);
+    window.navigator.msSaveOrOpenBlob(file, safeFileName);
   } else {
     //Other browsers
     const a = document.createElement("a");
     document.body.appendChild(a);
     a.href = URL.createObjectURL(file);
-    a.download = fileName;
+    a.download = safeFileName;
     a.click();
   }
 }

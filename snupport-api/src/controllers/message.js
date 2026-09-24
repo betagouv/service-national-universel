@@ -9,7 +9,7 @@ const { matchVentilationRule } = require("../utils/ventilation");
 
 const { getFile, deleteFile, uploadAttachment, getHoursDifference, getSignedUrl, sendResponseTicket } = require("../utils");
 const { decrypt, encrypt } = require("../utils/crypto");
-const { getS3Path } = require("../utils/file");
+const { getS3Path, getAttachmentFileName } = require("../utils/file");
 const { agentGuard } = require("../middlewares/authenticationGuards");
 const { forbidReadOnlyRoles } = require("../middlewares/userRoleGuards");
 const { validateParams, validateBody, validateQuery, idSchema } = require("../middlewares/validation");
@@ -280,7 +280,7 @@ router.post(
     for (const file of files) {
       const { mime, accepted } = await inspectAttachment(file.data);
       if (!accepted) return res.status(400).send({ ok: false, code: "UNSUPPORTED_TYPE" });
-      inspectedFiles.push({ name: file.name, data: file.data, mime });
+      inspectedFiles.push({ name: getAttachmentFileName(file.name, mime), data: file.data, mime });
     }
 
     const mailFormatFiles = inspectedFiles.map((file) => ({ content: file.data.toString("base64"), name: file.name }));

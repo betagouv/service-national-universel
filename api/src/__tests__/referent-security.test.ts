@@ -9,6 +9,9 @@
  * H69 GET  /referent/:id                     : canViewReferent sans périmètre (profil complet de tout référent)
  * H68 GET  /referent/:id/patches             : USER_HISTORY ignorePolicy (historique de tout référent)
  * M68 GET  /referent?email=                  : annuaire par email ouvert à la famille chef de centre
+ *
+ * Audit des fronts du 23/09/2026 :
+ * FM7 department libre : un tableau `[département, formule]` devenait une formule dans l'export Excel
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -915,6 +918,70 @@ describe("Sécurité référent — audit 2026-09-21", () => {
 
       expect(res.statusCode).toEqual(200);
       expect(res.body.data.email).toEqual("cible-m68-ok@example.org");
+    });
+  });
+
+  describe("FM7 — département d'un référent (formule dans l'export « Utilisateurs »)", () => {
+    const FORMULE = 'HYPERLINK("https://attaquant.example","Ouvrir")';
+
+    it("POST /referent/signup_invite/:template refuse un département hors de la liste", async () => {
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent[ROLES.REFERENT_DEPARTMENT]}`)
+        .send({
+          email: "fm7-invite@example.org",
+          firstName: "A",
+          lastName: "B",
+          role: ROLES.REFERENT_DEPARTMENT,
+          region: "Auvergne-Rhône-Alpes",
+          department: ["Ain", FORMULE],
+        });
+
+      expect(res.statusCode).toEqual(400);
+      expect(await ReferentModel.findOne({ email: "fm7-invite@example.org" })).toBeNull();
+    });
+
+    it("PUT /referent/:id refuse un département hors de la liste", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .put(`/referent/${cible._id}`)
+        .send({ department: ["Ain", FORMULE] });
+
+      expect(res.statusCode).toEqual(400);
+      expect((await getReferentByIdHelper(cible._id))?.department).toEqual(["Ain"]);
+    });
+
+    it("PUT /referent/:id accepte un département de la liste", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"], region: "Auvergne-Rhône-Alpes" }));
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .put(`/referent/${cible._id}`)
+        .send({ department: ["Allier"] });
+
+      expect(res.statusCode).toEqual(200);
+      expect((await getReferentByIdHelper(cible._id))?.department).toEqual(["Allier"]);
+    });
+
+    it("POST /referent/signup_invite/:template ne garde que les champs de périmètre du rôle invité", async () => {
+      const structure = await createStructureHelper(getNewStructureFixture());
+
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .post(`/referent/signup_invite/${TEMPLATE}`)
+        .send({
+          email: "fm7-responsable@example.org",
+          firstName: "A",
+          lastName: "B",
+          role: ROLES.RESPONSIBLE,
+          structureId: structure._id.toString(),
+          region: "Auvergne-Rhône-Alpes",
+          department: ["Ain"],
+        });
+
+      expect(res.statusCode).toEqual(200);
+      const cree = await ReferentModel.findOne({ email: "fm7-responsable@example.org" });
+      expect(cree?.structureId).toEqual(structure._id.toString());
+      expect(cree?.department ?? []).toEqual([]);
+      expect(cree?.region ?? "").toEqual("");
     });
   });
 });

@@ -27,6 +27,31 @@ const getS3Path = (fileName, mime) => {
   return `message/${uuid()}.${extension}`;
 };
 
+const MAX_ATTACHMENT_BASE_NAME_LENGTH = 150;
+
+// Nom affiché et proposé au téléchargement : la base vient de l'expéditeur, l'extension du type
+// détecté. Sans cela, un polyglotte accepté comme PDF et nommé `piece.hta` s'enregistrait avec
+// cette extension chez l'agent (constat FL6).
+const getAttachmentFileName = (fileName, mime) => {
+  const rawName = String(fileName ?? "")
+    .split(/[\\/]/)
+    .pop()
+    // eslint-disable-next-line no-control-regex
+    .replace(/[\u0000-\u001f\u007f]/g, "")
+    .trim();
+  const lastDot = rawName.lastIndexOf(".");
+  const rawBase = lastDot > 0 ? rawName.slice(0, lastDot) : rawName;
+  const baseName =
+    rawBase
+      .replace(/[<>:"|?*.]/g, "_")
+      .replace(/\s+/g, " ")
+      .replace(/^[\s_-]+|[\s_-]+$/g, "")
+      .slice(0, MAX_ATTACHMENT_BASE_NAME_LENGTH) || "piece-jointe";
+  const extension = (mime && EXTENSIONS_BY_MIME[mime]) || "bin";
+  return `${baseName}.${extension}`;
+};
+
 module.exports = {
   getS3Path,
+  getAttachmentFileName,
 };

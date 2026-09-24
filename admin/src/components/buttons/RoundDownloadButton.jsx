@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import * as FileSaver from "file-saver";
+import { getSafeDownloadFileName } from "snu-lib";
 import { toastr } from "react-redux-toastr";
 import IconButton from "./IconButton";
 import ModalConfirm from "../modals/ModalConfirm";
@@ -21,7 +22,7 @@ export default function RoundButton({ source, icon, bgColor, ...rest }) {
     setButtonsLoading(true);
     try {
       const f = await source();
-      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), f.fileName);
+      FileSaver.saveAs(new Blob([new Uint8Array(f.data.data)], { type: f.mimeType }), getSafeDownloadFileName(f.fileName, f.mimeType));
     } catch (e) {
       toastr.error("Oups, une erreur est survenue pendant le téléchagement", e.toString());
     }
