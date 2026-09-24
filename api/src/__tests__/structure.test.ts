@@ -64,6 +64,14 @@ describe("Structure", () => {
         .send(structure);
       expect(res.status).toBe(200);
       const updatedStructure = await getStructureByIdHelper(res.body.data._id);
+    it("ignore un nom de réseau envoyé sans rattachement (GOO-43)", async () => {
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+        .post("/structure")
+        .send({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkName: "orphelin" });
+      expect(res.status).toBe(200);
+      const created = await getStructureByIdHelper(res.body.data._id);
+      expect(created?.networkName || "").toBe("");
+    });
       expect(updatedStructure?.networkName).toBe("network");
     });
     it("RESPONSIBLE cannot create structure", async () => {
@@ -212,6 +220,82 @@ describe("Structure", () => {
         .send({ name: "changed", isNetwork: "false" });
       expect(res.status).toBe(200);
       const updatedStructure = await getStructureByIdHelper(structure._id);
+
+    describe("réseau de rattachement (GOO-43)", () => {
+      it("REFERENT_REGION ne rattache pas une structure à un réseau par son seul nom", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkName: "", region: "Île-de-France" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Île-de-France" }))
+          .put("/structure/" + structure._id)
+          .send({ ...structure.toJSON(), networkName: network.name });
+        expect(res.status).toBe(403);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.networkName || "").toBe("");
+        expect(updated?.networkId || "").toBe("");
+      });
+
+      it("RESPONSIBLE ne rattache pas sa structure à un réseau", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkName: "" });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ networkId: network._id.toString(), networkName: network.name });
+        expect(res.status).toBe(403);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.networkName || "").toBe("");
+        expect(updated?.networkId || "").toBe("");
+      });
+
+      it("RESPONSIBLE met à jour sa structure en renvoyant le réseau inchangé", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkId: network._id.toString(), networkName: "network" });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ name: "changed", networkId: network._id.toString(), networkName: "network" });
+        expect(res.status).toBe(200);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.name).toBe("changed");
+        expect(updated?.networkId).toBe(network._id.toString());
+        expect(updated?.networkName).toBe("network");
+      });
+
+      it("un enregistrement corrige un nom de réseau sans rattachement", async () => {
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkName: "orphelin" });
+        const responsible = await createReferentHelper({ ...getNewReferentFixture(), structureId: structure._id, role: ROLES.RESPONSIBLE });
+        const res = await request(await getAppHelperWithAcl(responsible.toJSON()))
+          .put("/structure/" + structure._id)
+          .send({ name: "changed", networkName: "orphelin" });
+        expect(res.status).toBe(200);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.networkName).toBe("");
+      });
+
+      it("ADMIN rattache : le nom du réseau vient du réseau, pas du corps de la requête", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkName: "" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+          .put("/structure/" + structure._id)
+          .send({ networkId: network._id.toString(), networkName: "autre" });
+        expect(res.status).toBe(200);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.networkId).toBe(network._id.toString());
+        expect(updated?.networkName).toBe("network");
+      });
+
+      it("ADMIN détache : le nom du réseau est vidé", async () => {
+        const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+        const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "s", isNetwork: "false", networkId: network._id.toString(), networkName: "network" });
+        const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
+          .put("/structure/" + structure._id)
+          .send({ networkId: "", networkName: "network" });
+        expect(res.status).toBe(200);
+        const updated = await getStructureByIdHelper(structure._id);
+        expect(updated?.networkId || "").toBe("");
+        expect(updated?.networkName).toBe("");
+      });
+    });
       expect(updatedStructure?.name).toBe("changed");
     });
   });
