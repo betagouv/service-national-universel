@@ -15,6 +15,7 @@
  * CLE, mais pas le territoire des référents départementaux et régionaux. Elle alimente la même
  * page que GET /cle/classe/:id : les deux périmètres doivent coïncider.
  */
+import { Types } from "mongoose";
 import request from "supertest";
 
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SUB_ROLES } from "snu-lib";
@@ -362,6 +363,34 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       }
       expect(res.body.data.etablissement).not.toHaveProperty("referentEtablissementIds");
       expect(res.body.data.etablissement).not.toHaveProperty("coordinateurIds");
+    }, 30000);
+
+    it("projette explicitement la racine du document classe", async () => {
+      const { classe } = await createEtablissementComplet();
+
+      const res = await request(await getAppHelperWithAcl(null)).get(`/cle/classe/public/${classe._id}`);
+
+      expect(res.statusCode).toEqual(200);
+      const allowed = ["_id", "cohort", "cohortDetails", "coloration", "etablissement", "grades", "id", "name", "referents", "status", "uniqueKeyAndId"];
+      expect(Object.keys(res.body.data).filter((key) => !allowed.includes(key))).toEqual([]);
+      expect(res.body.data).toMatchObject({ id: classe._id.toString(), name: classe.name, uniqueKeyAndId: classe.uniqueKeyAndId });
+      expect(Object.keys(res.body.data.etablissement).filter((key) => !["city", "name"].includes(key))).toEqual([]);
+    }, 30000);
+
+    it("ne renvoie que la projection racine sans withDetails", async () => {
+      const { classe } = await createEtablissementComplet();
+
+      const res = await request(await getAppHelperWithAcl(null)).get(`/cle/classe/public/${classe._id}?withDetails=false`);
+
+      expect(res.statusCode).toEqual(200);
+      const allowed = ["_id", "cohort", "coloration", "grades", "id", "name", "status", "uniqueKeyAndId"];
+      expect(Object.keys(res.body.data).filter((key) => !allowed.includes(key))).toEqual([]);
+    }, 30000);
+
+    it("renvoie 404 pour une classe inconnue", async () => {
+      const res = await request(await getAppHelperWithAcl(null)).get(`/cle/classe/public/${new Types.ObjectId()}`);
+
+      expect(res.statusCode).toEqual(404);
     }, 30000);
   });
 });
