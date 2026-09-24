@@ -84,9 +84,7 @@
     "xlsx": "https://cdn.sheetjs.com/xlsx-0.20.3/xlsx-0.20.3.tgz"
   },
   "devDependencies": {
-    "@sentry/integrations": "^7.7.0",
-    "@sentry/react": "^7.7.0",
-    "@sentry/tracing": "^7.7.0",
+    "@sentry/react": "^8.55.2",
     "@sentry/vite-plugin": "^2.22.2",
     "@swc/plugin-styled-components": "^2.0.12",
     "@tsconfig/vite-react": "^2.0.1",
