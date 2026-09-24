@@ -9,6 +9,7 @@ import CreateTicketModal from "./CreateTicketModal";
 import Avatar from "../../../components/Avatar";
 import API from "../../../services/api";
 import { classNames, htmlCleaner } from "../../../utils";
+import { detectMimeTypeFromBytes, getSafeDownloadFileName } from "../../../utils/downloadFileName";
 import { useSelector } from "react-redux";
 import Loader from "../../../components/Loader";
 
@@ -82,7 +83,10 @@ export default function ChatBox({
   const downloadFileFromS3 = async (file) => {
     try {
       const { data } = await API.post({ path: `/message/s3file`, body: { path: file.path } });
-      FileSaver.saveAs(new Blob([new Uint8Array(data.data)], { type: "image/*" }), file.name);
+      // Le type n'est pas renvoyé : il est déduit du contenu, et l'extension du nom en découle.
+      const bytes = new Uint8Array(data.data);
+      const mimeType = detectMimeTypeFromBytes(bytes);
+      FileSaver.saveAs(new Blob([bytes], { type: mimeType || "application/octet-stream" }), getSafeDownloadFileName(file.name, mimeType));
     } catch (e) {
       toast.error(e, "Erreur");
     }

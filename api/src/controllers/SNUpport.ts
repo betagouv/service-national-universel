@@ -5,7 +5,7 @@ import fs from "fs";
 import Joi from "joi";
 import { v4 as uuid } from "uuid";
 
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES, SENDINBLUE_TEMPLATES, ReferentStatus, getSafeDownloadFileName } from "snu-lib";
 
 import slack from "../slack";
 import { cookieOptions, COOKIE_SNUPPORT_MAX_AGE_MS } from "../cookie-options";
@@ -614,7 +614,8 @@ router.post(
         const path = `message/${uuid()}.${extension}`;
         const encryptedBuffer = encrypt(data, config.FILE_ENCRYPTION_SECRET_SUPPORT);
         const response = (await uploadFile(path, { data: encryptedBuffer, encoding: "7bit", mimetype: mimeFromMagicNumbers }, SUPPORT_BUCKET_CONFIG)) as UploadResponse;
-        const attachment = { name, url: response.Location, path: response.key };
+        // Le nom affiché et proposé au téléchargement prend l'extension du type détecté (FL6).
+        const attachment = { name: getSafeDownloadFileName(name, mimeFromMagicNumbers), url: response.Location, path: response.key };
         await rememberAttachment(req.user._id.toString(), attachment);
         responseData.push(attachment);
         fs.unlinkSync(tempFilePath);

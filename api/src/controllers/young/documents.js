@@ -5,7 +5,7 @@ const router = express.Router({ mergeParams: true });
 const { capture } = require("../../sentry");
 const { YoungModel, CohortModel, ContractModel, ApplicationModel } = require("../../models");
 const { ERRORS, isYoung, isReferent, uploadFile, deleteFile, getFile } = require("../../utils");
-const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung } = require("snu-lib");
+const { FILE_KEYS, MILITARY_FILE_KEYS, COHORTS, canSendFileByMailToYoung, canDownloadYoungDocuments, canEditYoung, getSafeDownloadFileName } = require("snu-lib");
 const fs = require("fs");
 const fileUpload = require("express-fileupload");
 const mongoose = require("mongoose");
@@ -182,7 +182,9 @@ router.post(
         // Create document
         const newFile = {
           _id: new mongoose.Types.ObjectId(),
-          name: decodeURIComponent(name),
+          // Le nom vient du déposant : l'extension suit le type détecté (un polyglotte %PDF nommé
+          // `.hta` ou `.html` gardait cette extension au téléchargement, constat FL6).
+          name: getSafeDownloadFileName(decodeURIComponent(name), mimeFromContent),
           size,
           uploadedAt: Date.now(),
           mimetype,
@@ -363,7 +365,8 @@ router.get("/:key/:fileId", passport.authenticate(["young", "referent"], { sessi
     return res.status(200).send({
       data: Buffer.from(decryptedBuffer, "base64"),
       mimeType,
-      fileName: young.files[key].id(fileId).name,
+      // Les fichiers déposés avant FL6 portent encore le nom d'origine : il est recalculé ici aussi.
+      fileName: getSafeDownloadFileName(young.files[key].id(fileId).name, mimeType),
       ok: true,
     });
   } catch (error) {

@@ -39,8 +39,10 @@ const moduleExports = {
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
+  // Aucun composant next/image : l'optimiseur d'images (/_next/image) ne sert qu'à exposer une
+  // surface de DoS anonyme, sans correctif en 13.x. `unoptimized` le fait répondre 404 (FM22).
   images: {
-    domains: ["snu-bucket-staging.cellar-c2.services.clever-cloud.com"],
+    unoptimized: true,
   },
   async redirects() {
     return [

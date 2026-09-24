@@ -5,6 +5,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import { NavLink, useHistory, useParams } from "react-router-dom";
 import * as XLSX from "xlsx";
+import { safeJsonToSheet, safeAoaToSheet } from "@/utils/file";
 
 import { COHORTS_WITH_JDM_COUNT, download, getDepartmentNumber } from "snu-lib";
 
@@ -418,7 +419,7 @@ export default function CenterYoungIndex() {
       const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
       const wb = XLSX.utils.book_new();
       formatedRep.forEach((sheet) => {
-        let ws = XLSX.utils.json_to_sheet(sheet.data);
+        let ws = safeJsonToSheet(sheet.data);
         XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
       });
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
@@ -691,7 +692,7 @@ async function toArrayOfArray(data) {
 async function toXLSX(fileName, csv) {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const fileExtension = ".xlsx";
-  const ws = XLSX.utils.aoa_to_sheet(csv);
+  const ws = safeAoaToSheet(csv);
   const wb = { Sheets: { data: ws }, SheetNames: ["data"] };
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
   const resultData = new Blob([excelBuffer], { type: fileType });

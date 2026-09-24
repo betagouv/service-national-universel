@@ -9,6 +9,7 @@ import { toastr } from "react-redux-toastr";
 import dayjs from "@/utils/dayjs.utils";
 import API from "../../services/api";
 import * as XLSX from "xlsx";
+import { safeJsonToSheet } from "@/utils/file";
 import { formatPhoneE164 } from "../../utils/formatPhoneE164";
 import { getPhoneZoneByDepartment } from "../../utils/getPhoneZoneByDepartment";
 import { translateStatus } from "./components/commons";
@@ -272,7 +273,7 @@ function generateExcelWorkbook(data, filename) {
   const fileType = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet;charset=UTF-8";
   const wb = XLSX.utils.book_new();
   data.forEach((sheet) => {
-    const ws = XLSX.utils.json_to_sheet(sheet.data);
+    const ws = safeJsonToSheet(sheet.data);
     XLSX.utils.book_append_sheet(wb, ws, sheet.name.substring(0, 30));
   });
   const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });

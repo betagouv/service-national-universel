@@ -23,7 +23,7 @@ jest.mock("../middlewares/authenticationGuards", () => ({
 
 jest.mock("../sentry", () => ({ capture: jest.fn() }));
 jest.mock("../utils/crypto", () => ({ encrypt: (b) => b, decrypt: (b) => b }));
-jest.mock("../utils/file", () => ({ getS3Path: (n) => `message/${n}` }));
+jest.mock("../utils/file", () => ({ getS3Path: (n) => `message/${n}`, getAttachmentFileName: (n) => n }));
 jest.mock("../utils/ventilation", () => ({ matchVentilationRule: async (t) => t }));
 jest.mock("../utils", () => ({
   getFile: jest.fn(),
