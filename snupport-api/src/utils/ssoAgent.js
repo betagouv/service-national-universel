@@ -7,9 +7,10 @@
 // la synchronisation POST /v0/referent (cron `syncReferentSupport`, qui ne pousse que les rôles
 // REFERENT_DEPARTMENT et REFERENT_REGION). L'email ne sert plus que de contrôle de cohérence.
 // Sans identifiant, la requête ne prouve rien : on refuse plutôt que de retomber sur l'email.
+// Le rôle est contraint lui aussi : seul un compte référent peut être ouvert par SSO (GOO-13).
 function buildSsoAgentQuery({ email, snuReferentId }) {
   if (!snuReferentId || !email) return null;
-  return { snuReferentId, email };
+  return { snuReferentId, email, role: { $in: ["REFERENT_DEPARTMENT", "REFERENT_REGION"] } };
 }
 
 module.exports = { buildSsoAgentQuery };

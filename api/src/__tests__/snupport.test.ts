@@ -1,7 +1,7 @@
 import request from "supertest";
 import { Types } from "mongoose";
 import passport from "passport";
-import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 
 import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
@@ -131,6 +131,25 @@ beforeEach(() => {
 });
 
 const calledPaths = () => SNUpport.api.mock.calls.map((call: any[]) => call[0]);
+
+describe("GET /SNUpport/signin (GOO-13)", () => {
+  const ssoResponse = { ok: true, data: "https://support.example/ticket", token: "jeton-agent" };
+
+  it.each([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION])("should open the support session of a %s", async (role) => {
+    SNUpport.api.mockResolvedValue(ssoResponse);
+    const res = await request(await getAppHelper({ ...user, role })).get("/SNUpport/signin");
+    expect(res.status).toBe(200);
+    expect(calledPaths().some((path: string) => path.startsWith("/v0/sso/signin"))).toBe(true);
+  });
+
+  it.each([ROLES.ADMIN, ROLES.RESPONSIBLE, ROLES.VISITOR])("should refuse a %s, even a former referent who still has a support account", async (role) => {
+    SNUpport.api.mockResolvedValue(ssoResponse);
+    const res = await request(await getAppHelper({ ...user, role })).get("/SNUpport/signin");
+    expect(res.status).toBe(403);
+    expect(res.headers["set-cookie"]).toBeUndefined();
+    expect(calledPaths().some((path: string) => path.startsWith("/v0/sso/signin"))).toBe(false);
+  });
+});
 
 describe("GET /SNUpport/ticket/:id", () => {
   it("should return 400 when the id is invalid", async () => {
