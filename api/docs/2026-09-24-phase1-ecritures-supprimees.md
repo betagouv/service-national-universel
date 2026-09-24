@@ -1,7 +1,7 @@
 # Phase 1 en lecture seule : suppression des écritures
 
-Date : 2026-09-24 · Décision produit du 24/09 · Branche `fix/phase1-ecritures-supprimees`, empilée sur
-`fix/goo-37-lot-j-reservation-places` (PR #5395)
+Date : 2026-09-24 · Décision produit du 24/09 · Branche `fix/phase1-ecritures-supprimees`, base `origin/main`
+(`1eceec3a9`, après #5395)
 
 ## Décision
 
