@@ -26,6 +26,7 @@ import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMi
 import { isEtablissementInUserScope } from "../etablissement/etablissementScope";
 import { isClasseInUserScope } from "./classeScope";
 import { REFERENT_CLE_PUBLIC_FIELDS } from "../referentProjection";
+import { toErrorCode } from "../../utils/errorCode";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -107,7 +108,7 @@ router.post("/export", async (req: UserRequest, res: Response) => {
     res.send({ ok: true, data: classes });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: error.message });
+    return res.status(500).send({ ok: false, code: toErrorCode(error) });
   }
 });
 
@@ -233,7 +234,7 @@ router.get(
       return res.status(200).send({ ok: true, data: classePatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

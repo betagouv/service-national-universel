@@ -10,6 +10,7 @@ import { getReferentsByIds } from "./referentService";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
+import { toErrorCode } from "../../utils/errorCode";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -36,7 +37,7 @@ router.post(
       }
 
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

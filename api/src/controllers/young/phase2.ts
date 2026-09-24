@@ -33,7 +33,7 @@ router.put("/militaryPreparation/status", passport.authenticate(["young", "refer
     );
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     // L'appartenance (jeune = lui-même, référent = son périmètre) est contrôlée par le middleware monté

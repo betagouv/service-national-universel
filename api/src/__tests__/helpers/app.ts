@@ -1,7 +1,6 @@
 /* eslint-disable no-import-assign */
 import express from "express";
 import cookieParser from "cookie-parser";
-import bodyParser from "body-parser";
 import passport from "passport";
 import { Types } from "mongoose";
 const { ObjectId } = Types;
@@ -14,6 +13,7 @@ import { ReferentDocument, YoungDocument } from "../../models";
 import { getAcl } from "../../services/iam/Permission.service";
 import { ROLE_JEUNE, ROLES } from "snu-lib";
 import { resetRateLimiters } from "../../middlewares/rateLimit";
+import { applyBodyParsers, handleError } from "../../middlewares/httpHardening";
 
 export function resetAppAuth() {
   // Les limiteurs de débit des routes d'auth vivent au niveau du module, donc
@@ -49,12 +49,12 @@ export async function getAppHelperWithAcl(user?: Partial<UserRequest["user"] & {
 
 function getAppHelper(user?: Partial<UserRequest["user"] & { subRole?: any; acl?: any[] }> | YoungDocument | ReferentDocument | null, authStrategy?: "young" | "referent") {
   const app = express();
-  app.use(bodyParser.json());
-  app.use(bodyParser.text({ type: "application/x-ndjson" }));
-  app.use(bodyParser.urlencoded({ extended: true }));
+  // Mêmes analyseurs de corps et même gestionnaire d'erreurs que main.js.
+  applyBodyParsers(app);
   // @ts-ignore
   app.use(cookieParser());
   injectRoutes(app);
+  app.use(handleError);
 
   if (user) {
     // @ts-ignore

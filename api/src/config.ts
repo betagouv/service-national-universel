@@ -100,7 +100,6 @@ export const config = {
   API_DEMARCHE_SIMPLIFIEE_TOKEN: _env(envStr, "API_DEMARCHE_SIMPLIFIEE_TOKEN"),
   PM2_SLACK_URL: _env(envStr, "PM2_SLACK_URL"),
   TASK_QUEUE_PREFIX: _env(envStr, "TASK_QUEUE_PREFIX", environment),
-  TASK_MONITOR_ENABLE_AUTH: _env(envBool, "TASK_MONITOR_ENABLE_AUTH", false),
   TASK_MONITOR_USER: _env(envStr, "TASK_MONITOR_USER"),
   TASK_MONITOR_SECRET: _env(envStr, "TASK_MONITOR_SECRET"),
   ENABLE_2FA: _env(envBool, "ENABLE_2FA", false),

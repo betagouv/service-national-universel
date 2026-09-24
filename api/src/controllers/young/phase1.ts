@@ -52,7 +52,7 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const { id, sessionId, centerId, meetingPointId, pdrOption, ligneId } = value;
@@ -171,7 +171,7 @@ router.post("/dispense", passport.authenticate("referent", { session: false, fai
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const { statusPhase1MotifDetail, statusPhase1Motif, id } = value;
@@ -206,7 +206,7 @@ router.post("/depart", passport.authenticate("referent", { session: false, failW
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const { departSejourMotif, departSejourAt, departSejourMotifComment, id } = value;
@@ -239,7 +239,7 @@ router.put("/depart", passport.authenticate("referent", { session: false, failWi
     }).validate({ ...req.params }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const young = await YoungModel.findById(value.id);
@@ -284,7 +284,7 @@ router.post("/:key", passport.authenticate("referent", { session: false, failWit
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const { value: newValue, key, id } = value;

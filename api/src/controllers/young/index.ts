@@ -1095,7 +1095,7 @@ router.post("/phase1/multiaction/depart", passport.authenticate("referent", { se
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const { departSejourMotif, departSejourAt, departSejourMotifComment, ids } = value;
