@@ -47,6 +47,7 @@ if [[ $application == "snupport-app" ]]; then
 fi
 
 source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+source "$(cd "$(dirname "$0")" && pwd)/csp-report.sh"
 
 cd "$(dirname $0)/../.."
 
@@ -74,7 +75,10 @@ mkdir -p $destination
 
 if (( $front )); then
     mv out/$application/build $destination
-    envsubst '$APP_HOME $PORT' < devops/build/front/nginx.conf > $destination/nginx.conf
+    # Affectation séparée de l'export : sous `set -e`, un échec de csp_report_uri arrête le build
+    CSP_REPORT_URI=$(csp_report_uri $application)
+    export CSP_REPORT_URI
+    envsubst '$APP_HOME $PORT $CSP_REPORT_URI' < devops/build/front/nginx.conf > $destination/nginx.conf
     cp devops/build/front/package.json $destination
 fi
 

@@ -16,6 +16,7 @@ if [[ $destination == "" ]]; then
 fi
 
 source "$(cd "$(dirname "$0")" && pwd)/copy-packages.sh"
+source "$(cd "$(dirname "$0")" && pwd)/csp-report.sh"
 
 cd "$(dirname $0)/../.."
 
@@ -51,7 +52,11 @@ mv out/api/{src,migrations,public,node_modules} $destination/api/
 mkdir -p $destination/apiv2/
 mv out/apiv2/{dist/*,node_modules} $destination/apiv2/
 
-envsubst '$APP_HOME $PORT' < devops/build/all/nginx.conf > $destination/nginx.conf
+# Affectations séparées de l'export : sous `set -e`, un échec de csp_report_uri arrête le build
+CSP_REPORT_URI_APP=$(csp_report_uri app)
+CSP_REPORT_URI_ADMIN=$(csp_report_uri admin)
+export CSP_REPORT_URI_APP CSP_REPORT_URI_ADMIN
+envsubst '$APP_HOME $PORT $CSP_REPORT_URI_APP $CSP_REPORT_URI_ADMIN' < devops/build/all/nginx.conf > $destination/nginx.conf
 mkdir -p $destination/nginx/{proxy,client}
 cp devops/build/all/{package.json,ecosystem.config.js,start-nginx.sh} $destination
 
