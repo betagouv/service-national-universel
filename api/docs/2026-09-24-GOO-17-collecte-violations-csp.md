@@ -27,8 +27,9 @@ sans échéance.
   n'est exposé, les clés ne sont pas recopiées (gitleaks les signalerait), et un changement de projet
   Sentry suit sans toucher au script de build.
 - **`report-uri` seule, sans `report-to`.** Tous les navigateurs lisent `report-uri` (Firefox
-  n'applique pas `report-to` à la CSP), et Chrome la suit tant que `report-to` est absent. Cela évite aussi de dépendre de la prise en charge du format
-  `application/reports+json` par l'instance Sentry auto-hébergée.
+  n'applique pas `report-to` à la CSP), et Chrome la suit tant que `report-to` est absent. Cela évite
+  aussi de dépendre de la prise en charge du format `application/reports+json` par l'instance Sentry
+  auto-hébergée.
 - **Politique appliquée inchangée.** Les directives déjà bloquantes (`frame-ancestors`, `base-uri`,
   `object-src`) ne reçoivent pas d'adresse de collecte : l'objectif est l'observation de la politique
   cible avant sa bascule.
