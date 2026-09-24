@@ -49,7 +49,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     const { error, value } = Joi.object({ id: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const equivalences = await MissionEquivalenceModel.find({ youngId: value.id }).sort({ createdAt: -1 });
@@ -95,7 +95,7 @@ router.get("/:idEquivalence", passport.authenticate("young", { session: false, f
     const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);
@@ -172,7 +172,7 @@ router.put("/:idEquivalence", passport.authenticate(["referent", "young"], { ses
     }
     if (error) {
       capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const young = req.targetYoung!;
@@ -246,7 +246,7 @@ router.delete("/:idEquivalence", passport.authenticate("young", { session: false
     const { error, value } = Joi.object({ id: Joi.string().required(), idEquivalence: Joi.string().required() }).validate({ ...req.params }, { stripUnknown: true });
 
     if (error) {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error: error.details });
+      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
     }
 
     const equivalence = await MissionEquivalenceModel.findById(value.idEquivalence);

@@ -32,6 +32,7 @@ import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isContractInUserScope } from "../services/contractAccess";
+import { toErrorCode } from "../utils/errorCode";
 
 async function createContract(data: any, fromUser: UserDto): Promise<ContractType> {
   const { sendMessage } = data;
@@ -396,7 +397,7 @@ router.get(
       return res.status(200).send({ ok: true, data: contractPatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

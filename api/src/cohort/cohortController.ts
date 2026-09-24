@@ -192,7 +192,7 @@ router.get("/", passport.authenticate(["referent", "young"], { session: false, f
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, data: [], code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, data: [], code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -203,7 +203,7 @@ router.get("/public", async (_req: UserRequest, res: Response) => {
     return res.status(200).send({ ok: true, data: cohorts });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -225,7 +225,7 @@ router.get("/:cohort", passport.authenticate(["referent", "young"], { session: f
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -266,7 +266,7 @@ router.get("/:cohortId/public", async (req: UserRequest, res: Response) => {
     return res.status(200).send({ ok: true, data });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 
@@ -293,7 +293,7 @@ router.get("/bysession/:sessionId", passport.authenticate(["referent"], { sessio
     return res.status(200).send({ ok: true, data: cohort });
   } catch (error) {
     capture(error);
-    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR, error });
+    return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
   }
 });
 

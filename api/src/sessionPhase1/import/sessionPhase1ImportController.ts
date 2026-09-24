@@ -14,6 +14,7 @@ import { capture } from "../../sentry";
 import { importSessionsPhase1, removeDeprecatedSessionsPhase1 } from "./sessionPhase1ImportService";
 import { checkColumnHeaders } from "./sessionPhase1ImportValidator";
 import { SessionCohesionCenterCSV } from "./sessionPhase1Import";
+import { toErrorCode } from "../../utils/errorCode";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -81,7 +82,7 @@ router.post("/", [accessControlMiddleware([])], fileUpload({ limits: { fileSize:
     });
   } catch (error) {
     capture(error);
-    return res.status(422).send({ ok: false, code: error.message });
+    return res.status(422).send({ ok: false, code: toErrorCode(error) });
   }
 });
 

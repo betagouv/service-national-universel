@@ -10,6 +10,7 @@ import { capture } from "../../sentry";
 import { generateCSVStream, getHeaders, streamToBuffer } from "../../services/fileService";
 import { ERRORS, uploadFile } from "../../utils";
 import { buildPathOnBucket, checkColumnHeaders, importCohesionCenter, uploadAndConvertFile, xlsxMimetype } from "./cohesionCenterImportService";
+import { toErrorCode } from "../../utils/errorCode";
 
 const router = express.Router();
 router.use(authMiddleware("referent"));
@@ -53,7 +54,7 @@ router.post("/", accessControlMiddleware([]), fileUpload({ limits: { fileSize: 5
     return res.status(200).send({ ok: true, data: importedCohesionCenter });
   } catch (error) {
     capture(error);
-    return res.status(422).send({ ok: false, code: error.message });
+    return res.status(422).send({ ok: false, code: toErrorCode(error) });
   }
 });
 export default router;

@@ -9,11 +9,11 @@ export const validationErrorHandler = (
   res: Response,
   next: NextFunction
 ) => {
+  // Le détail Joi recopie les valeurs reçues et décrit le schéma : le client ne reçoit que le code (L7, audit du 21/09/2026).
   if (error instanceof ValidationError) {
     return res.status(400).json({
       ok: false,
       code: ERRORS.VALIDATION_ERROR,
-      error: error.toString(),
     });
   }
 

@@ -33,6 +33,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { toErrorCode } from "../utils/errorCode";
 
 const router = express.Router();
 
@@ -56,7 +57,7 @@ router.post(
       const { error, value: checkedMission } = validateMission(req.body);
       if (error) {
         capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY, error });
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
       }
 
       let structure: StructureDocument | null = null;
@@ -435,7 +436,7 @@ router.get(
     } catch (error) {
       if (error.message === ERRORS.OPERATION_UNAUTHORIZED) return res.status(403).send({ ok: false, code: error.message });
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

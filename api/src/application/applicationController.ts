@@ -61,6 +61,7 @@ import patches from "../controllers/patches";
 import { logger } from "../logger";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
+import { toErrorCode } from "../utils/errorCode";
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -1042,7 +1043,7 @@ router.get(
       return res.status(200).send({ ok: true, data: applicationPatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );

@@ -30,6 +30,7 @@ import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddl
 import { authMiddleware } from "../middlewares/authMiddleware";
 import { RouteRequest, RouteResponse, UserRequest } from "./request";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
+import { toErrorCode } from "../utils/errorCode";
 
 const setAndSave = async (data: any, keys: Record<string, any>, fromUser?: UserDto): Promise<void> => {
   data.set({ ...keys });
@@ -296,7 +297,7 @@ router.get(
       return res.status(200).send({ ok: true, data: structurePatches });
     } catch (error) {
       capture(error);
-      res.status(500).send({ ok: false, code: error.message });
+      res.status(500).send({ ok: false, code: toErrorCode(error) });
     }
   },
 );
