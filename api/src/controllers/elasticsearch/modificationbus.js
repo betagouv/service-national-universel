@@ -7,6 +7,7 @@ const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { joiElasticSearch, buildNdJson, buildRequestBody } = require("./utils");
+const { getLigneBusScope, getLigneBusIdsInScope } = require("../../services/sejourAccess");
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -24,7 +25,12 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
+    // Les demandes de modification ne portent que `lineId` : un référent ne voit que
+    // celles des lignes de son territoire (M16). Admin et transporteur restent nationaux.
+    const scope = await getLigneBusScope(user);
+    if (!scope) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
     let contextFilters = [];
+    if (!scope.national) contextFilters.push({ terms: { "lineId.keyword": await getLigneBusIdsInScope(scope) } });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size });

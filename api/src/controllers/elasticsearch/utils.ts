@@ -343,6 +343,10 @@ function buildDashboardUserRoleContext(user: UserDto): DashboardUserRoleContextR
   return { dashboardUserRoleContextFilters: contextFilters };
 }
 
+/** Bornes des recherches de missions côté jeune : `from + size` ≤ 10 000 (fenêtre ES). */
+const YOUNG_MISSION_SEARCH_MAX_SIZE = 100;
+const YOUNG_MISSION_SEARCH_MAX_PAGE = 99;
+
 function getResponsibleCenterField(role: string | undefined): string | null {
   if (!role) return null;
   let field = "";
@@ -364,4 +368,6 @@ export {
   buildApplicationContext,
   buildDashboardUserRoleContext,
   getResponsibleCenterField,
+  YOUNG_MISSION_SEARCH_MAX_SIZE,
+  YOUNG_MISSION_SEARCH_MAX_PAGE,
 };

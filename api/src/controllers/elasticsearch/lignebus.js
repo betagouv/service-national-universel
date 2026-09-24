@@ -9,19 +9,37 @@ const { ES_NO_LIMIT, ROLES, canSearchLigneBus, canExportLigneBus } = require("sn
 const { allRecords } = require("../../es/utils");
 const { serializeYoungs } = require("../../utils/es-serializer");
 const logger = require("../../logger");
+const { getLigneBusScope, getLigneBusScopeEsFilter } = require("../../services/sejourAccess");
+
+/**
+ * Filtres de contexte communs aux recherches sur l'index `lignebus` : lignes non
+ * supprimées, et pour un référent celles de son territoire (L12). `null` = aucun accès.
+ */
+async function getLigneBusContextFilters(user) {
+  const scope = await getLigneBusScope(user);
+  if (!scope) return null;
+  const scopeFilter = getLigneBusScopeEsFilter(scope);
+  return [{ bool: { must_not: { exists: { field: "deletedAt" } } } }, scopeFilter].filter(Boolean);
+}
 
 router.post("/by-point-de-rassemblement/aggs", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
+    // Aucun rôle n'était exigé : tout compte référent agrégeait les lignes de France (L12).
+    if (!canSearchLigneBus(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
     const { queryFilters, error } = joiElasticSearch({ filterFields: ["meetingPointIds", "cohort"], body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const contextFilters = await getLigneBusContextFilters(req.user);
+    if (!contextFilters) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const body = {
       query: {
         bool: {
           filter: [
-            { terms: { "meetingPointsIds.keyword": queryFilters.meetingPointIds } },
-            queryFilters.cohort.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
-            { bool: { must_not: { exists: { field: "deletedAt" } } } },
+            { terms: { "meetingPointsIds.keyword": queryFilters?.meetingPointIds || [] } },
+            queryFilters?.cohort?.length ? { terms: { "cohort.keyword": queryFilters.cohort } } : null,
+            ...contextFilters,
           ].filter(Boolean),
         },
       },
@@ -79,7 +97,8 @@ router.post("/search", passport.authenticate(["referent"], { session: false, fai
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     // Context filters
-    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
+    const contextFilters = await getLigneBusContextFilters(user);
+    if (!contextFilters) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Build request body
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
@@ -177,7 +196,8 @@ router.post("/export", passport.authenticate(["referent"], { session: false, fai
     const { queryFilters, page, sort, error, exportFields } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let contextFilters = [{ bool: { must_not: { exists: { field: "deletedAt" } } } }];
+    const contextFilters = await getLigneBusContextFilters(req.user);
+    if (!contextFilters) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     const { hitsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters });
 

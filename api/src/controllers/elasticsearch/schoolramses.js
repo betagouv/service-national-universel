@@ -1,5 +1,6 @@
 const passport = require("passport");
 const express = require("express");
+const Joi = require("joi");
 const router = express.Router();
 const { ROLES, ES_NO_LIMIT, canSearchInElasticSearch } = require("snu-lib");
 const { capture } = require("../../sentry");
@@ -116,36 +117,45 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
   }
 });
 
-router.post("/public/search", async (req, res) => {
+// Référentiel des établissements, utilisé par l'éditeur d'établissement du dossier
+// jeune (admin). La route était anonyme et renvoyait jusqu'à 10 000 établissements
+// par appel sans aucune limite de débit (L15) : elle exige désormais un compte
+// référent autorisé sur l'index, et le nombre de résultats est plafonné. Le chemin
+// `/public/search` est conservé pour ne pas casser l'appelant.
+const PUBLIC_SEARCH_MAX_HITS = 1000;
+const PUBLIC_SEARCH_MAX_HITS_WITHOUT_FILTER = 50;
+
+const publicSearchQuerySchema = Joi.object({
+  searchCity: Joi.string().trim().min(2).max(100),
+  aggsByCountries: Joi.any(),
+  aggsByCities: Joi.any(),
+  aggsByCitiesAndDepartments: Joi.any(),
+});
+
+router.post("/public/search", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
-    const { body } = req;
+    if (!canSearchInElasticSearch(req.user, "schoolramses")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+
+    const { error: queryError, value: queryParams } = publicSearchQuerySchema.validate(req.query, { stripUnknown: true });
+    if (queryError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
     const filterFields = ["country.keyword", "departmentName.keyword", "city.keyword"];
-    const { queryFilters } = joiElasticSearch({ filterFields, body });
+    const { queryFilters, error } = joiElasticSearch({ filterFields, body: req.body });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let query = {};
+    const hasFilter = Boolean(queryParams.searchCity || queryFilters?.country?.length || queryFilters?.departmentName?.length || queryFilters?.city?.length);
 
-    if (req.query.searchCity) {
-      query = {
-        query: {
-          match_bool_prefix: {
-            "city.folded": req.query.searchCity,
-          },
+    const query = {
+      query: {
+        bool: {
+          must: queryParams.searchCity ? [{ match_bool_prefix: { "city.folded": queryParams.searchCity } }] : [{ match_all: {} }],
+          filter: [],
         },
-      };
-    } else {
-      query = {
-        query: {
-          bool: {
-            must: { match_all: {} },
-            filter: [],
-          },
-        },
-        size: ES_NO_LIMIT,
-      };
-    }
+      },
+      size: hasFilter ? PUBLIC_SEARCH_MAX_HITS : PUBLIC_SEARCH_MAX_HITS_WITHOUT_FILTER,
+    };
 
-    if (queryFilters?.country) {
+    if (queryFilters?.country?.length) {
       query.query.bool.filter.push({
         terms: {
           "country.keyword": queryFilters.country,
@@ -153,7 +163,7 @@ router.post("/public/search", async (req, res) => {
       });
     }
 
-    if (queryFilters?.departmentName) {
+    if (queryFilters?.departmentName?.length) {
       query.query.bool.filter.push({
         terms: {
           "departmentName.keyword": queryFilters.departmentName,
@@ -161,7 +171,7 @@ router.post("/public/search", async (req, res) => {
       });
     }
 
-    if (queryFilters?.city) {
+    if (queryFilters?.city?.length) {
       query.query.bool.filter.push({
         terms: {
           "city.keyword": queryFilters.city,
@@ -169,21 +179,21 @@ router.post("/public/search", async (req, res) => {
       });
     }
 
-    if (req.query.aggsByCountries) {
+    if (queryParams.aggsByCountries) {
       query.size = 0;
       query.aggs = {
         countries: { terms: { field: "country.keyword", size: ES_NO_LIMIT } },
       };
     }
 
-    if (req.query.aggsByCities) {
+    if (queryParams.aggsByCities) {
       query.size = 0;
       query.aggs = {
         cities: { terms: { field: "city.keyword", size: ES_NO_LIMIT } },
       };
     }
 
-    if (req.query.aggsByCitiesAndDepartments) {
+    if (queryParams.aggsByCitiesAndDepartments) {
       query.size = 0;
       query.aggs = {
         cities: {

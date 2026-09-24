@@ -1,12 +1,24 @@
 const passport = require("passport");
 const express = require("express");
 const router = express.Router();
-const { ROLES, canSearchInElasticSearch, ES_NO_LIMIT } = require("snu-lib");
+const { ES_NO_LIMIT } = require("snu-lib");
 const { capture } = require("../../sentry");
 const esClient = require("../../es");
 const { ERRORS } = require("../../utils");
 const { allRecords } = require("../../es/utils");
 const { buildNdJson, buildRequestBody, joiElasticSearch } = require("./utils");
+const { canViewSejourHistory, getGeoScopeEsFilter } = require("../../services/sejourAccess");
+
+/**
+ * Les séjours ne sont plus consultables que par l'administrateur et les référents
+ * territoriaux, dans leur périmètre (cf. sejourAccess). `canSearchInElasticSearch`
+ * ouvrait aussi l'index aux chefs de centre, au transporteur et aux rôles CLE sans
+ * aucun filtre : ils lisaient toutes les sessions de France (M17).
+ */
+function getSessionPhase1ContextFilters(user) {
+  const geoFilter = getGeoScopeEsFilter(user);
+  return geoFilter ? [geoFilter] : [];
+}
 
 router.post("/:action(search|export)", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -31,15 +43,13 @@ router.post("/:action(search|export)", passport.authenticate(["referent"], { ses
 
     const sortFields = [];
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewSejourHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error, exportFields, size } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let contextFilters = [];
-    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+    const contextFilters = getSessionPhase1ContextFilters(req.user);
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({
       searchFields,
@@ -137,15 +147,13 @@ router.post("/young-affectation/:cohort/:action(search|export)", passport.authen
     const sortFields = [];
 
     // Authorization
-    if (!canSearchInElasticSearch(req.user, "sessionphase1")) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    if (!canViewSejourHistory(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
     // Body params validation
     const { queryFilters, page, sort, error } = joiElasticSearch({ filterFields, sortFields, body: req.body });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    let contextFilters = [{ term: { "cohort.keyword": req.params.cohort } }, { range: { placesLeft: { gt: 0 } } }];
-    if (req.user.role === ROLES.REFERENT_REGION) contextFilters.push({ term: { "region.keyword": req.user.region } });
-    if (req.user.role === ROLES.REFERENT_DEPARTMENT) contextFilters.push({ terms: { "department.keyword": req.user.department } });
+    const contextFilters = [{ term: { "cohort.keyword": req.params.cohort } }, { range: { placesLeft: { gt: 0 } } }, ...getSessionPhase1ContextFilters(req.user)];
 
     const { hitsRequestBody, aggsRequestBody } = buildRequestBody({ searchFields, filterFields, queryFilters, page, sort, contextFilters, size: 3 });
 
