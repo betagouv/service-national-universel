@@ -9,7 +9,7 @@ import fs from "fs";
 import fileUpload from "express-fileupload";
 
 import AuthObject from "../auth";
-import { signinRateLimiter, emailSendingRateLimiter } from "../middlewares/rateLimit";
+import { signinRateLimiter, emailSendingRateLimiter, userRateLimiter } from "../middlewares/rateLimit";
 import { requireJsonBody } from "../middlewares/requireJsonBody";
 import patches from "../controllers/patches";
 import ClasseStateManager from "../cle/classe/stateManager";
@@ -2065,20 +2065,21 @@ router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent
   }
 });
 
-router.post("/exist", passport.authenticate(["referent"], { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    const { error, value } = Joi.object({ email: Joi.string().email() }).validate(req.body, { stripUnknown: true });
+// La réponse dit si un email correspond à un compte : quota par compte appelant, pour que la route
+// ne serve pas à balayer une liste d'emails (audit 2026-09-21, M70). L'usage légitime est une
+// vérification par structure créée.
+const referentExistLimiter = userRateLimiter({ prefix: "referent-exist", windowMs: 10 * 60 * 1000, limit: 20 });
 
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-    const where: any = {};
-    if (value.email) where.email = value.email;
+router.post("/exist", passport.authenticate(["referent"], { session: false, failWithError: true }), referentExistLimiter, async (req: UserRequest, res: Response) => {
+  try {
     if (!canCheckIfRefExist(req.user)) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const referent = await ReferentModel.findOne(where);
-    if (referent) return res.status(200).send({ ok: true, data: true });
-    else return res.status(200).send({ ok: true, data: false });
+
+    // Email obligatoire : sans lui, la recherche partait sur `{}` et répondait toujours `true`.
+    const { error, value } = Joi.object({ email: Joi.string().trim().lowercase().email().required() }).validate(req.body, { stripUnknown: true });
+    if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+
+    const referent = await ReferentModel.exists({ email: value.email });
+    return res.status(200).send({ ok: true, data: !!referent });
   } catch (error) {
     capture(error);
     res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
