@@ -21,11 +21,14 @@ export const VitePluginWatchPackages = async (config) => {
   };
 };
 
-// eslint-disable-next-line no-unused-vars
-export default defineConfig(({ mode }) => {
+export default defineConfig(({ command, mode }) => {
   // Load env file based on `mode` in the current working directory.
   // Set the third parameter to '' to load all env regardless of the `VITE_` prefix.
   const env = loadEnv(mode, process.cwd(), "");
+  // Sans VITE_ENVIRONMENT, le bundle retombait sur « development » : Sentry coupé et contrôles réservés à la production désactivés.
+  if (command === "build" && !env.VITE_ENVIRONMENT) {
+    throw new Error("VITE_ENVIRONMENT est obligatoire pour construire l'application (production, staging, ci, custom…)");
+  }
   const plugins = [react({ plugins: [["@swc/plugin-styled-components", {}]] })];
   if (mode !== "development") {
     plugins.push(
