@@ -187,10 +187,8 @@ export class AdminModule {
         consumer.apply(ClsMiddleware).forRoutes("{*cls}");
         consumer
             .apply(AddUserToRequestMiddleware)
-            .exclude({ path: "/classe/public/:id", method: RequestMethod.GET })
             .exclude({ path: "/plan-marketing/import/webhook", method: RequestMethod.POST })
             .exclude({ path: "/", method: RequestMethod.GET })
-            .exclude({ path: "/testsentry", method: RequestMethod.GET })
             .exclude({ path: "/health", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues", method: RequestMethod.GET })
             .exclude({ path: "/queues/*queues/retry/*retry", method: RequestMethod.PUT })

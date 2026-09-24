@@ -1,6 +1,6 @@
 import configuration from "@config/testConfiguration";
 import { getQueueToken } from "@nestjs/bullmq";
-import { Logger, ValidationPipe } from "@nestjs/common";
+import { Logger } from "@nestjs/common";
 import { ConfigModule } from "@nestjs/config";
 import { JwtModule } from "@nestjs/jwt";
 import { Test, TestingModule } from "@nestjs/testing";
@@ -64,6 +64,7 @@ import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag
 import { DesistementService } from "../../src/admin/core/sejours/phase1/desistement/Desistement.service";
 import { JeuneService } from "@admin/core/sejours/jeune/Jeune.service";
 import { InscrireEleveManuellement } from "@admin/core/sejours/cle/classe/useCase/InscrireEleveManuellement";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 export interface SetupOptions {
     newContainer: boolean;
@@ -171,7 +172,7 @@ export const setupAdminTest = async (setupOptions: SetupOptions = { newContainer
         .compile();
 
     const app = adminTestModule.createNestApplication({ logger: false });
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
 
     return { app, adminTestModule };
 };

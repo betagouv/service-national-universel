@@ -95,6 +95,21 @@ describe("Phase1Controller", () => {
         });
     });
 
+    describe("identifiants de route mal formés (L42)", () => {
+        it.each([
+            ["GET /phase1/simulations/abc", () => request(app.getHttpServer()).get("/phase1/simulations/abc")],
+            ["GET /phase1/abc/simulations", () => request(app.getHttpServer()).get("/phase1/abc/simulations")],
+            [
+                "DELETE /phase1/abc/plan-de-transport",
+                () => request(app.getHttpServer()).delete("/phase1/abc/plan-de-transport"),
+            ],
+        ])("%s répond 400 au lieu d'un CastError en 500", async (_, appel) => {
+            const response = await appel();
+
+            expect(response.status).toBe(400);
+        });
+    });
+
     afterAll(async () => {
         await app.close();
         mongoose.disconnect();

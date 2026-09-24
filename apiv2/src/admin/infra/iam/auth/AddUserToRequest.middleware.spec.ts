@@ -14,6 +14,7 @@ import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
 import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { PermissionService } from "@auth/core/Permission.service";
 import { CustomRequest } from "@shared/infra/CustomRequest";
+import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
 
 import { AddUserToRequestMiddleware } from "./AddUserToRequest.middleware";
 import { AuthProvider } from "./Auth.provider";
@@ -101,9 +102,9 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
     });
 
     it("rejette le jeton d'un compte désactivé", async () => {
-        await expect(
-            appeler(payloadValide, referent({ status: ReferentStatus.INACTIVE })),
-        ).rejects.toThrow(UnauthorizedException);
+        await expect(appeler(payloadValide, referent({ status: ReferentStatus.INACTIVE }))).rejects.toThrow(
+            UnauthorizedException,
+        );
     });
 
     it("rejette le jeton d'un compte supprimé", async () => {
@@ -123,5 +124,28 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
 
     it("rejette un jeton dont le compte n'existe plus", async () => {
         await expect(appeler(payloadValide, null as unknown as ReferentModel)).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("répond 401 quand le dépôt ne trouve pas le titulaire du jeton (NOT_FOUND, pas 422)", async () => {
+        authProvider.parseToken.mockResolvedValue(payloadValide);
+        referentGateway.findById.mockRejectedValue(new FunctionalException(FunctionalExceptionCode.NOT_FOUND));
+        const req = { headers: { authorization: "JWT un.jeton.signe" } } as unknown as CustomRequest;
+
+        await expect(middleware.use(req, {} as any, jest.fn())).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("répond 401 sans interroger la base quand l'identifiant du jeton n'est pas un ObjectId", async () => {
+        await expect(appeler({ ...payloadValide, id: "pas-un-object-id" }, referent())).rejects.toThrow(
+            UnauthorizedException,
+        );
+        expect(referentGateway.findById).not.toHaveBeenCalled();
+    });
+
+    it("propage les erreurs techniques du dépôt au lieu de les masquer en 401", async () => {
+        authProvider.parseToken.mockResolvedValue(payloadValide);
+        referentGateway.findById.mockRejectedValue(new Error("mongo indisponible"));
+        const req = { headers: { authorization: "JWT un.jeton.signe" } } as unknown as CustomRequest;
+
+        await expect(middleware.use(req, {} as any, jest.fn())).rejects.toThrow("mongo indisponible");
     });
 });

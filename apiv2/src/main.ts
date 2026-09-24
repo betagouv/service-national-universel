@@ -1,11 +1,12 @@
 import { ConfigService } from "@nestjs/config";
-import { RequestMethod, ValidationPipe } from "@nestjs/common";
+import { RequestMethod } from "@nestjs/common";
 import { NestFactory } from "@nestjs/core";
 import { AppModule } from "./App.module";
+import { pipesGlobaux } from "./shared/infra/ObjectIdParams.pipe";
 
 async function bootstrap() {
     const app = await NestFactory.create(AppModule);
-    app.useGlobalPipes(new ValidationPipe());
+    app.useGlobalPipes(...pipesGlobaux());
     const config = app.get(ConfigService);
     app.enableCors({
         origin: [config.getOrThrow("urls.admin"), config.getOrThrow("urls.app")],

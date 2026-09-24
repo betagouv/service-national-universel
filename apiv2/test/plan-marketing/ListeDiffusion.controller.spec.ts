@@ -6,7 +6,7 @@
  * listes qui définissent le ciblage des campagnes emailing. Le contrôleur doit être réservé
  * aux super-administrateurs, comme `CampagneController`.
  */
-import { INestApplication, ValidationPipe } from "@nestjs/common";
+import { INestApplication } from "@nestjs/common";
 import { Test, TestingModule } from "@nestjs/testing";
 import * as request from "supertest";
 import { ROLES, SUB_ROLE_GOD, SUB_ROLES } from "snu-lib";
@@ -14,6 +14,7 @@ import { ROLES, SUB_ROLE_GOD, SUB_ROLES } from "snu-lib";
 import { ListeDiffusionController } from "@plan-marketing/infra/api/ListeDiffusion.controller";
 import { ListeDiffusionService } from "@plan-marketing/core/service/ListeDiffusion.service";
 import { BasculerArchivageListeDiffusion } from "@plan-marketing/core/useCase/BasculerArchivageListeDiffusion";
+import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
 describe("ListeDiffusionController - habilitation", () => {
     let app: INestApplication;
@@ -42,7 +43,7 @@ describe("ListeDiffusionController - habilitation", () => {
             req.user = utilisateurCourant;
             next();
         });
-        app.useGlobalPipes(new ValidationPipe());
+        app.useGlobalPipes(...pipesGlobaux());
         await app.init();
     });
 
@@ -119,7 +120,10 @@ describe("ListeDiffusionController - habilitation", () => {
         it("accepte les filtres proposés par l'admin", async () => {
             await request(app.getHttpServer())
                 .post("/liste-diffusion")
-                .send({ ...listeValide, filters: { region: ["Bretagne"], status: ["VALIDATED"], isRegionRural: ["N/A"] } })
+                .send({
+                    ...listeValide,
+                    filters: { region: ["Bretagne"], status: ["VALIDATED"], isRegionRural: ["N/A"] },
+                })
                 .expect(201);
             expect(listeDiffusionService.creerListeDiffusion).toHaveBeenCalled();
         });
