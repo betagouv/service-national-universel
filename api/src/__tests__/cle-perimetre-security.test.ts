@@ -374,7 +374,7 @@ describe("Périmètre CLE — audit 2026-09-21", () => {
       const allowed = ["_id", "cohort", "cohortDetails", "coloration", "etablissement", "grades", "id", "name", "referents", "status", "uniqueKeyAndId"];
       expect(Object.keys(res.body.data).filter((key) => !allowed.includes(key))).toEqual([]);
       expect(res.body.data).toMatchObject({ id: classe._id.toString(), name: classe.name, uniqueKeyAndId: classe.uniqueKeyAndId });
-      expect(Object.keys(res.body.data.etablissement).filter((key) => !["city", "name", "schoolYear"].includes(key))).toEqual([]);
+      expect(Object.keys(res.body.data.etablissement).filter((key) => !["city", "name"].includes(key))).toEqual([]);
     }, 30000);
 
     it("ne renvoie que la projection racine sans withDetails", async () => {

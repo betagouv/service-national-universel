@@ -160,7 +160,7 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
     query = query
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
       .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } })
-      .populate({ path: "etablissement", options: { select: { name: 1, city: 1, schoolYear: 1 } } });
+      .populate({ path: "etablissement", options: { select: { name: 1, city: 1 } } });
   }
 
   const classe = await query.exec();
@@ -180,7 +180,7 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
       fullName: referent.fullName,
     }));
     publicClasse.cohortDetails = classe.cohortDetails ? { dateStart: classe.cohortDetails.dateStart, dateEnd: classe.cohortDetails.dateEnd } : null;
-    publicClasse.etablissement = classe.etablissement ? { name: classe.etablissement.name, city: classe.etablissement.city, schoolYear: classe.etablissement.schoolYear } : null;
+    publicClasse.etablissement = classe.etablissement ? { name: classe.etablissement.name, city: classe.etablissement.city } : null;
   }
   return publicClasse;
 };

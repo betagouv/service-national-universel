@@ -25,7 +25,7 @@ La supprimer casserait les deux premiers usages ; on applique la projection expl
 
 | Avant | Après |
 |---|---|
-| document classe complet + virtuals peuplés | objet construit champ par champ : `_id`, `id`, `name`, `uniqueKeyAndId`, `coloration`, `grades`, `status`, `cohort` ; avec détails : `referents` (`_id`, `id`, `firstName`, `lastName`, `fullName`), `etablissement` (`name`, `city`, `schoolYear`), `cohortDetails` (`dateStart`, `dateEnd`) |
+| document classe complet + virtuals peuplés | objet construit champ par champ : `_id`, `id`, `name`, `uniqueKeyAndId`, `coloration`, `grades`, `status`, `cohort` ; avec détails : `referents` (`_id`, `id`, `firstName`, `lastName`, `fullName`), `etablissement` (`name`, `city`), `cohortDetails` (`dateStart`, `dateEnd`) |
 | classe inconnue → 200 `data: null` | 404 |
 
 `referentClasseIds` et `etablissementId` sont lus pour peupler les virtuals mais ne sont plus renvoyés.
@@ -38,7 +38,7 @@ L'équivalent apiv2 (`/v2/classe/public/:id`, L41) a été supprimé par le lot 
 `api/src/__tests__/cle-perimetre-security.test.ts`, bloc « L4 » :
 
 - racine projetée (aucune clé hors liste blanche) avec et sans `withDetails` ;
-- établissement limité à `name`, `city`, `schoolYear` ;
+- établissement limité à `name` et `city` (`schoolYear` n'existe pas sur le modèle) ;
 - classe inconnue → 404.
 
 Contre-épreuve faite : sur le code de `origin/main`, les trois nouveaux tests échouent.
