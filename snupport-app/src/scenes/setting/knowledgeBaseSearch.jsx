@@ -3,6 +3,7 @@ import React, { Fragment, useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { HiChevronDown } from "react-icons/hi";
 import { translateRoleBDC } from "../../utils";
+import { safeJsonToSheet } from "../../utils/sheet";
 import * as XLSX from "xlsx";
 import * as FileSaver from "file-saver";
 import dayjs from "dayjs";
@@ -50,7 +51,7 @@ export default function Shortcut() {
       const fileExtension = ".xlsx";
 
       const wb = XLSX.utils.book_new();
-      let ws = XLSX.utils.json_to_sheet(sheet.data);
+      const ws = safeJsonToSheet(sheet.data);
       XLSX.utils.book_append_sheet(wb, ws, sheet.name);
       const excelBuffer = XLSX.write(wb, { bookType: "xlsx", type: "array" });
       const resultData = new Blob([excelBuffer], { type: fileType });

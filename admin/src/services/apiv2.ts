@@ -27,30 +27,30 @@ class Apiv2 implements IApiV2 {
   }
 
   async get<T>(path: string): Promise<T> {
-    return this.axios.get<T, T>(path);
+    return this.axios.get<T, T>(path) as Promise<T>;
   }
 
   async post<T>(path: string, payload: unknown): Promise<T> {
-    return this.axios.post<T, T>(path, payload);
+    return this.axios.post<T, T>(path, payload) as Promise<T>;
   }
 
   async postFile<T>(path: string, file: File, payload?: Record<string, unknown>): Promise<T> {
     const formData = payload ? hashToFormData(payload, "data") : new FormData();
     formData.append("file", file, file.name);
 
-    return this.axios.post<T, T>(path, formData, { headers: { "Content-Type": "multipart/form-data" } });
+    return this.axios.post<T, T>(path, formData, { headers: { "Content-Type": "multipart/form-data" } }) as Promise<T>;
   }
 
   async remove<T>(path: string): Promise<T> {
-    return this.axios.delete<T, T>(path);
+    return this.axios.delete<T, T>(path) as Promise<T>;
   }
 
   async put<T>(path: string, payload: unknown): Promise<T> {
-    return this.axios.put<T, T>(path, payload);
+    return this.axios.put<T, T>(path, payload) as Promise<T>;
   }
 
   async patch<T>(path: string, payload: unknown): Promise<T> {
-    return this.axios.patch<T, T>(path, payload);
+    return this.axios.patch<T, T>(path, payload) as Promise<T>;
   }
 
   initInterceptor() {
