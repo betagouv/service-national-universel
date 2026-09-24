@@ -245,41 +245,46 @@ export async function getReferentsPhase2(department: string): Promise<ReferentDo
 
 export async function updateMission(app, fromUser) {
   try {
-    const mission = await MissionModel.findById(app.missionId);
-    if (!mission) return;
-
-    // Get all applications for the mission
-    const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
-    const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
-    if (mission.placesLeft !== placesLeft) {
-      mission.set({ placesLeft });
-    }
-
-    if (placesLeft === 0) {
-      mission.set({ placesStatus: "FULL" });
-    } else if (placesLeft === mission.placesTotal) {
-      mission.set({ placesStatus: "EMPTY" });
-    } else {
-      mission.set({ placesStatus: "ONE_OR_MORE" });
-    }
-
-    // On met à jour le nb de candidatures en attente.
-    const pendingApplications = await ApplicationModel.countDocuments({
-      missionId: mission._id,
-      status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
-    });
-
-    if (mission.pendingApplications !== pendingApplications) {
-      mission.set({ pendingApplications });
-    }
-
-    const allApplications = await ApplicationModel.find({ missionId: mission._id });
-    mission.set({ applicationStatus: allApplications.map((e) => e.status) });
-
-    await mission.save({ fromUser });
+    await recomputeMissionPlaces(app.missionId, fromUser);
   } catch (e) {
     capture(e);
   }
+}
+
+/** Recalcule places et candidatures en attente de la mission. Les erreurs remontent à l'appelant (lot D : L1). */
+export async function recomputeMissionPlaces(missionId, fromUser) {
+  const mission = await MissionModel.findById(missionId);
+  if (!mission) return;
+
+  // Get all applications for the mission
+  const placesTaken = await ApplicationModel.countDocuments({ missionId: mission._id, status: { $in: ["VALIDATED", "IN_PROGRESS", "DONE"] } });
+  const placesLeft = Math.max(0, mission.placesTotal - placesTaken);
+  if (mission.placesLeft !== placesLeft) {
+    mission.set({ placesLeft });
+  }
+
+  if (placesLeft === 0) {
+    mission.set({ placesStatus: "FULL" });
+  } else if (placesLeft === mission.placesTotal) {
+    mission.set({ placesStatus: "EMPTY" });
+  } else {
+    mission.set({ placesStatus: "ONE_OR_MORE" });
+  }
+
+  // On met à jour le nb de candidatures en attente.
+  const pendingApplications = await ApplicationModel.countDocuments({
+    missionId: mission._id,
+    status: { $in: ["WAITING_VERIFICATION", "WAITING_VALIDATION"] },
+  });
+
+  if (mission.pendingApplications !== pendingApplications) {
+    mission.set({ pendingApplications });
+  }
+
+  const allApplications = await ApplicationModel.find({ missionId: mission._id });
+  mission.set({ applicationStatus: allApplications.map((e) => e.status) });
+
+  await mission.save({ fromUser });
 }
 
 interface EmailTemplate {
