@@ -23,9 +23,10 @@ import {
 
 import { capture } from "../../sentry";
 import { sendTemplate } from "../../brevo";
-import { YoungModel, SessionPhase1Model, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
+import { YoungModel, SessionPhase1Model, SessionPhase1Document, PointDeRassemblementModel, LigneBusModel, CohortModel } from "../../models";
 import { ERRORS, updatePlacesSessionPhase1, updateSeatsTakenInBusLine, getCcOfYoung } from "../../utils";
 import { serializeYoung, serializeSessionPhase1 } from "../../utils/serializer";
+import { reserveSessionPhase1Places, resyncSessionPhase1Places, reserveBusLineSeat, resyncBusLineSeats } from "../../utils/placeReservation";
 import { UserRequest } from "../request";
 import { getCompletionObjectifs } from "../../services/inscription-goal";
 import { handleNotificationForDeparture } from "../../young/youngService";
@@ -92,13 +93,17 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
     }
 
     if (ligneId) {
-      bus = await LigneBusModel.findById(ligneId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      const isFull = bus.youngCapacity - bus.youngSeatsTaken <= 0;
-      if (isFull) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      const ligne = await LigneBusModel.findById(ligneId);
+      if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
     }
 
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
+    // Le jeune déjà compté sur cette ligne (changement de point sur la même ligne) garde son siège.
+    const youngAlreadyHoldsSeat =
+      !!ligneId &&
+      young.ligneId === ligneId &&
+      young.status === YOUNG_STATUS.VALIDATED &&
+      ([YOUNG_STATUS_PHASE1.AFFECTED, YOUNG_STATUS_PHASE1.DONE] as string[]).includes(young.statusPhase1);
 
     // update youngs infos
     if (young.status === "WAITING_LIST") {
@@ -113,6 +118,25 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       young.set({ status: "VALIDATED" });
     }
 
+    // Réservation atomique des places (constat L25) : session puis ligne, le jeune n'est écrit
+    // qu'une fois les deux réservations obtenues ; en cas d'échec, les compteurs déjà réservés sont recalculés.
+    let reservedSession: SessionPhase1Document | null = null;
+    if (youngIsChangingSession || youngIsChangingCenter) {
+      reservedSession = await reserveSessionPhase1Places(sessionId);
+      if (!reservedSession) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
+    if (ligneId && !youngAlreadyHoldsSeat) {
+      bus = await reserveBusLineSeat(ligneId);
+      if (!bus) {
+        if (reservedSession) await resyncSessionPhase1Places(sessionId, req.user);
+        return res.status(409).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
+    }
+    const resyncReservations = async () => {
+      if (reservedSession) await resyncSessionPhase1Places(sessionId, req.user);
+      if (bus) await resyncBusLineSeats(ligneId);
+    };
+
     if (([YOUNG_STATUS_PHASE1.WAITING_AFFECTATION, YOUNG_STATUS_PHASE1.AFFECTED] as string[]).includes(young.statusPhase1)) {
       young.set({ statusPhase1: YOUNG_STATUS_PHASE1.AFFECTED });
     }
@@ -126,24 +150,29 @@ router.post("/affectation", passport.authenticate("referent", { session: false, 
       ligneId: ligneId ? ligneId : undefined,
       hasMeetingInformation: pdrOption !== "young-select" ? "true" : "false",
     });
-    if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
-      const cohortPeriod = getCohortPeriod(cohort);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION;
-      let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
-      let params = { cohortPeriod: cohortPeriod };
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, { emailTo, params, cc });
+    try {
+      if (cohort?.isAssignmentAnnouncementsOpenForYoung) {
+        const cohortPeriod = getCohortPeriod(cohort);
+        let template = SENDINBLUE_TEMPLATES.young.PHASE1_AFFECTATION;
+        let emailTo = [{ name: `${young.firstName} ${young.lastName}`, email: young.email }];
+        let params = { cohortPeriod: cohortPeriod };
+        let cc = getCcOfYoung({ template, young });
+        await sendTemplate(template, { emailTo, params, cc });
+      }
+
+      await young.save({ fromUser: req.user });
+    } catch (e) {
+      await resyncReservations();
+      throw e;
     }
 
-    await young.save({ fromUser: req.user });
-
-    // update session infos
-    const data = await updatePlacesSessionPhase1(session, req.user);
-    if (oldSession) await updatePlacesSessionPhase1(oldSession, req.user);
+    // update session infos (recomptage : réaligne les compteurs sur les jeunes réellement affectés)
+    const data = await updatePlacesSessionPhase1(reservedSession ?? session, req.user);
+    if (oldSession && oldSession._id.toString() !== session._id.toString()) await updatePlacesSessionPhase1(oldSession, req.user);
 
     //update Bus infos
     if (bus) await updateSeatsTakenInBusLine(bus);
-    if (oldBus) await updateSeatsTakenInBusLine(oldBus);
+    if (oldBus && oldBus._id.toString() !== bus?._id.toString()) await updateSeatsTakenInBusLine(oldBus);
 
     return res.status(200).send({
       data: serializeSessionPhase1(data, req.user),

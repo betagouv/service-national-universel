@@ -15,6 +15,7 @@ import { mapBusTeamToUpdate } from "./ligneDeBusMapper";
 import { Types, ClientSession } from "mongoose";
 import { ERRORS, UserDto, checkTime, BusTeamDto, YOUNG_STATUS_PHASE1, YOUNG_STATUS, COHORT_TYPE, hasPermission, ACTIONS, PlanTransportType } from "snu-lib";
 import { updatePlacesSessionPhase1 } from "../../utils";
+import { reserveSessionPhase1Places } from "../../utils/placeReservation";
 import { endSession, startSession, withTransaction } from "../../mongo";
 import { notifyReferentsCLELineWasUpdated, notifyYoungsAndRlsPDRWasUpdated, notifyYoungsAndRlsSessionWasUpdated } from "./ligneDeBusNotificationService";
 import { logger } from "../../logger";
@@ -284,6 +285,13 @@ export const updateSessionForLine = async ({
 
   try {
     await withTransaction(transaction, async () => {
+      // Réservation atomique des places de la ligne dans la session cible (constat L25) :
+      // la lecture de placesLeft ci-dessus ne protège pas contre une affectation concurrente.
+      if (ligne.youngSeatsTaken > 0) {
+        const reserved = await reserveSessionPhase1Places(session.id, ligne.youngSeatsTaken, transaction);
+        if (!reserved) throw new Error(ERRORS.OPERATION_NOT_ALLOWED);
+      }
+
       // Ligne
       ligne.set({
         sessionId: session.id,
@@ -322,7 +330,8 @@ export const updateSessionForLine = async ({
     });
 
     await updatePlacesSessionPhase1(currentSessionPhase1, user);
-    await updatePlacesSessionPhase1(session, user);
+    // Document relu : le compteur en base a été décrémenté par la réservation.
+    await updatePlacesSessionPhase1((await SessionPhase1Model.findById(session._id)) ?? session, user);
 
     if (sendCampaign) {
       const updatedYoungs = await YoungModel.find({
