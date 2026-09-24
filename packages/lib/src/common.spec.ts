@@ -1,4 +1,4 @@
-import { HTML_CLEANER_OPTIONS, HTML_LINK_SCHEMES, htmlCleaner, sanitizeStoredHtml } from "./common";
+import { HTML_CLEANER_OPTIONS, HTML_LINK_SCHEMES, htmlCleaner, htmlToPlainText, sanitizeStoredHtml } from "./common";
 
 describe("htmlCleaner", () => {
   it("retire scripts et gestionnaires d'événements", () => {
@@ -31,6 +31,30 @@ describe("sanitizeStoredHtml", () => {
     expect(sanitizeStoredHtml(`<b>Asso</b><img src=x onerror=alert(1)>`)).toBe("<b>Asso</b>");
     expect(sanitizeStoredHtml(`Texte <IMG SRC=x onerror=alert(1)>`)).toBe("Texte ");
     expect(sanitizeStoredHtml(`a</p><!--x--><?x>`)).not.toMatch(/<!--|<\?/);
+  });
+});
+
+describe("htmlToPlainText", () => {
+  it("décode les entités laissées par l'assainissement à l'écriture (GOO-44)", () => {
+    const stored = sanitizeStoredHtml("Recette A & B <test>");
+    expect(stored).toBe("Recette A &amp; B ");
+    expect(htmlToPlainText(stored)).toBe("Recette A & B");
+  });
+
+  it("laisse intact un texte saisi sans balisage", () => {
+    expect(htmlToPlainText("Âge < 16 ans & 3<4")).toBe("Âge < 16 ans & 3<4");
+    expect(htmlToPlainText("Ligne 1\nLigne 2")).toBe("Ligne 1\nLigne 2");
+    expect(htmlToPlainText("")).toBe("");
+    expect(htmlToPlainText(null)).toBeNull();
+    expect(htmlToPlainText(undefined)).toBeUndefined();
+  });
+
+  it("retire les balises et garde les fins de paragraphe", () => {
+    expect(htmlToPlainText("<p>Aider <b>les</b> &quot;seniors&quot;</p><ul><li>un</li><li>deux</li></ul>A<br/>B")).toBe('Aider les "seniors"\nun\ndeux\nA\nB');
+  });
+
+  it("ne réintroduit pas de balise : une entité &lt; décodée reste du texte", () => {
+    expect(htmlToPlainText("&lt;script&gt;alert(1)&lt;/script&gt;<script>alert(2)</script>")).toBe("<script>alert(1)</script>");
   });
 });
 

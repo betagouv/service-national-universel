@@ -16,6 +16,7 @@ import { translate, ROLES, MISSION_DOMAINS, PERIOD, MISSION_PERIOD_DURING_HOLIDA
 import MissionView from "./wrapper";
 import Pencil from "../../../assets/icons/Pencil";
 import Field from "@/components/ui/forms/Field";
+import { MISSION_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import Toggle from "../../../components/Toggle";
 
@@ -238,6 +239,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
         return setLoading(false);
       }
       toastr.success("Mission enregistrée", "");
+      warnIfHtmlSanitized(valuesToSend, missionReturned, MISSION_HTML_FIELDS);
       setLoading(false);
       setLoadingBottom(false);
       setEdittingBottom(false);
@@ -693,7 +695,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                   <Field
                     readOnly={!editing}
                     type="textarea"
-                    plainText
+                    preserveLineBreaks
                     row={4}
                     onChange={(contraintes) => setValues({ ...values, contraintes })}
                     label="Précisez les informations complémentaires à préciser au volontaire."
@@ -846,7 +848,7 @@ export default function DetailsView({ mission, setMission, getMission }: Details
                     bgColor={mission?.isJvaMission === "true" && "bg-gray-200"}
                     name="frequence"
                     type="textarea"
-                    plainText
+                    preserveLineBreaks
                     row={4}
                     onChange={(frequence) => setValues({ ...values, frequence })}
                     label="Fréquence estimée de la mission"

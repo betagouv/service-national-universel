@@ -20,6 +20,7 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ViewStructureLink from "../../components/buttons/ViewStructureLink";
 import api from "../../services/api";
+import { MISSION_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 
 export default function Create(props) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -153,6 +154,7 @@ export default function Create(props) {
         return setLoading(false);
       }
       toastr.success("Mission enregistrée");
+      warnIfHtmlSanitized(values, data, MISSION_HTML_FIELDS);
       return history.push(`/mission/${data._id}`);
     } catch (e) {
       setLoading(false);
