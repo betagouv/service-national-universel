@@ -10,8 +10,12 @@ function _env<T>(callback: (value: any, fallback?: T) => T, key: string, fallbac
   return undefined;
 }
 
+// Repli « development » réservé au serveur de dev : un build sans VITE_ENVIRONMENT échoue (vite.config.js).
+// @ts-expect-error import.meta
+const isDevServer: boolean = import.meta.env.DEV === true;
+
 const RELEASE = _env(envStr, "VITE_RELEASE", "development");
-const environment = _env(envStr, "VITE_ENVIRONMENT", "development");
+const environment = _env(envStr, "VITE_ENVIRONMENT", isDevServer ? "development" : undefined);
 const apiURL = _env(envStr, "VITE_API_URL", "http://localhost:8080");
 const apiv2URL = _env(envStr, "VITE_APIV2_URL", "http://localhost:8086");
 const appURL = _env(envStr, "VITE_APP_URL", "http://localhost:8081");
