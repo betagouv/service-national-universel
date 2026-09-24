@@ -3,7 +3,7 @@
 // https://nextjs.org/docs/api-reference/next.config.js/introduction
 // https://docs.sentry.io/platforms/javascript/guides/nextjs/
 
-const { withSentryConfig } = require("@sentry/nextjs");
+const { withSentryConfig } = require("@sentry/nextjs/config");
 
 // En-têtes de sécurité, alignés sur devops/build/front/nginx.conf (vidéos Vimeo seules en iframe)
 const securityHeaders = [
@@ -34,13 +34,14 @@ const securityHeaders = [
 
 const moduleExports = {
   // Your existing module.exports
-  optimizeFonts: false,
   poweredByHeader: false,
+  // La KB est hors des workspaces npm : sa racine est ce dossier, pas celle du monorepo
+  outputFileTracingRoot: __dirname,
   async headers() {
     return [{ source: "/:path*", headers: securityHeaders }];
   },
-  // Aucun composant next/image : l'optimiseur d'images (/_next/image) ne sert qu'à exposer une
-  // surface de DoS anonyme, sans correctif en 13.x. `unoptimized` le fait répondre 404 (FM22).
+  // Aucun composant next/image : l'optimiseur d'images (/_next/image) n'est qu'une surface
+  // d'attaque anonyme (DoS, RCE AVIF avant 15.5.24). `unoptimized` le fait répondre 404 (FM22).
   images: {
     unoptimized: true,
   },
@@ -70,19 +71,19 @@ const moduleExports = {
   },
 };
 
-const sentryWebpackPluginOptions = {
-  // Additional config options for the Sentry Webpack plugin. Keep in mind that
-  // the following options are set automatically, and overriding them is not
-  // recommended:
-  //   release, url, org, project, authToken, configFile, stripPrefix,
-  //   urlPrefix, include, ignore
-
-  silent: true, // Suppresses all logs
+const sentryBuildOptions = {
   // For all available options, see:
-  // https://github.com/getsentry/sentry-webpack-plugin#options.
+  // https://docs.sentry.io/platforms/javascript/guides/nextjs/configuration/build/
+  silent: true, // Suppresses all logs
+  // Pas de télémétrie de build envoyée à Sentry
+  telemetry: false,
+  // Les sourcemaps sont envoyées à Sentry sans être servies publiquement (le script de build
+  // supprime aussi les .map restants de .next/static)
+  sourcemaps: {
+    deleteSourcemapsAfterUpload: true,
+  },
 };
 
 // Make sure adding Sentry options is the last code to run before exporting, to
 // ensure that your source maps include changes from all other Webpack plugins
-// hideSourceMaps : les sourcemaps sont envoyées à Sentry sans être servies publiquement
-module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions, { hideSourceMaps: true });
+module.exports = withSentryConfig(moduleExports, sentryBuildOptions);
