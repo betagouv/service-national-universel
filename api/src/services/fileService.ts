@@ -4,14 +4,16 @@ import { Transform } from "stream";
 import * as XLSX from "xlsx";
 import fs from "fs";
 
-import { ERRORS } from "snu-lib";
+import { ERRORS, neutralizeSpreadsheetRow } from "snu-lib";
 
 import { capture } from "../sentry";
 import { logger } from "../logger";
 
 export function generateCSVStream(data: any[], headers: null | boolean | string[] = true) {
   const csvStream = format({ headers });
-  data.forEach((row) => csvStream.write(row));
+  // Les rapports d'import reprennent des valeurs saisies dans les fichiers importés :
+  // une cellule `=…` redeviendrait une formule à l'ouverture du CSV (L36).
+  data.forEach((row) => csvStream.write(neutralizeSpreadsheetRow(row)));
   csvStream.end();
   return csvStream;
 }

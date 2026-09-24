@@ -7,7 +7,7 @@ import * as AWS from "aws-sdk";
 import { ConfigService } from "@nestjs/config";
 import { Injectable, Logger } from "@nestjs/common";
 
-import { cleanFileNamePath, ERRORS } from "snu-lib";
+import { cleanFileNamePath, ERRORS, neutralizeSpreadsheetRow } from "snu-lib";
 import { CsvOptions, FileGateway } from "@shared/core/File.gateway";
 
 import { TechnicalException, TechnicalExceptionType } from "./TechnicalException";
@@ -24,7 +24,14 @@ export class FileProvider implements FileGateway {
     ): Promise<string> {
         this.logger.log(`Generating CSV with ${recordArray.length} rows with column names:${options.headers}`);
 
-        return writeToString(recordArray, { ...options, quote: '"', alwaysWriteHeaders: true });
+        // Neutralise les cellules `=`, `+`, `-`, `@`… qu'un tableur lirait comme des formules (L36).
+        // Les writers XLSX ci-dessous n'en ont pas besoin : une chaîne y est stockée en cellule
+        // texte, jamais en formule.
+        return writeToString(recordArray.map(neutralizeSpreadsheetRow), {
+            ...options,
+            quote: '"',
+            alwaysWriteHeaders: true,
+        });
     }
 
     async readFile(filePath: string): Promise<Buffer> {

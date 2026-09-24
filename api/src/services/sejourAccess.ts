@@ -1,6 +1,6 @@
 import { ROLES, UserDto } from "snu-lib";
 
-import { CohesionCenterModel } from "../models";
+import { CohesionCenterModel, LigneBusModel, PointDeRassemblementModel } from "../models";
 
 /**
  * Périmètre des séjours de cohésion et du plan de transport.
@@ -143,4 +143,62 @@ export async function getCenterIdsInUserScope(user: UserDto): Promise<string[] |
   if (!filter) return [];
   const centers = await CohesionCenterModel.find(filter).select({ _id: 1 });
   return centers.map((center) => String(center._id));
+}
+
+/**
+ * Périmètre de consultation des lignes de bus dans les recherches Elasticsearch
+ * (lignebus, modificationbus). Contrairement à la fiche d'une ligne, rattachée au
+ * seul centre de destination, une liste doit aussi montrer au référent les lignes
+ * qui partent de son territoire : une ligne est dans le périmètre si son centre
+ * OU l'un de ses points de rassemblement y est. Ces index ne portent que des
+ * métadonnées de transport (aucun jeune).
+ *
+ * - `{ national: true }` : administrateur et transporteur, acteurs nationaux ;
+ * - `{ national: false, … }` : référents, bornés à leur région / département ;
+ * - `null` : aucun accès (fail-closed).
+ */
+export type LigneBusScope = { national: true } | { national: false; centerIds: string[]; meetingPointIds: string[] };
+
+export async function getLigneBusScope(user: UserDto): Promise<LigneBusScope | null> {
+  if ([ROLES.ADMIN, ROLES.TRANSPORTER].includes(user?.role as any)) return { national: true };
+  const geoFilter = getGeoScopeFilter(user);
+  if (!geoFilter) return null;
+  const [centers, meetingPoints] = await Promise.all([
+    CohesionCenterModel.find(geoFilter).select({ _id: 1 }),
+    PointDeRassemblementModel.find(geoFilter).select({ _id: 1 }),
+  ]);
+  return {
+    national: false,
+    centerIds: centers.map((center) => String(center._id)),
+    meetingPointIds: meetingPoints.map((meetingPoint) => String(meetingPoint._id)),
+  };
+}
+
+/** Filtre Elasticsearch de l'index `lignebus` pour un périmètre borné ; `null` = pas de filtre. */
+export function getLigneBusScopeEsFilter(scope: LigneBusScope): Record<string, unknown> | null {
+  if (scope.national) return null;
+  return {
+    bool: {
+      should: [{ terms: { "centerId.keyword": scope.centerIds } }, { terms: { "meetingPointsIds.keyword": scope.meetingPointIds } }],
+      minimum_should_match: 1,
+    },
+  };
+}
+
+/** Identifiants des lignes d'un périmètre borné, pour les index qui ne portent que `lineId`. */
+export async function getLigneBusIdsInScope(scope: Extract<LigneBusScope, { national: false }>): Promise<string[]> {
+  const lignes = await LigneBusModel.find({ $or: [{ centerId: { $in: scope.centerIds } }, { meetingPointsIds: { $in: scope.meetingPointIds } }] }).select({ _id: 1 });
+  return lignes.map((ligne) => String(ligne._id));
+}
+
+/** Filtre Elasticsearch géographique d'un index portant `region` / `department` ; `null` = pas de filtre. */
+export function getGeoScopeEsFilter(user: UserDto): Record<string, unknown> | null {
+  switch (user?.role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      return { terms: { "department.keyword": user.department || [] } };
+    case ROLES.REFERENT_REGION:
+      return { term: { "region.keyword": user.region } };
+    default:
+      return null;
+  }
 }

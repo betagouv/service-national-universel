@@ -1,4 +1,4 @@
-import { getHeaders, readCSVBuffer } from "./fileService";
+import { generateCSVStream, getHeaders, readCSVBuffer, streamToBuffer } from "./fileService";
 import { ERRORS } from "snu-lib";
 
 describe("readCSVBuffer", () => {
@@ -65,5 +65,18 @@ describe("getHeaders", () => {
 
     const result = getHeaders(data);
     expect(result).toEqual(expectedResult);
+  });
+});
+
+describe("generateCSVStream", () => {
+  it("neutralise les cellules qu'un tableur lirait comme des formules (L36)", async () => {
+    const data = [
+      { nom: "=1+1", ville: "+33 Brest", note: "-2", contact: "@SUM(A1)", tab: "\tx", cr: "\rx" },
+      { nom: "Dupont", ville: "Brest", note: -2, contact: "a@b.fr", tab: "x", cr: "x" },
+    ];
+    const csv = (await streamToBuffer(generateCSVStream(data))).toString("utf-8");
+    const [, dangereuse, saine] = csv.split("\n");
+    expect(dangereuse).toBe(`'=1+1,'+33 Brest,'-2,'@SUM(A1),'\tx,"'\rx"`);
+    expect(saine).toBe("Dupont,Brest,-2,a@b.fr,x,x");
   });
 });
