@@ -76,14 +76,17 @@ type LimiterOptions = {
   skipSuccessfulRequests?: boolean;
   /** Avec `skipSuccessfulRequests` : ce qui compte comme un succès (par défaut, un statut < 400). */
   requestWasSuccessful?: Options["requestWasSuccessful"];
+  /** Clé du compteur : l'IP par défaut. */
+  keyGenerator?: Options["keyGenerator"];
 };
 
-export function authRateLimiter({ windowMs, limit, prefix, skipSuccessfulRequests = false, requestWasSuccessful }: LimiterOptions): RateLimitRequestHandler {
+export function authRateLimiter({ windowMs, limit, prefix, skipSuccessfulRequests = false, requestWasSuccessful, keyGenerator }: LimiterOptions): RateLimitRequestHandler {
   const options: Partial<Options> = {
     windowMs,
     limit,
     skipSuccessfulRequests,
     ...(requestWasSuccessful ? { requestWasSuccessful } : {}),
+    ...(keyGenerator ? { keyGenerator } : {}),
     standardHeaders: "draft-7",
     legacyHeaders: false,
     handler: (_req, res) => res.status(429).send({ ok: false, code: "TOO_MANY_REQUESTS" }),
@@ -97,3 +100,19 @@ export const signinRateLimiter = () => authRateLimiter({ prefix: "signin", windo
 
 /** Routes qui envoient un email ou réécrivent un token : quota plus serré. */
 export const emailSendingRateLimiter = (prefix: string) => authRateLimiter({ prefix, windowMs: HOUR, limit: 10 });
+
+/**
+ * Routes authentifiées qui renseignent sur des comptes tiers (M70) : le quota suit le compte
+ * appelant, pas l'IP, pour qu'un compte ne le contourne pas en changeant d'adresse. À monter
+ * après l'authentification.
+ */
+export const userRateLimiter = ({ prefix, windowMs, limit }: { prefix: string; windowMs: number; limit: number }) =>
+  authRateLimiter({
+    prefix,
+    windowMs,
+    limit,
+    keyGenerator: (req) => {
+      const userId = (req as any).user?._id;
+      return userId ? `user:${userId}` : `ip:${req.ip}`;
+    },
+  });

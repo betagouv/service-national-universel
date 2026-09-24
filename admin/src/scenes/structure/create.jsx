@@ -15,6 +15,7 @@ import api from "../../services/api";
 import { useAddress, ENABLE_PM, legalStatus, ROLES, SENDINBLUE_TEMPLATES, sousTypesStructure, translate, typesStructure } from "../../utils";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
 import validator from "validator";
+import { canCheckIfRefExist, ERRORS } from "snu-lib";
 
 export default function Create() {
   const user = useSelector((state) => state.Auth.user);
@@ -80,11 +81,15 @@ export default function Create() {
             setIsLoading(false);
             return;
           }
-          const { data: exist } = await api.post("/referent/exist", { email: values.email });
-          if (exist) {
-            toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
-            setIsLoading(false);
-            return;
+          // Vérification réservée aux référents et admins (M70) : pour un superviseur, un doublon
+          // est signalé par l'invitation elle-même.
+          if (canCheckIfRefExist(user)) {
+            const { data: exist } = await api.post("/referent/exist", { email: values.email });
+            if (exist) {
+              toastr.warning("Utilisateur déjà inscrit", "Merci de vérifier si la structure existe déjà sur la plateforme");
+              setIsLoading(false);
+              return;
+            }
           }
 
           if (!values.location) {
@@ -108,8 +113,18 @@ export default function Create() {
             structureName: data.name,
             phone: values.phone,
           };
-          const { ok, code } = await api.post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE}`, obj);
-          if (!ok) return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+          // api.post rejette sur tout statut autre que 200 : le 409 d'un email déjà inscrit arrive ici.
+          const { ok, code } = await api
+            .post(`/referent/signup_invite/${SENDINBLUE_TEMPLATES.invitationReferent.NEW_STRUCTURE}`, obj)
+            .catch((error) => ({ ok: false, code: error?.code }));
+          if (!ok) {
+            setIsLoading(false);
+            if (code === ERRORS.USER_ALREADY_REGISTERED) {
+              toastr.warning("Structure créée, mais le responsable est déjà inscrit", "Rattachez un autre membre depuis la fiche de la structure");
+              return history.push(`/structure/${data._id}`);
+            }
+            return toastr.error("Oups, une erreur est survenue lors de l'ajout du nouveau membre", translate(code));
+          }
           toastr.success("Invitation envoyée");
           setIsLoading(false);
           if (redirect) history.push(redirect);

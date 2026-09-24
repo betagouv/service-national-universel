@@ -1158,8 +1158,11 @@ export function isSuperAdmin(actor) {
   return [ROLES.ADMIN].includes(actor.role) && actor.subRole === SUB_ROLE_GOD;
 }
 
+// Réponse discriminante sur l'existence d'un compte : réservée aux rôles qui administrent les
+// comptes d'un territoire. Un superviseur y trouvait un oracle d'énumération des emails (audit
+// 2026-09-21, M70) ; un doublon à l'invitation lui est signalé par le 409 de signup_invite.
 function canCheckIfRefExist(actor) {
-  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT, ROLES.SUPERVISOR].includes(actor.role);
+  return [ROLES.ADMIN, ROLES.REFERENT_REGION, ROLES.REFERENT_DEPARTMENT].includes(actor?.role);
 }
 
 function canSeeDashboardSejourInfo(actor) {
