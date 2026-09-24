@@ -26,7 +26,19 @@ import {
 } from "snu-lib";
 
 import { capture, captureMessage } from "../sentry";
-import { YoungModel, CohortModel, ReferentModel, ApplicationModel, ContractModel, MissionModel, StructureModel, StructureDocument } from "../models";
+import {
+  YoungModel,
+  YoungDocument,
+  CohortModel,
+  CohortDocument,
+  ReferentModel,
+  ApplicationModel,
+  ApplicationDocument,
+  ContractModel,
+  MissionModel,
+  StructureModel,
+  StructureDocument,
+} from "../models";
 import { decrypt, encrypt } from "../cryptoUtils";
 import { sendTemplate } from "../brevo";
 import { validateUpdateApplication, validateNewApplication, validateId, idSchema } from "../utils/validator";
@@ -41,11 +53,13 @@ import {
   updateYoungPhase2StatusAndHours,
   getFile,
   updateYoungStatusPhase2Contract,
+  recomputeYoungPhase2StatusAndHours,
+  recomputeYoungStatusPhase2Contract,
   getReferentManagerPhase2,
   updateYoungApplicationFilesType,
 } from "../utils";
 import { scanFile } from "../utils/virusScanner";
-import { getAuthorizationToApply, updateMission, sendNotificationsByStatus } from "../application/applicationService";
+import { getAuthorizationToApply, updateMission, recomputeMissionPlaces, sendNotificationsByStatus } from "../application/applicationService";
 import { apiEngagement } from "../services/gouv.fr/api-engagement";
 import { getMimeFromBuffer, getMimeFromFile } from "../utils/file";
 import { requestValidatorMiddleware } from "../middlewares/requestValidatorMiddleware";
@@ -63,6 +77,7 @@ import { permissionAccessControlMiddleware } from "../middlewares/permissionAcce
 import { isApplicationInUserScope, isContractInUserScope } from "../services/contractAccess";
 import { toErrorCode } from "../utils/errorCode";
 import { canReferentChangeApplicationStatus } from "../young/youngStatusTransitions";
+import { userRateLimiter } from "../middlewares/rateLimit";
 
 const { ObjectId } = require("mongoose").Types;
 
@@ -325,6 +340,7 @@ router.post(
         structures = await StructureModel.find({ $or: [{ networkId: String(req.user.structureId) }, { _id: String(req.user.structureId) }] });
       }
 
+      const cohorts = new Map<string, CohortDocument | null>();
       for (const application of applications) {
         const young = application.young;
         if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
@@ -344,28 +360,53 @@ router.post(
             return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
           }
         }
+        // Mêmes transitions par rôle que PUT /application (GOO-12 : FL2) : sans ce contrôle, le lot
+        // permettait à une structure de passer une candidature WAITING_ACCEPTATION à DONE.
+        if (application.status !== valueKey.key) {
+          const cohortKey = young.cohortId ? `id:${young.cohortId}` : `name:${young.cohort}`;
+          if (!cohorts.has(cohortKey)) {
+            cohorts.set(cohortKey, young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort }));
+          }
+          if (!canReferentChangeApplicationStatus(req.user, application.status, valueKey.key, cohorts.get(cohortKey))) {
+            return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+          }
+        }
       }
 
-      // Séquentiel : plusieurs candidatures d'un même volontaire recalculent son statut de phase 2
-      // (`updateYoungPhase2StatusAndHours`) à partir du document en mémoire — en parallèle, les
-      // écritures concurrentes sur le jeune s'écrasent entre elles.
+      // 1. Écriture des candidatures, une par une.
+      const updatedApplications: ApplicationDocument[] = [];
       for (const id of value.ids) {
         const application = await ApplicationModel.findById(id);
         if (!application) continue;
-
-        const young = await YoungModel.findById(application.youngId);
-
         application.set({ status: valueKey.key });
         await application.save({ fromUser: req.user });
+        updatedApplications.push(application);
 
         if (application.apiEngagementId) {
           await apiEngagement.update(application);
         }
+      }
 
-        await updateYoungPhase2StatusAndHours(young, req.user);
-        await updateYoungStatusPhase2Contract(young, req.user);
-        await updateMission(application, req.user);
+      // 2. Un seul recalcul par volontaire et par mission, une fois toutes les candidatures écrites
+      // (lot D : L1). Les erreurs remontent : un lot dont un recalcul échoue répond 500 au lieu
+      // de laisser des heures de phase 2 ou des places de mission faussées sans le dire.
+      const youngIds = [...new Set(updatedApplications.map((application) => String(application.youngId)))];
+      const youngs = new Map<string, YoungDocument>();
+      for (const youngId of youngIds) {
+        const young = await YoungModel.findById(youngId);
+        if (!young) continue;
+        await recomputeYoungPhase2StatusAndHours(young, req.user);
+        await recomputeYoungStatusPhase2Contract(young, req.user);
+        youngs.set(youngId, young);
+      }
+      const missionIds = [...new Set(updatedApplications.map((application) => String(application.missionId)))];
+      for (const missionId of missionIds) {
+        await recomputeMissionPlaces(missionId, req.user);
+      }
 
+      // 3. Notifications, une fois l'état stabilisé.
+      for (const application of updatedApplications) {
+        const young = youngs.get(String(application.youngId));
         if (young) {
           await sendNotificationsByStatus(application, young, valueKey.key);
         }
@@ -588,40 +629,6 @@ router.get(
   },
 );
 
-router.post(
-  "/notify/docs-military-preparation/:template",
-  authMiddleware("young"),
-  permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
-  async (req: UserRequest, res: Response) => {
-    try {
-      const { error, value: template } = Joi.string().required().validate(req.params.template);
-      if (error) {
-        capture(error);
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const toReferents = await getReferentManagerPhase2(req.user.department);
-      if (!toReferents) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-      if (SENDINBLUE_TEMPLATES.referent.MILITARY_PREPARATION_DOCS_SUBMITTED !== template) {
-        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-      }
-
-      const mail = await sendTemplate(template, {
-        emailTo: toReferents.map((referent) => ({
-          name: `${referent.firstName} ${referent.lastName}`,
-          email: referent.email,
-        })),
-        params: { cta: `${config.ADMIN_URL}/volontaire/${req.user._id}/phase2`, youngFirstName: req.user.firstName, youngLastName: req.user.lastName },
-      });
-      return res.status(200).send({ ok: true, data: mail });
-    } catch (error) {
-      capture(error);
-      res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-    }
-  },
-);
-
 type Params = {
   youngFirstName?: string;
   youngLastName?: string;
@@ -635,24 +642,65 @@ type Params = {
 
 type CC = { name: string; email: string };
 
+/**
+ * Notifications qu'un volontaire peut déclencher sur sa propre candidature, avec les statuts de
+ * candidature qui les justifient (lot D : L2) — ce sont celles qu'envoie l'app après un changement
+ * de statut (`scenes/missions/view*.jsx`). `null` : pas de condition de statut (ajout de pièce jointe).
+ * Le reste (validation, refus, relance…) est réservé aux référents.
+ */
+const YOUNG_NOTIFY_TEMPLATES: Record<string, string[] | null> = {
+  [SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION]: [APPLICATION_STATUS.WAITING_VALIDATION, APPLICATION_STATUS.WAITING_VERIFICATION],
+  [SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION]: [APPLICATION_STATUS.ABANDON],
+  [SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION]: [APPLICATION_STATUS.CANCEL],
+  [SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION]: [APPLICATION_STATUS.CANCEL],
+  [SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION]: null,
+};
+
+/** Templates traités par la route : toute autre valeur est refusée avant la moindre lecture. */
+const REFERENT_NOTIFY_TEMPLATES = [
+  SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED,
+  SENDINBLUE_TEMPLATES.young.VALIDATE_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.VALIDATE_APPLICATION_TUTOR,
+  SENDINBLUE_TEMPLATES.referent.CANCEL_APPLICATION,
+  SENDINBLUE_TEMPLATES.young.CANCEL_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.ABANDON_APPLICATION,
+  SENDINBLUE_TEMPLATES.young.REFUSE_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.NEW_APPLICATION,
+  SENDINBLUE_TEMPLATES.referent.RELANCE_APPLICATION,
+  SENDINBLUE_TEMPLATES.ATTACHEMENT_PHASE_2_APPLICATION,
+];
+
+/** Types de pièces jointes de phase 2 (cf. `translateAddFilePhase2`). */
+const PHASE2_ATTACHMENT_TYPES = ["contractAvenantFiles", "justificatifsFiles", "feedBackExperienceFiles", "othersFiles"];
+
+// Un volontaire déclenche au plus 2 notifications par action (annulation) : 20 par heure laissent
+// de la marge sans permettre d'arroser les référents. Les référents envoient en masse depuis
+// l'admin : ils ne sont pas limités ici.
+const youngNotifyLimiter = userRateLimiter({ prefix: "application-notify", windowMs: 60 * 60 * 1000, limit: 20 });
+
 router.post(
   "/:id/notify/:template",
   authMiddleware(["referent", "young"]),
+  (req: UserRequest, res: Response, next) => (isYoung(req.user) ? youngNotifyLimiter(req, res, next) : next()),
   permissionAccessControlMiddleware([{ resource: PERMISSION_RESOURCES.APPLICATION, action: PERMISSION_ACTIONS.WRITE, ignorePolicy: true }]),
   async (req: UserRequest, res: Response) => {
     try {
+      const allowedTemplates = isYoung(req.user) ? Object.keys(YOUNG_NOTIFY_TEMPLATES) : REFERENT_NOTIFY_TEMPLATES;
       const { error, value } = Joi.object({
-        id: Joi.string().required(),
-        template: Joi.string().required(),
-        // Seul texte libre repris dans un email (motif de refus) : on le borne en longueur.
-        message: Joi.string().max(2000).optional(),
-        type: Joi.string().optional(),
-        multipleDocument: Joi.string().optional(),
+        id: idSchema().required(),
+        template: Joi.string()
+          .required()
+          .valid(...allowedTemplates),
+        // Seul texte libre repris dans un email (motif de refus, envoyé par un référent) : on le borne en longueur.
+        message: isYoung(req.user) ? Joi.forbidden() : Joi.string().max(2000).optional(),
+        type: Joi.string()
+          .valid(...PHASE2_ATTACHMENT_TYPES)
+          .optional(),
+        multipleDocument: Joi.string().valid("true", "false").optional(),
       })
         .unknown()
         .validate({ ...req.params, ...req.body }, { stripUnknown: true });
       if (error) {
-        capture(error);
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
@@ -660,6 +708,13 @@ router.post(
 
       const application = await ApplicationModel.findById(id);
       if (!application) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+
+      // Un volontaire ne notifie que ce que le statut de sa candidature justifie (pas d'« abandon »
+      // sur une candidature en cours, par exemple).
+      const youngAllowedStatuses = isYoung(req.user) ? YOUNG_NOTIFY_TEMPLATES[defaultTemplate] : null;
+      if (youngAllowedStatuses && !youngAllowedStatuses.includes(application.status!)) {
+        return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
+      }
       const mission = await MissionModel.findById(application.missionId);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
       const referent = await ReferentModel.findById(mission.tutorId);

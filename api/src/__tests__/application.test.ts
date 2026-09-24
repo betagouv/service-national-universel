@@ -479,14 +479,14 @@ describe("Application", () => {
   describe("POST /application/:id/notify/:template", () => {
     it("should return 404 when application is not found", async () => {
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${notExistingApplicationId}/notify/foo`)
+        .post(`/application/${notExistingApplicationId}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
     it("should return 404 when young is not found", async () => {
       const application = await createApplication(getNewApplicationFixture());
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${application._id}/notify/foo`)
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
@@ -494,11 +494,11 @@ describe("Application", () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const application = await createApplication({ ...getNewApplicationFixture(), youngId: young._id });
       const res = await request(await getAppHelperWithAcl())
-        .post(`/application/${application._id}/notify/foo`)
+        .post(`/application/${application._id}/notify/${SENDINBLUE_TEMPLATES.referent.YOUNG_VALIDATED}`)
         .send({});
       expect(res.status).toBe(404);
     });
-    it("should return 404 when template is not found", async () => {
+    it("should return 400 when template is not handled", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const referent = await createReferentHelper(getNewReferentFixture());
       const mission = await createMissionHelper({ ...getNewMissionFixture(), tutorId: referent._id });
@@ -507,7 +507,7 @@ describe("Application", () => {
       const res = await request(await getAppHelperWithAcl())
         .post(`/application/${application._id}/notify/foo`)
         .send({});
-      expect(res.status).toBe(404);
+      expect(res.status).toBe(400);
     });
     it("should return 200 when template is found", async () => {
       const young = await createYoungHelper(getNewYoungFixture());

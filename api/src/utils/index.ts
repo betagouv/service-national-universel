@@ -342,94 +342,102 @@ export const sendAutoCancelMeetingPoint = async (young) => {
 
 export async function updateYoungPhase2StatusAndHours(young, fromUser) {
   try {
-    // Récupération des applications et équivalences pertinentes
-    const applications = await ApplicationModel.find({ youngId: young._id });
-    const equivalences = await MissionEquivalenceModel.find({
-      youngId: young._id,
-      status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
-    });
-
-    // Calcul des heures effectuées
-    const totalHoursDone =
-      applications.reduce((acc, application) => {
-        if (application.status === "DONE") {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (equivalence.status === "VALIDATED") {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Calcul des heures estimées
-    const totalHoursEstimated =
-      applications.reduce((acc, application) => {
-        if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
-          return acc + Number(application.missionDuration || 0);
-        }
-        return acc;
-      }, 0) +
-      equivalences.reduce((acc, equivalence) => {
-        if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
-          return acc + (equivalence.missionDuration || 0);
-        }
-        return acc;
-      }, 0);
-
-    // Mise à jour des heures dans le modèle young
-    young.set({
-      phase2NumberHoursDone: String(totalHoursDone),
-      phase2NumberHoursEstimated: String(totalHoursEstimated),
-      statusPhase2UpdatedAt: Date.now(),
-    });
-
-    // Mise à jour du statut de la phase 2
-    const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
-    const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
-
-    if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
-      // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
-      young.set({ statusPhase2ValidatedAt: Date.now() });
-      await cancelPendingApplications(pendingApplication, fromUser);
-    } else if (Number(young.phase2NumberHoursDone) >= 84) {
-      // Valider la phase 2 si 84 heures effectuées
-      young.set({
-        statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
-        statusPhase2ValidatedAt: Date.now(),
-        "files.militaryPreparationFilesIdentity": [],
-        "files.militaryPreparationFilesCensus": [],
-        "files.militaryPreparationFilesAuthorization": [],
-        "files.militaryPreparationFilesCertificate": [],
-        statusMilitaryPreparationFiles: undefined,
-      });
-      await cancelPendingApplications(pendingApplication, fromUser);
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
-        },
-        cc,
-      });
-    } else if (activeApplication.length) {
-      // Mettre le statut en IN_PROGRESS si une application est active
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
-    } else {
-      // Sinon, attendre la réalisation
-      young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
-    }
-
-    // Mise à jour des statuts des applications
-    young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
-    // Sauvegarde du modèle young
-    await young.save({ fromUser });
+    await recomputeYoungPhase2StatusAndHours(young, fromUser);
   } catch (e) {
     capture(e);
   }
+}
+
+/**
+ * Recalcule les heures et le statut de phase 2 du volontaire. Contrairement à
+ * `updateYoungPhase2StatusAndHours`, les erreurs remontent à l'appelant (lot D : L1).
+ */
+export async function recomputeYoungPhase2StatusAndHours(young, fromUser) {
+  // Récupération des applications et équivalences pertinentes
+  const applications = await ApplicationModel.find({ youngId: young._id });
+  const equivalences = await MissionEquivalenceModel.find({
+    youngId: young._id,
+    status: { $in: ["VALIDATED", "WAITING_VERIFICATION", "DONE", "WAITING_CORRECTION"] },
+  });
+
+  // Calcul des heures effectuées
+  const totalHoursDone =
+    applications.reduce((acc, application) => {
+      if (application.status === "DONE") {
+        return acc + Number(application.missionDuration || 0);
+      }
+      return acc;
+    }, 0) +
+    equivalences.reduce((acc, equivalence) => {
+      if (equivalence.status === "VALIDATED") {
+        return acc + (equivalence.missionDuration || 0);
+      }
+      return acc;
+    }, 0);
+
+  // Calcul des heures estimées
+  const totalHoursEstimated =
+    applications.reduce((acc, application) => {
+      if (["VALIDATED", "IN_PROGRESS"].includes(application.status)) {
+        return acc + Number(application.missionDuration || 0);
+      }
+      return acc;
+    }, 0) +
+    equivalences.reduce((acc, equivalence) => {
+      if (["VALIDATED", "WAITING_VERIFICATION", "WAITING_CORRECTION"].includes(equivalence.status!)) {
+        return acc + (equivalence.missionDuration || 0);
+      }
+      return acc;
+    }, 0);
+
+  // Mise à jour des heures dans le modèle young
+  young.set({
+    phase2NumberHoursDone: String(totalHoursDone),
+    phase2NumberHoursEstimated: String(totalHoursEstimated),
+    statusPhase2UpdatedAt: Date.now(),
+  });
+
+  // Mise à jour du statut de la phase 2
+  const activeApplication = applications.filter((a) => ["WAITING_VALIDATION", "VALIDATED", "IN_PROGRESS", "WAITING_VERIFICATION"].includes(a.status));
+  const pendingApplication = applications.filter((a) => ["WAITING_VALIDATION", "WAITING_VERIFICATION"].includes(a.status));
+
+  if (young.statusPhase2 === YOUNG_STATUS_PHASE2.VALIDATED || young.status === YOUNG_STATUS.WITHDRAWN) {
+    // Ne pas changer le statut si déjà VALIDATED ou WITHDRAWN
+    young.set({ statusPhase2ValidatedAt: Date.now() });
+    await cancelPendingApplications(pendingApplication, fromUser);
+  } else if (Number(young.phase2NumberHoursDone) >= 84) {
+    // Valider la phase 2 si 84 heures effectuées
+    young.set({
+      statusPhase2: YOUNG_STATUS_PHASE2.VALIDATED,
+      statusPhase2ValidatedAt: Date.now(),
+      "files.militaryPreparationFilesIdentity": [],
+      "files.militaryPreparationFilesCensus": [],
+      "files.militaryPreparationFilesAuthorization": [],
+      "files.militaryPreparationFilesCertificate": [],
+      statusMilitaryPreparationFiles: undefined,
+    });
+    await cancelPendingApplications(pendingApplication, fromUser);
+    let template = SENDINBLUE_TEMPLATES.young.PHASE_2_VALIDATED;
+    let cc = getCcOfYoung({ template, young });
+    await sendTemplate(template, {
+      emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
+      params: {
+        cta: `${config.APP_URL}/phase2?utm_campaign=transactionnel+nouvelles+mig+proposees&utm_source=notifauto&utm_medium=mail+154+telecharger`,
+      },
+      cc,
+    });
+  } else if (activeApplication.length) {
+    // Mettre le statut en IN_PROGRESS si une application est active
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.IN_PROGRESS, statusPhase2ValidatedAt: undefined });
+  } else {
+    // Sinon, attendre la réalisation
+    young.set({ statusPhase2: YOUNG_STATUS_PHASE2.WAITING_REALISATION });
+  }
+
+  // Mise à jour des statuts des applications
+  young.set({ phase2ApplicationStatus: applications.map((e) => e.status) });
+  // Sauvegarde du modèle young
+  await young.save({ fromUser });
 }
 
 export async function updateYoungPhase2Hours(young, fromUser) {
@@ -570,34 +578,39 @@ export const checkStatusContract = (contract) => {
 
 export const updateYoungStatusPhase2Contract = async (young, fromUser) => {
   try {
-    const contracts = await ContractModel.find({ youngId: young._id });
-
-    // on récupère toutes les candidatures du volontaire
-    const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
-
-    // on filtre sur les candidatures pour lesquelles le contrat est "actif"
-    const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
-
-    //on filtre les contrats liés à ces candidatures filtrée précédement
-    const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
-
-    const arrayContract: string[] = [];
-    for (const contract of activeContracts) {
-      const status = checkStatusContract(contract);
-      const application = await ApplicationModel.findById(contract.applicationId);
-      application!.contractStatus = status;
-      await application!.save({ fromUser });
-      arrayContract.push(status);
-    }
-
-    young.set({
-      statusPhase2Contract: arrayContract,
-    });
-
-    await young.save({ fromUser });
+    await recomputeYoungStatusPhase2Contract(young, fromUser);
   } catch (e) {
     capture(e);
   }
+};
+
+/** Variante de `updateYoungStatusPhase2Contract` dont les erreurs remontent à l'appelant (lot D : L1). */
+export const recomputeYoungStatusPhase2Contract = async (young, fromUser) => {
+  const contracts = await ContractModel.find({ youngId: young._id });
+
+  // on récupère toutes les candidatures du volontaire
+  const applications = await ApplicationModel.find({ _id: { $in: contracts?.map((c) => c.applicationId) } });
+
+  // on filtre sur les candidatures pour lesquelles le contrat est "actif"
+  const applicationsThatContractIsActive = applications.filter((application) => ["VALIDATED", "IN_PROGRESS", "DONE", "ABANDON"].includes(application.status));
+
+  //on filtre les contrats liés à ces candidatures filtrée précédement
+  const activeContracts = contracts.filter((contract) => applicationsThatContractIsActive.map((application) => application._id.toString()).includes(contract.applicationId));
+
+  const arrayContract: string[] = [];
+  for (const contract of activeContracts) {
+    const status = checkStatusContract(contract);
+    const application = await ApplicationModel.findById(contract.applicationId);
+    application!.contractStatus = status;
+    await application!.save({ fromUser });
+    arrayContract.push(status);
+  }
+
+  young.set({
+    statusPhase2Contract: arrayContract,
+  });
+
+  await young.save({ fromUser });
 };
 
 export async function cancelPendingApplications(pendingApplication, fromUser) {
