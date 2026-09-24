@@ -98,6 +98,26 @@ router.delete("/",
   }
 );
 
+// Un référent qui perd le rôle REFERENT_DEPARTMENT/REGION ou passe en statut inactif sans être supprimé
+// gardait son compte support : seule la suppression du référent déclenchait DELETE /v0/referent, et la
+// synchro ne fait que créer ou mettre à jour (GOO-13). L'API v1 envoie chaque nuit la liste complète des
+// référents encore habilités ; tout compte référent rattaché à un référent SNU absent de cette liste est
+// supprimé, comme à la suppression du référent. Les comptes sans `snuReferentId` (antérieurs à son
+// introduction) et les agents du support (AGENT, DG) ne sont jamais concernés.
+router.post("/reconcile",
+  validateBody(Joi.object({
+    // Une liste vide viendrait d'une erreur côté API et révoquerait tous les référents : refusée.
+    activeReferentIds: Joi.array().items(SCHEMA_ID).min(1),
+  }).prefs({ presence: 'required' })),
+  async (req, res) => {
+    const { activeReferentIds } = req.cleanBody;
+    const query = { role: { $in: REFERENT_ROLES }, snuReferentId: { $exists: true, $nin: [null, "", ...activeReferentIds] } };
+    const revoked = await AgentModel.find(query).select("_id snuReferentId").lean();
+    if (revoked.length) await AgentModel.deleteMany({ _id: { $in: revoked.map((agent) => agent._id) } });
+    return res.status(200).send({ ok: true, data: { revokedReferentIds: revoked.map((agent) => String(agent.snuReferentId)) } });
+  }
+);
+
 module.exports = router;
 
 function isIdenticalAgent(agentBdd, agentSnu) {

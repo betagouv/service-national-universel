@@ -169,6 +169,12 @@ router.get("/ticketsInfo", authMiddleware(["referent", "young"]), async (req: Us
 
 router.get("/signin", authMiddleware("referent"), async (req: UserRequest, res) => {
   try {
+    // Seuls les référents départementaux et régionaux ont un compte support. Un référent qui a
+    // changé de rôle garde son compte agent jusqu'à la réconciliation nocturne : l'accès lui est
+    // refusé ici dès le changement (GOO-13). Le statut INACTIVE est déjà refusé par passport.
+    if (!([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION] as string[]).includes(req.user.role)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+    }
     // On transmet l'identifiant SNU du référent : c'est lui qui désigne le compte agent côté
     // support, l'email seul ne suffit pas à prouver qu'il s'agit bien du même utilisateur.
     const { ok, data, token } = await SNUpport.api(

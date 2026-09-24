@@ -5,6 +5,7 @@ describe("buildSsoAgentQuery", () => {
     expect(buildSsoAgentQuery({ email: "referent@snu.gouv.fr", snuReferentId: "6ab19d5ed8e8941f0c1baa23" })).toEqual({
       snuReferentId: "6ab19d5ed8e8941f0c1baa23",
       email: "referent@snu.gouv.fr",
+      role: { $in: ["REFERENT_DEPARTMENT", "REFERENT_REGION"] },
     });
   });
 
@@ -20,7 +21,13 @@ describe("buildSsoAgentQuery", () => {
 
   it("ne produit jamais un filtre qui n'est pas contraint sur snuReferentId", () => {
     const query = buildSsoAgentQuery({ email: "a@snu.gouv.fr", snuReferentId: "6ab19d5ed8e8941f0c1baa23" });
-    expect(Object.keys(query).sort()).toEqual(["email", "snuReferentId"]);
+    expect(Object.keys(query).sort()).toEqual(["email", "role", "snuReferentId"]);
     expect(typeof query.snuReferentId).toBe("string");
+  });
+
+  it("n'ouvre par SSO qu'un compte référent, jamais un agent du support (GOO-13)", () => {
+    const query = buildSsoAgentQuery({ email: "a@snu.gouv.fr", snuReferentId: "6ab19d5ed8e8941f0c1baa23" });
+    expect(query.role.$in).not.toContain("AGENT");
+    expect(query.role.$in).not.toContain("DG");
   });
 });

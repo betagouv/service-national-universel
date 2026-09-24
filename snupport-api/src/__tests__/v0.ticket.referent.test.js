@@ -38,7 +38,7 @@ const MESSAGE = {
 jest.mock("../models/ticket", () => ({ find: jest.fn(), findOne: jest.fn() }));
 jest.mock("../models/contact", () => ({ findOne: jest.fn() }));
 jest.mock("../models/message", () => ({ find: jest.fn() }));
-jest.mock("../models/agent", () => ({ findOne: jest.fn(), create: jest.fn(), findOneAndDelete: jest.fn() }));
+jest.mock("../models/agent", () => ({ findOne: jest.fn(), create: jest.fn(), findOneAndDelete: jest.fn(), find: jest.fn(), deleteMany: jest.fn() }));
 jest.mock("../models/organisation", () => ({ findOne: jest.fn().mockResolvedValue({ _id: "org" }) }));
 
 const TicketModel = require("../models/ticket");
@@ -160,5 +160,47 @@ describe("POST /v0/referent (M93)", () => {
 
     expect(res.status).toBe(404);
     expect(AgentModel.findOne).toHaveBeenCalledWith({ email: "support@snu.gouv.fr", role: { $in: ["REFERENT_DEPARTMENT", "REFERENT_REGION"] } });
+  });
+});
+
+describe("POST /v0/referent/reconcile (GOO-13)", () => {
+  const ACTIVE_ID = "aaaaaaaaaaaaaaaaaaaaaaaa";
+  const FORMER_ID = "bbbbbbbbbbbbbbbbbbbbbbbb";
+  const mockFind = (agents) => AgentModel.find.mockReturnValue({ select: () => ({ lean: jest.fn().mockResolvedValue(agents) }) });
+
+  it("supprime les comptes des référents qui ne sont plus habilités", async () => {
+    mockFind([{ _id: "a-former", snuReferentId: FORMER_ID }]);
+
+    const res = await request(app).post("/v0/referent/reconcile").send({ activeReferentIds: [ACTIVE_ID] });
+
+    expect(res.status).toBe(200);
+    expect(res.body.data.revokedReferentIds).toEqual([FORMER_ID]);
+    expect(AgentModel.deleteMany).toHaveBeenCalledWith({ _id: { $in: ["a-former"] } });
+  });
+
+  it("ne cible que les comptes référents rattachés à un référent SNU absent de la liste", async () => {
+    mockFind([]);
+
+    await request(app).post("/v0/referent/reconcile").send({ activeReferentIds: [ACTIVE_ID] });
+
+    expect(AgentModel.find).toHaveBeenCalledWith({
+      role: { $in: ["REFERENT_DEPARTMENT", "REFERENT_REGION"] },
+      snuReferentId: { $exists: true, $nin: [null, "", ACTIVE_ID] },
+    });
+    expect(AgentModel.deleteMany).not.toHaveBeenCalled();
+  });
+
+  it("refuse une liste vide, qui révoquerait tous les référents", async () => {
+    const res = await request(app).post("/v0/referent/reconcile").send({ activeReferentIds: [] });
+
+    expect(res.status).toBe(400);
+    expect(AgentModel.find).not.toHaveBeenCalled();
+  });
+
+  it("refuse un identifiant mal formé", async () => {
+    const res = await request(app).post("/v0/referent/reconcile").send({ activeReferentIds: [{ $ne: null }] });
+
+    expect(res.status).toBe(400);
+    expect(AgentModel.find).not.toHaveBeenCalled();
   });
 });
