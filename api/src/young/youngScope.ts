@@ -149,6 +149,21 @@ export async function isYoungInStructureScope(user: UserDto, young: Pick<YoungTy
 }
 
 /**
+ * Filtre Mongo à ajouter à `{ youngId }` pour ne joindre au dossier d'un volontaire que les
+ * candidatures que l'utilisateur a le droit de voir.
+ *
+ * Un responsable / superviseur n'ouvre le dossier que parce que le volontaire a candidaté dans son
+ * périmètre (`isYoungInStructureScope`) : les candidatures dans d'autres structures ne le regardent
+ * pas, et `CANDIDATURE_READ` est seedée sans policy pour ces rôles (GOO-41). Les autres rôles
+ * voient le dossier au titre de leur territoire ou de leur rattachement : toutes les candidatures
+ * du volontaire relèvent alors de leur périmètre.
+ */
+export async function getApplicationScopeFilter(user: UserDto): Promise<{ structureId?: { $in: string[] } }> {
+  if (![ROLES.RESPONSIBLE, ROLES.SUPERVISOR].includes(user.role as any)) return {};
+  return { structureId: { $in: await getActorStructureIds(user) } };
+}
+
+/**
  * Périmètre d'un responsable / superviseur sur les pièces de préparation militaire : le volontaire
  * doit avoir candidaté à une mission portée par une structure de préparation militaire de son
  * périmètre.

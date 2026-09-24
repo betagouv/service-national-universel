@@ -136,7 +136,14 @@ import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser, isReferentUpdateInUserScope } from "./referentScope";
 import { sanitizeEmailText } from "../email/emailInput";
-import { canEditYoungInScope, canViewYoungFileInScope, isYoungInUserScope, isYoungInStructureScope, isYoungInMilitaryPreparationStructureScope } from "../young/youngScope";
+import {
+  canEditYoungInScope,
+  canViewYoungFileInScope,
+  getApplicationScopeFilter,
+  isYoungInUserScope,
+  isYoungInStructureScope,
+  isYoungInMilitaryPreparationStructureScope,
+} from "../young/youngScope";
 import { canReferentApplyYoungUpdate } from "../young/youngStatusTransitions";
 
 const router = express.Router();
@@ -1527,11 +1534,19 @@ router.get("/young/:id", passport.authenticate("referent", { session: false, fai
     // `canViewYoung` ne contrôle que le rôle : sans ce périmètre, tout responsable de structure ou
     // référent hors de son territoire lit le dossier de n'importe quel volontaire (constat H67).
     if (!(await canViewYoungFileInScope(req.user, data))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    const applicationsFromDb = await ApplicationModel.find({ youngId: data._id });
+    // Un responsable / superviseur ne voit que les candidatures de son périmètre, et les coordonnées
+    // du représentant de l'état de la structure ne sont jamais jointes : `GET /structure/:id` les
+    // refuse hors périmètre, le dossier ne doit pas servir de détour (GOO-41).
+    const applicationsFromDb = await ApplicationModel.find({ youngId: data._id, ...(await getApplicationScopeFilter(req.user)) });
     let applications: any[] = [];
     for (let application of applicationsFromDb) {
       const structure = await StructureModel.findById(application.structureId);
-      applications.push({ ...application.toObject(), structure: structure ? serializeStructure(structure, req.user) : null });
+      let serializedStructure: any = null;
+      if (structure) {
+        serializedStructure = serializeStructure(structure, req.user);
+        delete serializedStructure.structureManager;
+      }
+      applications.push({ ...application.toObject(), structure: serializedStructure });
     }
 
     let etablissement: EtablissementDocument | null = null;

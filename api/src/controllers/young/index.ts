@@ -35,7 +35,14 @@ import { validateYoung, validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import {
+  canAccessYoungDocumentsInScope,
+  canEditYoungInScope,
+  canViewYoungFileInScope,
+  getApplicationScopeFilter,
+  isYoungInReferentGeography,
+  isYoungInUserScope,
+} from "../../young/youngScope";
 import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
@@ -769,6 +776,12 @@ router.get(
       if (isReferent(req.user) && !isReadAuthorized({ user: req.user, resource: PERMISSION_RESOURCES.APPLICATION, context: { young: young.toJSON() } })) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
+      // `CANDIDATURE_READ` est seedée sans policy : `isReadAuthorized` répond vrai pour tout volontaire.
+      // Même périmètre que le dossier (`GET /referent/young/:id`), puis seules les candidatures de sa
+      // structure / son réseau pour un responsable ou un superviseur (GOO-41).
+      if (isReferent(req.user) && !(await canViewYoungFileInScope(req.user, young))) {
+        return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+      }
 
       const { error: queryError, value: isMilitaryPreparation } = Joi.boolean().validate(req.query.isMilitaryPreparation);
       if (queryError) {
@@ -776,7 +789,7 @@ router.get(
         return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
 
-      const query: any = { youngId: id };
+      const query: any = { youngId: id, ...(isReferent(req.user) ? await getApplicationScopeFilter(req.user) : {}) };
 
       type PopulatedApplication = ApplicationDocument & { mission: MissionType; tutor: ReferentType; contract: ContractType };
       let data: PopulatedApplication[] = await ApplicationModel.find(query).populate("mission").populate("contract").populate("tutor");
