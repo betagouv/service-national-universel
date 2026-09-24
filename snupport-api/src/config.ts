@@ -69,7 +69,7 @@ export const config = {
   ENABLE_SLACK: _env(envBool, "ENABLE_SLACK", environment === "production"),
   PORT: _env(envInt, "PORT", 8090),
   MONGO_URL: _env(envStr, "MONGO_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"),
-  JWT_SECRET: _env(envStr, "JWT_SECRET", "my-secret"),
+  JWT_SECRET: _env(envStr, "JWT_SECRET", environment === "development" || environment === "test" ? "my-secret" : undefined),
   PASSWORD_RESET_TOKEN_SECRET: _env(
     envStr,
     "PASSWORD_RESET_TOKEN_SECRET",
@@ -104,5 +104,9 @@ export const config = {
 if (environment !== "development" && environment !== "test") {
   if (!config.PASSWORD_RESET_TOKEN_SECRET) {
     throw new Error("Missing required environment variable PASSWORD_RESET_TOKEN_SECRET");
+  }
+  // Sans cette garde, un JWT_SECRET absent retombait sur « my-secret » : n'importe qui pouvait signer une session agent (L47).
+  if (!config.JWT_SECRET) {
+    throw new Error("Missing required environment variable JWT_SECRET");
   }
 }

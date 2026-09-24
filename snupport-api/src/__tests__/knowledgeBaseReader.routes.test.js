@@ -31,6 +31,7 @@ const FeedbackModel = require("../models/feedback");
 const { signReaderToken } = require("../utils/knowledgeBaseReader");
 
 require("../passport")();
+const { JWT_VERSION } = require("../jwt-options");
 
 // Requête mongoose chaînable : sort/populate/limit/lean renvoient le même résultat.
 const query = (result) => {
@@ -57,7 +58,7 @@ const buildApp = () => {
 };
 
 const readerAuth = (roles) => ({ Authorization: `KnowledgeBaseReader ${signReaderToken(roles)}` });
-const agentAuth = (id) => ({ Authorization: `JWTZAMOUD ${jwt.sign({ __v: "0", _id: id }, JWT_SECRET)}` });
+const agentAuth = (id) => ({ Authorization: `JWTZAMOUD ${jwt.sign({ __v: JWT_VERSION, _id: id, lastLogoutAt: null, passwordChangedAt: null }, JWT_SECRET)}` });
 
 beforeEach(() => {
   jest.clearAllMocks();
