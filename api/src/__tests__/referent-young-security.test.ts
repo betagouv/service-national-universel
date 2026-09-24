@@ -8,6 +8,7 @@
  * H67 GET /referent/young/:id                                  : périmètre limité au rôle, document brut (tokens)
  * L23 PUT /young/update_phase3/:young                          : `canEditYoung` seul, sans rattachement réel
  * FM13 PUT /referent/young/:id                                 : historique des statuts accepté tel quel du client (GOO-12)
+ *      puis statuts, cohorte et affectation écrits sans borne de rôle (GOO-12 : FM13, FL2)
  */
 import request from "supertest";
 import { Types } from "mongoose";
@@ -141,6 +142,89 @@ describe("Sécurité dossier volontaire côté référent — audit 2026-09-21 (
       expect(res.status).toBe(200);
       const updated = await YoungModel.findById(young._id);
       expect(updated?.historic).toHaveLength(1);
+    }, 30000);
+  });
+
+  describe("FM13 / FL2 — PUT /referent/young/:id : statuts, cohorte et affectation bornés par rôle", () => {
+    async function createReferentDuTerritoire() {
+      return createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: [TERRITOIRE.department], region: TERRITOIRE.region }));
+    }
+
+    it("refuse à un référent départemental un statut hors parcours (ABANDONED)", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED } as any));
+      const referent = await createReferentDuTerritoire();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ status: YOUNG_STATUS.ABANDONED });
+
+      expect(res.status).toBe(403);
+      expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.VALIDATED);
+    }, 30000);
+
+    it("refuse à un référent départemental la réactivation d'un volontaire désisté", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.WITHDRAWN } as any));
+      const referent = await createReferentDuTerritoire();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ status: YOUNG_STATUS.VALIDATED });
+
+      expect(res.status).toBe(403);
+      expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.WITHDRAWN);
+    }, 30000);
+
+    it("refuse à un référent départemental un changement de cohorte hors /change-cohort", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, cohortId: new ObjectId().toString() } as any));
+      const referent = await createReferentDuTerritoire();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ cohort: "Autre cohorte", cohortId: new ObjectId().toString() });
+
+      expect(res.status).toBe(403);
+      expect((await YoungModel.findById(young._id))?.cohortId).toBe(young.cohortId);
+    }, 30000);
+
+    it("refuse à un référent départemental une affectation directe à une session", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED } as any));
+      const referent = await createReferentDuTerritoire();
+      const sessionPhase1Id = new ObjectId().toString();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ sessionPhase1Id, cohesionCenterId: new ObjectId().toString() });
+
+      expect(res.status).toBe(403);
+      expect((await YoungModel.findById(young._id))?.sessionPhase1Id).not.toBe(sessionPhase1Id);
+    }, 30000);
+
+    it("refuse à un référent départemental un statut de phase 1 posé à la main", async () => {
+      const young = await createYoungHelper(getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.VALIDATED, statusPhase1: "AFFECTED" } as any));
+      const referent = await createReferentDuTerritoire();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ statusPhase1: "DONE" });
+
+      expect(res.status).toBe(403);
+      expect((await YoungModel.findById(young._id))?.statusPhase1).toBe("AFFECTED");
+    }, 30000);
+
+    it("autorise la demande de correction et accepte le renvoi à l'identique de la cohorte et de l'affectation", async () => {
+      const cohortId = new ObjectId().toString();
+      const sessionPhase1Id = new ObjectId().toString();
+      const young = await createYoungHelper(
+        getNewYoungFixture({ ...TERRITOIRE, status: YOUNG_STATUS.WAITING_VALIDATION, cohort: "Juillet 2023", cohortId, sessionPhase1Id } as any),
+      );
+      const referent = await createReferentDuTerritoire();
+
+      const res = await request(await getAppHelperWithAcl(referent, "referent"))
+        .put(`/referent/young/${young._id}`)
+        .send({ status: YOUNG_STATUS.WAITING_CORRECTION, cohort: "Juillet 2023", cohortId, sessionPhase1Id, cohesionCenterId: "" });
+
+      expect(res.status).toBe(200);
+      expect((await YoungModel.findById(young._id))?.status).toBe(YOUNG_STATUS.WAITING_CORRECTION);
     }, 30000);
   });
 

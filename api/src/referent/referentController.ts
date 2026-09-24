@@ -148,6 +148,7 @@ import {
   isYoungInStructureScope,
   isYoungInMilitaryPreparationStructureScope,
 } from "../young/youngScope";
+import { canReferentApplyYoungUpdate } from "../young/youngStatusTransitions";
 
 const router = express.Router();
 const ReferentAuth = new AuthObject(ReferentModel);
@@ -637,6 +638,13 @@ router.put("/young/:id", passport.authenticate("referent", { session: false, fai
 
     if (!(await canEditYoungInScope(req.user, young))) return res.status(403).send({ ok: false, code: ERRORS.YOUNG_NOT_EDITABLE });
     const cohort = young.cohortId ? await CohortModel.findById(young.cohortId) : await CohortModel.findOne({ name: young.cohort });
+
+    // Statuts, cohorte et affectation : mêmes bornes par rôle que l'IHM, qui était seule à les appliquer
+    // (GOO-12 : FM13, FL2).
+    if (!canReferentApplyYoungUpdate(req.user, young, value, cohort)) {
+      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+    }
+
     // eslint-disable-next-line no-unused-vars
     let { __v, ...newYoung } = value;
 

@@ -232,7 +232,8 @@ function joiElasticSearch({ filterFields, sortFields = [], body }: JoiElasticSea
       .allow(null)
       .default(null),
     exportFields: Joi.alternatives().try(Joi.array().items(Joi.string()).max(200).allow(null).default(null), Joi.string().valid("*")),
-    size: Joi.number().integer().min(10).max(100).default(10),
+    // `0` : comptage seul (hits.total), sans renvoyer de dossier (cf. YoungFooterNoRequest).
+    size: Joi.alternatives().try(Joi.number().valid(0), Joi.number().integer().min(10).max(100)).default(10),
   });
 
   const { error, value } = schema.validate({ ...body }, { stripUnknown: true });

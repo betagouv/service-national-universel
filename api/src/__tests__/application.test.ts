@@ -369,6 +369,49 @@ describe("Application", () => {
       expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
     });
 
+    // GOO-12 FL2 : les transitions d'un responsable n'étaient bornées que dans l'admin.
+    it("ne devrait pas laisser un responsable passer en DONE une candidature que le volontaire n'a pas acceptée", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const structureId = new ObjectId().toString();
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId }));
+      const application = await createApplication({
+        ...getNewApplicationFixture(),
+        youngId: young._id,
+        missionId: mission._id,
+        structureId,
+        status: APPLICATION_STATUS.WAITING_ACCEPTATION,
+      });
+
+      const res = await request(await getAppHelperWithAcl(responsable, "referent"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.DONE, missionDuration: "100" });
+      expect(res.status).toBe(403);
+
+      const updatedYoung = await getYoungByIdHelper(young._id);
+      expect(updatedYoung!.statusPhase2).not.toBe(YOUNG_STATUS_PHASE2.VALIDATED);
+    });
+
+    it("devrait laisser un responsable valider une candidature en attente de validation", async () => {
+      const young = await createYoungHelper(getNewYoungFixture());
+      const mission = await createMissionHelper(getNewMissionFixture());
+      const structureId = new ObjectId().toString();
+      const responsable = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId }));
+      const application = await createApplication({
+        ...getNewApplicationFixture(),
+        youngId: young._id,
+        missionId: mission._id,
+        structureId,
+        status: APPLICATION_STATUS.WAITING_VALIDATION,
+      });
+
+      const res = await request(await getAppHelperWithAcl(responsable, "referent"))
+        .put("/application")
+        .send({ _id: application._id.toString(), status: APPLICATION_STATUS.VALIDATED });
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe(APPLICATION_STATUS.VALIDATED);
+    });
+
     it("ne devrait pas laisser un volontaire gonfler la durée de sa mission", async () => {
       const young = await createYoungHelper(getNewYoungFixture());
       const mission = await createMissionHelper(getNewMissionFixture());

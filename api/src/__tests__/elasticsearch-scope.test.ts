@@ -228,6 +228,26 @@ describe("FH8 — le visiteur n'accède plus aux dossiers des volontaires", () =
   });
 });
 
+describe("GOO-12 — comptage des volontaires en liste complémentaire (YoungFooterNoRequest)", () => {
+  it("accepte size: 0 et ne renvoie aucun dossier, seulement le total", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: { status: ["WAITING_LIST"] }, size: 0 });
+    expect(res.status).toBe(200);
+    const hitsQuery = JSON.parse(String(mockEsCalls.msearch[0].body).trim().split("\n")[1]);
+    expect(hitsQuery.size).toBe(0);
+    expect(res.body.responses[0].hits.hits).toEqual([]);
+    expect(res.body.responses[0].hits.total.value).toBeGreaterThan(0);
+  });
+
+  it("refuse toujours une taille de page arbitraire entre 1 et 9", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.ADMIN } as any))
+      .post("/elasticsearch/young/search")
+      .send({ filters: {}, size: 5 });
+    expect(res.status).toBe(400);
+  });
+});
+
 describe("FH4 — export ES des classes CLE", () => {
   it.each([ROLES.TRANSPORTER, ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE])("refuse l'export des classes au rôle %s", async (role) => {
     const res = await request(getAppHelper({ ...getNewReferentFixture(), role } as any))

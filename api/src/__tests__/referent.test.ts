@@ -229,7 +229,14 @@ describe("Referent", () => {
         {
           status: YOUNG_STATUS.VALIDATED,
         },
-        { region: inscriptionGoal.region, department: inscriptionGoal.department, schoolDepartment: inscriptionGoal.department, cohort: cohort.name, cohortId: cohort._id },
+        {
+          status: YOUNG_STATUS.WAITING_VALIDATION,
+          region: inscriptionGoal.region,
+          department: inscriptionGoal.department,
+          schoolDepartment: inscriptionGoal.department,
+          cohort: cohort.name,
+          cohortId: cohort._id,
+        },
         { keepYoung: true },
         { role: ROLES.REFERENT_DEPARTMENT, department: [inscriptionGoal.department!], region: inscriptionGoal.region },
       );

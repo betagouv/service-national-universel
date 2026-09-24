@@ -41,9 +41,10 @@ export function YoungFooterNoRequest({ processing, young, onProcess, footerClass
         const departement = getDepartmentForInscriptionGoal(young);
         const tauxRemplissage = await InscriptionGoalService.getTauxRemplissage({ cohort: young.cohort!, department: departement });
         isGoalReached = tauxRemplissage >= 1;
-        // on vérifie qu'il n'y pas de jeunes en LC
+        // on vérifie qu'il n'y pas de jeunes en LC : seul le total compte, aucun dossier n'est téléchargé
         const { responses } = await api.post("/elasticsearch/young/search", {
           filters: { cohort: [young.cohort], status: [YOUNG_STATUS.WAITING_LIST] },
+          size: 0,
         });
         isLCavailable = (responses?.[0]?.hits?.total?.value || 0) > 0;
       }
