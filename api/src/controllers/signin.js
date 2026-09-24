@@ -5,7 +5,7 @@ const jwt = require("jsonwebtoken");
 const { ROLES } = require("snu-lib");
 const { getToken } = require("../passport");
 const { config } = require("../config");
-const { cookieOptions } = require("../cookie-options");
+const { clearSessionCookie } = require("../cookie-options");
 const { ERRORS } = require("../utils");
 
 const { YoungModel, ReferentModel } = require("../models");
@@ -123,7 +123,7 @@ router.post("/logout", async (req, res) => {
     const { user, isYoung } = session;
     user.set({ lastLogoutAt: Date.now() });
     await user.save({ fromUser: req.user });
-    res.clearCookie(isYoung ? "jwt_young" : "jwt_ref", cookieOptions());
+    clearSessionCookie(res, isYoung ? "jwt_young" : "jwt_ref");
     return res.status(200).send({ ok: true });
   } catch (error) {
     capture(error);

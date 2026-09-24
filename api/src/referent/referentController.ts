@@ -62,7 +62,7 @@ import {
 import { validateId, idSchema, validateSelf, validateYoung, validateReferent, referentDepartmentSchema } from "../utils/validator";
 import { serializeYoung, serializeReferent, serializeSessionPhase1, serializeStructure } from "../utils/serializer";
 import { JWT_SIGNIN_MAX_AGE_SEC, JWT_SIGNIN_VERSION } from "../jwt-options";
-import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
+import { setSessionCookie, COOKIE_SIGNIN_MAX_AGE_MS } from "../cookie-options";
 import {
   ROLES_LIST,
   canInviteUser,
@@ -284,9 +284,9 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
       },
     );
     if (type === "referent") {
-      res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+      setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
     } else if (type === "young") {
-      res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+      setSessionCookie(res, "jwt_young", token, COOKIE_SIGNIN_MAX_AGE_MS);
     }
 
     let userToReturn = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -318,7 +318,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: user.id, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt }, config.JWT_SECRET, {
       expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
     });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
     const userSerialized = serializeReferent(user);
     userSerialized.acl = await getAcl(user);
     return res.status(200).send({ ok: true, data: userSerialized });
@@ -581,7 +581,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     }
 
     const token = jwt.sign({ __v: JWT_SIGNIN_VERSION, _id: referent.id, lastLogoutAt: null, passwordChangedAt: null }, config.JWT_SECRET, { expiresIn: JWT_SIGNIN_MAX_AGE_SEC });
-    res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
+    setSessionCookie(res, "jwt_ref", token, COOKIE_SIGNIN_MAX_AGE_MS);
 
     await referent.save({ fromUser: req.user });
     await updateTutorNameInMissionsAndApplications(referent, req.user);
