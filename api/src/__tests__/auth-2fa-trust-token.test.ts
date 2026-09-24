@@ -92,7 +92,9 @@ describe("2FA trust token binding (H6)", () => {
     const res = await signinReferent(victim.email as string, [cookie]);
     expect(res.status).toBe(200);
     expect(res.body.code).not.toBe("2FA_REQUIRED");
-    expect(res.body.token).toBeDefined();
+    // La session passe par le seul cookie httpOnly : le JWT n'est plus renvoyé au JavaScript (FM16).
+    expect(String(res.headers["set-cookie"])).toContain("jwt_ref=");
+    expect(res.body.token).toBeUndefined();
   });
 
   it("H6 : un trust token émis pour le compte de l'attaquant ne passe pas le 2FA de la victime", async () => {

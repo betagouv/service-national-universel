@@ -33,7 +33,7 @@ function initSentry() {
       transportOptions: {
         maxQueueSize: 50,
       },
-      // Pas d'en-têtes, de cookies ni d'IP : le JWT de session voyage dans l'en-tête Authorization.
+      // Pas d'en-têtes, de cookies ni d'IP : ils peuvent porter le JWT de session.
       sendDefaultPii: false,
       // Corps de requête/réponse, query strings, state Redux et console retirés (FH7, FM4, FM5, FM6).
       beforeSend: redactFrontSentryEvent,

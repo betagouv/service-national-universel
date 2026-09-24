@@ -50,7 +50,9 @@ describe("H62 — POST /referent/signup_verify", () => {
     const res = await request(getAppHelper()).post("/referent/signup_verify").send({ invitationToken });
 
     expect(res.status).toBe(200);
-    expect(res.body.data.email).toBe(referent.email);
+    expect(res.body.data.firstName).toBe(referent.firstName);
+    // FM17 : l'email est le second élément exigé par signup_invite, il n'est plus révélé.
+    expect(res.body.data.email).toBeUndefined();
   });
 
   it("n'émet aucun jeton de session en échange du seul invitationToken", async () => {
@@ -243,6 +245,7 @@ describe("L35 — POST /referent/signin_as/referent/:id", () => {
       .send();
 
     expect(res.status).toBe(200);
-    expect(res.body.token).toBeTruthy();
+    expect(String(res.headers["set-cookie"])).toContain("jwt_ref=");
+    expect(res.body.token).toBeUndefined();
   });
 });

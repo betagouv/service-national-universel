@@ -6,7 +6,12 @@ export const ticketPreviewActions = {
   CLOSE_TICKET: "CLOSE_TICKET",
   TOGGLE_TICKET_EXPANSION: "TOGGLE_TICKET_EXPANSION",
   REDUCE_OPEN_TICKETS_TO: "REDUCE_OPEN_TICKETS_TO",
+  RESET: "RESET_TICKET_PREVIEW",
 };
+
+export function resetTicketPreview() {
+  return { type: ticketPreviewActions.RESET };
+}
 
 export function addTicket(ticket) {
   return { type: ticketPreviewActions.ADD_TICKET, ticket };

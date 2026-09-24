@@ -11,12 +11,14 @@ import {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC,
+  JWT_SESSION_ABSOLUTE_MAX_AGE_MS,
   JWT_SIGNIN_VERSION,
   JWT_TRUST_TOKEN_VERSION,
   JWT_TRUST_TOKEN_TYPE,
   checkJwtTrustTokenVersion,
 } from "./jwt-options";
 import { COOKIE_SIGNIN_MAX_AGE_MS, COOKIE_TRUST_TOKEN_ADMIN_JWT_MAX_AGE_MS, COOKIE_TRUST_TOKEN_MONCOMPTE_JWT_MAX_AGE_MS, cookieOptions } from "./cookie-options";
+import { getToken } from "./passport";
 import { validatePassword, ERRORS, isYoung, STEPS2023, isReferent, validateBirthDate, normalizeString } from "./utils";
 import {
   SENDINBLUE_TEMPLATES,
@@ -267,7 +269,6 @@ class Auth {
 
       return res.status(200).send({
         ok: true,
-        token,
         user: serializeYoung(user, user),
       });
     } catch (error) {
@@ -420,7 +421,6 @@ class Auth {
       res.cookie("jwt_young", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
       return res.status(200).send({
         ok: true,
-        token,
         user: serializeYoung(user, user),
       });
     } catch (error) {
@@ -534,7 +534,6 @@ class Auth {
 
       return res.status(200).send({
         ok: true,
-        token,
         user: data,
         data,
       });
@@ -597,7 +596,6 @@ class Auth {
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
-        token,
         user: data,
         data,
       });
@@ -770,7 +768,6 @@ class Auth {
       data.featureFlags = await getFeatureFlagsAvailable();
       return res.status(200).send({
         ok: true,
-        token,
         user: data,
         data,
       });
@@ -858,7 +855,7 @@ class Auth {
       } else if (isReferent(user)) {
         data.acl = await getAcl(user);
       }
-      res.send({ ok: true, token: token, user: data, data });
+      res.send({ ok: true, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -873,6 +870,16 @@ class Auth {
       if (user?.status === ReferentStatus.INACTIVE) {
         return res.status(401).send({ ok: false, code: SNU_ERRORS.REFERENT_INACTIVE });
       }
+      // Durée absolue de session (GOO-16) : l'instant de connexion suit le jeton d'un renouvellement
+      // à l'autre, et un jeton émis sans ce marqueur est daté par son `iat`. Passé le plafond, plus
+      // de renouvellement : un jeton volé ne se prolonge plus indéfiniment.
+      const currentPayload = jwt.decode(getToken(req) || "") as jwt.JwtPayload | null;
+      const sessionStartedAt = typeof currentPayload?.sessionStartedAt === "number" ? currentPayload.sessionStartedAt : (currentPayload?.iat || 0) * 1000;
+      if (!sessionStartedAt || Date.now() - sessionStartedAt > JWT_SESSION_ABSOLUTE_MAX_AGE_MS) {
+        res.clearCookie("jwt_ref", cookieOptions());
+        return res.status(401).send({ ok: false, code: ERRORS.PASSWORD_TOKEN_EXPIRED_OR_INVALID });
+      }
+
       user.set({ lastActivityAt: Date.now() });
       await user.save();
       const data = isYoung(user) ? serializeYoung(user, user) : serializeReferent(user);
@@ -881,7 +888,14 @@ class Auth {
       data.impersonateId = req.user.impersonateId;
 
       const token = jwt.sign(
-        { __v: JWT_SIGNIN_VERSION, _id: user.id, _impersonateId: req.user.impersonateId, lastLogoutAt: user.lastLogoutAt, passwordChangedAt: user.passwordChangedAt },
+        {
+          __v: JWT_SIGNIN_VERSION,
+          _id: user.id,
+          _impersonateId: req.user.impersonateId,
+          lastLogoutAt: user.lastLogoutAt,
+          passwordChangedAt: user.passwordChangedAt,
+          sessionStartedAt,
+        },
         config.JWT_SECRET,
         {
           expiresIn: JWT_SIGNIN_MAX_AGE_SEC,
@@ -894,7 +908,7 @@ class Auth {
       }
 
       res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS));
-      res.send({ ok: true, token, user: data, data });
+      res.send({ ok: true, user: data, data });
     } catch (error) {
       capture(error);
       return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });

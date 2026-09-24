@@ -6,6 +6,7 @@
  * la désactivation du compte, alors que la passport v1 (api/src/passport.ts) rejette ces jetons.
  */
 import { UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { Test, TestingModule } from "@nestjs/testing";
 import { ClsService } from "nestjs-cls";
 import { ReferentStatus, ROLES } from "snu-lib";
@@ -15,11 +16,13 @@ import { ReferentModel } from "@admin/core/iam/Referent.model";
 import { PermissionService } from "@auth/core/Permission.service";
 import { CustomRequest } from "@shared/infra/CustomRequest";
 
-import { AddUserToRequestMiddleware } from "./AddUserToRequest.middleware";
+import { AddUserToRequestMiddleware, lireCookie } from "./AddUserToRequest.middleware";
 import { AuthProvider } from "./Auth.provider";
 
 const LOGOUT = new Date("2026-09-20T10:00:00.000Z");
 const CHANGEMENT_MDP = new Date("2026-09-18T08:30:00.000Z");
+const ADMIN_URL = "https://admin.snu.gouv.fr";
+const configService = { getOrThrow: (cle: string) => ({ "urls.admin": ADMIN_URL })[cle] };
 
 describe("AddUserToRequestMiddleware - validité de la session", () => {
     let middleware: AddUserToRequestMiddleware;
@@ -37,6 +40,7 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
                 { provide: ReferentGateway, useValue: referentGateway },
                 { provide: PermissionService, useValue: permissionService },
                 { provide: ClsService, useValue: { set: jest.fn() } },
+                { provide: ConfigService, useValue: configService },
             ],
         }).compile();
 
@@ -123,5 +127,86 @@ describe("AddUserToRequestMiddleware - validité de la session", () => {
 
     it("rejette un jeton dont le compte n'existe plus", async () => {
         await expect(appeler(payloadValide, null as unknown as ReferentModel)).rejects.toThrow(UnauthorizedException);
+    });
+});
+
+/**
+ * FM16 (audit des fronts du 23/09/2026) : l'admin ne garde plus le JWT en localStorage et
+ * s'authentifie sur /v2 par le cookie httpOnly `jwt_ref`, lu seulement depuis l'origine admin.
+ */
+describe("AddUserToRequestMiddleware - cookie de session admin", () => {
+    let middleware: AddUserToRequestMiddleware;
+    const authProvider = { parseToken: jest.fn() };
+    const referentGateway = { findById: jest.fn() };
+
+    beforeEach(async () => {
+        jest.clearAllMocks();
+        const module: TestingModule = await Test.createTestingModule({
+            providers: [
+                AddUserToRequestMiddleware,
+                { provide: AuthProvider, useValue: authProvider },
+                { provide: ReferentGateway, useValue: referentGateway },
+                { provide: PermissionService, useValue: { getAcl: jest.fn().mockResolvedValue([]) } },
+                { provide: ClsService, useValue: { set: jest.fn() } },
+                { provide: ConfigService, useValue: configService },
+            ],
+        }).compile();
+
+        middleware = module.get(AddUserToRequestMiddleware);
+        authProvider.parseToken.mockResolvedValue({ id: "6600000000000000000000aa", __v: "0", lastLogoutAt: null, passwordChangedAt: null });
+        referentGateway.findById.mockResolvedValue({
+            id: "6600000000000000000000aa",
+            role: ROLES.REFERENT_DEPARTMENT,
+            status: ReferentStatus.ACTIVE,
+            metadata: {},
+        } as unknown as ReferentModel);
+    });
+
+    const appeler = async (headers: Record<string, string>) => {
+        const req = { headers } as unknown as CustomRequest;
+        const next = jest.fn();
+        await middleware.use(req, {} as any, next);
+        return next;
+    };
+
+    it("lit le cookie jwt_ref d'une requête émise par l'admin", async () => {
+        const next = await appeler({ origin: ADMIN_URL, cookie: "autre=1; jwt_ref=jeton.du.cookie" });
+
+        expect(next).toHaveBeenCalled();
+        expect(authProvider.parseToken).toHaveBeenCalledWith("jeton.du.cookie");
+    });
+
+    it("ignore le cookie d'une requête émise par une autre origine", async () => {
+        await expect(appeler({ origin: "https://moncompte.snu.gouv.fr", cookie: "jwt_ref=jeton.du.cookie" })).rejects.toThrow(
+            UnauthorizedException,
+        );
+        expect(authProvider.parseToken).not.toHaveBeenCalled();
+    });
+
+    it("ignore le cookie d'une requête sans origine", async () => {
+        await expect(appeler({ cookie: "jwt_ref=jeton.du.cookie" })).rejects.toThrow(UnauthorizedException);
+    });
+
+    it("garde l'en-tête Authorization prioritaire sur le cookie", async () => {
+        await appeler({ authorization: "JWT jeton.de.l.entete", origin: ADMIN_URL, cookie: "jwt_ref=jeton.du.cookie" });
+
+        expect(authProvider.parseToken).toHaveBeenCalledWith("jeton.de.l.entete");
+    });
+
+    it("se rabat sur le cookie quand l'en-tête est vide", async () => {
+        await appeler({ authorization: "JWT ", origin: ADMIN_URL, cookie: "jwt_ref=jeton.du.cookie" });
+
+        expect(authProvider.parseToken).toHaveBeenCalledWith("jeton.du.cookie");
+    });
+});
+
+describe("lireCookie", () => {
+    it("extrait la valeur exacte du cookie demandé", () => {
+        expect(lireCookie("jwt_ref_old=a; jwt_ref=b%2Ec; x=y", "jwt_ref")).toBe("b.c");
+    });
+
+    it("renvoie undefined sans en-tête ou sans cookie correspondant", () => {
+        expect(lireCookie(undefined, "jwt_ref")).toBeUndefined();
+        expect(lireCookie("jwt_young=a", "jwt_ref")).toBeUndefined();
     });
 });

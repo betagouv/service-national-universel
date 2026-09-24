@@ -7,7 +7,7 @@ import queryString from "query-string";
 import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { setUser } from "../../redux/auth/actions";
-import api, { setJwtToken } from "../../services/api";
+import api from "../../services/api";
 import Header from "./components/header";
 import UnavailabilityBanner from "./components/unavailabilityBanner";
 import PasswordEye from "../../components/PasswordEye";
@@ -67,14 +67,13 @@ export default function Signin() {
                 onSubmit={async ({ email, password }, actions) => {
                   try {
                     setIsReferentInactive(false);
-                    const { user, token, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
+                    const { user, code, redirect: signinRedirect } = await api.post(`/referent/signin`, { email, password });
                     if (code === "2FA_REQUIRED") {
                       plausibleEvent("2FA demandée");
                       return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
                     } else if (code === "VERIFICATION_REQUIRED") {
                       return history.push(signinRedirect);
                     }
-                    if (token) setJwtToken(token);
                     if (user) {
                       plausibleEvent("Connexion réussie");
                       dispatch(setUser(user));

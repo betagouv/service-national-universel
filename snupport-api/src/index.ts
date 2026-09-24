@@ -23,7 +23,10 @@ app.use(helmet());
 console.log("ENVIRONMENT:", config.ENVIRONMENT);
 app.use(logger("dev"));
 
-const origin = [config.SNU_URL_APP, config.SNU_URL_ADMIN, config.SNUPPORT_URL_KB, config.SNUPPORT_URL_ADMIN];
+// L'admin SNU et moncompte n'appellent jamais snupport-api directement (tout passe par l'api v1,
+// authentifiée par clé d'API) : leur ouvrir le CORS avec credentials faisait d'une XSS dans l'un de
+// ces fronts une session d'agent support (FM19, audit des fronts du 23/09/2026).
+const origin = [config.SNUPPORT_URL_KB, config.SNUPPORT_URL_ADMIN];
 if (config.ENVIRONMENT === "development") {
   origin.push(config.KNOWLEDGE_BASE_PUBLIC_URL);
 }
@@ -37,7 +40,8 @@ app.use(
 );
 app.use(bodyParser.json());
 app.use(bodyParser.text({ type: "application/x-ndjson" }));
-app.use(bodyParser.urlencoded({ extended: true }));
+// Pas de parseur urlencoded : aucun client n'en envoie, et c'est le corps qu'un formulaire HTML
+// d'un autre sous-domaine peut poster sans preflight (CSRF, FL11).
 
 app.use(cookieParser());
 // Pas de parseur multipart global : il est monté sur les seules routes qui reçoivent des fichiers

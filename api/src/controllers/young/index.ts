@@ -26,6 +26,7 @@ import {
 } from "../../models";
 import AuthObject from "../../auth";
 import { signinRateLimiter, emailSendingRateLimiter } from "../../middlewares/rateLimit";
+import { requireJsonBody } from "../../middlewares/requireJsonBody";
 import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent, updatePlacesSessionPhase1, getCcOfYoung, getFile, updateSeatsTakenInBusLine } from "../../utils";
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
@@ -108,8 +109,8 @@ router.post("/signup", (_req, res) => {
 router.post("/signup/email", emailSendingRateLimiter("young-signup-email"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
   YoungAuth.changeEmailDuringSignUp(req, res),
 );
-router.post("/signin", youngSigninLimiter, (req, res) => YoungAuth.signin(req, res));
-router.post("/signin-2fa", youngSigninLimiter, (req, res) => YoungAuth.signin2FA(req, res));
+router.post("/signin", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin(req, res));
+router.post("/signin-2fa", youngSigninLimiter, requireJsonBody, (req, res) => YoungAuth.signin2FA(req, res));
 router.post("/email", emailSendingRateLimiter("young-email-update"), passport.authenticate("young", { session: false, failWithError: true }), (req, res) =>
   YoungAuth.requestEmailUpdate(req, res),
 );
@@ -183,7 +184,7 @@ router.post("/signup_invite", async (req: UserRequest, res) => {
 
     await young.save({ fromUser: req.user });
 
-    return res.status(200).send({ data: serializeYoung(young, young), token, ok: true });
+    return res.status(200).send({ data: serializeYoung(young, young), ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
