@@ -10,7 +10,7 @@ import { ROLES } from "snu-lib";
 import { useSelector } from "react-redux";
 import UploadedFileIcon from "../../../assets/icons/UploadedFileIcon";
 
-export default function PedagoProject({ session, setSession, className = "" }) {
+export default function PedagoProject({ session, className = "" }) {
   const params = new URLSearchParams(window.location.search);
   const [modalOpened, setModalOpened] = useState(params.get("pedagoProject") === "true");
   const currentUser = useSelector((state) => state.Auth.user);
@@ -49,14 +49,16 @@ export default function PedagoProject({ session, setSession, className = "" }) {
                 Relancer le chef de centre
               </BorderButton>
             )}
-            <PlainButton className="mt-3" onClick={() => setModalOpened(true)}>
-              <Download />
-              &#xA0;{hasPedagoProject ? "Télécharger le(s) document(s)" : "Téléverser"}
-            </PlainButton>
+            {hasPedagoProject && (
+              <PlainButton className="mt-3" onClick={() => setModalOpened(true)}>
+                <Download />
+                &#xA0;Télécharger le(s) document(s)
+              </PlainButton>
+            )}
           </div>
         </div>
       </div>
-      {modalOpened && <ModalPedagoProject session={session} setSession={setSession} onCancel={() => setModalOpened(false)} />}
+      {modalOpened && <ModalPedagoProject session={session} onCancel={() => setModalOpened(false)} />}
     </div>
   );
 }

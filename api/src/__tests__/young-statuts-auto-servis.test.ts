@@ -1,21 +1,18 @@
 /**
  * Lot H2 de l'audit sécurité du 21/09/2026 : statuts et drapeaux que le volontaire fixait lui-même
  * (M41, M44, M45, M49, L24) et actions de masse phase 1 sans rattachement de la session (M50).
+ * Les routes phase 1 (M49, M50) ont été supprimées le 2026-09-24 : voir phase1-ecritures-supprimees.test.ts.
  */
 import request from "supertest";
 import { addDays, addYears } from "date-fns";
-import { ROLES, YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE3 } from "snu-lib";
+import { YOUNG_STATUS, YOUNG_STATUS_PHASE1, YOUNG_STATUS_PHASE3 } from "snu-lib";
 
 import { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import getNewYoungFixture from "./fixtures/young";
 import { createYoungHelper, getYoungByIdHelper } from "./helpers/young";
-import { createReferentHelper } from "./helpers/referent";
-import { getNewReferentFixture } from "./fixtures/referent";
 import { createCohortHelper } from "./helpers/cohort";
 import getNewCohortFixture from "./fixtures/cohort";
-import { createSessionPhase1 } from "./helpers/sessionPhase1";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -229,93 +226,5 @@ describe("PUT /young/:id/validate-mission-phase3 (M45)", () => {
     expect(res.status).toBe(403);
     const updated = await getYoungByIdHelper(young._id);
     expect(updated?.phase3StructureName).toBe("Attestée");
-  });
-});
-
-describe("PUT /young/phase1/imageRight (M49)", () => {
-  it("n'écrit que la demande, jamais le drapeau effectif imageRight", async () => {
-    const young = await createYoungHelper(getNewYoungFixture({ imageRight: "false", imageRightFilesStatus: "TO_UPLOAD" }));
-
-    const res = await request(await getAppHelperWithAcl(young))
-      .put("/young/phase1/imageRight")
-      .send({ imageRight: "true", imageRightFiles: ["droit-image.pdf"] });
-
-    expect(res.status).toBe(200);
-    const updated = await getYoungByIdHelper(young._id);
-    expect(updated?.imageRight).toBe("false");
-    expect(updated?.imageRightFilesStatus).toBe("WAITING_VERIFICATION");
-    expect(updated?.imageRightFiles).toEqual(["droit-image.pdf"]);
-  });
-});
-
-describe("PUT /young/phase1/rules", () => {
-  it("n'est plus accepté : rulesYoung reste inchangé", async () => {
-    const young = await createYoungHelper(getNewYoungFixture({ rulesYoung: "false" }));
-
-    const res = await request(await getAppHelperWithAcl(young))
-      .put("/young/phase1/rules")
-      .send({ rulesYoung: "true" });
-
-    expect(res.status).toBe(400);
-    expect((await getYoungByIdHelper(young._id))?.rulesYoung).toBe("false");
-  });
-});
-
-describe("POST /young/phase1/multiaction (M50)", () => {
-  async function createYoungInSession(department: string, extra: Record<string, unknown> = {}) {
-    const cohort = await createCohortHelper(getNewCohortFixture({ dateStart: addDays(new Date(), 30), dateEnd: addDays(new Date(), 45) }));
-    const session = await createSessionPhase1(getNewSessionPhase1Fixture({ department, cohort: cohort.name, cohortId: cohort._id.toString(), ...extra }));
-    const young = await createYoungHelper(
-      getNewYoungFixture({ cohort: cohort.name, cohortId: cohort._id.toString(), sessionPhase1Id: session._id.toString(), cohesionStayMedicalFileReceived: "false" }),
-    );
-    return { session, young };
-  }
-
-  it("refuse à un référent départemental une session d'un autre département", async () => {
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Yvelines"] }));
-    const { young } = await createYoungInSession("Nord");
-
-    const res = await request(await getAppHelperWithAcl(referent))
-      .post("/young/phase1/multiaction/cohesionStayMedicalFileReceived")
-      .send({ value: "true", ids: [young._id.toString()] });
-
-    expect(res.status).toBe(403);
-    expect((await getYoungByIdHelper(young._id))?.cohesionStayMedicalFileReceived).toBe("false");
-  });
-
-  it("autorise un référent départemental sur une session de son département", async () => {
-    const referent = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_DEPARTMENT, department: ["Yvelines"] }));
-    const { young } = await createYoungInSession("Yvelines");
-
-    const res = await request(await getAppHelperWithAcl(referent))
-      .post("/young/phase1/multiaction/cohesionStayMedicalFileReceived")
-      .send({ value: "true", ids: [young._id.toString()] });
-
-    expect(res.status).toBe(200);
-    expect((await getYoungByIdHelper(young._id))?.cohesionStayMedicalFileReceived).toBe("true");
-  });
-
-  it("refuse le départ à un chef de centre qui n'est pas responsable de la session", async () => {
-    const headCenter = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-    const autreChef = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-    const { young } = await createYoungInSession("Nord", { headCenterId: autreChef._id.toString() });
-
-    const res = await request(await getAppHelperWithAcl(headCenter))
-      .post("/young/phase1/multiaction/depart")
-      .send({ departSejourMotif: "Exclusion", departSejourAt: new Date().toISOString(), ids: [young._id.toString()] });
-
-    expect(res.status).toBe(403);
-    expect((await getYoungByIdHelper(young._id))?.departInform).toBeUndefined();
-  });
-
-  it("autorise le chef de centre responsable de la session", async () => {
-    const headCenter = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-    const { young } = await createYoungInSession("Nord", { headCenterId: headCenter._id.toString() });
-
-    const res = await request(await getAppHelperWithAcl(headCenter))
-      .post("/young/phase1/multiaction/cohesionStayMedicalFileReceived")
-      .send({ value: "true", ids: [young._id.toString()] });
-
-    expect(res.status).toBe(200);
   });
 });

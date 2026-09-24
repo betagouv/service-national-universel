@@ -10,17 +10,34 @@ import { QueueName, TaskQueue } from "@shared/infra/Queue";
 import { AdminTaskRepository } from "./AdminTaskMongo.repository";
 import { ReferentielImportTaskModel } from "@admin/core/referentiel/routes/ReferentielImportTask.model";
 import { AdminTaskImportReferentielSelectorService } from "./AdminTaskImportReferentielSelector.service";
-import { AdminTaskAffectationSelectorService } from "./AdminTaskAffectationSelector.service";
 import { AdminTaskInscriptionSelectorService } from "./AdminTaskInscriptionSelector.service";
 import { AdminTaskEngagementSelectorService } from "./AdminTaskEngagementSelector";
 import { SentryExceptionCaptured } from "@sentry/nestjs";
+
+// Écritures phase 1 supprimées (affectation, désistement, bascule) : plus aucune route ne crée ces
+// tâches. Une tâche restée en file est marquée en échec avec un message explicite, sans planter le worker.
+export const ADMIN_TASKS_SUPPRIMEES: string[] = [
+    TaskName.AFFECTATION_HTS_SIMULATION,
+    TaskName.AFFECTATION_HTS_SIMULATION_VALIDER,
+    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION,
+    TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER,
+    TaskName.AFFECTATION_CLE_SIMULATION,
+    TaskName.AFFECTATION_CLE_SIMULATION_VALIDER,
+    TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION,
+    TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER,
+    TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION,
+    TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER,
+    TaskName.BACULE_JEUNES_VALIDES_SIMULATION,
+    TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER,
+    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION,
+    TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER,
+];
 
 @Processor(QueueName.ADMIN_TASK, { lockDuration: 1000 * 60 * 2 })
 export class AdminTaskConsumer extends WorkerHost {
     constructor(
         private readonly logger: Logger,
         private readonly adminTaskRepository: AdminTaskRepository,
-        private readonly adminTaskAffectationSelectorService: AdminTaskAffectationSelectorService,
         private readonly adminTaskInscriptionSelectorService: AdminTaskInscriptionSelectorService,
         private readonly adminTaskEngagementSelectorService: AdminTaskEngagementSelectorService,
         private readonly referentielTaskService: AdminTaskImportReferentielSelectorService,
@@ -43,22 +60,6 @@ export class AdminTaskConsumer extends WorkerHost {
                 const task = await this.adminTaskRepository.toInProgress(job.data.id);
                 this.cls.set("user", { id: "", firstName: job.name, lastName: task.metadata?.parameters?.type });
                 switch (job.name) {
-                    case TaskName.AFFECTATION_HTS_SIMULATION:
-                    case TaskName.AFFECTATION_HTS_SIMULATION_VALIDER:
-                    case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION:
-                    case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION_VALIDER:
-                    case TaskName.AFFECTATION_CLE_SIMULATION:
-                    case TaskName.AFFECTATION_CLE_SIMULATION_VALIDER:
-                    case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
-                    case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION_VALIDER:
-                    case TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION:
-                    case TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER:
-                        results = await this.adminTaskAffectationSelectorService.handleAffectation(job, task);
-                        break;
-                    case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
-                    case TaskName.BACULE_JEUNES_VALIDES_SIMULATION_VALIDER:
-                    case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
-                    case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION_VALIDER:
                     case TaskName.JEUNE_EXPORT:
                         results = await this.adminTaskInscriptionSelectorService.handleInscription(job, task);
                         break;
@@ -75,6 +76,9 @@ export class AdminTaskConsumer extends WorkerHost {
                         results = await this.adminTaskEngagementSelectorService.handleEngagement(job, task);
                         break;
                     default:
+                        if (ADMIN_TASKS_SUPPRIMEES.includes(job.name)) {
+                            throw new Error(`Task "${job.name}" supprimée (écritures phase 1 retirées)`);
+                        }
                         throw new Error(`Task "${job.name}" not handle yet`);
                 }
             } catch (error: any) {

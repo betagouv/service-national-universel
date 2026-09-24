@@ -6,8 +6,6 @@ import { Test } from "@nestjs/testing";
 import { TaskName, TaskStatus } from "snu-lib";
 
 import { Phase1Controller } from "@admin/infra/sejours/phase1/api/Phase1.controller";
-import { SupprimerPlanDeTransport } from "@admin/core/sejours/phase1/affectation/SupprimerPlanDeTransport";
-import { SupprimerLigneDeBus } from "@admin/core/sejours/phase1/affectation/SupprimerLigneDeBus";
 import { TaskGateway } from "@task/core/Task.gateway";
 import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
 
@@ -20,11 +18,7 @@ describe("Phase1Controller - validation de la query des listings de tâches", ()
     beforeAll(async () => {
         const module = await Test.createTestingModule({
             controllers: [Phase1Controller],
-            providers: [
-                { provide: SupprimerPlanDeTransport, useValue: {} },
-                { provide: SupprimerLigneDeBus, useValue: {} },
-                { provide: TaskGateway, useValue: taskGateway },
-            ],
+            providers: [{ provide: TaskGateway, useValue: taskGateway }],
         }).compile();
 
         app = module.createNestApplication();

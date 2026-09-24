@@ -28,12 +28,10 @@ import { gatewayProviders as phase1GatewayProviders } from "./infra/sejours/phas
 import { gatewayProviders as jeuneGatewayProviders } from "./infra/sejours/jeune/initProvider/gateway";
 import { guardProviders } from "./infra/sejours/cle/initProvider/guard";
 import { useCaseProvider as cleUseCaseProviders } from "@admin/infra/sejours/cle/initProvider/useCase";
-import { useCaseProvider as phase1UseCaseProviders } from "@admin/infra/sejours/phase1/initProvider/useCase";
 import { AdminTaskRepository } from "./infra/task/AdminTaskMongo.repository";
 import { AdminTaskController } from "./infra/task/api/AdminTask.controller";
 import { Phase1Controller } from "./infra/sejours/phase1/api/Phase1.controller";
 import { AffectationController } from "./infra/sejours/phase1/affectation/api/Affectation.controller";
-import { SimulationAffectationCLEService } from "./core/sejours/phase1/affectation/SimulationAffectationCLE.service";
 import { SimulationAffectationHTSService } from "./core/sejours/phase1/affectation/SimulationAffectationHTS.service";
 import { jeuneMongoProviders } from "./infra/sejours/jeune/provider/JeuneMongo.provider";
 import { centreMongoProviders } from "./infra/sejours/phase1/centre/provider/CentreMongo.provider";
@@ -62,8 +60,6 @@ import { BasculeJeuneValidesController } from "./infra/sejours/phase1/inscriptio
 import { InscriptionService } from "./core/sejours/phase1/inscription/Inscription.service";
 import { BasculeJeuneNonValidesController } from "./infra/sejours/phase1/inscription/api/BasculeJeuneNonValides.controller";
 import { DesistementController } from "./infra/sejours/phase1/desistement/api/Desistement.controller";
-import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
-import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
 import { AuthModule } from "../auth/Auth.module";
 import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
@@ -128,9 +124,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         AffectationService,
         InscriptionService,
         SimulationAffectationHTSService,
-        SimulationAffectationCLEService,
-        DesistementService,
-        ValiderDesisterPostAffectation,
         ExporterJeuneService,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -157,7 +150,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         { provide: ContactGateway, useClass: ContactProducer },
         { provide: TaskGateway, useClass: AdminTaskRepository },
         ...cleUseCaseProviders,
-        ...phase1UseCaseProviders,
         ...cleGatewayProviders,
         ...phase1GatewayProviders,
         ...jeuneGatewayProviders,

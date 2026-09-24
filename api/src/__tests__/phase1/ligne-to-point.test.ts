@@ -89,33 +89,4 @@ describe("Ligne To Point", () => {
       jest.restoreAllMocks();
     });
   });
-  describe("DELETE /:id", () => {
-    // Modifier la route pour valider id: Joi.string().length(24).hex().required() et mettre un id trop cour en param ????
-    it("should return 400 and INVALID_PARAMS code if id is not provided", async () => {
-      res = await request(await getAppHelperWithAcl())
-        .delete("/ligne-to-point/123")
-        .send();
-      expect(res.status).toBe(400);
-      expect(res.body).toStrictEqual({ ok: false, code: "INVALID_PARAMS" });
-    });
-
-    it("should return 404 and NOT_FOUND code if id does not exist", async () => {
-      res = await request(await getAppHelperWithAcl())
-        .delete(`/ligne-to-point/${notExistingMeetingPointId}`)
-        .send();
-      expect(res.status).toBe(404);
-      expect(res.body).toStrictEqual({ ok: false, code: "NOT_FOUND" });
-    });
-
-    it("should return 500 and SERVER_ERROR code on server error", async () => {
-      jest.spyOn(LigneToPointModel, "findById").mockRejectedValue(new Error("Mock server error"));
-      res = await request(await getAppHelperWithAcl())
-        .delete(`/ligne-to-point/${ligneToPoint._id}`)
-        .send();
-      expect(res.status).toBe(500);
-      expect(res.body).toStrictEqual({ ok: false, code: "SERVER_ERROR" });
-
-      jest.restoreAllMocks();
-    });
-  });
 });

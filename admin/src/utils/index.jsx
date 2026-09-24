@@ -281,7 +281,7 @@ function formatField(field) {
 }
 
 function formatValue(path, value) {
-  if (typeof value === 'boolean') {
+  if (typeof value === "boolean") {
     return value ? "Oui" : "Non";
   }
   if (!value) return "Vide";
@@ -330,12 +330,12 @@ export function createEvent(e, value, originalValue, role) {
 
 function filterEmptyValues(e) {
   const ignoredValues = [null, undefined, "", "Vide", "[]"];
-  
+
   const checkEmpty = (val) => {
-    if (typeof val === 'boolean') return false;
-    return !val || (typeof val === 'string' && !val.length) || ignoredValues.includes(val);
+    if (typeof val === "boolean") return false;
+    return !val || (typeof val === "string" && !val.length) || ignoredValues.includes(val);
   };
-  
+
   return checkEmpty(e.value) && checkEmpty(e.originalValue);
 }
 
@@ -455,15 +455,6 @@ export const debouncePromise = (func, delay) => {
       }
     });
   };
-};
-
-export const youngCheckinField = {
-  [ROLES.ADMIN]: "youngCheckinForAdmin",
-  [ROLES.HEAD_CENTER]: "youngCheckinForHeadOfCenter",
-  [ROLES.HEAD_CENTER_ADJOINT]: "youngCheckinForHeadOfCenter",
-  [ROLES.REFERENT_SANITAIRE]: "youngCheckinForHeadOfCenter",
-  [ROLES.REFERENT_REGION]: "youngCheckinForRegionReferent",
-  [ROLES.REFERENT_DEPARTMENT]: "youngCheckinForDepartmentReferent",
 };
 
 export const CDN_BASE_URL =

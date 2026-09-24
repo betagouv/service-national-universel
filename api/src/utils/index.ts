@@ -3,18 +3,16 @@ import https from "https";
 import http from "http";
 import passwordValidator from "password-validator";
 import sanitizeHtml from "sanitize-html";
-import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, SessionPhase1Model, MissionEquivalenceModel } from "../models";
+import { YoungModel, ReferentModel, ContractModel, PlanTransportModel, MeetingPointModel, ApplicationModel, MissionEquivalenceModel } from "../models";
 
 import { sendEmail, sendTemplate } from "../brevo";
 import path from "path";
 import fs from "fs";
-import { addDays } from "date-fns";
 import { config } from "../config";
 import { logger } from "../logger";
 import { YOUNG_STATUS_PHASE2, SENDINBLUE_TEMPLATES, YOUNG_STATUS, APPLICATION_STATUS, ROLES, SUB_ROLES, EQUIVALENCE_STATUS, ReferentStatus } from "snu-lib";
 import { capture, captureMessage } from "../sentry";
 import dayjs from "dayjs";
-import { getCohortIdsFromCohortName } from "../cohort/cohortService";
 
 // Timeout a promise in ms
 export const timeout = (prom, time) => {
@@ -260,35 +258,6 @@ export const deleteCenterDependencies = async (center, fromUser) => {
     meetingPoint.set({ centerId: undefined, centerCode: undefined });
     await meetingPoint.save({ fromUser });
   });
-};
-
-export const updatePlacesBus = async (bus) => {
-  try {
-    const meetingPoints = await MeetingPointModel.find({ busId: bus.id, cohort: bus.cohort });
-    if (!meetingPoints?.length) {
-      logger.warn("meetingPoints not found");
-      return;
-    }
-    const idsMeetingPoints = meetingPoints.map((e) => e._id);
-    const youngs = await YoungModel.find({
-      status: "VALIDATED",
-      meetingPointId: {
-        $in: idsMeetingPoints,
-      },
-    });
-    const placesTaken = youngs.filter(
-      (young) => (["AFFECTED", "DONE"].includes(young.statusPhase1) || ["AFFECTED", "DONE"].includes(young.statusPhase1Tmp!)) && young.status === "VALIDATED",
-    ).length;
-    const placesLeft = Math.max(0, bus.capacity - placesTaken);
-    if (bus.placesLeft !== placesLeft) {
-      logger.debug(`Bus ${bus.id}: total ${bus.capacity}, left from ${bus.placesLeft} to ${placesLeft}`);
-      bus.set({ placesLeft });
-      await bus.save();
-    }
-  } catch (e) {
-    capture(e);
-  }
-  return bus;
 };
 
 export async function updateSeatsTakenInBusLine(busline) {
@@ -679,14 +648,6 @@ export async function notifDepartmentChange(department, template, young, extraPa
   }
 }
 
-export async function addingDayToDate(days, dateStart) {
-  const startDate = new Date(dateStart);
-  const newDate = addDays(startDate, days);
-  const formattedValidationDate = newDate.toISOString();
-
-  return formattedValidationDate;
-}
-
 export const getReferentManagerPhase2 = async (department) => {
   let toReferent = await ReferentModel.find({
     subRole: SUB_ROLES.manager_phase2,
@@ -764,23 +725,6 @@ export const updateYoungApplicationFilesType = async (application, user) => {
   } catch (e) {
     capture(e);
   }
-};
-
-export const updateHeadCenter = async (headCenterId, user) => {
-  const headCenter = await ReferentModel.findById(headCenterId);
-  if (!headCenter) return;
-  const sessions = await SessionPhase1Model.find({ headCenterId }, { cohort: 1 });
-  const cohorts = new Set(sessions.map((s) => s.cohort!));
-  const cohortIds = await getCohortIdsFromCohortName([...cohorts]);
-  headCenter.set({ cohorts: [...cohorts], cohortIds: cohortIds });
-  await headCenter.save({ fromUser: user });
-};
-
-export const getTransporter = async () => {
-  let toReferent = await ReferentModel.find({
-    role: ROLES.TRANSPORTER,
-  });
-  return toReferent;
 };
 
 // TODO: move to snu-lib

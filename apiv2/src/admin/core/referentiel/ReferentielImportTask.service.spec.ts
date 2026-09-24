@@ -60,7 +60,7 @@ describe("ReferentielImportTaskService", () => {
         };
 
         const mockImportParams = {
-            importType: ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES,
+            importType: ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES as const,
             fileName: "fileName",
             buffer: Buffer.from("test"),
             mimetype: "mimetype",
@@ -97,7 +97,7 @@ describe("ReferentielImportTaskService", () => {
             ]);
             await expect(
                 referentielImportTaskService.import({
-                    importType: ReferentielTaskType.IMPORT_ROUTES,
+                    importType: ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES,
                     fileName: "fileName",
                     buffer: Buffer.from("test"),
                     mimetype: "mimetype",

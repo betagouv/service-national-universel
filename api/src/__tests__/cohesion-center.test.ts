@@ -1,12 +1,10 @@
 import request from "supertest";
 import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import getNewYoungFixture from "./fixtures/young";
 import getAppHelper, { resetAppAuth } from "./helpers/app";
-import { notExistingCohesionCenterId, createCohesionCenter, createCohesionCenterWithSession } from "./helpers/cohesionCenter";
+import { notExistingCohesionCenterId, createCohesionCenter } from "./helpers/cohesionCenter";
 import { dbConnect, dbClose } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
-import { ROLES } from "snu-lib";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -89,35 +87,5 @@ describe("Cohesion Center", () => {
         .send();
       expect(res.status).toBe(403);
     });
-  });
-
-  describe("DELETE /cohesion-center/:id", () => {
-    it("should return 404 when cohesion center is not found", async () => {
-      const res = await request(getAppHelper())
-        .delete("/cohesion-center/" + notExistingCohesionCenterId)
-        .send();
-      expect(res.status).toBe(404);
-    });
-    it("should return 404 when center has sessions", async () => {
-      const cohesionCenter = await createCohesionCenterWithSession(getNewCohesionCenterFixture(), getNewSessionPhase1Fixture());
-      const res = await request(getAppHelper())
-        .delete("/cohesion-center/" + cohesionCenter._id)
-        .send();
-      expect(res.status).toBe(400);
-    });
-    it("should return 200 when cohesion center is found", async () => {
-      const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-      const res = await request(getAppHelper())
-        .delete("/cohesion-center/" + cohesionCenter._id)
-        .send();
-      expect(res.status).toBe(200);
-    });
-  });
-  it("should be only allowed to admin", async () => {
-    const cohesionCenter = await createCohesionCenter(getNewCohesionCenterFixture());
-    const res = await request(getAppHelper({ role: ROLES.RESPONSIBLE }))
-      .delete("/cohesion-center/" + cohesionCenter._id)
-      .send();
-    expect(res.status).toBe(403);
   });
 });

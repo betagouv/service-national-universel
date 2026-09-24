@@ -2,7 +2,7 @@ import { GRADES } from "snu-lib";
 
 import { TaskModel } from "@task/core/Task.model";
 
-import { SimulationAffectationHTSResult } from "./SimulationAffectationHTS";
+import { Analytics } from "./SimulationAffectationHTS.service";
 
 export interface SimulationAffectationHTSTaskParameters {
     sessionId: string;
@@ -14,7 +14,7 @@ export interface SimulationAffectationHTSTaskParameters {
 }
 
 export type SimulationAffectationHTSTaskResult = Pick<
-    SimulationAffectationHTSResult["analytics"],
+    Analytics,
     | "selectedCost"
     | "iterationCostList"
     | "jeunesNouvellementAffected"

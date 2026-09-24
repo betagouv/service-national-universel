@@ -88,7 +88,9 @@ export function validateStructure(structure) {
       name: Joi.string().allow(null, ""),
       siret: Joi.string().allow(null, ""),
       // Texte libre rendu en HTML sur la fiche mission de moncompte (FH1).
-      description: Joi.string().allow(null, "").custom((value) => sanitizeStoredHtml(value)),
+      description: Joi.string()
+        .allow(null, "")
+        .custom((value) => sanitizeStoredHtml(value)),
       website: Joi.string().allow(null, ""),
       facebook: Joi.string().allow(null, ""),
       twitter: Joi.string().allow(null, ""),
@@ -330,52 +332,6 @@ export function validateNewCohesionCenter(application) {
 
 export function validateUpdateCohesionCenter(application) {
   return Joi.object().keys(cohesionCenterKeys()).validate(application, { stripUnknown: true });
-}
-
-const sessionPhase1Keys = {
-  cohesionCenterId: Joi.string().allow(null, ""),
-  headCenterId: Joi.string().allow(null, ""),
-  cohort: Joi.string().allow(null, ""),
-  userId: Joi.string().allow(null, ""),
-  team: Joi.array().items(Joi.any().allow(null, "")),
-  waitingList: Joi.array().items(Joi.string().allow(null, "")),
-  placesTotal: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  placesLeft: Joi.alternatives().try(Joi.string().allow(null, ""), Joi.number().allow(null)),
-  dateStart: Joi.date().allow(null),
-  dateEnd: Joi.date().allow(null),
-  sanitaryContactEmail: Joi.string().allow(null, ""),
-};
-
-/**
- * Champs modifiables par `PUT /session-phase1/:id`. Le centre, la cohorte, le chef de centre,
- * la liste d'attente et l'équipe passent par leurs routes dédiées ; `placesLeft` est recalculé.
- */
-export function validateSessionPhase1Update(session) {
-  return Joi.object()
-    .keys({
-      placesTotal: sessionPhase1Keys.placesTotal,
-      dateStart: sessionPhase1Keys.dateStart,
-      dateEnd: sessionPhase1Keys.dateEnd,
-      sanitaryContactEmail: sessionPhase1Keys.sanitaryContactEmail,
-    })
-    .validate(session, { stripUnknown: true });
-}
-
-const sessionPhase1TeamMemberKeys = {
-  firstName: Joi.string().trim().max(100).allow(null, ""),
-  lastName: Joi.string().trim().max(100).allow(null, ""),
-  role: Joi.string().trim().max(100).allow(null, ""),
-  // Pas de `.email()` : des équipes existantes portent des adresses mal formées, qu'un
-  // réenregistrement de l'équipe ne doit pas rendre impossible.
-  email: Joi.string().trim().max(200).allow(null, ""),
-  phone: Joi.string().trim().max(30).allow(null, ""),
-};
-
-/** `team` : membres typés, les clés inconnues (dont `_id`) sont retirées. */
-export function validateSessionPhase1Team(body) {
-  return Joi.object({
-    team: Joi.array().items(Joi.object(sessionPhase1TeamMemberKeys)).max(200).required(),
-  }).validate(body, { stripUnknown: true });
 }
 
 export function validateYoung(young: YoungDto) {
@@ -741,32 +697,6 @@ export function validateSelf(referent) {
       mobile: Joi.string().allow(null, ""),
     })
     .validate(referent, { stripUnknown: true });
-}
-
-export function validatePhase1Document(phase1document, key) {
-  switch (key) {
-    case "imageRight":
-      // Pas de `imageRight` : le jeune ne dépose que les pièces ; le drapeau effectif est fixé par un
-      // référent à la vérification (audit 2026-09-21, M49). `stripUnknown` pour ne pas rejeter un
-      // client qui l'enverrait encore.
-      return Joi.object({
-        imageRightFiles: Joi.array().items(Joi.string().required()).required().min(1),
-      }).validate(phase1document, { stripUnknown: true });
-    case "agreement":
-      return Joi.object({
-        youngPhase1Agreement: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    case "cohesionStayMedical":
-      return Joi.object({
-        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    case "convocation":
-      return Joi.object({
-        convocationFileDownload: Joi.string().trim().required().valid("true"),
-      }).validate(phase1document);
-    default:
-      return { value: null, error: { key: "unknow " + key } };
-  }
 }
 
 export function validatePhase2Preference(preferences) {

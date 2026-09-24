@@ -11,7 +11,6 @@ import { FunctionalExceptionCode } from "@shared/core/FunctionalException";
 import { FileProvider } from "@shared/infra/File.provider";
 import { ConfigService } from "@nestjs/config";
 import { ClockGateway } from "@shared/core/Clock.gateway";
-import { ReferentielClasseService } from "@admin/core/referentiel/classe/ReferentielClasse.service";
 import { ReferentielService } from "@admin/core/referentiel/Referentiel.service";
 import { NotificationGateway } from "@notification/core/Notification.gateway";
 import { pipesGlobaux } from "@shared/infra/ObjectIdParams.pipe";
@@ -48,7 +47,6 @@ describe("ImportReferentielController", () => {
             controllers: [ImportReferentielController],
             providers: [
                 ConfigService,
-                ReferentielClasseService,
                 ReferentielImportTaskService,
                 ReferentielService,
                 { provide: NotificationGateway, useValue: mockNotificationGateway },
@@ -200,6 +198,29 @@ describe("ImportReferentielController", () => {
             });
         });
 
+        describe("422 - imports phase 1 supprimés", () => {
+            it.each([
+                [ReferentielTaskType.IMPORT_ROUTES, "routes.xlsx"],
+                [ReferentielTaskType.IMPORT_CLASSES, "classes.xlsx"],
+                [ReferentielTaskType.IMPORT_DESISTER_CLASSES, "classes.xlsx"],
+                [ReferentielTaskType.IMPORT_DESISTER_CLASSES_ET_IMPORTER_CLASSES, "classes.xlsx"],
+            ])("refuse l'import %s sans créer de tâche", async (name, fixture) => {
+                const testFile = require("fs").readFileSync(`./test/admin/referentiel/fixtures/${fixture}`);
+
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${name}`)
+                    .attach("file", testFile, {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(422);
+                expect(response.body.message).toEqual(FunctionalExceptionCode.IMPORT_NOT_VALID);
+                expect(fileGateway.uploadFile).not.toHaveBeenCalled();
+                expect(taskGateway.create).not.toHaveBeenCalled();
+            });
+        });
+
         describe("403 - Forbidden", () => {
             it(`Invalid roles`, async () => {
                 const invalidRoles = [
@@ -258,32 +279,6 @@ describe("ImportReferentielController", () => {
 
                 const response = await request(app.getHttpServer())
                     .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES}`)
-                    .attach("file", testFile, {
-                        filename: "test.xlsx",
-                        contentType: MIME_TYPES.EXCEL,
-                    });
-
-                expect(response.statusCode).toEqual(201);
-            });
-
-            it(`imports ROUTES`, async () => {
-                const testFile = require("fs").readFileSync("./test/admin/referentiel/fixtures/routes.xlsx");
-                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
-                    Location: "test",
-                    ETag: "test",
-                    Bucket: "test",
-                    Key: "test",
-                });
-                jest.spyOn(taskGateway, "create").mockResolvedValue({
-                    id: "task-id",
-                    name: TaskName.REFERENTIEL_IMPORT,
-                    status: TaskStatus.PENDING,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                });
-
-                const response = await request(app.getHttpServer())
-                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_ROUTES}`)
                     .attach("file", testFile, {
                         filename: "test.xlsx",
                         contentType: MIME_TYPES.EXCEL,

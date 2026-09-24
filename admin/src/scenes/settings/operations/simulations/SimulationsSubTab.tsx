@@ -1,6 +1,5 @@
 import React, { useMemo, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { HiPlay } from "react-icons/hi";
 import { useLocation } from "react-router-dom";
 
 import { CohortDto, formatDateFR, getZonedDate, Phase1Routes, TaskName, translateSimulationName, translateTaskStatus } from "snu-lib";
@@ -12,17 +11,10 @@ import ActionCell from "../components/ActionCell";
 import StatusCell from "../components/StatusCell";
 import RapportCell from "../components/RapportCell";
 import SimulationHtsResultCell from "./affectationHts/SimulationHtsResultCell";
-import SimulationHtsResultStartButton from "./affectationHts/SimulationHtsResultStartButton";
 import SimulationCleResultCell from "./affectationCle/SimulationCleResultCell";
-import SimulationCleResultStartButton from "./affectationCle/SimulationCleResultStartButton";
-import BasculeJeuneValidesStartButton from "./basculeJeune/BasculeJeuneValidesStartButton";
-import BasculeJeuneNonValidesStartButton from "./basculeJeune/BasculeJeuneNonValidesStartButton";
 import BasculeJeuneCell from "./basculeJeune/BasculeJeuneCell";
-import SimulationCleDromComResultStartButton from "./affectationCle/SimulationCleDromComResultStartButton";
 import SimulationHtsDromComResultCell from "./affectationHts/SimulationHtsDromComResultCell";
-import SimulationHtsDromComResultStartButton from "./affectationHts/SimulationHtsDromComResultStartButton";
 import DesistementResultCell from "./desistement/DesistementResultCell";
-import DesistementStartButton from "./desistement/DesistementStartButton";
 import DesistementActionCell from "./desistement/DesistementActionCell";
 
 interface SimulationsSubTabProps {
@@ -127,29 +119,6 @@ export default function SimulationsSubTab({ session }: SimulationsSubTabProps) {
             key: "rapportKey",
             title: "Simulat.",
             renderCell: RapportCell,
-          },
-          {
-            key: "lancer",
-            title: "Lancer",
-            renderCell: (simulation) => {
-              switch (simulation.name) {
-                case TaskName.AFFECTATION_HTS_SIMULATION:
-                  return <SimulationHtsResultStartButton simulation={simulation} />;
-                case TaskName.AFFECTATION_HTS_DROMCOM_SIMULATION:
-                  return <SimulationHtsDromComResultStartButton simulation={simulation} />;
-                case TaskName.AFFECTATION_CLE_SIMULATION:
-                  return <SimulationCleResultStartButton simulation={simulation} />;
-                case TaskName.AFFECTATION_CLE_DROMCOM_SIMULATION:
-                  return <SimulationCleDromComResultStartButton simulation={simulation} />;
-                case TaskName.BACULE_JEUNES_VALIDES_SIMULATION:
-                  return <BasculeJeuneValidesStartButton simulation={simulation} />;
-                case TaskName.BACULE_JEUNES_NONVALIDES_SIMULATION:
-                  return <BasculeJeuneNonValidesStartButton simulation={simulation} />;
-                case TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION:
-                  return <DesistementStartButton simulation={simulation} />;
-              }
-              return <HiPlay className="text-gray-400" size={50} />;
-            },
           },
         ]}
       />

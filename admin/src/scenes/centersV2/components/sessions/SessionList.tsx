@@ -1,14 +1,10 @@
-import React, { useState } from "react";
+import React from "react";
 import { useHistory } from "react-router-dom";
 import { useSelector } from "react-redux";
 
-import { toastr } from "react-redux-toastr";
+import { Container, InputNumber, Label } from "@snu/ds/admin";
 
-import { Container, InputText, InputNumber, Label } from "@snu/ds/admin";
-
-import { canPutSpecificDateOnSessionPhase1, CohesionCenterType, ROLES, isAdmin, isSessionEditionOpen, isSuperAdmin } from "snu-lib";
-import { capture } from "@/sentry";
-import api from "@/services/api";
+import { CohesionCenterType } from "snu-lib";
 import dayjs from "@/utils/dayjs.utils";
 
 import { CohortState } from "@/redux/cohorts/reducer";
@@ -27,17 +23,11 @@ import SessionVolontairesButton from "./SessionVolontairesButton";
 
 type Props = {
   center: CohesionCenterType;
-  onCenterChange: React.Dispatch<React.SetStateAction<CohesionCenterType>>;
   sessions: Session[];
-  onSessionsChange: React.Dispatch<React.SetStateAction<Session[]>>;
-  onRefetchSessions: () => void;
 };
 
-type Errors = {
-  [key: string]: string;
-};
-
-export default function SessionList({ center, onCenterChange, sessions, onSessionsChange, onRefetchSessions }: Props) {
+// Consultation seule : la modification des sessions (places, dates spécifiques) a été supprimée.
+export default function SessionList({ center, sessions }: Props) {
   const history = useHistory();
   const cohorts = useSelector((state: CohortState) => state.Cohorts);
   const user = useSelector((state: AuthState) => state.Auth.user);
@@ -45,74 +35,8 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
   const cohortParam = new URLSearchParams(location.search).get("cohorte");
   const session = cohortParam ? sessions.find((session) => session.cohort === cohortParam) : getDefaultSession(sessions, cohorts);
   const cohort = cohorts.find((cohort) => cohort.name === session?.cohort);
-  const setSession = (newSession: Session) => onSessionsChange(sessions.map((session) => (session._id === newSession._id ? newSession : session)));
-
-  const [values, setValues] = useState<Session | null>(null);
-  const [errors, setErrors] = useState<Errors>({});
 
   if (!session || !cohort) return <div></div>;
-
-  const isEditionAllowed = isSessionEditionOpen(user, cohort);
-
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    if (!values) return;
-
-    const errorsObject: Errors = {};
-    if (isNaN(values.placesTotal)) {
-      errorsObject.placesTotal = "Le nombre de places est incorrect";
-    } else if (values.placesTotal < session.placesTotal - session.placesLeft) {
-      errorsObject.placesTotal = "Le nombre de places total est inférieur au nombre d'inscrits";
-    }
-    if (values.dateStart && values.dateEnd && new Date(values.dateStart) > new Date(values.dateEnd)) {
-      errorsObject.date = "La date de début doit être antérieure à la date de fin";
-    }
-
-    if (Object.keys(errorsObject).length > 0) {
-      setErrors(errorsObject);
-      return;
-    }
-
-    // Restriction d'édition en fonction du rôle de l'utilisateur et de l'état de la session
-    const dataToSend: Partial<Session> | null = values;
-
-    if (!isEditionAllowed) {
-      // Vérification supplémentaire pour bloquer la soumission si l'assignement est ouvert pour les jeunes
-      if (cohort.isAssignmentAnnouncementsOpenForYoung) {
-        toastr.error("Vous ne pouvez pas modifier cette session pour le moment.", "OPERATION_UNAUTHORIZED");
-        return;
-      }
-    }
-
-    try {
-      const { ok, code, data } = await api.put(`/session-phase1/${session._id}`, dataToSend);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification du centre", code || "");
-
-        return;
-      }
-      toastr.success("La session a bien été modifiée avec succès", "");
-      setSession(data);
-      setValues(null);
-      setErrors({});
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification du centre", "");
-    }
-  };
-
-  const handleToggleDate = () => {
-    if (!values) return;
-    if (values.dateStart && values.dateEnd) {
-      setValues({ ...values, dateStart: null, dateEnd: null });
-    } else {
-      setValues({
-        ...values,
-        dateStart: session?.dateStart || cohort?.dateStart?.toString() || new Date().toString(),
-        dateEnd: session?.dateEnd || cohort?.dateEnd?.toString() || new Date().toString(),
-      });
-    }
-  };
 
   const handleSelect = (cohortName: string) => {
     history.push(`?cohorte=${cohortName}`);
@@ -122,7 +46,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
 
   return (
     <div className="mx-8 my-4 space-y-4">
-      <form onSubmit={handleSubmit} id="session-form">
+      <div>
         <div className="flex items-center justify-between mb-3">
           <Title>Par séjour</Title>
           {!cannotSelectSEssion && (
@@ -149,19 +73,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                     name="placesTotal"
                     tooltip="C’est le nombre de places proposées sur un séjour. Cette donnée doit être inférieure ou égale à la capacité maximale d’accueil, elle ne peut lui être supérieure."
                   />
-                  <InputNumber
-                    label=""
-                    name="placesTotal"
-                    value={values ? values?.placesTotal : session.placesTotal}
-                    onChange={(e) => {
-                      const inputValue = e.target.value;
-                      const parsedValue = parseInt(inputValue, 10);
-                      if (values) setValues({ ...values, placesTotal: parsedValue });
-                    }}
-                    readOnly={!values}
-                    disabled={!isEditionAllowed}
-                  />
-                  {errors?.placesTotal && <div className="text-[#EF4444] mx-auto mt-1">{errors?.placesTotal}</div>}
+                  <InputNumber label="" name="placesTotal" value={session.placesTotal} onChange={() => {}} readOnly={true} />
                 </div>
               </div>
             </div>
@@ -186,31 +98,28 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
                     </p>
                     <p className="text-left text-xs text-gray-500"></p>
                   </div>
-                  {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
                 </div>
               </div>
               <div className="flex flex-col w-full">
                 <ToggleDate
                   label="Dates spécifiques"
-                  className={`border ${!isEditionAllowed || !canPutSpecificDateOnSessionPhase1(user) ? "bg-gray-50" : "bg-white"}`}
+                  className="border bg-gray-50"
                   tooltipText={
                     <p>
                       Les dates de cette session diffèrent des dates officielles :{" "}
                       <strong>{`${dayjs(cohort?.dateStart).format("DD")} - ${dayjs(cohort?.dateEnd).format("DD MMMM YYYY")}`}</strong>.
                     </p>
                   }
-                  disabled={!isEditionAllowed || !canPutSpecificDateOnSessionPhase1(user)}
-                  value={values ? !!values?.dateStart : !!session.dateStart}
-                  onChange={handleToggleDate}
+                  disabled={true}
+                  readOnly={true}
+                  value={!!session.dateStart}
+                  onChange={() => {}}
                   range={{
-                    from: values?.dateStart || session.dateStart,
-                    to: values?.dateEnd || session.dateEnd,
+                    from: session.dateStart,
+                    to: session.dateEnd,
                   }}
-                  onChangeRange={(range: { to: string; from: string }) => {
-                    if (values) setValues({ ...values, dateStart: range?.from, dateEnd: range?.to });
-                  }}
+                  onChangeRange={() => {}}
                 />
-                {errors?.date && <div className="text-[#EF4444] mx-auto mt-1">{errors?.date}</div>}
               </div>
               <div className="flex mt-8 text-blue-600">
                 <div className="flex max-w-xl flex-1 flex-col items-center justify-between gap-2 bg-white">
@@ -220,7 +129,7 @@ export default function SessionList({ center, onCenterChange, sessions, onSessio
             </div>
           </div>
         </Container>
-      </form>
+      </div>
     </div>
   );
 }

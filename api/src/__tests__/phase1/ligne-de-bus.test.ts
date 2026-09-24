@@ -7,11 +7,8 @@ import {
   LigneToPointModel,
   CohesionCenterModel,
   YoungModel,
-  CohortModel,
   LigneBusModel,
-  PlanTransportModel,
   PointDeRassemblementModel,
-  SessionPhase1Model,
 } from "../models";
 import { dbConnect, dbClose, mockTransaction } from "./helpers/db";
 import { createYoungHelper } from "./helpers/young";
@@ -20,14 +17,7 @@ import { createPointDeRassemblementWithBus } from "./helpers/PlanDeTransport/poi
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getBusTeamFixture from "./fixtures/busTeam";
-import { ERRORS, PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
-import { sendTemplate } from "../brevo";
-import getNewLigneToPointFixture from "./fixtures/PlanDeTransport/ligneToPoint";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
-import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
-import getNewCohortFixture from "./fixtures/cohort";
-import getPlanDeTransportFixture from "./fixtures/PlanDeTransport/planDeTransport";
-import * as ligneDeBusService from "../planDeTransport/ligneDeBus/ligneDeBusService";
+import { PERMISSION_ACTIONS, PERMISSION_RESOURCES, ROLES } from "snu-lib";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 
@@ -82,10 +72,6 @@ const mockModelMethodWithError = (model, method) => {
   });
 };
 
-// jest.mock("../planDeTransport/ligneDeBus/ligneDeBusService", () => ({
-//   updatePDRForLine: jest.fn(),
-// }));
-
 jest.mock("../brevo", () => ({
   sendTemplate: jest.fn(),
 }));
@@ -93,11 +79,6 @@ jest.mock("../brevo", () => ({
 jest.mock("../utils/es-serializer", () => ({
   serializeYoungs: jest.fn().mockReturnValue([{ ligneId: "ligneId", firstName: "John", lastName: "Doe" }]),
 }));
-
-const userSuperAdmin = {
-  role: ROLES.ADMIN,
-  subRole: "god",
-};
 
 beforeAll(async () => {
   await dbConnect(__filename.slice(__dirname.length + 1, -3));
@@ -620,222 +601,6 @@ describe.skip("LigneDeBus", () => {
       expect(res.body.code).toBe("SERVER_ERROR");
 
       jest.spyOn(LigneBusModel, "findOne").mockRestore();
-    });
-  });
-  describe("PUT /:id/info", () => {
-    afterEach(async () => {
-      await Promise.all([LigneBusModel.deleteMany(), CohortModel.deleteMany(), PlanTransportModel.deleteMany()]);
-    });
-    it("should return 403 when the user is not authorized", async () => {
-      const user = { _id: "123", role: "transporter" };
-
-      const ligneBus = await LigneBusModel.create(
-        getNewLigneBusFixture({
-          cohort: "Février 2023 - C",
-        }),
-      );
-
-      await ligneBus.save();
-
-      const res = await request(await getAppHelperWithAcl(user))
-        .put(`/ligne-de-bus/${ligneBus._id}/info`)
-        .send({
-          busId: "new_bus_id",
-          departuredDate: new Date(),
-          returnDate: new Date(),
-          youngCapacity: 15,
-          totalCapacity: 25,
-          followerCapacity: 5,
-          travelTime: "02:00",
-          lunchBreak: false,
-          lunchBreakReturn: false,
-          delayedForth: "00:10",
-          delayedBack: "00:15",
-        });
-
-      expect(res.status).toBe(403);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("OPERATION_UNAUTHORIZED");
-    });
-
-    it("should return 404 when the ligneBus with the given id is not found", async () => {
-      const user = { _id: "1234", role: "admin" };
-
-      const res = await request(await getAppHelperWithAcl(user))
-        .put(`/ligne-de-bus/123456789012345678901234/info`)
-        .send({
-          busId: "new_bus_id",
-          departuredDate: new Date(),
-          returnDate: new Date(),
-          youngCapacity: 15,
-          totalCapacity: 25,
-          followerCapacity: 5,
-          travelTime: "02:00",
-          lunchBreak: false,
-          lunchBreakReturn: false,
-          delayedForth: "00:10",
-          delayedBack: "00:15",
-        });
-
-      expect(res.status).toBe(404);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("NOT_FOUND");
-    });
-
-    it("should return 500 when there's an error", async () => {
-      const user = { _id: "123", role: "admin" };
-
-      const ligneBus = await LigneBusModel.create(
-        getNewLigneBusFixture({
-          cohort: "Février 2023 - C",
-        }),
-      );
-
-      await ligneBus.save();
-
-      jest.spyOn(LigneBusModel, "findById").mockImplementation(() => {
-        throw new Error("test error");
-      });
-
-      const res = await request(await getAppHelperWithAcl(user))
-        .put(`/ligne-de-bus/${ligneBus._id}/info`)
-        .send({
-          busId: "new_bus_id",
-          departuredDate: new Date(),
-          returnDate: new Date(),
-          youngCapacity: 15,
-          totalCapacity: 25,
-          followerCapacity: 5,
-          travelTime: "02:00",
-          lunchBreak: false,
-          lunchBreakReturn: false,
-          delayedForth: "00:10",
-          delayedBack: "00:15",
-        });
-
-      expect(res.status).toBe(500);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("SERVER_ERROR");
-
-      jest.spyOn(LigneBusModel, "findById").mockRestore();
-    });
-  });
-
-  describe("PUT /:id/updatePDRForLine", () => {
-    let cohort;
-    let center;
-    let sessionPhase1;
-    let meetingPoint1;
-    let meetingPoint2;
-    let ligneBus;
-    let ligneToPoint;
-    let planDeTransport;
-    let payload;
-
-    beforeAll(async () => {
-      cohort = await CohortModel.create(getNewCohortFixture());
-      center = await CohesionCenterModel.create(getNewCohesionCenterFixture());
-      sessionPhase1 = await SessionPhase1Model.create(getNewSessionPhase1Fixture({ cohortId: cohort._id, cohesionCenterId: center._id }));
-      meetingPoint1 = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
-      meetingPoint2 = await PointDeRassemblementModel.create(getNewPointDeRassemblementFixture());
-      ligneBus = await LigneBusModel.create(
-        getNewLigneBusFixture({ cohort: cohort.name, cohortId: cohort._id, centerId: center._id, sessionId: sessionPhase1._id, meetingPointsIds: [meetingPoint1._id] }),
-      );
-      ligneToPoint = await LigneToPointModel.create({ ...getNewLigneToPointFixture(), lineId: ligneBus._id, meetingPointId: meetingPoint1._id });
-      planDeTransport = await PlanTransportModel.create({
-        ...getPlanDeTransportFixture({
-          busId: ligneBus._id,
-          centerId: center._id,
-          cohortId: cohort._id,
-          cohort: cohort.name,
-        }),
-        _id: new ObjectId(ligneBus._id),
-      });
-      planDeTransport.pointDeRassemblements.push({
-        meetingPointId: meetingPoint1._id,
-        ...meetingPoint1._doc,
-        busArrivalHour: ligneToPoint.busArrivalHour,
-        meetingHour: ligneToPoint.meetingHour,
-        departureHour: ligneToPoint.departureHour,
-        returnHour: ligneToPoint.returnHour,
-        transportType: ligneToPoint.transportType,
-      });
-      await planDeTransport.save();
-      payload = {
-        transportType: "bus",
-        meetingHour: "08:00",
-        busArrivalHour: "07:30",
-        departureHour: "08:30",
-        returnHour: "18:00",
-        meetingPointId: meetingPoint1._id,
-        newMeetingPointId: meetingPoint2._id,
-        sendEmailCampaign: false,
-      };
-    });
-
-    it("should return 403 if user is not an admin or a transporter", async () => {
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_DEPARTMENT }))
-        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
-        .send(payload);
-
-      expect(res.status).toBe(403);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe(ERRORS.OPERATION_UNAUTHORIZED);
-    });
-
-    it("should return 404 if ligne bus is not found", async () => {
-      const fakeLigneBus = new LigneBusModel(getNewLigneBusFixture());
-      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
-        .put(`/ligne-de-bus/${fakeLigneBus._id}/updatePDRForLine`)
-        .send(payload);
-
-      expect(res.status).toBe(404);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("NOT_FOUND");
-    });
-
-    it("should return 400 if meeting hour is after departure hour", async () => {
-      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
-        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
-        .send({ ...payload, meetingHour: "09:00", departureHour: "08:30" });
-
-      expect(res.status).toBe(400);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("INVALID_BODY");
-    });
-
-    it("should return 400 if bus arrival hour is after departure hour", async () => {
-      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
-        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
-        .send({ ...payload, busArrivalHour: "09:00", departureHour: "08:30" });
-
-      expect(res.status).toBe(400);
-      expect(res.body.ok).toBe(false);
-      expect(res.body.code).toBe("INVALID_BODY");
-    });
-
-    it("should update PDR for line successfully", async () => {
-      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
-        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
-        .send(payload);
-
-      expect(res.status).toBe(200);
-      expect(res.body.ok).toBe(true);
-      expect(res.body.data).toBeDefined();
-      expect(res.body.data.meetingPointsIds).toStrictEqual([meetingPoint2._id.toString()]);
-    });
-
-    it("should send email campaign when sendEmailCampaign is true", async () => {
-      const updatePDRForLineSpy = jest.spyOn(ligneDeBusService, "updatePDRForLine").mockResolvedValue(ligneBus);
-      (sendTemplate as jest.Mock).mockResolvedValue({});
-      const res = await request(await getAppHelperWithAcl(userSuperAdmin))
-        .put(`/ligne-de-bus/${ligneBus._id}/updatePDRForLine`)
-        .send({ ...payload, sendEmailCampaign: true });
-
-      expect(res.status).toBe(200);
-      expect(res.body.ok).toBe(true);
-      expect(updatePDRForLineSpy).toHaveBeenCalledWith(ligneBus._id.toString(), expect.objectContaining({ sendEmailCampaign: true }), expect.objectContaining(userSuperAdmin));
-      updatePDRForLineSpy.mockRestore();
     });
   });
 });

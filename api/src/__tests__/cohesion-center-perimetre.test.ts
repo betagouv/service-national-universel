@@ -6,7 +6,7 @@ import { dbConnect, dbClose } from "./helpers/db";
 import { createSessionPhase1 } from "./helpers/sessionPhase1";
 import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import { getNewCohesionCenterFixture, getNewCohesionCenterFixtureV2 } from "./fixtures/cohesionCenter";
-import { CohesionCenterModel, SessionPhase1Model } from "../models";
+import { CohesionCenterModel } from "../models";
 
 jest.mock("../brevo", () => ({
   ...jest.requireActual("../brevo"),
@@ -62,22 +62,6 @@ describe("Centres de cohésion — périmètre (lot K2)", () => {
 
       const inchange = await CohesionCenterModel.findById(center._id);
       expect(inchange?.name).toBe(center.name);
-    });
-
-    it("PUT /:id/session-phase1 est refusé hors périmètre et au transporteur", async () => {
-      const center = await createCenter();
-      for (const user of refusesHorsPerimetre()) {
-        const res = await request(getAppHelper(user)).put(`/cohesion-center/${center._id}/session-phase1`).send({ cohort: "k2-m10-refus", placesTotal: 5 });
-        expect(res.status).toBe(403);
-      }
-      expect(await SessionPhase1Model.countDocuments({ cohesionCenterId: center._id.toString() })).toBe(0);
-    });
-
-    it("PUT /:id/session-phase1 reste ouvert au référent du périmètre", async () => {
-      const center = await createCenter();
-      const res = await request(getAppHelper(referentDuPerimetre())).put(`/cohesion-center/${center._id}/session-phase1`).send({ cohort: "k2-m10-ok", placesTotal: 5 });
-      expect(res.status).toBe(200);
-      expect(res.body.data.cohesionCenterId).toBe(center._id.toString());
     });
   });
 

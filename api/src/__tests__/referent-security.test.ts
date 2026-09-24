@@ -670,41 +670,6 @@ describe("Sécurité référent — audit 2026-09-21", () => {
     });
   });
 
-  describe("M69 — PUT /referent/young/:id/phase1Status/:document", () => {
-    it("refuse un référent départemental hors du département du jeune", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ department: "Paris", region: "Ile-de-France" }));
-      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
-
-      const res = await request(await getAppHelperWithAcl(actor))
-        .put(`/referent/young/${young._id}/phase1Status/cohesionStayMedical`)
-        .send({ cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" });
-
-      expect(res.statusCode).toEqual(403);
-    });
-
-    it("autorise un référent départemental du département du jeune", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ department: "Sarthe", region: "Pays de la Loire" }));
-      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Sarthe"], region: "Pays de la Loire" };
-
-      const res = await request(await getAppHelperWithAcl(actor))
-        .put(`/referent/young/${young._id}/phase1Status/cohesionStayMedical`)
-        .send({ cohesionStayMedicalFileReceived: "true", cohesionStayMedicalFileDownload: "true" });
-
-      expect(res.statusCode).toEqual(200);
-    });
-  });
-  describe("PUT /referent/young/:id/phase1Status/rules", () => {
-    it("n'est plus accepté, même pour un admin", async () => {
-      const young = await createYoungHelper(getNewYoungFixture({ rulesYoung: "false" }));
-
-      const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
-        .put(`/referent/young/${young._id}/phase1Status/rules`)
-        .send({ rulesYoung: "true" });
-
-      expect(res.statusCode).toEqual(400);
-      expect((await getYoungByIdHelper(young._id))?.rulesYoung).toEqual("false");
-    });
-  });
   describe("H69 — GET /referent/:id", () => {
     it("refuse un responsable lisant un responsable d'une autre structure", async () => {
       const actorStructure = await createStructureHelper(getNewStructureFixture());

@@ -1,14 +1,10 @@
 import React from "react";
 import { BsCircleFill } from "react-icons/bs";
 import { IoAirplaneOutline, IoRocketOutline } from "react-icons/io5";
-import { formatDateFR, ROLES, translate } from "snu-lib";
+import { formatDateFR } from "snu-lib";
 import BusSvg from "../../../../../assets/icons/Bus";
 import Train from "../../components/Icons/Train";
 import Toggle from "../../components/Toggle";
-import { useSelector } from "react-redux";
-import API from "../../../../../services/api";
-import { capture } from "../../../../../sentry";
-import { toastr } from "react-redux-toastr";
 
 function classNames(...classes) {
   return classes.filter(Boolean).join(" ");
@@ -27,10 +23,9 @@ function getIcon(type) {
   }
 }
 
-export default function Itineraire({ meetingsPoints, center, aller, retour, bus, setBus }) {
+export default function Itineraire({ meetingsPoints, center, aller, retour }) {
   const [showRetour, setShowRetour] = React.useState(false);
   const [timeline, setTimeline] = React.useState([]);
-  const user = useSelector((state) => state.Auth.user);
 
   const toggleAllerRetour = () => {
     let flatMeetingsPoints = [];
@@ -99,36 +94,6 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
     if (data === "false") return false;
   };
 
-  const toggleDelay = async () => {
-    const data = {
-      busId: bus.busId || "",
-      departuredDate: bus.departuredDate || "",
-      returnDate: bus.returnDate || "",
-      youngCapacity: bus.youngCapacity || "",
-      totalCapacity: bus.totalCapacity || "",
-      followerCapacity: bus.followerCapacity || "",
-      travelTime: bus.travelTime || "",
-      lunchBreak: bus.lunchBreak || false,
-      lunchBreakReturn: bus.lunchBreakReturn || false,
-      delayedForth: bus.delayedForth || "false",
-      delayedBack: bus.delayedBack || "false",
-    };
-    if (showRetour) data.delayedBack = bus.delayedBack === "true" ? "false" : "true";
-    else data.delayedForth = bus.delayedForth === "true" ? "false" : "true";
-
-    try {
-      const { ok, code, data: ligneInfo } = await API.put(`/ligne-de-bus/${bus._id}/info`, data);
-      if (!ok) {
-        toastr.error("Oups, une erreur est survenue lors de la modification de la ligne", translate(code));
-        return;
-      }
-      setBus(ligneInfo);
-    } catch (e) {
-      capture(e);
-      toastr.error("Oups, une erreur est survenue lors de la modification de la ligne");
-    }
-  };
-
   React.useEffect(() => {
     toggleAllerRetour();
   }, [showRetour, meetingsPoints, center, aller, retour]);
@@ -191,18 +156,6 @@ export default function Itineraire({ meetingsPoints, center, aller, retour, bus,
           ))}
         </ul>
       </div>
-      {[ROLES.ADMIN].includes(user.role) ? (
-        <div className="bg-gray-100 rounded-md w-full flex flex-row py-2 gap-3 px-3 align-middle">
-          <input
-            type="checkbox"
-            checked={showRetour ? bus.delayedBack === "true" : bus.delayedForth === "true"}
-            onChange={() => {
-              toggleDelay();
-            }}
-          />
-          <p>Signaler le retard de la ligne de bus {showRetour ? '"Retour"' : '"Aller"'}</p>
-        </div>
-      ) : null}
     </div>
   );
 }
