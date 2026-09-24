@@ -1,6 +1,34 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { sanitizeHttpsUrl, sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } from "../safeUrl.js";
+import { sanitizeLinkUrl as sanitizeArticleLinkUrl } from "../../scenes/knowledge-base/utils/safeUrl.js";
+
+// Vecteurs partagés avec snu-lib (GOO-19) : cette copie du filtre doit se comporter comme la référence.
+const VECTORS = JSON.parse(readFileSync(new URL("../../../../packages/lib/src/utils/safeUrl.vectors.json", import.meta.url), "utf8"));
+const FILTERS = {
+  link: (value) => sanitizeLinkUrl(value),
+  linkWithSitePath: (value) => sanitizeLinkUrl(value, { allowSitePath: true }),
+  image: sanitizeImageUrl,
+  video: sanitizeVideoUrl,
+  https: sanitizeHttpsUrl,
+};
+
+test("respecte les vecteurs partagés de snu-lib", () => {
+  assert.deepEqual(
+    Object.keys(VECTORS).filter((key) => !key.startsWith("_")),
+    Object.keys(FILTERS),
+  );
+  for (const [name, filter] of Object.entries(FILTERS)) {
+    for (const value of VECTORS[name].accept) assert.notEqual(filter(value), null, `${name} accepte ${JSON.stringify(value)}`);
+    for (const value of VECTORS[name].reject) assert.equal(filter(value), null, `${name} refuse ${JSON.stringify(value)}`);
+  }
+});
+
+test("les liens d'article acceptent les chemins internes", () => {
+  for (const value of VECTORS.linkWithSitePath.accept) assert.notEqual(sanitizeArticleLinkUrl(value), null, value);
+  for (const value of VECTORS.linkWithSitePath.reject) assert.equal(sanitizeArticleLinkUrl(value), null, String(value));
+});
 
 const DANGEROUS = [
   "javascript:alert(1)",

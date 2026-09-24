@@ -11,6 +11,7 @@ import {
   translatePhase2,
   translateReferentStatus,
   translateStatusClasse,
+  sanitizeLinkUrl,
 } from "snu-lib";
 import api from "../services/api";
 import { translateModelFields } from "./translateFieldsModel";
@@ -223,9 +224,10 @@ export function classNames(...classes) {
 
 export const ENABLE_PM = true;
 
+/** Lien externe saisi sans schéma (« www.site.fr ») : http ajouté, puis filtre d'URL partagé (GOO-19). */
 export function urlWithScheme(url) {
-  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
-  return url;
+  const withScheme = /^https?:\/\//i.test(url) ? url : `http://${url}`;
+  return sanitizeLinkUrl(withScheme) ?? undefined;
 }
 
 export function slugifyFileName(str) {

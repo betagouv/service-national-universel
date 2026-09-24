@@ -1,0 +1,49 @@
+{
+  "_comment": "Vecteurs partagés du filtre d'URL (GOO-19). Rejoués par snu-lib, snupport-app et snupport-api : toute copie du filtre doit les respecter.",
+  "link": {
+    "accept": ["https://www.snu.gouv.fr/", "http://example.org/a?b=c#d", "HTTPS://WWW.SNU.GOUV.FR/", "  https://www.snu.gouv.fr/  ", "mailto:contact@snu.gouv.fr"],
+    "reject": [
+      "javascript:alert(1)",
+      " JavaScript:alert(1)",
+      "java\tscript:alert(1)",
+      "java\nscript:alert(1)",
+      "\u0000javascript:alert(1)",
+      "jav&#x61;script:alert(1)",
+      "vbscript:msgbox(1)",
+      "data:text/html,<script>alert(1)</script>",
+      "data:image/png;base64,iVBORw0KGgo=",
+      "file:///etc/passwd",
+      "blob:https://www.snu.gouv.fr/uuid",
+      "//evil.example",
+      "/\\evil.example",
+      "/base-de-connaissance/article",
+      "relative/path",
+      "",
+      "   ",
+      null
+    ]
+  },
+  "linkWithSitePath": {
+    "accept": ["https://www.snu.gouv.fr/", "mailto:contact@snu.gouv.fr", "/base-de-connaissance/mon-article", " /base-de-connaissance/mon-article "],
+    "reject": ["javascript:alert(1)", "//evil.example", "/\\evil.example", "///evil.example", "relative/path", "data:text/html,x", null]
+  },
+  "image": {
+    "accept": ["https://cellar-c2.services.clever-cloud.com/kb/a.png", "http://example.org/a.jpg"],
+    "reject": ["javascript:alert(1)", "data:image/svg+xml,<svg onload=alert(1)>", "mailto:contact@snu.gouv.fr", "/relative.png", "//evil.example/a.png", null]
+  },
+  "video": {
+    "accept": ["https://player.vimeo.com/video/123"],
+    "reject": [
+      "http://player.vimeo.com/video/123",
+      "https://evil.example/video/123",
+      "https://player.vimeo.com.evil.example/video/123",
+      "https://evil.example/?https://player.vimeo.com/video/123",
+      "javascript:alert(document.cookie)//https://player.vimeo.com",
+      null
+    ]
+  },
+  "https": {
+    "accept": ["https://www.snu.gouv.fr/"],
+    "reject": ["http://www.snu.gouv.fr/", "javascript:alert(1)", "mailto:contact@snu.gouv.fr", "//evil.example", null]
+  }
+}

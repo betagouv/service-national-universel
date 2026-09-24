@@ -22,10 +22,10 @@ const parseTags = (html) => {
 
 test("htmlCleaner retire scripts, gestionnaires d'événements et schémas dangereux", () => {
   assert.equal(htmlCleaner('<p onclick="alert(1)">a</p><script>alert(1)</script>'), "<p>a</p>");
-  assert.equal(htmlCleaner('<a href="javascript:alert(1)">x</a>'), "<a>x</a>");
-  assert.equal(htmlCleaner('<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>'), "<a>x</a>");
-  assert.equal(htmlCleaner('<a href="data:image/png;base64,AAAA">x</a>'), "<a>x</a>");
-  assert.equal(htmlCleaner('<a href="//evil.example">x</a>'), "<a>x</a>");
+  assert.equal(htmlCleaner('<a href="javascript:alert(1)">x</a>'), '<a rel="noopener noreferrer">x</a>');
+  assert.equal(htmlCleaner('<a href="data:text/html;base64,PHNjcmlwdD4=">x</a>'), '<a rel="noopener noreferrer">x</a>');
+  assert.equal(htmlCleaner('<a href="data:image/png;base64,AAAA">x</a>'), '<a rel="noopener noreferrer">x</a>');
+  assert.equal(htmlCleaner('<a href="//evil.example">x</a>'), '<a rel="noopener noreferrer">x</a>');
 });
 
 test("htmlCleaner garde les images collées dans un e-mail (data:image en base64) et elles seules", () => {
@@ -39,6 +39,11 @@ test("htmlCleaner garde les images collées dans un e-mail (data:image en base64
 test("htmlCleaner retire l'attribut style (FM23)", () => {
   assert.equal(htmlCleaner('<blockquote style="position:fixed;top:0">x</blockquote>'), "<blockquote>x</blockquote>");
   assert.equal(htmlCleaner('<img src="https://a.fr/i.png" style="width:100%" />'), '<img src="https://a.fr/i.png" />');
+});
+
+test("htmlCleaner garde les listes à puces et force rel sur tout lien, comme snu-lib", () => {
+  assert.equal(htmlCleaner("<ul><li>a</li></ul>"), "<ul><li>a</li></ul>");
+  assert.equal(htmlCleaner('<a href="https://a.fr">x</a>'), '<a href="https://a.fr" rel="noopener noreferrer">x</a>');
 });
 
 test("htmlCleaner force rel=noopener noreferrer sur target=_blank", () => {

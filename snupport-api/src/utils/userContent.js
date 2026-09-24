@@ -6,9 +6,8 @@ const sanitizeHtml = require("sanitize-html");
 // lien `javascript:` ou un gestionnaire d'événement stocké ici vaut prise de session d'agent (GOO-6).
 // Le front filtre aussi au rendu ; ce module empêche la charge d'être stockée.
 
-const LINK_PROTOCOLS = ["http:", "https:", "mailto:"];
-const IMAGE_PROTOCOLS = ["http:", "https:"];
-const VIDEO_HOSTS = ["player.vimeo.com"];
+const { SAFE_LINK_PROTOCOLS, sanitizeImageUrl, sanitizeLinkUrl, sanitizeVideoUrl } = require("./safeUrl");
+
 const MAX_SLATE_DEPTH = 32;
 
 const HTML_OPTIONS = {
@@ -17,7 +16,7 @@ const HTML_OPTIONS = {
     a: ["href", "target", "rel"],
     img: ["src", "alt", "width", "height"],
   },
-  allowedSchemes: ["http", "https", "mailto"],
+  allowedSchemes: SAFE_LINK_PROTOCOLS.map((protocol) => protocol.slice(0, -1)),
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
 };
@@ -27,23 +26,10 @@ const sanitizeUserHtml = (html) => (typeof html === "string" ? sanitizeHtml(html
 // Texte brut (notes) : aucune balise n'est conservée, le texte reste lisible.
 const sanitizeUserText = (text) => (typeof text === "string" ? sanitizeHtml(text, { allowedTags: [], allowedAttributes: {} }) : text);
 
-const parseUrl = (value, protocols) => {
-  if (typeof value !== "string") return null;
-  try {
-    const parsed = new URL(value.trim());
-    return protocols.includes(parsed.protocol) ? parsed : null;
-  } catch {
-    return null;
-  }
-};
-
 const isAllowedNodeUrl = (type, url) => {
-  if (type === "link") return !!parseUrl(url, LINK_PROTOCOLS);
-  if (type === "image") return !!parseUrl(url, IMAGE_PROTOCOLS);
-  if (type === "video") {
-    const parsed = parseUrl(url, ["https:"]);
-    return !!parsed && VIDEO_HOSTS.includes(parsed.hostname);
-  }
+  if (type === "link") return sanitizeLinkUrl(url) !== null;
+  if (type === "image") return sanitizeImageUrl(url) !== null;
+  if (type === "video") return sanitizeVideoUrl(url) !== null;
   return false;
 };
 
