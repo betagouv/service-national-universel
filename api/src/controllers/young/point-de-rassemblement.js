@@ -9,6 +9,7 @@ const { LigneToPointModel } = require("../../models");
 const { PointDeRassemblementModel } = require("../../models");
 const { serializeYoung } = require("../../utils/serializer");
 const { isPDRChoiceOpenForYoung } = require("../../services/pointDeRassemblement.service");
+const { reserveBusLineSeat, resyncBusLineSeats } = require("../../utils/placeReservation");
 
 /**
  * Le tableau `team` d'une ligne de bus contient l'identité, la date de naissance, l'email et le
@@ -31,24 +32,21 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     if (!isOpen) return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
 
     // verify data
+    // meetingPointId et ligneId vont ensemble : un ligneId seul contournait le contrôle de capacité de la ligne (constat M57).
     const { error, value } = Joi.object({
       meetingPointId: Joi.string().optional(),
       ligneId: Joi.string().optional(),
       deplacementPhase1Autonomous: Joi.string().optional(),
       id: Joi.string().required(),
     })
+      .and("meetingPointId", "ligneId")
       .unknown()
       .validate({ ...req.params, ...req.body }, { stripUnknown: true });
     if (error) {
       capture(error);
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
-    const { id, meetingPointId, ligneId, deplacementPhase1Autonomous } = value;
-
-    if (meetingPointId && !ligneId) {
-      // si on a meetingPointId, on doit avoir ligneId.
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
+    const { meetingPointId, ligneId, deplacementPhase1Autonomous } = value;
 
     // Appartenance contrôlée par youngPerimeterMiddleware (monté sur /young/:id/point-de-rassemblement).
     const young = req.targetYoung;
@@ -59,19 +57,32 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     if (meetingPointId) {
       const meetingPoint = await PointDeRassemblementModel.findOne({ _id: meetingPointId, deletedAt: { $exists: false } });
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await LigneBusModel.findById(ligneId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (bus.youngSeatsTaken >= bus.youngCapacity) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      const ligne = await LigneBusModel.findById(ligneId);
+      if (!ligne) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // La ligne doit desservir ce point et appartenir à la cohorte et à la session du jeune.
+      const ligneToPoint = await LigneToPointModel.findOne({ lineId: ligneId, meetingPointId, deletedAt: { $exists: false } });
+      if (!ligneToPoint || ligne.cohort !== young.cohort || ligne.sessionId !== young.sessionPhase1Id) {
+        return res.status(400).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
+      // Réservation atomique d'une place (constat L25) : le jeune n'est écrit qu'en cas de succès.
+      bus = await reserveBusLineSeat(ligneId);
+      if (!bus) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     const oldBus = young.ligneId ? await LigneBusModel.findById(young.ligneId) : null;
 
     young.set({ meetingPointId, ligneId, deplacementPhase1Autonomous, hasMeetingInformation: "true" });
-    await young.save({ fromUser: req.user });
+    try {
+      await young.save({ fromUser: req.user });
+    } catch (e) {
+      if (bus) await resyncBusLineSeats(ligneId);
+      throw e;
+    }
 
+    // Recomptage : réaligne les compteurs sur les jeunes réellement affectés (dont une réservation faite pour un jeune déjà sur la ligne).
     if (bus) {
       await updateSeatsTakenInBusLine(bus);
     }
-    if (oldBus) {
+    if (oldBus && oldBus._id.toString() !== bus?._id.toString()) {
       await updateSeatsTakenInBusLine(oldBus);
     }
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });

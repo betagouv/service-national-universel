@@ -11,6 +11,7 @@ const { BusModel } = require("../../models");
 const { ERRORS, updatePlacesBus, isYoung, isReferent } = require("../../utils");
 const { serializeMeetingPoint, serializeYoung } = require("../../utils/serializer");
 const { validateId } = require("../../utils/validator");
+const { reserveLegacyBusPlace, resyncLegacyBusPlaces } = require("../../utils/placeReservation");
 
 router.get("/", passport.authenticate(["referent", "young"], { session: false, failWithError: true }), async (req, res) => {
   try {
@@ -95,18 +96,25 @@ router.put("/", passport.authenticate(["young", "referent"], { session: false, f
     if (meetingPointId) {
       const meetingPoint = await MeetingPointModel.findById(meetingPointId);
       if (!meetingPoint) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      bus = await BusModel.findById(meetingPoint.busId);
-      if (!bus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (bus.placesLeft <= 0) return res.status(404).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      const existingBus = await BusModel.findById(meetingPoint.busId);
+      if (!existingBus) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
+      // Réservation atomique d'une place (constat L25) : le jeune n'est écrit qu'en cas de succès.
+      bus = await reserveLegacyBusPlace(meetingPoint.busId);
+      if (!bus) return res.status(409).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
     }
     const oldMeetingPoint = await MeetingPointModel.findById(young.meetingPointId);
     const oldBus = await BusModel.findById(oldMeetingPoint?.busId);
 
     young.set({ meetingPointId, deplacementPhase1Autonomous });
-    await young.save({ fromUser: req.user });
+    try {
+      await young.save({ fromUser: req.user });
+    } catch (e) {
+      if (bus) await resyncLegacyBusPlaces(bus._id);
+      throw e;
+    }
 
     if (bus) await updatePlacesBus(bus);
-    if (oldBus) await updatePlacesBus(oldBus);
+    if (oldBus && oldBus._id.toString() !== bus?._id.toString()) await updatePlacesBus(oldBus);
     res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
   } catch (error) {
     capture(error);
