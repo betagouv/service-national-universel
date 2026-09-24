@@ -85,13 +85,14 @@ function formatMission(mission: JeVeuxAiderMission, structure: StructureDocument
 
   return {
     name: mission.title,
-    description,
-    actions,
+    // HTML fourni par JeVeuxAider, rendu tel quel dans les fiches mission de app et admin (GOO-19).
+    description: sanitizeStoredHtml(description),
+    actions: sanitizeStoredHtml(actions),
     mainDomain: jva2SnuDomaines[mission.domain],
     startAt: addHours(startAt, 2),
     endAt: missionEndDate,
     placesTotal: mission.snuPlaces,
-    frequence: mission.schedule,
+    frequence: sanitizeStoredHtml(mission.schedule),
     structureId: structure.id,
     structureName: structure.name,
     tutorId: referentMission.id,

@@ -10,6 +10,7 @@ import {
   canCreateApplications,
   canCreateEquivalences,
   isCohortFullyArchived,
+  sanitizeLinkUrl,
 } from "snu-lib";
 export * from "snu-lib";
 import slugify from "slugify";
@@ -127,9 +128,10 @@ export const HERO_IMAGES_LIST = ["login.jpg", "phase3.jpg", "rang.jpeg"];
 
 export const ENABLE_PM = true;
 
+/** Lien externe saisi sans schéma (« www.site.fr ») : http ajouté, puis filtre d'URL partagé (GOO-19). */
 export function urlWithScheme(url) {
-  if (!/^https?:\/\//i.test(url)) return `http://${url}`;
-  return url;
+  const withScheme = /^https?:\/\//i.test(url) ? url : `http://${url}`;
+  return sanitizeLinkUrl(withScheme) ?? undefined;
 }
 
 export const copyToClipboard = (text) => {

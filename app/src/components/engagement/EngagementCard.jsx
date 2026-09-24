@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { sanitizeLinkUrl } from "snu-lib";
 
 export default function EngagementCard({ program }) {
   const [isOpen, setIsOpen] = useState(false);
@@ -29,9 +30,9 @@ export default function EngagementCard({ program }) {
 
         <p className="m-0 text-right">
           <a
-            href={program.url}
+            href={sanitizeLinkUrl(program.url) ?? undefined}
             target="_blank"
-            rel="noreferrer"
+            rel="noopener noreferrer"
             className="
           text-sm">
             Voir

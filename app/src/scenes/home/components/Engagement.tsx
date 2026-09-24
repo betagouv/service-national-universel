@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import Loader from "@/components/Loader";
 import usePrograms from "@/scenes/phase2/scenes/usePrograms";
 import { HiExternalLink } from "react-icons/hi";
-import { ProgramType } from "snu-lib";
+import { ProgramType, sanitizeLinkUrl } from "snu-lib";
 
 export default function Engagement() {
   const { data: programs, isPending, isError } = usePrograms();
@@ -29,11 +29,13 @@ export default function Engagement() {
 
 function EngagementCard({ program }: { program: ProgramType }) {
   const imgSrc = `https://snu-bucket-prod.cellar-c2.services.clever-cloud.com/programmes-engagement/${program.imageString}`;
+  // URL saisie dans l'admin : filtrée au rendu comme tout lien issu de la base (GOO-19).
+  const url = sanitizeLinkUrl(program.url) ?? undefined;
 
   return (
     <div className="w-72 h-88 flex-none flex flex-col">
       <div className="h-36 w-full rounded-t-lg overflow-hidden">
-        <a href={program.url} target="_blank" rel="noreferrer">
+        <a href={url} target="_blank" rel="noopener noreferrer">
           <img src={imgSrc} className="h-full w-full object-cover" />
         </a>
       </div>
@@ -41,7 +43,7 @@ function EngagementCard({ program }: { program: ProgramType }) {
       <div className="border-x-[1px] border-b-[1px] border-gray-300 p-3 rounded-b-lg flex flex-col flex-grow">
         <p className="font-medium leading-6">{program.name}</p>
         <p className="mt-2 text-sm leading-6 text-gray-500 line-clamp-3">{program.description}</p>
-        <a href={program.url} target="_blank" rel="noreferrer" className="text-blue-600 text-sm mt-auto">
+        <a href={url} target="_blank" rel="noopener noreferrer" className="text-blue-600 text-sm mt-auto">
           Lire plus
           <HiExternalLink className="inline-block ml-1 align-middle" />
         </a>

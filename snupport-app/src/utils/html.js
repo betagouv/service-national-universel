@@ -1,21 +1,29 @@
 import sanitizeHtml from "sanitize-html";
 
+import { SAFE_IMAGE_PROTOCOLS, SAFE_LINK_PROTOCOLS } from "./safeUrl.js";
+
 // Seul rempart avant les `dangerouslySetInnerHTML` de snupport-app : les contenus rendus (messages,
 // notes) viennent de contacts externes et de référents. Pas d'attribut `style` (CSS arbitraire :
 // superposition, exfiltration par url()) ni de schéma `data:` dans les liens (FM23).
 // Exception : les images collées dans le corps d'un e-mail arrivent en `data:` (mailparser remplace
 // les `cid:`). Une image ne peut pas exécuter de script ; seuls les formats matriciels courants en
 // base64 sont admis, jamais dans un href.
+//
+// Base commune avec `HTML_CLEANER_OPTIONS` de snu-lib (GOO-19) : mêmes balises de texte, schémas de
+// liens issus du filtre d'URL partagé, `rel` imposé sur tout lien. snupport-app y ajoute les balises
+// des e-mails (br, div, blockquote) et les images.
 const DATA_IMAGE_URL = /^data:image\/(?:png|jpe?g|gif|webp|bmp);base64,[a-z0-9+/=\s]+$/i;
 
+const withoutColon = (protocols) => protocols.map((protocol) => protocol.slice(0, -1));
+
 const CLEANER_OPTIONS = {
-  allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "br", "div", "blockquote", "img"],
+  allowedTags: ["b", "i", "em", "strong", "a", "li", "p", "h1", "h2", "h3", "u", "ol", "ul", "br", "div", "blockquote", "img"],
   allowedAttributes: {
     a: ["href", "target", "rel"],
     img: ["src", "alt", "width", "height", "iwc-no-src"],
   },
-  allowedSchemes: ["http", "https", "mailto"],
-  allowedSchemesByTag: { img: ["http", "https", "data"] },
+  allowedSchemes: withoutColon(SAFE_LINK_PROTOCOLS),
+  allowedSchemesByTag: { img: [...withoutColon(SAFE_IMAGE_PROTOCOLS), "data"] },
   allowedSchemesAppliedToAttributes: ["href", "src"],
   allowProtocolRelative: false,
   transformTags: {
@@ -25,10 +33,7 @@ const CLEANER_OPTIONS = {
       const { src, ...rest } = attribs;
       return { tagName, attribs: rest };
     },
-    a: (tagName, attribs) => {
-      if (attribs.target !== "_blank") return { tagName, attribs };
-      return { tagName, attribs: { ...attribs, rel: "noopener noreferrer" } };
-    },
+    a: (tagName, attribs) => ({ tagName, attribs: { ...attribs, rel: "noopener noreferrer" } }),
   },
 };
 
