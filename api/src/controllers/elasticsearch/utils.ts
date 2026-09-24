@@ -249,12 +249,32 @@ interface MissionContextResult {
   };
 }
 
-async function buildMissionContext(user: UserDto): Promise<MissionContextResult> {
+type MissionContextOptions = {
+  /**
+   * Garde le périmètre national des référents. Réservé à la recherche de missions à proposer à un
+   * volontaire : elle ne porte que sur des missions validées et visibles, que le volontaire trouve
+   * lui-même au-delà des limites du département.
+   */
+  referentNationalScope?: boolean;
+};
+
+async function buildMissionContext(user: UserDto, { referentNationalScope = false }: MissionContextOptions = {}): Promise<MissionContextResult> {
   const contextFilters: ContextFilters = [];
 
   // A young can only see validated missions.
   if (isYoung(user)) contextFilters.push({ term: { "status.keyword": "VALIDATED" } });
   if (isReferent(user) && !canSearchInElasticSearch(user, "mission")) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+
+  // Les référents ne listent que les missions de leur territoire, comme `isMissionInUserScope` (GOO-45).
+  if (!referentNationalScope && user.role === ROLES.REFERENT_DEPARTMENT) {
+    const departments = ([] as string[]).concat(user.department || []);
+    if (!departments.length) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ terms: { "department.keyword": departments } });
+  }
+  if (!referentNationalScope && user.role === ROLES.REFERENT_REGION) {
+    if (!user.region) return { missionContextError: { status: 403, body: { ok: false, code: ERRORS.OPERATION_UNAUTHORIZED } } };
+    contextFilters.push({ term: { "region.keyword": user.region } });
+  }
 
   // A responsible cans only see their structure's missions.
   if (user.role === ROLES.RESPONSIBLE) {

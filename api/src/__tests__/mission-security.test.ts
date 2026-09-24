@@ -323,7 +323,12 @@ describe("Sécurité des missions", () => {
       const structure = await createStructure();
       const referent = await createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: ["Ain"] });
       const tuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
-      const mission = await createMission(structure, { status: MISSION_STATUS.WAITING_VALIDATION, tutorId: String(tuteur._id) });
+      const mission = await createMission(structure, {
+        status: MISSION_STATUS.WAITING_VALIDATION,
+        tutorId: String(tuteur._id),
+        department: "Ain",
+        region: "Auvergne-Rhône-Alpes",
+      });
 
       const res = await request(await getAppHelperWithAcl(referent))
         .put(`/mission/${mission._id}`)
@@ -387,6 +392,157 @@ describe("Sécurité des missions", () => {
       expect(res.statusCode).toEqual(200);
       const creee = await getMissionByIdHelper(res.body.data._id);
       expect(creee!.placesLeft).toEqual(5);
+    });
+  });
+
+  describe("GOO-45 — périmètre territorial des référents sur les missions", () => {
+    const RHONE = { department: "Rhône", region: "Auvergne-Rhône-Alpes" };
+    const PARIS = { department: "Paris", region: "Île-de-France" };
+    const HAUTS_DE_SEINE = { department: "Hauts-de-Seine", region: "Île-de-France" };
+
+    async function referentDepartemental92() {
+      return createReferent({ role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" });
+    }
+
+    async function missionEn(territoire: Record<string, string>, overrides: Record<string, unknown> = {}) {
+      const structure = await createStructure();
+      return createMission(structure, { status: MISSION_STATUS.DRAFT, ...territoire, ...overrides });
+    }
+
+    it.each([
+      ["du Rhône", RHONE],
+      ["de Paris (même région)", PARIS],
+    ])("refuse à un référent du 92 de changer le statut d'une mission %s", async (_label, territoire) => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(territoire);
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/mission/${mission._id}`)
+        .send({ status: MISSION_STATUS.WAITING_VALIDATION, description: mission.description, actions: mission.actions });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getMissionByIdHelper(mission._id))!.status).toEqual(MISSION_STATUS.DRAFT);
+    });
+
+    it.each([
+      ["du Rhône", RHONE],
+      ["de Paris (même région)", PARIS],
+    ])("refuse à un référent du 92 de supprimer une mission %s", async (_label, territoire) => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(territoire);
+
+      const res = await request(await getAppHelperWithAcl(referent)).delete(`/mission/${mission._id}`);
+
+      expect(res.statusCode).toEqual(403);
+      expect(await getMissionByIdHelper(mission._id)).not.toBeNull();
+    });
+
+    it("laisse un référent du 92 modifier et supprimer une mission du 92", async () => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(HAUTS_DE_SEINE);
+      const app = await getAppHelperWithAcl(referent);
+
+      const put = await request(app).put(`/mission/${mission._id}`).send({ status: MISSION_STATUS.DRAFT, name: "Mission renommée" });
+      expect(put.statusCode).toEqual(200);
+      expect((await getMissionByIdHelper(mission._id))!.name).toEqual("Mission renommée");
+
+      const del = await request(app).delete(`/mission/${mission._id}`);
+      expect(del.statusCode).toEqual(200);
+      expect(await getMissionByIdHelper(mission._id)).toBeNull();
+    });
+
+    it("refuse à un référent du 92 de déplacer une mission du 92 vers un autre département", async () => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(HAUTS_DE_SEINE);
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .put(`/mission/${mission._id}`)
+        .send({ status: MISSION_STATUS.DRAFT, ...RHONE });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getMissionByIdHelper(mission._id))!.department).toEqual("Hauts-de-Seine");
+    });
+
+    it("refuse à un référent du 92 de créer une mission dans un autre département", async () => {
+      const referent = await referentDepartemental92();
+      const structure = await createStructure();
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/mission")
+        .send(missionCreationPayload(structure, RHONE));
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse à un référent régional d'Île-de-France de modifier une mission du Rhône, et le laisse sur Paris", async () => {
+      const referent = await createReferent({ role: ROLES.REFERENT_REGION, region: "Île-de-France", department: [] });
+      const app = await getAppHelperWithAcl(referent);
+      const horsRegion = await missionEn(RHONE);
+      const dansRegion = await missionEn(PARIS);
+      const payload = { status: MISSION_STATUS.DRAFT, name: "Mission renommée" };
+
+      expect((await request(app).put(`/mission/${horsRegion._id}`).send(payload)).statusCode).toEqual(403);
+      expect((await request(app).put(`/mission/${dansRegion._id}`).send(payload)).statusCode).toEqual(200);
+    });
+
+    it("refuse le changement de tuteur d'une mission hors territoire", async () => {
+      const referent = await referentDepartemental92();
+      const structure = await createStructure();
+      const tuteur = await createReferent({ role: ROLES.RESPONSIBLE, structureId: String(structure._id) });
+      const mission = await createMission(structure, RHONE);
+
+      const res = await request(await getAppHelperWithAcl(referent))
+        .post("/mission/multiaction/change-tutor")
+        .send({ ids: [String(mission._id)], tutorId: String(tuteur._id), tutorName: "x" });
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("refuse l'historique d'une mission hors territoire", async () => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(RHONE);
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/mission/${mission._id}/patches`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("ne montre, hors territoire, que les candidatures des volontaires du référent", async () => {
+      const referent = await referentDepartemental92();
+      const structure = await createStructure();
+      const mission = await createMission(structure, RHONE);
+      const candidature = (youngDepartment: string) =>
+        createApplication({ ...getNewApplicationFixture(), missionId: String(mission._id), structureId: String(structure._id), status: "VALIDATED", youngDepartment });
+      const sienne = await candidature("Hauts-de-Seine");
+      await candidature("Rhône");
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/mission/${mission._id}/application`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data.map((application: any) => String(application._id))).toEqual([String(sienne._id)]);
+    });
+
+    it("montre toutes les candidatures d'une mission du territoire", async () => {
+      const referent = await referentDepartemental92();
+      const structure = await createStructure();
+      const mission = await createMission(structure, HAUTS_DE_SEINE);
+      for (const youngDepartment of ["Hauts-de-Seine", "Paris"]) {
+        await createApplication({ ...getNewApplicationFixture(), missionId: String(mission._id), structureId: String(structure._id), status: "VALIDATED", youngDepartment });
+      }
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/mission/${mission._id}/application`);
+
+      expect(res.statusCode).toEqual(200);
+      expect(res.body.data).toHaveLength(2);
+    });
+
+    it("laisse un référent lire la fiche d'une mission hors territoire", async () => {
+      const referent = await referentDepartemental92();
+      const mission = await missionEn(RHONE);
+
+      const res = await request(await getAppHelperWithAcl(referent)).get(`/mission/${mission._id}`);
+
+      expect(res.statusCode).toEqual(200);
     });
   });
 });

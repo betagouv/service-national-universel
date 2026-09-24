@@ -230,7 +230,7 @@ router.post("/propose/:action(search|export)", passport.authenticate(["referent"
     });
     if (error) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
 
-    const { missionContextFilters, missionContextError } = await buildMissionContext(user);
+    const { missionContextFilters, missionContextError } = await buildMissionContext(user, { referentNationalScope: true });
     if (missionContextError) {
       return res.status(missionContextError.status).send(missionContextError.body);
     }
