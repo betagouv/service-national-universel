@@ -4,15 +4,11 @@ import { useSelector } from "react-redux";
 import { HiOutlineAdjustments } from "react-icons/hi";
 import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu";
 
-import { isSuperAdmin } from "snu-lib";
 import { AuthState } from "@/redux/auth/reducer";
-import { CohortState } from "@/redux/cohorts/reducer";
 import { Header, Navbar } from "@snu/ds/admin";
 import plausibleEvent from "@/services/plausible";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
-import DeletePDTButton from "../DeletePDTButton";
-import SyncPlacesPDTButton from "../SyncPlacesPDTButton";
 import HeaderExport from "./ButtonExport";
 import { isResponsableDeCentre } from "snu-lib";
 
@@ -29,8 +25,6 @@ interface Props {
 export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, setCurrentTab, selectedFilters }: Props) {
   const history = useHistory();
   const { user } = useSelector((state: AuthState) => state.Auth);
-  const cohorts = useSelector((state: CohortState) => state.Cohorts);
-  const cohortDto = cohorts?.find((c) => c.name === cohort);
 
   const isResonsableDeCentre = isResponsableDeCentre(user);
 
@@ -61,10 +55,6 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
             : []
         }
       />
-      <div className="flex gap-2 items-center">
-        {isSuperAdmin(user) && cohortDto && <DeletePDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
-        {isSuperAdmin(user) && cohortDto && <SyncPlacesPDTButton cohort={cohortDto} disabled={!hasValue} className="mb-4" />}
-      </div>
       {hasValue && (
         <Navbar
           tab={[

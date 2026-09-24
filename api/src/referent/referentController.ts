@@ -54,7 +54,6 @@ import {
   isYoung,
   inSevenDays,
   STEPS2023,
-  getCcOfYoung,
   notifDepartmentChange,
   updateSeatsTakenInBusLine,
   cancelPendingApplications,
@@ -82,7 +81,6 @@ import {
   canChangeYoungCohort,
   canSendTutorTemplate,
   canSearchSessionPhase1,
-  canCreateOrUpdateSessionPhase1,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS,
   YOUNG_STATUS_PHASE1,
@@ -90,7 +88,6 @@ import {
   MILITARY_FILE_KEYS,
   department2region,
   formatPhoneNumberFromPhoneZone,
-  translateFileStatusPhase1,
   canCheckIfRefExist,
   YOUNG_SOURCE,
   YOUNG_SOURCE_LIST,
@@ -107,7 +104,6 @@ import {
   isAdmin,
   isReferentReg,
   canValidateYoungToLP,
-  FILE_STATUS_PHASE1,
   ERRORS as ERRORS_LIB,
   ReferentType,
   PermissionDto,
@@ -140,14 +136,7 @@ import { addMonths } from "date-fns";
 import { permissionAccessControlMiddleware } from "../middlewares/permissionAccessControlMiddleware";
 import { canContactTutorInScope, isInvitationInUserScope, isReferentInUserScope, isReferentReadableByUser, isReferentUpdateInUserScope } from "./referentScope";
 import { sanitizeEmailText } from "../email/emailInput";
-import {
-  canEditYoungInScope,
-  canViewYoungFileInScope,
-  isYoungInReferentGeography,
-  isYoungInUserScope,
-  isYoungInStructureScope,
-  isYoungInMilitaryPreparationStructureScope,
-} from "../young/youngScope";
+import { canEditYoungInScope, canViewYoungFileInScope, isYoungInUserScope, isYoungInStructureScope, isYoungInMilitaryPreparationStructureScope } from "../young/youngScope";
 import { canReferentApplyYoungUpdate } from "../young/youngStatusTransitions";
 
 const router = express.Router();
@@ -1966,82 +1955,6 @@ router.get(
     }
   },
 );
-
-router.put("/young/:id/phase1Status/:document", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
-  try {
-    // `rules` n'est plus accepté : aucun écran de l'admin ne l'appelait plus.
-    const keys = ["cohesionStayMedical", "imageRight"];
-    const { error: documentError, value: document } = Joi.string()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document);
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.params.id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    let value;
-    if (["imageRight"].includes(document)) {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        [`${document}FilesStatus`]: Joi.string()
-          .trim()
-          .valid(FILE_STATUS_PHASE1.TO_UPLOAD, FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED)
-          .required(),
-        [`${document}FilesComment`]: Joi.alternatives().conditional(`${document}FilesStatus`, {
-          is: FILE_STATUS_PHASE1.WAITING_CORRECTION,
-          then: Joi.string().trim().required(),
-          otherwise: Joi.isError(new Error()),
-        }),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      if (!tempValue[`${document}FilesComment`]) tempValue[`${document}FilesComment`] = undefined;
-      value = tempValue;
-    } else if (document === "cohesionStayMedical") {
-      const { error: bodyError, value: tempValue } = Joi.object({
-        cohesionStayMedicalFileReceived: Joi.string().trim().required().valid("true", "false"),
-        cohesionStayMedicalFileDownload: Joi.string().trim().required().valid("true", "false"),
-      }).validate(req.body);
-      if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-      value = tempValue;
-    } else {
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-    }
-
-    const session = await SessionPhase1Model.findById(young.sessionPhase1Id);
-
-    if (!canCreateOrUpdateSessionPhase1(req.user, session)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-    // `canCreateOrUpdateSessionPhase1` n'applique aucun périmètre aux référents dép./rég. : on le fait ici.
-    if ([ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION].includes(req.user.role) && !isYoungInReferentGeography(req.user, young)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    if (document === "imageRight") {
-      if ([FILE_STATUS_PHASE1.WAITING_VERIFICATION, FILE_STATUS_PHASE1.WAITING_CORRECTION, FILE_STATUS_PHASE1.VALIDATED].includes(value[`${document}FilesStatus`])) {
-        const statusToMail = {
-          WAITING_VERIFICATION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION,
-          WAITING_CORRECTION: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_CORRECTION,
-          VALIDATED: SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_VALIDATED,
-        };
-
-        let cc = getCcOfYoung({ template: statusToMail[value[`${document}FilesStatus`]], young });
-        await sendTemplate(statusToMail[value[`${document}FilesStatus`]], {
-          emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-          params: { type_document: translateFileStatusPhase1(document), modif: value[`${document}FilesComment`] },
-          cc,
-        });
-      }
-    }
-    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
 
 router.put("/young/:id/removeMilitaryFile/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res: Response) => {
   try {

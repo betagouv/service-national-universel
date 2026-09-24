@@ -27,7 +27,6 @@ jest.mock("../brevo", () => ({
 // dès que le statut visé est WAITING_VALIDATION.
 jest.mock("../services/gouv.fr/api-adresse", () => ({
   getNearestLocation: () => Promise.resolve({ lat: 48.85, lon: 2.35 }),
-  getSpecificAdressLocation: () => Promise.resolve({ lat: 48.85, lon: 2.35 }),
 }));
 
 beforeAll(async () => {
@@ -58,11 +57,7 @@ beforeAll(async () => {
       whitelist: [],
     },
   ]);
-  await addPermissionHelper(
-    [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR],
-    PERMISSION_RESOURCES.USER_HISTORY,
-    PERMISSION_ACTIONS.READ,
-  );
+  await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION, ROLES.SUPERVISOR], PERMISSION_RESOURCES.USER_HISTORY, PERMISSION_ACTIONS.READ);
   await addPermissionHelper([ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION], PERMISSION_RESOURCES.PATCH, PERMISSION_ACTIONS.READ);
 }, 120_000);
 afterAll(dbClose);

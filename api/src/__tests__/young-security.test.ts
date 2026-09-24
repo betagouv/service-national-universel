@@ -9,7 +9,7 @@
  * H42 GET /young/:id/documents/:key/:fileId               : mimeType dérivé du nom de fichier (XSS stocké)
  * H43 POST /young/invite                                  : invitationToken renvoyé dans la réponse
  * H44 POST /young/note/:youngId                           : aucun périmètre, dossier complet renvoyé
- * H45 POST /young/:id/phase1/:key                         : canEditPresenceYoung sans périmètre
+ * H45 POST /young/:id/phase1/:key                         : route supprimée (phase1-ecritures-supprimees.test.ts)
  * H46 POST /young/:id/phase1/dispense                     : idem
  * H47 PUT /young/:id/phase2/preference                    : document brut (tokens)
  * H48 GET /young/:id/point-de-rassemblement?withbus=true  : IDOR + équipe de convoyage (PII) renvoyée brute
@@ -48,11 +48,9 @@ import { getNewReferentFixture } from "./fixtures/referent";
 import getNewYoungFixture from "./fixtures/young";
 import getNewStructureFixture from "./fixtures/structure";
 import getNewCohortFixture from "./fixtures/cohort";
-import { getNewSessionPhase1Fixture } from "./fixtures/sessionPhase1";
 import getNewLigneBusFixture from "./fixtures/PlanDeTransport/ligneBus";
 import getNewPointDeRassemblementFixture from "./fixtures/PlanDeTransport/pointDeRassemblement";
 import getBusTeamFixture from "./fixtures/busTeam";
-import { getNewCohesionCenterFixture } from "./fixtures/cohesionCenter";
 import { createReferentHelper } from "./helpers/referent";
 import { createYoungHelper } from "./helpers/young";
 import { createStructureHelper } from "./helpers/structure";
@@ -324,47 +322,6 @@ describe("Sécurité /young/:id/* — audit 2026-09-21 (lot 3)", () => {
       expect(res.status).toBe(403);
       const untouched = await YoungModel.findById(victim._id);
       expect(untouched?.notes ?? []).toHaveLength(0);
-    });
-  });
-
-  describe("H45 / H46 — POST /young/:id/phase1/*", () => {
-    it("refuse à un chef de centre d'un autre centre de marquer la présence d'un jeune", async () => {
-      const otherCenter = await CohesionCenterModel.create(getNewCohesionCenterFixture());
-      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-      const attackerSession = await SessionPhase1Model.create(
-        getNewSessionPhase1Fixture({ cohesionCenterId: otherCenter._id.toString(), headCenterId: attacker._id.toString() }),
-      );
-
-      const victimCenter = await CohesionCenterModel.create(getNewCohesionCenterFixture());
-      const victimSession = await SessionPhase1Model.create(getNewSessionPhase1Fixture({ cohesionCenterId: victimCenter._id.toString(), headCenterId: new ObjectId().toString() }));
-      const victim = await createYoungHelper(
-        getNewYoungFixture({ ...youngSecrets, presenceJDM: "false", sessionPhase1Id: victimSession._id.toString(), cohesionCenterId: victimCenter._id.toString() }),
-      );
-
-      expect(attackerSession._id.toString()).not.toBe(victimSession._id.toString());
-
-      const res = await request(await getAppHelperWithAcl(attacker, "referent"))
-        .post(`/young/${victim._id}/phase1/presenceJDM`)
-        .send({ value: "true" });
-
-      expect(res.status).toBe(403);
-      const untouched = await YoungModel.findById(victim._id);
-      expect(untouched?.presenceJDM).not.toBe("true");
-    });
-
-    it("refuse à un chef de centre d'un autre centre de dispenser un jeune", async () => {
-      const attacker = await createReferentHelper(getNewReferentFixture({ role: ROLES.HEAD_CENTER }));
-      const victimCenter = await CohesionCenterModel.create(getNewCohesionCenterFixture());
-      const victimSession = await SessionPhase1Model.create(getNewSessionPhase1Fixture({ cohesionCenterId: victimCenter._id.toString(), headCenterId: new ObjectId().toString() }));
-      const victim = await createYoungHelper(getNewYoungFixture({ ...youngSecrets, statusPhase1: "NOT_DONE", sessionPhase1Id: victimSession._id.toString() }));
-
-      const res = await request(await getAppHelperWithAcl(attacker, "referent"))
-        .post(`/young/${victim._id}/phase1/dispense`)
-        .send({ statusPhase1Motif: "OTHER", statusPhase1MotifDetail: "x" });
-
-      expect(res.status).toBe(403);
-      const untouched = await YoungModel.findById(victim._id);
-      expect(untouched?.statusPhase1).toBe("NOT_DONE");
     });
   });
 

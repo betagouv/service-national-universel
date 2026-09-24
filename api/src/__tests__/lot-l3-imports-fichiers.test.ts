@@ -2,7 +2,7 @@
  * Lot L3 — imports de fichiers (audit du 21/09/2026).
  *
  *   L32 — import plan marketing : nom de fichier client comme clé S3, type MIME déclaré, pas d'antivirus
- *   L33 — import PDR : nom de fichier client comme clé S3, fichiers temporaires non purgés, `error.message` renvoyé
+ *   L33 — import PDR : route supprimée avec les écritures phase 1 (phase1-ecritures-supprimees.test.ts)
  *   M63, L16 — import du plan de transport : route supprimée par #5312, le service orphelin l'est ici
  *   L5  — PII sur stdout dans `update-referents-by-csv` : route supprimée (cle-routes-supprimees.test.ts)
  */
@@ -18,16 +18,11 @@ import getAppHelper, { resetAppAuth } from "./helpers/app";
 import { assertImportedFile, buildImportedFileKey } from "../utils/importedFile";
 import { scanFile } from "../utils/virusScanner";
 import { uploadFile } from "../utils";
-import { importPointDeRassemblement } from "../planDeTransport/pointDeRassemblement/import/pointDeRassemblementImportService";
 
 jest.mock("../sentry", () => ({ capture: jest.fn(), captureMessage: jest.fn() }));
 jest.mock("../brevo", () => ({ ...jest.requireActual("../brevo"), sendTemplate: jest.fn().mockResolvedValue(undefined) }));
 jest.mock("../utils/virusScanner", () => ({ scanFile: jest.fn().mockResolvedValue({ infected: false }) }));
 jest.mock("../utils", () => ({ ...jest.requireActual("../utils"), uploadFile: jest.fn().mockResolvedValue({}) }));
-jest.mock("../planDeTransport/pointDeRassemblement/import/pointDeRassemblementImportService", () => ({
-  ...jest.requireActual("../planDeTransport/pointDeRassemblement/import/pointDeRassemblementImportService"),
-  importPointDeRassemblement: jest.fn(),
-}));
 
 jest.setTimeout(60000);
 
@@ -136,55 +131,6 @@ describe("L32 — POST /plan-marketing/import", () => {
 
     expect(res.status).toBe(403);
     expect(uploadFile).not.toHaveBeenCalled();
-  });
-});
-
-describe("L33 — POST /point-de-rassemblement/import", () => {
-  it("range le fichier sous une clé générée côté serveur", async () => {
-    (importPointDeRassemblement as jest.Mock).mockResolvedValueOnce([{ matricule: "PDR-1", action: "created" }]);
-    const before = fileUploadTempFiles();
-    const res = await request(getAppHelper(SUPER_ADMIN))
-      .post("/point-de-rassemblement/import")
-      .attach("file", XLSX_BUFFER, { filename: "../x.xlsx", contentType: MIME_TYPES.EXCEL });
-
-    expect(res.status).toBe(200);
-    const keys = (uploadFile as jest.Mock).mock.calls.map(([key]) => key);
-    expect(keys[0]).toMatch(/^file\/point-de-rassemblement\/[A-Za-z0-9_-]+\.xlsx$/);
-    expect(keys.join(" ")).not.toContain("..");
-
-    await waitForTempFilesPurge(before);
-    expect(fileUploadTempFiles().filter((name) => !before.includes(name))).toEqual([]);
-  });
-
-  it("ne renvoie pas le message d'une erreur technique", async () => {
-    (importPointDeRassemblement as jest.Mock).mockRejectedValueOnce(new Error("E11000 duplicate key error collection: snu.pointderassemblements"));
-    const res = await request(getAppHelper(SUPER_ADMIN))
-      .post("/point-de-rassemblement/import")
-      .attach("file", XLSX_BUFFER, { filename: "pdr.xlsx", contentType: MIME_TYPES.EXCEL });
-
-    expect(res.status).toBe(422);
-    expect(res.body).toEqual({ ok: false, code: ERRORS.FILE_CORRUPTED });
-  });
-
-  it("garde le message des colonnes manquantes, destiné à l'utilisateur", async () => {
-    const { checkColumnHeaders } = jest.requireActual("../planDeTransport/pointDeRassemblement/import/pointDeRassemblementImportService");
-    (importPointDeRassemblement as jest.Mock).mockImplementationOnce(async () => checkColumnHeaders(["Adresse"]));
-    const res = await request(getAppHelper(SUPER_ADMIN))
-      .post("/point-de-rassemblement/import")
-      .attach("file", XLSX_BUFFER, { filename: "pdr.xlsx", contentType: MIME_TYPES.EXCEL });
-
-    expect(res.status).toBe(422);
-    expect(res.body.code).toBe(ERRORS.INVALID_BODY);
-    expect(res.body.message).toContain("Matricule du point de rassemblement");
-  });
-
-  it("refuse un fichier qui n'est pas un classeur XLSX sans rien téléverser", async () => {
-    const res = await request(getAppHelper(SUPER_ADMIN)).post("/point-de-rassemblement/import").attach("file", CSV, { filename: "pdr.xlsx", contentType: MIME_TYPES.EXCEL });
-
-    expect(res.status).toBe(422);
-    expect(res.body).toEqual({ ok: false, code: ERRORS.UNSUPPORTED_TYPE });
-    expect(uploadFile).not.toHaveBeenCalled();
-    expect(importPointDeRassemblement).not.toHaveBeenCalled();
   });
 });
 

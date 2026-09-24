@@ -31,17 +31,16 @@ import { uploadFile, validatePassword, ERRORS, inSevenDays, isYoung, isReferent,
 import { getMimeFromFile, getMimeFromBuffer } from "../../utils/file";
 import { sendTemplate, unsync } from "../../brevo";
 import { cookieOptions, COOKIE_SIGNIN_MAX_AGE_MS } from "../../cookie-options";
-import { validateYoung, validateId, validatePhase1Document, idSchema } from "../../utils/validator";
+import { validateYoung, validateId, idSchema } from "../../utils/validator";
 import patches from "../patches";
 import { serializeYoung, serializeApplication, serializeContract, serializeReferent, serializeMission } from "../../utils/serializer";
 import { youngPerimeterMiddleware } from "./youngPerimeterMiddleware";
-import { canAccessYoungDocumentsInScope, canEditYoungInScope, isSessionPhase1InUserScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
+import { canAccessYoungDocumentsInScope, canEditYoungInScope, isYoungInReferentGeography, isYoungInUserScope } from "../../young/youngScope";
 import { purgeYoungFiles } from "../../young/youngFilesPurge";
 import {
   canDeleteYoung,
   canGetYoungByEmail,
   canInviteYoung,
-  canEditPresenceYoung,
   canDeletePatchesHistory,
   SENDINBLUE_TEMPLATES,
   YOUNG_STATUS_PHASE1,
@@ -52,7 +51,6 @@ import {
   YOUNG_SOURCE,
   youngCanChangeSession,
   youngCanWithdraw,
-  translateFileStatusPhase1,
   REGLEMENT_INTERIEUR_VERSION,
   getDepartmentForInscriptionGoal,
   FUNCTIONAL_ERRORS,
@@ -61,12 +59,12 @@ import {
   ContractType,
   CohortType,
   ReferentType,
-  getCohortPeriod,
   WITHRAWN_REASONS,
   PERMISSION_RESOURCES,
   isReadAuthorized,
   PERMISSION_CODES,
-  PERMISSION_ACTIONS, ReferentStatus,
+  PERMISSION_ACTIONS,
+  ReferentStatus,
 } from "snu-lib";
 import { getFilteredSessionsForChangementSejour } from "../../cohort/cohortService";
 import { anonymizeApplicationsFromYoungId } from "../../application/applicationService";
@@ -81,8 +79,7 @@ import { FileTypeResult } from "file-type";
 import { requestValidatorMiddleware } from "../../middlewares/requestValidatorMiddleware";
 import { authMiddleware } from "../../middlewares/authMiddleware";
 import { accessControlMiddleware } from "../../middlewares/accessControlMiddleware";
-import { handleNotificationForDeparture, handleNotifForYoungWithdrawn } from "../../young/youngService";
-import { autoValidationSessionPhase1Young } from "../../sessionPhase1/validation/sessionPhase1ValidationService";
+import { handleNotifForYoungWithdrawn } from "../../young/youngService";
 import { permissionAccessControlMiddleware } from "../../middlewares/permissionAccessControlMiddleware";
 
 const router = express.Router();
@@ -124,7 +121,9 @@ router.get(
 );
 router.post("/logout", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.logout(req, res));
 router.get("/signin_token", passport.authenticate("young", { session: false, failWithError: true }), (req, res) => YoungAuth.signinToken(req, res));
-router.post("/forgot_password", emailSendingRateLimiter("young-forgot-password"), async (req: UserRequest, res) => YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`));
+router.post("/forgot_password", emailSendingRateLimiter("young-forgot-password"), async (req: UserRequest, res) =>
+  YoungAuth.forgotPassword(req, res, `${config.APP_URL}/auth/reset`),
+);
 router.post("/forgot_password_reset", youngSigninLimiter, async (req: UserRequest, res) => YoungAuth.forgotPasswordReset(req, res));
 router.post("/reset_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.resetPassword(req, res));
 router.post("/check_password", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => YoungAuth.checkPassword(req, res));
@@ -1020,185 +1019,6 @@ router.get("/", passport.authenticate(["referent"], { session: false, failWithEr
   }
 });
 
-router.put("/phase1/:document", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    // `rules` n'est plus accepté : l'acceptation du règlement intérieur n'est plus demandée au jeune et aucun
-    // écran n'appelait plus cette route pour elle (audit 2026-09-21, M49).
-    const keys = ["cohesionStayMedical", "imageRight", "agreement", "convocation"];
-    const { error: documentError, value: document } = Joi.string<"cohesionStayMedical" | "imageRight" | "agreement" | "convocation">()
-      .required()
-      .valid(...keys)
-      .validate(req.params.document, { stripUnknown: true });
-    if (documentError) return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
-
-    const young = await YoungModel.findById(req.user._id);
-    if (!young) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-
-    const { error: bodyError, value } = validatePhase1Document(req.body, document);
-    if (bodyError) return res.status(400).send({ ok: false, code: bodyError });
-
-    // Droit à l'image : le jeune ne dépose qu'une demande (pièces + statut à vérifier). Le drapeau effectif
-    // `imageRight`, consommé par les exports et attestations, n'est écrit que par un référent
-    // (audit 2026-09-21, M49) ; `validatePhase1Document` ne l'accepte plus.
-    if (["imageRight"].includes(document)) {
-      value[`${document}FilesStatus`] = "WAITING_VERIFICATION";
-      value[`${document}FilesComment`] = undefined;
-    }
-
-    young.set(value);
-    await young.save({ fromUser: req.user });
-
-    if (document === "imageRight") {
-      let template = SENDINBLUE_TEMPLATES.young.PHASE_1_PJ_WAITING_VERIFICATION;
-      let cc = getCcOfYoung({ template, young });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: { type_document: translateFileStatusPhase1(document) },
-        cc,
-      });
-    }
-
-    // uniquement post affectation
-    if (document === "agreement") {
-      // youngPhase1Agreement est forcément true ici
-      let template = SENDINBLUE_TEMPLATES.young.PHASE1_AGREEMENT;
-      let cc = getCcOfYoung({ template, young });
-      const cohort = await CohortModel.findOne({ name: young.cohort });
-      await sendTemplate(template, {
-        emailTo: [{ name: `${young.firstName} ${young.lastName}`, email: young.email }],
-        params: {
-          cta: `${config.APP_URL}`,
-          date_cohorte: cohort ? getCohortPeriod(cohort) : "",
-          youngFirstName: young.firstName,
-          youngLastName: young.lastName,
-        },
-        cc,
-      });
-    }
-
-    return res.status(200).send({ ok: true, data: serializeYoung(young, req.user) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/phase1/multiaction/depart", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const { error, value } = Joi.object({
-      departSejourMotif: Joi.string().required(),
-      departSejourAt: Joi.string().required(),
-      departSejourMotifComment: Joi.string().optional().allow(null, ""),
-      ids: Joi.array().items(Joi.string().required()).required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    const { departSejourMotif, departSejourAt, departSejourMotifComment, ids } = value;
-
-    const youngs = await YoungModel.find({ _id: { $in: ids } });
-    if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    if (!canEditPresenceYoung(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    // `canEditPresenceYoung` n'est qu'une matrice de rôles : la session du lot doit être rattachée à
-    // l'acteur (audit 2026-09-21, M50).
-    if (!(await isSessionPhase1InUserScope(req.user, youngs[0].sessionPhase1Id))) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    for (let young of youngs) {
-      young.set({ departSejourAt, departSejourMotif, departSejourMotifComment, departInform: "true" });
-      await young.save({ fromUser: req.user });
-      await autoValidationSessionPhase1Young({ young, user: req.user });
-    }
-
-    for (let young of youngs) {
-      await handleNotificationForDeparture(young, departSejourMotif, departSejourMotifComment);
-    }
-
-    res.status(200).send({ ok: true, data: youngs.map((young) => serializeYoung(young, req.user)) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
-router.post("/phase1/multiaction/:key", passport.authenticate("referent", { session: false, failWithError: true }), async (req: UserRequest, res) => {
-  try {
-    const allowedKeys = ["cohesionStayPresence", "presenceJDM", "cohesionStayMedicalFileReceived"];
-    const { error, value } = Joi.object({
-      value: Joi.string().trim().valid("true", "false").required(),
-      key: Joi.string()
-        .trim()
-        .required()
-        .valid(...allowedKeys),
-      ids: Joi.array().items(Joi.string().required()).required(),
-    })
-      .unknown()
-      .validate({ ...req.params, ...req.body }, { stripUnknown: true });
-    if (error) {
-      capture(error);
-      return res.status(400).send({ ok: false, code: ERRORS.INVALID_BODY });
-    }
-
-    const { value: newValue, key, ids } = value;
-
-    const youngs = await YoungModel.find({ _id: { $in: ids } });
-    if (!youngs || youngs?.length === 0) return res.status(404).send({ ok: false, code: ERRORS.YOUNG_NOT_FOUND });
-
-    if (!canEditPresenceYoung(req.user)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (youngs.some((young) => young.sessionPhase1Id !== youngs[0].sessionPhase1Id)) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    if (!(await isSessionPhase1InUserScope(req.user, youngs[0].sessionPhase1Id))) {
-      return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-    }
-
-    for (let young of youngs) {
-      if ((key === "cohesionStayPresence" && newValue === "false") || (key === "presenceJDM" && young.cohesionStayPresence === "false")) {
-        young.set({ cohesionStayPresence: "false", presenceJDM: "false" });
-      } else {
-        young.set({ [key]: newValue });
-      }
-      await young.save({ fromUser: req.user });
-      const sessionPhase1 = await SessionPhase1Model.findById(young.sessionPhase1Id);
-      await autoValidationSessionPhase1Young({ young, user: req.user });
-      await updatePlacesSessionPhase1(sessionPhase1, req.user);
-      if (key === "cohesionStayPresence" && newValue === "true") {
-        let emailTo = [{ name: `${young.parent1FirstName} ${young.parent1LastName}`, email: young.parent1Email! }];
-        if (young.parent2Email) emailTo.push({ name: `${young.parent2FirstName} ${young.parent2LastName}`, email: young.parent2Email! });
-        await sendTemplate(SENDINBLUE_TEMPLATES.YOUNG_ARRIVED_IN_CENTER_TO_REPRESENTANT_LEGAL, {
-          emailTo,
-          params: {
-            youngFirstName: young.firstName,
-            youngLastName: young.lastName,
-          },
-        });
-      }
-    }
-
-    res.status(200).send({ ok: true, data: youngs.map((young) => serializeYoung(young, req.user)) });
-  } catch (error) {
-    capture(error);
-    res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
-  }
-});
-
 router.get("/file/:youngId/:key/:fileName", passport.authenticate("young", { session: false, failWithError: true }), async (req: UserRequest, res) => {
   try {
     const { error, value } = Joi.object({
@@ -1264,7 +1084,6 @@ router.use("/note/:youngId", youngPerimeterMiddleware({ paramName: "youngId" }),
 router.use("/:id/documents", youngPerimeterMiddleware({ referentAccess: canAccessYoungDocumentsInScope }), require("./documents"));
 router.use("/:id/meeting-point", youngPerimeterMiddleware(), require("./meeting-point"));
 router.use("/:id/session", youngPerimeterMiddleware(), require("./session"));
-router.use("/:id/phase1", youngPerimeterMiddleware(), require("./phase1").default);
 router.use("/:id/phase2", youngPerimeterMiddleware(), require("./phase2"));
 router.use("/:id/point-de-rassemblement", youngPerimeterMiddleware(), require("./point-de-rassemblement"));
 

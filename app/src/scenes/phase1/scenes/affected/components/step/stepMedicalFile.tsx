@@ -1,43 +1,16 @@
 import React, { useState } from "react";
-import api from "../../../../../../services/api";
 import MedicalFileModal from "../../../../components/MedicalFileModal";
 import { StepCard } from "../StepCard";
-import { setYoung } from "@/redux/auth/actions";
-import { useDispatch } from "react-redux";
 import { STEPS, useSteps } from "../../utils/steps.utils";
-import { capture } from "@/sentry";
-import useAuth from "@/services/useAuth";
 import useAffectationData from "../../utils/useAffectationInfo";
 
 export default function StepMedicalField() {
   const index = 4;
-  const { young } = useAuth();
   const { session } = useAffectationData();
   const { isStepDone } = useSteps();
-  const isEnabled = isStepDone(STEPS.CONVOCATION);
   const isDone = isStepDone(STEPS.MEDICAL_FILE);
-  const dispatch = useDispatch();
   const [open, setOpen] = useState(false);
   const email = session?.sanitaryContactEmail;
-
-  async function handleClick() {
-    if (young?.cohesionStayMedicalFileDownload === "true") return;
-    try {
-      const { ok, data, code } = await api.put("/young/phase1/cohesionStayMedical", { cohesionStayMedicalFileDownload: "true" });
-      if (!ok) throw new Error(code);
-      dispatch(setYoung(data));
-    } catch (e) {
-      capture(e);
-    }
-  }
-
-  if (!isEnabled) {
-    return (
-      <StepCard variant="disabled" index={index}>
-        <p className="font-medium text-gray-400">Transmettez votre fiche sanitaire</p>
-      </StepCard>
-    );
-  }
 
   return (
     <StepCard variant={isDone ? "done" : ""} index={index}>
@@ -80,7 +53,7 @@ export default function StepMedicalField() {
           </button>
         </div>
       )}
-      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} onClick={handleClick} />
+      <MedicalFileModal title="Comment transmettre ma fiche sanitaire ?" isOpen={open} onClose={() => setOpen(false)} />
     </StepCard>
   );
 }

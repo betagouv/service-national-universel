@@ -1,34 +1,14 @@
-import { Body, Controller, Get, Inject, Param, Post, Request, UseGuards } from "@nestjs/common";
-import {
-    TaskName,
-    TaskStatus,
-    DesistementRoutes,
-    DesisterSimulationTaskParameters,
-    DesisterValiderTaskParameters,
-} from "snu-lib";
-import { TaskGateway } from "@task/core/Task.gateway";
+import { Controller, Get, Inject, Param, UseGuards } from "@nestjs/common";
+import { TaskName, DesistementRoutes } from "snu-lib";
 import { AdminGuard } from "@admin/infra/iam/guard/Admin.guard";
-import { SuperAdminGuard } from "@admin/infra/iam/guard/SuperAdmin.guard";
-import { TaskMapper } from "@task/infra/Task.mapper";
-import { CustomRequest } from "@shared/infra/CustomRequest";
 import { Phase1Service, StatusSimulation, StatusValidation } from "@admin/core/sejours/phase1/Phase1.service";
-import {
-    GetDesistementParamsDto,
-    PostSimulationDesistementParamsDto,
-    PostSimulationsDesistementPayloadDto,
-    PostValiderDesistementParamsDto,
-} from "./Desistement.validation";
-import { FunctionalException, FunctionalExceptionCode } from "@shared/core/FunctionalException";
-import { ValiderAffectationHTSDromComTaskModel } from "@admin/core/sejours/phase1/affectation/ValiderAffectationHTSDromComTask.model";
-import { FileGateway } from "@shared/core/File.gateway";
+import { GetDesistementParamsDto } from "./Desistement.validation";
 
+// POST /:sessionId/simulation et POST /:sessionId/simulation/:taskId/valider sont supprimées :
+// seul le statut (lecture de l'historique des tâches) reste exposé.
 @Controller("desistement")
 export class DesistementController {
-    constructor(
-        @Inject(Phase1Service) private readonly phase1Service: Phase1Service,
-        @Inject(TaskGateway) private readonly taskGateway: TaskGateway,
-        @Inject(FileGateway) private readonly fileGateway: FileGateway,
-    ) {}
+    constructor(@Inject(Phase1Service) private readonly phase1Service: Phase1Service) {}
 
     @UseGuards(AdminGuard)
     @Get("/:sessionId")
@@ -54,85 +34,5 @@ export class DesistementController {
                 lastCompletedAt: traitement.lastCompletedAt?.toISOString(),
             },
         };
-    }
-
-    @UseGuards(AdminGuard)
-    @Post("/:sessionId/simulation")
-    async simulationDesister(
-        @Request() request: CustomRequest,
-        @Param() { sessionId }: PostSimulationDesistementParamsDto,
-        @Body() payload: PostSimulationsDesistementPayloadDto,
-    ): Promise<DesistementRoutes["PostSimuler"]["response"]> {
-        const affectationTask: ValiderAffectationHTSDromComTaskModel = await this.taskGateway.findById(
-            payload.affectationTaskId,
-        );
-        if (!affectationTask.metadata?.results?.rapportKey) {
-            throw new FunctionalException(
-                FunctionalExceptionCode.NOT_FOUND,
-                "Fichier associé à l'affectation introuvable",
-            );
-        }
-        const parameters: DesisterSimulationTaskParameters = {
-            sessionId,
-            affectationTaskId: payload.affectationTaskId,
-            affectationFileName: this.fileGateway.baseName(affectationTask.metadata.results.rapportKey),
-            auteur: {
-                id: request.user.id,
-                prenom: request.user.prenom,
-                nom: request.user.nom,
-                role: request.user.role,
-                sousRole: request.user.sousRole,
-            },
-        };
-        const task = await this.taskGateway.create({
-            name: TaskName.DESISTEMENT_POST_AFFECTATION_SIMULATION,
-            status: TaskStatus.PENDING,
-            metadata: {
-                parameters,
-            },
-        });
-        return TaskMapper.toDto(task);
-    }
-
-    @UseGuards(SuperAdminGuard)
-    @Post("/:sessionId/simulation/:taskId/valider")
-    async validerionDesister(
-        @Request() request: CustomRequest,
-        @Param() { sessionId, taskId }: PostValiderDesistementParamsDto,
-    ): Promise<DesistementRoutes["PostSimuler"]["response"]> {
-        const simulationTask = await this.taskGateway.findById(taskId);
-
-        // On verifie qu'une simulation n'a pas déjà été affecté en amont
-        const { status, lastCompletedAt } = await this.phase1Service.getStatusValidation(
-            sessionId,
-            TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER,
-        );
-
-        if (
-            [TaskStatus.IN_PROGRESS, TaskStatus.PENDING].includes(status as TaskStatus) ||
-            (lastCompletedAt && simulationTask.createdAt <= lastCompletedAt)
-        ) {
-            throw new FunctionalException(FunctionalExceptionCode.SIMULATION_OUTDATED);
-        }
-
-        const parameters: DesisterValiderTaskParameters = {
-            sessionId,
-            simulationTaskId: taskId,
-            auteur: {
-                id: request.user.id,
-                prenom: request.user.prenom,
-                nom: request.user.nom,
-                role: request.user.role,
-                sousRole: request.user.sousRole,
-            },
-        };
-        const task = await this.taskGateway.create({
-            name: TaskName.DESISTEMENT_POST_AFFECTATION_VALIDER,
-            status: TaskStatus.PENDING,
-            metadata: {
-                parameters,
-            },
-        });
-        return TaskMapper.toDto(task);
     }
 }

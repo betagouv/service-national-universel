@@ -80,9 +80,6 @@ const PERMISSIONS_BY_ROUTE = {
   "/ligne-de-bus": {
     permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.READ }],
   },
-  "/edit-transport": {
-    permissions: [{ resource: PERMISSION_RESOURCES.LIGNE_BUS, action: PERMISSION_ACTIONS.WRITE }],
-  },
   "/volontaire": {
     ignorePolicy: true, // should have read permission but not specific to a young
     permissions: [{ resource: PERMISSION_RESOURCES.YOUNG, action: PERMISSION_ACTIONS.READ }],

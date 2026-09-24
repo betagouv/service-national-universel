@@ -1,6 +1,6 @@
 import React from "react";
 import { useToggle } from "react-use";
-import { useDownloadConvocation, useSendConvocationByEmail, useValidateConvocationStep } from "../../utils/convocationMutations";
+import { useDownloadConvocation, useSendConvocationByEmail } from "../../utils/convocationMutations";
 import plausibleEvent from "@/services/plausible";
 import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
@@ -14,13 +14,11 @@ export default function StepConvocation() {
   const index = 3;
   const { young, isCLE } = useAuth();
   const { isStepDone } = useSteps();
-  const isEnabled = isStepDone(STEPS.AGREEMENT);
   const isDone = isStepDone(STEPS.CONVOCATION);
   const [isEmailOpen, setIsEmailOpen] = useToggle(false);
   const [isConvocationOpen, setIsConvocationOpen] = useToggle(false);
   const { mutate: download, isPending: isDownloadPending } = useDownloadConvocation();
   const { mutate: sendByEmail } = useSendConvocationByEmail();
-  const { mutate: validateStep } = useValidateConvocationStep();
 
   const handleDownload = () => {
     plausibleEvent("Phase1/telechargement convocation");
@@ -34,18 +32,7 @@ export default function StepConvocation() {
 
   const handleView = () => {
     setIsConvocationOpen(true);
-    if (!isDone) {
-      validateStep();
-    }
   };
-
-  if (!isEnabled) {
-    return (
-      <StepCard variant="disabled" index={index}>
-        <p className="font-medium text-gray-400">Téléchargez votre convocation</p>
-      </StepCard>
-    );
-  }
 
   return (
     <StepCard variant={isDone ? "done" : ""} index={index}>

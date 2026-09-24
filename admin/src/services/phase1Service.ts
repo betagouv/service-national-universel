@@ -31,22 +31,6 @@ const Phase1Service = {
       target: "API_V2",
     })();
   },
-  deletePlanDeTransport: async (sessionId: string) => {
-    return await buildRequest<Phase1Routes["DeletePDT"]>({
-      path: "/phase1/{sessionId}/plan-de-transport",
-      method: "DELETE",
-      params: { sessionId },
-      target: "API_V2",
-    })();
-  },
-  deleteLigneBus: async (sessionId: string, busId: string) => {
-    return await buildRequest<Phase1Routes["DeleteLigneBus"]>({
-      path: "/phase1/{sessionId}/ligne-de-bus/{busId}",
-      method: "DELETE",
-      params: { sessionId, busId },
-      target: "API_V2",
-    })();
-  },
   getLigneBusStats: async (
     ligneDeBusId: string,
   ): Promise<{

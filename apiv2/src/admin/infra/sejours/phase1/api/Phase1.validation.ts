@@ -1,4 +1,4 @@
-import { IsEnum, IsIn, IsMongoId, ValidateIf } from "class-validator";
+import { IsEnum, IsIn, ValidateIf } from "class-validator";
 
 import { TaskName, TaskStatus } from "snu-lib";
 
@@ -23,14 +23,6 @@ export const PHASE1_TRAITEMENTS_TASK_NAMES = [
 
 // Le front envoie `?name=` quand aucun filtre n'est choisi : une chaîne vide vaut absence.
 const isProvided = (value: unknown) => value !== undefined && value !== null && value !== "";
-
-export class DeleteLigneDeBusParamsDto {
-    @IsMongoId()
-    sessionId: string;
-
-    @IsMongoId()
-    ligneId: string;
-}
 
 // Chaque paramètre est borné à une liste fermée : un objet (`?name[$ne]=x`) est refusé
 // avant d'atteindre le filtre Mongo, et `name` ne sort pas de la famille de tâches listée.

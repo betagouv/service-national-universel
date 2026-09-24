@@ -1,10 +1,9 @@
 import React from "react";
 import { useHistory, useLocation } from "react-router";
-import { HiOutlineDocumentDownload, HiOutlineDocumentReport, HiOutlineDocumentText } from "react-icons/hi";
+import { HiOutlineDocumentDownload, HiOutlineDocumentReport } from "react-icons/hi";
 
 import { Container, NavbarControlled } from "@snu/ds/admin";
 
-import ActionsSubTab from "./actions/ActionsSubTab";
 import SimulationsSubTab from "./simulations/SimulationsSubTab";
 import TraitementsSubTab from "./traitements/TraitementsSubTab";
 import { CohortDto } from "snu-lib";
@@ -17,7 +16,8 @@ export default function OperationsTab({ session }: OperationTabProps) {
   const history = useHistory();
   const { search } = useLocation();
 
-  const currentTab = (new URLSearchParams(search).get("tab") || "actions") as "actions" | "simulations" | "traitements";
+  // Les actions (lancement de simulations et de traitements) ont été supprimées : seul l'historique reste consultable.
+  const currentTab = (new URLSearchParams(search).get("tab") || "simulations") as "simulations" | "traitements";
 
   const tabs: Array<{
     id: typeof currentTab;
@@ -25,13 +25,6 @@ export default function OperationsTab({ session }: OperationTabProps) {
     leftIcon: React.ReactNode;
     content?: React.ReactNode;
   }> = [
-    {
-      id: "actions",
-      title: "Actions des opérations",
-      leftIcon: <HiOutlineDocumentText size={20} className="mt-0.5" />,
-      content: <ActionsSubTab session={session} />,
-    },
-
     {
       id: "simulations" as const,
       title: "Historique des simulations",
