@@ -146,14 +146,21 @@ export const getClasseById = async (classeId, withPopulate = true) => {
   return classe;
 };
 
+// Champs exposés sans authentification (formulaire de contact public, page « Ma situation scolaire »).
+// La racine du document est projetée explicitement : identifiants liés (session, centre, ligne,
+// point de rassemblement, référents), effectifs, statut de validation et métadonnées ne sortent pas.
+const PUBLIC_CLASSE_FIELDS = ["name", "uniqueKeyAndId", "coloration", "grades", "status", "cohort"] as const;
+// Clés locales des virtuals peuplés : lues pour la population, jamais renvoyées.
+const PUBLIC_CLASSE_POPULATE_KEYS = ["referentClasseIds", "etablissementId"] as const;
+
 export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
-  let query = ClasseModel.findById(classeId);
+  let query = ClasseModel.findById(classeId).select([...PUBLIC_CLASSE_FIELDS, ...PUBLIC_CLASSE_POPULATE_KEYS].join(" "));
 
   if (withPopulate) {
     query = query
       .populate({ path: "referents", options: { select: { firstName: 1, lastName: 1 } } })
       .populate({ path: "cohortDetails", options: { select: { dateStart: 1, dateEnd: 1 } } })
-      .populate({ path: "etablissement", options: { select: { name: 1, schoolYear: 1 } } });
+      .populate({ path: "etablissement", options: { select: { name: 1, city: 1, schoolYear: 1 } } });
   }
 
   const classe = await query.exec();
@@ -162,7 +169,20 @@ export const getClasseByIdPublic = async (classeId, withPopulate = true) => {
     return null;
   }
 
-  return classe;
+  const publicClasse: Record<string, unknown> = { _id: classe._id, id: classe._id.toString() };
+  for (const field of PUBLIC_CLASSE_FIELDS) publicClasse[field] = classe[field];
+  if (withPopulate) {
+    publicClasse.referents = (classe.referents || []).map((referent) => ({
+      _id: referent._id,
+      id: referent._id.toString(),
+      firstName: referent.firstName,
+      lastName: referent.lastName,
+      fullName: referent.fullName,
+    }));
+    publicClasse.cohortDetails = classe.cohortDetails ? { dateStart: classe.cohortDetails.dateStart, dateEnd: classe.cohortDetails.dateEnd } : null;
+    publicClasse.etablissement = classe.etablissement ? { name: classe.etablissement.name, city: classe.etablissement.city, schoolYear: classe.etablissement.schoolYear } : null;
+  }
+  return publicClasse;
 };
 
 export const updateReferentByClasseId = async (classeId: string, newReferent: UpdateReferentClasse, fromUser: object) => {
