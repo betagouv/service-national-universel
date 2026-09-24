@@ -4,6 +4,8 @@ import { ROLES } from "snu-lib";
 import getAppHelper, { getAppHelperWithAcl, resetAppAuth } from "./helpers/app";
 import { dbConnect, dbClose } from "./helpers/db";
 import { getNewReferentFixture } from "./fixtures/referent";
+import getNewStructureFixture from "./fixtures/structure";
+import { StructureModel } from "../models";
 import { PermissionModel } from "../models/permissions/permission";
 import { addPermissionHelper } from "./helpers/permissions";
 import { PERMISSION_ACTIONS, PERMISSION_RESOURCES } from "snu-lib";
@@ -382,5 +384,71 @@ describe("H24/H25/H70 — index referent", () => {
     // Sans borne géographique, aucun des champs de périmètre n'apparaît dans la requête.
     expect(query).toMatch(/region\.keyword|department\.keyword|structureId\.keyword/);
     expect(leakedSecrets(res.body, REFERENT_SECRETS)).toEqual([]);
+  });
+});
+
+describe("GOO-46 — annuaire « Utilisateurs » d'un référent départemental", () => {
+  /** Valeurs `structureId.keyword` du périmètre poussé à ES pour les responsables / superviseurs. */
+  const structureIdsInQuery = (query: any = lastMsearchQuery()): string[] => {
+    const found: string[] = [];
+    const walk = (node: any) => {
+      if (!node || typeof node !== "object") return;
+      if (Array.isArray(node)) return node.forEach(walk);
+      if (Array.isArray(node.terms?.["structureId.keyword"])) found.push(...node.terms["structureId.keyword"]);
+      Object.values(node).forEach(walk);
+    };
+    walk(query);
+    return found;
+  };
+
+  let structure92: string, structureParis: string, teteDeReseauParis: string, structureNantes: string;
+
+  beforeAll(async () => {
+    await StructureModel.deleteMany({});
+    const teteDeReseau = await StructureModel.create({ ...getNewStructureFixture(), name: "Réseau national", department: "Paris", region: "Île-de-France" });
+    teteDeReseauParis = teteDeReseau._id.toString();
+    structure92 = (
+      await StructureModel.create({ ...getNewStructureFixture(), department: "Hauts-de-Seine", region: "Île-de-France", networkId: teteDeReseauParis })
+    )._id.toString();
+    structureParis = (await StructureModel.create({ ...getNewStructureFixture(), department: "Paris", region: "Île-de-France" }))._id.toString();
+    structureNantes = (await StructureModel.create({ ...getNewStructureFixture(), department: "Loire-Atlantique", region: "Pays de la Loire" }))._id.toString();
+  });
+
+  afterAll(async () => {
+    await StructureModel.deleteMany({});
+  });
+
+  beforeEach(() => {
+    setEsDocs(referentDoc());
+  });
+
+  it.each(["search", "export"])("référent du 92 (%s) : seuls les responsables des structures du 92", async (action) => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" } as any))
+      .post(`/elasticsearch/referent/${action}`)
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery(action === "export" ? mockEsCalls.search[mockEsCalls.search.length - 1].body : undefined);
+    expect(ids).toContain(structure92);
+    expect(ids).not.toContain(structureParis);
+    expect(ids).not.toContain(teteDeReseauParis);
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional d'Île-de-France : toutes les structures de sa région, et elles seules", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: "Île-de-France" } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    const ids = structureIdsInQuery();
+    expect(ids).toEqual(expect.arrayContaining([structure92, structureParis, teteDeReseauParis]));
+    expect(ids).not.toContain(structureNantes);
+  });
+
+  it("référent régional sans région : aucune structure", async () => {
+    const res = await request(getAppHelper({ ...getNewReferentFixture(), role: ROLES.REFERENT_REGION, department: [], region: undefined } as any))
+      .post("/elasticsearch/referent/search")
+      .send({ filters: {} });
+    expect(res.status).toBe(200);
+    expect(structureIdsInQuery()).toEqual([]);
   });
 });

@@ -734,6 +734,49 @@ describe("Sécurité référent — audit 2026-09-21", () => {
       expect(res.statusCode).toEqual(200);
     });
 
+    // GOO-46 : l'annuaire d'un référent départemental liste les référents régionaux et visiteurs de sa région.
+    it.each([ROLES.REFERENT_REGION, ROLES.VISITOR])("GOO-46 — autorise un référent départemental lisant un %s de sa région", async (role) => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role, department: [], region: "Île-de-France" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(200);
+    });
+
+    it("GOO-46 — refuse un référent départemental lisant un référent régional d'une autre région", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, department: [], region: "Bretagne" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
+    it("GOO-46 — la lecture du référent régional n'ouvre pas sa modification au référent départemental", async () => {
+      const cible = await createReferentHelper(getNewReferentFixture({ role: ROLES.REFERENT_REGION, department: [], region: "Île-de-France" }));
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" };
+
+      const res = await request(await getAppHelperWithAcl(actor))
+        .put(`/referent/${cible._id}`)
+        .send({ firstName: "Pirate" });
+
+      expect(res.statusCode).toEqual(403);
+      expect((await getReferentByIdHelper(cible._id.toString()))?.firstName).toEqual(cible.firstName);
+    });
+
+    it("GOO-46 — refuse un référent départemental lisant un responsable d'une structure du département voisin", async () => {
+      const structureParis = await createStructureHelper({ ...getNewStructureFixture(), department: "Paris", region: "Île-de-France" } as any);
+      const cible = await createReferentHelper(
+        getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: structureParis._id.toString(), department: undefined, region: undefined } as any),
+      );
+      const actor = { role: ROLES.REFERENT_DEPARTMENT, department: ["Hauts-de-Seine"], region: "Île-de-France" };
+
+      const res = await request(await getAppHelperWithAcl(actor)).get(`/referent/${cible._id}`);
+
+      expect(res.statusCode).toEqual(403);
+    });
+
     it("autorise la lecture de son propre profil", async () => {
       const moi = await createReferentHelper(getNewReferentFixture({ role: ROLES.RESPONSIBLE, structureId: new ObjectId().toString() }));
 

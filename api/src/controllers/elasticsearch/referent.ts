@@ -45,22 +45,28 @@ function toDepartments(department: UserDto["department"]): string[] {
 }
 
 /**
- * Structures du périmètre d'un référent départemental ou régional, têtes de
- * réseau incluses (elles ne portent pas toujours de région).
+ * Structures du périmètre d'un référent départemental ou régional.
+ *
+ * Doit rester aligné sur la lecture d'une fiche (`isReferentReadableByUser`) : un responsable
+ * n'apparaît dans l'annuaire que si sa fiche est lisible (GOO-46).
+ * - référent départemental : les structures de SES départements. Le critère « région de ses
+ *   départements » remontait toutes les structures de la région, donc les coordonnées de leurs
+ *   responsables, alors que leurs fiches répondaient 403 ;
+ * - référent régional : les structures de sa région (région ou département de la région, certaines
+ *   ne portent que l'un des deux).
+ * Les têtes de réseau rattachées ne sont plus ajoutées : situées hors du territoire (souvent
+ * nationales), leurs responsables n'étaient pas lisibles par le référent.
  */
 async function getStructureIdsInPerimeter(user: UserDto): Promise<string[]> {
-  const userDepartments = toDepartments(user.department);
-  const regions = user.role === ROLES.REFERENT_REGION ? [user.region] : [...new Set(userDepartments.map((department) => department2region[department]).filter(Boolean))];
-  const departments = user.role === ROLES.REFERENT_REGION ? region2department[user.region as string] || [] : userDepartments;
+  // Sans région, `{ region: undefined }` remonterait les structures sans région.
+  if (user.role === ROLES.REFERENT_REGION && !user.region) return [];
+  const query =
+    user.role === ROLES.REFERENT_REGION
+      ? { $or: [{ region: user.region }, { department: { $in: region2department[user.region as string] || [] } }] }
+      : { department: { $in: toDepartments(user.department) } };
 
-  const structures = await StructureModel.find({ $or: [{ region: { $in: regions } }, { department: { $in: departments } }] }).select({ _id: 1, networkId: 1 });
-
-  const ids = new Set<string>();
-  for (const structure of structures) {
-    ids.add(structure._id.toString());
-    if (structure.networkId) ids.add(String(structure.networkId));
-  }
-  return [...ids];
+  const structures = await StructureModel.find(query).select({ _id: 1 });
+  return structures.map((structure) => structure._id.toString());
 }
 
 async function buildReferentContext(user: UserDto): Promise<ReferentContext> {
