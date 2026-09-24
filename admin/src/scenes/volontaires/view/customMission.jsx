@@ -13,6 +13,7 @@ import { adminURL } from "../../../config";
 import api from "../../../services/api";
 import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import Field from "@/components/ui/forms/Field";
+import { MISSION_HTML_FIELDS, warnIfHtmlSanitized } from "@/utils/sanitizedFields";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
 import YoungHeader from "../../phase0/components/YoungHeader";
 import { isPossiblePhoneNumber } from "libphonenumber-js";
@@ -157,6 +158,7 @@ export default function CustomMission({ young, onChange }) {
 
       const application = await handleProposal(responseMission.data, values.applicationStatus);
       toastr.success("Mission enregistrée");
+      warnIfHtmlSanitized(values, responseMission.data, MISSION_HTML_FIELDS);
       history.push(`/volontaire/${young._id}/phase2/application/${application._id}/contrat`);
     } catch (e) {
       setLoading(false);

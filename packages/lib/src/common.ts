@@ -241,6 +241,27 @@ const sanitizeStoredHtml = <T extends string | null | undefined>(text: T): T => 
   return htmlCleaner(text) as T;
 };
 
+/**
+ * Texte lisible d'un champ stocké en HTML assaini (descriptions, actions, contraintes, fréquence de
+ * mission ; description de structure), pour les contextes qui n'affichent pas de HTML : exports,
+ * panneaux en texte brut (GOO-44). Les fins de paragraphe, d'item et `<br>` deviennent des retours à la
+ * ligne, les balises disparaissent, et les entités que sanitize-html réencode (`&amp;`, `&lt;`, `&gt;`,
+ * `&quot;`) sont décodées. Le résultat est du texte : il ne doit jamais être réinjecté comme HTML.
+ */
+const HTML_LINE_BREAK = /<br\s*\/?>|<\/(?:p|li|h[1-6]|div)\s*>/gi;
+
+const htmlToPlainText = <T extends string | null | undefined>(html: T): T => {
+  if (!html) return html;
+  const text = sanitizeHtml(html.replace(HTML_LINE_BREAK, "\n"), { allowedTags: [], allowedAttributes: {} })
+    .replace(/&lt;/g, "<")
+    .replace(/&gt;/g, ">")
+    .replace(/&quot;/g, '"')
+    .replace(/&amp;/g, "&")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+  return text as T;
+};
+
 const formatMessageForReadingInnerHTML = (content) => {
   const cleanedMessage = htmlCleaner(content);
   const message = cleanedMessage.replace(/\\n/g, "<br>").replace(/\\r/g, "<br>");
@@ -264,6 +285,7 @@ export {
   HTML_CLEANER_OPTIONS,
   HTML_LINK_SCHEMES,
   htmlCleaner,
+  htmlToPlainText,
   sanitizeStoredHtml,
   validateEmailAcademique,
 };

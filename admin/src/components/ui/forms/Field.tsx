@@ -25,8 +25,8 @@ interface FieldProps {
   options?: Array<any>;
   filterOnType?: boolean;
   disabled?: boolean;
-  // Textarea en lecture seule rendu en texte brut, pour les champs qui n'ont pas besoin de HTML.
-  plainText?: boolean;
+  // Textarea en lecture seule : garde les retours à la ligne d'un texte saisi sans balisage.
+  preserveLineBreaks?: boolean;
 }
 
 export default function Field({
@@ -52,7 +52,7 @@ export default function Field({
   options,
   filterOnType,
   disabled = false,
-  plainText = false,
+  preserveLineBreaks = false,
 }: FieldProps) {
   const [copied, setCopied] = useState(false);
 
@@ -103,10 +103,11 @@ export default function Field({
         )}
 
         {type === "textarea" &&
-          (readOnly && plainText ? (
-            <div className={"w-full h-[84px] text-start overflow-x-auto whitespace-pre-line " + className}>{value}</div>
-          ) : readOnly ? (
-            <div className={"w-full h-[84px] text-start overflow-x-auto " + className} dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }} />
+          (readOnly ? (
+            <div
+              className={"w-full h-[84px] text-start overflow-x-auto " + (preserveLineBreaks ? "whitespace-pre-line " : "") + className}
+              dangerouslySetInnerHTML={{ __html: htmlCleaner(value) }}
+            />
           ) : (
             <textarea
               rows={row}

@@ -7,6 +7,7 @@ import {
     formatDateFRTimezoneUTC,
     formatLongDateFR,
     formatLongDateUTC,
+    htmlToPlainText,
     MIME_TYPES,
     missionCandidatureExportFields,
     MissionType,
@@ -354,7 +355,7 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
                 "Statut juridique de la structure": mission.structure?.legalStatus || "",
                 "Type de structure": mission.structure?.types?.toString() || "",
                 "Sous-type de structure": mission.structure?.sousType || "",
-                "Présentation de la structure": mission.structure?.description || "",
+                "Présentation de la structure": htmlToPlainText(mission.structure?.description) || "",
             },
             structureLocation: {
                 "Adresse de la structure": mission.structure?.address || "",
