@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import plausibleEvent from "../../../../../services/plausible";
 import MedicalFileModal from "../../../components/MedicalFileModal";
 import Arrow from "../assets/Arrow";
 import DontForget from "../assets/DontForget";
@@ -33,9 +32,6 @@ export default function TodoBackpack() {
       ...todo,
       [e.target.name]: e.target.checked,
     });
-    if (Object.values(todo).filter((e) => e === true).length === 2) {
-      plausibleEvent("Phase1/Sac a dos 2e case cochee");
-    }
     localStorage.setItem("todo", JSON.stringify(todo));
   }
 

@@ -7,7 +7,6 @@ import { YOUNG_SITUATIONS, translate as t, isInRuralArea, getAge, formatDateFRTi
 import api from "../../services/api";
 import PanelActionButton from "../../components/buttons/PanelActionButton";
 import { Info, Details } from "../../components/Panel";
-import plausibleEvent from "../../services/plausible";
 import styled from "styled-components";
 import PanelV2 from "../../components/PanelV2";
 
@@ -36,7 +35,7 @@ export default function DeletedInscriptionPanel({ onChange, value }) {
             </div>
           )}
           <div style={{ display: "flex", flexWrap: "wrap" }}>
-            <Link to={`/volontaire/${young._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")}>
+            <Link to={`/volontaire/${young._id}`}>
               <PanelActionButton icon="eye" title="Consulter" />
             </Link>
           </div>

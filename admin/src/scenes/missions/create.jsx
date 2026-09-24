@@ -20,7 +20,6 @@ import { useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import ViewStructureLink from "../../components/buttons/ViewStructureLink";
 import api from "../../services/api";
-import plausibleEvent from "@/services/plausible";
 
 export default function Create(props) {
   const urlParams = new URLSearchParams(window.location.search);
@@ -153,7 +152,6 @@ export default function Create(props) {
         toastr.error("Oups, une erreur est survenue lors de l'enregistrement de la mission", translate(code));
         return setLoading(false);
       }
-      plausibleEvent(`Admin/${duplicate ? "Dupliquer" : "Créer"} une mission`);
       toastr.success("Mission enregistrée");
       return history.push(`/mission/${data._id}`);
     } catch (e) {

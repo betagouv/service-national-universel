@@ -1,5 +1,4 @@
 import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
 import store from "@/redux/store";
 import { setUser } from "@/redux/auth/actions";
 import { getImpersonationChannel } from "@/utils/broadcastChannel";
@@ -23,7 +22,6 @@ export const restorePreviousSignin = async () => {
 
     store.dispatch(setUser(data));
     getImpersonationChannel().postMessage({ action: "impersonation_stopped" });
-    plausibleEvent("Admin - Reprendre sa place");
   } catch (e) {
     console.log(e);
   }

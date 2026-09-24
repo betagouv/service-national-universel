@@ -3,7 +3,6 @@ import { Redirect, useHistory } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import { toastr } from "react-redux-toastr";
 import queryString from "query-string";
-import plausibleEvent from "@/services/plausible";
 import { maintenance } from "../../config";
 import { setUser } from "../../redux/auth/actions";
 import api from "../../services/api";
@@ -35,7 +34,6 @@ export default function Signin() {
       const response = await api.post(`/referent/signin-2fa`, { email, token_2fa: token.trim(), rememberMe });
       setLoading(false);
       if (response.user) {
-        plausibleEvent("2FA / Connexion réussie");
         dispatch(setUser(response.user));
         return redirectAfterSignin(history, redirect);
       }

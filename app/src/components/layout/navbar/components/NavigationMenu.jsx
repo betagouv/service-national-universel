@@ -3,7 +3,6 @@ import useAuth from "@/services/useAuth";
 import { FEATURES_NAME, isFeatureEnabled } from "snu-lib";
 import { environment, knowledgebaseURL } from "../../../../config";
 import { hasAccessToPhase3, permissionPhase1, permissionPhase3 } from "../../../../utils";
-import plausibleEvent from "@/services/plausible";
 
 import IconHome from "../assets/IconHome";
 import IconPhase1 from "../assets/IconPhase1";
@@ -49,13 +48,7 @@ export default function NavigationMenu({ onClose = () => {} }) {
           </MenuGroup>
         )}
         <div className="m-8" />
-        <MenuLinkExternal
-          onClick={plausibleEvent("Compte/Besoin d'aide")}
-          href={knowledgebaseURL}
-          icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />}
-          text="Besoin d'aide ?"
-          onClose={onClose}
-        />
+        <MenuLinkExternal href={knowledgebaseURL} icon={<HiOutlineQuestionMarkCircle className="text-lg stroke-[1.5]" />} text="Besoin d'aide ?" onClose={onClose} />
         {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="develop-assets" icon={<GoTools />} text="Dev tools" onClose={onClose} />}
         {isFeatureEnabled(FEATURES_NAME.DEVELOPERS_MODE, undefined, environment) && <MenuLink to="design-system" icon={<CiPalette />} text="Design system" onClose={onClose} />}
       </ul>

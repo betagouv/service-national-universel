@@ -4,8 +4,7 @@ import useAuth from "@/services/useAuth";
 import HomeContainer from "@/components/layout/HomeContainer";
 import HomeHeader from "@/components/layout/HomeHeader";
 import hero from "../../assets/hero/home.png";
-import { isCle, translate } from "../../utils";
-import plausibleEvent from "../../services/plausible";
+import { isCle } from "../../utils";
 
 export default function Withdrawn() {
   const { young } = useAuth();
@@ -18,7 +17,7 @@ export default function Withdrawn() {
           Votre désistement du SNU {isCle(young) && "dans le cadre des classes engagées "} a bien été pris en compte. Si l&apos;engagement vous donne envie, vous trouverez
           ci-dessous des dispositifs qui pourront vous intéresser.
         </p>
-        <Link to="/les-programmes" onClick={() => plausibleEvent("CTA désisté - Autres possibilités d'engagement", { statut: translate(young.status) })}>
+        <Link to="/les-programmes">
           <p className="mt-6 text-center md:w-fit rounded-md bg-blue-600 py-2 px-3 text-sm text-white transition duration-150 ease-in-out hover:bg-blue-800">
             Consulter les autres possibilités d&apos;engagement
           </p>

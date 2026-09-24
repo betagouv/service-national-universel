@@ -13,7 +13,6 @@ import Loader from "../../components/Loader";
 import { Filters, ResultTable, Save, SelectedFilters, SortOption } from "../../components/filters-system-v2";
 import { appURL } from "../../config";
 import useFilterLabels from "./useFilterLabels";
-import plausibleEvent from "../../services/plausible";
 import { ROLES, YOUNG_STATUS, YOUNG_STATUS_COLORS, getAge, translate, translatePhase1, translatePhase2 } from "../../utils";
 import { Title } from "../pointDeRassemblement/components/common";
 import DeletedVolontairePanel from "./deletedPanel";
@@ -244,7 +243,6 @@ const Action = ({ hit }) => {
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
       window.open(appURL, "_blank");
     } catch (e) {
@@ -273,7 +271,7 @@ const Action = ({ hit }) => {
 
             <Transition show={open} as={Fragment} leave="transition ease-in duration-100" leaveFrom="opacity-100" leaveTo="opacity-0">
               <Listbox.Options className="max-h-60 absolute z-10 mt-1 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm">
-                <Link className="!cursor-pointer" to={`/volontaire/${hit._id}`} onClick={() => plausibleEvent("Volontaires/CTA - Consulter profil volontaire")} target="_blank">
+                <Link className="!cursor-pointer" to={`/volontaire/${hit._id}`} target="_blank">
                   <Listbox.Option className={("text-gray-900", "relative cursor-pointer select-none list-none py-2 pl-3 pr-9 hover:text-white hover:bg-blue-600")}>
                     <span className={"block truncate font-normal text-xs"}>Consulter le profil</span>
                   </Listbox.Option>

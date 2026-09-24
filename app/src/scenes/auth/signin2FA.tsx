@@ -1,6 +1,5 @@
 import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
-import plausibleEvent from "@/services/plausible";
 import Input from "../../components/dsfr/forms/input";
 import api from "../../services/api";
 import Error from "../../components/error";
@@ -45,7 +44,6 @@ const Signin2FA: React.FC = () => {
 
       if (!response.user) return;
 
-      plausibleEvent("2FA/ Connexion réussie");
       await login(response.user);
 
       return redirectAfterSignin(history, redirect);

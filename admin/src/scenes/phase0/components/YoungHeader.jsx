@@ -28,7 +28,6 @@ import TabList from "@/components/views/TabList";
 import Title from "@/components/views/Title";
 import { appURL } from "@/config";
 import api from "@/services/api";
-import plausibleEvent from "@/services/plausible";
 import { Button } from "./Buttons";
 import { ChangeCohortPen } from "./ChangeCohortPen";
 import ConfirmationModal from "./ConfirmationModal";
@@ -198,7 +197,6 @@ export default function YoungHeader({ young, tab, onChange, phase = YOUNG_PHASE.
     if (!user) return toastr.error("Vous devez être connecté pour effectuer cette action.");
 
     try {
-      plausibleEvent("Volontaires/CTA - Prendre sa place");
       await signinAs("young", young_id);
     } catch (e) {
       toastr.error("Une erreur s'est produite lors de la prise de place du volontaire.");

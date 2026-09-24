@@ -32,7 +32,6 @@ import Download from "../../assets/icons/Download";
 import { capture } from "../../sentry";
 import House from "./components/HouseIcon";
 import { htmlCleaner } from "snu-lib";
-import plausibleEvent from "@/services/plausible";
 import { apiEngagement } from "./utils";
 import ApplicationStatusBadge from "../phase2/components/ApplicationStatusBadge";
 
@@ -135,12 +134,7 @@ export default function ViewDesktop() {
     });
   };
 
-  const handleClick = (mission) => {
-    if (mission.isMilitaryPreparation === "true") {
-      plausibleEvent("Phase 2/CTA - PM - Candidater");
-    } else {
-      plausibleEvent("Phase2/CTA missions - Candidater");
-    }
+  const handleClick = () => {
     setModal("APPLY");
   };
 
@@ -199,7 +193,7 @@ export default function ViewDesktop() {
             {mission.application ? (
               <ApplicationStatus mission={mission} updateApplication={updateApplication} loading={loading} canManageApplications={canManageApplications} />
             ) : (
-              <ApplyButton mission={mission} onClick={() => handleClick(mission)} />
+              <ApplyButton mission={mission} onClick={handleClick} />
             )}
           </div>
         </div>

@@ -6,7 +6,6 @@ import TitleImage from "../../assets/onboarding-cle.png";
 import MyClass from "./MyClass";
 import { alreadyHaveAnAccountModal } from "@/components/modals/dsfrModals";
 import AlreadyHaveAnAccountModal from "./components/AlreadyHaveAnAccountModal";
-import plausibleEvent from "@/services/plausible";
 import useAuth from "@/services/useAuth";
 import ErrorMessage from "@/components/dsfr/forms/ErrorMessage";
 import Loader from "@/components/Loader";
@@ -67,7 +66,6 @@ const OnboardingContent = ({ classe }) => {
           <Button
             className={`sm:!w-full items-center justify-center bg md:!w-auto`}
             onClick={() => {
-              plausibleEvent("CLE/CTA preinscription - demarrer");
               history.push(`/preinscription/profil?parcours=CLE&classeId=${classe.id}`);
             }}>
             Démarrer mon inscription

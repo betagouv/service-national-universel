@@ -11,7 +11,6 @@ import Toggle from "../../../components/Toggle";
 import ViewStructureLink from "../../../components/buttons/ViewStructureLink";
 import { adminURL } from "../../../config";
 import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
 import { ENABLE_PM, MISSION_DOMAINS, MISSION_PERIOD_DURING_HOLIDAYS, MISSION_PERIOD_DURING_SCHOOL, PERIOD, SENDINBLUE_TEMPLATES, translate } from "../../../utils";
 import Field from "@/components/ui/forms/Field";
 import VerifyAddress from "../../phase0/components/VerifyAddress";
@@ -151,8 +150,6 @@ export default function CustomMission({ young, onChange }) {
         toastr.error("Oups, le formulaire est incomplet");
         return setLoading(false);
       }
-
-      plausibleEvent("Volontaires/profil/phase2 CTA - Créer mission personnalisée");
 
       values.addressVerified = values.addressVerified.toString();
       const responseMission = await api.post("/mission", values);

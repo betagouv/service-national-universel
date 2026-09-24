@@ -1,5 +1,4 @@
 import React from "react";
-import plausibleEvent from "../../../../../services/plausible";
 import { HiOutlineDownload, HiOutlineMail } from "react-icons/hi";
 import useAuth from "@/services/useAuth";
 import ButtonPrimary from "../../../../../components/ui/buttons/ButtonPrimary";
@@ -17,7 +16,6 @@ export function ModalConvocation({ open, setOpen }) {
   const { mutate: sendByEmail, isPending: isEmailPending } = useSendConvocationByEmail();
 
   const handleDownload = () => {
-    plausibleEvent("Phase1/telechargement convocation");
     download();
   };
 

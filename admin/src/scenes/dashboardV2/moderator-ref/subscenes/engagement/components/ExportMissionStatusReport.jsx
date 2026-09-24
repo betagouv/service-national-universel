@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import * as FileSaver from "file-saver";
 import * as XLSX from "xlsx";
 import { safeJsonToSheet } from "@/utils/file";
-import plausibleEvent from "../../../../../../services/plausible";
 import ModalConfirm from "../../../../../../components/modals/ModalConfirm";
 import { MISSION_STATUS, REFERENT_ROLES, region2department, translate } from "snu-lib";
 import { useSelector } from "react-redux";
@@ -17,7 +16,6 @@ export default function ExportMissionStatusReport({ filter }) {
   const user = useSelector((state) => state.Auth.user);
 
   const onClick = () => {
-    plausibleEvent("Dashboard/CTA - Exporter Detail missions");
     setModal({
       isOpen: true,
       onConfirm: run,
