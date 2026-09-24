@@ -1,4 +1,4 @@
-import { MISSION_STATUS, ROLES, UserDto, isAdmin } from "snu-lib";
+import { MISSION_STATUS, ROLES, UserDto, isAdmin, region2department } from "snu-lib";
 
 import { ReferentModel, StructureModel } from "../models";
 import { ERRORS } from "../utils";
@@ -13,18 +13,51 @@ import { ERRORS } from "../utils";
  * il pose les mêmes axes que les policies d'écriture (structure pour le responsable, réseau pour le
  * superviseur) et refuse par défaut tout rôle sans périmètre.
  *
- * Le périmètre national des rôles administrateur / référent départemental / référent régional est
- * conservé tel quel : `MISSION_FULL` leur est seedée sans policy, et restreindre ces rôles sortirait
- * du cadre de ce correctif.
+ * `MISSION_FULL` est aussi seedée sans policy pour les référents départementaux et régionaux : sans
+ * ce contrôle, un référent validait, annulait, modifiait ou supprimait n'importe quelle mission du
+ * pays (GOO-45). Leur périmètre est territorial : département de la mission parmi les siens pour le
+ * référent départemental, région de la mission égale à la sienne pour le référent régional. Seul
+ * l'administrateur reste national.
+ *
+ * La fiche d'une mission (`GET /mission/:id`) reste lisible par tout référent : un référent suit les
+ * candidatures de ses volontaires, y compris sur des missions d'un autre territoire, et ces données
+ * sont celles que la mission publie aux volontaires.
  */
 
-type MissionScope = { structureId?: string | null };
+type MissionScope = { structureId?: string | null; department?: string | null; region?: string | null };
 
 const idRegex = /^[0-9a-fA-F]{24}$/;
 const isObjectId = (value: unknown): value is string => typeof value === "string" && idRegex.test(value);
 
-/** Rôles dont la permission MISSION est seedée sans policy : leur périmètre est national. */
-const ROLES_WITH_NATIONAL_MISSION_SCOPE: string[] = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+/** Rôles qui modèrent les missions (statuts réservés, places restantes). */
+const MISSION_MODERATOR_ROLES: string[] = [ROLES.ADMIN, ROLES.REFERENT_DEPARTMENT, ROLES.REFERENT_REGION];
+
+/** `user.department` est typé chaîne ou tableau : un `includes` sur une chaîne testerait une sous-chaîne. */
+const toDepartmentList = (department: UserDto["department"]): string[] => (Array.isArray(department) ? department : department ? [department] : []);
+
+/** La mission est-elle sur le territoire du référent ? Faux pour tout autre rôle. */
+function isMissionInReferentTerritory(user: UserDto, mission: MissionScope): boolean {
+  switch (user?.role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      return !!mission?.department && toDepartmentList(user.department).includes(mission.department);
+    case ROLES.REFERENT_REGION:
+      return !!mission?.region && !!user.region && String(mission.region) === String(user.region);
+    default:
+      return false;
+  }
+}
+
+/** Départements du territoire d'un référent, `null` pour tout autre rôle. */
+export function getReferentDepartments(user: UserDto): string[] | null {
+  switch (user?.role) {
+    case ROLES.REFERENT_DEPARTMENT:
+      return toDepartmentList(user.department);
+    case ROLES.REFERENT_REGION:
+      return user.region ? region2department[user.region] || [] : [];
+    default:
+      return null;
+  }
+}
 
 /**
  * Statuts qu'un rôle peut poser lui-même, à l'image de ce que propose l'écran d'administration
@@ -53,9 +86,11 @@ async function getStructureNetworkIds(structureId?: string | null): Promise<stri
 export async function isMissionInUserScope(user: UserDto, mission: MissionScope): Promise<boolean> {
   switch (user?.role) {
     case ROLES.ADMIN:
+      return true;
+
     case ROLES.REFERENT_DEPARTMENT:
     case ROLES.REFERENT_REGION:
-      return true;
+      return isMissionInReferentTerritory(user, mission);
 
     case ROLES.RESPONSIBLE: {
       if (!user.structureId || !mission?.structureId) return false;
@@ -102,7 +137,16 @@ type CheckMissionPayloadParams = {
  * dérivés (`placesLeft`, `tutorName`) sont retirés du corps : ils sont recalculés par le contrôleur.
  */
 export async function checkMissionPayload({ user, payload, storedMission }: CheckMissionPayloadParams): Promise<string | null> {
-  const hasNationalScope = ROLES_WITH_NATIONAL_MISSION_SCOPE.includes(user?.role as string);
+  const isModerator = MISSION_MODERATOR_ROLES.includes(user?.role as string);
+
+  // Un référent ne crée ni ne déplace une mission hors de son territoire.
+  if (user?.role === ROLES.REFERENT_DEPARTMENT || user?.role === ROLES.REFERENT_REGION) {
+    const target = {
+      department: payload.department ?? storedMission?.department,
+      region: payload.region ?? storedMission?.region,
+    };
+    if (!isMissionInReferentTerritory(user, target)) return ERRORS.OPERATION_UNAUTHORIZED;
+  }
 
   // Statut : liste blanche par rôle, fail-closed pour tout rôle non listé.
   if (payload.status) {
@@ -122,8 +166,8 @@ export async function checkMissionPayload({ user, payload, storedMission }: Chec
     return ERRORS.OPERATION_UNAUTHORIZED;
   }
 
-  // `placesLeft` est dérivé de `placesTotal` et des candidatures ; seuls les rôles au périmètre national le posent.
-  if (!hasNationalScope) {
+  // `placesLeft` est dérivé de `placesTotal` et des candidatures ; seuls les rôles modérateurs le posent.
+  if (!isModerator) {
     if (storedMission) {
       delete payload.placesLeft;
     } else if (payload.placesTotal !== undefined && payload.placesTotal !== null) {

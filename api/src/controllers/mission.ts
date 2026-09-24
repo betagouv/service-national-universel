@@ -24,7 +24,7 @@ import {
   ReferentStatus,
 } from "snu-lib";
 import { serializeMission, serializeApplication } from "../utils/serializer";
-import { checkMissionPayload, isMissionInUserScope, isTutorAllowedForMission } from "../services/missionAccess";
+import { checkMissionPayload, getReferentDepartments, isMissionInUserScope, isTutorAllowedForMission } from "../services/missionAccess";
 import patches from "./patches";
 import { sendTemplate } from "../brevo";
 import { config } from "../config";
@@ -167,7 +167,9 @@ router.put(
           resource: PERMISSION_RESOURCES.MISSION,
           user: req.user,
           context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
-        })
+        }) ||
+        // MISSION_FULL est seedée sans policy pour les référents : le territoire est vérifié ici (GOO-45).
+        !(await isMissionInUserScope(req.user, mission))
       ) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
@@ -325,7 +327,8 @@ router.post(
             resource: PERMISSION_RESOURCES.MISSION,
             user: req.user,
             context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
-          })
+          }) ||
+          !(await isMissionInUserScope(req.user, mission))
         ) {
           return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
         }
@@ -457,9 +460,15 @@ router.get(
       // relever du périmètre de l'acteur, ce qu'aucun rapprochement ne vérifiait.
       const mission = await MissionModel.findById(id);
       if (!mission) return res.status(404).send({ ok: false, code: ERRORS.NOT_FOUND });
-      if (!(await isMissionInUserScope(req.user, mission))) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
 
       const where: any = { missionId: id };
+      if (!(await isMissionInUserScope(req.user, mission))) {
+        // Hors de son territoire, un référent ne voit que les candidatures de ses propres volontaires
+        // (même règle que l'index `application`) : il suit leur parcours, pas celui des autres (GOO-45).
+        const departments = getReferentDepartments(req.user);
+        if (!departments?.length) return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
+        where.youngDepartment = { $in: departments };
+      }
       if (req.user.role === ROLES.RESPONSIBLE || req.user.role === ROLES.SUPERVISOR) {
         where.status = { $ne: "WAITING_ACCEPTATION " };
       }
@@ -544,7 +553,8 @@ router.delete(
           resource: PERMISSION_RESOURCES.MISSION,
           user: req.user,
           context: { mission: mission.toJSON(), structure: structure ? structure.toJSON() : null },
-        })
+        }) ||
+        !(await isMissionInUserScope(req.user, mission))
       ) {
         return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
       }
