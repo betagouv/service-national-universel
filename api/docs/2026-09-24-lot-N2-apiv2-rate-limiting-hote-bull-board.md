@@ -22,7 +22,7 @@ dans `apiv2/src/main.ts`, et Bull Board sous authentification basique seule
 |---|---|---|
 | M79 | Bull Board : auth basique seule ; jobs EMAIL conservés indéfiniment, jetons visibles | liste d'IP `BROKER_MONITOR_ALLOWED_IPS` (fermé en 404 si vide sur un environnement déployé) ; 20 échecs d'auth / 15 min / IP puis 429 ; données et résultats de jobs affichés avec jetons masqués (`MaskedBullMQAdapter`) ; file EMAIL en `removeOnComplete`, échecs purgés après 7 jours |
 | M80 | aucun rate limiting | plafond global de 3 000 requêtes / 5 min ; `POST` d'export, simulation, validation et import limités à 10 / 15 min. Le compteur est tenu par utilisateur si le JWT est valide, par IP sinon. Il vit dans le Redis du broker et laisse passer les requêtes si Redis tombe. Réponse 429 `TOO_MANY_REQUESTS`. |
-| L46 | aucun contrôle d'hôte, aucun en-tête de sécurité | sur les environnements déployés, `Host` différent de l'hôte de `APIV2_URL` (ou de `ALLOWED_HOSTS`) → 421 ; `GET /` et `/health` exemptés (sondes) ; `helmet` (CSP désactivée sur `/queues` seulement) ; `trust proxy` réglé comme la v1 (`TRUST_PROXY_HOPS`) |
+| L46 | aucun contrôle d'hôte, aucun en-tête de sécurité | sur les environnements déployés, `Host` différent de l'hôte de `APIV2_URL` (ou de `ALLOWED_HOSTS`) → 421 ; `GET /` et `/health` exemptés (sondes) ; `helmet` avec sa CSP par défaut, Bull Board compris ; `trust proxy` réglé comme la v1 (`TRUST_PROXY_HOPS`) |
 
 Les confs nginx des images `back` et `all` (staging, CI, recettes) transmettent désormais `Host`
 au bloc `/v2`, comme elles le faisaient déjà pour la v1. Sans cela, le contrôle d'hôte aurait

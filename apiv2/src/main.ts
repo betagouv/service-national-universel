@@ -25,10 +25,9 @@ async function bootstrap() {
             hostGuard(hotesAutorises(config.getOrThrow("urls.apiv2"), config.get("httpServer.allowedHosts") ?? "")),
         );
     }
-    // Bull Board sert une page dont le CSP par défaut de helmet bloquerait les ressources.
-    const helmetApi = helmet();
-    const helmetBullBoard = helmet({ contentSecurityPolicy: false });
-    app.use((req, res, next) => (/\/queues(\/|$)/.test(req.path) ? helmetBullBoard : helmetApi)(req, res, next));
+    // CSP par défaut partout, Bull Board compris : ses scripts et sa feuille de style sont servis
+    // depuis la même origine, ses polices Google passent par `https:` (style-src, font-src).
+    app.use(helmet());
 
     const authProvider = app.get<AuthProvider>(AuthProvider, { strict: false });
     const store = rateLimitStoreFactory(config.getOrThrow("environment"), config.getOrThrow("broker.url"));
