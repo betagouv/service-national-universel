@@ -2,7 +2,6 @@ import React, { useState } from "react";
 import useAuth from "@/services/useAuth";
 import { useHistory } from "react-router-dom";
 import { formatToActualTime } from "snu-lib";
-import plausibleEvent from "@/services/plausible";
 import Input from "../../components/dsfr/forms/input";
 import RightArrow from "../../assets/icons/RightArrow";
 import api from "../../services/api";
@@ -41,7 +40,6 @@ const Signin: React.FC = () => {
       const invitationToken = urlParams.get("token");
       const { data: young } = await api.post(`/young/signup_invite`, { email, password, invitationToken });
       if (young) {
-        plausibleEvent("INVITATION/ Connexion réussie");
         await login(young);
         history.push("/home");
       }

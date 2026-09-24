@@ -6,7 +6,6 @@ import { LuArrowRightCircle, LuArrowLeftCircle, LuHistory } from "react-icons/lu
 
 import { AuthState } from "@/redux/auth/reducer";
 import { Header, Navbar } from "@snu/ds/admin";
-import plausibleEvent from "@/services/plausible";
 import SelectCohort from "@/components/cohorts/SelectCohort";
 
 import HeaderExport from "./ButtonExport";
@@ -85,7 +84,6 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                     onClick: () => {
                       history.push(`/ligne-de-bus/historique?cohort=${cohort}`);
                       setCurrentTab("historique");
-                      plausibleEvent(`Historique du PDT - ${cohort}`);
                     },
                   },
                   {
@@ -95,7 +93,6 @@ export default function HeaderPDT({ cohort, setCohort, hasValue, currentTab, set
                     onClick: () => {
                       history.push(`/ligne-de-bus/demande-de-modification?cohort=${cohort}`);
                       setCurrentTab("modification");
-                      plausibleEvent(`Demande de modifications du PDT - ${cohort}`);
                     },
                   },
                 ]

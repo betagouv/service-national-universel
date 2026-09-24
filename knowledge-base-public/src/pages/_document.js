@@ -13,7 +13,6 @@ class MyDocument extends Document {
         <Head>
           <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
           <link rel="icon" href="/assets/logo-snu.png" type="image/png" />
-          <script defer data-domain="support.snu.gouv.fr" src="https://plausible.io/js/script.outbound-links.js"></script>
         </Head>
         <body>
           <Main />

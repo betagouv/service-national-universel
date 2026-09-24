@@ -1,4 +1,3 @@
-import plausibleEvent from "@/services/plausible";
 import { Link } from "react-router-dom";
 import queryString from "query-string";
 import React, { useState, useEffect } from "react";
@@ -39,7 +38,6 @@ const Signin: React.FC = () => {
       const { user: young, code } = await api.post(`/young/signin`, { email, password });
 
       if (code === "2FA_REQUIRED") {
-        plausibleEvent("2FA demandée");
         return history.push(`/auth/2fa?email=${encodeURIComponent(email)}`);
       }
 
@@ -47,7 +45,6 @@ const Signin: React.FC = () => {
         return;
       }
 
-      plausibleEvent("Connexion réussie");
       await login(young);
 
       redirectAfterSignin(history, redirect);

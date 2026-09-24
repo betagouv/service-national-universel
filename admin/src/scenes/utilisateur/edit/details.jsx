@@ -10,7 +10,6 @@ import ModalChangeTutor from "../../../components/modals/ModalChangeTutor";
 import ModalReferentDeleted from "../../../components/modals/ModalReferentDeleted";
 import ModalUniqueResponsable from "../composants/ModalUniqueResponsable";
 import api from "../../../services/api";
-import plausibleEvent from "../../../services/plausible";
 import {
   canUpdateReferent,
   canDeleteReferent,
@@ -133,7 +132,6 @@ export default function Details({ user, setUser, currentUser }) {
     try {
       setSaving(true);
       if (validate()) {
-        plausibleEvent("Utilisateur/Profil CTA - Enregistrer profil utilisateur");
         const updatedData = { ...data };
         if (trimmedPhone) updatedData.phone = trimmedPhone;
         if (trimmedMobile) updatedData.mobile = trimmedMobile;

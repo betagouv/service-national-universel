@@ -13,7 +13,6 @@ import History from "../../../assets/icons/History";
 import PanelActionButton from "../../../components/buttons/PanelActionButton";
 import { setUser as setUserInRedux } from "../../../redux/auth/actions";
 import TabList from "../../../components/views/TabList";
-import plausibleEvent from "../../../services/plausible";
 import Tab from "../../phase0/components/Tab";
 
 interface UserHeaderProps {
@@ -38,7 +37,6 @@ export default function UserHeader({ user, tab, currentUser, onUserUpdate }: Use
     try {
       if (handleImpersonateLoading) return;
       setHandleImpersonateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Prendre sa place");
       const data = await signinAs("referent", user._id);
       dispatch(setUserInRedux(data));
       history.push("/dashboard");
@@ -54,7 +52,6 @@ export default function UserHeader({ user, tab, currentUser, onUserUpdate }: Use
       toastr.clean();
       if (statusUpdateLoading || selectedOption.value === user.status) return;
       setStatusUpdateLoading(true);
-      plausibleEvent("Utilisateurs/CTA - Changer statut");
 
       const { ok, code, data } = await api.put(`/referent/${user._id}`, { status: selectedOption.value });
       if (!ok) {
@@ -85,7 +82,7 @@ export default function UserHeader({ user, tab, currentUser, onUserUpdate }: Use
             </div>
             <div className="flex items-center">
               {user.structureId && (
-                <Link to={`/structure/${user.structureId}`} onClick={() => plausibleEvent("Utilisateurs/Profil CTA - Voir structure")}>
+                <Link to={`/structure/${user.structureId}`}>
                   <PanelActionButton icon="eye" title="Voir la structure" className="m-0 mr-2" />
                 </Link>
               )}

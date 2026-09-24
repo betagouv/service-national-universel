@@ -18,11 +18,11 @@ const securityHeaders = [
     key: "Content-Security-Policy-Report-Only",
     value: [
       "default-src 'self'",
-      "script-src 'self' https://plausible.io",
+      "script-src 'self'",
       "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
       "font-src 'self' data: https://fonts.gstatic.com",
       "img-src 'self' data: blob: https:",
-      "connect-src 'self' https://*.snu.gouv.fr https://*.beta-snu.dev https://sentry.incubateur.net https://plausible.io",
+      "connect-src 'self' https://*.snu.gouv.fr https://*.beta-snu.dev https://sentry.incubateur.net",
       "frame-src https://player.vimeo.com",
       "form-action 'self'",
       "frame-ancestors 'none'",

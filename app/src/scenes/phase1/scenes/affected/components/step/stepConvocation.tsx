@@ -1,7 +1,6 @@
 import React from "react";
 import { useToggle } from "react-use";
 import { useDownloadConvocation, useSendConvocationByEmail } from "../../utils/convocationMutations";
-import plausibleEvent from "@/services/plausible";
 import { StepCard } from "../StepCard";
 import ConfirmationModal from "@/components/ui/modals/ConfirmationModal";
 import ConvocationModal from "../modals/ConvocationModal";
@@ -21,7 +20,6 @@ export default function StepConvocation() {
   const { mutate: sendByEmail } = useSendConvocationByEmail();
 
   const handleDownload = () => {
-    plausibleEvent("Phase1/telechargement convocation");
     download();
   };
 
