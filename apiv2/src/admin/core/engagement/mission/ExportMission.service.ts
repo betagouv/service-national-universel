@@ -9,6 +9,27 @@ import { SearchMissionGateway } from "@analytics/core/SearchMission.gateway";
 
 export const EXPORT_MISSION_FOLDER = "file/admin/engagement/mission";
 
+// Filtres de la liste des missions de l'admin (scenes/missions/list.tsx). Toute autre clé
+// deviendrait un `terms` sur un champ arbitraire de l'index : elle est écartée.
+export const MISSION_EXPORT_FILTER_KEYS = [
+    "region",
+    "department",
+    "status",
+    "isJvaMission",
+    "visibility",
+    "mainDomain",
+    "placesLeft",
+    "tutorName",
+    "isMilitaryPreparation",
+    "hebergement",
+    "hebergementPayant",
+    "placesStatus",
+    "applicationStatus",
+    "fromDate",
+    "toDate",
+    "structureName",
+] as const;
+
 @Injectable()
 export class ExportMissionService {
     private readonly logger: Logger = new Logger(ExportMissionService.name);
@@ -21,8 +42,25 @@ export class ExportMissionService {
         @Inject(SearchStructureGateway) private readonly searchStructureGateway: SearchStructureGateway,
     ) {}
 
+    /**
+     * Ne garde que les filtres connus, à valeur chaîne ou liste de chaînes. Appliqué à
+     * l'exécution de la tâche : couvre aussi les tâches déjà en file.
+     */
+    filtrerFiltresExport(filters: Record<string, unknown> | undefined): Record<string, string | string[]> {
+        const filtres: Record<string, string | string[]> = {};
+        for (const key of MISSION_EXPORT_FILTER_KEYS) {
+            const value = filters?.[key];
+            if (typeof value === "string") {
+                filtres[key] = value;
+            } else if (Array.isArray(value) && value.every((v) => typeof v === "string")) {
+                filtres[key] = value;
+            }
+        }
+        return filtres;
+    }
+
     async searchMissions({
-        filters,
+        filters: filtersInput,
         searchTerm,
         auteur,
     }: {
@@ -38,6 +76,7 @@ export class ExportMissionService {
         if (!referent) {
             throw new FunctionalException(FunctionalExceptionCode.NOT_FOUND, `Referent not found: ${auteur.id}`);
         }
+        const filters = this.filtrerFiltresExport(filtersInput);
 
         if (auteur.role === ROLES.RESPONSIBLE) {
             if (!referent.structureId) {
@@ -105,7 +144,7 @@ export class ExportMissionService {
             return { youngDepartment: departements };
         }
         if (auteur.role === ROLES.REFERENT_REGION) {
-            const departements = referent.region ? (region2department[referent.region] ?? []) : [];
+            const departements = referent.region ? region2department[referent.region] ?? [] : [];
             if (!departements.length) {
                 throw new FunctionalException(FunctionalExceptionCode.NOT_ENOUGH_DATA, "Referent region is required");
             }

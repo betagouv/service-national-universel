@@ -1,4 +1,4 @@
-import { INestApplication } from "@nestjs/common";
+import { INestApplication, ValidationPipe } from "@nestjs/common";
 import * as request from "supertest";
 import mongoose from "mongoose";
 import { MIME_TYPES, ReferentielTaskType, ROLES, SUB_ROLE_GOD, TaskName, TaskStatus } from "snu-lib";
@@ -59,11 +59,13 @@ describe("ImportReferentielController", () => {
                         parseXLS: new FileProvider(new ConfigService()).parseXLS,
                     }),
                 },
-                { provide: TaskGateway, useValue: { create: jest.fn() } },
+                { provide: TaskGateway, useValue: { create: jest.fn(), findByNames: jest.fn().mockResolvedValue([]) } },
             ],
         }).compile();
 
         app = module.createNestApplication();
+        // Comme main.ts : la validation des DTO passe par le pipe global.
+        app.useGlobalPipes(new ValidationPipe());
         app.use(mockedAddUserToRequestMiddleware);
 
         await app.init();
@@ -114,6 +116,31 @@ describe("ImportReferentielController", () => {
                 expect(response.body.message).toEqual(FunctionalExceptionCode.INVALID_FILE_FORMAT);
             });
 
+            it(`empty file`, async () => {
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES}`)
+                    .attach("file", Buffer.from(""), {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(422);
+                expect(response.body.message).toEqual(FunctionalExceptionCode.INVALID_FILE_FORMAT);
+            });
+
+            it(`content not matching the declared excel type`, async () => {
+                const response = await request(app.getHttpServer())
+                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES}`)
+                    .attach("file", Buffer.from("<html>pas un classeur</html>"), {
+                        filename: "test.xlsx",
+                        contentType: MIME_TYPES.EXCEL,
+                    });
+
+                expect(response.statusCode).toEqual(422);
+                expect(response.body.message).toEqual(FunctionalExceptionCode.INVALID_FILE_FORMAT);
+                expect(taskGateway.create).not.toHaveBeenCalled();
+            });
+
             it(`no mimetype provided`, async () => {
                 const response = await request(app.getHttpServer())
                     .post("/referentiel/import/:name")
@@ -128,9 +155,12 @@ describe("ImportReferentielController", () => {
 
         describe("422 - Unprocessable Entity", () => {
             it(`not supported import type`, async () => {
+                const testFile = require("fs").readFileSync(
+                    "./test/admin/referentiel/fixtures/regions-academiques.xlsx",
+                );
                 const response = await request(app.getHttpServer())
                     .post("/referentiel/import/:name")
-                    .attach("file", Buffer.from(""), {
+                    .attach("file", testFile, {
                         filename: "test.xlsx",
                         contentType: MIME_TYPES.EXCEL,
                     });
@@ -166,32 +196,6 @@ describe("ImportReferentielController", () => {
 
                 expect(response.statusCode).toEqual(422);
                 expect(response.body.message).toEqual(FunctionalExceptionCode.IMPORT_MISSING_COLUMN);
-            });
-
-            it(`Empty file`, async () => {
-                jest.spyOn(fileGateway, "uploadFile").mockResolvedValue({
-                    Location: "test",
-                    ETag: "test",
-                    Bucket: "test",
-                    Key: "test",
-                });
-                jest.spyOn(taskGateway, "create").mockResolvedValue({
-                    id: "task-id",
-                    name: TaskName.REFERENTIEL_IMPORT,
-                    status: TaskStatus.PENDING,
-                    createdAt: new Date(),
-                    updatedAt: new Date(),
-                });
-
-                const response = await request(app.getHttpServer())
-                    .post(`/referentiel/import/${ReferentielTaskType.IMPORT_REGIONS_ACADEMIQUES}`)
-                    .attach("file", Buffer.from(""), {
-                        filename: "test.xlsx",
-                        contentType: MIME_TYPES.EXCEL,
-                    });
-
-                expect(response.statusCode).toEqual(422);
-                expect(response.body.message).toEqual(FunctionalExceptionCode.IMPORT_EMPTY_FILE);
             });
         });
 
@@ -378,6 +382,67 @@ describe("ImportReferentielController", () => {
                     expect(response.statusCode).toEqual(403);
                 }
             });
+        });
+    });
+
+    describe("/GET referentiel/import - validation de la query", () => {
+        it("refuse un opérateur Mongo dans status", async () => {
+            const response = await request(app.getHttpServer()).get("/referentiel/import?status[$ne]=x");
+            expect(response.statusCode).toEqual(400);
+            expect(taskGateway.findByNames).not.toHaveBeenCalled();
+        });
+
+        it("refuse un opérateur Mongo dans type", async () => {
+            const response = await request(app.getHttpServer()).get("/referentiel/import?type[$ne]=x");
+            expect(response.statusCode).toEqual(400);
+        });
+
+        it("refuse une valeur multiple (clé répétée)", async () => {
+            const response = await request(app.getHttpServer()).get(
+                "/referentiel/import?status=PENDING&status=COMPLETED",
+            );
+            expect(response.statusCode).toEqual(400);
+            expect(taskGateway.findByNames).not.toHaveBeenCalled();
+        });
+
+        it("refuse un nom de tâche hors du référentiel", async () => {
+            const response = await request(app.getHttpServer())
+                .get("/referentiel/import")
+                .query({ name: TaskName.JEUNE_EXPORT });
+            expect(response.statusCode).toEqual(400);
+            expect(taskGateway.findByNames).not.toHaveBeenCalled();
+        });
+
+        it("refuse une limite hors bornes", async () => {
+            const response = await request(app.getHttpServer()).get("/referentiel/import?limit=100000");
+            expect(response.statusCode).toEqual(400);
+        });
+
+        it("accepte la requête du front et transmet des valeurs scalaires", async () => {
+            const response = await request(app.getHttpServer()).get("/referentiel/import").query({
+                name: TaskName.REFERENTIEL_IMPORT,
+                type: ReferentielTaskType.IMPORT_ROUTES,
+                limit: 1,
+                sort: "DESC",
+            });
+            expect(response.statusCode).toEqual(200);
+            expect(taskGateway.findByNames).toHaveBeenCalledWith(
+                [TaskName.REFERENTIEL_IMPORT],
+                { "metadata.parameters.type": ReferentielTaskType.IMPORT_ROUTES },
+                "DESC",
+                1,
+            );
+        });
+
+        it("traite un filtre vide comme absent", async () => {
+            const response = await request(app.getHttpServer()).get("/referentiel/import?name=&status=&sort=");
+            expect(response.statusCode).toEqual(200);
+            expect(taskGateway.findByNames).toHaveBeenCalledWith(
+                [TaskName.REFERENTIEL_IMPORT],
+                {},
+                undefined,
+                undefined,
+            );
         });
     });
 

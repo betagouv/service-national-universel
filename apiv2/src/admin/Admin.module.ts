@@ -65,13 +65,11 @@ import { DesistementController } from "./infra/sejours/phase1/desistement/api/De
 import { DesistementService } from "./core/sejours/phase1/desistement/Desistement.service";
 import { ValiderDesisterPostAffectation } from "./core/sejours/phase1/desistement/ValiderDesisterPostAffectation";
 import { Phase1Service } from "./core/sejours/phase1/Phase1.service";
-import { ValidationInscriptionEnMasseClasse } from "./core/sejours/cle/classe/importEnMasse/useCase/ValidationInscriptionEnMasseClasse";
 import { AuthModule } from "../auth/Auth.module";
 import { FeatureFlagGateway } from "@shared/core/featureFlag/FeatureFlag.gateway";
 import { FeatureFlagMongoRepository } from "@shared/infra/featureFlag/FeatureFlagMongo.repository";
 import { featureFlagMongoProviders } from "@shared/infra/featureFlag/FeatureFlag.provider";
 import { FeatureFlagService } from "@shared/core/featureFlag/FeatureFlag.service";
-import { ClasseImportService } from "./core/sejours/cle/classe/importEnMasse/ClasseImportEnMasse.service";
 import { InscrireEleveManuellement } from "./core/sejours/cle/classe/useCase/InscrireEleveManuellement";
 import { JeuneService } from "./core/sejours/jeune/Jeune.service";
 import { MissionController } from "./infra/engagement/mission/api/Mission.controller";
@@ -133,7 +131,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         SimulationAffectationCLEService,
         DesistementService,
         ValiderDesisterPostAffectation,
-        ValidationInscriptionEnMasseClasse,
         ExporterJeuneService,
         AdminTaskRepository,
         { provide: AuthProvider, useClass: JwtTokenService },
@@ -168,7 +165,6 @@ import { structureMongoProviders } from "./infra/engagement/structure/provider/S
         ...serviceProvider,
         ...featureFlagMongoProviders,
         FeatureFlagService,
-        ClasseImportService,
         JeuneService,
         InscrireEleveManuellement,
         {

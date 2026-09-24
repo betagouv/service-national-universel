@@ -77,7 +77,13 @@ export class ExporterMissionCanditatures implements UseCase<ExporterMissionCandi
         // Le périmètre est rejoué ici, côté worker : les filtres du client ne peuvent pas l'élargir.
         const perimetreCandidatures = this.exportMissionService.perimetreCandidatures(auteur, referent);
 
-        const excelData = await this.generateRapport(missions.hits, fields, filters, auteur, perimetreCandidatures);
+        const excelData = await this.generateRapport(
+            missions.hits,
+            fields,
+            this.exportMissionService.filtrerFiltresExport(filters),
+            auteur,
+            perimetreCandidatures,
+        );
 
         this.logger.log(`Generate excel`, ExporterMissionCanditatures.name);
         // création du fichier excel de rapport
