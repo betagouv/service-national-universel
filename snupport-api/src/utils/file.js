@@ -27,6 +27,17 @@ const getS3Path = (fileName, mime) => {
   return `message/${uuid()}.${extension}`;
 };
 
+// Rognage linéaire des séparateurs en tête et en fin : `/[\s_-]+$/` est polynomial sur une longue
+// suite de séparateurs suivie d'un autre caractère (nom de fichier contrôlé par le déposant).
+const isNameSeparator = (char) => char === "_" || char === "-" || /\s/.test(char);
+function trimNameSeparators(value) {
+  let start = 0;
+  let end = value.length;
+  while (start < end && isNameSeparator(value[start])) start++;
+  while (end > start && isNameSeparator(value[end - 1])) end--;
+  return value.slice(start, end);
+}
+
 const MAX_ATTACHMENT_BASE_NAME_LENGTH = 150;
 
 // Nom affiché et proposé au téléchargement : la base vient de l'expéditeur, l'extension du type
@@ -41,12 +52,7 @@ const getAttachmentFileName = (fileName, mime) => {
     .trim();
   const lastDot = rawName.lastIndexOf(".");
   const rawBase = lastDot > 0 ? rawName.slice(0, lastDot) : rawName;
-  const baseName =
-    rawBase
-      .replace(/[<>:"|?*.]/g, "_")
-      .replace(/\s+/g, " ")
-      .replace(/^[\s_-]+|[\s_-]+$/g, "")
-      .slice(0, MAX_ATTACHMENT_BASE_NAME_LENGTH) || "piece-jointe";
+  const baseName = trimNameSeparators(rawBase.replace(/[<>:"|?*.]/g, "_").replace(/\s+/g, " ")).slice(0, MAX_ATTACHMENT_BASE_NAME_LENGTH) || "piece-jointe";
   const extension = (mime && EXTENSIONS_BY_MIME[mime]) || "bin";
   return `${baseName}.${extension}`;
 };

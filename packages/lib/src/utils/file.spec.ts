@@ -35,6 +35,14 @@ describe("getSafeDownloadFileName", () => {
     expect(getSafeDownloadFileName(undefined, "image/png", "cni")).toBe("cni.png");
   });
 
+  it("reste linéaire sur une longue suite de séparateurs (pas de ReDoS)", () => {
+    const start = Date.now();
+    expect(getSafeDownloadFileName(`a${"\t".repeat(100000)}b.pdf`, "application/pdf")).toBe("ab.pdf");
+    expect(getSafeDownloadFileName(`${"_".repeat(100000)}x`, "application/pdf")).toBe("x.pdf");
+    expect(getSafeDownloadFileName(`x${"_ ".repeat(50000)}!y.pdf`, "application/pdf")).toMatch(/^x_ [_ ]*\.pdf$/);
+    expect(Date.now() - start).toBeLessThan(1000);
+  });
+
   it("borne la longueur de la base", () => {
     const name = getSafeDownloadFileName(`${"a".repeat(500)}.pdf`, "application/pdf");
     expect(name).toBe(`${"a".repeat(150)}.pdf`);
