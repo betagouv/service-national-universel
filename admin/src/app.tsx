@@ -31,7 +31,7 @@ import { RestrictedRoute } from "./components/layout/RestrictedRoute";
 import Loader from "./components/Loader";
 import Footer from "./components/footer";
 
-import api, { initApi, setJwtToken } from "./services/api";
+import api, { initApi } from "./services/api";
 
 import { adminURL, environment } from "./config";
 
@@ -195,11 +195,9 @@ const Home = () => {
       try {
         const res = await api.checkToken();
         if (!res.ok || !res.user) {
-          setJwtToken(null);
           dispatch(setUser(null));
           setLoading(false);
         }
-        if (res.token) setJwtToken(res.token);
         if (res.user) dispatch(setUser(res.user));
         const cohorts = await getCohorts(); // TODO: mise en place d'un cache (redux-persist?)
         if (cohorts) dispatch({ type: COHORTS_ACTIONS.SET_COHORTS, payload: cohorts });

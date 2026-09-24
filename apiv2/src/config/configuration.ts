@@ -21,6 +21,8 @@ const jwtSecret =
         ? _env(envStr, "JWT_SECRET", "dev-secret")
         : _env(envStr, "JWT_SECRET");
 
+const isDeployedEnvironment = ["production", "staging", "ci", "custom"].includes(environment ?? "");
+
 const configuration = () => ({
     environment,
     release: _env(envStr, "RELEASE", "development"),
@@ -31,6 +33,13 @@ const configuration = () => ({
     },
     httpServer: {
         port: _env(envInt, "PORT", 8086),
+        // Même réglage que la v1 (api/src/config.ts) : sans lui, req.ip désigne le reverse proxy
+        // et le rate limiting compterait toutes les requêtes sur une seule IP.
+        trustProxyHops: _env(envInt, "TRUST_PROXY_HOPS", isDeployedEnvironment ? 1 : 0),
+        // Contrôle d'hôte : actif sur les environnements déployés. L'hôte de APIV2_URL est
+        // toujours accepté ; ALLOWED_HOSTS ajoute des hôtes (liste séparée par des virgules).
+        enforceHost: isDeployedEnvironment,
+        allowedHosts: _env(envStr, "ALLOWED_HOSTS", ""),
     },
     database: {
         url: _env(envStr, "DATABASE_URL", "mongodb://localhost:27017/snu_dev?directConnection=true"), // MONGO_URL in v1
@@ -40,6 +49,9 @@ const configuration = () => ({
         queuePrefix: _env(envStr, "BROKER_QUEUE_PREFIX", environment), // TASK_QUEUE_PREFIX in v1
         monitorUser: _env(envStr, "BROKER_MONITOR_USER"),
         monitorSecret: _env(envStr, "BROKER_MONITOR_SECRET"),
+        // Bull Board : IP autorisées (liste séparée par des virgules). Sur un environnement
+        // déployé, une liste vide ferme le tableau de bord.
+        monitorAllowedIps: _env(envStr, "BROKER_MONITOR_ALLOWED_IPS", ""),
     },
     email: {
         provider: _env(envStr, "EMAIL_PROVIDER", "mock"), // MAIL_TRANSPORT in v1

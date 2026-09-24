@@ -32,4 +32,17 @@ describe("getToken de snupport-api : origine de la base de connaissance", () => 
   it("garde l'en-tête Authorization explicite, qui suppose de détenir le jeton", () => {
     expect(getToken(buildRequest({ origin: "https://support.snu.gouv.fr", authorization: "jwtzamoud entete" }))).toBe("entete");
   });
+
+  // FM19 (audit des fronts du 23/09/2026) : une XSS dans l'admin SNU ou moncompte ne doit pas agir
+  // avec la session d'un agent support qui les consulte.
+  it.each(["https://admin.snu.gouv.fr", "https://moncompte.snu.gouv.fr", "https://autre.snu.gouv.fr", "null"])(
+    "ignore le cookie agent quand l'origine n'est pas l'interface du support (%s)",
+    (origin) => {
+      expect(getToken(buildRequest({ origin, cookie: "jeton" }))).toBeFalsy();
+    }
+  );
+
+  it("lit le cookie agent sans origine (navigation de premier niveau)", () => {
+    expect(getToken(buildRequest({ cookie: "jeton" }))).toBe("jeton");
+  });
 });
