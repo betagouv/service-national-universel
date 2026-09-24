@@ -5,9 +5,40 @@
 
 const { withSentryConfig } = require("@sentry/nextjs");
 
+// En-têtes de sécurité, alignés sur devops/build/front/nginx.conf (vidéos Vimeo seules en iframe)
+const securityHeaders = [
+  { key: "X-Frame-Options", value: "DENY" },
+  { key: "X-Content-Type-Options", value: "nosniff" },
+  { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+  { key: "Strict-Transport-Security", value: "max-age=31536000" },
+  // Directives sans effet sur le rendu : appliquées dès maintenant
+  { key: "Content-Security-Policy", value: "frame-ancestors 'none'; base-uri 'self'; object-src 'none'" },
+  // Politique cible (pas de 'unsafe-inline' dans script-src), en observation avant application
+  {
+    key: "Content-Security-Policy-Report-Only",
+    value: [
+      "default-src 'self'",
+      "script-src 'self' https://plausible.io",
+      "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com",
+      "font-src 'self' data: https://fonts.gstatic.com",
+      "img-src 'self' data: blob: https:",
+      "connect-src 'self' https://*.snu.gouv.fr https://*.beta-snu.dev https://sentry.incubateur.net https://plausible.io",
+      "frame-src https://player.vimeo.com",
+      "form-action 'self'",
+      "frame-ancestors 'none'",
+      "base-uri 'self'",
+      "object-src 'none'",
+    ].join("; "),
+  },
+];
+
 const moduleExports = {
   // Your existing module.exports
   optimizeFonts: false,
+  poweredByHeader: false,
+  async headers() {
+    return [{ source: "/:path*", headers: securityHeaders }];
+  },
   images: {
     domains: ["snu-bucket-staging.cellar-c2.services.clever-cloud.com"],
   },
@@ -51,4 +82,5 @@ const sentryWebpackPluginOptions = {
 
 // Make sure adding Sentry options is the last code to run before exporting, to
 // ensure that your source maps include changes from all other Webpack plugins
-module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions);
+// hideSourceMaps : les sourcemaps sont envoyées à Sentry sans être servies publiquement
+module.exports = withSentryConfig(moduleExports, sentryWebpackPluginOptions, { hideSourceMaps: true });

@@ -44,6 +44,10 @@ export default defineConfig(({ command, mode }) => {
             env: mode,
           },
         },
+        // Sourcemaps envoyées à Sentry, jamais publiées avec le build
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
+        },
         validate: true,
         reactComponentAnnotation: { enabled: true },
 
@@ -58,7 +62,8 @@ export default defineConfig(({ command, mode }) => {
 
   return {
     build: {
-      sourcemap: mode !== "development",
+      // "hidden" : pas de commentaire sourceMappingURL dans les bundles publiés
+      sourcemap: mode !== "development" ? "hidden" : false,
       outDir: "build",
       port: 8082,
       rollupOptions: {

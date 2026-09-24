@@ -11,8 +11,6 @@ export default ({ mode }) => {
   if (mode !== "development") {
     plugins.push(
       sentryVitePlugin({
-        include: ".",
-        ignore: ["node_modules", "vite.config.ts"],
         org: "betagouv",
         project: "snupport-app",
         authToken: process.env.SENTRY_AUTH_TOKEN,
@@ -24,10 +22,9 @@ export default ({ mode }) => {
             env: mode,
           },
         },
-        sourceMaps: {
-          include: ["./dist/assets"],
-          ignore: ["node_modules"],
-          urlPrefix: "~/assets",
+        // Sourcemaps envoyées à Sentry, jamais publiées avec le build
+        sourcemaps: {
+          filesToDeleteAfterUpload: ["./build/**/*.map"],
         },
         setCommits: {
           auto: true,
@@ -42,7 +39,8 @@ export default ({ mode }) => {
       port: 8092,
     },
     build: {
-      sourcemap: true,
+      // "hidden" : pas de commentaire sourceMappingURL dans les bundles publiés
+      sourcemap: mode !== "development" ? "hidden" : false,
       outDir: "build",
       rollupOptions: {
         output: {
