@@ -31,7 +31,7 @@ describe("Referent", () => {
   let res;
   describe("POST /referent/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/referent/signin");
+      res = await request(getAppHelper()).post("/referent/signin").send({});
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/referent/signin").send({ email: "foo@bar.fr" });

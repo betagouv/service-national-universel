@@ -4,14 +4,13 @@ import { capture } from "../sentry";
 import { apiURL } from "../config";
 import { createFormDataForFileUpload, ERRORS, RouteResponseBody } from "snu-lib";
 
-const JWT_TOKEN_KEY = "jwt_token";
-
-export function getJwtToken(): string | null {
-  return localStorage.getItem(JWT_TOKEN_KEY) || null;
-}
-
-export function setJwtToken(token: string | null) {
-  return localStorage.setItem(JWT_TOKEN_KEY, token || "");
+// La session repose sur le seul cookie httpOnly `jwt_ref`, envoyé par `credentials: "include"` :
+// le JWT n'est plus lisible par le JavaScript de l'admin, où toute XSS le récupérait (FM16, audit
+// des fronts du 23/09/2026). On efface le jeton qu'une version précédente a pu laisser en localStorage.
+try {
+  localStorage.removeItem("jwt_token");
+} catch (e) {
+  // stockage indisponible (navigation privée stricte) : rien à purger
 }
 
 let fetch = window.fetch;
@@ -28,7 +27,7 @@ class api {
     return;
   }
 
-  checkToken(shouldRefresh = false): Promise<RouteResponseBody<any> & { user?: any; token?: string }> {
+  checkToken(shouldRefresh = false): Promise<RouteResponseBody<any> & { user?: any }> {
     return new Promise(async (resolve, reject) => {
       try {
         const controller = new AbortController();
@@ -44,7 +43,7 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { "Content-Type": "application/json", ...this.headers },
           signal,
         });
         const res = await response.json();
@@ -100,7 +99,7 @@ class api {
         mode: "cors",
         method: "POST",
         credentials: "include",
-        headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+        headers: { "Content-Type": "application/json", ...this.headers },
         body: typeof body === "string" ? body : JSON.stringify(body),
         signal,
       });
@@ -148,7 +147,7 @@ class api {
           mode: "cors",
           method: "GET",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { "Content-Type": "application/json", ...this.headers },
           signal,
         });
         if (response.status === 401) {
@@ -187,7 +186,7 @@ class api {
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { "Content-Type": "application/json", ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });
@@ -228,7 +227,7 @@ class api {
           mode: "cors",
           method: "PUT",
           credentials: "include",
-          headers: { Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { ...this.headers },
           body: formData,
         });
         if (response.status === 401) {
@@ -292,7 +291,7 @@ class api {
           mode: "cors",
           credentials: "include",
           method: "DELETE",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { "Content-Type": "application/json", ...this.headers },
           body: body ? (typeof body === "string" ? body : JSON.stringify(body)) : undefined,
         });
         if (response.status === 401) {
@@ -322,7 +321,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { ...this.headers },
           body: formData,
         });
 
@@ -357,7 +356,7 @@ class api {
           mode: "cors",
           method: "POST",
           credentials: "include",
-          headers: { "Content-Type": "application/json", Authorization: `JWT ${getJwtToken()}`, ...this.headers },
+          headers: { "Content-Type": "application/json", ...this.headers },
           body: typeof body === "string" ? body : JSON.stringify(body),
           signal,
         });

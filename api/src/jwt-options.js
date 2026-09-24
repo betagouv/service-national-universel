@@ -4,6 +4,11 @@ const JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC = 60 * 60 * 24 * 30 * 6; // 6 mois
 const JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC = 60 * 60 * 24 * 30; // 1 mois
 //!TOKEN need to be in seconds
 
+// Durée absolue d'une session admin : au-delà, GET /referent/refresh_token refuse de renouveler le
+// jeton et impose une reconnexion. Sans plafond, un jeton volé se renouvelait indéfiniment toutes
+// les 2 h (GOO-16, audit des fronts du 23/09/2026).
+const JWT_SESSION_ABSOLUTE_MAX_AGE_MS = 1000 * 60 * 60 * 12; // 12h
+
 // ! If you upgrade this, all jwt will be invalid
 const JWT_SIGNIN_VERSION = "0";
 // ! v1 : le trust token porte désormais le compte auquel il est lié (type/_id/passwordChangedAt).
@@ -28,6 +33,7 @@ module.exports = {
   JWT_SIGNIN_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_MONCOMPTE_MAX_AGE_SEC,
   JWT_TRUST_TOKEN_ADMIN_MAX_AGE_SEC,
+  JWT_SESSION_ABSOLUTE_MAX_AGE_MS,
   JWT_SIGNIN_VERSION,
   JWT_TRUST_TOKEN_VERSION,
   JWT_TRUST_TOKEN_TYPE,

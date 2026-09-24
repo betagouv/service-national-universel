@@ -10,6 +10,7 @@ import fileUpload from "express-fileupload";
 
 import AuthObject from "../auth";
 import { signinRateLimiter, emailSendingRateLimiter } from "../middlewares/rateLimit";
+import { requireJsonBody } from "../middlewares/requireJsonBody";
 import patches from "../controllers/patches";
 import ClasseStateManager from "../cle/classe/stateManager";
 
@@ -218,8 +219,8 @@ function cleanReferentData(referent) {
 // Lot C de l'audit du 21/09/2026 : quota par IP sur les routes publiques d'auth.
 const referentSigninLimiter = signinRateLimiter();
 
-router.post("/signin", referentSigninLimiter, (req, res) => ReferentAuth.signin(req, res));
-router.post("/signin-2fa", referentSigninLimiter, (req, res) => ReferentAuth.signin2FA(req, res));
+router.post("/signin", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin(req, res));
+router.post("/signin-2fa", referentSigninLimiter, requireJsonBody, (req, res) => ReferentAuth.signin2FA(req, res));
 router.post("/logout", passport.authenticate("referent", { session: false, failWithError: true }), (req, res) => ReferentAuth.logout(req, res));
 router.post("/signup", (_req, res) => {
   return res.status(403).send({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
@@ -295,7 +296,7 @@ router.post("/signin_as/:type/:id", passport.authenticate("referent", { session:
     userToReturn.impersonateId = req.user._id;
     userToReturn.acl = acl;
 
-    return res.status(200).json({ ok: true, token, data: userToReturn });
+    return res.status(200).json({ ok: true, data: userToReturn });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -323,7 +324,7 @@ router.get("/restore_signin", passport.authenticate("referent", { session: false
     res.cookie("jwt_ref", token, cookieOptions(COOKIE_SIGNIN_MAX_AGE_MS) as any);
     const userSerialized = serializeReferent(user);
     userSerialized.acl = await getAcl(user);
-    return res.status(200).send({ ok: true, token, data: userSerialized });
+    return res.status(200).send({ ok: true, data: userSerialized });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -457,6 +458,28 @@ function shouldResendInvitation(referent: ReferentDocument): boolean {
 }
 
 /**
+ * Émet un nouveau jeton d'invitation et l'envoie par email. Le jeton précédent cesse de valoir :
+ * un lien d'invitation déjà diffusé ne doit pas rester utilisable indéfiniment (FM17).
+ */
+async function sendNewInvitation(referent: ReferentDocument, { fromName, fromUser, invitationExpires }: { fromName: string; fromUser: any; invitationExpires: Date | number }) {
+  const invitationToken = crypto.randomBytes(20).toString("hex");
+  referent.set({ invitationToken, invitationExpires });
+
+  const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
+  const toName = `${referent.firstName} ${referent.lastName}`;
+  const cohesionCenterName = referent.cohesionCenterName;
+  const region = referent.region;
+  const department = referent.department;
+  const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
+
+  await referent.save({ fromUser });
+  await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
+    emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
+    params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
+  });
+}
+
+/**
  * Renvoi d'une invitation expirée. Route non authentifiée : la réponse est identique quel que soit
  * le sort de la demande. Un 404 sur adresse inconnue en faisait un oracle d'existence de compte
  * référent, interrogeable par n'importe qui (audit 2026-09-21, M66).
@@ -472,23 +495,7 @@ router.post("/signup_retry", emailSendingRateLimiter("referent-signup-retry"), a
     const referent = await ReferentModel.findOne({ email: value.email });
     if (!referent || !shouldResendInvitation(referent)) return res.status(200).send({ ok: true });
 
-    const invitationToken = crypto.randomBytes(20).toString("hex");
-    referent.set({ invitationToken });
-    referent.set({ invitationExpires: inSevenDays() });
-
-    const cta = `${config.ADMIN_URL}/auth/signup/invite?token=${invitationToken}`;
-    const fromName = "L'équipe SNU";
-    const toName = `${referent.firstName} ${referent.lastName}`;
-    const cohesionCenterName = referent.cohesionCenterName;
-    const region = referent.region;
-    const department = referent.department;
-    const structureName = referent.structureId ? (await StructureModel.findById(referent.structureId))?.name : "";
-
-    await referent.save({ fromUser: req.user });
-    await sendTemplate(SENDINBLUE_TEMPLATES.invitationReferent[referent.role!], {
-      emailTo: [{ name: `${referent.firstName} ${referent.lastName}`, email: referent.email }],
-      params: { cta, cohesionCenterName, structureName, region, department, fromName, toName },
-    });
+    await sendNewInvitation(referent, { fromName: "L'équipe SNU", fromUser: req.user, invitationExpires: inSevenDays() });
 
     return res.status(200).send({ ok: true });
   } catch (error) {
@@ -505,14 +512,18 @@ router.post("/signup_verify", referentSigninLimiter, async (req: UserRequest, re
       return res.status(400).send({ ok: false, code: ERRORS.INVALID_PARAMS });
     }
 
-    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() } });
-    if (!referent) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
+    const referent = await ReferentModel.findOne({ invitationToken: value.invitationToken, invitationExpires: { $gt: Date.now() }, deletedAt: { $exists: false } });
+    if (!referent || referent.status === ReferentStatus.INACTIVE) return res.status(404).send({ ok: false, code: ERRORS.INVITATION_TOKEN_EXPIRED_OR_INVALID });
 
     // Cette route ne sert qu'à pré-remplir le formulaire d'activation : elle n'ouvre pas de session.
     // Elle délivrait un JWT de session complet contre le seul jeton d'invitation, sans mot de passe
     // ni 2FA (audit 2026-09-21, H62). C'est `signup_invite` qui authentifie, et cette route-là ne lit
     // pas le JWT : elle revérifie le couple (email, invitationToken) puis pose le cookie de session.
-    return res.status(200).send({ ok: true, data: serializeReferent(referent) });
+    // L'email n'est pas renvoyé : c'est le second élément que `signup_invite` exige avec le jeton,
+    // et le révéler ici réduisait l'activation au seul jeton d'invitation (FM17, audit des fronts
+    // du 23/09/2026). L'invité le saisit lui-même.
+    const { firstName, lastName, role, department } = referent;
+    return res.status(200).send({ ok: true, data: { firstName, lastName, role, department } });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -537,8 +548,11 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
     }
     const { email, password, firstName, lastName, invitationToken, acceptCGU } = value;
 
-    const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() } });
+    const referent = await ReferentModel.findOne({ email, invitationToken, invitationExpires: { $gt: Date.now() }, deletedAt: { $exists: false } });
     if (!referent) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
+    // Un compte désactivé gardait son jeton d'invitation : l'activer ici rouvrait un accès
+    // qu'un administrateur venait de couper (FM17, audit des fronts du 23/09/2026).
+    if (referent.status === ReferentStatus.INACTIVE) return res.status(404).send({ ok: false, data: null, code: ERRORS.USER_NOT_FOUND });
 
     // CLE (H17) : cette route non authentifiée ne doit plus pouvoir activer de compte ADMINISTRATEUR_CLE ni REFERENT_CLASSE.
     if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
@@ -590,7 +604,7 @@ router.post("/signup_invite", async (req: UserRequest, res: Response) => {
       });
     }
 
-    return res.status(200).send({ data: serializeReferent(referent), token, ok: true });
+    return res.status(200).send({ data: serializeReferent(referent), ok: true });
   } catch (error) {
     capture(error);
     return res.status(500).send({ ok: false, code: ERRORS.SERVER_ERROR });
@@ -2082,13 +2096,22 @@ router.post(
       const referent = await ReferentModel.findById(req.validatedParams.id);
       if (!referent) return res.status(404).json({ ok: false, code: ERRORS.NOT_FOUND });
 
-      if (!referent.invitationExpires || !referent.invitationToken) {
+      // Un compte déjà activé n'a plus d'invitation. Un compte désactivé ou supprimé ne doit pas en
+      // recevoir : son jeton a été vidé à la désactivation.
+      if (referent.registredAt || referent.status === ReferentStatus.INACTIVE || referent.deletedAt) {
         return res.status(400).json({ ok: false, code: ERRORS.INVALID_PARAMS });
       }
+      // Les comptes CLE s'activent par un autre parcours (`/creer-mon-compte`), que
+      // `/auth/signup/invite` refuse (H17) : un lien régénéré ici leur serait inutilisable.
+      if ([ROLES.ADMINISTRATEUR_CLE, ROLES.REFERENT_CLASSE].includes(referent.role!)) {
+        return res.status(400).json({ ok: false, code: ERRORS.OPERATION_NOT_ALLOWED });
+      }
 
+      // Le renouvellement prolongeait le même jeton d'un mois : un lien d'invitation intercepté
+      // restait valable aussi longtemps qu'on le renouvelait. On émet un nouveau jeton, envoyé par
+      // email, et l'ancien lien cesse de fonctionner (FM17, audit des fronts du 23/09/2026).
       const invitationExpires = addMonths(new Date(), 1);
-      referent.set({ invitationExpires });
-      await referent.save({ fromUser: req.user });
+      await sendNewInvitation(referent, { fromName: "L'équipe SNU", fromUser: req.user, invitationExpires });
 
       return res.status(200).json({ ok: true, data: { invitationExpires } });
     } catch (error) {

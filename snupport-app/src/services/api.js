@@ -3,6 +3,7 @@ import { SNUPPORT_URL_API } from "../config";
 import fetchRetry from "fetch-retry";
 import "isomorphic-fetch";
 import { capture } from "../sentry";
+import { clearLocalSession } from "./localSession";
 
 let fetch = window.fetch;
 
@@ -53,6 +54,7 @@ class ApiService {
 
       if (!response.ok && response.status === 401) {
         this.token = "";
+        await clearLocalSession();
         if (!window.location.pathname.includes("/auth")) {
           window.location.href = "/auth";
         }

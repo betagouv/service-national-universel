@@ -1,6 +1,7 @@
 import { NextFunction, Response } from "express";
 import { ClsService } from "nestjs-cls";
 import { Inject, Injectable, NestMiddleware, UnauthorizedException } from "@nestjs/common";
+import { ConfigService } from "@nestjs/config";
 import { ReferentStatus } from "snu-lib";
 import { CustomRequest } from "../../../../shared/infra/CustomRequest";
 import { ReferentGateway } from "@admin/core/iam/Referent.gateway";
@@ -16,6 +17,28 @@ import { ReferentMapper } from "../repository/mongo/Referent.mapper";
  */
 const JWT_SIGNIN_VERSION = "0";
 
+/** Cookie httpOnly de session posé par la v1 (api/src/auth.ts) pour l'espace admin. */
+const COOKIE_SESSION_ADMIN = "jwt_ref";
+
+export const lireCookie = (entete: string | undefined, nom: string): string | undefined => {
+    if (!entete) {
+        return undefined;
+    }
+    for (const paire of entete.split(";")) {
+        const separateur = paire.indexOf("=");
+        if (separateur === -1 || paire.slice(0, separateur).trim() !== nom) {
+            continue;
+        }
+        const valeur = paire.slice(separateur + 1).trim();
+        try {
+            return decodeURIComponent(valeur);
+        } catch {
+            return valeur;
+        }
+    }
+    return undefined;
+};
+
 const memeInstant = (gauche?: Date | string | null, droite?: Date | string | null): boolean => {
     const a = gauche ? new Date(gauche).getTime() : undefined;
     const b = droite ? new Date(droite).getTime() : undefined;
@@ -29,10 +52,11 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
         @Inject(AuthProvider) private authProvider: AuthProvider,
         @Inject(PermissionService) private permissionService: PermissionService,
         private readonly cls: ClsService,
+        private readonly config: ConfigService,
     ) {}
 
     async use(req: CustomRequest, _: Response, next: NextFunction) {
-        const token = req.headers.authorization?.split(" ")?.[1];
+        const token = this.extraireJeton(req);
         if (!token) {
             throw new UnauthorizedException();
         }
@@ -63,6 +87,24 @@ export class AddUserToRequestMiddleware implements NestMiddleware {
             acl,
         });
         next();
+    }
+
+    /**
+     * L'en-tête Authorization reste prioritaire. À défaut, le cookie httpOnly `jwt_ref` est lu, ce
+     * qui permet à l'admin de ne plus garder le JWT en localStorage, où toute XSS le lisait (FM16,
+     * audit des fronts du 23/09/2026). Comme dans la passport v1 (api/src/passport.ts), le cookie
+     * n'est accepté que d'une requête émise par l'admin : le cookie est partagé par tous les
+     * sous-domaines, et une autre origine (formulaire, autre front) agirait sinon avec la session.
+     */
+    private extraireJeton(req: CustomRequest): string | undefined {
+        const enTete = req.headers.authorization?.split(" ")?.[1];
+        if (enTete) {
+            return enTete;
+        }
+        if (req.headers.origin !== this.config.getOrThrow<string>("urls.admin")) {
+            return undefined;
+        }
+        return lireCookie(req.headers.cookie, COOKIE_SESSION_ADMIN);
     }
 
     private estSessionValide(payload: AuthTokenPayload, user: ReferentModel): boolean {

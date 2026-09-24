@@ -29,7 +29,7 @@ describe("Young Auth", () => {
   let res;
   describe("POST /young/signin", () => {
     it("should return 400 when no email, no password or wrong email", async () => {
-      res = await request(getAppHelper()).post("/young/signin");
+      res = await request(getAppHelper()).post("/young/signin").send({});
       expect(res.status).toBe(400);
 
       res = await request(getAppHelper()).post("/young/signin").send({ email: "foo@bar.fr" });
@@ -144,7 +144,7 @@ describe("Young Auth", () => {
         cohort: fixture.cohort,
       });
       expect(res.status).toBe(200);
-      expect(res.body.token).toBeTruthy();
+      expect(String(res.headers["set-cookie"])).toContain("jwt_young=");
     });
 
     it.skip("should transform firstName and lastName", async () => {

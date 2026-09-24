@@ -5,7 +5,6 @@ import { FunctionalException, hashToFormData, HttpError, translate } from "snu-l
 
 import { apiv2URL } from "@/config";
 import { capture } from "@/sentry";
-import { getJwtToken } from "./api";
 
 export interface IApiV2 {
   get<T>(path: string): Promise<T>;
@@ -21,6 +20,8 @@ class Apiv2 implements IApiV2 {
   constructor() {
     this.axios = axios.create({
       baseURL: apiv2URL,
+      // Session portée par le cookie httpOnly `jwt_ref`, que l'apiv2 lit pour l'origine admin (FM16).
+      withCredentials: true,
     });
     this.initInterceptor();
   }
@@ -54,7 +55,7 @@ class Apiv2 implements IApiV2 {
 
   initInterceptor() {
     this.axios.interceptors.request.use((request: InternalAxiosRequestConfig) => {
-      request.headers.set({ "x-user-timezone": new Date().getTimezoneOffset(), Authorization: `JWT ${getJwtToken()}` });
+      request.headers.set({ "x-user-timezone": new Date().getTimezoneOffset() });
       if (request.headers["Content-Type"] !== "multipart/form-data") {
         request.headers.setContentType("application/json");
       }
