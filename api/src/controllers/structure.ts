@@ -127,18 +127,9 @@ router.post(
         checkedStructure.networkId = req.user.structureId;
       } else if (!isAdmin(req.user)) {
         // Le rattachement réseau ouvre un périmètre d'accès : seul un ADMIN le choisit.
-        // Même règle pour le réseau de rattachement : un nom de réseau accepté sans son identifiant affichait une
-        // affiliation que l'API refusait (GOO-43). Un envoi inchangé reste accepté (l'écran renvoie toute la fiche).
-        const networkIdChanged = "networkId" in checkedStructure && (checkedStructure.networkId || "").toString() !== (structure.networkId || "").toString();
-        const networkNameChanged = "networkName" in checkedStructure && (checkedStructure.networkName || "") !== (structure.networkName || "");
-        if (networkIdChanged || networkNameChanged) {
-          return res.status(403).send({ ok: false, code: ERRORS.OPERATION_UNAUTHORIZED });
-        }
         delete checkedStructure.isNetwork;
         delete checkedStructure.networkId;
       }
-      // Le nom du réseau se déduit du rattachement (updateNetworkName), il ne vient jamais du client.
-      delete checkedStructure.networkName;
 
       const data = await StructureModel.create(checkedStructure);
       await updateNetworkName(data, req.user);

@@ -26,9 +26,7 @@ beforeAll(async () => {
   // Structure : même jeu que la migration 20250624122150 (policies incluses)
   await addPermissionHelper([ROLES.ADMIN], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.FULL);
   for (const action of [PERMISSION_ACTIONS.READ, PERMISSION_ACTIONS.WRITE]) {
-    await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, action, [
-      { where: [{ field: "region", source: "region" }], blacklist: [], whitelist: [] },
-    ]);
+    await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, action, [{ where: [{ field: "region", source: "region" }], blacklist: [], whitelist: [] }]);
     await addPermissionHelper([ROLES.REFERENT_DEPARTMENT], PERMISSION_RESOURCES.STRUCTURE, action, [
       { where: [{ field: "department", source: "department" }], blacklist: [], whitelist: [] },
     ]);
@@ -64,6 +62,8 @@ describe("Structure", () => {
         .send(structure);
       expect(res.status).toBe(200);
       const updatedStructure = await getStructureByIdHelper(res.body.data._id);
+      expect(updatedStructure?.networkName).toBe("network");
+    });
     it("ignore un nom de réseau envoyé sans rattachement (GOO-43)", async () => {
       const res = await request(await getAppHelperWithAcl({ role: ROLES.ADMIN }))
         .post("/structure")
@@ -72,7 +72,17 @@ describe("Structure", () => {
       const created = await getStructureByIdHelper(res.body.data._id);
       expect(created?.networkName || "").toBe("");
     });
-      expect(updatedStructure?.networkName).toBe("network");
+    it("ne laisse pas un référent rattacher à un réseau la structure qu'il crée (GOO-43)", async () => {
+      await addPermissionHelper([ROLES.REFERENT_REGION], PERMISSION_RESOURCES.STRUCTURE, PERMISSION_ACTIONS.CREATE);
+      const network = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
+      const res = await request(await getAppHelperWithAcl({ role: ROLES.REFERENT_REGION, region: "Île-de-France" }))
+        .post("/structure")
+        .send({ ...getNewStructureFixture(), name: "child", isNetwork: "true", networkId: network._id.toString(), networkName: "network" });
+      expect(res.status).toBe(200);
+      const created = await getStructureByIdHelper(res.body.data._id);
+      expect(created?.networkId || "").toBe("");
+      expect(created?.networkName || "").toBe("");
+      expect(created?.isNetwork).not.toBe("true");
     });
     it("RESPONSIBLE cannot create structure", async () => {
       const structure = await createStructureHelper({ ...getNewStructureFixture(), name: "network", isNetwork: "true" });
@@ -107,7 +117,7 @@ describe("Structure", () => {
         .send({ ...structure.toJSON(), description: `<b>Asso</b><img src=x onerror="alert(1)"><a href="javascript:alert(1)">lien</a> & sport` });
       expect(res.status).toBe(200);
       const updated = await getStructureByIdHelper(structure._id);
-      expect(updated?.description).toBe("<b>Asso</b><a rel=\"noopener noreferrer\">lien</a> &amp; sport");
+      expect(updated?.description).toBe('<b>Asso</b><a rel="noopener noreferrer">lien</a> &amp; sport');
     });
 
     it("laisse intacte une description sans balise", async () => {
@@ -220,6 +230,8 @@ describe("Structure", () => {
         .send({ name: "changed", isNetwork: "false" });
       expect(res.status).toBe(200);
       const updatedStructure = await getStructureByIdHelper(structure._id);
+      expect(updatedStructure?.name).toBe("changed");
+    });
 
     describe("réseau de rattachement (GOO-43)", () => {
       it("REFERENT_REGION ne rattache pas une structure à un réseau par son seul nom", async () => {
@@ -295,8 +307,6 @@ describe("Structure", () => {
         expect(updated?.networkId || "").toBe("");
         expect(updated?.networkName).toBe("");
       });
-    });
-      expect(updatedStructure?.name).toBe("changed");
     });
   });
 
@@ -385,7 +395,9 @@ describe("Structure", () => {
       await mine.save();
       const res = await request(await getAppHelperWithAcl({ role: ROLES.SUPERVISOR, structureId: mine._id.toString() })).get(`/structure/${mine._id}/patches`);
       expect(res.status).toBe(200);
-      expect(res.body.data).toEqual(expect.arrayContaining([expect.objectContaining({ ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MINE RENAMED" })]) })]));
+      expect(res.body.data).toEqual(
+        expect.arrayContaining([expect.objectContaining({ ops: expect.arrayContaining([expect.objectContaining({ op: "replace", path: "/name", value: "MINE RENAMED" })]) })]),
+      );
     });
   });
 
